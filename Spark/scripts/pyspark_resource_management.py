@@ -14,7 +14,7 @@ spark = SparkSession.builder \
 
 # Step 2: Data Ingestion
 # Replace "path/to/data.csv" with the actual path to your CSV file
-df = spark.read.csv("path/to/data.csv", header=True, inferSchema=True)
+df = spark.read.csv("data/data.csv", header=True, inferSchema=True)
 
 # Step 3: Data Processing
 # Example transformation: Filter rows and aggregate data
