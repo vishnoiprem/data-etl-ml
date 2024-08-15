@@ -24,7 +24,7 @@ processed_df = df.filter(col('value') > 10) \
 
 # Step 4: Write the Processed Data to Output
 # Replace "path/to/output" with the actual path where you want to save the output
-processed_df.write.mode("overwrite").parquet("path/to/output")
+processed_df.write.mode("overwrite").parquet("../../data/output")
 
 # Step 5: Stop the Spark Session
 spark.stop()
