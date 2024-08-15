@@ -1,6 +1,4 @@
 
-
-cat <<EOL > /Users/prem/PycharmProjects/data-etl-ml/.gitignore
 # Python
 __pycache__/
 *.py[cod]
