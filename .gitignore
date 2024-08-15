@@ -1,0 +1,32 @@
+
+
+cat <<EOL > /Users/prem/PycharmProjects/data-etl-ml/.gitignore
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Data files
+*.csv
+*.json
+*.xlsx
+data/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environments
+.env
+.venv
+EOL
+
+
