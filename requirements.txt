@@ -4,3 +4,5 @@ scikit-learn
 pyspark
 pyyaml
 jupyterlab
+matplotlib
+seaborn
