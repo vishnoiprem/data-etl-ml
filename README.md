@@ -29,6 +29,8 @@ This project includes components for Machine Learning (ML), ETL processes, Spark
 2. Install required Python packages:
    ```bash
    pip install -r requirements.txt
+   
+spark-submit --master "local[*]" /Users/prem/PycharmProjects/data-etl-ml/Spark/scripts/pyspark_resource_management.py
    ```
 
 ### Usage
@@ -36,6 +38,7 @@ This project includes components for Machine Learning (ML), ETL processes, Spark
 - **ML**: Run the training script using `python ML/src/train.py`.
 - **Spark**: Execute Spark jobs using the scripts in `Spark/scripts/`.
 - **ETL**: Run ETL pipelines using the scripts in `ETL/scripts/`.
+
 
 ## License
 
