@@ -6,3 +6,4 @@ pyyaml
 jupyterlab
 matplotlib
 seaborn
+great_expectations
