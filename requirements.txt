@@ -7,3 +7,4 @@ jupyterlab
 matplotlib
 seaborn
 great_expectations
+sympy
