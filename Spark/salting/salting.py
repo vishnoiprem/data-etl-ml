@@ -11,8 +11,11 @@ rdd2 = spark.sparkContext.parallelize(data2)
 
 # Salting keys in rdd1
 salted_rdd1 = rdd1.flatMap(lambda x: [(x[0] + "_" + str(i), x[1]) for i in range(3)])
+print(salted_rdd1.collect())
+print('\n next ;ine')
 # Salting keys in rdd2
 salted_rdd2 = rdd2.flatMap(lambda x: [(x[0] + "_" + str(i), x[1]) for i in range(3)])
+print(salted_rdd2.collect())
 
 # Perform the join on the salted keys
 joined_rdd = salted_rdd1.join(salted_rdd2)
