@@ -22,7 +22,7 @@ This project includes components for Machine Learning (ML), ETL processes, Spark
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/data-etl-ml.git
+   git clone https://github.com/vishnoiprem/data-etl-ml.git
    cd data-etl-ml
    ```
 
