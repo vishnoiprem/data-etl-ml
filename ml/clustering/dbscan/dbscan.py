@@ -1,8 +1,13 @@
 from pyspark.sql import SparkSession
+<<<<<<< HEAD
 from sklearn.cluster import DBSCAN
 import numpy as np
 from pyspark.sql import functions as F
 from pyspark.sql.types import IntegerType
+=======
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.clustering import DBSCAN
+>>>>>>> refs/remotes/origin/master
 
 # Initialize Spark session
 spark = SparkSession.builder \
