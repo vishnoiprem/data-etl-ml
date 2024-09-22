@@ -14,3 +14,5 @@ pyspark-dbscan
 geopy
 tensorflow
 graphviz
+transformers
+tf-keras
