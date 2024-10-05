@@ -18,3 +18,4 @@ transformers
 tf-keras
 delta-spark
 xgboost
+torch
