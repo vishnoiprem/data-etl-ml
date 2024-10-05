@@ -45,7 +45,7 @@ spark-submit --master "local[*]" /Users/prem/PycharmProjects/data-etl-ml/Spark/s
 This project is licensed under the MIT License - see the `LICENSE` file for details.
 
 
-GIT PUSH 
+## git 
 ```
 git add .
 git commit -m "change the llm mode"
