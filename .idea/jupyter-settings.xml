@@ -6,7 +6,6 @@
         <entry key="$PROJECT_DIR$/.idea/data-etl-ml.iml">
           <value>
             <JupyterConnectionParameters>
-              <option name="argv" value="notebook -chrome" />
               <option name="managed" value="true" />
               <option name="sdkName" value="" />
             </JupyterConnectionParameters>
