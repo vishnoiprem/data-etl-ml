@@ -18,4 +18,5 @@ transformers
 tf-keras
 delta-spark
 xgboost
+rouge
 torch
