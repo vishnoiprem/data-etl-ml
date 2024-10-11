@@ -1,3 +1,10 @@
+# Ignore specific file
+# Ignore all .safetensors files
+*.safetensors
+
+# Ignore specific file
+ml/LLM/fine_tuned_gpt2/model.safetensors
+
 
 # Python
 __pycache__/
