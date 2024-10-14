@@ -11,6 +11,7 @@ data = [
 hasher = FeatureHasher(n_features=5, input_type='dict')
 # Transform the data
 hashed_features = hasher.transform(data)
+print(hashed_features)
 
 # Convert to dense array to view
 hashed_features_array = hashed_features.toarray()
