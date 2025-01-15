@@ -20,3 +20,5 @@ delta-spark
 xgboost
 rouge
 torch
+diffusers
+accelerate
