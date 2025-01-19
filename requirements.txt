@@ -19,4 +19,6 @@ tf-keras
 delta-spark
 xgboost
 rouge
+xgboost
+libomp
 torch
