@@ -19,6 +19,12 @@ tf-keras
 delta-spark
 xgboost
 rouge
+<<<<<<< HEAD
 torch
 diffusers
 accelerate
+=======
+xgboost
+libomp
+torch
+>>>>>>> refs/remotes/origin/master
