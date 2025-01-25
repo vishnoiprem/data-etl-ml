@@ -13,6 +13,7 @@ def main():
     print(f"Generated dataset of shape: {data.shape}")
     data.head()
 
+
     # Step 2: Initialize churn prediction system
     print("\nInitializing churn prediction system...")
     churn_system = ChurnPredictionSystem(random_state=42)
