@@ -21,7 +21,8 @@ class ChurnPredictionSystem:
 
     def __init__(self, random_state=42):
         self.random_state = random_state
-        self.model_version = datetime.now().strftime("%Y%m%d_%H%M%S")  # Add this line
+        # self.model_version = datetime.now().strftime("%Y%m%d_%H%M%S")  # Add this line fir ver
+        self.model_version = 'cc1.1'
         self.logger = self._setup_logger()
         self.preprocessor = None
         self.model = None
@@ -40,13 +41,13 @@ class ChurnPredictionSystem:
     def preprocess_data(self, df):
         """Preprocesses the input data."""
         try:
-            # Define the feature groups
+            # Define the feature groups based on the data set
             numeric_features = ['tenure', 'MonthlyCharges', 'TotalCharges']
             categorical_features = ['gender', 'SeniorCitizen', 'Partner', 'Dependents',
                                     'PhoneService', 'InternetService', 'Contract',
                                     'PaperlessBilling', 'PaymentMethod']
 
-            # Create preprocessing pipelines
+            # Create preprocessing pipelines for both
             numeric_transformer = Pipeline(steps=[
                 ('imputer', SimpleImputer(strategy='median')),
                 ('scaler', StandardScaler())
