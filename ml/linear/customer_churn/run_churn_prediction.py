@@ -9,7 +9,7 @@ def main():
 
     # Step 1: Generate sample data
     print("Generating sample data...")
-    data = generate_sample_data(n_samples=15000, random_state=42)
+    data = generate_sample_data(n_samples=2000, random_state=42)
     print(f"Generated dataset of shape: {data.shape}")
     print("\nSample data head:")
     print(data.head())
