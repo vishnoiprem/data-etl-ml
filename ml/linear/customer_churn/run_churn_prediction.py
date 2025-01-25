@@ -29,6 +29,8 @@ def main():
     print("\nInitializing churn prediction system...")
     churn_system = ChurnPredictionSystem(random_state=42)
 
+
+
     # Step 3: Preprocess data
     print("\nPreprocessing data...")
     X, y = churn_system.preprocess_data(data)
