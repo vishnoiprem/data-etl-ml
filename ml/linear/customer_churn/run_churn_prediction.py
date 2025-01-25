@@ -8,7 +8,7 @@ def main():
     """Runs the end-to-end churn prediction pipeline."""
 
     # Step 1: Generate sample data
-    print("Generating sample data...")
+    print("1.Generating sample data...")
     data = generate_sample_data(n_samples=2000, random_state=42)
     print(f"Generated dataset of shape: {data.shape}")
     print("\nSample data head:")
@@ -29,10 +29,11 @@ def main():
     print("\nInitializing churn prediction system...")
     churn_system = ChurnPredictionSystem(random_state=42)
 
+    print(churn_system)
 
 
     # Step 3: Preprocess data
-    print("\nPreprocessing data...")
+    print("\n  Step 3 Preprocessing data...")
     X, y = churn_system.preprocess_data(data)
     print(f"Preprocessed data shape: {X.shape}")
 
