@@ -6,9 +6,11 @@ def generate_sample_data(n_samples=1000, random_state=42):
     """Generates synthetic sample data for the churn model."""
 
     np.random.seed(random_state)
+    print(np.random.seed(random_state))
 
     # Generate customer IDs
     customer_ids = [f"CUST_{i:05d}" for i in range(n_samples)]
+    print(customer_ids)
 
     # Generate demographic data
     gender = np.random.choice(['Male', 'Female'], size=n_samples)
@@ -64,3 +66,6 @@ def generate_sample_data(n_samples=1000, random_state=42):
 
     df = pd.DataFrame(data)
     return df
+
+
+print(generate_sample_data())
