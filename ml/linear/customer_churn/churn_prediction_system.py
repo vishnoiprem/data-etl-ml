@@ -72,6 +72,8 @@ class ChurnPredictionSystem:
             X = df.drop('Churn', axis=1)
             y = df['Churn'].map({'Yes': 1, 'No': 0})
 
+
+
             # Transform the features
             X_transformed = preprocessor.fit_transform(X)
 
@@ -79,6 +81,22 @@ class ChurnPredictionSystem:
             self.feature_names = (numeric_features +
                                   list(preprocessor.named_transformers_['cat']
                                        .named_steps['onehot'].get_feature_names_out(categorical_features)))
+
+            X_transformed = preprocessor.fit_transform(X)
+
+            # Convert the transformed features back to a DataFrame
+
+            X_transformed_df = pd.DataFrame(
+                X_transformed,
+                columns=numeric_features + list(preprocessor.named_transformers_['cat']
+                                                .named_steps['onehot']
+                                                .get_feature_names_out(categorical_features))
+            )
+            # Print the transformed DataFrame shape and a sample of the data
+            print(f"\nTransformed DataFrame shape: {X_transformed_df.shape}")
+            print("Transformed DataFrame sample:")
+            print(X_transformed_df.head())
+
 
             return X_transformed, y
 
