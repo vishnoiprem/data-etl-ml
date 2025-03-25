@@ -157,6 +157,7 @@ def main():
     # Create dataset
     print("Creating dataset...")
     df = create_student_dataset()
+    print(df.head())
     
     # Prepare data
     print("Preparing data...")
