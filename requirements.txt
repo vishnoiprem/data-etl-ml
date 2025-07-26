@@ -29,3 +29,4 @@ xgboost
 shap
 imbalanced-learn
 joblib
+nltk==3.9.1
