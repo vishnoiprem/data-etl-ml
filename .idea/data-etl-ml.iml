@@ -4,6 +4,13 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/ml/GenAI-Pinnacle-Master/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/.ipynb_checkpoints" />
+      <excludeFolder url="file://$MODULE_DIR$/ml/LLM/.ipynb_checkpoints" />
+      <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/0_StringIndexer_74f5e7a18a43/data" />
+      <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/2_MinMaxScaler_d5275382d64a/data" />
+      <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
