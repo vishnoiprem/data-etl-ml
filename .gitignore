@@ -33,5 +33,12 @@ Thumbs.db
 .env
 .venv
 EOL
+.*pth
 
 
+ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
+ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
+*.pth
+*.h5
+*.bin
+*.zip
