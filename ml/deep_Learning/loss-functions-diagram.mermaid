@@ -1,0 +1,40 @@
+flowchart TD
+    subgraph Loss[Loss Functions Overview]
+        direction TB
+        A[Loss Functions] --> B[Classification]
+        A --> C[Regression]
+        
+        B --> D[Binary Cross-Entropy]
+        B --> E[Categorical Cross-Entropy]
+        
+        C --> F[Mean Squared Error]
+        C --> G[Mean Absolute Error]
+        
+        style A fill:#f9f,stroke:#333,stroke-width:4px
+        style B fill:#bbf,stroke:#333
+        style C fill:#bfb,stroke:#333
+    end
+
+    subgraph Examples[Real-World Examples]
+        direction TB
+        D --> H[Spam Detection]
+        D --> I[Fraud Detection]
+        
+        E --> J[Image Classification]
+        E --> K[Language Detection]
+        
+        F --> L[House Prices]
+        F --> M[Stock Prediction]
+        
+        G --> N[Age Estimation]
+        G --> O[Delivery Times]
+        
+        style H fill:#ddf,stroke:#333
+        style I fill:#ddf,stroke:#333
+        style J fill:#ddf,stroke:#333
+        style K fill:#ddf,stroke:#333
+        style L fill:#dfd,stroke:#333
+        style M fill:#dfd,stroke:#333
+        style N fill:#dfd,stroke:#333
+        style O fill:#dfd,stroke:#333
+    end
