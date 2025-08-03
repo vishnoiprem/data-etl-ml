@@ -1,1 +1,4 @@
 *.safetensors
+ml/GenAI-Pinnacle-Master/Computer[[:space:]]Vision[[:space:]]using[[:space:]]PyTorch/Module[[:space:]]2/notebooks/best_model.pth filter=lfs diff=lfs merge=lfs -text
+.*pth
+
