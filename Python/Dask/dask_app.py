@@ -1,23 +1,27 @@
 import dask.dataframe as dd
-from fsspec import open_files
 
-# 1. Define remote CSV (supports HTTP/S3/GCS/Blob Storage)
-url = "https://storage.googleapis.com/bigdata-bucket/50gb_dataset.csv"  # Replace with your URL
-
-# 2. Configure remote connection
-storage_options = {
-    'https': {'timeout': 30},  # Increase timeout for large files
-    'headers': {'User-Agent': 'Dask Processor'}  # Some servers require this
+# Correct dtypes (fix for Admin2 column)
+dtypes = {
+    'Admin2': 'object',
+    'Confirmed': 'float64',
+    'Deaths': 'float64',
+    'Recovered': 'float64',
+    'Latitude': 'float64',
+    'Longitude': 'float64'
 }
 
-# 3. Lazy-load the remote file (no full download needed)
+# URL to GitHub raw CSV (fixed with Accept-Encoding header)
+url = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/01-01-2021.csv"
+
+# Read with FIXED storage_options
 ddf = dd.read_csv(
     url,
-    blocksize="256MB",  # Adjust based on your network speed
-    storage_options=storage_options,
-    dtype={'price': 'float32'}  # Reduce memory usage
+    dtype=dtypes,
+    storage_options={'headers': {'Accept-Encoding': 'identity'}}  ,
+    blocksize="50KB",  # Force 2 chunks
+
 )
 
-# 4. Process in parallel (streaming chunks)
-result = ddf.groupby('category').price.mean().compute()
-print(f"Average price by category:\n{result}")
+# Compute total rows
+total_rows = ddf.shape[0].compute()
+print(f"Total rows: {total_rows}")
