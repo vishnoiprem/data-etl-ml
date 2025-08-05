@@ -1,59 +1,7 @@
-# Ignore specific file
-# Ignore all .safetensors files
-*.safetensors
-# Ignore large files
-*.pth
-*.bin
-*.h5
-*.zip
-*.jar
-# Ignore specific file
-ml/LLM/fine_tuned_gpt2/model.safetensors
-
-
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.env
-
-# Jupyter Notebooks
-.ipynb_checkpoints
-
-# Data files
-*.csv
-*.json
-*.xlsx
-data/
-
-# Logs
-*.log
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Environments
-.env
-.venv
-venv
-
-EOL
-.*pth
-
-
-ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
-ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
-*.pth
-*.h5
-*.bin
-*.zip
-
 # Python environments
 venv/
-.env
 .venv/
+.env
 
 # Large ML files
 *.pth
@@ -64,15 +12,3 @@ venv/
 *.so
 *.dylib
 *.jar
-
-# Ignore specific large files
-venv/lib/python3.10/site-packages/tensorflow/libtensorflow_cc.2.dylib
-venv/lib/python3.10/site-packages/torch/lib/libtorch_cpu.dylib
-venv/lib/python3.10/site-packages/pyflink/lib/flink-dist-2.1.0.jar
-venv/lib/python3.10/site-packages/onnxruntime/capi/libonnxruntime.1.22.0.dylib
-venv/lib/python3.10/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.so
-venv/lib/python3.10/site-packages/clang/native/libclang.dylib
-venv/lib/python3.10/site-packages/llvmlite/binding/libllvmlite.dylib
-venv/lib/python3.10/site-packages/tensorflow/compiler/mlir/stablehlo/stablehlo_extension.so
-venv/lib/python3.10/site-packages/pyspark/jars/rocksdbjni-8.3.2.jar
-ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
