@@ -16,7 +16,7 @@ A CrewAI-based system that autonomously researches flights, makes bookings, and 
 - OpenAI API key (for cloud option)
 
 `
-OPENAI_API_KEY=your_api_key_here
+OPENAI_API_KEY1=your_api_key_here
 
 `
 ## Installation
