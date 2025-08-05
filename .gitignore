@@ -17,3 +17,4 @@ venv/
 *.checkpoint.ipynb
 *.parquet
 *.json
+*.pyc
