@@ -1,13 +1,18 @@
-git filter-repo \
-  --path venv/lib/python3.10/site-packages/tensorflow/libtensorflow_cc.2.dylib \
-  --path venv/lib/python3.10/site-packages/torch/lib/libtorch_cpu.dylib \
-  --path venv/lib/python3.10/site-packages/pyflink/lib/flink-dist-2.1.0.jar \
-  --path venv/lib/python3.10/site-packages/onnxruntime/capi/libonnxruntime.1.22.0.dylib \
-  --path venv/lib/python3.10/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.so \
-  --path venv/lib/python3.10/site-packages/clang/native/libclang.dylib \
-  --path venv/lib/python3.10/site-packages/llvmlite/binding/libllvmlite.dylib \
-  --path venv/lib/python3.10/site-packages/tensorflow/compiler/mlir/stablehlo/stablehlo_extension.so \
-  --path venv/lib/python3.10/site-packages/pyspark/jars/rocksdbjni-8.3.2.jar \
-  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/notebooks/best_model.pth \
-  --path "*.safetensors" \
-  --strip-blobs-bigger-than 50M
+#git filter-repo \
+#  --path venv/lib/python3.10/site-packages/tensorflow/libtensorflow_cc.2.dylib \
+#  --path venv/lib/python3.10/site-packages/torch/lib/libtorch_cpu.dylib \
+#  --path venv/lib/python3.10/site-packages/pyflink/lib/flink-dist-2.1.0.jar \
+#  --path venv/lib/python3.10/site-packages/onnxruntime/capi/libonnxruntime.1.22.0.dylib \
+#  --path venv/lib/python3.10/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.so \
+#  --path venv/lib/python3.10/site-packages/clang/native/libclang.dylib \
+#  --path venv/lib/python3.10/site-packages/llvmlite/binding/libllvmlite.dylib \
+#  --path venv/lib/python3.10/site-packages/tensorflow/compiler/mlir/stablehlo/stablehlo_extension.so \
+#  --path venv/lib/python3.10/site-packages/pyspark/jars/rocksdbjni-8.3.2.jar \
+#  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/notebooks/best_model.pth \
+#  --path "*.safetensors" \
+#  --strip-blobs-bigger-than 50M
+
+
+git add .
+git commit -m " code"
+git push origin main
