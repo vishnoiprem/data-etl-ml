@@ -1,13 +1,33 @@
 git filter-repo \
-  --path venv/lib/python3.10/site-packages/tensorflow/libtensorflow_cc.2.dylib \
-  --path venv/lib/python3.10/site-packages/torch/lib/libtorch_cpu.dylib \
-  --path venv/lib/python3.10/site-packages/pyflink/lib/flink-dist-2.1.0.jar \
-  --path venv/lib/python3.10/site-packages/onnxruntime/capi/libonnxruntime.1.22.0.dylib \
-  --path venv/lib/python3.10/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.so \
-  --path venv/lib/python3.10/site-packages/clang/native/libclang.dylib \
-  --path venv/lib/python3.10/site-packages/llvmlite/binding/libllvmlite.dylib \
-  --path venv/lib/python3.10/site-packages/tensorflow/compiler/mlir/stablehlo/stablehlo_extension.so \
-  --path venv/lib/python3.10/site-packages/pyspark/jars/rocksdbjni-8.3.2.jar \
-  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/notebooks/best_model.pth \
-  --path "*.safetensors" \
+  --path .gitattributes \
+  --path Spark/agg/transaction_logs.csv \
+  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/Human\ Action\ Recognition/Modified_Training_set.csv \
+  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/Human\ Action\ Recognition/Reduced_Testing_set.csv \
+  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/notebooks/.ipynb_checkpoints/AlexNet_hands_on-checkpoint.ipynb \
+  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/notebooks/.ipynb_checkpoints/LeNet-checkpoint.ipynb \
+  --path ml/GenAI-Pinnacle-Master/Computer\ Vision\ using\ PyTorch/Module\ 2/notebooks/.ipynb_checkpoints/lenet_from_my_own-checkpoint.ipynb \
+  --path ml/LLM/.DS_Store \
+  --path ml/LLM/.ipynb_checkpoints/data_nb-checkpoint.ipynb \
+  --path ml/LLM/.ipynb_checkpoints/llm_training-checkpoint.ipynb \
+  --path ml/LLM/app/artists-data.csv \
+  --path ml/LLM/app/lyrics-data.csv \
+  --path ml/LLM/fine_tuned_gpt2/config.json \
+  --path ml/LLM/fine_tuned_gpt2/generation_config.json \
+  --path ml/LLM/fine_tuned_gpt2/special_tokens_map.json \
+  --path ml/LLM/fine_tuned_gpt2/tokenizer_config.json \
+  --path ml/LLM/fine_tuned_gpt2/vocab.json \
+  --path ml/cn/01/Data\ .xlsx \
+  --path ml/system_design/databricks_cust_data.csv \
+  --path ml/system_design/path_to_save_model/stages/0_StringIndexer_74f5e7a18a43/data/._SUCCESS.crc \
+  --path ml/system_design/path_to_save_model/stages/0_StringIndexer_74f5e7a18a43/data/.part-00000-fd501e2c-b461-4325-8d8f-d2e443377abe-c000.snappy.parquet.crc \
+  --path ml/system_design/path_to_save_model/stages/0_StringIndexer_74f5e7a18a43/data/_SUCCESS \
+  --path ml/system_design/path_to_save_model/stages/0_StringIndexer_74f5e7a18a43/data/part-00000-fd501e2c-b461-4325-8d8f-d2e443377abe-c000.snappy.parquet \
+  --path ml/system_design/path_to_save_model/stages/2_MinMaxScaler_d5275382d64a/data/._SUCCESS.crc \
+  --path ml/system_design/path_to_save_model/stages/2_MinMaxScaler_d5275382d64a/data/.part-00000-bdb89f78-7e42-4ec1-9126-ca425d91d174-c000.snappy.parquet.crc \
+  --path ml/system_design/path_to_save_model/stages/2_MinMaxScaler_d5275382d64a/data/_SUCCESS \
+  --path ml/system_design/path_to_save_model/stages/2_MinMaxScaler_d5275382d64a/data/part-00000-bdb89f78-7e42-4ec1-9126-ca425d91d174-c000.snappy.parquet \
+  --path ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data/._SUCCESS.crc \
+  --path ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data/.part-00000-7e39b5b2-7b52-4261-8a1f-1b7fdaba38f8-c000.snappy.parquet.crc \
+  --path ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data/_SUCCESS \
+  --path ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data/part-00000-7e39b5b2-7b52-4261-8a1f-1b7fdaba38f8-c000.snappy.parquet \
   --strip-blobs-bigger-than 50M
