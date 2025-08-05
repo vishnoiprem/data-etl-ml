@@ -32,6 +32,8 @@ Thumbs.db
 # Environments
 .env
 .venv
+venv
+
 EOL
 .*pth
 
