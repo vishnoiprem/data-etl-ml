@@ -18,3 +18,4 @@ venv/
 *.parquet
 *.json
 *.pyc
+*.dylib
