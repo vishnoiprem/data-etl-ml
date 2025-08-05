@@ -49,3 +49,30 @@ ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_m
 *.h5
 *.bin
 *.zip
+
+# Python environments
+venv/
+.env
+.venv/
+
+# Large ML files
+*.pth
+*.safetensors
+*.bin
+*.h5
+*.zip
+*.so
+*.dylib
+*.jar
+
+# Ignore specific large files
+venv/lib/python3.10/site-packages/tensorflow/libtensorflow_cc.2.dylib
+venv/lib/python3.10/site-packages/torch/lib/libtorch_cpu.dylib
+venv/lib/python3.10/site-packages/pyflink/lib/flink-dist-2.1.0.jar
+venv/lib/python3.10/site-packages/onnxruntime/capi/libonnxruntime.1.22.0.dylib
+venv/lib/python3.10/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.so
+venv/lib/python3.10/site-packages/clang/native/libclang.dylib
+venv/lib/python3.10/site-packages/llvmlite/binding/libllvmlite.dylib
+venv/lib/python3.10/site-packages/tensorflow/compiler/mlir/stablehlo/stablehlo_extension.so
+venv/lib/python3.10/site-packages/pyspark/jars/rocksdbjni-8.3.2.jar
+ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
