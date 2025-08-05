@@ -1,35 +1,37 @@
-# Core Data & ML
+# Core Data Science & ML (Enhanced)
 pandas>=2.0.0
 numpy>=1.24.0
 scikit-learn>=1.4.0
 imbalanced-learn>=0.12.0
 xgboost>=2.0.0
 tensorflow>=2.16.0
-tf-keras>=2.16.0
+tf-keras>=2.16.0                # NEW: Explicit Keras 2.x support
 torch>=2.2.2
 transformers>=4.40.0
 diffusers>=0.27.0
 sentence-transformers>=2.7.0
-nltk==3.9.1  # Pinned due to constraint
+nltk==3.9.1
 shap>=0.45.0
 matplotlib>=3.8.0
 seaborn>=0.13.0
 joblib>=1.3.0
 sympy>=1.12.0
 pyyaml>=6.0.0
+mlflow>=2.8.0                  # NEW: Experiment tracking
 
-# Dask (Big Data Processing)
+# Big Data Processing (Optimized)
 dask[dataframe]==2024.5.1
 distributed==2024.5.1
-pyarrow>=14.0.1
-# Spark & Flink (Streaming/Batch)
+pyarrow>=14.0.1                # Security fix
 pyspark>=3.5.0
 delta-spark>=3.1.0
 apache-flink>=1.18.0
+ray[default]>=2.10.0           # NEW: Distributed computing
 
-# Geospatial & NLP
+# NLP & Geospatial (Consolidated)
 geopy>=2.4.0
-nltk==3.9.1
+spacy>=3.7.0                   # NEW: Industrial-strength NLP
+rouge>=1.0.1
 
 # Visualization & Reporting
 matplotlib>=3.8.0
@@ -38,18 +40,27 @@ graphviz>=0.20.1
 jupyterlab>=4.0.0
 streamlit>=1.33.0
 flask>=2.0.0
+plotly>=5.18.0                 # NEW: Interactive viz
 
 # Vector DB & LLM Ops
 pinecone-client>=3.2.0
+chromadb>=0.4.0                # NEW: Local vector DB alternative
 
 # Evaluation & Metrics
 rouge>=1.0.1
+evidently>=0.4.0               # NEW: Data drift detection
 
 # Data Quality & Validation
 great_expectations>=0.18.0
 
-# Environment & Utils
+# Deployment & Production
 python-dotenv>=0.19.0
+gunicorn>=20.1.0
+uvicorn>=0.23.0
+fastapi>=0.109.0               # NEW: Modern API framework
+docker>=7.0.0                  # NEW: Containerization
+crewai==0.5.0
 
-# Security Fix (CVE-2023-47248 for PyArrow)
-pyarrow>=14.0.1  # Required by Dask; avoid insecure versions <14.0.1
+# Optional GPU Support
+# cuda-python>=12.0.0          # Uncommented if needed
+# nvidia-cudnn-cu12>=8.9.2
