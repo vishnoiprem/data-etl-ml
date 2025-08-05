@@ -12,3 +12,8 @@ venv/
 *.so
 *.dylib
 *.jar
+*.crc
+*.csv
+*.checkpoint.ipynb
+*.parquet
+*.json
