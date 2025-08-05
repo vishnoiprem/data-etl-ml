@@ -106,7 +106,7 @@ def notification_task(context):
         expected_output="Email delivery confirmation",
         context=context,
         action=lambda: DummyTravelAPI.send_email(
-            email="customer@example.com",
+            email="premvishnoisoft@gmail.com",
             message=message
         )
     )
