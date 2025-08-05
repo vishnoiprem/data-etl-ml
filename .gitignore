@@ -1,6 +1,11 @@
 # Ignore specific file
 # Ignore all .safetensors files
 *.safetensors
+# Ignore large files
+*.pth
+*.bin
+*.h5
+*.zip
 *.jar
 # Ignore specific file
 ml/LLM/fine_tuned_gpt2/model.safetensors
