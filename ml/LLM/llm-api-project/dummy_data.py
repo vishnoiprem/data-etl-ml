@@ -1,17 +1,16 @@
-import random
-from faker import Faker
+# dummy_data.py
+DUMMY_USERS = {
+    "user1": {"username": "user1", "password": "password123", "credits": 100},
+    "user2": {"username": "user2", "password": "securepass", "credits": 50}
+}
 
-fake = Faker()
+DUMMY_API_KEYS = {
+    "client_123": {"user_id": "user1", "credits": 100},
+    "client_456": {"user_id": "user2", "credits": 50}
+}
 
-def generate_dummy_users(count=10):
-    return {
-        f"user_{i}": {
-            "credits": random.randint(10, 100),
-            "name": fake.name(),
-            "email": fake.email()
-        } for i in range(count)
-    }
-
-if __name__ == "__main__":
-    users = generate_dummy_users()
-    print(users)
+DUMMY_PROMPTS = [
+    "What's the capital of France?",
+    "Summarize the history of AI in 100 words.",
+    "Generate a poem about the moon."
+]
