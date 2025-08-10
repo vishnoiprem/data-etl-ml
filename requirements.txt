@@ -5,7 +5,7 @@ scikit-learn>=1.4.0
 imbalanced-learn>=0.12.0
 xgboost>=2.0.0
 tensorflow>=2.12.0
-tf-keras>=2.16.0                # NEW: Explicit Keras 2.x support
+tf-keras==2.15.1         # NEW: Explicit Keras 2.x support
 torch>=2.2.2
 transformers>=4.40.0
 diffusers>=0.27.0
@@ -67,3 +67,4 @@ redis==5.0.8
 # cuda-python>=12.0.0          # Uncommented if needed
 # nvidia-cudnn-cu12>=8.9.2
 protobuf==3.20.*  # Known compatible version
+faiss-cpu==1.8.0.post1
