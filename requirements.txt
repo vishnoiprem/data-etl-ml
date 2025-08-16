@@ -110,3 +110,7 @@ gunicorn==21.2.0
 # nvidia-cudnn-cu12==8.9.2.26
 
 psycopg2-binary==2.9.5
+streamlit==1.24.0
+redis==4.6.0
+pandas==2.0.3
+plotly==5.15.0
