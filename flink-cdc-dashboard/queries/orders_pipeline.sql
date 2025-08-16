@@ -1,4 +1,3 @@
--- queries/orders_pipeline.sql
 CREATE TABLE orders_cdc (
   before ROW<id INT, user_id STRING, amount DECIMAL(10,2)>,
   after ROW<id INT, user_id STRING, amount DECIMAL(10,2)>,
@@ -7,12 +6,12 @@ CREATE TABLE orders_cdc (
 ) WITH (
   'connector' = 'kafka',
   'topic' = 'postgres.public.orders',
-  'properties.bootstrap.servers' = 'kafka:9092',
+  'properties.bootstrap.servers' = 'kafka:29092',
+  'scan.startup.mode' = 'earliest-offset',
   'format' = 'debezium-json'
 );
 
--- Redis sink for live dashboard
-CREATE TABLE redis_dashboard (
+CREATE TABLE redis_sink (
   user_id STRING,
   total_orders INT,
   total_revenue DECIMAL(10,2),
@@ -22,17 +21,15 @@ CREATE TABLE redis_dashboard (
   'host' = 'redis',
   'port' = '6379',
   'format' = 'json',
+  'mode' = 'hash',
   'key' = 'user_analytics'
 );
 
-INSERT INTO redis_dashboard
+INSERT INTO redis_sink
 SELECT
-  user_id,
+  after.user_id,
   COUNT(*) as total_orders,
-  SUM(amount) as total_revenue
-FROM (
-  SELECT after.user_id, after.amount
-  FROM orders_cdc
-  WHERE op = 'c'
-)
-GROUP BY user_id;
+  SUM(after.amount) as total_revenue
+FROM orders_cdc
+WHERE op = 'c' OR op = 'u'
+GROUP BY after.user_id;
