@@ -40,9 +40,20 @@ def get_recommendations(title, cosine_sim=cosine_sim):
             return f"Title not found. Did you mean: {', '.join(similar_titles[:3])}?"
         return "Title not found in dataset."
 
+print(metadata['title'].head(20))         # first 20 titles
 
 # Test with error handling
-print(get_recommendations('The Dark Knight Rises'))
-print(get_recommendations('Dark Hero'))
-print(get_recommendations('Inception Point'))
-print(get_recommendations('Non-existent Movie'))
+print('Lost Path 539')
+
+print(get_recommendations('Lost Path 539'))
+
+
+print('Broken Game')
+print(get_recommendations('Broken Game 1'))
+# print(get_recommendations('Inception Point'))
+# print(get_recommendations('Non-existent Movie'))
+#
+#
+# print(get_recommendations('Toy Story'))
+# print(get_recommendations('Jumanji'))
+# print(get_recommendations('Grumpier Old Men'))

@@ -1,5 +1,7 @@
 import pandas as pd
 
+
+
 # Load the MovieLens metadata
 metadata = pd.read_csv('../../data/movies_metadata.csv', low_memory=False)
 
