@@ -78,3 +78,5 @@ def predict(userId, movieId):
 
 # Example: Predict rating for user=1, movie=2
 print("Predicted Rating:", predict(1, 2))
+
+print("Predicted Rating:", predict(7, 1))
