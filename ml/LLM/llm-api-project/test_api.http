@@ -1,0 +1,15 @@
+### Health Check
+GET http://localhost:8000/health
+
+### Check Credits
+GET http://localhost:8000/credits/demo_key
+
+### Make Chat Request
+POST http://localhost:8000/chat
+Content-Type: application/json
+X-API-Key: demo_key
+
+{
+  "prompt": "Explain quantum computing in simple terms",
+  "max_length": 200
+}

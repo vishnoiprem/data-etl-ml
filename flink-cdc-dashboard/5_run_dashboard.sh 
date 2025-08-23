@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Launch Streamlit dashboard
+echo "📊 Starting real-time dashboard..."
+streamlit run dashboard/dashboard.py
