@@ -1,21 +1,23 @@
 # Core Dependencies
-pyspark>=3.5.0
-delta-spark>=3.0.0
-pandas>=2.0.0
-numpy>=1.24.0
+pyspark==3.5.0
+delta-spark==3.0.0
+pandas==2.0.3
+numpy==1.24.3
+
+
+
 
 # Azure Services
-azure-ai-documentintelligence>=1.0.0
-azure-storage-blob>=12.0.0
-azure-identity>=1.12.0
-azure-keyvault-secrets>=4.7.0
+azure-ai-documentintelligence==1.0.0
+azure-storage-blob==12.19.0
+azure-identity==1.12.0
+azure-keyvault-secrets==4.7.0
 
 # Utilities
-pyyaml>=6.0
-python-dotenv>=1.0.0
-requests>=2.31.0
-tqdm>=4.65.0
-python-multipart>=0.0.6
+pyyaml==6.0
+python-dotenv==1.0.0
+requests==2.31.0
+tqdm==4.65.0
 
 # ML & NLP (for RAG)
 openai>=1.3.0
