@@ -1,0 +1,43 @@
+# config/config.yaml
+azure:
+  document_intelligence:
+    endpoint: "https://<your-resource>.cognitiveservices.azure.com/"
+    api_version: "2023-10-31-preview"
+    models:
+      read: "prebuilt-read"
+      layout: "prebuilt-layout"
+      invoice: "prebuilt-invoice"
+      receipt: "prebuilt-receipt"
+    rate_limit_tps: 15
+    retry_attempts: 3
+
+storage:
+  account_name: "yourstorageaccount"
+  containers:
+    incoming: "incoming-documents"
+    bronze: "bronze-layer"
+    silver: "silver-layer"
+    gold: "gold-layer"
+    dlq: "dead-letter-queue"
+
+databricks:
+  delta_path: "dbfs:/mnt/document_processing"
+  checkpoint_location: "/checkpoints/document_processing"
+  parallelism: 10
+  trigger_interval: "5 minutes"
+
+processing:
+  supported_formats: ["pdf", "png", "jpg", "jpeg", "tiff", "bmp", "docx"]
+  max_file_size_mb: 50
+  content_types:
+    pdf: "application/pdf"
+    png: "image/png"
+    jpg: "image/jpeg"
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+monitoring:
+  alert_thresholds:
+    error_rate_percent: 5
+    dlq_count: 100
+    processing_lag_minutes: 60
+  metrics_table: "document_processing_metrics"

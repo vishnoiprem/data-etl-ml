@@ -50,4 +50,88 @@ Features
 ✅ RAG-ready chunking and embeddings
 
 ✅ Production monitoring and alerting
-EOF
+
+
+
+# docs/production_checklist.md
+
+# Production Deployment Checklist
+
+## Infrastructure Setup
+- [ ] Azure Subscription with appropriate quotas
+- [ ] Resource Group created
+- [ ] Storage Account with GRS replication
+- [ ] Azure Document Intelligence resource (Standard tier)
+- [ ] Databricks Workspace (Premium tier)
+- [ ] Network security groups configured
+- [ ] Private endpoints for secure access
+- [ ] Monitoring workspace set up
+
+## Configuration
+- [ ] Environment variables set in Databricks secrets
+- [ ] Configuration files updated for each environment
+- [ ] API keys and connection strings secured
+- [ ] Rate limits configured based on Azure Document Intelligence tier
+- [ ] Retention policies set for Delta tables
+- [ ] Backup schedules configured
+
+## Pipeline Deployment
+- [ ] Terraform infrastructure deployed
+- [ ] Delta tables created with appropriate schemas
+- [ ] Auto Loader configured for incoming documents
+- [ ] Processing cluster configured with auto-scaling
+- [ ] DLQ table and retry logic implemented
+- [ ] Monitoring dashboard deployed
+- [ ] Alert rules configured and tested
+
+## Security
+- [ ] Azure AD authentication enabled
+- [ ] Role-based access control configured
+- [ ] Secrets managed in Azure Key Vault
+- [ ] Network isolation with private endpoints
+- [ ] Data encryption at rest and in transit
+- [ ] Audit logging enabled
+
+## Testing
+- [ ] Unit tests passing
+- [ ] Integration tests with sample documents
+- [ ] Load testing with representative volume
+- [ ] Error handling scenarios tested
+- [ ] Failover and recovery tested
+- [ ] Cost optimization verified
+
+## Monitoring & Alerting
+- [ ] Dashboard accessible to operations team
+- [ ] Alerts configured for:
+  - [ ] High error rates (>5%)
+  - [ ] DLQ size thresholds
+  - [ ] Processing delays
+  - [ ] Cost thresholds
+  - [ ] API rate limiting
+- [ ] Log analytics workspace configured
+- [ ] Performance baselines established
+
+## Documentation
+- [ ] Architecture diagrams updated
+- [ ] Runbooks for common operations
+- [ ] Troubleshooting guide
+- [ ] Cost optimization guide
+- [ ] API documentation for downstream consumers
+- [ ] SLA definitions documented
+
+## Rollout Plan
+- [ ] Deploy to development environment
+- [ ] Run full test suite
+- [ ] Deploy to staging with canary testing
+- [ ] Monitor for 48 hours in staging
+- [ ] Deploy to production with feature flag
+- [ ] Gradual traffic increase
+- [ ] Full production cutover
+- [ ] Post-deployment validation
+
+## Post-Deployment
+- [ ] Performance metrics collected
+- [ ] Cost analysis completed
+- [ ] User feedback gathered
+- [ ] Optimization opportunities identified
+- [ ] Documentation updated based on learnings
