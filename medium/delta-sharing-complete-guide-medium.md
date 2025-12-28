@@ -28,16 +28,16 @@ Before you know it, you are  managing:
 - 40 potential points of failure
 - 40 copies of data that can drift out of sync
 
-And when something goes wrong  and it always does you are the one debugging which export failed, which partner has stale data, and why the numbers do not match.
+And when something goes wrong and it always does you are the one debugging which export failed, which partner has stale data, and why the numbers do not match.
 
-**This is the distributed synchronization problem.** and it's eating data teams alive.
+**This is the distributed synchronization problem ** and it's eating data teams alive.
 
 
 ## The Problem Nobody Wants to Talk About
 
-Here's the dirty secret: exporting data is easy. *Keeping it in sync* is the nightmare.
+Here's the dirty secret: exporting data is easy, *Keeping it in sync* is the nightmare.
 
-Every time you export data, you create a copy. That copy immediately starts aging. By the time your partner imports it into their system, you've already updated the source table three times.
+Every time you export data, you create a copy, That copy immediately starts aging, By the time your partner imports it into their system, you have  already updated the source table three times.
 
 Now multiply that by 40 partners.
 
@@ -65,7 +65,7 @@ I spent a year of my career managing this mess. It was exhausting.
 
 Then I found Delta Sharing.
 
----
+
 
 ## What Delta Sharing Actually Is
 
