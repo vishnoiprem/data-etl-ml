@@ -1,18 +1,23 @@
 # Delta Sharing: The Protocol That Made Me Delete All Our Export Jobs
 
-*How we went from 40 fragmented data copies to one source of truth and why your team should too*
+*How we went from a mess of exports to one source of truth  and why I am  never going back*
 
 
+A while ago, we finally got our main Delta table into a really good place.
 
-You have a Delta table,  It's beautiful and  Clean,  Well-maintained. 
-It's your source of truth for customer data, and you've spent months perfecting it.
+Clean schema.
+Well maintained.
+Fast queries.
+It's your source of truth for customer data, and you have  spent months perfecting it.
 
 Now, 40 different teams need access to this data.
 
 What do you do?
 
 If you are  like most data teams, you set up export jobs,  One for Partner A (they want CSV). One for Partner B (they need it in their S3 bucket). 
-One for the analytics team (hourly refresh), One for the finance vendor (daily SFTP upload)  One for... you get the idea.
+One for the analytics team (hourly refresh), One for the finance vendor (daily SFTP upload)  One for.. you get the idea.
+
+
 
 Before you know it, you are  managing:
 - 40 separate export jobs
@@ -20,11 +25,10 @@ Before you know it, you are  managing:
 - 40 potential points of failure
 - 40 copies of data that can drift out of sync
 
-And when something goes wrong  and it always does  you are the one debugging which export failed, which partner has stale data, and why the numbers do not match.
+And when something goes wrong  and it always does you are the one debugging which export failed, which partner has stale data, and why the numbers do not match.
 
-**This is the distributed synchronization problem.** And it's eating data teams alive.
+**This is the distributed synchronization problem.** and it's eating data teams alive.
 
----
 
 ## The Problem Nobody Wants to Talk About
 
