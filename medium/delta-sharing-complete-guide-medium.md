@@ -20,7 +20,7 @@ Before you know it, you are  managing:
 - 40 potential points of failure
 - 40 copies of data that can drift out of sync
 
-And when something goes wrong  and it always does  you're the one debugging which export failed, which partner has stale data, and why the numbers do not match.
+And when something goes wrong  and it always does  you are the one debugging which export failed, which partner has stale data, and why the numbers do not match.
 
 **This is the distributed synchronization problem.** And it's eating data teams alive.
 
@@ -173,7 +173,7 @@ Let me break this down:
 
 You generate this profile, send it to the recipient securely, and they're ready to query.
 
-> ⚠️ **Security note:** The `expirationTime` field is optional, but please always set it. Long-lived or perpetual tokens are a security antipattern. Rotate your secrets. Keep them safe.
+>  ** Note:** The `expirationTime` field is optional, but please always set it. Long-lived or perpetual tokens are a security antipattern. Rotate your secrets. Keep them safe.
 
 ---
 
@@ -675,7 +675,7 @@ What are you waiting for?
 
 
 
-*Still managing export jobs? Still emailing CSVs? Drop a comment  I've been there, and I'd love to help.*
+*Still managing export jobs? Still emailing CSVs? Drop a comment  I have been there, and I'd love to help.*
 
 
 
