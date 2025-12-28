@@ -6,8 +6,11 @@
 A while ago, we finally got our main Delta table into a really good place.
 
 Clean schema.
+
 Well maintained.
+
 Fast queries.
+
 It's your source of truth for customer data, and you have  spent months perfecting it.
 
 Now, 40 different teams need access to this data.
