@@ -1,6 +1,6 @@
 # Delta Sharing: The Protocol That Made Me Delete All Our Export Jobs
 
-*How we went from 40 fragmented data copies to one source of truth — and why your team should too*
+*How we went from 40 fragmented data copies to one source of truth and why your team should too*
 
 
 
@@ -88,7 +88,7 @@ The protocol is:
 
 Let me show you how it works.
 
----
+
 
 ## The Three Players: Providers, Shares, and Recipients
 
@@ -120,7 +120,7 @@ shares:
             id: "7a2b3c4d-5e6f-7890-abcd-ef1234567890"
 ```
 
-This configuration says: *"The `marketing_analysts_share` gives access to two tables — `clickstream_hourly` and `campaign_performance` — both in the `consumer` schema."*
+This configuration says: *"The `marketing_analysts_share` gives access to two tables — `clickstream_hourly` and `campaign_performance`  both in the `consumer` schema."*
 
 You can create multiple shares with different access levels:
 
@@ -151,7 +151,7 @@ Different shares for different needs. All reading from the same source tables.
 
 A recipient is the identity receiving access. Could be a user, a team, a department, or an external partner.
 
-Each recipient gets a **profile file** — a small JSON document containing everything they need to connect:
+Each recipient gets a **profile file**  a small JSON document containing everything they need to connect:
 
 ```json
 {
@@ -340,7 +340,7 @@ Response:
 }
 ```
 
-This is usually what you want — skip the hierarchy traversal and see everything at once.
+This is usually what you want  skip the hierarchy traversal and see everything at once.
 
 ### Pagination
 
@@ -608,7 +608,7 @@ Let me tell you what happened after we adopted Delta Sharing.
 
 The biggest change? **Trust.**
 
-When partners know they're reading from the source of truth — not a copy of a copy — they trust the data. No more "can you verify this number?" No more "which export is the latest?"
+When partners know they're reading from the source of truth  not a copy of a copy  they trust the data. No more "can you verify this number?" No more "which export is the latest?"
 
 There's only one version. The real one.
 
@@ -675,7 +675,7 @@ What are you waiting for?
 
 
 
-*Still managing export jobs? Still emailing CSVs? Drop a comment — I've been there, and I'd love to help.*
+*Still managing export jobs? Still emailing CSVs? Drop a comment  I've been there, and I'd love to help.*
 
 
 
