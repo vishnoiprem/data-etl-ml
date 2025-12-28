@@ -59,9 +59,9 @@ Each destination is a diverging copy.
 Each ??? is "who knows what state it's in."
 ```
 
-The worst part? You have to track state for every single export. Did it succeed? Did it fail halfway through? Did the partner actually receive it? What happens when you need to replace corrupted data?
+The worst part? You have to track state for every single export, Did it succeed? Did it fail halfway through? Did the partner actually receive it? What happens when you need to replace corrupted data?
 
-I spent a year of my career managing this mess. It was exhausting.
+I spent a year of my career managing this mess, It was exhausting.
 
 Then I found Delta Sharing.
 
