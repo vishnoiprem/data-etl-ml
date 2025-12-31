@@ -1,18 +1,20 @@
 # I Built a $50K/Month AI Consulting Business Using These 3 Prompt Engineering Techniques
 
-*The complete technical guide to Chain-of-Thought, Self-Consistency, and Verify-and-Edit — with Python implementations, real client case studies, and production-ready code*
+*The complete technical guide to Chain of Thought, Self Consistency, and verify and edit with Python implementations, real client case studies, and production ready code*
+
 
 ---
 
+
 ## The $847,000 Mistake That Started Everything
 
-March 2024. I'm sitting in a conference room at a Fortune 500 insurance company, watching their Chief Actuary's face turn pale.
+March 2024. I was sitting in a conference room at a Fortune 500 insurance company, watching their Chief Actuary's face turn pale.
 
-For six weeks, their team had been using GPT-4 to automate policy risk assessments. The AI had been processing claims with 94% accuracy — impressive numbers that made everyone comfortable. Until the quarterly audit revealed something terrifying.
+For six weeks, their team had been using GPT-4 to automate policy risk assessments. The AI had been processing claims with 94% accuracy impressive numbers that made everyone comfortable. Until the quarterly audit revealed something terrifying.
 
-The AI had systematically underestimated risk on 847 high-value policies. Total exposure: $847,000 in potential claims they hadn't reserved for.
+The AI had systematically underestimated risk on 847 high-value policies. Total exposure: $847,000 in potential claims they had not  reserved for.
 
-The problem? The model was pattern-matching, not reasoning. When it saw "45-year-old male, non-smoker, office job," it retrieved the most common outcome from training data. It never actually *calculated* the compound risk factors. It never *verified* its assumptions. It just... guessed confidently.
+The problem? The model was pattern matching, not reasoning. When it saw "45-year-old male, non-smoker, office job," it retrieved the most common outcome from training data. It never actually *calculated* the compound risk factors. It never *verified* its assumptions. It just... guessed confidently.
 
 That day, I made them a promise: I would find a way to make AI actually *think*.
 
@@ -22,13 +24,14 @@ This is the complete technical breakdown of how I did it.
 
 ---
 
+
 ## Part 1: Understanding Why Standard Prompting Fails
 
 Before we fix anything, we need to understand what's broken.
 
 ### The Greedy Decoding Problem
 
-When you send a prompt to an LLM, it doesn't "think" — it predicts. Specifically, it predicts the most likely next token given all previous tokens. This is called **greedy decoding**.
+When you send a prompt to an LLM, it doesn't "think"  it predicts. Specifically, it predicts the most likely next token given all previous tokens. This is called **greedy decoding**.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
