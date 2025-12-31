@@ -47,21 +47,21 @@ When you send a prompt to an LLM, it doesn't "think"  it predicts. Specifically,
 │  └─────┘    └─────┘    └─────┘    └─────┘    └─────┘                       │
 │    │          │          │          │          │                           │
 │   95%        89%        97%        92%        73%  ← Probability           │
-│                                                                             │
+│                                                                            │
 │  The model picked "20" because it's the most common answer format          │
 │  for subtraction problems in training data. It never actually computed.    │
-│                                                                             │
-│  Correct answer: 23 - 7 + 4 = 16 + 4 = 20 ✓ (lucky guess!)                │
-│                                                                             │
+│                                                                            │
+│  Correct answer: 23 - 7 + 4 = 16 + 4 = 20 ✓ (lucky guess!)                 │
+│                                                                            │
 │  But try: "What is 23 - 7 + 4 - 3?"                                        │
 │  Model says: "17" ✗ (Correct: 17 ✓ — sometimes right!)                     │
-│                                                                             │
-│  Try: "What is 847.50 × 0.15?"                                              │
+│                                                                            │
+│  Try: "What is 847.50 × 0.15?"                                             │
 │  Model says: "127.13" ✗ (Correct: 127.125)                                 │
-│                                                                             │
+│                                                                            │
 │  The model isn't calculating — it's pattern matching.                      │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Real Failure Case: The Insurance Risk Calculator
@@ -106,11 +106,12 @@ The AI wasn't reasoning through the compound effects. It was retrieving cached p
 
 ---
 
-## Part 2: Chain-of-Thought Prompting — Teaching AI to Show Its Work
+## Part 2: Chain of Thought Prompting Teaching AI to Show Its Work
 
 ### The Core Mechanism
 
-Chain-of-Thought (CoT) prompting forces the model to generate intermediate reasoning steps before producing a final answer. This isn't just about getting explanations — it fundamentally changes *how* the model processes information.
+Chain of Thought (CoT) prompting forces the model to generate intermediate reasoning steps before producing a final answer. 
+This isn't just about getting explanations  it fundamentally changes *how* the model processes information.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -123,23 +124,23 @@ Chain-of-Thought (CoT) prompting forces the model to generate intermediate reaso
 │  └──────────┘      (Pattern Matching)      └──────────┘                     │
 │                                                                             │
 │  CHAIN-OF-THOUGHT:                                                          │
-│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐              │
-│  │ Question │───▶│  Step 1  │───▶│  Step 2  │───▶│  Step 3  │──┐           │
-│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │           │
-│                       │              │              │          │           │
-│                       ▼              ▼              ▼          │           │
-│                  ┌─────────────────────────────────────────┐   │           │
-│                  │        Working Memory Context           │   │           │
-│                  │  (Each step informs the next step)      │   │           │
-│                  └─────────────────────────────────────────┘   │           │
-│                                                                │           │
-│                                                   ┌────────────┘           │
-│                                                   ▼                        │
-│                                              ┌──────────┐                  │
-│                                              │  Answer  │                  │
-│                                              └──────────┘                  │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐               │
+│  │ Question │───▶│  Step 1  │───▶│  Step 2  │───▶│  Step 3  │──┐            │
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘  │            │
+│                       │              │              │          │            │
+│                       ▼              ▼              ▼          │            │
+│                  ┌─────────────────────────────────────────┐   │            │
+│                  │        Working Memory Context           │   │            │
+│                  │  (Each step informs the next step)      │   │            │
+│                  └─────────────────────────────────────────┘   │            │
+│                                                                │            │
+│                                                   ┌────────────┘            │
+│                                                   ▼                         │
+│                                              ┌──────────┐                   │
+│                                              │  Answer  │                   │
+│                                              └──────────┘                   │
 │                                                                             │
-│  KEY INSIGHT: Each reasoning step adds to the context window,              │
+│  KEY INSIGHT: Each reasoning step adds to the context window,               │
 │  making subsequent predictions more informed.                               │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -147,7 +148,7 @@ Chain-of-Thought (CoT) prompting forces the model to generate intermediate reaso
 
 ### Implementation: Python Prototype
 
-Here's a production-ready Chain-of-Thought implementation:
+Here's a production ready Chain-of-Thought implementation:
 
 ```python
 import openai
@@ -342,28 +343,31 @@ if __name__ == "__main__":
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  BEFORE (Standard Prompting):                                               │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Accuracy vs Actuary Assessment                                      │   │
-│  │                                                                      │   │
-│  │  Low Risk Cases:    ████████████████████░░░░░  89% accurate         │   │
-│  │  Medium Risk Cases: ████████████████░░░░░░░░░  71% accurate         │   │
-│  │  High Risk Cases:   ████████████░░░░░░░░░░░░░  58% accurate  ← FAIL │   │
-│  │                                                                      │   │
-│  │  Overall: 73% | Cost of errors: $847,000                            │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  Accuracy vs Actuary Assessment                                     │    │
+│  │                                                                     │    │
+│  │  Low Risk Cases:    ████████████████████░░░░░  89% accurate         │    │
+│  │  Medium Risk Cases: ████████████████░░░░░░░░░  71% accurate         │    │
+│  │  High Risk Cases:   ████████████░░░░░░░░░░░░░  58% accurate  ← FAIL │    │
+│  │                                                                     │    │
+│  │  Overall: 73% | Cost of errors: $847,000                            │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
 │  AFTER (Chain-of-Thought):                                                  │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Accuracy vs Actuary Assessment                                      │   │
-│  │                                                                      │   │
-│  │  Low Risk Cases:    █████████████████████████  97% accurate         │   │
-│  │  Medium Risk Cases: ████████████████████████░  94% accurate         │   │
-│  │  High Risk Cases:   ███████████████████████░░  91% accurate  ← FIXED│   │
-│  │                                                                      │   │
-│  │  Overall: 94% | Cost of errors: $23,000 (97% reduction)             │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  Accuracy vs Actuary Assessment                                     │    │
+│  │                                                                     │    │
+│  │  Low Risk Cases:    █████████████████████████  97% accurate         │    │
+│  │  Medium Risk Cases: ████████████████████████░  94% accurate         │    │
+│  │  High Risk Cases:   ███████████████████████░░  91% accurate  ← FIXED│    │
+│  │                                                                     │    │
+│  │  Overall: 94% | Cost of errors: $23,000 (97% reduction)             │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
+
+
+
 ```
 
 ---

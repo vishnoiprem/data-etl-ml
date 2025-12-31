@@ -240,7 +240,9 @@ The recipient's profile reflects this:
 }
 ```
 
----
+
+
+
 
 ## The REST API: How It All Works
 
