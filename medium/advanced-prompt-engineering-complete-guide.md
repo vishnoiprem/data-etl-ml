@@ -673,41 +673,41 @@ if __name__ == "__main__":
 │                                                                             │
 │  CONFIDENCE LEVELS AND RECOMMENDED ACTIONS:                                 │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  90-100% (9-10/10 paths agree)                                      │   │
-│  │  ████████████████████████████████████████████████████████████████   │   │
-│  │                                                                      │   │
-│  │  Status: HIGH CONFIDENCE                                            │   │
-│  │  Action: Auto-approve, minimal review needed                        │   │
-│  │  Use case: Automated pipelines, batch processing                    │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  90-100% (9-10/10 paths agree)                                      │    │
+│  │  ████████████████████████████████████████████████████████████████   │    │
+│  │                                                                     │    │
+│  │  Status: HIGH CONFIDENCE                                            │    │
+│  │  Action: Auto-approve, minimal review needed                        │    │
+│  │  Use case: Automated pipelines, batch processing                    │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  70-89% (7-8/10 paths agree)                                        │   │
-│  │  ██████████████████████████████████████████████░░░░░░░░░░░░░░░░░░   │   │
-│  │                                                                      │   │
-│  │  Status: GOOD CONFIDENCE                                            │   │
-│  │  Action: Spot-check recommended                                     │   │
-│  │  Use case: Semi-automated workflows                                 │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  70-89% (7-8/10 paths agree)                                        │    │
+│  │  ██████████████████████████████████████████████░░░░░░░░░░░░░░░░░░   │    │
+│  │                                                                     │    │
+│  │  Status: GOOD CONFIDENCE                                            │    │
+│  │  Action: Spot-check recommended                                     │    │
+│  │  Use case: Semi-automated workflows                                 │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  50-69% (5-6/10 paths agree)                                        │   │
-│  │  ██████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   │   │
-│  │                                                                      │   │
-│  │  Status: MODERATE CONFIDENCE                                        │   │
-│  │  Action: Human review required before action                        │   │
-│  │  Use case: Flag for expert review                                   │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  50-69% (5-6/10 paths agree)                                        │    │
+│  │  ██████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   │    │
+│  │                                                                     │    │
+│  │  Status: MODERATE CONFIDENCE                                        │    │
+│  │  Action: Human review required before action                        │    │
+│  │  Use case: Flag for expert review                                   │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
-│  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │  Below 50% (≤4/10 paths agree)                                      │   │
-│  │  ██████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   │   │
-│  │                                                                      │   │
-│  │  Status: LOW CONFIDENCE                                             │   │
-│  │  Action: DO NOT USE - escalate to human expert                      │   │
-│  │  Use case: Indicates ambiguous or complex question                  │   │
-│  └─────────────────────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────────────────────┐    │
+│  │  Below 50% (≤4/10 paths agree)                                      │    │
+│  │  ██████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   │    │
+│  │                                                                     │    │
+│  │  Status: LOW CONFIDENCE                                             │    │
+│  │  Action: DO NOT USE - escalate to human expert                      │    │
+│  │  Use case: Indicates ambiguous or complex question                  │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -725,37 +725,37 @@ Verify-and-Edit adds a crucial layer: external fact-checking. The AI generates v
 │                    VERIFY-AND-EDIT ARCHITECTURE                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                         PHASE 1: INITIAL RESPONSE                     │  │
-│  │                                                                       │  │
-│  │  Question: "Which team that John Nyskohus played for                 │  │
-│  │            was known as 'the Black and Whites'?"                     │  │
-│  │                                                                       │  │
-│  │  Initial CoT Answer:                                                  │  │
-│  │  "John Nyskohus played for Odd Grenland, a Norwegian team.          │  │
-│  │   Odd Grenland is known as 'the Black and Whites.'                  │  │
-│  │   Answer: Odd Grenland"                                              │  │
-│  │                                                                       │  │
-│  │  Confidence: UNCERTAIN (obscure facts)                               │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                         PHASE 1: INITIAL RESPONSE                    │   │
+│  │                                                                      │   │
+│  │  Question: "Which team that John Nyskohus played for                 │   │
+│  │            was known as 'the Black and Whites'?"                     │   │
+│  │                                                                      │   │
+│  │  Initial CoT Answer:                                                 │   │
+│  │  "John Nyskohus played for Odd Grenland, a Norwegian team.           │   │
+│  │   Odd Grenland is known as 'the Black and Whites.'                   │   │
+│  │   Answer: Odd Grenland"                                              │   │
+│  │                                                                      │   │
+│  │  Confidence: UNCERTAIN (obscure facts)                               │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 │                              │                                              │
 │                              ▼                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    PHASE 2: GENERATE VERIFY QUESTIONS                 │  │
-│  │                                                                       │  │
-│  │  Extracted Claims:                                                    │  │
-│  │  1. "John Nyskohus played for Odd Grenland"                          │  │
-│  │  2. "Odd Grenland is known as 'the Black and Whites'"                │  │
-│  │                                                                       │  │
-│  │  Generated Verification Questions:                                    │  │
-│  │  Q1: "What football teams did John Nyskohus play for?"               │  │
-│  │  Q2: "Which football team is nicknamed 'the Black and Whites'?"      │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    PHASE 2: GENERATE VERIFY QUESTIONS                │   │
+│  │                                                                      │   │
+│  │  Extracted Claims:                                                   │   │
+│  │  1. "John Nyskohus played for Odd Grenland"                          │   │
+│  │  2. "Odd Grenland is known as 'the Black and Whites'"                │   │
+│  │                                                                      │   │
+│  │  Generated Verification Questions:                                   │   │
+│  │  Q1: "What football teams did John Nyskohus play for?"               │   │
+│  │  Q2: "Which football team is nicknamed 'the Black and Whites'?"      │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 │                              │                                              │
 │                              ▼                                              │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    PHASE 3: EXTERNAL KNOWLEDGE RETRIEVAL              │  │
-│  │                                                                       │  │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    PHASE 3: EXTERNAL KNOWLEDGE RETRIEVAL             │  │
+│  │                                                                      │  │
 │  │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐   │  │
 │  │  │   WIKIPEDIA     │    │   GOOGLE        │    │   DATABASE      │   │  │
 │  │  │                 │    │                 │    │                 │   │  │
@@ -765,38 +765,38 @@ Verify-and-Edit adds a crucial layer: external fact-checking. The AI generates v
 │  │  │  played for     │    │ team' show      │    │                 │   │  │
 │  │  │  Adelaide City" │    │ Adelaide City   │    │                 │   │  │
 │  │  └─────────────────┘    └─────────────────┘    └─────────────────┘   │  │
-│  │                                                                       │  │
-│  │  Retrieved Facts:                                                     │  │
+│  │                                                                      │  │
+│  │  Retrieved Facts:                                                    │  │
 │  │  ✓ John Nyskohus: Australian footballer, played for Adelaide City    │  │
-│  │  ✓ Adelaide City FC: Also known as 'The Zebras', 'Black and Whites' │  │
-│  │  ✗ Odd Grenland: Norwegian team, NOT 'Black and Whites'             │  │
+│  │  ✓ Adelaide City FC: Also known as 'The Zebras', 'Black and Whites'  │  │
+│  │  ✗ Odd Grenland: Norwegian team, NOT 'Black and Whites'              │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
-│                              │                                              │
-│                              ▼                                              │
+│                              │                                             │
+│                              ▼                                             │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    PHASE 4: EDIT RATIONALES                           │  │
-│  │                                                                       │  │
+│  │                    PHASE 4: EDIT RATIONALES                          │  │
+│  │                                                                      │  │
 │  │  Original Claim 1: "John Nyskohus played for Odd Grenland"           │  │
-│  │  Verification: ❌ FALSE                                               │  │
+│  │  Verification: ❌ FALSE                                              │  │
 │  │  Correction: "John Nyskohus played for Adelaide City"                │  │
-│  │                                                                       │  │
+│  │                                                                      │  │
 │  │  Original Claim 2: "Odd Grenland is 'the Black and Whites'"          │  │
-│  │  Verification: ❌ FALSE                                               │  │
+│  │  Verification: ❌ FALSE                                              │  │
 │  │  Correction: "Adelaide City is 'the Black and Whites'"               │  │
-│  │                                                                       │  │
-│  │  EDITED REASONING:                                                    │  │
+│  │                                                                      │  │
+│  │  EDITED REASONING:                                                   │  │
 │  │  "John Nyskohus is an Australian footballer who played for           │  │
 │  │   Adelaide City in the National Soccer League. Adelaide City         │  │
 │  │   Football Club is known as 'the Black and Whites.'"                 │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
-│                              │                                              │
-│                              ▼                                              │
+│                              │                                             │
+│                              ▼                                             │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    PHASE 5: FINAL VERIFIED ANSWER                     │  │
-│  │                                                                       │  │
+│  │                    PHASE 5: FINAL VERIFIED ANSWER                    │  │
+│  │                                                                      │  │
 │  │  ┌────────────────────────────────────────────────────────────────┐  │  │
 │  │  │                                                                │  │  │
-│  │  │   ANSWER: Adelaide City Football Club ✓                       │  │  │
+│  │  │   ANSWER: Adelaide City Football Club ✓                        │  │  │
 │  │  │                                                                │  │  │
 │  │  │   Verification Status: CONFIRMED                               │  │  │
 │  │  │   Sources: Wikipedia, Adelaide City FC official records        │  │  │
@@ -804,8 +804,8 @@ Verify-and-Edit adds a crucial layer: external fact-checking. The AI generates v
 │  │  │                                                                │  │  │
 │  │  └────────────────────────────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Implementation: Full Verify-and-Edit System
@@ -1178,40 +1178,40 @@ if __name__ == "__main__":
 │                         └────────┬────────┘                                 │
 │                                  │                                          │
 │                                  ▼                                          │
-│  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    STAGE 1: CHAIN-OF-THOUGHT                          │  │
-│  │                                                                       │  │
-│  │   • Decompose into steps                                              │  │
-│  │   • Generate intermediate reasoning                                   │  │
-│  │   • Produce initial answer                                            │  │
-│  │                                                                       │  │
-│  └──────────────────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    STAGE 1: CHAIN-OF-THOUGHT                         │   │
+│  │                                                                      │   │
+│  │   • Decompose into steps                                             │   │
+│  │   • Generate intermediate reasoning                                  │   │
+│  │   • Produce initial answer                                           │   │
+│  │                                                                      │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 │                                  │                                          │
 │                                  ▼                                          │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │                    STAGE 2: SELF-CONSISTENCY                          │  │
-│  │                                                                       │  │
+│  │                    STAGE 2: SELF-CONSISTENCY                         │  │
+│  │                                                                      │  │
 │  │   ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                            │  │
 │  │   │Path1│ │Path2│ │Path3│ │Path4│ │Path5│  (temperature=0.7)         │  │
 │  │   └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘                            │  │
-│  │      │       │       │       │       │                                │  │
-│  │      └───────┴───────┼───────┴───────┘                                │  │
-│  │                      ▼                                                │  │
-│  │              ┌───────────────┐                                        │  │
-│  │              │ MAJORITY VOTE │                                        │  │
-│  │              │ + Confidence  │                                        │  │
-│  │              └───────────────┘                                        │  │
-│  │                                                                       │  │
+│  │      │       │       │       │       │                               │  │
+│  │      └───────┴───────┼───────┴───────┘                               │  │
+│  │                      ▼                                               │  │
+│  │              ┌───────────────┐                                       │  │
+│  │              │ MAJORITY VOTE │                                       │  │
+│  │              │ + Confidence  │                                       │  │
+│  │              └───────────────┘                                       │  │
+│  │                                                                      │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
-│                                  │                                          │
-│                                  ▼                                          │
-│                    ┌─────────────────────────┐                              │
-│                    │  Confidence > 90%?       │                             │
-│                    └────────────┬────────────┘                              │
-│                           │           │                                     │
-│                    [YES]  │           │  [NO]                               │
-│                           │           │                                     │
-│                           ▼           ▼                                     │
+│                                  │                                         │
+│                                  ▼                                         │
+│                    ┌─────────────────────────┐                             │
+│                    │  Confidence > 90%?       │                            │
+│                    └────────────┬────────────┘                             │
+│                           │           │                                    │
+│                    [YES]  │           │  [NO]                              │
+│                           │           │                                    │
+│                           ▼           ▼                                    │
 │      ┌─────────────────────┐    ┌─────────────────────────────────────┐    │
 │      │    RETURN ANSWER    │    │    STAGE 3: VERIFY-AND-EDIT         │    │
 │      │    (High Confidence)│    │                                     │    │
@@ -1221,18 +1221,18 @@ if __name__ == "__main__":
 │                                 │   • Edit reasoning with facts       │    │
 │                                 │   • Produce verified answer         │    │
 │                                 │                                     │    │
-│                                 └──────────────────────────────────────┘    │
-│                                                                             │
-│                                  │                                          │
-│                                  ▼                                          │
-│                         ┌─────────────────┐                                 │
-│                         │  FINAL ANSWER   │                                 │
-│                         │  + Confidence   │                                 │
-│                         │  + Sources      │                                 │
-│                         │  + Reasoning    │                                 │
-│                         └─────────────────┘                                 │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+│                                 └─────────────────────────────────────┘    │
+│                                                                            │
+│                                  │                                         │
+│                                  ▼                                         │
+│                         ┌─────────────────┐                                │
+│                         │  FINAL ANSWER   │                                │
+│                         │  + Confidence   │                                │
+│                         │  + Sources      │                                │
+│                         │  + Reasoning    │                                │
+│                         └─────────────────┘                                │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Production Implementation
@@ -1424,8 +1424,8 @@ if __name__ == "__main__":
 │  │ External       │ No            │ No            │ Yes           │        │
 │  │ Dependencies   │               │               │ (Search API)  │        │
 │  └────────────────┴───────────────┴───────────────┴───────────────┘        │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -1435,32 +1435,32 @@ if __name__ == "__main__":
 ### Case Study: Insurance Company (My Original Client)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    BEFORE / AFTER METRICS                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ACCURACY                                                                   │
+┌────────────────────────────────────────────────────────────────────────────┐
+│                    BEFORE / AFTER METRICS                                  │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│  ACCURACY                                                                  │
 │  Before: ███████████████░░░░░░░░░░░  73%                                   │
 │  After:  █████████████████████████░  97% (+24 percentage points)           │
-│                                                                             │
-│  ERROR COST                                                                 │
+│                                                                            │
+│  ERROR COST                                                                │
 │  Before: $847,000 / quarter                                                │
 │  After:  $23,000 / quarter (97% reduction)                                 │
-│                                                                             │
-│  PROCESSING TIME                                                            │
+│                                                                            │
+│  PROCESSING TIME                                                           │
 │  Before: 45 min / policy (manual review)                                   │
 │  After:  3 min / policy (AI + spot check)                                  │
-│                                                                             │
-│  HUMAN REVIEW REQUIREMENT                                                   │
+│                                                                            │
+│  HUMAN REVIEW REQUIREMENT                                                  │
 │  Before: 100% (everything needed review)                                   │
 │  After:  12% (only low-confidence flagged)                                 │
-│                                                                             │
-│  ROI                                                                        │
+│                                                                            │
+│  ROI                                                                       │
 │  Implementation cost: $45,000                                              │
 │  Annual savings: $3.2M                                                     │
 │  ROI: 7,011%                                                               │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
