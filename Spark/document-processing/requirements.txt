@@ -3,6 +3,8 @@ pyspark==3.5.0
 delta-spark==3.0.0
 pandas==2.0.3
 numpy==1.24.3
+PyYAML==6.0.1
+python-dotenv==1.0.0
 
 
 
@@ -14,8 +16,6 @@ azure-identity==1.12.0
 azure-keyvault-secrets==4.7.0
 
 # Utilities
-pyyaml==6.0
-python-dotenv==1.0.0
 requests==2.31.0
 tqdm==4.65.0
 
