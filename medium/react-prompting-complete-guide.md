@@ -556,7 +556,7 @@ Final Answer: Elon Musk is the CEO of Tesla and his age (53) squared is 2809.
 
 ## When Should You Use ReAct Prompting?
 
-### ✅ Best Use Cases for ReAct
+###  Best Use Cases for ReAct
 
 | Use Case | Why ReAct Helps |
 |----------|-----------------|
@@ -566,7 +566,7 @@ Final Answer: Elon Musk is the CEO of Tesla and his age (53) squared is 2809.
 | **Math + facts combined** | Can search AND calculate |
 | **Complex questions** | Can break down and verify each part |
 
-### ❌ When NOT to Use ReAct
+###  When NOT to Use ReAct
 
 - **Simple questions** — "What is 2+2?" (no need to search)
 - **Creative writing** — No facts to verify
