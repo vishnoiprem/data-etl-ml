@@ -584,17 +584,13 @@ Final Answer: Elon Musk is the CEO of Tesla and his age (53) squared is 2809.
 
 METHOD              │ REASONING │ ACTIONS │ EXTERNAL INFO │ BEST FOR
 ────────────────────┼───────────┼─────────┼───────────────┼──────────
-Standard            │    ❌     │   ❌    │      ❌       │ Simple Q&A
-                    │           │         │               │
-Chain-of-Thought    │    ✅     │   ❌    │      ❌       │ Math, Logic
-                    │           │         │               │
-ReAct               │    ✅     │   ✅    │      ✅       │ Research,
+Standard            │    NO     │   NO    │      NO       │Simple Q&A
+Chain-of-Thought    │    YES    │   NO    │      NO       │ Math, Logic
+ReAct               │   YES     │   YES   │      YES      │ Research,
                     │           │         │               │ Fact-checking
-                    │           │         │               │
-Tree of Thoughts    │    ✅     │   ❌    │      ❌       │ Complex
+Tree of Thoughts    │    YES    │   NO    │       NO      │ Complex
                     │           │         │               │ puzzles
-                    │           │         │               │
-ReAct + CoT         │    ✅     │   ✅    │      ✅       │ BEST OVERALL
+ReAct + CoT         │   YES     │   YES   │      YES      │ BEST OVERALL
 (Combined)          │           │         │               │ for accuracy
 ```
 
