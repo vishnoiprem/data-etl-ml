@@ -1,4 +1,4 @@
-# ReAct Prompting: How to Make AI Think AND Act Like a Human [2025]
+g# ReAct Prompting: How to Make AI Think AND Act Like a Human [2025]
 
 *The secret technique that lets AI use Google, Wikipedia, and calculators while solving problems*
 
@@ -197,11 +197,11 @@ ReAct (Reasoning + Acting):
 
 | Feature | Chain-of-Thought | ReAct |
 |---------|-----------------|-------|
-| Uses external tools | ❌ No | ✅ Yes |
-| Can check facts | ❌ No | ✅ Yes |
-| Self-corrects | ❌ Rarely | ✅ Yes |
-| Transparent reasoning | ✅ Yes | ✅ Yes |
-| Best for facts | ❌ Can hallucinate | ✅ Verifies info |
+| Uses external tools |  No |  Yes  |
+| Can check facts     |  No |  Yes |
+| Self-corrects       |  Rarely |  Yes |
+| Transparent reasoning |  Yes |  Yes |
+| Best for facts      |  Can hallucinate |  Verifies info |
 
 ---
 
