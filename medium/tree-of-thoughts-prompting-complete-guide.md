@@ -26,9 +26,9 @@ But here's what happened when I tested this:
 
 | Model | Answer | Correct? |
 |-------|--------|----------|
-| ChatGPT 3.5 (Standard) | "The garden"  | ❌ |
-| ChatGPT 4 (Standard)   | "The bedroom" | ✅ |
-| ChatGPT 3.5 (with ToT) | "The bedroom" | ✅ |
+| ChatGPT 3.5 (Standard) | "The garden"  |  NO |
+| ChatGPT 4 (Standard)   | "The bedroom" | YES |
+| ChatGPT 3.5 (with ToT) | "The bedroom" | YES |
 
 **The same free model got it right with ToT prompting!**
 
