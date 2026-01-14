@@ -1,5 +1,4 @@
-# Metadata Management & Data Lineage: Stop Getting Lost in Your Own Data Lake [2025]
-
+# Metadata Management & Data Lineage: Stop Getting Lost in Your Own Data Lake
 *How to build a GPS for your lakehouse — because nobody wants to wander in the data wilderness*
 
 ---
