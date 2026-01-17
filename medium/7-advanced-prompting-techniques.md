@@ -140,12 +140,14 @@ ANSWER: The Kansas City Chiefs won. KC has ~520,000 people.
 
 ### When to Use
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| Current events | Opinions |
-| Fact verification | Brainstorming |
-| Research tasks | Creative writing |
-| Multi-source queries | Simple lookups |
+| Perfect For          | Skip For         |
+|----------------------|------------------|
+| Current events       | Opinions         |
+| Fact verification    | Brainstorming    |
+| Research tasks       | Creative writing |
+| Multi-source queries | Simple lookups   |
+
+
 
 ---
 
