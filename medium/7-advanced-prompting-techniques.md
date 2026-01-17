@@ -608,15 +608,15 @@ Conclusion: CONTRADICTION → Hallucination detected
 
 ## Comparison: All 7 Techniques
 
-| Technique                 | Speed        | Accuracy    | Best Use Case        |
-|---------------------------|--------------|-------------|----------------------|
-| **Chain-of-Thought**      | ⚡ Fast       | ⭐⭐⭐         | Math, logic          |
-| **ReAct**                 | 🐢 Slow      | ⭐⭐⭐⭐        | Research, facts      |
-| **Skeleton-of-Thought**   | ⚡⚡ Fastest   | ⭐⭐⭐         | Long answers         |
-| **Self-Refine**           | 🐢 Slow      | ⭐⭐⭐⭐        | Quality writing      |
-| **Rephrase & Respond**    | ⚡ Fast       | ⭐⭐⭐⭐        | Unclear questions    |
-| **Chain-of-Verification** | 🐢 Slow      | ⭐⭐⭐⭐        | Fact-checking        |
-| **CoNLI**                 | 🐢🐢 Slowest | ⭐⭐⭐⭐⭐       | Anti-hallucination   |
+| Technique                 | Speed    | Accuracy(5) | Best Use Case        |
+|---------------------------|----------|-------------|----------------------|
+| **Chain-of-Thought**      | Fast     | 3           | Math, logic          |
+| **ReAct**                 | Slow     | 4           | Research, facts      |
+| **Skeleton-of-Thought**   | Fastest  | 3           | Long answers         |
+| **Self-Refine**           | Slow     | 4           | Quality writing      |
+| **Rephrase & Respond**    | Fast     | 4           | Unclear questions    |
+| **Chain-of-Verification** | Slow     | 4           | Fact-checking        |
+| **CoNLI**                 | Slowest  | 5           | Anti-hallucination   |
 
 ### Decision Flowchart
 
