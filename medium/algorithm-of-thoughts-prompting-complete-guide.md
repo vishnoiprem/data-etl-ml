@@ -1,4 +1,6 @@
-# Algorithm of Thoughts Prompting: The 100x More Efficient Way to Solve Complex Problems [2025]
+
+
+# Algorithm of Thoughts Prompting: The 100x More Efficient Way to Solve Complex Problems [2026]
 
 *How Virginia Tech and Microsoft created a prompting technique that matches Tree of Thoughts with 100x fewer API calls*
 
@@ -328,7 +330,7 @@ The difference? AoT shows its work, explores dead ends, and backtracks — all w
 
 ## When Should You Use Algorithm of Thoughts?
 
-### ✅ Best Use Cases
+###  Best Use Cases
 
 | Use Case | Why AoT Works |
 |----------|---------------|
@@ -338,7 +340,7 @@ The difference? AoT shows its work, explores dead ends, and backtracks — all w
 | **Research questions** | Explores hypotheses systematically |
 | **Code debugging** | Tries fixes, backtracks from failures |
 
-### ❌ When NOT to Use AoT
+###  When NOT to Use AoT
 
 - **Simple factual questions** — Overkill for "What's the capital of France?"
 - **Creative writing** — No right answer to explore toward
@@ -412,21 +414,21 @@ It's like giving a search algorithm a sense of smell for good solutions.
 
 Let's be honest about the downsides:
 
-### ❌ Requires Strong Models
+###  Requires Strong Models
 
 AoT was optimized for GPT-4. With smaller models, you might get:
 - Incomplete exploration
 - Forgetting to backtrack
 - Messy output formatting
 
-### ❌ Longer Responses
+###  Longer Responses
 
 Because AoT shows all its exploration, responses are longer. This means:
 - More output tokens (some cost)
 - Longer wait times
 - More to read
 
-### ❌ Not Always Necessary
+###  Not Always Necessary
 
 For simple problems, AoT is overkill. Don't use a sledgehammer to hang a picture frame.
 

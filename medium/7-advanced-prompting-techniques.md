@@ -55,7 +55,7 @@ Add the magic words: **"Let's think step by step."**
 ```
 Q: A bat and ball cost $1.10. The bat costs $1 more than the ball. 
    How much does the ball cost?
-A: $0.10  ❌ (WRONG!)
+A: $0.10   (WRONG!)
 ```
 
 **With CoT:**
@@ -73,12 +73,12 @@ A: Step 1: Let ball = x
 
 ### When to Use
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| Math problems | Simple facts |
-| Logic puzzles | Yes/no questions |
+| Perfect For          |  Skip For |
+|----------------------|-----------|
+| Math problems        | Simple facts |
+| Logic puzzles        | Yes/no questions |
 | Multi-step reasoning | Definitions |
-| Debugging code | Creative writing |
+| Debugging code       | Creative writing |
 
 ### Copy-Paste Template
 
