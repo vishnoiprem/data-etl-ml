@@ -198,12 +198,13 @@ Each point gets expanded at the same time = **2x speed boost!**
 
 ### When to Use
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| Multi-point answers | Simple questions |
-| List-based questions | Math problems |
-| Long-form content | Short answers |
-| Speed-critical apps | Narratives |
+| Perfect For          | Skip For         |
+|----------------------|------------------|
+| Multi-point answers  | Simple questions |
+| List-based questions | Math problems    |
+| Long-form content    | Short answers    |
+| Speed-critical apps  | Narratives       |
+
 
 ---
 
@@ -281,12 +282,12 @@ def sum(n):
 
 ### When to Use
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| Code optimization | Simple lookups |
-| Writing polish | Time-critical |
-| Quality-critical work | Basic queries |
-| Complex analysis | High volume |
+| Perfect For           | Skip For       |
+|-----------------------|----------------|
+| Code optimization     | Simple lookups |
+| Writing polish        | Time-critical  |
+| Quality-critical work | Basic queries  |
+| Complex analysis      | High volume    |
 
 ---
 
@@ -371,12 +372,12 @@ Finally, provide your answer.
 
 ### When to Use RaR
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| Ambiguous questions | Clear questions |
-| Complex instructions | Simple facts |
-| Non-native speakers | Quick lookups |
-| Technical jargon | Casual chat |
+| Perfect For          | Skip For        |
+|----------------------|-----------------|
+| Ambiguous questions  | Clear questions |
+| Complex instructions | Simple facts    |
+| Non-native speakers  | Quick lookups   |
+| Technical jargon     | Casual chat     |
 
 ### Limitations
 
@@ -474,12 +475,12 @@ Each verification is independent, preventing one error from affecting others.
 
 ### When to Use CoVe
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| Factual claims | Opinions |
+| Perfect For        | Skip For         |
+|--------------------|------------------|
+| Factual claims     | Opinions         |
 | List-based answers | Creative writing |
-| Historical data | Brainstorming |
-| Biographical info | Casual chat |
+| Historical data    | Brainstorming    |
+| Biographical info  | Casual chat      |
 
 ### Limitations
 
@@ -564,10 +565,10 @@ be members in good standing with SNC/SNL. Events are time finals."
 **Detection:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Claim                    │ Source Says    │ Status        │
+│  Claim                    │ Source Says    │ Status         │
 ├─────────────────────────────────────────────────────────────┤
-│  "members with SPCA/SNL"  │ "SNC/SNL"      │ ❌ WRONG      │
-│  "speed finals"           │ "time finals"  │ ❌ WRONG      │
+│  "members with SPCA/SNL"  │ "SNC/SNL"      │  WRONG         │
+│  "speed finals"           │ "time finals"  │  WRONG         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -589,12 +590,12 @@ Conclusion: CONTRADICTION → Hallucination detected
 
 ### When to Use CoNLI
 
-| ✅ Perfect For | ❌ Skip For |
-|----------------|------------|
-| RAG applications | Creative writing |
-| Document summarization | Opinions |
-| High-stakes content | Casual chat |
-| Medical/legal/financial | Short responses |
+| Perfect For             | Skip For         |
+|-------------------------|------------------|
+| RAG applications        | Creative writing |
+| Document summarization  | Opinions         |
+| High-stakes content     | Casual chat      |
+| Medical/legal/financial | Short responses  |
 
 ### Limitations
 
@@ -607,15 +608,15 @@ Conclusion: CONTRADICTION → Hallucination detected
 
 ## Comparison: All 7 Techniques
 
-| Technique | Speed | Accuracy | Best Use Case |
-|-----------|-------|----------|---------------|
-| **Chain-of-Thought** | ⚡ Fast | ⭐⭐⭐ | Math, logic |
-| **ReAct** | 🐢 Slow | ⭐⭐⭐⭐ | Research, facts |
-| **Skeleton-of-Thought** | ⚡⚡ Fastest | ⭐⭐⭐ | Long answers |
-| **Self-Refine** | 🐢 Slow | ⭐⭐⭐⭐ | Quality writing |
-| **Rephrase & Respond** | ⚡ Fast | ⭐⭐⭐⭐ | Unclear questions |
-| **Chain-of-Verification** | 🐢 Slow | ⭐⭐⭐⭐ | Fact-checking |
-| **CoNLI** | 🐢🐢 Slowest | ⭐⭐⭐⭐⭐ | Anti-hallucination |
+| Technique                 | Speed        | Accuracy    | Best Use Case        |
+|---------------------------|--------------|-------------|----------------------|
+| **Chain-of-Thought**      | ⚡ Fast       | ⭐⭐⭐         | Math, logic          |
+| **ReAct**                 | 🐢 Slow      | ⭐⭐⭐⭐        | Research, facts      |
+| **Skeleton-of-Thought**   | ⚡⚡ Fastest   | ⭐⭐⭐         | Long answers         |
+| **Self-Refine**           | 🐢 Slow      | ⭐⭐⭐⭐        | Quality writing      |
+| **Rephrase & Respond**    | ⚡ Fast       | ⭐⭐⭐⭐        | Unclear questions    |
+| **Chain-of-Verification** | 🐢 Slow      | ⭐⭐⭐⭐        | Fact-checking        |
+| **CoNLI**                 | 🐢🐢 Slowest | ⭐⭐⭐⭐⭐       | Anti-hallucination   |
 
 ### Decision Flowchart
 
@@ -746,15 +747,15 @@ For each claim:
 
 ## Key Takeaways
 
-| # | Technique | One-Liner |
-|---|-----------|-----------|
-| 1 | **Chain-of-Thought** | "Think step by step" |
-| 2 | **ReAct** | Think → Act → Observe → Repeat |
-| 3 | **Skeleton-of-Thought** | Outline → Expand in parallel |
-| 4 | **Self-Refine** | Generate → Critique → Improve |
-| 5 | **Rephrase & Respond** | Clarify question → Then answer |
-| 6 | **Chain-of-Verification** | Answer → Verify facts → Correct |
-| 7 | **CoNLI** | Detect hallucinations → Fix them |
+| # | Technique                 | One-Liner                        |
+|---|---------------------------|----------------------------------|
+| 1 | **Chain-of-Thought**      | "Think step by step"             |
+| 2 | **ReAct**                 | Think → Act → Observe → Repeat   |
+| 3 | **Skeleton-of-Thought**   | Outline → Expand in parallel     |
+| 4 | **Self-Refine**           | Generate → Critique → Improve    |
+| 5 | **Rephrase & Respond**    | Clarify question → Then answer   |
+| 6 | **Chain-of-Verification** | Answer → Verify facts → Correct  |
+| 7 | **CoNLI**                 | Detect hallucinations → Fix them |
 
 ---
 
@@ -781,8 +782,9 @@ Now you know how.
 - Lei et al. (2023) "Chain of NLI for Reducing LLM Hallucinations"
 - Analytics Vidhya — Advanced Prompt Engineering Course
 
+
 ---
 
-*Which technique will you try first? Drop a comment below!*
+*Which technique will you try first? Drop a comment below! at Linkedein *
 
-**Tags:** #PromptEngineering #AI #ChatGPT #LLM #ChainOfThought #ReAct #SelfRefine #CoNLI
+* #PromptEngineering #AI #ChatGPT #LLM #ChainOfThought #ReAct #SelfRefine #CoNLI *
