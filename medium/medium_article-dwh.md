@@ -62,10 +62,10 @@ Think of it as your digital cash register. It handles the day-to-day operations:
 │                  (The Cash Register)                        │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   ✓ "Add this item to the customer's order"                │
-│   ✓ "Process this credit card payment"                     │
-│   ✓ "Update the inventory count"                           │
-│   ✓ "Record this customer's address change"                │
+│   ✓ "Add this item to the customer's order"                 │
+│   ✓ "Process this credit card payment"                      │
+│   ✓ "Update the inventory count"                            │
+│   ✓ "Record this customer's address change"                 │
 │                                                             │
 │   Speed: Milliseconds                                       │
 │   Operations: INSERT, UPDATE, DELETE                        │
@@ -96,15 +96,15 @@ This is where you answer the big questions:
 │                 (The Analyst's Playground)                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   ✓ "What were our sales by region last quarter?"          │
-│   ✓ "Which customer segments are most profitable?"         │
-│   ✓ "How do this year's trends compare to last year?"      │
-│   ✓ "What products are often purchased together?"          │
+│   ✓ "What were our sales by region last quarter?"           │
+│   ✓ "Which customer segments are most profitable?"          │
+│   ✓ "How do this year's trends compare to last year?"       │
+│   ✓ "What products are often purchased together?"           │
 │                                                             │
-│   Speed: Seconds to minutes (acceptable)                   │
-│   Operations: Complex SELECTs, aggregations                │
-│   Data: Historical, often years of data                    │
-│   Users: Dozens (analysts, executives)                     │
+│   Speed: Seconds to minutes (acceptable)                    │
+│   Operations: Complex SELECTs, aggregations                 │
+│   Data: Historical, often years of data                     │
+│   Users: Dozens (analysts, executives)                      │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -171,22 +171,22 @@ Now that you understand why analytics needs its own system, let's look at your o
 │              ANALYTICAL DATA STORAGE OPTIONS                │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   ┌───────────────┐                                        │
-│   │  DATA LAKE    │  ← Store EVERYTHING (raw, unstructured)│
-│   │   (Raw)       │                                        │
-│   └───────┬───────┘                                        │
+│   ┌───────────────┐                                         │
+│   │  DATA LAKE    │  ← Store EVERYTHING (raw, unstructured) │
+│   │   (Raw)       │                                         │
+│   └───────┬───────┘                                         │
 │           │                                                 │
 │           ▼                                                 │
-│   ┌───────────────┐                                        │
-│   │DATA WAREHOUSE │  ← Structured, clean, ready for queries│
-│   │  (Processed)  │                                        │
-│   └───────┬───────┘                                        │
+│   ┌───────────────┐                                         │
+│   │DATA WAREHOUSE │  ← Structured, clean, ready for queries │
+│   │  (Processed)  │                                         │
+│   └───────┬───────┘                                         │
 │           │                                                 │
 │           ▼                                                 │
-│   ┌───────────────┐                                        │
-│   │  DATA MART    │  ← Subset for specific team/use case  │
-│   │ (Specialized) │                                        │
-│   └───────────────┘                                        │
+│   ┌───────────────┐                                         │
+│   │  DATA MART    │  ← Subset for specific team/use case    │
+│   │ (Specialized) │                                         │
+│   └───────────────┘                                         │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -216,17 +216,17 @@ A **data warehouse** is like a well-organized library where every book is catalo
 │                   (The Organized Library)                   │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   📚 Every book has a catalog number                       │
-│   📚 Books are organized by subject                        │
-│   📚 You can find any book in seconds                      │
-│   📚 No random papers lying around                         │
-│   📚 Librarian checks everything before shelving           │
+│   📚 Every book has a catalog number                        │
+│   📚 Books are organized by subject                         │
+│   📚 You can find any book in seconds                       │
+│   📚 No random papers lying around                          │
+│   📚 Librarian checks everything before shelving            │
 │                                                             │
 │   In data terms:                                            │
-│   • All data is structured (tables with columns)           │
-│   • Data is cleaned before loading (ETL process)           │
+│   • All data is structured (tables with columns)            │
+│   • Data is cleaned before loading (ETL process)            │
 │   • Fast queries using SQL                                  │
-│   • High data quality and consistency                      │
+│   • High data quality and consistency                       │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -271,18 +271,18 @@ A **data lake** is like a massive storage warehouse where you can dump ANYTHING 
 │                (The Storage Warehouse)                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   📦 Throw anything in — boxes, furniture, whatever        │
-│   📦 No need to label or organize upfront                  │
-│   📦 Massive space at cheap prices                         │
-│   📦 Sort through it when you need something               │
-│   📦 Some stuff might be junk — that's okay                │
+│   📦 Throw anything in — boxes, furniture, whatever         │
+│   📦 No need to label or organize upfront                   │
+│   📦 Massive space at cheap prices                          │
+│   📦 Sort through it when you need something                │
+│   📦 Some stuff might be junk — that's okay                 │
 │                                                             │
 │   In data terms:                                            │
-│   • Store raw data: logs, images, videos, JSON, XML        │
+│   • Store raw data: logs, images, videos, JSON, XML         │
 │   • No preprocessing required                               │
-│   • Extremely cost-effective for large volumes             │
-│   • Process data only when needed (ELT)                    │
-│   • May contain duplicates or unverified data              │
+│   • Extremely cost-effective for large volumes              │
+│   • Process data only when needed (ELT)                     │
+│   • May contain duplicates or unverified data               │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -331,20 +331,20 @@ A **data mart** is like a specific section of a department store — electronics
 │              (The Department Store Section)                 │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   👔 Clothing section: Only clothes, organized by type     │
-│   📺 Electronics section: Only gadgets, easy to browse     │
-│   🛋️ Furniture section: Only furniture, quick to find     │
+│   👔 Clothing section: Only clothes, organized by type      │
+│   📺 Electronics section: Only gadgets, easy to browse      │
+│   🛋️ Furniture section: Only furniture, quick to find       │
 │                                                             │
 │   In data terms:                                            │
-│   • Marketing mart: Campaign data, customer segments       │
-│   • Finance mart: Revenue, costs, budgets                  │
-│   • Sales mart: Pipeline, forecasts, performance           │
+│   • Marketing mart: Campaign data, customer segments        │
+│   • Finance mart: Revenue, costs, budgets                   │
+│   • Sales mart: Pipeline, forecasts, performance            │
 │                                                             │
 │   Benefits:                                                 │
-│   • Faster queries (smaller dataset)                       │
-│   • Tailored to team's specific needs                      │
-│   • Easier to manage and secure                            │
-│   • Teams don't interfere with each other                  │
+│   • Faster queries (smaller dataset)                        │
+│   • Tailored to team's specific needs                       │
+│   • Easier to manage and secure                             │
+│   • Teams don't interfere with each other                   │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -494,18 +494,18 @@ Target's pregnancy prediction model analyzed purchase patterns (unscented lotion
 │       ▼                                                     │
 │   Is your data structured (tables, rows, columns)?          │
 │       │                                                     │
-│       ├─ NO → Do you need to store it anyway?              │
+│       ├─ NO → Do you need to store it anyway?               │
 │       │          │                                          │
-│       │          ├─ YES → DATA LAKE (store raw)            │
-│       │          └─ NO → Don't store it                    │
+│       │          ├─ YES → DATA LAKE (store raw)             │
+│       │          └─ NO → Don't store it                     │
 │       │                                                     │
-│       └─ YES → Who needs access?                           │
+│       └─ YES → Who needs access?                            │
 │                  │                                          │
-│                  ├─ Whole company → DATA WAREHOUSE         │
+│                  ├─ Whole company → DATA WAREHOUSE          │
 │                  │                                          │
-│                  └─ One team → DATA MART                   │
+│                  └─ One team → DATA MART                    │
 │                      │                                      │
-│                      └─ (Or create mart FROM warehouse)    │
+│                      └─ (Or create mart FROM warehouse)     │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -549,29 +549,29 @@ Here's what a typical enterprise architecture looks like today:
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │   DATA SOURCES                                              │
-│   ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                 │
-│   │ CRM │ │ ERP │ │ Web │ │ IoT │ │ API │                 │
-│   └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘                 │
+│   ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐                   │
+│   │ CRM │ │ ERP │ │ Web │ │ IoT │ │ API │                   │
+│   └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘ └──┬──┘                   │
 │      │       │       │       │       │                      │
 │      └───────┴───────┴───────┴───────┘                      │
 │                      │                                      │
 │                      ▼                                      │
-│   ┌─────────────────────────────────────┐                  │
-│   │           DATA LAKE                  │ ← Raw storage   │
-│   │    (S3, Azure Data Lake, GCS)       │                  │
-│   └─────────────────┬───────────────────┘                  │
+│   ┌─────────────────────────────────────┐                   │
+│   │           DATA LAKE                  │ ← Raw storage    │
+│   │    (S3, Azure Data Lake, GCS)       │                   │
+│   └─────────────────┬───────────────────┘                   │
 │                     │                                       │
 │                     ▼                                       │
-│   ┌─────────────────────────────────────┐                  │
-│   │        DATA WAREHOUSE               │ ← Processed     │
-│   │  (Snowflake, Redshift, BigQuery)    │                  │
-│   └──────┬──────────┬──────────┬────────┘                  │
+│   ┌─────────────────────────────────────┐                   │
+│   │        DATA WAREHOUSE               │ ← Processed       │
+│   │  (Snowflake, Redshift, BigQuery)    │                   │
+│   └──────┬──────────┬──────────┬────────┘                   │
 │          │          │          │                            │
 │          ▼          ▼          ▼                            │
-│   ┌──────────┐ ┌──────────┐ ┌──────────┐                   │
-│   │ Sales    │ │ Marketing│ │ Finance  │ ← Data Marts     │
-│   │ Mart     │ │ Mart     │ │ Mart     │                   │
-│   └──────────┘ └──────────┘ └──────────┘                   │
+│   ┌──────────┐ ┌──────────┐ ┌──────────┐                    │
+│   │ Sales    │ │ Marketing│ │ Finance  │ ← Data Marts       │
+│   │ Mart     │ │ Mart     │ │ Mart     │                    │
+│   └──────────┘ └──────────┘ └──────────┘                    │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
