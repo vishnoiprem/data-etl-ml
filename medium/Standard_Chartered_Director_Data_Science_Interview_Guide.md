@@ -232,7 +232,7 @@ Typically 3-4 questions, 1-2 minutes each:
 **Common Questions:**
 
 **Q1: "Tell us about yourself and why you're interested in Standard Chartered."**
-> "I'm a Data Science leader with [X] years of experience building and deploying AI/ML solutions in financial services. Most recently at [Company], I led [specific achievement].
+> "I'm a Data Science leader with 15 years of experience building and deploying AI/ML solutions in financial services. Most recently at CP Axtra, I led [chatbot for internal user,fraud detection system for 10M customers, ultra fresh demand model].
 >
 > I'm interested in Standard Chartered for three reasons:
 > 1. The scale of AI opportunity in CIB — serving 20,000 corporate clients across 60+ markets
