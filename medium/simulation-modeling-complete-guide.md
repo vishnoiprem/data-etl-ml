@@ -126,13 +126,13 @@ Instead of "profit will be $200,000," you get "profit will be between $120,000 a
 
 ### When to Use Monte Carlo
 
-| ✅ Perfect For | ❌ Skip When |
-|----------------|-------------|
-| Financial forecasting | You need time-based analysis |
-| Risk assessment | System has complex logic |
-| Project cost estimation | Real-time decisions needed |
-| Portfolio analysis | Single deterministic answer is fine |
-| "What-if" scenarios | |
+| Perfect For             | Skip When                           |
+|-------------------------|-------------------------------------|
+| Financial forecasting   | You need time-based analysis        |
+| Risk assessment         | System has complex logic            |
+| Project cost estimation | Real-time decisions needed          |
+| Portfolio analysis      | Single deterministic answer is fine |
+| "What-if" scenarios     |                                     |
 
 ### Hands-On Example: Business Planning Simulation
 
@@ -141,12 +141,12 @@ Let's build a Monte Carlo simulation to assess a new product launch.
 **The Scenario:**
 Your company is launching a new product. You need to estimate first-year profit, but several variables are uncertain:
 
-| Variable | Value |
-|----------|-------|
-| Sales Volume | Normal distribution (mean: 63,000, std: 5,600) |
-| Unit Sales Price | $12.50 (fixed) |
-| Fixed Cost | $220,000 (fixed) |
-| Unit Variable Cost | $4 (20%), $5 (50%), or $6 (30%) |
+| Variable           | Value                                          |
+|--------------------|------------------------------------------------|
+| Sales Volume       | Normal distribution (mean: 63,000, std: 5,600) |
+| Unit Sales Price   | $12.50 (fixed)                                 |
+| Fixed Cost         | $220,000 (fixed)                               |
+| Unit Variable Cost | $4 (20%), $5 (50%), or $6 (30%)                |
 
 **The Formula:**
 ```
@@ -306,14 +306,14 @@ The simulation jumps from event to event, skipping the "nothing happening" time 
 
 DES is the most popular simulation type for business process analysis. Use it when:
 
-| ✅ Perfect For | ❌ Skip When |
-|----------------|-------------|
+|  Perfect For                |  Skip When                                |
+|-----------------------------|-------------------------------------------|
 | Queue/waiting line analysis | Continuous processes (chemical reactions) |
-| Manufacturing processes | Simple risk analysis (use Monte Carlo) |
-| Hospital patient flow | High-level strategic planning |
-| Airport operations | Population dynamics (use System Dynamics) |
-| Call center optimization | |
-| Supply chain logistics | |
+| Manufacturing processes     | Simple risk analysis (use Monte Carlo)    |
+| Hospital patient flow       | High-level strategic planning             |
+| Airport operations          | Population dynamics (use System Dynamics) |
+| Call center optimization    |                                           |
+| Supply chain logistics      |                                           |
 
 ### The Core Concept: Events Drive Everything
 
@@ -549,14 +549,14 @@ Server utilization: 83.4 ± 4.2%
 
 ### Real-World DES Applications
 
-| Industry | Application |
-|----------|-------------|
-| **Healthcare** | Emergency room patient flow, operating room scheduling |
+| Industry          | Application                                             |
+|-------------------|---------------------------------------------------------|
+| **Healthcare**    | Emergency room patient flow, operating room scheduling  |
 | **Manufacturing** | Production line optimization, bottleneck identification |
-| **Airports** | Security screening, baggage handling, gate assignments |
-| **Call Centers** | Staffing optimization, skill-based routing |
-| **Supply Chain** | Warehouse operations, delivery routing |
-| **Retail** | Checkout line management, inventory replenishment |
+| **Airports**      | Security screening, baggage handling, gate assignments  |
+| **Call Centers**  | Staffing optimization, skill-based routing              |
+| **Supply Chain**  | Warehouse operations, delivery routing                  |
+| **Retail**        | Checkout line management, inventory replenishment       |
 
 ### Pros and Cons of DES
 
@@ -588,23 +588,23 @@ Think of it like:
 
 ### When to Use System Dynamics
 
-| ✅ Perfect For | ❌ Skip When |
-|----------------|-------------|
-| Population dynamics | Individual-level tracking needed |
-| Epidemic modeling | Discrete events matter |
-| Market adoption curves | Queue/waiting line analysis |
-| Environmental systems | Manufacturing processes |
-| Policy analysis | |
+| Perfect For            | Skip When                        |
+|------------------------|----------------------------------|
+| Population dynamics    | Individual-level tracking needed |
+| Epidemic modeling      | Discrete events matter           |
+| Market adoption curves | Queue/waiting line analysis      |
+| Environmental systems  | Manufacturing processes          |
+| Policy analysis        |                                  |
 
 ### Quick Comparison: Monte Carlo vs DES vs System Dynamics
 
-| Aspect | Monte Carlo | DES | System Dynamics |
-|--------|-------------|-----|-----------------|
-| **Time** | Static (no time) | Dynamic (discrete) | Dynamic (continuous) |
-| **Entities** | Not tracked | Individual | Aggregate |
-| **Best for** | Risk analysis | Process flows | Feedback systems |
-| **Complexity** | Low | Medium-High | Medium |
-| **Speed** | Fast | Slower | Fast |
+| Aspect         | Monte Carlo      | DES                | System Dynamics      |
+|----------------|------------------|--------------------|----------------------|
+| **Time**       | Static (no time) | Dynamic (discrete) | Dynamic (continuous) |
+| **Entities**   | Not tracked      | Individual         | Aggregate            |
+| **Best for**   | Risk analysis    | Process flows      | Feedback systems     |
+| **Complexity** | Low              | Medium-High        | Medium               |
+| **Speed**      | Fast             | Slower             | Fast                 |
 
 ---
 
@@ -693,29 +693,29 @@ Whether you're using Monte Carlo, DES, or System Dynamics, follow this process:
 ## Tools and Software
 
 ### For Monte Carlo Simulation
-| Tool | Best For | Cost |
-|------|----------|------|
-| **Python (NumPy/SciPy)** | Custom analysis, integration | Free |
-| **Excel** | Quick prototyping, business users | Included in Office |
-| **@RISK (Palisade)** | Excel add-in, comprehensive | Paid |
-| **Crystal Ball (Oracle)** | Excel add-in, enterprise | Paid |
+| Tool                      | Best For                          | Cost               |
+|---------------------------|-----------------------------------|--------------------|
+| **Python (NumPy/SciPy)**  | Custom analysis, integration      | Free               |
+| **Excel**                 | Quick prototyping, business users | Included in Office |
+| **@RISK (Palisade)**      | Excel add-in, comprehensive       | Paid               |
+| **Crystal Ball (Oracle)** | Excel add-in, enterprise          | Paid               |
 
 ### For Discrete Event Simulation
-| Tool | Best For | Cost |
-|------|----------|------|
-| **Simio** | Manufacturing, logistics, healthcare | Paid (free for students) |
-| **AnyLogic** | Multi-method, agent-based | Paid (free PLE) |
-| **Arena** | Traditional DES, manufacturing | Paid |
-| **SimPy (Python)** | Programmers, custom models | Free |
-| **FlexSim** | 3D visualization, manufacturing | Paid |
+| Tool               | Best For                             | Cost                     |
+|--------------------|--------------------------------------|--------------------------|
+| **Simio**          | Manufacturing, logistics, healthcare | Paid (free for students) |
+| **AnyLogic**       | Multi-method, agent-based            | Paid (free PLE)          |
+| **Arena**          | Traditional DES, manufacturing       | Paid                     |
+| **SimPy (Python)** | Programmers, custom models           | Free                     |
+| **FlexSim**        | 3D visualization, manufacturing      | Paid                     |
 
 ### For System Dynamics
-| Tool | Best For | Cost |
-|------|----------|------|
-| **Vensim** | Classic SD modeling | Paid (free PLE) |
-| **Stella** | Education, policy analysis | Paid |
-| **AnyLogic** | Combined with DES/ABM | Paid |
-| **PySD (Python)** | Programmers | Free |
+| Tool              | Best For                   | Cost            |
+|-------------------|----------------------------|-----------------|
+| **Vensim**        | Classic SD modeling        | Paid (free PLE) |
+| **Stella**        | Education, policy analysis | Paid            |
+| **AnyLogic**      | Combined with DES/ABM      | Paid            |
+| **PySD (Python)** | Programmers                | Free            |
 
 ---
 
