@@ -70,25 +70,25 @@ Before we get into the details, here's the high-level map:
 │              SIMULATION MODEL TYPOLOGY                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│                    ┌─────────────┐                         │
-│                    │ SIMULATION  │                         │
-│                    └──────┬──────┘                         │
+│                    ┌─────────────┐                          │
+│                    │ SIMULATION  │                          │
+│                    └──────┬──────┘                          │
 │                           │                                 │
-│            ┌──────────────┼──────────────┐                 │
-│            ▼              ▼              ▼                 │
-│     ┌───────────┐  ┌───────────┐  ┌───────────┐          │
-│     │  MONTE    │  │ DISCRETE  │  │  SYSTEM   │          │
-│     │  CARLO    │  │  EVENT    │  │ DYNAMICS  │          │
-│     └───────────┘  └───────────┘  └───────────┘          │
+│            ┌──────────────┼──────────────┐                  │
+│            ▼              ▼              ▼                  │
+│     ┌───────────┐  ┌───────────┐  ┌───────────┐             │
+│     │  MONTE    │  │ DISCRETE  │  │  SYSTEM   │             │
+│     │  CARLO    │  │  EVENT    │  │ DYNAMICS  │             │
+│     └───────────┘  └───────────┘  └───────────┘             │
 │                                                             │
-│     Static         Dynamic         Dynamic                 │
-│     Discrete       Discrete        Continuous              │
-│     Stochastic     Stochastic      Stochastic              │
+│     Static         Dynamic         Dynamic                  │
+│     Discrete       Discrete        Continuous               │
+│     Stochastic     Stochastic      Stochastic               │
 │                                                             │
-│     Best for:      Best for:       Best for:               │
-│     Risk analysis  Process flows   Feedback loops          │
-│     Financial      Queues/lines    Population dynamics     │
-│     modeling       Manufacturing   Policy analysis         │
+│     Best for:      Best for:       Best for:                │
+│     Risk analysis  Process flows   Feedback loops           │
+│     Financial      Queues/lines    Population dynamics      │
+│     modeling       Manufacturing   Policy analysis          │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
