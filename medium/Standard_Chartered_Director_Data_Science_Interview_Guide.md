@@ -241,11 +241,26 @@ Typically 3-4 questions, 1-2 minutes each:
 >
 > My experience in [NLP/Document AI/Fraud Detection] directly aligns with CIB's needs."
 
+
+"Hi, my name is Prem Vishnoi. I’m a data science leader with over 15 years of experience in the banking and financial sector, as well as retail banking. Recently, I’ve been working with CP Extra, helping to expand their data and AI capabilities. For instance, I led projects like a demand forecasting model and the implementation of ChatGPT for search and recommendation systems. Previously, I also reduced annual costs by $2.4 million and grew my team from 5 to 25 members.
+
+I’m particularly excited about the opportunity at Standard Chartered because of the scale of AI opportunities in corporate and investment banking, the bank’s commitment to responsible AI, and the cross-border focus that aligns with my expertise in NLP and fraud detection.
+
 **Q2: "Describe a challenging data science project you led."**
 > Use STAR format (Situation, Task, Action, Result)
 > - Keep to 90 seconds
 > - Include specific metrics
 > - Show leadership and technical depth
+
+One of the most challenging data science projects I led involved tackling significant fraud losses. Our legacy system was causing about $10 million in annual losses due to fraud, and it had a high false positive rate of around 40%, which negatively impacted customer experience.
+
+To address this, I led the development and deployment of a new real-time machine learning system. First, I assembled a cross-functional team that included risk, engineering, and product experts. We transitioned to a cloud-first architecture to ensure scalability and performance.
+
+Technically, we implemented a two-stage model: first, a lightweight gradient boosting model for initial scoring, and then a deep learning network to analyze transaction sequences over time. We also set up a continuous feedback loop to retrain the model regularly.
+
+As a result, we reduced annual fraud losses by 65%, saving around $6 million, and we cut the false positive rate from 40% down to 12%, which significantly improved the customer experience. The system was also scalable and handled peak volumes, ensuring that our fraud prevention could keep pace with growth.
+
+Overall, this project not only saved the company millions but also enhanced customer trust and experience.
 
 **Q3: "How do you stay current with AI developments?"**
 > "I stay current through multiple channels:
@@ -255,6 +270,11 @@ Typically 3-4 questions, 1-2 minutes each:
 > - Internal knowledge sharing — I run monthly AI updates for my team
 > - Practical application — I don't just read about techniques, I implement them"
 
+
+
+To stay current with AI developments, I use multiple channels. I regularly read and write articles on platforms like Medium, and I often experiment with AI models using Google Colab. I also enroll in online university courses and attend industry meetups and seminars to keep up with the latest trends.
+
+In addition, I actively engage with the research community by reading papers from top conferences like NeurIPS and ICML. I also run monthly AI update sessions within my team to share knowledge. Most importantly, I believe in hands-on practice, so I don’t just read about techniques, I implement them. For example, I recently fine-tuned a LLaMA model for document classification. This blend of continuous learning and practical application helps me stay at the forefront of AI advancements
 ---
 
 ## 👤 ROUND 1: HR SCREENING (30-45 min)
@@ -272,6 +292,15 @@ Typically 3-4 questions, 1-2 minutes each:
 > - [Achievement 2 with metrics]
 > - [Team size/mentorship if applicable]
 >
+> I began my career as a software engineer at Xilent, where I developed a strong foundation in data, statistics, and analytics. From there, I moved to PayPal, transitioning into a senior data scientist role, where I led enterprise data warehouse initiatives and gained expertise in big data tools like Hadoop and Spark.
+
+Next, I moved to Singapore and joined DBS, working with platform teams on large-scale data infrastructure. Then, I joined Standard Chartered Bank, where I specialized in fraud detection and AML analytics.
+
+After that, I spent six years at Lazada, part of the Alibaba Group, where I progressed from data engineer to VP of Data. There, I built comprehensive data platforms and machine learning models for demand forecasting.
+
+Most recently, I’ve been leading a 25-person team at CP Extra, focusing on data and AI solutions, driving innovation and cross-border fraud prevention
+
+
 > Now I'm looking for a Director-level role where I can combine hands-on technical work with strategic impact — which is exactly what this role offers."
 
 ---
@@ -286,6 +315,12 @@ Typically 3-4 questions, 1-2 minutes each:
 >
 > **Third, the role scope is ideal.** It's hands-on technical work plus stakeholder engagement plus mentorship. I'm not looking to be a pure people manager — I want to stay close to the models while having strategic impact."
 
+
+There are three main reasons why I'm drawn to this role at Standard Chartered. First, the AI opportunities within the Corporate and Investment Banking division are immense. With over 30,000 corporate clients and complex cross-border needs, there are numerous impactful use cases, such as AI in trade finance, entity matching, KYC, and anomaly detection for AML.
+
+Second, I’m impressed by the bank’s approach to AI, particularly the rollout of GPT models across 80,000 employees. This shows a commitment to innovation balanced with responsible governance, which aligns with my own values.
+
+Lastly, the role perfectly matches what I’m looking for: a blend of hands-on technical work, stakeholder engagement, and mentorship. I want to remain closely connected to the models and drive strategic impact, rather than just focusing on people management.
 ---
 
 **Q3: "What's your experience with banking/financial services?"**
@@ -300,6 +335,11 @@ If you don't have direct banking experience:
 >
 > I understand the unique constraints of financial services — regulatory compliance, data governance, model explainability requirements. I'm confident I can apply my skills to banking use cases while quickly learning the domain specifics."
 
+I have nearly six years of experience in the banking and financial sector. This includes two years at PayPal, where I worked on enterprise data and payment systems, and three years at Standard Chartered Bank, focusing on anti-money laundering and data integration. I also spent six months at DBS, working with platform teams on large-scale data infrastructure.
+
+At PayPal, I gained experience with handling massive volumes of payment data and ensuring data quality and integration. At Standard Chartered, I worked extensively with the AML team, gathering and processing data from multiple sources and building solutions to support anti-money laundering efforts.
+
+Additionally, I have familiarity with various financial systems, including EBS and Fusion, and a solid understanding of how these systems integrate into broader financial workflows. Overall, my experience has given me a comprehensive and practical understanding of the banking and financial sector.
 ---
 
 **Q4: "This role requires working with non-technical stakeholders. Give an example."**
@@ -316,7 +356,13 @@ If you don't have direct banking experience:
 > **Result:** [Specific outcome — adoption rate, business impact, stakeholder feedback]
 >
 > The key insight: stakeholders don't care about model architecture. They care about solving their problem reliably."
+"In my role at CP Extra, I frequently collaborated with non-technical stakeholders. For example, when building marketing technology solutions, the key challenge was translating business requirements into technical specifications.
 
+I began with thorough requirement gathering, always focusing on the 'why' behind the needs, not just the 'what.' I created visual mockups to ensure that everyone had a clear vision before development began. I also established a shared vocabulary and agreed-upon success metrics to keep everyone on the same page.
+
+Throughout the project, I provided regular updates, often through simple, user-friendly dashboards that highlighted key performance indicators and business impact. This approach ensured that stakeholders understood the value and progress without needing to dive into technical details.
+
+Ultimately, the goal was to focus on solving business problems reliably and effectively, and my role was to bridge the gap between technical teams and business units.
 ---
 
 **Q5: "What are your salary expectations?"**
@@ -324,7 +370,7 @@ If you don't have direct banking experience:
 > "I'm focused on finding the right role and fit. I understand Standard Chartered has a competitive compensation structure aligned with the Fair Pay Charter. I'm happy to discuss specifics once we've established mutual fit.
 >
 > Could you share the budgeted range for this role?"
-
+When it comes to salary expectations, I'm really focused on finding the right role and the right fit. I understand that Standard Chartered offers a competitive compensation package that aligns with the role and responsibilities. I'm open to discussing specifics once we’ve established a mutual fit and understanding of the role. At this point, I’m quite flexible and open to finding a compensation package that reflects the value I can bring to the team.
 ---
 
 **Q6: "What's your notice period? Any constraints?"**
@@ -332,7 +378,7 @@ If you don't have direct banking experience:
 > "My notice period is [X weeks/months]. I can potentially negotiate for an earlier release if there's urgency.
 >
 > I have no other constraints — I'm eligible to work in Singapore and available for the hybrid arrangement."
-
+My current notice period is one month, though I’m open to negotiating an earlier release if there’s urgency. Additionally, I’m eligible to work in Singapore and am open to a hybrid arrangement.
 ---
 
 **Q7: "Do you have questions for me?"**
@@ -341,7 +387,7 @@ Ask 2-3:
 1. "What does the first 90 days look like for someone in this role?"
 2. "How does the DCDA team interact with the broader CIB business teams?"
 3. "What are the biggest data science challenges CIB is trying to solve right now?"
-
+I’d love to know what the first 90 days would look like for someone in this role. How does the Data Science and Innovation team interact with the broader Corporate and Investment Banking teams? Also, what would you say is the biggest data science challenge that the CIB is currently tackling?
 ---
 
 ## 💻 ROUND 2: TECHNICAL DEEP DIVE (60 min)
