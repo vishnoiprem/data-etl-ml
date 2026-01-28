@@ -1,3 +1,5 @@
+from multiprocessing.connection import answer_challenge
+
 # STANDARD CHARTERED BANK
 # Director, Data Science & Innovation (CIB)
 ## Complete Interview Preparation Guide
@@ -410,6 +412,15 @@ I’d love to know what the first 90 days would look like for someone in this ro
 >
 > **Example:** In my last project, I built a modular ML pipeline where each component (data loader, feature engineer, model trainer, evaluator) was a separate class. This made the code testable, maintainable, and easy to extend."
 
+
+> ** 
+> In object-oriented programming, we have four main principles: encapsulation, abstraction, inheritance, and polymorphism.
+Encapsulation means bundling data and methods together. For instance, in data science, a FeatureEngineer class can encapsulate all feature transformation logic, such as methods for fitting and transforming data.
+Abstraction involves defining abstract base classes that provide a blueprint for other classes. For example, we can have an abstract Model class that defines methods like train, predict, and evaluate, and specific models implement these methods.
+Inheritance allows us to create new classes based on existing ones, ensuring consistency and reducing code duplication. For instance, we can have a base model class that is inherited by specific model classes, which helps maintain a consistent interface.
+Polymorphism means that different classes can be used interchangeably if they follow the same interface. This is particularly useful in data science for A/B testing, where we can swap out different model classes seamlessly.
+In my previous project, I applied these principles by creating separate classes for each component of the machine learning pipeline, such as data loading, feature engineering, model training, and evaluation. This modular approach made the code more maintainable and testable
+> **
 ---
 
 **Q2: "Write a Python class for a simple ML pipeline that handles data preprocessing, training, and prediction."**
@@ -483,6 +494,68 @@ class ClassificationPipeline(BasePipeline):
             raise ValueError("Model not trained. Call train() first.")
         X_scaled = self.preprocess(X)
         return self.model.predict_proba(X_scaled)
+
+
+
+##MY answer
+from abc import ABC, abstractmethod
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+import numpy as np
+
+class BasePipeline(ABC):
+
+    @abstractmethod
+    def preprocess(self, X):
+        pass
+
+    @abstractmethod
+    def train(self, X, y):
+        pass
+
+    @abstractmethod
+    def predict(self, X):
+        pass
+
+class ClassificationPipeline(BasePipeline):
+
+    def __init__(self, model):
+        self.model = model
+        self.scaler = StandardScaler()
+        self.is_filtered = False
+
+    def preprocess(self, X, fit=False):
+        if fit:
+            self.scaler.fit(X)
+        return self.scaler.transform(X)
+
+    def train(self, X, y, test_size=0.2, random_state=42):
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+        X_train_scaled = self.preprocess(X_train, fit=True)
+        X_test_scaled = self.preprocess(X_test, fit=False)
+
+        self.model.fit(X_train_scaled, y_train)
+        self.is_filtered = True
+
+        train_score = self.model.score(X_train_scaled, y_train)
+        test_score = self.model.score(X_test_scaled, y_test)
+
+        return train_score, test_score
+
+    def predict(self, X):
+        if not self.is_filtered:
+            raise Exception("Pipeline has not been trained. Call `train` first.")
+
+        X_scaled = self.preprocess(X, fit=False)
+        return self.model.predict(X_scaled)
+
+    def predict_proba(self, X):
+        if not self.is_filtered:
+            raise Exception("Pipeline has not been trained. Call `train` first.")
+
+        X_scaled = self.preprocess(X, fit=False)
+        return self.model.predict_proba(X_scaled)
+
 ```
 
 ---
@@ -507,6 +580,12 @@ class ClassificationPipeline(BasePipeline):
 >
 > **Example:** In a fraud detection project, my initial logistic regression had high bias (70% recall). I moved to XGBoost which improved recall to 85%, then used regularization and early stopping to prevent overfitting."
 
+
+> MY answerr 
+
+The bias-variance tradeoff is about finding the right balance for a model. Bias refers to errors from overly simplistic assumptions. If a model is too simple, it won’t capture the complexity of the data, and that leads to underfitting. Variance, on the other hand, refers to errors from being too sensitive to the training data. If a model is too complex, it will memorize the training data and fail to generalize well, leading to overfitting.
+In practice, we handle this by using techniques like cross-validation to measure how well the model performs on different data subsets. If we notice high bias, we might try a more complex model or add more features. If we notice high variance, we can use regularization, like L1 or L2, or techniques like dropout in neural networks, and even use methods like bagging or boosting to stabilize the model.
+For example, in a fraud detection project, I started with a simple logistic regression that had high bias. By switching to a more complex model like XGBoost, I improved performance. And to prevent overfitting, I used regularization and early stopping
 ---
 
 **Q4: "You're building a model to detect fraudulent transactions. Walk me through your approach."**
@@ -543,11 +622,17 @@ class ClassificationPipeline(BasePipeline):
 > - Feedback loop for confirmed fraud cases
 > - Drift monitoring"
 
+
+When building a fraud detection model, I start by understanding the problem. I define what fraud means in that context and consider the business impact of false positives versus false negatives. Fraud is usually rare, so class imbalance is important.
+Next, I focus on data preparation. I look at transaction features like amount, time, and merchant details, and also create features based on normal customer behavior and patterns.
+To handle class imbalance, I don’t just rely on accuracy. Instead, I look at precision, recall, and the trade-off between them. I might use techniques like SMOTE or other sampling methods.
+For the model, I start simple with something like logistic regression and then move to more advanced models like XGBoost if needed. I also keep an eye on performance metrics and do regular evaluation to make sure the model adapts over time.
+Finally, in production, I consider real-time scoring and model explainability. I monitor for any changes in patterns and update the model as needed
 ---
 
 **Q5: "How do you handle missing data in a production ML system?"**
 
-> "My approach depends on the missingness mechanism:
+> "My approach depends on the missingness mechanism:gi
 >
 > **1. Understand WHY data is missing:**
 > - MCAR (Missing Completely at Random): Can use simple imputation
