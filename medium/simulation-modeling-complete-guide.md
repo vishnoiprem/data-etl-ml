@@ -324,15 +324,15 @@ In DES, the simulation clock advances from event to event:
 │           DISCRETE EVENT SIMULATION TIMELINE                │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│   Time: 0    5    10   15   20   25   30   35   40        │
-│         │    │    │    │    │    │    │    │    │          │
-│         ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼          │
-│         A1   A2   D1   A3   A4   D2   D3   A5   D4         │
+│   Time: 0    5    10   15   20   25   30   35   40          │
+│         │    │    │    │    │    │    │    │    │           │
+│         ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼    ▼           │
+│         A1   A2   D1   A3   A4   D2   D3   A5   D4          │
 │                                                             │
 │   A = Arrival event                                         │
 │   D = Departure event                                       │
 │                                                             │
-│   Between events → Nothing changes, simulation "jumps"     │
+│   Between events → Nothing changes, simulation "jumps"      │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
