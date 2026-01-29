@@ -4,7 +4,7 @@
 
 ---
 
-**By [Your Name]** · 12 min read · January 2025
+**By [Prem Vishnoi]** · 12 min read · January 2025
 
 ---
 
