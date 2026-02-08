@@ -389,7 +389,7 @@ This pattern comes up constantly. Here's how it actually works end-to-end:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│                        MEDALLION ARCHITECTURE                         │
+│                        MEDALLION ARCHITECTURE                        │
 ├──────────────────┬───────────────────┬───────────────────────────────┤
 │      BRONZE      │       SILVER      │             GOLD              │
 ├──────────────────┼───────────────────┼───────────────────────────────┤
@@ -648,15 +648,15 @@ Always check these metrics:
 
 ## Quick Reference: Streaming Options Cheat Sheet
 
-| Option | What It Does | Default | Example |
-|--------|--------------|---------|---------|
-| `maxFilesPerTrigger` | Limit files per batch | 1000 | `100` |
-| `maxBytesPerTrigger` | Limit data per batch | None | `"10g"` |
-| `ignoreDeletes` | Skip delete operations | false | `"true"` |
-| `ignoreChanges` | Treat changes as inserts | false | `"true"` |
-| `startingVersion` | Start from specific version | 0 | `125` |
-| `startingTimestamp` | Start from specific time | None | `"2024-01-15"` |
-| `readChangeFeed` | Read change data feed | false | `"true"` |
+| Option               | What It Does                | Default   | Example        |
+|----------------------|-----------------------------|-----------|----------------|
+| `maxFilesPerTrigger` | Limit files per batch       | 1000      | `100`          |
+| `maxBytesPerTrigger` | Limit data per batch        | None      | `"10g"`        |
+| `ignoreDeletes`      | Skip delete operations      | false     | `"true"`       |
+| `ignoreChanges`      | Treat changes as inserts    | false     | `"true"`       |
+| `startingVersion`    | Start from specific version | 0         | `125`          |
+| `startingTimestamp`  | Start from specific time    | None      | `"2024-01-15"` |
+| `readChangeFeed`     | Read change data feed       | false     | `"true"`       |
 
 ---
 
