@@ -1,0 +1,28 @@
+# config.yaml
+bronze_path: "data/bronze"
+silver_path: "data/silver"
+gold_path: "data/gold"
+checkpoint_path: "data/checkpoints"
+output_path: "output"
+
+batch_size: 10000
+partitions:
+  - "country"
+  - "year"
+  - "month"
+
+anomaly_threshold: 3.0
+quality_threshold: 0.95
+
+supported_countries:
+  - "TH"
+  - "VN"
+  - "ID"
+
+high_value_threshold: 1000000
+variance_tolerance: 0.1
+
+records_per_country:
+  TH: 2000
+  VN: 2000
+  ID: 2000
