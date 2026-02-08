@@ -3,6 +3,8 @@
 This project includes components for Machine Learning (ML), ETL processes, Spark jobs, and general Python scripts.
 
 ## Project Structure
+https://github.com/ByteByteGoHq/system-design-101/blob/main/data/guides/why-is-redis-so-fast.md
+
 
 - **ML/**: Machine learning related code and models.
 - **Spark/**: Spark jobs and related scripts.
