@@ -6,7 +6,6 @@ Run: python run_demo.py
 """
 
 import sys
-import json
 from pathlib import Path
 
 from rich.console import Console
