@@ -864,7 +864,7 @@
   </table>
 
   <div class="callout">
-    <p><strong>💡 Key insight:</strong> Serverless databases are economically optimal for <em>spiky, unpredictable, or intermittent</em> workloads. If your load is constant and high, a provisioned instance is usually cheaper.</p>
+    <p><strong> Key insight:</strong> Serverless databases are economically optimal for <em>spiky, unpredictable, or intermittent</em> workloads. If your load is constant and high, a provisioned instance is usually cheaper.</p>
   </div>
 
   <hr>
@@ -959,7 +959,7 @@ conn.<span class="fn">close</span>()
 </code></pre>
 
   <div class="callout">
-    <p><strong>💡 Why Neon matters:</strong> Its compute can scale to zero — meaning you pay $0 when no queries are running. Traditional managed Postgres always has at least one instance burning money.</p>
+    <p><strong> Why Neon matters:</strong> Its compute can scale to zero — meaning you pay $0 when no queries are running. Traditional managed Postgres always has at least one instance burning money.</p>
   </div>
 
   <h3>3. Amazon DynamoDB — Serverless NoSQL</h3>
@@ -1112,28 +1112,28 @@ console.<span class="fn">log</span>(result.Items);
 
   <div class="vs-grid">
     <div class="vs-side">
-      <h4>✅ Use Serverless When</h4>
+      <h4> Use Serverless When</h4>
       <ul>
-        <li><span class="icon">📈</span> Traffic is unpredictable or spiky (e-commerce flash sales, event-driven apps)</li>
-        <li><span class="icon">🌙</span> Workloads go idle for hours (dev/staging environments, cron-driven ETL)</li>
-        <li><span class="icon">🚀</span> You need to ship fast without a DBA on the team</li>
-        <li><span class="icon">💰</span> Budget is variable and you want costs to track usage</li>
+        <li><span class="icon"></span> Traffic is unpredictable or spiky (e-commerce flash sales, event-driven apps)</li>
+        <li><span class="icon"></span> Workloads go idle for hours (dev/staging environments, cron-driven ETL)</li>
+        <li><span class="icon"></span> You need to ship fast without a DBA on the team</li>
+        <li><span class="icon"></span> Budget is variable and you want costs to track usage</li>
       </ul>
     </div>
     <div class="vs-center">VS</div>
     <div class="vs-side">
-      <h4>🚫 Avoid Serverless When</h4>
+      <h4> Avoid Serverless When</h4>
       <ul>
-        <li><span class="icon">🏭</span> You have a steady, high-throughput workload 24/7</li>
-        <li><span class="icon">⏱️</span> You need guaranteed sub-5ms latency with zero cold starts</li>
-        <li><span class="icon">🔧</span> You require deep Postgres tuning (shared_buffers, work_mem, etc.)</li>
-        <li><span class="icon">🧮</span> Per-request billing at scale would exceed reserved pricing</li>
+        <li><span class="icon"></span> You have a steady, high-throughput workload 24/7</li>
+        <li><span class="icon">️</span> You need guaranteed sub-5ms latency with zero cold starts</li>
+        <li><span class="icon"></span> You require deep Postgres tuning (shared_buffers, work_mem, etc.)</li>
+        <li><span class="icon"></span> Per-request billing at scale would exceed reserved pricing</li>
       </ul>
     </div>
   </div>
-
+Why Neon matters
   <div class="callout callout-warn">
-    <p><strong>⚠️ The cold start problem is real.</strong> In Aurora Serverless v2, the minimum ACU of 0.5 means compute never fully shuts off — but it can still take 200–500ms to scale up during a traffic spike. Neon's scale-to-zero can add 1–2 seconds on the first query after extended idle. For user-facing APIs where p99 latency matters, measure this before committing.</p>
+    <p><strong>The cold start problem is real.</strong> In Aurora Serverless v2, the minimum ACU of 0.5 means compute never fully shuts off  but it can still take 200–500ms to scale up during a traffic spike. Neon's scale-to-zero can add 1–2 seconds on the first query after extended idle. For user-facing APIs where p99 latency matters, measure this before committing.</p>
   </div>
 
   <hr>
