@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What Is a Serverless Database? — And Why You Should Care</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Code+Pro:wght@400;500;600&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #242424;
+    --text-secondary: #6b6b6b;
+    --accent: #1a8917;
+    --accent-light: #e6f4e5;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-comment: #6c7086;
+    --code-keyword: #cba6f7;
+    --code-string: #a6e3a1;
+    --code-func: #89b4fa;
+    --code-number: #fab387;
+    --code-operator: #89dceb;
+    --border: #e6e6e6;
+    --tag-bg: #f2f2f2;
+    --diagram-bg: #fafafa;
+    --diagram-node: #ffffff;
+    --diagram-accent: #1a8917;
+    --diagram-secondary: #4a90d9;
+    --diagram-warn: #e6a817;
+    --callout-bg: #f0faf0;
+    --callout-border: #1a8917;
+    --table-header: #f7f7f7;
+    --table-border: #e0e0e0;
+    --serif: 'Lora', Georgia, 'Times New Roman', serif;
+    --sans: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'Source Code Pro', 'Fira Code', 'Consolas', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--serif);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 18px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* === TOP BAR === */
+  .top-bar {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+  .top-bar-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar .logo {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .top-bar .meta-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .top-bar .meta-actions span {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* === ARTICLE === */
+  article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Author header */
+  .author-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a8917, #4a90d9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .author-name {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .author-name .follow {
+    color: var(--accent);
+    font-weight: 500;
+    margin-left: 4px;
+    cursor: pointer;
+  }
+  .author-meta {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Headings */
+  h1 {
+    font-family: var(--sans);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -1.2px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .subtitle {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 32px;
+    font-weight: 400;
+  }
+
+  h2 {
+    font-family: var(--sans);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.6px;
+    margin: 52px 0 20px;
+    line-height: 1.3;
+    color: var(--text);
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 21px;
+    font-weight: 600;
+    margin: 36px 0 14px;
+    line-height: 1.35;
+    color: var(--text);
+  }
+
+  p {
+    margin-bottom: 22px;
+  }
+
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: rgba(26,137,23,0.3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s;
+  }
+  a:hover { text-decoration-color: var(--accent); }
+
+  /* Inline code */
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--tag-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #d63384;
+  }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 24px 0 28px;
+    overflow-x: auto;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  pre code {
+    font-family: var(--mono);
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--code-text);
+    background: none;
+    padding: 0;
+    border-radius: 0;
+  }
+  pre .code-label {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #585b70;
+    background: rgba(255,255,255,0.06);
+    padding: 3px 10px;
+    border-radius: 5px;
+  }
+
+  /* Syntax highlighting */
+  .kw { color: var(--code-keyword); }
+  .str { color: var(--code-string); }
+  .fn { color: var(--code-func); }
+  .num { color: var(--code-number); }
+  .cm { color: var(--code-comment); font-style: italic; }
+  .op { color: var(--code-operator); }
+  .prop { color: #f38ba8; }
+
+  /* Hero Image / Diagram */
+  .hero-diagram {
+    margin: 8px 0 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--diagram-bg);
+  }
+  .hero-diagram img {
+    width: 100%;
+    display: block;
+  }
+  .hero-caption {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 10px 16px;
+    background: var(--diagram-bg);
+    border-top: 1px solid var(--border);
+  }
+
+  /* Architecture Diagram */
+  .arch-diagram {
+    background: var(--diagram-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px 24px 32px;
+    margin: 28px 0 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-diagram::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--diagram-accent), var(--diagram-secondary));
+  }
+  .arch-title {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .flow-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .flow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    background: var(--diagram-node);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    min-width: 130px;
+    position: relative;
+    transition: all 0.25s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .flow-node:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  .flow-node.primary {
+    border-color: var(--diagram-accent);
+    background: var(--accent-light);
+  }
+  .flow-node.secondary {
+    border-color: var(--diagram-secondary);
+    background: #e8f0fb;
+  }
+  .flow-node.warn {
+    border-color: var(--diagram-warn);
+    background: #fef8e6;
+  }
+  .flow-node .node-sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    display: block;
+  }
+  .flow-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 0;
+    color: var(--text-secondary);
+  }
+  .flow-arrow .arrow-line {
+    width: 2px;
+    height: 20px;
+    background: #ccc;
+  }
+  .flow-arrow svg {
+    width: 14px;
+    height: 14px;
+    fill: #999;
+  }
+  .flow-arrow .arrow-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin: 2px 0;
+  }
+  .flow-bracket {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    position: relative;
+  }
+  .flow-bracket .bracket-label {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: var(--diagram-bg);
+    padding: 0 8px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  /* Comparison table */
+  .comparison-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 24px 0 32px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--table-border);
+    font-size: 15px;
+  }
+  .comparison-table th {
+    background: var(--table-header);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-secondary);
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 2px solid var(--table-border);
+  }
+  .comparison-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--table-border);
+    font-family: var(--sans);
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .comparison-table tr:hover td { background: #fafafa; }
+  .comparison-table .cell-highlight {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Callout box */
+  .callout {
+    background: var(--callout-bg);
+    border-left: 4px solid var(--callout-border);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 28px 0;
+    font-size: 16.5px;
+  }
+  .callout p { margin-bottom: 0; }
+  .callout strong {
+    font-family: var(--sans);
+    color: var(--accent);
+  }
+
+  .callout-warn {
+    background: #fef8e6;
+    border-left-color: #e6a817;
+  }
+  .callout-warn strong { color: #b5860f; }
+
+  /* Tags */
+  .tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 40px 0 28px;
+  }
+  .tag {
+    font-family: var(--sans);
+    font-size: 13px;
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .tag:hover { background: #e0e0e0; text-decoration: none; }
+
+  /* Separator */
+  hr {
+    border: none;
+    text-align: center;
+    margin: 48px auto;
+    max-width: 100px;
+  }
+  hr::before {
+    content: '• • •';
+    color: #ccc;
+    letter-spacing: 8px;
+    font-size: 14px;
+  }
+
+  /* Engagement bar */
+  .engagement {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 40px 0;
+  }
+  .engagement .left, .engagement .right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .engagement .stat {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .engagement .stat:hover { color: var(--text); }
+  .engagement .stat svg { width: 20px; height: 20px; }
+
+  /* VS comparison layout */
+  .vs-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    margin: 28px 0 32px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .vs-side {
+    padding: 24px;
+    background: var(--diagram-bg);
+  }
+  .vs-side:first-child { border-right: 1px solid var(--border); }
+  .vs-side:last-child { border-left: 1px solid var(--border); }
+  .vs-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--tag-bg);
+    padding: 0 16px;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-secondary);
+  }
+  .vs-side h4 {
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .vs-side ul {
+    list-style: none;
+    padding: 0;
+  }
+  .vs-side ul li {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    padding: 6px 0;
+    color: var(--text-secondary);
+    border-bottom: 1px dashed #e6e6e6;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .vs-side ul li:last-child { border-bottom: none; }
+  .vs-side ul li .icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+  @media (max-width: 680px) {
+    h1 { font-size: 30px; }
+    .subtitle { font-size: 18px; }
+    article { padding: 32px 18px 60px; }
+    pre { padding: 18px; margin-left: -18px; margin-right: -18px; border-radius: 0; }
+    .vs-grid { grid-template-columns: 1fr; }
+    .vs-center { padding: 12px; }
+    .vs-side:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .vs-side:last-child { border-left: none; border-top: 1px solid var(--border); }
+    .flow-row { flex-direction: column; gap: 0; }
+    .flow-bracket { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<nav class="top-bar">
+  <div class="top-bar-inner">
+    <a class="logo" href="#">Medium</a>
+    <div class="meta-actions">
+      <span>14 min read</span>
+    </div>
+  </div>
+</nav>
+
+<article>
+
+  <!-- Title -->
+  <h1>What Is a Serverless Database? A Deep Dive With Architecture, Code, and Real-World Trade-Offs</h1>
+  <p class="subtitle">Serverless databases promise zero ops, auto-scaling, and pay-per-query billing. Here's how they actually work under the hood — with code you can run today.</p>
+
+  <!-- Author Block -->
+  <div class="author-block">
+    <div class="author-avatar">D</div>
+    <div class="author-info">
+      <div class="author-name">DevOps Insider <span class="follow">· Follow</span></div>
+      <div class="author-meta">Published Feb 20, 2026 · 14 min read</div>
+    </div>
+  </div>
+
+  <!-- Engagement -->
+  <div class="engagement">
+    <div class="left">
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 11v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8a1 1 0 011-1h2a1 1 0 011 1zm0 0l3.5-7a2.5 2.5 0 012.5 2.5V9h5.38a2 2 0 011.96 2.38l-1.25 6A2 2 0 0117.13 19H10a3 3 0 01-3-3v-5z"/></svg>
+        4.2K
+      </span>
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        87
+      </span>
+    </div>
+    <div class="right">
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+      </span>
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- Hero Diagram — Embedded SVG -->
+  <div class="hero-diagram" style="padding:0;">
+    <svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fafafa;">
+      <defs>
+        <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+        <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#1a8917"/></marker>
+        <marker id="arrowB" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="#666"/></marker>
+      </defs>
+      <!-- Title bar -->
+      <rect x="0" y="0" width="900" height="44" rx="0" fill="#1a8917"/>
+      <text x="26" y="29" font-family="Libre Franklin,sans-serif" font-size="17" font-weight="700" fill="#fff">What is Serverless DB?</text>
+      <!-- Divider -->
+      <line x1="450" y1="44" x2="450" y2="620" stroke="#ddd" stroke-width="1.5"/>
+      <circle cx="450" cy="340" r="22" fill="#f5c518" filter="url(#shadow)"/>
+      <text x="450" y="345" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="14" font-weight="800" fill="#333">VS</text>
+
+      <!-- LEFT SIDE: Normal Cloud DB -->
+      <text x="225" y="76" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="15" font-weight="700" fill="#e04545">Normal Cloud DB</text>
+      <!-- App Code -->
+      <rect x="140" y="100" width="170" height="42" rx="6" fill="#b8f0b0" stroke="#6cc460" stroke-width="1.5" filter="url(#shadow)"/>
+      <text x="225" y="126" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="13" font-weight="600" fill="#2a5e24">Application Code</text>
+      <!-- Arrows down -->
+      <line x1="185" y1="142" x2="130" y2="225" stroke="#666" stroke-width="1.5" marker-end="url(#arrowB)"/>
+      <line x1="265" y1="142" x2="320" y2="225" stroke="#666" stroke-width="1.5" marker-end="url(#arrowB)"/>
+      <!-- Labels -->
+      <circle cx="118" cy="215" r="12" fill="#f5c518"/><text x="118" y="219" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="10" font-weight="700" fill="#333">1</text>
+      <text x="134" y="218" font-family="Libre Franklin,sans-serif" font-size="11" fill="#666">normal load</text>
+      <circle cx="308" cy="215" r="12" fill="#f5c518"/><text x="308" y="219" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="10" font-weight="700" fill="#333">2</text>
+      <text x="324" y="218" font-family="Libre Franklin,sans-serif" font-size="11" fill="#666">peak load</text>
+      <!-- DB boxes -->
+      <rect x="55" y="240" width="170" height="90" rx="6" fill="#fff" stroke="#ccc" stroke-width="1.5" filter="url(#shadow)"/>
+      <text x="140" y="310" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="11" fill="#666">Existing Aurora Databases</text>
+      <rect x="80" y="256" width="28" height="32" rx="4" fill="#ddd" stroke="#bbb"/><rect x="80" y="252" width="28" height="6" rx="2" fill="#bbb"/>
+      <rect x="120" y="256" width="28" height="32" rx="4" fill="#ddd" stroke="#bbb"/><rect x="120" y="252" width="28" height="6" rx="2" fill="#bbb"/>
+      <rect x="160" y="256" width="28" height="32" rx="4" fill="#ddd" stroke="#bbb"/><rect x="160" y="252" width="28" height="6" rx="2" fill="#bbb"/>
+
+      <rect x="260" y="240" width="160" height="90" rx="6" fill="#fff" stroke="#ccc" stroke-width="1.5" stroke-dasharray="6,3" filter="url(#shadow)"/>
+      <text x="340" y="310" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="11" fill="#666">New Provisioned DBs</text>
+      <rect x="290" y="256" width="28" height="32" rx="4" fill="#ddd" stroke="#bbb"/><rect x="290" y="252" width="28" height="6" rx="2" fill="#bbb"/>
+      <rect x="330" y="256" width="28" height="32" rx="4" fill="#ddd" stroke="#bbb"/><rect x="330" y="252" width="28" height="6" rx="2" fill="#bbb"/>
+      <rect x="370" y="256" width="28" height="32" rx="4" fill="#ddd" stroke="#bbb"/><rect x="370" y="252" width="28" height="6" rx="2" fill="#bbb"/>
+
+      <!-- RIGHT SIDE: Serverless DB -->
+      <text x="675" y="76" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="15" font-weight="700" fill="#e04545">Serverless DB (Aurora Serverless)</text>
+      <!-- App Code -->
+      <rect x="590" y="100" width="170" height="42" rx="6" fill="#b8f0b0" stroke="#6cc460" stroke-width="1.5" filter="url(#shadow)"/>
+      <text x="675" y="126" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="13" font-weight="600" fill="#2a5e24">Application Code</text>
+      <text x="625" y="158" font-family="Libre Franklin,sans-serif" font-size="10" fill="#888">reads writes</text>
+      <text x="730" y="158" font-family="Libre Franklin,sans-serif" font-size="10" fill="#888">reads</text>
+      <line x1="640" y1="142" x2="640" y2="190" stroke="#666" stroke-width="1.2" marker-end="url(#arrowB)"/>
+      <line x1="720" y1="142" x2="720" y2="190" stroke="#666" stroke-width="1.2" marker-end="url(#arrowB)"/>
+
+      <!-- Router Fleet -->
+      <rect x="510" y="195" width="330" height="60" rx="8" fill="#fff" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="675" y="240" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="12" font-weight="600" fill="#666">Router Fleet</text>
+      <circle cx="590" cy="218" r="8" fill="#4a90d9" opacity="0.5"/><circle cx="620" cy="218" r="8" fill="#4a90d9" opacity="0.5"/>
+      <circle cx="720" cy="218" r="8" fill="#4a90d9" opacity="0.5"/><circle cx="750" cy="218" r="8" fill="#4a90d9" opacity="0.5"/>
+
+      <!-- Auto Scale label -->
+      <text x="675" y="275" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="11" font-weight="700" fill="#1a8917">auto scale ↓</text>
+
+      <!-- Compute Layer -->
+      <rect x="490" y="290" width="370" height="100" rx="8" fill="#fff" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="675" y="375" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="12" font-weight="600" fill="#666">Compute Layer</text>
+      <!-- RW nodes -->
+      <rect x="510" y="305" width="72" height="36" rx="5" fill="#e8f0fb" stroke="#4a90d9" stroke-width="1.2"/>
+      <text x="546" y="327" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="9" font-weight="600" fill="#2a5e8e">ReadWrite</text>
+      <rect x="598" y="305" width="72" height="36" rx="5" fill="#e8f0fb" stroke="#4a90d9" stroke-width="1.2"/>
+      <text x="634" y="327" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="9" font-weight="600" fill="#2a5e8e">ReadWrite</text>
+      <!-- RO nodes -->
+      <rect x="686" y="305" width="72" height="36" rx="5" fill="#f5f5f5" stroke="#aaa" stroke-width="1.2"/>
+      <text x="722" y="327" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="9" font-weight="600" fill="#666">Readonly</text>
+      <rect x="774" y="305" width="72" height="36" rx="5" fill="#f5f5f5" stroke="#aaa" stroke-width="1.2"/>
+      <text x="810" y="327" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="9" font-weight="600" fill="#666">Readonly</text>
+
+      <!-- Auto Scale label 2 -->
+      <text x="675" y="410" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="11" font-weight="700" fill="#1a8917">auto scale ↓</text>
+
+      <!-- Data Layer -->
+      <rect x="510" y="425" width="330" height="80" rx="8" fill="#fff" stroke="#ccc" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="675" y="495" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="12" font-weight="600" fill="#666">Data Layer — Storage Fleet</text>
+      <circle cx="590" cy="460" r="16" fill="#fef8e6" stroke="#e6a817" stroke-width="1.2"/><text x="590" y="464" text-anchor="middle" font-size="12">💾</text>
+      <circle cx="675" cy="460" r="16" fill="#fef8e6" stroke="#e6a817" stroke-width="1.2"/><text x="675" y="464" text-anchor="middle" font-size="12">💾</text>
+      <circle cx="760" cy="460" r="16" fill="#fef8e6" stroke="#e6a817" stroke-width="1.2"/><text x="760" y="464" text-anchor="middle" font-size="12">💾</text>
+
+      <!-- Source -->
+      <text x="875" y="610" text-anchor="end" font-family="Libre Franklin,sans-serif" font-size="9" fill="#aaa">Inspired by blog.bytebytego.com</text>
+    </svg>
+    <div class="hero-caption">Normal Cloud DB vs. Serverless DB (Amazon Aurora Serverless) — Architecture Comparison</div>
+  </div>
+
+  <p>If you've deployed a database to AWS, GCP, or Azure in the last two years, you've almost certainly been asked: <em>"Have you tried the serverless option?"</em></p>
+
+  <p>The pitch is compelling. No instances to provision. No capacity planning. No paying for idle clusters at 3 a.m. You write queries; the cloud handles everything else. But what does "serverless" actually mean when applied to a database? And more importantly — should you trust it with your production data?</p>
+
+  <p>In this article we'll break down how serverless databases work architecturally, compare them to traditional provisioned databases with real code, walk through a production-grade flow diagram, and discuss the trade-offs no marketing page will tell you about.</p>
+
+  <hr>
+
+  <h2>The Core Idea: Decouple Compute from Storage</h2>
+
+  <p>Every serverless database rests on a single architectural insight: <strong>separate the compute layer (query processing, indexing) from the data layer (durable storage).</strong> Once those two are independent, you can scale them on different axes, spin compute nodes up or down without touching data, and — critically — bill for each independently.</p>
+
+  <p>Look at the diagram above. On the left, a traditional Aurora cluster forces you to pre-provision instances for both normal and peak load. On the right, Aurora Serverless splits the architecture into three tiers: a <strong>Router Fleet</strong> that accepts connections, a <strong>Compute Layer</strong> with auto-scaling read/write nodes, and a shared <strong>Data Layer</strong> (Storage Fleet). Each tier scales independently.</p>
+
+  <!-- Architecture Diagram: Serverless DB Internals -->
+  <div class="arch-diagram">
+    <div class="arch-title">Serverless Database — Internal Architecture Flow</div>
+    <div class="flow-container">
+      <div class="flow-node primary" style="min-width:260px;">
+        🖥️ Application / Client
+        <span class="node-sub">Sends SQL queries via standard connection string</span>
+      </div>
+
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">TLS Connection</div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-bracket" style="justify-content:center;">
+        <span class="bracket-label">Router / Proxy Fleet</span>
+        <div class="flow-node secondary">
+          🔀 Connection Router
+          <span class="node-sub">Auth, rate-limit, shard routing</span>
+        </div>
+        <div class="flow-node secondary">
+          🔀 Connection Router
+          <span class="node-sub">Failover & load balancing</span>
+        </div>
+      </div>
+
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">Auto-Scale</div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-bracket" style="justify-content:center;">
+        <span class="bracket-label">Compute Layer (Elastic)</span>
+        <div class="flow-node primary">
+          ⚡ Read/Write Node
+          <span class="node-sub">Query engine + buffer pool</span>
+        </div>
+        <div class="flow-node primary">
+          ⚡ Read/Write Node
+          <span class="node-sub">Handles transactions</span>
+        </div>
+        <div class="flow-node" style="border-style:dashed;">
+          📖 Read Replica
+          <span class="node-sub">Scales read-heavy traffic</span>
+        </div>
+      </div>
+
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">Auto-Scale</div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-bracket" style="justify-content:center;">
+        <span class="bracket-label">Data Layer — Distributed Storage</span>
+        <div class="flow-node warn">
+          💾 Storage Volume
+          <span class="node-sub">Replicated across 3 AZs</span>
+        </div>
+        <div class="flow-node warn">
+          💾 Storage Volume
+          <span class="node-sub">Durability: 99.999999999%</span>
+        </div>
+        <div class="flow-node warn">
+          💾 Storage Volume
+          <span class="node-sub">Auto-expanding to 128 TB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>This three-tier architecture is the backbone of nearly every serverless database — Aurora Serverless, Neon, PlanetScale, CockroachDB Serverless, and even non-relational offerings like DynamoDB and Firestore follow a variant of this pattern.</p>
+
+  <hr>
+
+  <h2>Traditional vs. Serverless: A Side-by-Side</h2>
+
+  <p>Before we get into code, let's formalize what changes when you go serverless.</p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Provisioned (Traditional)</th>
+        <th>Serverless</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Setup</td>
+        <td>Choose instance type, RAM, CPU, disk IOPS</td>
+        <td class="cell-highlight">Create database; no sizing decisions</td>
+      </tr>
+      <tr>
+        <td>Scaling</td>
+        <td>Manual resize or scheduled auto-scaling</td>
+        <td class="cell-highlight">Automatic, sub-second scale-out</td>
+      </tr>
+      <tr>
+        <td>Cost at idle</td>
+        <td>Full instance cost (even at 0 QPS)</td>
+        <td class="cell-highlight">$0 or near-$0 when idle</td>
+      </tr>
+      <tr>
+        <td>Billing model</td>
+        <td>Hourly or reserved instance pricing</td>
+        <td class="cell-highlight">Per-request + storage consumed</td>
+      </tr>
+      <tr>
+        <td>Cold start</td>
+        <td>Always warm</td>
+        <td>May have 200ms–2s wake-up latency</td>
+      </tr>
+      <tr>
+        <td>Ops burden</td>
+        <td>OS patches, backups, failover drills</td>
+        <td class="cell-highlight">Fully managed</td>
+      </tr>
+      <tr>
+        <td>Cost at sustained load</td>
+        <td class="cell-highlight">Often cheaper at high, steady throughput</td>
+        <td>Per-request cost adds up quickly</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <p><strong>💡 Key insight:</strong> Serverless databases are economically optimal for <em>spiky, unpredictable, or intermittent</em> workloads. If your load is constant and high, a provisioned instance is usually cheaper.</p>
+  </div>
+
+  <hr>
+
+  <h2>Hands-On: Code You Can Run Today</h2>
+
+  <p>Theory is great, but let's connect to actual serverless databases. Below are working examples for three popular offerings.</p>
+
+  <h3>1. Amazon Aurora Serverless v2 (PostgreSQL)</h3>
+
+  <p>Aurora Serverless v2 scales between a minimum and maximum ACU (Aurora Capacity Unit). Each ACU is roughly 2 GB of RAM. You set the range; Aurora handles the rest.</p>
+
+  <pre><code><span class="code-label">Python</span>
+<span class="cm"># pip install psycopg2-binary boto3</span>
+<span class="kw">import</span> psycopg2
+<span class="kw">import</span> json
+
+<span class="cm"># Aurora Serverless v2 endpoint — no instance type to choose</span>
+conn <span class="op">=</span> psycopg2.<span class="fn">connect</span>(
+    host<span class="op">=</span><span class="str">"my-cluster.cluster-xxxx.us-east-1.rds.amazonaws.com"</span>,
+    port<span class="op">=</span><span class="num">5432</span>,
+    dbname<span class="op">=</span><span class="str">"appdb"</span>,
+    user<span class="op">=</span><span class="str">"admin"</span>,
+    password<span class="op">=</span><span class="str">"&lt;from-secrets-manager&gt;"</span>,
+    sslmode<span class="op">=</span><span class="str">"require"</span>
+)
+
+cur <span class="op">=</span> conn.<span class="fn">cursor</span>()
+
+<span class="cm"># Create a table — Aurora handles storage allocation</span>
+cur.<span class="fn">execute</span>(<span class="str">"""
+    CREATE TABLE IF NOT EXISTS orders (
+        id          SERIAL PRIMARY KEY,
+        customer_id INT NOT NULL,
+        total       DECIMAL(10,2) NOT NULL,
+        status      VARCHAR(20) DEFAULT 'pending',
+        created_at  TIMESTAMPTZ DEFAULT NOW()
+    );
+"""</span>)
+
+<span class="cm"># Insert 10K rows — Aurora auto-scales ACUs if needed</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">10000</span>):
+    cur.<span class="fn">execute</span>(
+        <span class="str">"INSERT INTO orders (customer_id, total) VALUES (%s, %s)"</span>,
+        (i <span class="op">%</span> <span class="num">500</span>, <span class="fn">round</span>(i <span class="op">*</span> <span class="num">1.37</span>, <span class="num">2</span>))
+    )
+
+conn.<span class="fn">commit</span>()
+
+<span class="cm"># Query — standard PostgreSQL, nothing serverless-specific</span>
+cur.<span class="fn">execute</span>(<span class="str">"""
+    SELECT status, COUNT(*), SUM(total)
+    FROM orders
+    GROUP BY status;
+"""</span>)
+
+<span class="kw">for</span> row <span class="kw">in</span> cur.<span class="fn">fetchall</span>():
+    <span class="fn">print</span>(row)
+
+cur.<span class="fn">close</span>()
+conn.<span class="fn">close</span>()
+</code></pre>
+
+  <p>Notice there's nothing serverless-specific in the SQL. Your application code is identical to what you'd write for a provisioned Aurora instance — the scaling magic happens beneath the connection layer.</p>
+
+  <h3>2. Neon — Serverless Postgres with Branching</h3>
+
+  <p>Neon separates compute from storage using a custom page server and safekeepers. It also introduces <strong>database branching</strong>, which lets you fork your data like a Git repo.</p>
+
+  <pre><code><span class="code-label">TypeScript</span>
+<span class="cm">// npm install @neondatabase/serverless</span>
+<span class="kw">import</span> { neon } <span class="kw">from</span> <span class="str">'@neondatabase/serverless'</span>;
+
+<span class="cm">// Single connection string — Neon manages pooling & scaling</span>
+<span class="kw">const</span> sql <span class="op">=</span> <span class="fn">neon</span>(process.env.<span class="prop">DATABASE_URL</span><span class="op">!</span>);
+
+<span class="cm">// Works inside Vercel Edge Functions, Cloudflare Workers, etc.</span>
+<span class="kw">export async function</span> <span class="fn">handler</span>(req: Request) {
+  <span class="cm">// Neon spins up compute on first query after idle</span>
+  <span class="kw">const</span> products <span class="op">=</span> <span class="kw">await</span> sql<span class="str">`
+    SELECT id, name, price
+    FROM products
+    WHERE category = ${</span>req.url.searchParams.<span class="fn">get</span>(<span class="str">'cat'</span>)<span class="str">}
+    ORDER BY price ASC
+    LIMIT 20
+  `</span>;
+
+  <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Response</span>(JSON.<span class="fn">stringify</span>(products), {
+    headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+  });
+}
+</code></pre>
+
+  <div class="callout">
+    <p><strong>💡 Why Neon matters:</strong> Its compute can scale to zero — meaning you pay $0 when no queries are running. Traditional managed Postgres always has at least one instance burning money.</p>
+  </div>
+
+  <h3>3. Amazon DynamoDB — Serverless NoSQL</h3>
+
+  <p>DynamoDB is arguably the most mature serverless database. There are no capacity units to think about in on-demand mode — you just read and write.</p>
+
+  <pre><code><span class="code-label">JavaScript (Node.js)</span>
+<span class="cm">// npm install @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb</span>
+<span class="kw">import</span> { DynamoDBClient } <span class="kw">from</span> <span class="str">'@aws-sdk/client-dynamodb'</span>;
+<span class="kw">import</span> {
+  DynamoDBDocumentClient, PutCommand, QueryCommand
+} <span class="kw">from</span> <span class="str">'@aws-sdk/lib-dynamodb'</span>;
+
+<span class="kw">const</span> client <span class="op">=</span> DynamoDBDocumentClient.<span class="fn">from</span>(
+  <span class="kw">new</span> <span class="fn">DynamoDBClient</span>({ region: <span class="str">'us-east-1'</span> })
+);
+
+<span class="cm">// Write — DynamoDB auto-scales write capacity</span>
+<span class="kw">await</span> client.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">PutCommand</span>({
+  TableName: <span class="str">'Sessions'</span>,
+  Item: {
+    userId:    <span class="str">'user_8a3f'</span>,
+    sessionId: <span class="str">'sess_20260220_001'</span>,
+    createdAt: Date.<span class="fn">now</span>(),
+    metadata:  { device: <span class="str">'mobile'</span>, os: <span class="str">'iOS 19'</span> }
+  }
+}));
+
+<span class="cm">// Query — pay per read capacity unit consumed</span>
+<span class="kw">const</span> result <span class="op">=</span> <span class="kw">await</span> client.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">QueryCommand</span>({
+  TableName: <span class="str">'Sessions'</span>,
+  KeyConditionExpression: <span class="str">'userId = :uid'</span>,
+  ExpressionAttributeValues: { <span class="str">':uid'</span>: <span class="str">'user_8a3f'</span> },
+  Limit: <span class="num">10</span>,
+  ScanIndexForward: <span class="kw">false</span>  <span class="cm">// newest first</span>
+}));
+
+console.<span class="fn">log</span>(result.Items);
+</code></pre>
+
+  <hr>
+
+  <h2>The Request Lifecycle: How a Query Flows</h2>
+
+  <p>To truly understand what happens when you execute <code>SELECT * FROM orders</code> against a serverless database, let's trace the full lifecycle.</p>
+
+  <!-- Flow Diagram: Query Lifecycle -->
+  <div class="arch-diagram">
+    <div class="arch-title">Query Lifecycle in a Serverless Database</div>
+    <div class="flow-container">
+
+      <div class="flow-row">
+        <div class="flow-node primary">
+          1️⃣ Client sends query
+          <span class="node-sub">SQL over TLS to endpoint</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-node secondary">
+          2️⃣ Proxy authenticates & routes
+          <span class="node-sub">Checks credentials, picks compute node</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <div class="arrow-label">⚡ Scale-up if needed</div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-node primary">
+          3️⃣ Compute node processes query
+          <span class="node-sub">Parse → Plan → Execute</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-node warn">
+          4️⃣ Pages fetched from storage
+          <span class="node-sub">Remote page reads over network</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="arrow-line"></div>
+        <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-node primary">
+          5️⃣ Results returned to client
+          <span class="node-sub">Billed per ACU-second + I/O</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <p>Steps 2 and 3 are where the "serverless magic" happens. If the compute layer has been scaled to zero (idle), step 2 triggers a <strong>cold start</strong>: a new compute node is provisioned and warmed. This is the latency penalty you pay for $0 idle costs, typically 200ms to 2 seconds depending on the provider.</p>
+
+  <hr>
+
+  <h2>Infrastructure as Code: Deploying a Serverless DB</h2>
+
+  <p>Let's see what it looks like to provision Aurora Serverless v2 with Terraform — the industry standard for infrastructure as code.</p>
+
+  <pre><code><span class="code-label">Terraform (HCL)</span>
+<span class="kw">resource</span> <span class="str">"aws_rds_cluster"</span> <span class="str">"serverless"</span> {
+  cluster_identifier = <span class="str">"my-serverless-cluster"</span>
+  engine             = <span class="str">"aurora-postgresql"</span>
+  engine_mode        = <span class="str">"provisioned"</span>  <span class="cm"># v2 uses "provisioned" with serverless scaling</span>
+  engine_version     = <span class="str">"15.4"</span>
+  database_name      = <span class="str">"appdb"</span>
+  master_username    = <span class="str">"admin"</span>
+  master_password    = var.<span class="prop">db_password</span>
+
+  <span class="kw">serverlessv2_scaling_configuration</span> {
+    min_capacity = <span class="num">0.5</span>   <span class="cm"># minimum ACUs (1 GB RAM)</span>
+    max_capacity = <span class="num">64</span>    <span class="cm"># maximum ACUs (128 GB RAM)</span>
+  }
+}
+
+<span class="kw">resource</span> <span class="str">"aws_rds_cluster_instance"</span> <span class="str">"serverless"</span> {
+  cluster_identifier = aws_rds_cluster.serverless.id
+  instance_class     = <span class="str">"db.serverless"</span>  <span class="cm"># the magic instance class</span>
+  engine             = aws_rds_cluster.serverless.engine
+  engine_version     = aws_rds_cluster.serverless.engine_version
+}
+
+<span class="kw">output</span> <span class="str">"endpoint"</span> {
+  value = aws_rds_cluster.serverless.<span class="prop">endpoint</span>
+}
+</code></pre>
+
+  <p>Compare this to a provisioned Aurora cluster where you'd specify <code>db.r6g.2xlarge</code> and agonize over whether 8 vCPUs is enough. With serverless, you set a range and let the system figure it out.</p>
+
+  <hr>
+
+  <h2>When Serverless Breaks Down</h2>
+
+  <p>Serverless databases aren't a silver bullet. Here are the real-world trade-offs that don't make it into the product landing pages.</p>
+
+  <div class="vs-grid">
+    <div class="vs-side">
+      <h4>✅ Use Serverless When</h4>
+      <ul>
+        <li><span class="icon">📈</span> Traffic is unpredictable or spiky (e-commerce flash sales, event-driven apps)</li>
+        <li><span class="icon">🌙</span> Workloads go idle for hours (dev/staging environments, cron-driven ETL)</li>
+        <li><span class="icon">🚀</span> You need to ship fast without a DBA on the team</li>
+        <li><span class="icon">💰</span> Budget is variable and you want costs to track usage</li>
+      </ul>
+    </div>
+    <div class="vs-center">VS</div>
+    <div class="vs-side">
+      <h4>🚫 Avoid Serverless When</h4>
+      <ul>
+        <li><span class="icon">🏭</span> You have a steady, high-throughput workload 24/7</li>
+        <li><span class="icon">⏱️</span> You need guaranteed sub-5ms latency with zero cold starts</li>
+        <li><span class="icon">🔧</span> You require deep Postgres tuning (shared_buffers, work_mem, etc.)</li>
+        <li><span class="icon">🧮</span> Per-request billing at scale would exceed reserved pricing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <p><strong>⚠️ The cold start problem is real.</strong> In Aurora Serverless v2, the minimum ACU of 0.5 means compute never fully shuts off — but it can still take 200–500ms to scale up during a traffic spike. Neon's scale-to-zero can add 1–2 seconds on the first query after extended idle. For user-facing APIs where p99 latency matters, measure this before committing.</p>
+  </div>
+
+  <hr>
+
+  <h2>A Practical Pattern: Serverless DB + Edge Functions</h2>
+
+  <p>The most common production pattern today pairs a serverless database with edge functions (Vercel, Cloudflare Workers, or AWS Lambda). Here's a full working example with Neon and Next.js API routes:</p>
+
+  <pre><code><span class="code-label">TypeScript — Next.js API Route</span>
+<span class="cm">// app/api/orders/route.ts</span>
+<span class="kw">import</span> { neon } <span class="kw">from</span> <span class="str">'@neondatabase/serverless'</span>;
+<span class="kw">import</span> { NextResponse } <span class="kw">from</span> <span class="str">'next/server'</span>;
+
+<span class="kw">const</span> sql <span class="op">=</span> <span class="fn">neon</span>(process.env.<span class="prop">DATABASE_URL</span><span class="op">!</span>);
+
+<span class="kw">export async function</span> <span class="fn">GET</span>(request: Request) {
+  <span class="kw">const</span> { searchParams } <span class="op">=</span> <span class="kw">new</span> <span class="fn">URL</span>(request.url);
+  <span class="kw">const</span> customerId <span class="op">=</span> searchParams.<span class="fn">get</span>(<span class="str">'customerId'</span>);
+
+  <span class="kw">if</span> (<span class="op">!</span>customerId) {
+    <span class="kw">return</span> NextResponse.<span class="fn">json</span>(
+      { error: <span class="str">'customerId is required'</span> },
+      { status: <span class="num">400</span> }
+    );
+  }
+
+  <span class="kw">const</span> orders <span class="op">=</span> <span class="kw">await</span> sql<span class="str">`
+    SELECT o.id, o.total, o.status, o.created_at,
+           json_agg(json_build_object(
+             'product', p.name,
+             'qty', oi.quantity
+           )) AS items
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.id
+    JOIN products p ON p.id = oi.product_id
+    WHERE o.customer_id = ${</span>customerId<span class="str">}
+    GROUP BY o.id
+    ORDER BY o.created_at DESC
+    LIMIT 50
+  `</span>;
+
+  <span class="kw">return</span> NextResponse.<span class="fn">json</span>(orders);
+}
+
+<span class="kw">export async function</span> <span class="fn">POST</span>(request: Request) {
+  <span class="kw">const</span> body <span class="op">=</span> <span class="kw">await</span> request.<span class="fn">json</span>();
+
+  <span class="cm">// Transaction — Neon handles this like standard Postgres</span>
+  <span class="kw">const</span> [order] <span class="op">=</span> <span class="kw">await</span> sql<span class="str">`
+    INSERT INTO orders (customer_id, total, status)
+    VALUES (${</span>body.customerId<span class="str">}, ${</span>body.total<span class="str">}, 'pending')
+    RETURNING id, created_at
+  `</span>;
+
+  <span class="kw">return</span> NextResponse.<span class="fn">json</span>(order, { status: <span class="num">201</span> });
+}
+</code></pre>
+
+  <p>This entire stack — Vercel Edge Function + Neon Serverless Postgres — can serve production traffic at $0/month during development and scale to thousands of requests per second without changing a line of code. That's the promise delivered.</p>
+
+  <hr>
+
+  <h2>The Market Landscape in 2026</h2>
+
+  <p>The serverless database space has matured considerably. Here's a snapshot of the major players and where they sit:</p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Database</th>
+        <th>Type</th>
+        <th>Scale to Zero</th>
+        <th>Best For</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Aurora Serverless v2</strong></td>
+        <td>Relational (MySQL/PG)</td>
+        <td>No (min 0.5 ACU)</td>
+        <td>Enterprise; AWS-native apps</td>
+      </tr>
+      <tr>
+        <td><strong>Neon</strong></td>
+        <td>Postgres</td>
+        <td class="cell-highlight">Yes</td>
+        <td>Startups; edge/Vercel apps</td>
+      </tr>
+      <tr>
+        <td><strong>PlanetScale</strong></td>
+        <td>MySQL (Vitess)</td>
+        <td class="cell-highlight">Yes</td>
+        <td>MySQL shops; schema migrations</td>
+      </tr>
+      <tr>
+        <td><strong>CockroachDB Serverless</strong></td>
+        <td>Distributed SQL</td>
+        <td>Near-zero</td>
+        <td>Global apps; multi-region</td>
+      </tr>
+      <tr>
+        <td><strong>DynamoDB</strong></td>
+        <td>NoSQL (Key-Value)</td>
+        <td class="cell-highlight">Yes (on-demand)</td>
+        <td>High-throughput; simple access patterns</td>
+      </tr>
+      <tr>
+        <td><strong>Firestore</strong></td>
+        <td>NoSQL (Document)</td>
+        <td class="cell-highlight">Yes</td>
+        <td>Mobile apps; real-time sync</td>
+      </tr>
+      <tr>
+        <td><strong>Turso (libSQL)</strong></td>
+        <td>SQLite (embedded)</td>
+        <td class="cell-highlight">Yes</td>
+        <td>Edge-first; ultra-low latency</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h2>What's Next: The Database Becomes an API</h2>
+
+  <p>We're heading toward a world where the database is a SQL API endpoint, as invisible as Stripe is for payments or Twilio is for messaging. You won't think about instances, ACUs, or even the word "serverless" — you'll just write queries and they'll work, everywhere, at any scale.</p>
+
+  <p>The pieces are falling into place: compute-storage separation is now standard, connection poolers like PgBouncer are being built into the platform, and edge runtimes can talk to databases over HTTP (not just TCP). The cold start problem is shrinking with each iteration. The pricing models are becoming more transparent.</p>
+
+  <p>For most new projects starting today, a serverless database is the correct default choice. You can always move to a provisioned instance later when you have enough data to justify it. But the operational overhead you avoid on day one? That's time you'll never need to get back.</p>
+
+  <p>Start with your cloud provider's serverless option. Measure your actual costs after 30 days. Adjust from there. That's the whole playbook.</p>
+
+  <hr>
+
+  <!-- Tags -->
+  <div class="tags">
+    <a class="tag" href="#">Serverless</a>
+    <a class="tag" href="#">Database</a>
+    <a class="tag" href="#">AWS Aurora</a>
+    <a class="tag" href="#">Cloud Computing</a>
+    <a class="tag" href="#">Backend Engineering</a>
+    <a class="tag" href="#">DevOps</a>
+    <a class="tag" href="#">PostgreSQL</a>
+  </div>
+
+  <!-- Bottom Engagement -->
+  <div class="engagement">
+    <div class="left">
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 11v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8a1 1 0 011-1h2a1 1 0 011 1zm0 0l3.5-7a2.5 2.5 0 012.5 2.5V9h5.38a2 2 0 011.96 2.38l-1.25 6A2 2 0 0117.13 19H10a3 3 0 01-3-3v-5z"/></svg>
+        4.2K
+      </span>
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        87
+      </span>
+    </div>
+    <div class="right">
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+      </span>
+      <span class="stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      </span>
+    </div>
+  </div>
+
+</article>
+
+</body>
+</html>
