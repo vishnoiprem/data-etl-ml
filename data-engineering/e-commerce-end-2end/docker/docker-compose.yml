@@ -1,0 +1,319 @@
+# ============================================================
+# E-Commerce End-to-End Data Pipeline
+# Docker Compose: Local Development Stack
+# ============================================================
+# Services:
+#   mysql         - Source transactional database
+#   zookeeper     - Kafka coordination
+#   kafka         - Event streaming (CDC + real-time events)
+#   kafka-ui      - Kafka management UI
+#   flink-jm      - Flink JobManager
+#   flink-tm      - Flink TaskManager
+#   clickhouse    - Real-time OLAP database
+#   bi-api        - FastAPI BI backend
+#   bi-frontend   - React dashboard
+#   prometheus    - Metrics collection
+#   grafana       - Operational dashboards
+# ============================================================
+
+networks:
+  ecomm-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  kafka_data:
+  clickhouse_data:
+  grafana_data:
+  prometheus_data:
+
+services:
+
+  # ── MySQL (Source DB with binlog enabled) ─────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: ecomm-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ecommerce123
+      MYSQL_DATABASE: ecommerce_db
+      MYSQL_USER: ecomm_user
+      MYSQL_PASSWORD: ecomm_pass
+    command: >
+      --server-id=1
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --binlog-row-image=FULL
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../source_mysql/schemas:/docker-entrypoint-initdb.d
+    networks:
+      - ecomm-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pecommerce123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MySQL CDC Replication User
+  mysql-init:
+    image: mysql:8.0
+    container_name: ecomm-mysql-init
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: >
+      bash -c "
+        mysql -h mysql -u root -pecommerce123 ecommerce_db -e \"
+          CREATE USER IF NOT EXISTS 'replication_user'@'%' IDENTIFIED BY 'replication_pass';
+          GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'replication_user'@'%';
+          GRANT SELECT ON ecommerce_db.* TO 'replication_user'@'%';
+          FLUSH PRIVILEGES;
+        \"
+        echo 'Replication user created.'
+      "
+    networks:
+      - ecomm-net
+    restart: "no"
+
+  # ── Zookeeper ─────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: ecomm-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - ecomm-net
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Kafka ─────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: ecomm-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_COMPRESSION_TYPE: snappy
+      KAFKA_NUM_PARTITIONS: 6
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - ecomm-net
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ── Kafka UI ──────────────────────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: ecomm-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ecomm-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "8080:8080"
+    networks:
+      - ecomm-net
+
+  # ── Flink JobManager ──────────────────────────────────────
+  flink-jm:
+    image: flink:1.18-scala_2.12
+    container_name: ecomm-flink-jm
+    restart: unless-stopped
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jm
+        taskmanager.numberOfTaskSlots: 4
+        parallelism.default: 4
+        state.backend: rocksdb
+        state.checkpoints.dir: file:///tmp/flink-checkpoints
+        execution.checkpointing.interval: 60000
+    ports:
+      - "8081:8081"
+    networks:
+      - ecomm-net
+    volumes:
+      - ../realtime_pipeline/flink:/opt/flink/jobs
+
+  # ── Flink TaskManager 1 ───────────────────────────────────
+  flink-tm-1:
+    image: flink:1.18-scala_2.12
+    container_name: ecomm-flink-tm-1
+    restart: unless-stopped
+    command: taskmanager
+    depends_on:
+      - flink-jm
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jm
+        taskmanager.numberOfTaskSlots: 4
+    networks:
+      - ecomm-net
+
+  # ── Flink TaskManager 2 ───────────────────────────────────
+  flink-tm-2:
+    image: flink:1.18-scala_2.12
+    container_name: ecomm-flink-tm-2
+    restart: unless-stopped
+    command: taskmanager
+    depends_on:
+      - flink-jm
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jm
+        taskmanager.numberOfTaskSlots: 4
+    networks:
+      - ecomm-net
+
+  # ── ClickHouse ────────────────────────────────────────────
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8
+    container_name: ecomm-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_DB: ecomm_realtime
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: clickhouse123
+    ports:
+      - "9000:9000"   # Native protocol
+      - "8123:8123"   # HTTP interface
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ../realtime_pipeline/clickhouse/schemas:/docker-entrypoint-initdb.d
+    networks:
+      - ecomm-net
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── BI API (FastAPI) ──────────────────────────────────────
+  bi-api:
+    build:
+      context: ../bi_product/backend
+      dockerfile: Dockerfile
+    container_name: ecomm-bi-api
+    restart: unless-stopped
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 9000
+      CLICKHOUSE_DB: ecomm_realtime
+      CLICKHOUSE_PASSWORD: clickhouse123
+    ports:
+      - "8000:8000"
+    networks:
+      - ecomm-net
+
+  # ── BI Frontend (React) ───────────────────────────────────
+  bi-frontend:
+    build:
+      context: ../bi_product/frontend
+      dockerfile: Dockerfile
+    container_name: ecomm-bi-frontend
+    restart: unless-stopped
+    depends_on:
+      - bi-api
+    environment:
+      REACT_APP_API_URL: http://localhost:8000/api/v1
+      REACT_APP_WS_URL: ws://localhost:8000/ws/live-orders
+    ports:
+      - "3000:3000"
+    networks:
+      - ecomm-net
+
+  # ── Prometheus ────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ecomm-prometheus
+    restart: unless-stopped
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - ecomm-net
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+
+  # ── Grafana ───────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ecomm-grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+      - clickhouse
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana:/etc/grafana/provisioning
+    ports:
+      - "3001:3000"
+    networks:
+      - ecomm-net
+
+  # ── CDC Producer ──────────────────────────────────────────
+  cdc-producer:
+    build:
+      context: ../realtime_pipeline/kafka
+      dockerfile: Dockerfile
+    container_name: ecomm-cdc-producer
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      KAFKA_BOOTSTRAP: kafka:9092
+    networks:
+      - ecomm-net

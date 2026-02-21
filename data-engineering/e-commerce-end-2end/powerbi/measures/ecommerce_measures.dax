@@ -1,0 +1,189 @@
+// ============================================================
+// Power BI DAX Measures - E-Commerce Platform Dashboard
+// Connect to: Databricks SQL or Azure Synapse (ADS layer)
+// ============================================================
+
+// ── GMV Measures ─────────────────────────────────────────────
+
+GMV Total =
+    CALCULATE(
+        SUM(fact_orders[total_amount]),
+        fact_orders[order_status] <> "cancelled"
+    )
+
+GMV MTD =
+    CALCULATE(
+        [GMV Total],
+        DATESMTD(dim_date[full_date])
+    )
+
+GMV YTD =
+    CALCULATE(
+        [GMV Total],
+        DATESYTD(dim_date[full_date])
+    )
+
+GMV Yesterday =
+    CALCULATE(
+        [GMV Total],
+        DATEADD(dim_date[full_date], -1, DAY)
+    )
+
+GMV WoW Change % =
+    VAR current_week = [GMV Total]
+    VAR prev_week = CALCULATE([GMV Total], DATEADD(dim_date[full_date], -7, DAY))
+    RETURN DIVIDE(current_week - prev_week, prev_week, 0) * 100
+
+GMV MoM Change % =
+    VAR current_month = [GMV MTD]
+    VAR prev_month = CALCULATE([GMV Total], DATEADD(dim_date[full_date], -1, MONTH))
+    RETURN DIVIDE(current_month - prev_month, prev_month, 0) * 100
+
+
+// ── Order Metrics ─────────────────────────────────────────────
+
+Total Orders =
+    COUNTROWS(fact_orders)
+
+Completed Orders =
+    CALCULATE(COUNTROWS(fact_orders), fact_orders[order_status] = "delivered")
+
+Cancelled Orders =
+    CALCULATE(COUNTROWS(fact_orders), fact_orders[order_status] = "cancelled")
+
+Completion Rate % =
+    DIVIDE([Completed Orders], [Total Orders], 0) * 100
+
+Cancellation Rate % =
+    DIVIDE([Cancelled Orders], [Total Orders], 0) * 100
+
+Avg Order Value =
+    DIVIDE([GMV Total], [Total Orders], 0)
+
+Avg Fulfillment Days =
+    AVERAGEX(
+        FILTER(fact_orders, fact_orders[order_status] = "delivered"),
+        fact_orders[fulfillment_days]
+    )
+
+
+// ── Revenue & Margin ──────────────────────────────────────────
+
+Platform Revenue =
+    SUM(fact_orders[platform_commission])
+
+Platform Revenue MTD =
+    CALCULATE([Platform Revenue], DATESMTD(dim_date[full_date]))
+
+Total Gross Margin =
+    SUM(fact_order_items[gross_margin])
+
+Avg Margin % =
+    AVERAGEX(fact_order_items, fact_order_items[margin_pct])
+
+Total Discount Amount =
+    CALCULATE(
+        SUM(fact_orders[discount_amount]) + SUM(fact_orders[voucher_discount])
+    )
+
+Discount Rate % =
+    DIVIDE([Total Discount Amount], SUM(fact_orders[subtotal]), 0) * 100
+
+
+// ── Customer Metrics ──────────────────────────────────────────
+
+Unique Buyers =
+    DISTINCTCOUNT(fact_orders[user_id])
+
+New Customers =
+    CALCULATE(
+        DISTINCTCOUNT(fact_orders[user_id]),
+        dim_user[registered_at] >= MIN(dim_date[full_date])
+    )
+
+Repeat Purchase Rate % =
+    VAR buyers_2plus =
+        COUNTROWS(
+            FILTER(
+                VALUES(fact_orders[user_id]),
+                CALCULATE(COUNTROWS(fact_orders)) >= 2
+            )
+        )
+    RETURN DIVIDE(buyers_2plus, [Unique Buyers], 0) * 100
+
+Customer LTV Avg =
+    AVERAGEX(
+        dim_user,
+        dim_user[lifetime_value]
+    )
+
+
+// ── Product Metrics ───────────────────────────────────────────
+
+Units Sold =
+    SUM(fact_order_items[quantity])
+
+Units Sold MTD =
+    CALCULATE([Units Sold], DATESMTD(dim_date[full_date]))
+
+Product Revenue =
+    SUM(fact_order_items[subtotal])
+
+Top Product Name =
+    TOPN(1, VALUES(dim_product[product_name]),
+         CALCULATE([Product Revenue]))
+
+View to Purchase Rate % =
+    DIVIDE(
+        CALCULATE(COUNTROWS(fact_user_events), fact_user_events[event_type] = "purchase"),
+        CALCULATE(COUNTROWS(fact_user_events), fact_user_events[event_type] = "view"),
+        0
+    ) * 100
+
+
+// ── Inventory KPIs ────────────────────────────────────────────
+
+Total Stock Value =
+    SUM(fact_inventory_snapshot[inventory_value])
+
+Stockout SKU Count =
+    CALCULATE(
+        COUNTROWS(fact_inventory_snapshot),
+        fact_inventory_snapshot[is_stockout] = 1
+    )
+
+Stockout Rate % =
+    DIVIDE([Stockout SKU Count], COUNTROWS(fact_inventory_snapshot), 0) * 100
+
+SKUs Needing Reorder =
+    CALCULATE(
+        COUNTROWS(fact_inventory_snapshot),
+        fact_inventory_snapshot[needs_reorder] = 1
+    )
+
+Avg Warehouse Utilization % =
+    AVERAGEX(
+        ads_warehouse_efficiency,
+        ads_warehouse_efficiency[capacity_utilization_pct]
+    )
+
+
+// ── Seller Metrics ────────────────────────────────────────────
+
+Active Sellers =
+    DISTINCTCOUNT(fact_orders[seller_id])
+
+Avg Seller Rating =
+    AVERAGEX(dim_seller, dim_seller[rating])
+
+Top Seller =
+    TOPN(1, VALUES(dim_seller[shop_name]),
+         CALCULATE([GMV Total]))
+
+Seller GMV Concentration % =
+    VAR top5_gmv =
+        CALCULATE(
+            [GMV Total],
+            TOPN(5, dim_seller, CALCULATE([GMV Total]), DESC)
+        )
+    RETURN DIVIDE(top5_gmv, CALCULATE([GMV Total], ALL(dim_seller)), 0) * 100
