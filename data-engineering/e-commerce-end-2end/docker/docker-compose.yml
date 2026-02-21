@@ -1,5 +1,3 @@
-version: "3.9"
-
 # ============================================================
 # E-Commerce End-to-End Data Pipeline
 # Docker Compose: Local Development Stack
@@ -170,10 +168,10 @@ services:
     volumes:
       - ../realtime_pipeline/flink:/opt/flink/jobs
 
-  # ── Flink TaskManager ─────────────────────────────────────
-  flink-tm:
+  # ── Flink TaskManager 1 ───────────────────────────────────
+  flink-tm-1:
     image: flink:1.18-scala_2.12
-    container_name: ecomm-flink-tm
+    container_name: ecomm-flink-tm-1
     restart: unless-stopped
     command: taskmanager
     depends_on:
@@ -185,8 +183,22 @@ services:
         taskmanager.numberOfTaskSlots: 4
     networks:
       - ecomm-net
-    deploy:
-      replicas: 2
+
+  # ── Flink TaskManager 2 ───────────────────────────────────
+  flink-tm-2:
+    image: flink:1.18-scala_2.12
+    container_name: ecomm-flink-tm-2
+    restart: unless-stopped
+    command: taskmanager
+    depends_on:
+      - flink-jm
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jm
+        taskmanager.numberOfTaskSlots: 4
+    networks:
+      - ecomm-net
 
   # ── ClickHouse ────────────────────────────────────────────
   clickhouse:
