@@ -319,6 +319,9 @@ def seed_all():
         order_ids.append((order_id, seller_id, pay_status, status, total, created))
 
         # Order items (1-5 items per order)
+        # order_items.status ENUM: pending/confirmed/shipped/delivered/cancelled/returned
+        # Map 'processing' (valid for orders) → 'confirmed' (closest for items)
+        item_status = "confirmed" if status == "processing" else status
         item_count = random.randint(1, 5)
         chosen_skus = random.sample(sku_ids, min(item_count, len(sku_ids)))
         for sku_id in chosen_skus:
@@ -333,7 +336,7 @@ def seed_all():
                 random.choice(product_ids),
                 sku_id, qty, price,
                 round(qty * price, 2),
-                status
+                item_status
             ))
     conn.commit()
     print(f"  Created {len(order_ids)} orders")
