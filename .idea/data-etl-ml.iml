@@ -11,8 +11,9 @@
       <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/0_StringIndexer_74f5e7a18a43/data" />
       <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/2_MinMaxScaler_d5275382d64a/data" />
       <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data" />
+      <excludeFolder url="file://$MODULE_DIR$/.env" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.9" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

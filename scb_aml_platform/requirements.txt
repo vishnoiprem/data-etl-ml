@@ -1,0 +1,57 @@
+# SCB AML Platform — Python Dependencies
+# PyCharm: pip install -r requirements.txt
+#
+# NOTE: apache-airflow is NOT included here because it conflicts with
+#       sqlalchemy>=2.0 (airflow 2.7 requires sqlalchemy<2.0).
+#       For Airflow, see requirements-airflow.txt (separate install).
+#       The platform runs fully via pipeline_orchestrator.py without Airflow.
+
+# ── Core Data Processing
+pyspark==3.3.2
+pandas==2.0.3
+numpy==1.24.4
+pyarrow==12.0.1
+
+# ── Fuzzy Matching / Entity Resolution
+jellyfish==0.11.2
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.21.1
+
+# ── Elasticsearch (Lucid Search)
+elasticsearch==8.9.0
+elasticsearch-dsl==8.9.0
+
+# ── Kafka (ingestion simulation)
+kafka-python==2.0.2
+
+# ── Database / HDFS simulation (SQLite-based local Hive)
+sqlalchemy>=1.4,<3.0
+PyHive==0.7.0
+
+# ── Data Generation (dummy data)
+faker==19.6.2
+
+# ── API (Lucid Search — FastAPI)
+fastapi==0.103.1
+uvicorn==0.23.2
+httpx==0.25.0
+
+# ── Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+click==8.1.7
+rich==13.5.3
+loguru==0.7.2
+tqdm==4.66.1
+
+# ── Testing
+pytest==7.4.2
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+
+# ── Notebooks
+jupyter==1.0.0
+ipykernel==6.25.2
+matplotlib==3.7.3
+seaborn==0.12.2
+plotly==5.17.0
