@@ -20,9 +20,35 @@ import re
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 import jellyfish
 from loguru import logger
+
+
+def _serialize(v):
+    """Convert any value to a JSON-safe Python type."""
+    if v is None:
+        return None
+    if isinstance(v, (bool,)):
+        return v
+    if isinstance(v, (np.bool_,)):
+        return bool(v)
+    if isinstance(v, (np.integer,)):
+        return int(v)
+    if isinstance(v, (np.floating,)):
+        return None if np.isnan(v) else float(v)
+    if isinstance(v, float):
+        return None if np.isnan(v) else v
+    if isinstance(v, np.ndarray):
+        return [_serialize(x) for x in v.tolist()]
+    if isinstance(v, list):
+        return [_serialize(x) for x in v]
+    if isinstance(v, dict):
+        return {k: _serialize(val) for k, val in v.items()}
+    if isinstance(v, pd.Timestamp):
+        return v.isoformat()
+    return v
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
@@ -245,14 +271,8 @@ class LucidSearchEngine:
 
         results = []
         for _, row in df.iterrows():
-            r = {k: v for k, v in row.items() if not k.startswith("_")}
-            r["match_score"] = round(row["_score"] * 100, 1)
-            # Sanitise non-serialisable types
-            for k, v in r.items():
-                if isinstance(v, list):
-                    r[k] = v
-                elif pd.isna(v) if not isinstance(v, (list, dict)) else False:
-                    r[k] = None
+            r = {k: _serialize(v) for k, v in row.items() if not k.startswith("_")}
+            r["match_score"] = round(float(row["_score"]) * 100, 1)
             results.append(r)
 
         return results
@@ -266,8 +286,7 @@ class LucidSearchEngine:
         if matches.empty:
             return {}
         row = matches.iloc[0].to_dict()
-        return {k: (None if (not isinstance(v, (list, dict)) and pd.isna(v)) else v)
-                for k, v in row.items()}
+        return {k: _serialize(v) for k, v in row.items()}
 
     def _get_txn_summary(self, entity_id: str) -> dict:
         txn_path = PROCESSED_DIR / "agg_customer_txn_summary.parquet"
@@ -276,14 +295,19 @@ class LucidSearchEngine:
         txn = pd.read_parquet(txn_path)
         col = "customer_id"
         matches = txn[txn[col] == entity_id]
-        return matches.iloc[0].to_dict() if not matches.empty else {}
+        if matches.empty:
+            return {}
+        return {k: _serialize(v) for k, v in matches.iloc[0].to_dict().items()}
 
     def _get_screening(self, entity_id: str) -> list:
         if self.screening.empty:
             return []
         col = "customer_id"
         matches = self.screening[self.screening[col] == entity_id]
-        return matches.to_dict("records") if not matches.empty else []
+        if matches.empty:
+            return []
+        return [{k: _serialize(v) for k, v in rec.items()}
+                for rec in matches.to_dict("records")]
 
     def _get_relationships(self, entity_id: str) -> list:
         if self.relationships.empty:
@@ -292,4 +316,7 @@ class LucidSearchEngine:
             (self.relationships["entity_id"] == entity_id) |
             (self.relationships["related_entity_id"] == entity_id)
         ]
-        return rel.head(20).to_dict("records") if not rel.empty else []
+        if rel.empty:
+            return []
+        return [{k: _serialize(v) for k, v in rec.items()}
+                for rec in rel.head(20).to_dict("records")]
