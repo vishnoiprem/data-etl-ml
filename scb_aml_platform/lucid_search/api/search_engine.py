@@ -248,10 +248,10 @@ class LucidSearchEngine:
             r = {k: v for k, v in row.items() if not k.startswith("_")}
             r["match_score"] = round(row["_score"] * 100, 1)
             # Sanitise non-serialisable types
-            for k, v in r.items():
+            for k, v in list(r.items()):
                 if isinstance(v, list):
-                    r[k] = v
-                elif pd.isna(v) if not isinstance(v, (list, dict)) else False:
+                    pass
+                elif isinstance(v, float) and pd.isna(v):
                     r[k] = None
             results.append(r)
 
@@ -266,7 +266,7 @@ class LucidSearchEngine:
         if matches.empty:
             return {}
         row = matches.iloc[0].to_dict()
-        return {k: (None if (not isinstance(v, (list, dict)) and pd.isna(v)) else v)
+        return {k: (None if (isinstance(v, float) and pd.isna(v)) else v)
                 for k, v in row.items()}
 
     def _get_txn_summary(self, entity_id: str) -> dict:
