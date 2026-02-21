@@ -37,7 +37,31 @@ ES_DATA_DIR.mkdir(parents=True, exist_ok=True)
 def get_es_client():
     """Return ES client or None if unavailable."""
     try:
-        from elasticsearch import Elasticsearch
+        import importlib
+        import site
+
+        # The local scb_aml_platform/elasticsearch/ folder shadows the pip package.
+        # Load the pip-installed elasticsearch directly from site-packages.
+        original_modules = {k: v for k, v in sys.modules.items()
+                            if k == "elasticsearch" or k.startswith("elasticsearch.")}
+        original_path = sys.path[:]
+
+        # Build a path that only includes site-packages (no local project dirs)
+        site_paths = site.getsitepackages() + [site.getusersitepackages()]
+        sys.path = site_paths
+
+        for key in list(sys.modules.keys()):
+            if key == "elasticsearch" or key.startswith("elasticsearch."):
+                del sys.modules[key]
+
+        try:
+            es_mod = importlib.import_module("elasticsearch")
+            Elasticsearch = es_mod.Elasticsearch
+        finally:
+            sys.path = original_path
+            # Restore original modules (keep the pip one we just loaded)
+            pass
+
         client = Elasticsearch(
             hosts=[{"host": ES_HOST, "port": ES_PORT, "scheme": ES_SCHEME}],
             request_timeout=30,
@@ -94,16 +118,29 @@ def save_to_file(index_name: str, docs: list[dict]):
 
 def _df_to_docs(df: pd.DataFrame) -> list[dict]:
     """Convert DataFrame to list of dicts, handling non-serializable types."""
+    import numpy as np
     docs = []
     for record in df.to_dict("records"):
         clean = {}
         for k, v in record.items():
             if isinstance(v, list):
                 clean[k] = [str(x) for x in v]
-            elif pd.isna(v) if not isinstance(v, (list, dict)) else False:
+            elif isinstance(v, np.ndarray):
+                clean[k] = v.tolist()
+            elif v is None:
+                clean[k] = None
+            elif isinstance(v, float) and np.isnan(v):
                 clean[k] = None
             else:
-                clean[k] = v
+                try:
+                    is_na = pd.isna(v)
+                    # pd.isna on a scalar returns a plain bool; on array-like it may not
+                    if isinstance(is_na, bool) and is_na:
+                        clean[k] = None
+                    else:
+                        clean[k] = v
+                except (TypeError, ValueError):
+                    clean[k] = str(v)
         docs.append(clean)
     return docs
 

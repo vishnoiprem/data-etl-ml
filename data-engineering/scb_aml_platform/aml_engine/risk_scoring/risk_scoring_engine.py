@@ -45,9 +45,19 @@ def compute_crs(customers: pd.DataFrame, kyc: pd.DataFrame) -> pd.DataFrame:
       - ID verified:       -5 if verified
       - KYC status:        +10 if expired or pending
     """
+    # Compute kyc_age_days from kyc_date if not pre-computed
+    kyc_work = kyc.copy()
+    if "kyc_age_days" not in kyc_work.columns:
+        from datetime import datetime as _dt
+        kyc_work["kyc_date_dt"] = pd.to_datetime(kyc_work.get("kyc_date", "2010-01-01"), errors="coerce")
+        kyc_work["kyc_age_days"] = (_dt(2018, 12, 31) - kyc_work["kyc_date_dt"]).dt.days.fillna(999).astype(int)
+
+    merge_cols = ["customer_id", "kyc_age_days", "kyc_status", "pep_flag"]
+    if "id_verified" in kyc_work.columns:
+        merge_cols.append("id_verified")
+
     df = customers.merge(
-        kyc[["customer_id", "kyc_age_days", "kyc_status",
-             "id_verified", "pep_flag"]].rename(columns={"pep_flag": "kyc_pep"}),
+        kyc_work[merge_cols].rename(columns={"pep_flag": "kyc_pep"}),
         on="customer_id", how="left"
     )
 

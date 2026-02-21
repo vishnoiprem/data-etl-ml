@@ -147,11 +147,27 @@ def run() -> pd.DataFrame:
     # ── Volume velocity
     vel = compute_volume_velocity(txns)
 
-    # ── Merge all into summary
-    summary = entities[["customer_id", "golden_entity_id", "customer_name",
-                         "risk_rating", "country_code"]].copy() \
-        if "golden_entity_id" in entities.columns \
-        else entities[["customer_id", "customer_name", "risk_rating", "country_code"]].copy()
+    # ── Normalise entity key: entity_master uses entity_id, raw customers use customer_id
+    if "entity_id" in entities.columns and "customer_id" not in entities.columns:
+        entities = entities.rename(columns={"entity_id": "customer_id"})
+
+    # ── Select available columns defensively
+    base_cols = ["customer_id"]
+    for col in ["golden_entity_id", "customer_name", "risk_rating",
+                "risk_score", "country_code", "country_codes"]:
+        if col in entities.columns:
+            base_cols.append(col)
+    summary = entities[base_cols].copy()
+
+    # Ensure a risk_rating-like column exists for downstream compatibility
+    if "risk_rating" not in summary.columns and "risk_score" in summary.columns:
+        summary["risk_rating"] = summary["risk_score"].apply(
+            lambda s: "high" if s >= 70 else "medium" if s >= 40 else "low"
+        )
+    if "country_code" not in summary.columns and "country_codes" in summary.columns:
+        summary["country_code"] = summary["country_codes"].apply(
+            lambda v: v[0] if isinstance(v, list) and v else str(v)[:2]
+        )
 
     for agg_df in [agg_7d, agg_30d, agg_90d]:
         summary = summary.merge(agg_df, on="customer_id", how="left")
