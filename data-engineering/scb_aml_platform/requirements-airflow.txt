@@ -1,0 +1,20 @@
+# SCB AML Platform — Airflow Dependencies (separate install)
+#
+# apache-airflow 2.7.3 requires sqlalchemy<2.0, which conflicts with the
+# main requirements.txt. Install this in a SEPARATE virtual environment
+# dedicated to the Airflow scheduler/webserver.
+#
+# Setup:
+#   python -m venv venv-airflow
+#   source venv-airflow/bin/activate
+#   pip install -r requirements-airflow.txt
+#   export AIRFLOW_HOME=~/airflow
+#   airflow db init
+#   cp orchestration/airflow_dag.py ~/airflow/dags/
+#   airflow webserver --port 8080 &
+#   airflow scheduler &
+
+apache-airflow==2.7.3
+sqlalchemy>=1.4.28,<2.0
+pandas==2.0.3
+loguru==0.7.2
