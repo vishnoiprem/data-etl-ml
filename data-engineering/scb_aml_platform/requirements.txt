@@ -6,9 +6,8 @@
 #       For Airflow, see requirements-airflow.txt (separate install).
 #       The platform runs fully via pipeline_orchestrator.py without Airflow.
 apache-airflow==2.7.3
-sqlalchemy>=1.4.28,<2.0
-pandas==2.0.3
-loguru==0.7.2
+
+
 
 # ── Core Data Processing
 pyspark==3.3.2
@@ -29,7 +28,8 @@ elasticsearch-dsl==8.9.0
 kafka-python==2.0.2
 
 # ── Database / HDFS simulation (SQLite-based local Hive)
-sqlalchemy>=1.4,<3.0
+sqlalchemy>=1.4.28,<2.0
+
 PyHive==0.7.0
 
 # ── Data Generation (dummy data)
