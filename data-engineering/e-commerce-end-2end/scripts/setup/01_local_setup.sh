@@ -49,7 +49,7 @@ for topic in order_items inventory user_events payments shipments product_skus r
     --topic "ecomm.cdc.$topic" \
     --partitions 6 --replication-factor 1 2>/dev/null || true
 done
-echo "  ✅ Kafka topics created"
+echo "   Kafka topics created"
 
 # ── ClickHouse schema ─────────────────────────────────────────
 echo ""
@@ -57,7 +57,7 @@ echo "[5/5] Applying ClickHouse schema..."
 docker exec -i ecomm-clickhouse clickhouse-client \
   --password clickhouse123 \
   < realtime_pipeline/clickhouse/schemas/01_clickhouse_schema.sql
-echo "  ✅ ClickHouse schema applied"
+echo "   ClickHouse schema applied"
 
 # ── Summary ───────────────────────────────────────────────────
 echo ""

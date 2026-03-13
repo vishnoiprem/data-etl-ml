@@ -13,7 +13,7 @@
       <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data" />
       <excludeFolder url="file://$MODULE_DIR$/.env" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9 virtualenv at ~/PycharmProjects/data-etl-ml/.env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

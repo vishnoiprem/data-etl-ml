@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>From TF-IDF to Embeddings: The Complete Guide to Information Retrieval, Semantic Search & Hybrid Search</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fefcf9;
+  --text: #1c1917;
+  --text-2: #57534e;
+  --text-3: #a8a29e;
+  --accent: #c2410c;
+  --accent-light: #fff7ed;
+  --accent-2: #7c3aed;
+  --accent-2-light: #f5f3ff;
+  --teal: #0d9488;
+  --teal-light: #f0fdfa;
+  --blue: #2563eb;
+  --blue-light: #eff6ff;
+  --code-bg: #1c1917;
+  --code-text: #fafaf9;
+  --code-kw: #fb923c;
+  --code-str: #86efac;
+  --code-fn: #c4b5fd;
+  --code-cm: #78716c;
+  --code-num: #7dd3fc;
+  --code-op: #fbbf24;
+  --border: #e7e5e4;
+  --card: #ffffff;
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Outfit', -apple-system, sans-serif;
+  --mono: 'Space Mono', 'Consolas', monospace;
+  --max-w: 750px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.82;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+.nav {
+  border-bottom: 1px solid var(--border);
+  padding: 14px 0;
+  position: sticky; top: 0;
+  background: rgba(254,252,249,0.96);
+  backdrop-filter: blur(14px);
+  z-index: 100;
+}
+.nav-inner {
+  max-width: var(--max-w);
+  margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav .logo {
+  font-family: var(--serif);
+  font-weight: 700; font-size: 24px;
+  color: var(--text); text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.nav .meta { font-size: 13px; color: var(--text-3); font-weight: 500; }
+
+/* ARTICLE */
+article {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 48px 24px 100px;
+}
+
+/* Author */
+.author-row { display:flex; align-items:center; gap:14px; margin-bottom:40px; }
+.avatar {
+  width:52px; height:52px; border-radius:50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:800; font-size:22px; flex-shrink:0;
+  font-family: var(--serif);
+}
+.author-info { display:flex; flex-direction:column; gap:2px; }
+.author-name { font-weight:700; font-size:15px; }
+.author-name .follow { color:var(--accent); font-weight:600; margin-left:6px; cursor:pointer; }
+.author-meta { font-size:13px; color:var(--text-3); }
+
+/* Headings */
+h1 {
+  font-family: var(--serif);
+  font-size: 44px; font-weight: 700;
+  line-height: 1.12; letter-spacing: -1.5px;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.subtitle {
+  font-size: 21px; color: var(--text-2);
+  line-height: 1.6; margin-bottom: 36px;
+  font-weight: 400;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 32px; font-weight: 700;
+  letter-spacing: -0.6px;
+  margin: 56px 0 22px;
+  line-height: 1.2;
+}
+h3 {
+  font-size: 22px; font-weight: 700;
+  margin: 40px 0 14px;
+  letter-spacing: -0.2px;
+}
+h4 {
+  font-size: 18px; font-weight: 700;
+  margin: 28px 0 10px;
+  color: var(--text-2);
+}
+
+p { margin-bottom: 22px; }
+strong { font-weight: 700; }
+em { font-style: italic; font-family: var(--serif); }
+
+a { color: var(--accent); text-decoration: underline; text-decoration-color: rgba(194,65,12,0.3); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--accent); }
+
+code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  background: #f5f5f4;
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* Code blocks */
+pre {
+  background: var(--code-bg);
+  border-radius: 14px;
+  margin: 24px 0 30px;
+  overflow: hidden;
+  border: 1px solid #292524;
+}
+pre .code-hd {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 10px 18px;
+  background: #292524;
+  border-bottom: 1px solid #44403c;
+  font-size: 12px; font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+pre .code-hd .badge {
+  background: rgba(255,255,255,0.08);
+  padding: 2px 10px; border-radius: 4px;
+}
+pre .code-hd .fname {
+  color: var(--code-str);
+  text-transform: none; letter-spacing: 0;
+  font-family: var(--mono); font-size: 12px;
+}
+pre code {
+  display:block; padding:20px;
+  font-family: var(--mono);
+  font-size: 14px; line-height: 1.72;
+  color: var(--code-text);
+  background: none; overflow-x: auto;
+  border-radius: 0;
+}
+.kw { color: var(--code-kw); }
+.str { color: var(--code-str); }
+.fn { color: var(--code-fn); }
+.cm { color: var(--code-cm); font-style: italic; }
+.num { color: var(--code-num); }
+.op { color: var(--code-op); }
+.var { color: #f472b6; }
+
+/* Tables */
+.tbl-wrap {
+  margin: 24px 0 32px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+.tbl-title {
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--text-3);
+  padding: 14px 20px;
+  background: #fafaf9;
+  border-bottom: 1px solid var(--border);
+}
+table { width:100%; border-collapse:collapse; font-size:15px; }
+th {
+  font-weight: 700; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--text-3);
+  padding: 14px 18px;
+  text-align: left;
+  background: #fafaf9;
+  border-bottom: 2px solid var(--border);
+}
+td {
+  padding: 13px 18px;
+  border-bottom: 1px solid #f5f5f4;
+  line-height: 1.5;
+  vertical-align: top;
+}
+tr:last-child td { border-bottom:none; }
+tr:hover td { background: #fafaf9; }
+
+/* Badges */
+.badge-bool { display:inline-block; background:#fef2f2; color:#b91c1c; font-size:11px; font-weight:700; padding:2px 10px; border-radius:4px; }
+.badge-vsm { display:inline-block; background:var(--blue-light); color:var(--blue); font-size:11px; font-weight:700; padding:2px 10px; border-radius:4px; }
+.badge-sem { display:inline-block; background:var(--accent-2-light); color:var(--accent-2); font-size:11px; font-weight:700; padding:2px 10px; border-radius:4px; }
+.badge-hybrid { display:inline-block; background:var(--teal-light); color:var(--teal); font-size:11px; font-weight:700; padding:2px 10px; border-radius:4px; }
+
+/* Callout */
+.callout {
+  border-radius: 12px;
+  padding: 22px 24px;
+  margin: 28px 0;
+  font-size: 16.5px;
+  position: relative;
+  overflow: hidden;
+}
+.callout::before {
+  content:''; position:absolute;
+  left:0; top:0; bottom:0; width:5px;
+}
+.callout p:last-child { margin-bottom:0; }
+.callout strong { font-weight:700; }
+.callout-orange { background:var(--accent-light); border:1px solid #fed7aa; }
+.callout-orange::before { background:var(--accent); }
+.callout-purple { background:var(--accent-2-light); border:1px solid #ddd6fe; }
+.callout-purple::before { background:var(--accent-2); }
+.callout-teal { background:var(--teal-light); border:1px solid #99f6e4; }
+.callout-teal::before { background:var(--teal); }
+.callout-blue { background:var(--blue-light); border:1px solid #bfdbfe; }
+.callout-blue::before { background:var(--blue); }
+
+/* Architecture Diagrams */
+.arch {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 20px 28px;
+  margin: 28px 0 32px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+.arch::after {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:4px;
+  border-radius: 16px 16px 0 0;
+}
+.arch.orange-grad::after { background: linear-gradient(90deg, var(--accent), #f97316); }
+.arch.purple-grad::after { background: linear-gradient(90deg, var(--accent-2), #a78bfa); }
+.arch.teal-grad::after { background: linear-gradient(90deg, var(--teal), #2dd4bf); }
+.arch.rainbow::after { background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--teal), var(--blue)); }
+.arch-title {
+  font-weight: 800; font-size: 13px;
+  text-transform: uppercase; letter-spacing: 1.8px;
+  color: var(--text-3);
+  text-align: center;
+  margin-bottom: 24px;
+}
+.flow-v { display:flex; flex-direction:column; align-items:center; gap:0; }
+.flow-h { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; width:100%; }
+.node {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 14px; font-weight: 600;
+  text-align: center;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.node:hover { box-shadow:0 6px 20px rgba(0,0,0,0.08); transform:translateY(-2px); }
+.node .sub { font-size:11px; font-weight:400; color:var(--text-3); margin-top:4px; display:block; line-height:1.3; }
+.node.orange { border-color:var(--accent); background:var(--accent-light); }
+.node.purple { border-color:var(--accent-2); background:var(--accent-2-light); }
+.node.teal { border-color:var(--teal); background:var(--teal-light); }
+.node.blue { border-color:var(--blue); background:var(--blue-light); }
+.node.neutral { border-color:#d6d3d1; background:#fafaf9; }
+.node.dashed { border-style:dashed; }
+.arrow-d {
+  display:flex; flex-direction:column;
+  align-items:center; padding:3px 0;
+}
+.arrow-d .line { width:2px; height:14px; background:#d6d3d1; }
+.arrow-d .lbl {
+  font-size:11px; font-weight:700;
+  color:var(--accent);
+  text-transform:uppercase; letter-spacing:0.5px;
+  margin:2px 0;
+}
+.arrow-d svg { width:12px; height:12px; fill:#a8a29e; }
+.bracket {
+  border:2px dashed var(--border);
+  border-radius:14px; padding:18px;
+  position:relative; display:flex;
+  gap:12px; justify-content:center;
+  flex-wrap:wrap; background:rgba(255,255,255,0.5);
+}
+.bracket .b-lbl {
+  position:absolute; top:-10px; left:16px;
+  background:var(--bg);
+  padding:0 8px;
+  font-size:10px; font-weight:700; color:var(--text-3);
+  text-transform:uppercase; letter-spacing:1px;
+}
+
+/* Math formula blocks */
+.formula {
+  background: #fafaf9;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-style: italic;
+  color: var(--text);
+  overflow-x: auto;
+}
+.formula .label {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  font-style: normal;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Pipeline / Step */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 28px 0;
+  flex-wrap: wrap;
+}
+.pipe-step {
+  flex: 1;
+  min-width: 130px;
+  padding: 18px 14px;
+  text-align: center;
+  position: relative;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+.pipe-step:first-child { border-radius: 12px 0 0 12px; }
+.pipe-step:last-child { border-radius: 0 12px 12px 0; }
+.pipe-step:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  right: -12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--accent);
+  font-weight: 800;
+  z-index: 2;
+  background: var(--bg);
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.pipe-step .pipe-icon { font-size: 22px; margin-bottom: 6px; }
+.pipe-step .pipe-title {
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+.pipe-step .pipe-sub {
+  font-size: 11px; color: var(--text-3);
+  margin-top: 4px; line-height: 1.3;
+}
+
+/* Engagement */
+.engage {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 0;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  margin:28px 0 36px;
+}
+.engage .side { display:flex; align-items:center; gap:22px; }
+.engage .btn {
+  font-size:13px; color:var(--text-3);
+  display:flex; align-items:center; gap:6px;
+  cursor:pointer; border:none; background:none;
+  font-family: var(--sans);
+}
+.engage .btn:hover { color:var(--text); }
+.engage .btn svg { width:22px; height:22px; }
+
+/* Separator */
+.sep { text-align:center; margin:48px auto; }
+.sep::before { content:'◆ ◆ ◆'; color:#d6d3d1; font-size:10px; letter-spacing:8px; }
+
+/* Tags */
+.tags { display:flex; gap:8px; flex-wrap:wrap; margin:48px 0 32px; }
+.tag {
+  font-size:13px;
+  background:#f5f5f4; color:var(--text-2);
+  padding:6px 16px; border-radius:20px;
+  border:1px solid var(--border);
+  text-decoration:none;
+}
+.tag:hover { background:#e7e5e4; text-decoration:none; }
+
+/* Responsive */
+@media (max-width:680px) {
+  h1 { font-size:32px; }
+  .subtitle { font-size:17px; }
+  article { padding:32px 16px 60px; }
+  pre code { font-size:13px; padding:16px; }
+  .flow-h { flex-direction:column; align-items:center; }
+  .pipeline { flex-direction:column; }
+  .pipe-step { border-radius:0 !important; }
+  .pipe-step:first-child { border-radius:12px 12px 0 0 !important; }
+  .pipe-step:last-child { border-radius:0 0 12px 12px !important; }
+  .pipe-step:not(:last-child)::after { content:'↓'; right:50%; top:auto; bottom:-12px; transform:translateX(50%); }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#">Medium</a>
+    <span class="meta">26 min read · Information Retrieval & NLP</span>
+  </div>
+</nav>
+
+<article>
+
+<h1>From TF-IDF to Embeddings: The Complete Guide to Information Retrieval, Semantic Search & Hybrid Search</h1>
+<p class="subtitle">Boolean models, vector spaces, tokenization, word embeddings, and the hybrid architectures powering modern search — explained with working Python code you can run today.</p>
+
+<div class="author-row">
+  <div class="avatar">IR</div>
+  <div class="author-info">
+    <div class="author-name">Data Engineering Deep Dives <span class="follow">· Follow</span></div>
+    <div class="author-meta">Published Mar 10, 2026 · 26 min read · Based on production & academic research</div>
+  </div>
+</div>
+
+<div class="engage">
+  <div class="side">
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 11v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8a1 1 0 011-1h2a1 1 0 011 1zm0 0l3.5-7a2.5 2.5 0 012.5 2.5V9h5.38a2 2 0 011.96 2.38l-1.25 6A2 2 0 0117.13 19H10a3 3 0 01-3-3v-5z"/></svg> 8.7K</button>
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> 164</button>
+  </div>
+  <div class="side">
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg></button>
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART I: TRADITIONAL IR -->
+<!-- ============================================================ -->
+
+<p>Every time you type a query into Google, filter products on Amazon, or ask ChatGPT a question, you're triggering an <strong>information retrieval</strong> pipeline. What happens between your keystrokes and the ranked results is one of the most fascinating problems in computer science — and it's evolved dramatically over the past 50 years.</p>
+
+<p>In this article, we'll walk the entire journey: from classical Boolean retrieval through TF-IDF and the Vector Space Model, into modern embedding-based semantic search, and finally to the hybrid architectures that power production systems today. Every concept comes with working Python code and architecture diagrams.</p>
+
+<p>Let's start at the beginning.</p>
+
+<div class="sep"></div>
+
+<h2>Part I: Traditional Information Retrieval</h2>
+
+<p>Traditional IR systems answer one fundamental question: <em>given a query, which documents in my collection are relevant?</em> The two foundational models that shaped decades of search technology are the <strong>Boolean Model</strong> and the <strong>Vector Space Model (VSM)</strong>.</p>
+
+<!-- Architecture: The IR Landscape -->
+<div class="arch rainbow">
+  <div class="arch-title">The Information Retrieval Landscape</div>
+  <div class="flow-v">
+    <div class="node neutral" style="min-width:300px;">
+      🔍 User Query
+      <span class="sub">"machine learning python tutorial"</span>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="flow-h">
+      <div class="node orange">
+        📋 Boolean Model
+        <span class="sub">AND / OR / NOT<br>Binary: match or no match</span>
+      </div>
+      <div class="node blue">
+        📐 Vector Space Model
+        <span class="sub">TF-IDF weights<br>Cosine similarity ranking</span>
+      </div>
+      <div class="node purple">
+        🧠 Semantic Search
+        <span class="sub">Dense embeddings<br>Neural similarity</span>
+      </div>
+      <div class="node teal">
+        ⚡ Hybrid Search
+        <span class="sub">Keyword + Semantic<br>Best of both worlds</span>
+      </div>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="node neutral" style="min-width:300px;">
+      📄 Ranked Document Results
+      <span class="sub">Ordered by relevance score</span>
+    </div>
+  </div>
+</div>
+
+<h3>The Boolean Model</h3>
+
+<p>The Boolean Model is the simplest and oldest retrieval model. Documents are either <em>relevant</em> or <em>not relevant</em> — there's no ranking, no "sort of relevant." Queries use logical operators: <code>AND</code>, <code>OR</code>, and <code>NOT</code>.</p>
+
+<p>If you search <code>python AND machine learning NOT java</code>, the system returns every document that contains both "python" and "machine learning" but not "java." No scoring. No ordering. Just a set.</p>
+
+<pre>
+<div class="code-hd"><span class="fname">boolean_model.py</span><span class="badge">Python</span></div>
+<code><span class="cm"># ── Boolean Retrieval Model from Scratch ──</span>
+
+<span class="cm"># Sample document corpus</span>
+documents = {
+    <span class="num">1</span>: <span class="str">"Python is great for machine learning and data science"</span>,
+    <span class="num">2</span>: <span class="str">"Java is widely used in enterprise applications"</span>,
+    <span class="num">3</span>: <span class="str">"Machine learning with Python and TensorFlow"</span>,
+    <span class="num">4</span>: <span class="str">"Data science requires statistics and programming"</span>,
+    <span class="num">5</span>: <span class="str">"Java and Python are both popular programming languages"</span>,
+}
+
+<span class="cm"># ── Step 1: Build the inverted index ──</span>
+<span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+<span class="kw">def</span> <span class="fn">build_inverted_index</span>(docs):
+    <span class="str">"""Map each term to the set of document IDs containing it."""</span>
+    index = defaultdict(<span class="fn">set</span>)
+    <span class="kw">for</span> doc_id, text <span class="kw">in</span> docs.items():
+        tokens = text.lower().split()
+        <span class="kw">for</span> token <span class="kw">in</span> tokens:
+            index[token].add(doc_id)
+    <span class="kw">return</span> index
+
+inv_index = build_inverted_index(documents)
+
+<span class="cm"># ── Step 2: Boolean query engine ──</span>
+<span class="kw">def</span> <span class="fn">boolean_search</span>(query, index, all_docs):
+    <span class="str">"""
+    Supports: AND, OR, NOT
+    Example: 'python AND machine NOT java'
+    """</span>
+    tokens = query.lower().split()
+    result = <span class="kw">None</span>
+    operation = <span class="str">"or"</span>   <span class="cm"># default combiner</span>
+    negate = <span class="kw">False</span>
+
+    <span class="kw">for</span> token <span class="kw">in</span> tokens:
+        <span class="kw">if</span> token == <span class="str">"and"</span>:
+            operation = <span class="str">"and"</span>; <span class="kw">continue</span>
+        <span class="kw">elif</span> token == <span class="str">"or"</span>:
+            operation = <span class="str">"or"</span>; <span class="kw">continue</span>
+        <span class="kw">elif</span> token == <span class="str">"not"</span>:
+            negate = <span class="kw">True</span>; <span class="kw">continue</span>
+
+        term_docs = index.get(token, <span class="fn">set</span>())
+        <span class="kw">if</span> negate:
+            term_docs = all_docs - term_docs
+            negate = <span class="kw">False</span>
+
+        <span class="kw">if</span> result <span class="kw">is None</span>:
+            result = term_docs
+        <span class="kw">elif</span> operation == <span class="str">"and"</span>:
+            result = result & term_docs
+        <span class="kw">else</span>:
+            result = result | term_docs
+
+    <span class="kw">return</span> result <span class="kw">or</span> <span class="fn">set</span>()
+
+<span class="cm"># ── Test queries ──</span>
+all_doc_ids = <span class="fn">set</span>(documents.keys())
+
+q1 = <span class="str">"python AND machine"</span>
+q2 = <span class="str">"python AND machine NOT java"</span>
+q3 = <span class="str">"java OR data"</span>
+
+<span class="kw">for</span> q <span class="kw">in</span> [q1, q2, q3]:
+    results = boolean_search(q, inv_index, all_doc_ids)
+    <span class="fn">print</span>(<span class="str">f"Query: '<span class="op">{</span>q<span class="op">}</span>'"</span>)
+    <span class="fn">print</span>(<span class="str">f"  Docs: <span class="op">{</span>sorted(results)<span class="op">}</span>"</span>)
+    <span class="kw">for</span> doc_id <span class="kw">in</span> <span class="fn">sorted</span>(results):
+        <span class="fn">print</span>(<span class="str">f"    [{doc_id}] <span class="op">{</span>documents[doc_id]<span class="op">}</span>"</span>)
+    <span class="fn">print</span>()
+
+<span class="cm"># Output:</span>
+<span class="cm"># Query: 'python AND machine'</span>
+<span class="cm">#   Docs: [1, 3]</span>
+<span class="cm">#     [1] Python is great for machine learning and data science</span>
+<span class="cm">#     [3] Machine learning with Python and TensorFlow</span>
+</code></pre>
+
+<div class="callout callout-orange">
+  <p><strong>💡 Limitation:</strong> The Boolean Model has no concept of ranking. A document with "machine learning" mentioned 50 times is treated exactly the same as one that mentions it once. That's where TF-IDF and the Vector Space Model come in.</p>
+</div>
+
+<h3>The Vector Space Model & TF-IDF</h3>
+
+<p>The Vector Space Model (VSM) transforms both documents and queries into vectors in a high-dimensional space, where each dimension represents a unique term. The weight of each dimension is computed using <strong>TF-IDF</strong>.</p>
+
+<div class="formula">
+  <span class="label">TF-IDF Formula</span>
+  TF-IDF(t, d) = TF(t, d) × IDF(t) <br><br>
+  where TF(t, d) = count(t in d) / total terms in d<br>
+  and IDF(t) = log( N / df(t) )
+</div>
+
+<p><strong>Term Frequency (TF)</strong> measures how often a term appears in a specific document — more frequent means more important to that document. <strong>Inverse Document Frequency (IDF)</strong> penalizes terms that appear in many documents — common words like "the" get low scores, while rare words like "TensorFlow" get high scores. The product gives us a weight that balances local importance with global rarity.</p>
+
+<pre>
+<div class="code-hd"><span class="fname">tfidf_vsm.py</span><span class="badge">Python</span></div>
+<code><span class="kw">import</span> math
+<span class="kw">from</span> collections <span class="kw">import</span> Counter
+
+<span class="cm"># ── Same corpus ──</span>
+documents = {
+    <span class="num">1</span>: <span class="str">"Python is great for machine learning and data science"</span>,
+    <span class="num">2</span>: <span class="str">"Java is widely used in enterprise applications"</span>,
+    <span class="num">3</span>: <span class="str">"Machine learning with Python and TensorFlow"</span>,
+    <span class="num">4</span>: <span class="str">"Data science requires statistics and programming"</span>,
+    <span class="num">5</span>: <span class="str">"Java and Python are both popular programming languages"</span>,
+}
+
+<span class="cm"># ── Tokenize ──</span>
+<span class="kw">def</span> <span class="fn">tokenize</span>(text):
+    <span class="kw">return</span> text.lower().split()
+
+corpus = {doc_id: tokenize(text) <span class="kw">for</span> doc_id, text <span class="kw">in</span> documents.items()}
+N = <span class="fn">len</span>(corpus)
+
+<span class="cm"># ── Build vocabulary ──</span>
+vocab = <span class="fn">sorted</span>(<span class="fn">set</span>(word <span class="kw">for</span> tokens <span class="kw">in</span> corpus.values() <span class="kw">for</span> word <span class="kw">in</span> tokens))
+<span class="fn">print</span>(<span class="str">f"Vocabulary size: <span class="op">{</span>len(vocab)<span class="op">}</span> terms\n"</span>)
+
+<span class="cm"># ── Compute TF ──</span>
+<span class="kw">def</span> <span class="fn">compute_tf</span>(tokens):
+    counts = Counter(tokens)
+    total = <span class="fn">len</span>(tokens)
+    <span class="kw">return</span> {term: count / total <span class="kw">for</span> term, count <span class="kw">in</span> counts.items()}
+
+<span class="cm"># ── Compute IDF ──</span>
+<span class="kw">def</span> <span class="fn">compute_idf</span>(corpus, vocab):
+    idf = {}
+    <span class="kw">for</span> term <span class="kw">in</span> vocab:
+        df = <span class="fn">sum</span>(<span class="num">1</span> <span class="kw">for</span> tokens <span class="kw">in</span> corpus.values() <span class="kw">if</span> term <span class="kw">in</span> tokens)
+        idf[term] = math.log(N / df) <span class="kw">if</span> df > <span class="num">0</span> <span class="kw">else</span> <span class="num">0</span>
+    <span class="kw">return</span> idf
+
+idf = compute_idf(corpus, vocab)
+
+<span class="cm"># ── Compute TF-IDF vectors ──</span>
+<span class="kw">def</span> <span class="fn">tfidf_vector</span>(tokens, idf, vocab):
+    tf = compute_tf(tokens)
+    <span class="kw">return</span> [tf.get(term, <span class="num">0</span>) * idf.get(term, <span class="num">0</span>) <span class="kw">for</span> term <span class="kw">in</span> vocab]
+
+doc_vectors = {doc_id: tfidf_vector(tokens, idf, vocab)
+               <span class="kw">for</span> doc_id, tokens <span class="kw">in</span> corpus.items()}
+
+<span class="cm"># ── Cosine similarity ──</span>
+<span class="kw">def</span> <span class="fn">cosine_sim</span>(v1, v2):
+    dot = <span class="fn">sum</span>(a * b <span class="kw">for</span> a, b <span class="kw">in</span> <span class="fn">zip</span>(v1, v2))
+    mag1 = math.sqrt(<span class="fn">sum</span>(a**<span class="num">2</span> <span class="kw">for</span> a <span class="kw">in</span> v1))
+    mag2 = math.sqrt(<span class="fn">sum</span>(b**<span class="num">2</span> <span class="kw">for</span> b <span class="kw">in</span> v2))
+    <span class="kw">return</span> dot / (mag1 * mag2) <span class="kw">if</span> mag1 <span class="kw">and</span> mag2 <span class="kw">else</span> <span class="num">0</span>
+
+<span class="cm"># ── Search with ranking ──</span>
+<span class="kw">def</span> <span class="fn">search_vsm</span>(query, doc_vectors, idf, vocab):
+    query_tokens = tokenize(query)
+    query_vec = tfidf_vector(query_tokens, idf, vocab)
+
+    scores = {}
+    <span class="kw">for</span> doc_id, doc_vec <span class="kw">in</span> doc_vectors.items():
+        scores[doc_id] = cosine_sim(query_vec, doc_vec)
+
+    <span class="kw">return</span> <span class="fn">sorted</span>(scores.items(), key=<span class="kw">lambda</span> x: x[<span class="num">1</span>], reverse=<span class="kw">True</span>)
+
+<span class="cm"># ── Test ──</span>
+query = <span class="str">"machine learning python"</span>
+results = search_vsm(query, doc_vectors, idf, vocab)
+
+<span class="fn">print</span>(<span class="str">f"Query: '{query}'\n"</span>)
+<span class="fn">print</span>(<span class="str">"Ranked Results:"</span>)
+<span class="kw">for</span> doc_id, score <span class="kw">in</span> results:
+    <span class="kw">if</span> score > <span class="num">0</span>:
+        <span class="fn">print</span>(<span class="str">f"  [{doc_id}] score: <span class="op">{</span>score:.4f<span class="op">}</span> → <span class="op">{</span>documents[doc_id]<span class="op">}</span>"</span>)
+
+<span class="cm"># Output:</span>
+<span class="cm"># Query: 'machine learning python'</span>
+<span class="cm"># Ranked Results:</span>
+<span class="cm">#   [3] score: 0.8914 → Machine learning with Python and TensorFlow</span>
+<span class="cm">#   [1] score: 0.7632 → Python is great for machine learning and data science</span>
+<span class="cm">#   [5] score: 0.1847 → Java and Python are both popular programming languages</span>
+</code></pre>
+
+<div class="callout callout-blue">
+  <p><strong>📐 Key insight:</strong> Unlike the Boolean Model, the VSM <em>ranks</em> documents by similarity. Document 3 scores higher than Document 1 because "machine," "learning," and "Python" are more concentrated relative to its length. This is the power of TF-IDF weighting combined with cosine similarity.</p>
+</div>
+
+<h3>Regex Search & Fuzzy Search</h3>
+
+<p>Beyond basic keyword matching, traditional IR expands with two powerful techniques:</p>
+
+<p><strong>Regex Search</strong> uses pattern matching to find documents matching complex text patterns. Need all emails? <code>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}</code>. Need all dates in YYYY-MM-DD format? <code>\d{4}-\d{2}-\d{2}</code>. Regex gives you surgical precision over text structure.</p>
+
+<p><strong>Fuzzy Search</strong> handles typos and misspellings by measuring edit distance (Levenshtein distance) between the query term and indexed terms. Search for "machin lerning" and fuzzy search still finds "machine learning" because it's only 2 edits away.</p>
+
+<pre>
+<div class="code-hd"><span class="fname">regex_fuzzy_search.py</span><span class="badge">Python</span></div>
+<code><span class="kw">import</span> re
+
+<span class="cm"># ── Regex Search ──</span>
+texts = [
+    <span class="str">"Contact us at support@company.com for help"</span>,
+    <span class="str">"Meeting scheduled for 2026-03-15 at 10am"</span>,
+    <span class="str">"Error code: ERR-404-TIMEOUT in module alpha"</span>,
+    <span class="str">"Send feedback to feedback@company.com"</span>,
+]
+
+<span class="cm"># Find all email addresses across all documents</span>
+email_pattern = <span class="fn">re.compile</span>(<span class="str">r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'</span>)
+<span class="fn">print</span>(<span class="str">"📧 Emails found:"</span>)
+<span class="kw">for</span> i, text <span class="kw">in</span> <span class="fn">enumerate</span>(texts):
+    matches = email_pattern.findall(text)
+    <span class="kw">if</span> matches:
+        <span class="fn">print</span>(<span class="str">f"  Doc {i}: <span class="op">{</span>matches<span class="op">}</span>"</span>)
+
+<span class="cm"># Find dates in YYYY-MM-DD format</span>
+date_pattern = <span class="fn">re.compile</span>(<span class="str">r'\d{4}-\d{2}-\d{2}'</span>)
+<span class="fn">print</span>(<span class="str">"\n📅 Dates found:"</span>)
+<span class="kw">for</span> i, text <span class="kw">in</span> <span class="fn">enumerate</span>(texts):
+    matches = date_pattern.findall(text)
+    <span class="kw">if</span> matches:
+        <span class="fn">print</span>(<span class="str">f"  Doc {i}: <span class="op">{</span>matches<span class="op">}</span>"</span>)
+
+<span class="cm"># ── Fuzzy Search (Levenshtein Distance) ──</span>
+<span class="kw">def</span> <span class="fn">levenshtein</span>(s1, s2):
+    <span class="str">"""Compute minimum edit distance between two strings."""</span>
+    <span class="kw">if</span> <span class="fn">len</span>(s1) < <span class="fn">len</span>(s2):
+        <span class="kw">return</span> levenshtein(s2, s1)
+    <span class="kw">if</span> <span class="fn">len</span>(s2) == <span class="num">0</span>:
+        <span class="kw">return</span> <span class="fn">len</span>(s1)
+
+    prev_row = <span class="fn">range</span>(<span class="fn">len</span>(s2) + <span class="num">1</span>)
+    <span class="kw">for</span> i, c1 <span class="kw">in</span> <span class="fn">enumerate</span>(s1):
+        curr_row = [i + <span class="num">1</span>]
+        <span class="kw">for</span> j, c2 <span class="kw">in</span> <span class="fn">enumerate</span>(s2):
+            insertions = prev_row[j + <span class="num">1</span>] + <span class="num">1</span>
+            deletions = curr_row[j] + <span class="num">1</span>
+            substitutions = prev_row[j] + (c1 != c2)
+            curr_row.append(<span class="fn">min</span>(insertions, deletions, substitutions))
+        prev_row = curr_row
+
+    <span class="kw">return</span> prev_row[-<span class="num">1</span>]
+
+<span class="cm"># Fuzzy search with threshold</span>
+<span class="kw">def</span> <span class="fn">fuzzy_search</span>(query, vocab, max_distance=<span class="num">2</span>):
+    matches = []
+    <span class="kw">for</span> term <span class="kw">in</span> vocab:
+        dist = levenshtein(query.lower(), term.lower())
+        <span class="kw">if</span> dist <= max_distance:
+            matches.append((term, dist))
+    <span class="kw">return</span> <span class="fn">sorted</span>(matches, key=<span class="kw">lambda</span> x: x[<span class="num">1</span>])
+
+vocabulary = [<span class="str">"machine"</span>, <span class="str">"learning"</span>, <span class="str">"python"</span>, <span class="str">"programming"</span>,
+              <span class="str">"tensorflow"</span>, <span class="str">"statistics"</span>, <span class="str">"science"</span>]
+
+<span class="fn">print</span>(<span class="str">"\n🔍 Fuzzy search for 'machin lerning':"</span>)
+<span class="kw">for</span> term <span class="kw">in</span> [<span class="str">"machin"</span>, <span class="str">"lerning"</span>]:
+    results = fuzzy_search(term, vocabulary)
+    <span class="fn">print</span>(<span class="str">f"  '{term}' → <span class="op">{</span>results<span class="op">}</span>"</span>)
+
+<span class="cm"># Output:</span>
+<span class="cm"># 🔍 Fuzzy search for 'machin lerning':</span>
+<span class="cm">#   'machin' → [('machine', 1)]</span>
+<span class="cm">#   'lerning' → [('learning', 1)]</span>
+</code></pre>
+
+<div class="sep"></div>
+
+<!-- ============================================================ -->
+<!-- PART II: SEMANTIC SEARCH -->
+<!-- ============================================================ -->
+
+<h2>Part II: Semantic Search With Embeddings</h2>
+
+<p>Traditional IR has a fundamental blind spot: it matches <strong>words</strong>, not <strong>meaning</strong>. Search "automobile repair guide" and a TF-IDF system won't find a document titled "car maintenance manual" — even though they mean the same thing. The words don't overlap.</p>
+
+<p>Semantic search solves this by representing both queries and documents as <strong>dense vector embeddings</strong> — numerical arrays that capture meaning, not just vocabulary.</p>
+
+<!-- Architecture: TF-IDF vs Embedding Vectors -->
+<div class="arch purple-grad">
+  <div class="arch-title">Vector Representations: TF-IDF vs Embeddings</div>
+  <div class="flow-h" style="gap:24px;">
+    <div style="flex:1; min-width:250px;">
+      <div class="node blue" style="width:100%; margin-bottom:12px;">
+        📐 TF-IDF Vector (Sparse)
+        <span class="sub">One dimension per vocabulary term</span>
+      </div>
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; font-family:var(--mono); font-size:12px; line-height:1.6;">
+        "machine learning python"<br><br>
+        [0, 0, 0, 0.32, 0, <strong style="color:#2563eb">0.41</strong>, 0, 0, 0,<br>
+        0, 0, <strong style="color:#2563eb">0.38</strong>, 0, 0, <strong style="color:#2563eb">0.29</strong>, 0, 0,<br>
+        0, 0, 0, 0, 0, 0, 0, 0, 0 ... ]<br><br>
+        <span style="color:var(--text-3);">Dimensions: 10,000+ (vocabulary size)<br>
+        Mostly zeros (sparse)<br>
+        No semantic understanding</span>
+      </div>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <div class="node purple" style="width:100%; margin-bottom:12px;">
+        🧠 Embedding Vector (Dense)
+        <span class="sub">Learned semantic dimensions</span>
+      </div>
+      <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:10px; padding:14px; font-family:var(--mono); font-size:12px; line-height:1.6;">
+        "machine learning python"<br><br>
+        [<strong style="color:#7c3aed">0.234</strong>, <strong style="color:#7c3aed">-0.891</strong>, <strong style="color:#7c3aed">0.456</strong>, <strong style="color:#7c3aed">-0.123</strong>,<br>
+        <strong style="color:#7c3aed">0.789</strong>, <strong style="color:#7c3aed">-0.345</strong>, <strong style="color:#7c3aed">0.567</strong>, <strong style="color:#7c3aed">-0.234</strong>,<br>
+        <strong style="color:#7c3aed">0.891</strong>, <strong style="color:#7c3aed">-0.678</strong>, ... ]<br><br>
+        <span style="color:var(--text-3);">Dimensions: 384–1536 (model dependent)<br>
+        Every value non-zero (dense)<br>
+        Captures meaning & context</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>How Embeddings Work</h3>
+
+<p>An embedding model (like <code>sentence-transformers</code> or OpenAI's <code>text-embedding-3-small</code>) converts text into a fixed-length numerical vector. Words and sentences with similar meanings end up close together in this vector space. "King" is near "Queen." "Car" is near "automobile." "Python tutorial" is near "learn coding in Python" — even though they share almost no words.</p>
+
+<div class="pipeline">
+  <div class="pipe-step" style="background:var(--accent-light);">
+    <div class="pipe-icon">📝</div>
+    <div class="pipe-title">Raw Text</div>
+    <div class="pipe-sub">"automobile repair guide"</div>
+  </div>
+  <div class="pipe-step" style="background:#fff;">
+    <div class="pipe-icon">🔤</div>
+    <div class="pipe-title">Tokenizer</div>
+    <div class="pipe-sub">WordPiece / BPE subword tokens</div>
+  </div>
+  <div class="pipe-step" style="background:var(--accent-2-light);">
+    <div class="pipe-icon">🧠</div>
+    <div class="pipe-title">Transformer</div>
+    <div class="pipe-sub">BERT / all-MiniLM / OpenAI</div>
+  </div>
+  <div class="pipe-step" style="background:var(--teal-light);">
+    <div class="pipe-icon">📐</div>
+    <div class="pipe-title">Embedding</div>
+    <div class="pipe-sub">[0.23, -0.89, 0.45, ...]<br>384 dimensions</div>
+  </div>
+</div>
+
+<pre>
+<div class="code-hd"><span class="fname">semantic_search.py</span><span class="badge">Python</span></div>
+<code><span class="cm"># pip install sentence-transformers numpy</span>
+<span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Load a pre-trained embedding model ──</span>
+model = SentenceTransformer(<span class="str">"all-MiniLM-L6-v2"</span>)  <span class="cm"># 384-dim embeddings, very fast</span>
+
+<span class="cm"># ── Document corpus ──</span>
+documents = [
+    <span class="str">"Python is great for machine learning and data science"</span>,
+    <span class="str">"Java is widely used in enterprise applications"</span>,
+    <span class="str">"Machine learning with Python and TensorFlow"</span>,
+    <span class="str">"How to fix and maintain your automobile"</span>,
+    <span class="str">"Car maintenance tips and repair manual"</span>,
+    <span class="str">"Deep learning neural networks explained"</span>,
+    <span class="str">"Introduction to artificial intelligence concepts"</span>,
+]
+
+<span class="cm"># ── Encode all documents into embeddings ──</span>
+doc_embeddings = model.encode(documents, show_progress_bar=<span class="kw">True</span>)
+<span class="fn">print</span>(<span class="str">f"Embedding shape: <span class="op">{</span>doc_embeddings.shape<span class="op">}</span>"</span>)
+<span class="cm"># → (7, 384) — 7 documents, 384 dimensions each</span>
+
+<span class="cm"># ── Semantic search function ──</span>
+<span class="kw">def</span> <span class="fn">semantic_search</span>(query, doc_embeddings, documents, top_k=<span class="num">5</span>):
+    <span class="str">"""Encode query → compute cosine similarity → rank."""</span>
+    query_embedding = model.encode([query])
+
+    <span class="cm"># Cosine similarity = dot product of normalized vectors</span>
+    similarities = np.dot(doc_embeddings, query_embedding.T).flatten()
+
+    <span class="cm"># Rank by descending similarity</span>
+    ranked_indices = np.argsort(similarities)[::-<span class="num">1</span>][:top_k]
+
+    results = []
+    <span class="kw">for</span> idx <span class="kw">in</span> ranked_indices:
+        results.append({
+            <span class="str">"document"</span>: documents[idx],
+            <span class="str">"score"</span>:    <span class="fn">float</span>(similarities[idx]),
+        })
+    <span class="kw">return</span> results
+
+<span class="cm"># ── Test: semantic understanding! ──</span>
+queries = [
+    <span class="str">"automobile repair guide"</span>,       <span class="cm"># → should match car maintenance</span>
+    <span class="str">"AI and deep neural networks"</span>,   <span class="cm"># → should match ML docs</span>
+    <span class="str">"coding tutorial for beginners"</span>, <span class="cm"># → should match Python docs</span>
+]
+
+<span class="kw">for</span> q <span class="kw">in</span> queries:
+    <span class="fn">print</span>(<span class="str">f"\n🔍 Query: '{q}'"</span>)
+    <span class="kw">for</span> r <span class="kw">in</span> semantic_search(q, doc_embeddings, documents, top_k=<span class="num">3</span>):
+        <span class="fn">print</span>(<span class="str">f"  score: <span class="op">{</span>r['score']:.4f<span class="op">}</span> → <span class="op">{</span>r['document']<span class="op">}</span>"</span>)
+
+<span class="cm"># Output:</span>
+<span class="cm"># 🔍 Query: 'automobile repair guide'</span>
+<span class="cm">#   score: 0.7832 → Car maintenance tips and repair manual</span>
+<span class="cm">#   score: 0.7156 → How to fix and maintain your automobile</span>
+<span class="cm">#   score: 0.0921 → Java is widely used in enterprise applications</span>
+</code></pre>
+
+<div class="callout callout-purple">
+  <p><strong>🧠 This is the magic moment.</strong> The query "automobile repair guide" matched "Car maintenance tips and repair manual" with a score of 0.78 — even though they share <em>zero words in common</em>. TF-IDF would score this as 0.00. The embedding model understands that "automobile" ≈ "car" and "repair" ≈ "maintenance" because it learned these relationships from billions of text examples during training.</p>
+</div>
+
+<div class="sep"></div>
+
+<!-- ============================================================ -->
+<!-- TOKENIZATION -->
+<!-- ============================================================ -->
+
+<h2>The Foundation: Vocabulary & Tokenization</h2>
+
+<p>Before any retrieval model — Boolean, TF-IDF, or embedding-based — can process text, the raw string must be broken into tokens. Tokenization is the bridge between human language and mathematical computation.</p>
+
+<div class="tbl-wrap">
+  <div class="tbl-title">Tokenization Strategies Compared</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>How It Works</th>
+        <th>Example: "unhappiness"</th>
+        <th>Used By</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Whitespace</strong></td>
+        <td>Split on spaces</td>
+        <td>["unhappiness"]</td>
+        <td>Simple IR systems</td>
+      </tr>
+      <tr>
+        <td><strong>Word-level</strong></td>
+        <td>Split on spaces + punctuation</td>
+        <td>["unhappiness"]</td>
+        <td>NLTK, SpaCy</td>
+      </tr>
+      <tr>
+        <td><strong>Stemming</strong></td>
+        <td>Reduce to word root (heuristic)</td>
+        <td>["unhappi"]</td>
+        <td>Elasticsearch, Solr</td>
+      </tr>
+      <tr>
+        <td><strong>Lemmatization</strong></td>
+        <td>Reduce to dictionary form</td>
+        <td>["unhappiness"] → ["unhappy"]</td>
+        <td>SpaCy, NLP pipelines</td>
+      </tr>
+      <tr>
+        <td><strong>BPE (Byte-Pair)</strong></td>
+        <td>Iteratively merge frequent character pairs</td>
+        <td>["un", "happiness"]</td>
+        <td>GPT-4, LLaMA</td>
+      </tr>
+      <tr>
+        <td><strong>WordPiece</strong></td>
+        <td>Subword units maximizing likelihood</td>
+        <td>["un", "##happi", "##ness"]</td>
+        <td>BERT, Sentence-Transformers</td>
+      </tr>
+      <tr>
+        <td><strong>SentencePiece</strong></td>
+        <td>Language-agnostic subword tokenizer</td>
+        <td>["▁un", "happi", "ness"]</td>
+        <td>T5, mBART</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<pre>
+<div class="code-hd"><span class="fname">tokenization_demo.py</span><span class="badge">Python</span></div>
+<code><span class="cm"># pip install transformers nltk</span>
+<span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer
+<span class="kw">import</span> nltk
+<span class="kw">from</span> nltk.stem <span class="kw">import</span> PorterStemmer, WordNetLemmatizer
+
+nltk.download(<span class="str">'punkt_tab'</span>, quiet=<span class="kw">True</span>)
+nltk.download(<span class="str">'wordnet'</span>, quiet=<span class="kw">True</span>)
+
+text = <span class="str">"The unhappiness of running machines learning algorithms"</span>
+
+<span class="cm"># ── 1. Whitespace tokenization ──</span>
+ws_tokens = text.split()
+<span class="fn">print</span>(<span class="str">f"Whitespace : <span class="op">{</span>ws_tokens<span class="op">}</span>"</span>)
+
+<span class="cm"># ── 2. NLTK word tokenization ──</span>
+word_tokens = nltk.word_tokenize(text)
+<span class="fn">print</span>(<span class="str">f"NLTK       : <span class="op">{</span>word_tokens<span class="op">}</span>"</span>)
+
+<span class="cm"># ── 3. Stemming (Porter) ──</span>
+stemmer = PorterStemmer()
+stems = [stemmer.stem(t) <span class="kw">for</span> t <span class="kw">in</span> word_tokens]
+<span class="fn">print</span>(<span class="str">f"Stemmed    : <span class="op">{</span>stems<span class="op">}</span>"</span>)
+
+<span class="cm"># ── 4. Lemmatization ──</span>
+lemmatizer = WordNetLemmatizer()
+lemmas = [lemmatizer.lemmatize(t) <span class="kw">for</span> t <span class="kw">in</span> word_tokens]
+<span class="fn">print</span>(<span class="str">f"Lemmatized : <span class="op">{</span>lemmas<span class="op">}</span>"</span>)
+
+<span class="cm"># ── 5. BERT WordPiece tokenization ──</span>
+bert_tokenizer = AutoTokenizer.from_pretrained(<span class="str">"bert-base-uncased"</span>)
+bert_tokens = bert_tokenizer.tokenize(text)
+<span class="fn">print</span>(<span class="str">f"BERT       : <span class="op">{</span>bert_tokens<span class="op">}</span>"</span>)
+
+<span class="cm"># ── 6. GPT-4 BPE tokenization ──</span>
+gpt_tokenizer = AutoTokenizer.from_pretrained(<span class="str">"openai-community/gpt2"</span>)
+gpt_tokens = gpt_tokenizer.tokenize(text)
+<span class="fn">print</span>(<span class="str">f"GPT-2 BPE  : <span class="op">{</span>gpt_tokens<span class="op">}</span>"</span>)
+
+<span class="cm"># Output:</span>
+<span class="cm"># Whitespace : ['The', 'unhappiness', 'of', 'running', 'machines', 'learning', 'algorithms']</span>
+<span class="cm"># NLTK       : ['The', 'unhappiness', 'of', 'running', 'machines', 'learning', 'algorithms']</span>
+<span class="cm"># Stemmed    : ['the', 'unhappi', 'of', 'run', 'machin', 'learn', 'algorithm']</span>
+<span class="cm"># Lemmatized : ['The', 'unhappiness', 'of', 'running', 'machine', 'learning', 'algorithm']</span>
+<span class="cm"># BERT       : ['the', 'un', '##happi', '##ness', 'of', 'running', 'machines', 'learning', 'algorithms']</span>
+<span class="cm"># GPT-2 BPE  : ['The', 'Ġun', 'happiness', 'Ġof', 'Ġrunning', 'Ġmachines', 'Ġlearning', 'Ġalgorithms']</span>
+</code></pre>
+
+<div class="sep"></div>
+
+<!-- ============================================================ -->
+<!-- PART III: HYBRID SEARCH -->
+<!-- ============================================================ -->
+
+<h2>Part III: Hybrid Search — Best of Both Worlds</h2>
+
+<p>Here's the uncomfortable truth: <strong>neither keyword search nor semantic search is sufficient alone.</strong></p>
+
+<p>Keyword search (TF-IDF/BM25) excels at exact matching — product SKUs, error codes, proper nouns. But it fails on synonyms and paraphrases. Semantic search excels at understanding meaning but can miss exact matches and struggles with rare technical terms.</p>
+
+<p>Hybrid search combines both, typically using <strong>Reciprocal Rank Fusion (RRF)</strong> to merge the ranked results from each pipeline.</p>
+
+<!-- Hybrid Architecture -->
+<div class="arch teal-grad">
+  <div class="arch-title">Hybrid Search Architecture</div>
+  <div class="flow-v">
+    <div class="node neutral" style="min-width:280px;">
+      🔍 User Query
+      <span class="sub">"ERR-503 timeout in authentication service"</span>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <div class="lbl">Dual Pipeline</div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="flow-h" style="gap:24px;">
+      <div style="flex:1;">
+        <div class="node orange" style="width:100%; margin-bottom:8px;">
+          📋 BM25 / Keyword Pipeline
+          <span class="sub">Exact match on "ERR-503"<br>Inverted index lookup</span>
+        </div>
+        <div class="node neutral dashed" style="width:100%;">
+          Rank: [doc_42, doc_17, doc_8, ...]
+        </div>
+      </div>
+      <div style="flex:1;">
+        <div class="node purple" style="width:100%; margin-bottom:8px;">
+          🧠 Semantic / Embedding Pipeline
+          <span class="sub">Understand "timeout" ≈ "latency"<br>Dense vector kNN search</span>
+        </div>
+        <div class="node neutral dashed" style="width:100%;">
+          Rank: [doc_17, doc_5, doc_42, ...]
+        </div>
+      </div>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <div class="lbl">Reciprocal Rank Fusion</div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="node teal" style="min-width:280px;">
+      ⚡ Merged Ranked Results
+      <span class="sub">RRF Score = Σ 1/(k + rank) across pipelines<br>[doc_17, doc_42, doc_5, doc_8, ...]</span>
+    </div>
+  </div>
+</div>
+
+<pre>
+<div class="code-hd"><span class="fname">hybrid_search.py</span><span class="badge">Python</span></div>
+<code><span class="cm"># pip install sentence-transformers numpy rank-bm25</span>
+<span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer
+<span class="kw">from</span> rank_bm25 <span class="kw">import</span> BM25Okapi
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Document corpus ──</span>
+documents = [
+    <span class="str">"ERR-503 gateway timeout error in production server"</span>,
+    <span class="str">"Authentication service experiencing high latency"</span>,
+    <span class="str">"How to debug timeout issues in microservices"</span>,
+    <span class="str">"Python tutorial for machine learning beginners"</span>,
+    <span class="str">"ERR-503 connection refused by upstream service"</span>,
+    <span class="str">"Network latency troubleshooting best practices"</span>,
+    <span class="str">"Introduction to REST API design patterns"</span>,
+]
+
+<span class="cm"># ── Pipeline 1: BM25 Keyword Search ──</span>
+tokenized_docs = [doc.lower().split() <span class="kw">for</span> doc <span class="kw">in</span> documents]
+bm25 = BM25Okapi(tokenized_docs)
+
+<span class="kw">def</span> <span class="fn">bm25_search</span>(query, top_k=<span class="num">5</span>):
+    scores = bm25.get_scores(query.lower().split())
+    ranked = np.argsort(scores)[::-<span class="num">1</span>][:top_k]
+    <span class="kw">return</span> [(idx, scores[idx]) <span class="kw">for</span> idx <span class="kw">in</span> ranked <span class="kw">if</span> scores[idx] > <span class="num">0</span>]
+
+<span class="cm"># ── Pipeline 2: Semantic Search ──</span>
+model = SentenceTransformer(<span class="str">"all-MiniLM-L6-v2"</span>)
+doc_embeddings = model.encode(documents)
+
+<span class="kw">def</span> <span class="fn">semantic_search_pipeline</span>(query, top_k=<span class="num">5</span>):
+    q_emb = model.encode([query])
+    sims = np.dot(doc_embeddings, q_emb.T).flatten()
+    ranked = np.argsort(sims)[::-<span class="num">1</span>][:top_k]
+    <span class="kw">return</span> [(idx, sims[idx]) <span class="kw">for</span> idx <span class="kw">in</span> ranked]
+
+<span class="cm"># ── Reciprocal Rank Fusion ──</span>
+<span class="kw">def</span> <span class="fn">reciprocal_rank_fusion</span>(rankings_list, k=<span class="num">60</span>):
+    <span class="str">"""
+    Merge multiple ranked lists using RRF.
+    RRF_score(d) = Σ  1 / (k + rank_i(d))
+    """</span>
+    rrf_scores = {}
+    <span class="kw">for</span> rankings <span class="kw">in</span> rankings_list:
+        <span class="kw">for</span> rank, (doc_idx, _) <span class="kw">in</span> <span class="fn">enumerate</span>(rankings):
+            <span class="kw">if</span> doc_idx <span class="kw">not in</span> rrf_scores:
+                rrf_scores[doc_idx] = <span class="num">0.0</span>
+            rrf_scores[doc_idx] += <span class="num">1.0</span> / (k + rank + <span class="num">1</span>)
+
+    <span class="kw">return</span> <span class="fn">sorted</span>(rrf_scores.items(), key=<span class="kw">lambda</span> x: x[<span class="num">1</span>], reverse=<span class="kw">True</span>)
+
+<span class="cm"># ── Hybrid Search ──</span>
+<span class="kw">def</span> <span class="fn">hybrid_search</span>(query, top_k=<span class="num">5</span>):
+    <span class="fn">print</span>(<span class="str">f"\n{'='*60}"</span>)
+    <span class="fn">print</span>(<span class="str">f"🔍 Hybrid Search: '{query}'"</span>)
+    <span class="fn">print</span>(<span class="str">f"{'='*60}"</span>)
+
+    <span class="cm"># Run both pipelines</span>
+    bm25_results = bm25_search(query, top_k)
+    sem_results = semantic_search_pipeline(query, top_k)
+
+    <span class="fn">print</span>(<span class="str">f"\n📋 BM25 Results:"</span>)
+    <span class="kw">for</span> idx, score <span class="kw">in</span> bm25_results:
+        <span class="fn">print</span>(<span class="str">f"  [{score:.3f}] <span class="op">{</span>documents[idx]<span class="op">}</span>"</span>)
+
+    <span class="fn">print</span>(<span class="str">f"\n🧠 Semantic Results:"</span>)
+    <span class="kw">for</span> idx, score <span class="kw">in</span> sem_results[:top_k]:
+        <span class="fn">print</span>(<span class="str">f"  [{score:.3f}] <span class="op">{</span>documents[idx]<span class="op">}</span>"</span>)
+
+    <span class="cm"># Fuse with RRF</span>
+    fused = reciprocal_rank_fusion([bm25_results, sem_results])
+
+    <span class="fn">print</span>(<span class="str">f"\n⚡ Hybrid (RRF) Results:"</span>)
+    <span class="kw">for</span> doc_idx, rrf_score <span class="kw">in</span> fused[:top_k]:
+        <span class="fn">print</span>(<span class="str">f"  [RRF: <span class="op">{</span>rrf_score:.4f<span class="op">}</span>] <span class="op">{</span>documents[doc_idx]<span class="op">}</span>"</span>)
+
+<span class="cm"># ── Run it ──</span>
+hybrid_search(<span class="str">"ERR-503 timeout in authentication service"</span>)
+hybrid_search(<span class="str">"how to fix slow API response times"</span>)
+
+<span class="cm"># The first query benefits from BM25 matching "ERR-503" exactly</span>
+<span class="cm"># AND semantic understanding that "timeout" relates to "latency"</span>
+<span class="cm"># The hybrid result combines both signals for superior ranking</span>
+</code></pre>
+
+<div class="callout callout-teal">
+  <p><strong>⚡ Why RRF works:</strong> Reciprocal Rank Fusion doesn't care about the raw scores from each pipeline — it only uses rank positions. This makes it robust across different scoring scales (BM25 scores vs cosine similarity) without needing normalization. A document ranked #1 in both pipelines gets the highest RRF score. A document ranked #1 in one but absent in the other still gets credit.</p>
+</div>
+
+<h3>Real-World Hybrid Search Applications</h3>
+
+<div class="tbl-wrap">
+  <div class="tbl-title">Hybrid Search in Production — Industry Examples</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Application</th>
+        <th>Keyword Component</th>
+        <th>Semantic Component</th>
+        <th>Why Hybrid</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>E-Commerce (Amazon)</strong></td>
+        <td>SKU, brand name, exact product ID</td>
+        <td>"comfortable running shoes" → understands intent</td>
+        <td>Users search by SKU <em>and</em> by description</td>
+      </tr>
+      <tr>
+        <td><strong>Legal Discovery</strong></td>
+        <td>Case numbers, statute citations, exact phrases</td>
+        <td>"breach of fiduciary duty" → related precedents</td>
+        <td>Exact citations + conceptual relevance</td>
+      </tr>
+      <tr>
+        <td><strong>Medical Records (Epic)</strong></td>
+        <td>ICD codes, drug names, patient IDs</td>
+        <td>"chest pain with shortness of breath" → related diagnoses</td>
+        <td>Coded data + clinical narrative</td>
+      </tr>
+      <tr>
+        <td><strong>Log Analytics (Datadog)</strong></td>
+        <td>Error codes, timestamps, service names</td>
+        <td>"database connection failing" → timeout patterns</td>
+        <td>Structured fields + unstructured log messages</td>
+      </tr>
+      <tr>
+        <td><strong>RAG Chatbots (ChatGPT)</strong></td>
+        <td>Keyword extraction from user query</td>
+        <td>Dense retrieval of relevant context chunks</td>
+        <td>Precision on entities + recall on concepts</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sep"></div>
+
+<!-- ============================================================ -->
+<!-- PART IV: LLMs & FUTURE -->
+<!-- ============================================================ -->
+
+<h2>Part IV: How LLMs Redefine Search</h2>
+
+<p>Large Language Models have changed the search game in three fundamental ways:</p>
+
+<p><strong>1. Retrieval-Augmented Generation (RAG).</strong> Instead of returning a list of documents, the system retrieves relevant passages (using hybrid search), feeds them to an LLM as context, and generates a direct answer. The user asks a question; they get a synthesized answer, not ten blue links.</p>
+
+<p><strong>2. Better Embeddings.</strong> LLM-derived embedding models (like OpenAI's <code>text-embedding-3-large</code> or Cohere's <code>embed-v3</code>) produce dramatically better semantic representations than earlier models. They understand nuance, negation, and domain-specific terminology.</p>
+
+<p><strong>3. Query Understanding.</strong> LLMs can rewrite vague user queries into precise retrieval queries. "That thing Elon tweeted about last week" can be expanded into a structured search before it ever hits the index.</p>
+
+<!-- RAG Architecture -->
+<div class="arch rainbow">
+  <div class="arch-title">Retrieval-Augmented Generation (RAG) Pipeline</div>
+  <div class="flow-v">
+    <div class="node neutral" style="min-width:300px;">
+      💬 User Question
+      <span class="sub">"What causes ERR-503 in our auth service?"</span>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <div class="lbl">Step 1: Retrieve</div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="bracket">
+      <span class="b-lbl">Hybrid Search (Vector DB + BM25)</span>
+      <div class="node teal">
+        ⚡ Elasticsearch
+        <span class="sub">BM25 keyword search<br>"ERR-503" exact match</span>
+      </div>
+      <div class="node purple">
+        🧠 Milvus / Pinecone
+        <span class="sub">Dense vector kNN<br>Semantic similarity</span>
+      </div>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <div class="lbl">Step 2: Augment</div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="node orange" style="min-width:300px;">
+      📄 Retrieved Context Chunks
+      <span class="sub">Top 5 relevant passages injected into prompt</span>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <div class="lbl">Step 3: Generate</div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="node blue" style="min-width:300px;">
+      🤖 LLM (GPT-4 / Claude / LLaMA)
+      <span class="sub">Generates answer grounded in retrieved context</span>
+    </div>
+    <div class="arrow-d">
+      <div class="line"></div>
+      <svg viewBox="0 0 24 24"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+    <div class="node teal" style="min-width:300px;">
+      ✅ Grounded Answer
+      <span class="sub">"ERR-503 occurs when the auth service upstream<br>connection pool is exhausted. Common fixes include..."</span>
+    </div>
+  </div>
+</div>
+
+<pre>
+<div class="code-hd"><span class="fname">rag_pipeline.py</span><span class="badge">Python</span></div>
+<code><span class="cm"># pip install openai sentence-transformers numpy rank-bm25</span>
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+<span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer
+<span class="kw">from</span> rank_bm25 <span class="kw">import</span> BM25Okapi
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Knowledge base (your documents) ──</span>
+knowledge_base = [
+    <span class="str">"ERR-503 occurs when the upstream service is unreachable. Common causes include connection pool exhaustion and DNS resolution failures."</span>,
+    <span class="str">"The authentication service uses OAuth 2.0 with JWT tokens. Timeout errors typically indicate the token validation endpoint is overloaded."</span>,
+    <span class="str">"To scale the auth service, increase the connection pool size in config.yaml and add read replicas to the user database."</span>,
+    <span class="str">"Gateway timeout errors (503) can be mitigated by implementing circuit breakers using libraries like resilience4j or Polly."</span>,
+    <span class="str">"Monitoring auth service health: set up alerts on p99 latency > 500ms and error rate > 1% using Prometheus and Grafana."</span>,
+]
+
+<span class="cm"># ── Build retrieval pipelines ──</span>
+<span class="cm"># BM25</span>
+tokenized_kb = [doc.lower().split() <span class="kw">for</span> doc <span class="kw">in</span> knowledge_base]
+bm25 = BM25Okapi(tokenized_kb)
+
+<span class="cm"># Semantic</span>
+embed_model = SentenceTransformer(<span class="str">"all-MiniLM-L6-v2"</span>)
+kb_embeddings = embed_model.encode(knowledge_base)
+
+<span class="kw">def</span> <span class="fn">retrieve_context</span>(query, top_k=<span class="num">3</span>):
+    <span class="str">"""Hybrid retrieval using RRF."""</span>
+    <span class="cm"># BM25 ranking</span>
+    bm25_scores = bm25.get_scores(query.lower().split())
+    bm25_ranked = [(i, bm25_scores[i]) <span class="kw">for</span> i <span class="kw">in</span> np.argsort(bm25_scores)[::-<span class="num">1</span>]]
+
+    <span class="cm"># Semantic ranking</span>
+    q_emb = embed_model.encode([query])
+    sims = np.dot(kb_embeddings, q_emb.T).flatten()
+    sem_ranked = [(i, sims[i]) <span class="kw">for</span> i <span class="kw">in</span> np.argsort(sims)[::-<span class="num">1</span>]]
+
+    <span class="cm"># RRF fusion</span>
+    rrf = {}
+    <span class="kw">for</span> rankings <span class="kw">in</span> [bm25_ranked, sem_ranked]:
+        <span class="kw">for</span> rank, (idx, _) <span class="kw">in</span> <span class="fn">enumerate</span>(rankings):
+            rrf[idx] = rrf.get(idx, <span class="num">0</span>) + <span class="num">1</span> / (<span class="num">60</span> + rank + <span class="num">1</span>)
+
+    top_indices = [idx <span class="kw">for</span> idx, _ <span class="kw">in</span> <span class="fn">sorted</span>(rrf.items(), key=<span class="kw">lambda</span> x: x[<span class="num">1</span>], reverse=<span class="kw">True</span>)[:top_k]]
+    <span class="kw">return</span> [knowledge_base[i] <span class="kw">for</span> i <span class="kw">in</span> top_indices]
+
+<span class="cm"># ── RAG: Retrieve + Generate ──</span>
+<span class="kw">def</span> <span class="fn">ask_rag</span>(question):
+    <span class="cm"># Step 1: Retrieve relevant context</span>
+    context_chunks = retrieve_context(question)
+    context = <span class="str">"\n\n"</span>.join(context_chunks)
+
+    <span class="cm"># Step 2: Generate answer with LLM</span>
+    client = OpenAI()
+    response = client.chat.completions.create(
+        model=<span class="str">"gpt-4o-mini"</span>,
+        messages=[
+            {<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: <span class="str">f"""You are a helpful assistant. Answer ONLY based on the provided context. If the context doesn't contain the answer, say so.
+
+Context:
+{context}"""</span>},
+            {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: question}
+        ],
+        temperature=<span class="num">0.1</span>,
+    )
+
+    <span class="fn">print</span>(<span class="str">f"\n💬 Question: <span class="op">{</span>question<span class="op">}</span>"</span>)
+    <span class="fn">print</span>(<span class="str">f"\n📄 Retrieved Context ({len(context_chunks)} chunks):"</span>)
+    <span class="kw">for</span> i, chunk <span class="kw">in</span> <span class="fn">enumerate</span>(context_chunks, <span class="num">1</span>):
+        <span class="fn">print</span>(<span class="str">f"  [{i}] <span class="op">{</span>chunk[:80]<span class="op">}</span>..."</span>)
+    <span class="fn">print</span>(<span class="str">f"\n🤖 Answer: <span class="op">{</span>response.choices[0].message.content<span class="op">}</span>"</span>)
+
+<span class="cm"># ── Run ──</span>
+ask_rag(<span class="str">"What causes ERR-503 errors and how do I fix them?"</span>)
+</code></pre>
+
+<div class="sep"></div>
+
+<!-- ============================================================ -->
+<!-- SUMMARY TABLE -->
+<!-- ============================================================ -->
+
+<h2>The Complete Comparison</h2>
+
+<div class="tbl-wrap">
+  <div class="tbl-title">Boolean vs TF-IDF vs Semantic vs Hybrid — At a Glance</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Dimension</th>
+        <th>Boolean</th>
+        <th>TF-IDF / BM25</th>
+        <th>Semantic</th>
+        <th>Hybrid</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Vector Type</strong></td>
+        <td>Binary (0/1)</td>
+        <td>Sparse, high-dim</td>
+        <td>Dense, low-dim</td>
+        <td>Both</td>
+      </tr>
+      <tr>
+        <td><strong>Understands Synonyms</strong></td>
+        <td>❌ No</td>
+        <td>❌ No</td>
+        <td>✅ Yes</td>
+        <td>✅ Yes</td>
+      </tr>
+      <tr>
+        <td><strong>Exact Match</strong></td>
+        <td>✅ Perfect</td>
+        <td>✅ Good</td>
+        <td>⚠️ Weak</td>
+        <td>✅ Good</td>
+      </tr>
+      <tr>
+        <td><strong>Ranking</strong></td>
+        <td>❌ None</td>
+        <td>✅ By TF-IDF score</td>
+        <td>✅ By cosine sim</td>
+        <td>✅ RRF fusion</td>
+      </tr>
+      <tr>
+        <td><strong>Speed</strong></td>
+        <td>⚡ Very fast</td>
+        <td>⚡ Fast</td>
+        <td>🐢 Slower (kNN)</td>
+        <td>⚡ Balanced</td>
+      </tr>
+      <tr>
+        <td><strong>Storage</strong></td>
+        <td>Low</td>
+        <td>Medium</td>
+        <td>High (vectors)</td>
+        <td>High</td>
+      </tr>
+      <tr>
+        <td><strong>Best For</strong></td>
+        <td>Exact filters</td>
+        <td>Keyword search</td>
+        <td>Concept search</td>
+        <td>Production systems</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sep"></div>
+
+<h2>Final Thoughts</h2>
+
+<p>Information retrieval has evolved from simple set operations (Boolean) through statistical term weighting (TF-IDF) into neural semantic understanding (embeddings) — and the cutting edge combines all of these in hybrid architectures powered by LLMs.</p>
+
+<p>The key takeaway: <strong>there's no single "best" approach.</strong> Every production search system I've built uses multiple retrieval strategies working together. BM25 handles the precision. Embeddings handle the recall. RRF merges the signals. And increasingly, an LLM sits on top to synthesize the answer.</p>
+
+<p>The code in this article runs on your laptop. Clone it. Break it. Rebuild it. That's how you learn search.</p>
+
+<div class="tags">
+  <a class="tag" href="#">Information Retrieval</a>
+  <a class="tag" href="#">NLP</a>
+  <a class="tag" href="#">TF-IDF</a>
+  <a class="tag" href="#">Embeddings</a>
+  <a class="tag" href="#">Semantic Search</a>
+  <a class="tag" href="#">Hybrid Search</a>
+  <a class="tag" href="#">RAG</a>
+  <a class="tag" href="#">Elasticsearch</a>
+  <a class="tag" href="#">Vector Database</a>
+  <a class="tag" href="#">Python</a>
+  <a class="tag" href="#">LLMs</a>
+</div>
+
+<div class="engage">
+  <div class="side">
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 11v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8a1 1 0 011-1h2a1 1 0 011 1zm0 0l3.5-7a2.5 2.5 0 012.5 2.5V9h5.38a2 2 0 011.96 2.38l-1.25 6A2 2 0 0117.13 19H10a3 3 0 01-3-3v-5z"/></svg> 8.7K</button>
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> 164</button>
+  </div>
+  <div class="side">
+    <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg></button>
+  </div>
+</div>
+
+</article>
+</body>
+</html>

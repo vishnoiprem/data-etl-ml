@@ -1,0 +1,9 @@
+# Databricks SQL connector (official Databricks driver)
+databricks-sql-connector==3.3.0
+sqlalchemy-databricks==0.2.0
+# Superset extras
+Pillow==10.0.0
+gevent==23.9.1
+
+# Cache backend
+redis==5.0.0

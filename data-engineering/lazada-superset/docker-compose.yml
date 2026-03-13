@@ -1,0 +1,138 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Makro Data Service Platform — Apache Superset + Databricks
+# ─────────────────────────────────────────────────────────────────────────────
+# Services:
+#   superset      — main web UI  (port 8088)
+#   superset-init — one-time DB init + admin user creation
+#   worker        — Celery worker for async queries / alerts
+#   beat          — Celery beat scheduler (alert triggers)
+#   db            — PostgreSQL (Superset metadata store)
+#   redis         — Cache + Celery broker
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-superset-common: &superset-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: makro-superset:latest
+  env_file: .env
+  environment:
+    DATABASE_URL: "postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    SUPERSET_SECRET_KEY: "${SUPERSET_SECRET_KEY}"
+    SUPERSET_CONFIG_PATH: /app/superset_config.py
+    PYTHONPATH: /app
+    # Databricks connection (used by bootstrap script)
+    DATABRICKS_HOST: "${DATABRICKS_HOST}"
+    DATABRICKS_HTTP_PATH: "${DATABRICKS_HTTP_PATH}"
+    DATABRICKS_TOKEN: "${DATABRICKS_TOKEN}"
+    DATABRICKS_CATALOG: "${DATABRICKS_CATALOG:-hive_metastore}"
+    DATABRICKS_SCHEMA: "${DATABRICKS_SCHEMA:-testdb}"
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  volumes:
+    - superset_home:/app/superset_home
+    - ./superset_config.py:/app/superset_config.py:ro
+
+services:
+
+  # ── Superset web server ──────────────────────────────────────────────────
+  superset:
+    <<: *superset-common
+    container_name: makro_superset
+    command: >
+      gunicorn
+        --bind "0.0.0.0:8088"
+        --workers 4
+        --worker-class gevent
+        --worker-connections 1000
+        --timeout 300
+        --keep-alive 5
+        --limit-request-line 0
+        --limit-request-field_size 0
+        "superset.app:create_app()"
+    ports:
+      - "8088:8088"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── One-time initialisation ──────────────────────────────────────────────
+  superset-init:
+    <<: *superset-common
+    container_name: makro_superset_init
+    command: ["/bin/bash", "/app/docker/docker-init.d/init_superset.sh"]
+    restart: "no"
+
+  # ── Celery async query worker ────────────────────────────────────────────
+  worker:
+    <<: *superset-common
+    container_name: makro_celery_worker
+    command: celery --app=superset.tasks.celery_app:app worker --loglevel=info -Ofair
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "celery", "--app=superset.tasks.celery_app:app", "inspect", "ping", "-d", "celery@$$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Celery beat (scheduled alerts / reports) ─────────────────────────────
+  beat:
+    <<: *superset-common
+    container_name: makro_celery_beat
+    command: celery --app=superset.tasks.celery_app:app beat --loglevel=info --schedule /app/superset_home/celerybeat-schedule
+    restart: unless-stopped
+
+  # ── PostgreSQL metadata store ────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: makro_postgres
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-superset}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-superset}"
+      POSTGRES_DB: "${POSTGRES_DB:-superset}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-superset}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis (cache + broker) ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: makro_redis
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: makro_postgres_data
+  redis_data:
+    name: makro_redis_data
+  superset_home:
+    name: makro_superset_home
+
+networks:
+  default:
+    name: makro_network
