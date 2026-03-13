@@ -448,7 +448,7 @@ def seed_all():
 
     cur.close()
     conn.close()
-    print("\n✅ Seed complete!")
+    print("\n Seed complete!")
     print(f"  Users: 500 | Sellers: 50 | Products: 200 | SKUs: ~{len(sku_ids)}")
     print(f"  Orders: 2000 | Events: 10000 | Reviews: ~800")
 

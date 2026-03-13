@@ -9,14 +9,14 @@ Full stack: Azure + Databricks + Kafka + Flink + ClickHouse + Power BI + ML.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        DATA SOURCES                                  │
+│                        DATA SOURCES                                 │
 │  MySQL 8.0 (ecommerce_db) — Orders, Users, Products, Inventory      │
-└────────────────────┬──────────────────────────────────────────────┘
+└────────────────────┬──────────────────────────────────────────────--┘
                      │
          ┌───────────┴────────────────────────────────┐
-         │  BATCH (ADF hourly)                         │  CDC REAL-TIME
-         │                                              │  (MySQL Binlog)
-         ▼                                              ▼
+         │  BATCH (ADF hourly)                        │  CDC REAL-TIME
+         │                                            │  (MySQL Binlog)
+         ▼                                            ▼
 ┌─────────────────────────┐              ┌──────────────────────────┐
 │  Azure Data Lake Gen2   │              │   Kafka (6 partitions)   │
 │  (Delta Lake format)    │              │   ecomm.cdc.orders       │
@@ -42,11 +42,11 @@ Full stack: Azure + Databricks + Kafka + Flink + ClickHouse + Power BI + ML.
 │  │ ads_seller_score   │ │              └────────────┬─────────────┘
 │  │ ads_customer_rfm   │ │                           │
 │  │ ads_category_trends│ │                           │
-│  │ ads_warehouse_eff  │ │              ┌─────────────┴────────────┐
-│  └────────┬───────────┘ │              │                          │
-└───────────┼─────────────┘              │                          │
-            │                            │                          │
-    ┌───────┴──────┐         ┌───────────┴──────┐      ┌───────────┴──────┐
+│  │ ads_warehouse_eff  │ │              ┌────────────┴────────────┐
+│  └────────┬───────────┘ │              │                         │
+└───────────┼─────────────┘              │                         │
+            │                            │                         │
+    ┌───────┴──────┐         ┌───────────┴──────┐       ┌───────────┴──────┐
     │  Power BI    │         │  In-House BI      │      │  Real-Time       │
     │  Dashboard   │         │  (FastAPI+React)  │      │  Dashboard       │
     │  (batch KPIs)│         │  - REST API       │      │  (Grafana)       │
@@ -54,10 +54,10 @@ Full stack: Azure + Databricks + Kafka + Flink + ClickHouse + Power BI + ML.
                              └─────────┬─────────┘
                                        │
                              ┌─────────┴─────────┐
-                             │  ML Module         │
-                             │  - Demand Forecast │
-                             │  - Reorder Optim.  │
-                             │  - Transfer Optim. │
+                             │  ML Module        │
+                             │  - Demand Forecast│
+                             │  - Reorder Optim. │
+                             │  - Transfer Optim.│
                              └───────────────────┘
 ```
 
@@ -285,14 +285,14 @@ Connect Power BI Desktop to **Databricks SQL** or **Azure Synapse** pointing at 
 
 ## Azure Stack
 
-| Service | Purpose |
-|---|---|
+| Service                      | Purpose                          |
+|------------------------------|----------------------------------|
 | Azure Data Lake Storage Gen2 | Delta Lake storage (ODS/CDM/ADS) |
-| Azure Data Factory | Hourly orchestration pipeline |
-| Azure Databricks | Spark compute for ODS→CDM→ADS |
-| Azure Event Hubs (Kafka API) | Managed Kafka for CDC events |
-| Azure Key Vault | Secrets management |
-| Azure Monitor | Alerts + logging |
+| Azure Data Factory           | Hourly orchestration pipeline    |
+| Azure Databricks             | Spark compute for ODS→CDM→ADS    |
+| Azure Event Hubs (Kafka API) | Managed Kafka for CDC events     |
+| Azure Key Vault              | Secrets management               |
+| Azure Monitor                | Alerts + logging                 |
 
 ---
 
@@ -337,15 +337,15 @@ python ml/warehouse_optimization/models/warehouse_optimizer.py
 
 ### Service URLs
 
-| Service | URL | Credentials |
-|---|---|---|
-| BI Dashboard | http://localhost:3000 | — |
-| BI API Docs | http://localhost:8000/api/docs | — |
-| Kafka UI | http://localhost:8080 | — |
-| Flink UI | http://localhost:8081 | — |
-| ClickHouse | http://localhost:8123 | default / clickhouse123 |
-| Grafana | http://localhost:3001 | admin / admin123 |
-| MySQL | localhost:3306 | root / ecommerce123 |
+| Service      | URL                            | Credentials             |
+|--------------|--------------------------------|-------------------------|
+| BI Dashboard | http://localhost:3000          | —                       |
+| BI API Docs  | http://localhost:8000/api/docs | —                       |
+| Kafka UI     | http://localhost:8080          | —                       |
+| Flink UI     | http://localhost:8081          | —                       |
+| ClickHouse   | http://localhost:8123          | default / clickhouse123 |
+| Grafana      | http://localhost:3001          | admin / admin123        |
+| MySQL        | localhost:3306                 | root / ecommerce123     |
 
 ---
 
