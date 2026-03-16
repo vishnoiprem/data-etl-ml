@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windsurf SWE-1 Models: What Actually Changed</title>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--text:#111;--text2:#444;--text3:#888;--accent:#e04e00;--accent-bg:#fff5ef;--blue:#0969da;--green:#1a7f37;--purple:#8250df;--border:#d0d7de;--card:#f6f8fa;--code-bg:#0d1117;--serif:'Bitter',Georgia,serif;--sans:'Plus Jakarta Sans',-apple-system,sans-serif;--mono:'Fira Code',monospace;--max:740px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--sans);color:var(--text);background:var(--bg);line-height:1.78;font-size:18px;-webkit-font-smoothing:antialiased}
+nav{border-bottom:1px solid var(--border);padding:14px 0;position:sticky;top:0;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);z-index:100}
+nav .inner{max-width:var(--max);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+nav .logo{font-family:var(--serif);font-weight:800;font-size:23px;color:var(--text);text-decoration:none}
+nav .meta{font-size:13px;color:var(--text3);font-weight:500}
+article{max-width:var(--max);margin:0 auto;padding:44px 24px 100px}
+.author{display:flex;align-items:center;gap:14px;margin:0 0 36px}
+.author .av{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;flex-shrink:0}
+.author .info{display:flex;flex-direction:column;gap:2px}
+.author .name{font-weight:700;font-size:15px}
+.author .name .follow{color:var(--accent);font-weight:600;margin-left:6px}
+.author .ameta{font-size:13px;color:var(--text3)}
+h1{font-family:var(--serif);font-size:42px;font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:18px;color:var(--text)}
+h1+p>em:first-child{font-family:var(--sans);font-size:19px;font-style:normal;color:var(--text2);line-height:1.6;display:block;margin-bottom:30px}
+h2{font-family:var(--serif);font-size:30px;font-weight:700;margin:56px 0 20px;line-height:1.2;letter-spacing:-.5px}
+h3{font-size:22px;font-weight:700;margin:38px 0 14px}
+h4{font-size:17px;font-weight:700;margin:24px 0 10px;color:var(--text2)}
+p{margin-bottom:20px}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(224,78,0,.3)}
+a:hover{text-decoration-color:var(--accent)}
+strong{font-weight:700}
+em{font-style:italic}
+code{font-family:var(--mono);font-size:.8em;background:var(--card);padding:2px 7px;border-radius:5px;color:#cf222e;border:1px solid #eee}
+pre{background:var(--code-bg);border-radius:12px;margin:22px 0 28px;overflow:hidden;border:1px solid #30363d}
+pre code{display:block;padding:20px;font-family:var(--mono);font-size:14px;line-height:1.65;color:#e6edf3;background:none;overflow-x:auto;white-space:pre;border:none}
+table{width:100%;border-collapse:separate;border-spacing:0;margin:22px 0 28px;border-radius:10px;overflow:hidden;border:1px solid var(--border);font-size:14.5px}
+thead{background:var(--card)}
+th{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);padding:12px 16px;text-align:left;border-bottom:2px solid var(--border)}
+td{padding:11px 16px;border-bottom:1px solid #f0f0f0;line-height:1.5;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 10px 10px 0;padding:18px 22px;margin:24px 0;font-size:16.5px}
+blockquote p:last-child{margin-bottom:0}
+blockquote strong{color:var(--accent)}
+hr{border:none;text-align:center;margin:48px auto}
+hr::before{content:'• • •';color:#ccc;font-size:16px;letter-spacing:8px}
+ul,ol{margin:0 0 20px 24px}
+li{margin-bottom:8px;padding-left:4px}
+li p{margin-bottom:6px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:48px 0 32px}
+.tag{font-size:13px;background:var(--card);color:var(--text2);padding:6px 16px;border-radius:20px;border:1px solid var(--border);text-decoration:none}
+.engage{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:24px 0 36px}
+.engage .side{display:flex;align-items:center;gap:20px}
+.engage .btn{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;cursor:pointer;border:none;background:none;font-family:var(--sans)}
+.engage .btn:hover{color:var(--text)}
+.engage .btn svg{width:20px;height:20px}
+@media(max-width:680px){h1{font-size:30px}article{padding:30px 16px 60px}pre code{font-size:12.5px;padding:16px}table{font-size:13px}th,td{padding:9px 11px}}
+</style>
+</head>
+<body>
+<nav><div class="inner"><a class="logo" href="#">Medium</a><span class="meta">24 min read · 🔥 Trending in Technology</span></div></nav>
+<article>
+<div class="author">
+<div class="av">AI</div>
+<div class="info">
+<div class="name">AI Engineering Deep Dives <span class="follow">· Follow</span></div>
+<div class="ameta">Published Mar 12, 2026 · 24 min read · From a working AI Engineer</div>
+</div>
+</div>
+<div class="engage">
+<div class="side">
+<button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 11v8a1 1 0 01-1 1H4a1 1 0 01-1-1v-8a1 1 0 011-1h2a1 1 0 011 1zm0 0l3.5-7a2.5 2.5 0 012.5 2.5V9h5.38a2 2 0 011.96 2.38l-1.25 6A2 2 0 0117.13 19H10a3 3 0 01-3-3v-5z"/></svg> 14.2K</button>
+<button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> 312</button>
+</div>
+<div class="side">
+<button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg></button>
+</div>
+</div>
+<h1
+id="i-switched-to-windsurfs-swe-1-models-for-a-week.-heres-what-actually-changed.">I
+Switched to Windsurf’s SWE-1 Models for a Week. Here’s What Actually
+Changed.</h1>
+<p><em>Windsurf ships its own AI models built specifically for coding. I
+tested them against GPT-4o and Claude on real tasks. The results
+surprised me.</em></p>
+<hr />
+<p>I’ve been using AI coding assistants since GitHub Copilot launched.
+Cursor for a year. Then I switched to Windsurf three months ago because
+a coworker wouldn’t shut up about it.</p>
+<p>For the first two months, I used Claude Sonnet for everything inside
+Windsurf. It worked fine. Then I actually read the docs and realized
+Windsurf has its own model family — SWE-1 — that I’d been completely
+ignoring.</p>
+<p>So I ran a week-long experiment. Every task I’d normally throw at
+Claude, I tried with SWE-1 first. Here’s what happened.</p>
+<hr />
+<h2 id="what-swe-1-actually-is">What SWE-1 actually is</h2>
+<p>Windsurf built three models from scratch, trained specifically on
+software engineering workflows. Not just code — the <em>process</em> of
+writing code. Editing, debugging, reading terminal output, iterating.
+They call this “flow awareness.”</p>
+<p>The three models:</p>
+<p><strong>SWE-1</strong> — The heavy one. Multi-file refactoring,
+architecture, complex planning. Costs 1 credit per prompt.</p>
+<p><strong>SWE-1-lite</strong> — The daily driver. Code explanation,
+unit tests, quick refactors. Free.</p>
+<p><strong>SWE-1-mini</strong> — The autocomplete engine. Powers the Tab
+key suggestions. Free.</p>
+<p>The pricing matters. SWE-1-lite being free means you can use it
+hundreds of times a day without thinking about cost. That changes
+behavior — you stop rationing your AI usage and start treating it like a
+conversation.</p>
+<hr />
+<h2 id="day-1-building-an-api-from-scratch">Day 1: Building an API from
+scratch</h2>
+<p>My task: build a Flask API for time tracking. CRUD endpoints,
+PostgreSQL, basic auth.</p>
+<p>I opened Cascade (Windsurf’s chat panel) and typed:</p>
+<pre><code>Build a RESTful Flask API with endpoints to create, fetch, 
+and delete time entries. Each entry has user_id, task_name, 
+duration_minutes. Use SQLAlchemy with PostgreSQL. Add JWT auth.</code></pre>
+<p>With <strong>SWE-1-lite</strong> (free), I got a working single-file
+implementation. Correct routes, proper SQLAlchemy models, JWT decorator.
+Took 8 seconds. Missed some edge cases but the structure was solid.</p>
+<p>Same prompt with <strong>SWE-1</strong> (1 credit), and the
+difference was obvious. It created four files: <code>app.py</code>,
+<code>models.py</code>, <code>auth.py</code>, <code>config.py</code>. It
+added error handling, input validation with marshmallow, and proper HTTP
+status codes. It also created a <code>.env.example</code> file without
+me asking.</p>
+<p>SWE-1 didn’t just generate code. It <em>planned</em> a project
+structure.</p>
+<p><strong>My rule after Day 1:</strong> SWE-1-lite for single-file
+tasks. SWE-1 for anything that touches multiple files.</p>
+<hr />
+<h2 id="day-2-debugging-something-weird">Day 2: Debugging something
+weird</h2>
+<p>My FastAPI app was returning 422 errors on a POST endpoint that
+worked yesterday. I highlighted the route and the Pydantic model, then
+asked Cascade:</p>
+<pre><code>Why is this returning 422? It worked before I added the 
+optional fields.</code></pre>
+<p>SWE-1-lite nailed it in 3 seconds. The issue was a Pydantic v2
+breaking change — <code>Optional[str]</code> no longer defaults to
+<code>None</code>, you need <code>Optional[str] = None</code>
+explicitly. It showed me the fix and explained the v1→v2 migration
+difference.</p>
+<p>I didn’t need a heavy model for this. SWE-1-lite’s speed made it feel
+like asking a coworker sitting next to me. No loading spinner, no
+waiting. That speed matters more than people think.</p>
+<hr />
+<h2 id="day-3-refactoring-a-mess">Day 3: Refactoring a mess</h2>
+<p>I had a 400-line React component that did everything — fetching,
+state management, rendering, event handlers. Classic God Component. I
+asked SWE-1:</p>
+<pre><code>Refactor this into smaller components. Extract the data 
+fetching into a custom hook. Keep the same behavior.</code></pre>
+<p>It broke the file into five pieces: <code>useTimeEntries.ts</code>
+(custom hook), <code>TimeEntryList.tsx</code>,
+<code>TimeEntryForm.tsx</code>, <code>TimeEntryItem.tsx</code>, and the
+cleaned-up parent. It moved the shared types into a
+<code>types.ts</code> file. Every import was correct.</p>
+<p>I tried the same task with Claude 4 Sonnet. It also did a good job —
+arguably the component naming was slightly better — but it missed one
+import and put a type definition in the wrong file. SWE-1 got the
+<em>project structure</em> right because it could see my full codebase,
+not just the file I pasted.</p>
+<p>This is what Windsurf means by “flow awareness.” The model sees your
+terminal, your recent edits, your file tree. That context makes
+multi-file refactoring dramatically more reliable.</p>
+<hr />
+<h2 id="day-4-writing-tests">Day 4: Writing tests</h2>
+<p>This is where SWE-1-lite earned its keep. I selected a utility
+function and typed:</p>
+<pre><code>Write tests for this. Use pytest. Cover edge cases.</code></pre>
+<p>12 seconds later: 8 test cases including null input, empty string,
+boundary values, and a Unicode edge case I wouldn’t have thought of. All
+passing. Free.</p>
+<p>I ran this pattern probably 15 times that day. Select function →
+“write tests” → paste into test file → run. Because SWE-1-lite is free,
+I didn’t think twice about using it for every function. With a paid
+model I would have batched them or skipped the less critical ones.</p>
+<p>Free changes your habits.</p>
+<hr />
+<h2 id="day-5-the-task-where-i-switched-models">Day 5: The task where I
+switched models</h2>
+<p>I needed to write the README for an open-source project.
+Installation, usage examples, API reference, contributing
+guidelines.</p>
+<p>I started with SWE-1-lite. The output was technically accurate but
+read like documentation written by someone who’d never read a good
+README. Dry. Bulletpoint-heavy. No personality.</p>
+<p>I switched to Claude 4 Sonnet:</p>
+<pre><code>Write a README for Chrono-Logger, a TypeScript library for 
+performance timing. Make it welcoming and professional. Include 
+Installation, Quick Start with a code example, API Reference, 
+and Contributing. Keep it concise.</code></pre>
+<p>Much better. The opening paragraph had a clear value proposition. The
+code examples were practical. The tone was inviting. Claude is just
+better at prose.</p>
+<p><strong>My rule after Day 5:</strong> SWE-1 for code. Claude or GPT
+for writing that humans read.</p>
+<hr />
+<h2 id="the-model-selection-cheat-sheet">The model selection cheat
+sheet</h2>
+<p>After a week, my decision process became automatic:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Task</th>
+<th>Model</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Typing / autocomplete</td>
+<td>SWE-1-mini (automatic)</td>
+<td>It’s the Tab key. Fast.</td>
+</tr>
+<tr class="even">
+<td>“Explain this code”</td>
+<td>SWE-1-lite (free)</td>
+<td>Fast, accurate, free</td>
+</tr>
+<tr class="odd">
+<td>“Write tests for this”</td>
+<td>SWE-1-lite (free)</td>
+<td>Does it well, use it 20x/day</td>
+</tr>
+<tr class="even">
+<td>Quick bug fix</td>
+<td>SWE-1-lite (free)</td>
+<td>3-second answers</td>
+</tr>
+<tr class="odd">
+<td>Multi-file refactor</td>
+<td>SWE-1 (1 credit)</td>
+<td>Understands project structure</td>
+</tr>
+<tr class="even">
+<td>New feature scaffold</td>
+<td>SWE-1 (1 credit)</td>
+<td>Plans before generating</td>
+</tr>
+<tr class="odd">
+<td>README / docs</td>
+<td>Claude 4 Sonnet (2 credits)</td>
+<td>Better prose</td>
+</tr>
+<tr class="even">
+<td>“Summarize this research paper”</td>
+<td>GPT-4o (1 credit)</td>
+<td>Better at general text</td>
+</tr>
+</tbody>
+</table>
+<p>The pattern: <strong>free model by default, pay only when the task
+demands it.</strong></p>
+<hr />
+<h2 id="what-flow-awareness-actually-means-in-practice">What “flow
+awareness” actually means in practice</h2>
+<p>Windsurf talks a lot about flow awareness. Here’s what it means
+concretely.</p>
+<p>When I ask SWE-1 to fix a bug, it doesn’t just see the file I’m
+looking at. It sees:</p>
+<ul>
+<li>Which files I’ve edited in the last 10 minutes</li>
+<li>What’s in my terminal (including error output)</li>
+<li>My cursor position</li>
+<li>My recent Cascade conversation</li>
+</ul>
+<p>So when I get a test failure and type “fix this,” SWE-1 already knows
+which test failed, which file the error points to, and what I changed
+recently. It connects the dots without me having to explain the full
+context.</p>
+<p>Other models inside Windsurf get some of this context too. But SWE-1
+was trained on this exact loop — edit code, run test, read error, fix
+code — so it uses the context better. The difference is subtle but it
+compounds over a full day.</p>
+<hr />
+<h2 id="the-credit-math">The credit math</h2>
+<p>Windsurf’s pricing is straightforward:</p>
+<ul>
+<li><strong>Free plan:</strong> Limited monthly credits</li>
+<li><strong>Pro plan:</strong> Solid monthly credit allocation +
+unlimited free model usage</li>
+</ul>
+<p>The key insight: SWE-1-lite and SWE-1-mini are <strong>free on every
+plan.</strong> They handle 80% of my daily tasks. I only burn credits on
+SWE-1 for complex work (maybe 10–15 prompts/day) and Claude/GPT for
+specialized tasks (2–3 prompts/day).</p>
+<p>If you have your own Anthropic API key, you can use BYOK (Bring Your
+Own Key) for Claude models — zero Windsurf credits charged. This doesn’t
+work for OpenAI or Gemini models though.</p>
+<hr />
+<h2 id="honest-take-where-swe-1-falls-short">Honest take: where SWE-1
+falls short</h2>
+<p>It’s not perfect.</p>
+<p><strong>Long prose:</strong> As I said, writing that humans read
+(docs, READMEs, commit messages) is better with Claude or GPT. SWE-1
+writes like an engineer, which is great for code comments but not for
+user-facing text.</p>
+<p><strong>Niche frameworks:</strong> If you’re using something obscure,
+the generalist models sometimes know more because they were trained on a
+wider variety of text. SWE-1 is deep on mainstream development
+patterns.</p>
+<p><strong>Creative solutions:</strong> For “I have no idea how to
+approach this problem” moments, I sometimes get more creative
+suggestions from Claude. SWE-1 tends to give you the conventional
+solution, which is usually what you want — but not always.</p>
+<hr />
+<h2 id="the-bottom-line">The bottom line</h2>
+<p>Before this experiment I was paying for every AI interaction inside
+Windsurf. Now 80% of my usage is free (SWE-1-lite), and the paid prompts
+I do use are more targeted and effective because I’m picking the right
+model for each task.</p>
+<p>The SWE-1 family isn’t better than Claude or GPT at everything. It’s
+better at the specific thing I do all day: writing, debugging, and
+refactoring code inside an editor. That specialization — plus being free
+— makes it the obvious default.</p>
+<p>Stop using a $0.02/prompt model to explain a regex. Use SWE-1-lite.
+Save your credits for when you actually need the heavy reasoning.</p>
+<p>That’s the whole strategy. It’s not complicated. It just took me two
+months to figure out.</p>
+<hr />
+<p><em>Tags: Windsurf · AI Coding · SWE-1 · Developer Tools ·
+Productivity</em></p>
+<div class="tags">
+<a class="tag" href="#">AI Engineer</a><a class="tag" href="#">Machine Learning</a><a class="tag" href="#">Career</a><a class="tag" href="#">Software Engineering</a><a class="tag" href="#">LLMs</a><a class="tag" href="#">RAG</a><a class="tag" href="#">Python</a><a class="tag" href="#">System Design</a><a class="tag" href="#">Tech Career</a><a class="tag" href="#">Salary Guide</a>
+</div>
+</article>
+</body>
+</html>
