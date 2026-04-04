@@ -66,10 +66,28 @@ def rand_order_no():
     return "ORD" + datetime.now().strftime("%Y%m%d") + "".join(random.choices(string.digits, k=8))
 
 
+def truncate_all(cur, conn):
+    """Wipe all tables in dependency order before re-seeding."""
+    print("Truncating existing data...")
+    cur.execute("SET FOREIGN_KEY_CHECKS=0")
+    for tbl in [
+        "flash_sale_items", "flash_sales", "cart_items", "vouchers",
+        "user_events", "reviews", "shipments", "payments",
+        "order_items", "orders", "inventory", "product_skus",
+        "products", "sellers", "user_addresses", "users",
+        "warehouses", "brands", "categories",
+    ]:
+        cur.execute(f"TRUNCATE TABLE {tbl}")
+    cur.execute("SET FOREIGN_KEY_CHECKS=1")
+    conn.commit()
+    print("  ✅ All tables truncated")
+
+
 def seed_all():
     conn = mysql.connector.connect(**DB_CONFIG)
     cur = conn.cursor()
     print("Connected to MySQL. Starting seed...")
+    truncate_all(cur, conn)
 
     # ── Categories ───────────────────────────────────────────
     print("Seeding categories...")
@@ -97,7 +115,7 @@ def seed_all():
         utype = random.choices(["buyer", "seller", "both"], weights=[70, 15, 15])[0]
         created = rand_date(730, 0)
         cur.execute("""
-            INSERT INTO users (username, email, phone, password_hash, full_name, gender,
+            INSERT IGNORE INTO users (username, email, phone, password_hash, full_name, gender,
                                user_type, status, is_verified, country_code, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
@@ -117,7 +135,7 @@ def seed_all():
         for _ in range(random.randint(1, 3)):
             city = random.choice(CITIES_TH)
             cur.execute("""
-                INSERT INTO user_addresses
+                INSERT IGNORE INTO user_addresses
                     (user_id, label, recipient_name, phone, address_line1, city, postal_code, country_code, is_default)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
@@ -137,7 +155,7 @@ def seed_all():
         shop = fake.company() + " Shop"
         slug = shop.lower().replace(" ", "-").replace(",", "").replace(".", "")[:50] + str(uid)
         cur.execute("""
-            INSERT INTO sellers
+            INSERT IGNORE INTO sellers
                 (user_id, shop_name, shop_slug, seller_type, status, rating, total_reviews,
                  total_sales, response_rate, joined_date, warehouse_city, commission_rate)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -168,7 +186,7 @@ def seed_all():
     ]
     for code, name, city, lat, lng in wh_data:
         cur.execute("""
-            INSERT INTO warehouses (name, code, type, city, country_code, latitude, longitude, capacity_sqm, is_active)
+            INSERT IGNORE INTO warehouses (name, code, type, city, country_code, latitude, longitude, capacity_sqm, is_active)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (name, code, "fulfillment", city, "TH", lat, lng, random.uniform(5000, 50000), 1))
         warehouse_ids.append(cur.lastrowid)
