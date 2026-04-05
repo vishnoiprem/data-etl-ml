@@ -39,14 +39,14 @@ As a principal engineer evaluating vector databases for a banking platform, here
 
 ### The Shortlist
 
-| Database | Strengths | Weakness for Banking |
-|----------|-----------|---------------------|
-| **Weaviate** | Hybrid search, built-in RAG, multi-tenancy, open-source, K8s-native | Younger ecosystem than Elasticsearch |
-| **Pinecone** | Fully managed, simple API | No self-hosting, data leaves your infrastructure |
-| **pgvector** | Runs in existing PostgreSQL | No hybrid search, limited at scale |
-| **Qdrant** | High performance, Rust-based | Smaller ecosystem, fewer integrations |
-| **ChromaDB** | Developer-friendly, easy start | Not production-grade for large scale |
-| **Milvus** | Massive scale, battle-tested | Complex to operate, heavier footprint |
+| Database     | Strengths                                                           | Weakness for Banking                             |
+|--------------|---------------------------------------------------------------------|--------------------------------------------------|
+| **Weaviate** | Hybrid search, built-in RAG, multi-tenancy, open-source, K8s-native | Younger ecosystem than Elasticsearch             |
+| **Pinecone** | Fully managed, simple API                                           | No self-hosting, data leaves your infrastructure |
+| **pgvector** | Runs in existing PostgreSQL                                         | No hybrid search, limited at scale               |
+| **Qdrant**   | High performance, Rust-based                                        | Smaller ecosystem, fewer integrations            |
+| **ChromaDB** | Developer-friendly, easy start                                      | Not production-grade for large scale             |
+| **Milvus**   | Massive scale, battle-tested                                        | Complex to operate, heavier footprint            |
 
 ### Why Weaviate Wins for Banking
 
@@ -101,47 +101,47 @@ Here's how I'd architect a RAG system for HSBC's Wealth & Premier Solutions usin
 
 ```
                     ┌─────────────────────────────────┐
-                    │     RM Copilot (LangGraph)       │
-                    │   Supervisor → Agents → Tools    │
+                    │     RM Copilot (LangGraph)      │
+                    │   Supervisor → Agents → Tools   │
                     └──────────┬──────────────────────┘
                                │
                     ┌──────────▼──────────────────────┐
-                    │     RAG Orchestration Layer       │
-                    │  (LangChain / LlamaIndex)         │
-                    │                                    │
-                    │  ┌──────────┐  ┌──────────────┐  │
-                    │  │ Query    │  │ Reranker      │  │
-                    │  │ Rewriter │  │ (Cross-Enc.)  │  │
-                    │  └────┬─────┘  └──────▲───────┘  │
-                    │       │               │           │
-                    └───────┼───────────────┼───────────┘
+                    │     RAG Orchestration Layer     │
+                    │  (LangChain / LlamaIndex)       │
+                    │                                 │
+                    │  ┌──────────┐  ┌──────────────┐ │
+                    │  │ Query    │  │ Reranker     │ │
+                    │  │ Rewriter │  │ (Cross-Enc.) │ │
+                    │  └────┬─────┘  └──────▲───────┘ │
+                    │       │               │         │
+                    └───────┼───────────────┼─────────┘
                             │               │
                     ┌───────▼───────────────┼───────────┐
-                    │         WEAVIATE                    │
-                    │                                      │
-                    │  ┌────────────┐  ┌──────────────┐  │
-                    │  │ Hybrid     │  │ Multi-tenant  │  │
-                    │  │ Search     │  │ Collections   │  │
-                    │  │ (BM25 +    │  │               │  │
-                    │  │  Vector)   │  │ SG | HK | UK  │  │
-                    │  └────────────┘  └──────────────┘  │
-                    │                                      │
-                    │  ┌────────────┐  ┌──────────────┐  │
-                    │  │ HNSW Index │  │ Vectorizer   │  │
-                    │  │ + Filters  │  │ Module       │  │
-                    │  └────────────┘  └──────────────┘  │
-                    └──────────────────────────────────────┘
+                    │         WEAVIATE                  │
+                    │                                   │
+                    │  ┌────────────┐  ┌──────────────┐ │
+                    │  │ Hybrid     │  │ Multi-tenant │ │
+                    │  │ Search     │  │ Collections  │ │
+                    │  │ (BM25 +    │  │              │ │
+                    │  │  Vector)   │  │ SG | HK | UK │ │
+                    │  └────────────┘  └──────────────┘ │
+                    │                                   │
+                    │  ┌────────────┐  ┌──────────────┐ │
+                    │  │ HNSW Index │  │ Vectorizer   │ │
+                    │  │ + Filters  │  │ Module       │ │
+                    │  └────────────┘  └──────────────┘ │
+                    └───────────────────────────────────┘
                                │
                     ┌──────────▼──────────────────────┐
-                    │     Document Pipeline             │
-                    │  Kafka CDC → Chunker → Embedder  │
-                    └──────────────────────────────────┘
+                    │     Document Pipeline           │
+                    │  Kafka CDC → Chunker → Embedder │
+                    └─────────────────────────────────┘
                                │
                     ┌──────────▼──────────────────────┐
-                    │     Source Systems                │
-                    │  Product DB | Compliance Docs |   │
-                    │  Market Research | CRM             │
-                    └──────────────────────────────────┘
+                    │     Source Systems              │
+                    │  Product DB | Compliance Docs | │
+                    │  Market Research | CRM          │
+                    └─────────────────────────────────┘
 ```
 
 ### Architecture Decisions Explained
