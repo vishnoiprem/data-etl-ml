@@ -1,6 +1,6 @@
-# RAG Is Not Magic — It's an Engineering Problem
+# RAG Is Not Magic It's an Engineering Problem
 
-### Why Retrieval-Augmented Generation is the most important AI architectural pattern you're probably getting wrong
+### Why Retrieval-Augmented Generation is the most important AI architectural pattern you are  probably getting wrong
 
 ---
 
@@ -229,16 +229,16 @@ The retrieval component of RAG is evolving rapidly. A few directions worth watch
 
 If you're starting a new RAG project today, here's the minimum stack I'd recommend for a production deployment:
 
-| Component | Minimum | Upgrade Path |
-|-----------|---------|-------------|
-| Embedding | Cohere Embed-3 or OpenAI text-embedding-3-large | Domain-adapted fine-tune |
-| Vector DB | Qdrant (self-hosted) or Pinecone (serverless) | Databricks VSS if already on Databricks |
-| Retrieval | Hybrid search (dense + BM25) | Query intelligence, metadata filtering |
-| Reranking | Cohere Rerank or Jina Reranker | Custom cross-encoder |
-| LLM | GPT-4o or Claude 3.5 Sonnet | Fine-tuned domain model |
-| Hallucination | FCS via NLI model | Vectara or custom classifier |
-| Orchestration | LlamaIndex or custom async Python | Purpose-built service |
-| Observability | LangSmith or Langfuse | Full MLflow integration |
+| Component     | Minimum                                         | Upgrade Path                            |
+|---------------|-------------------------------------------------|-----------------------------------------|
+| Embedding     | Cohere Embed-3 or OpenAI text-embedding-3-large | Domain-adapted fine-tune                |
+| Vector DB     | Qdrant (self-hosted) or Pinecone (serverless)   | Databricks VSS if already on Databricks |
+| Retrieval     | Hybrid search (dense + BM25)                    | Query intelligence, metadata filtering  |
+| Reranking     | Cohere Rerank or Jina Reranker                  | Custom cross-encoder                    |
+| LLM           | GPT-4o or Claude 3.5 Sonnet                     | Fine-tuned domain model                 |
+| Hallucination | FCS via NLI model                               | Vectara or custom classifier            |
+| Orchestration | LlamaIndex or custom async Python               | Purpose-built service                   |
+| Observability | LangSmith or Langfuse                           | Full MLflow integration                 |
 
 ---
 
