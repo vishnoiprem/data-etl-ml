@@ -1,43 +1,22 @@
 package main
 
-import "fmt"
-
-// ---------- Generator ----------
-// Sends the given numbers one by one.
-func NumberGenerator(nums ...int) <-chan int {
-	out := make(chan int)
-	go func() {
-		defer close(out) // the stage that creates the channel also closes it
-		for _, n := range nums {
-			out <- n
-		}
-	}()
-	fmt.Println(out)
-	return out
-}
-
-// ---------- Processor ----------
-// Squares every number it receives.
-func SquareProcessor(in <-chan int) <-chan int {
-	out := make(chan int)
-	go func() {
-		defer close(out)
-		for n := range in {
-			out <- n * n
-		}
-	}()
-	return out
-}
-
-// ---------- Consumer ----------
-// Prints every value until the channel is closed.
-func PrintConsumer(in <-chan int) {
-	for n := range in {
-		fmt.Println(n)
-	}
-}
+import (
+    "context"
+    "fmt"
+)
 
 func main() {
-	// Connect the pipeline: numbers → square → print
-	PrintConsumer(SquareProcessor(NumberGenerator(1, 2, 3, 4, 5)))
+    ctx, cancel := context.WithCancel(context.Background())
+    defer cancel()
+
+    // Create the pipeline: numbers → square → print
+    squares := SquareProcessor(ctx, NumberGenerator(1, 2, 3, 4, 5))
+
+    for v := range squares {
+        fmt.Println(v)
+        if v == 9 { // optional early stop example
+            cancel()
+            break
+        }
+    }
 }
