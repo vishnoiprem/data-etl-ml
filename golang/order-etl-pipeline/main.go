@@ -12,6 +12,7 @@ func NumberGenerator(nums ...int) <-chan int {
 			out <- n
 		}
 	}()
+	fmt.Println(out)
 	return out
 }
 
