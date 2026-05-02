@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lorax-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lorax
+  template:
+    metadata:
+      labels:
+        app: lorax
+    spec:
+      containers:
+      - name: lorax
+        image: ghcr.io/predibase/lorax:07addea
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 600
+          periodSeconds: 1
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: HUGGING_FACE_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token-secret
+              key: HF_TOKEN
+        - name: MODEL_ID
+          value: "mistralai/Mistral-7B-Instruct-v0.1"
+        - name: MAX_BATCH_TOTAL_TOKENS
+          value: "4096"
+        - name: MAX_CONCURRENT_REQUESTS
+          value: "256"
+        - name: PORT
+          value: "8080"
+        resources:
+          requests:
+            memory: "2G"
+            cpu: "2"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "4G"
+            cpu: "3"
+            nvidia.com/gpu: "1"
+      volumes:
+      - name: data-volume
+        hostPath:
+          path: /path/to/your/data
+      restartPolicy: Always
