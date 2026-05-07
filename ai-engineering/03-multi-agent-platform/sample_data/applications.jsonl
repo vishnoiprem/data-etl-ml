@@ -1,0 +1,5 @@
+{"app_id": "APP-001", "name": "Alice Johnson", "ssn_last4": "4421", "dob": "1985-03-12", "amount": 25000, "purpose": "auto", "income_annual": 95000, "monthly_debt": 800, "credit_score": 740, "country": "US", "state": "CA"}
+{"app_id": "APP-002", "name": "Bob Smith", "ssn_last4": "8812", "dob": "1972-09-04", "amount": 350000, "purpose": "home_purchase", "income_annual": 180000, "monthly_debt": 2200, "credit_score": 770, "country": "US", "state": "TX"}
+{"app_id": "APP-003", "name": "Charlie Patel", "ssn_last4": "1199", "dob": "1990-06-22", "amount": 50000, "purpose": "small_business", "income_annual": 60000, "monthly_debt": 1500, "credit_score": 620, "country": "US", "state": "NY"}
+{"app_id": "APP-004", "name": "Dana Lee", "ssn_last4": "2233", "dob": "1988-11-30", "amount": 15000, "purpose": "personal", "income_annual": 72000, "monthly_debt": 600, "credit_score": 690, "country": "US", "state": "WA"}
+{"app_id": "APP-005", "name": "Evan Petrov", "ssn_last4": "9988", "dob": "1995-07-15", "amount": 800000, "purpose": "investment_property", "income_annual": 200000, "monthly_debt": 3500, "credit_score": 710, "country": "US", "state": "FL"}
