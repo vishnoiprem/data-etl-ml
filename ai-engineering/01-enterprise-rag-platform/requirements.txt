@@ -1,0 +1,21 @@
+-r ../shared/requirements.txt
+
+# Embeddings & retrieval (LOCAL mode)
+sentence-transformers>=2.7.0
+faiss-cpu>=1.8.0
+rank-bm25>=0.2.2
+
+# Document processing
+pypdf>=4.2.0
+markdown>=3.6
+beautifulsoup4>=4.12.0
+
+# API
+fastapi>=0.110.0
+uvicorn>=0.29.0
+
+# Tokenization (for token counting + chunking)
+tiktoken>=0.6.0
+
+# Eval
+numpy>=1.26.0

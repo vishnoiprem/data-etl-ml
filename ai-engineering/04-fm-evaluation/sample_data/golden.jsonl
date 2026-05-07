@@ -1,0 +1,8 @@
+{"id": "g1", "task": "extraction", "prompt": "Extract the policy ID from: 'Policy #: AUT-2024-001'", "reference": "AUT-2024-001"}
+{"id": "g2", "task": "extraction", "prompt": "Extract DOB from: 'born 1972-09-04'", "reference": "1972-09-04"}
+{"id": "g3", "task": "classification", "prompt": "Is HO3-99821 auto, home, life or renters?", "reference": "home"}
+{"id": "g4", "task": "summarization", "prompt": "Summarize: 'AUT-2025-007 covers a 2022 Tesla Model 3 with $1,650 annual premium and a $750 deductible.'", "reference": "Auto policy on a 2022 Tesla Model 3, $1,650/year, $750 deductible."}
+{"id": "g5", "task": "qa", "prompt": "What is the deductible on AUT-2024-001 if the premium is $1,247?", "reference": "$500"}
+{"id": "g6", "task": "extraction", "prompt": "Extract the SSN last4 from 'SSN ***-**-4421'", "reference": "4421"}
+{"id": "g7", "task": "classification", "prompt": "Is REN-44552 auto, home, life or renters?", "reference": "renters"}
+{"id": "g8", "task": "qa", "prompt": "What's the term in years for TL-22115?", "reference": "30"}
