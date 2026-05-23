@@ -153,7 +153,7 @@ def get_drivers() -> list[dict]:
 # ── Trends ─────────────────────────────────────────────────────────────────────
 
 @app.get("/api/trends", tags=["data"])
-def get_trends() -> list[dict]:
+def get_trends() -> dict:
     deliveries = _csv(DATA_DIR / "deliveries.csv")
     if deliveries.empty:
         return []
