@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Synapse Logistics — Live Dashboard</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <!-- Leaflet CSS + JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 900:'#0f172a', 800:'#1e293b', 700:'#334155', 600:'#475569' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { background:#0f172a; color:#e2e8f0; font-family:'Inter',system-ui,sans-serif; }
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:#1e293b; }
+    ::-webkit-scrollbar-thumb { background:#475569; border-radius:3px; }
+
+    .tab-btn { transition:all .2s; }
+    .tab-btn.active { background:#1d4ed8; color:#fff; }
+    .tab-btn:not(.active):hover { background:#334155; }
+
+    .kpi-card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:20px 24px; }
+    .kpi-value { font-size:2rem; font-weight:700; line-height:1.1; }
+    .kpi-delta { font-size:.82rem; margin-top:4px; }
+
+    #map { height:520px; border-radius:12px; overflow:hidden; z-index:0; }
+    #live-ticker { height:340px; overflow-y:auto; }
+
+    .live-row { display:flex; align-items:center; gap:10px; padding:8px 12px;
+                border-bottom:1px solid #334155; font-size:.83rem; animation:fadeIn .4s; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+
+    .badge { font-size:.72rem; font-weight:600; padding:2px 8px; border-radius:9999px; }
+    .badge-green  { background:#064e3b; color:#6ee7b7; }
+    .badge-red    { background:#4c0519; color:#fca5a5; }
+    .badge-orange { background:#431407; color:#fdba74; }
+    .badge-blue   { background:#1e3a5f; color:#93c5fd; }
+
+    .spinner { width:36px; height:36px; border:3px solid #334155;
+               border-top-color:#3b82f6; border-radius:50%; animation:spin .8s linear infinite; margin:40px auto; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    .chart-box { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:16px; }
+    .section-title { font-size:1.05rem; font-weight:600; color:#94a3b8; margin-bottom:14px; letter-spacing:.03em; }
+
+    .pulse { animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────────────── -->
+<header class="sticky top-0 z-50 bg-brand-900 border-b border-brand-700 px-6 py-3 flex items-center justify-between shadow-lg">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">🚚</span>
+    <div>
+      <div class="font-bold text-lg leading-tight">Synapse Logistics</div>
+      <div class="text-xs text-slate-400">Route Optimisation &amp; ETA Intelligence</div>
+    </div>
+  </div>
+  <div class="flex items-center gap-4 text-sm text-slate-400">
+    <div id="data-status" class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+      <span>Checking…</span>
+    </div>
+    <div id="live-indicator" class="flex items-center gap-2 hidden">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 pulse"></span>
+      <span class="text-emerald-400">LIVE</span>
+    </div>
+    <div id="clock" class="font-mono text-slate-300"></div>
+  </div>
+</header>
+
+<!-- ── TAB BAR ────────────────────────────────────────────────────────────── -->
+<nav class="bg-brand-800 border-b border-brand-700 px-6 flex gap-1 overflow-x-auto">
+  <button class="tab-btn active py-3 px-4 text-sm font-medium rounded-none" onclick="showTab('overview')">📊 Overview</button>
+  <button class="tab-btn py-3 px-4 text-sm font-medium rounded-none" onclick="showTab('routes')">🗺️ Route Map</button>
+  <button class="tab-btn py-3 px-4 text-sm font-medium rounded-none" onclick="showTab('eta')">🎯 ETA Model</button>
+  <button class="tab-btn py-3 px-4 text-sm font-medium rounded-none" onclick="showTab('operations')">🚛 Operations</button>
+  <button class="tab-btn py-3 px-4 text-sm font-medium rounded-none" onclick="showTab('trends')">📈 Trends</button>
+  <button class="tab-btn py-3 px-4 text-sm font-medium rounded-none" onclick="showTab('live')">🔴 Live Feed</button>
+</nav>
+
+<!-- ── MAIN CONTENT ───────────────────────────────────────────────────────── -->
+<main class="px-6 py-6 max-w-screen-2xl mx-auto">
+
+  <!-- OVERVIEW -->
+  <div id="tab-overview">
+    <div id="overview-content"><div class="spinner"></div></div>
+  </div>
+
+  <!-- ROUTES -->
+  <div id="tab-routes" class="hidden">
+    <div class="flex items-center gap-4 mb-4">
+      <span class="text-sm text-slate-400 font-medium">Pipeline:</span>
+      <button id="btn-ml" class="badge badge-green px-4 py-1.5 cursor-pointer" onclick="loadRoutes('ml')">ML Pipeline</button>
+      <button id="btn-baseline" class="badge bg-slate-700 text-slate-300 px-4 py-1.5 cursor-pointer" onclick="loadRoutes('baseline')">Baseline (NN)</button>
+    </div>
+    <div class="chart-box mb-4">
+      <div id="map"></div>
+    </div>
+    <div class="chart-box">
+      <div class="section-title">Route Summary by Driver</div>
+      <div id="route-table" class="overflow-x-auto"></div>
+    </div>
+  </div>
+
+  <!-- ETA MODEL -->
+  <div id="tab-eta" class="hidden">
+    <div id="eta-content"><div class="spinner"></div></div>
+  </div>
+
+  <!-- OPERATIONS -->
+  <div id="tab-operations" class="hidden">
+    <div id="ops-content"><div class="spinner"></div></div>
+  </div>
+
+  <!-- TRENDS -->
+  <div id="tab-trends" class="hidden">
+    <div id="trends-content"><div class="spinner"></div></div>
+  </div>
+
+  <!-- LIVE FEED -->
+  <div id="tab-live" class="hidden">
+    <div id="live-stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="chart-box">
+        <div class="section-title">Live Order Feed</div>
+        <div id="live-ticker"></div>
+      </div>
+      <div class="chart-box">
+        <div class="section-title">Rolling On-Time Rate (last 50 events)</div>
+        <div id="live-chart" style="height:320px"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+const API = '';
+const DARK = {
+  paper_bgcolor: '#1e293b', plot_bgcolor: '#1e293b',
+  font: { color: '#e2e8f0', size: 12 },
+  margin: { t: 40, r: 20, b: 40, l: 60 },
+  xaxis: { gridcolor: '#334155', zerolinecolor: '#334155' },
+  yaxis: { gridcolor: '#334155', zerolinecolor: '#334155' },
+};
+const C = { ml: '#34d399', baseline: '#f87171', neutral: '#60a5fa', warn: '#fbbf24', purple: '#a78bfa' };
+const PLOTLY_CFG = { displayModeBar: false, responsive: true };
+
+// ── State ──────────────────────────────────────────────────────────────────
+let activeTab = 'overview';
+let leafletMap = null;
+let mapPipeline = 'ml';
+let liveEvents = [];
+let liveStats = { total: 0, onTime: 0, errSum: 0 };
+let liveSSE = null;
+let tabLoaded = { overview: false, routes: false, eta: false, operations: false, trends: false };
+
+// ── Clock ──────────────────────────────────────────────────────────────────
+setInterval(() => {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-GB', { hour12: false });
+}, 1000);
+
+// ── Health check ───────────────────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const h = await fetchAPI('/api/health');
+    const el = document.getElementById('data-status');
+    if (h.data_ready) {
+      el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-400">Data ready</span>`;
+    } else {
+      el.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span class="text-amber-400">Run pipeline first</span>`;
+    }
+  } catch {
+    document.getElementById('data-status').innerHTML =
+      `<span class="w-2 h-2 rounded-full bg-red-400"></span><span class="text-red-400">API offline</span>`;
+  }
+}
+
+// ── Fetch helper ───────────────────────────────────────────────────────────
+async function fetchAPI(endpoint) {
+  const r = await fetch(API + endpoint);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function showTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['overview','routes','eta','operations','trends','live'];
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  ['overview','routes','eta','operations','trends','live'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+  });
+  if (!tabLoaded[tab]) {
+    tabLoaded[tab] = true;
+    const loaders = {
+      overview:   loadOverview,
+      routes:     () => loadRoutes('ml'),
+      eta:        loadETA,
+      operations: loadOperations,
+      trends:     loadTrends,
+    };
+    if (loaders[tab]) loaders[tab]();
+  }
+  if (tab === 'live' && !liveSSE) startLiveFeed();
+  if (tab === 'routes') setTimeout(() => leafletMap && leafletMap.invalidateSize(), 200);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OVERVIEW TAB
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadOverview() {
+  try {
+    const d = await fetchAPI('/api/kpis');
+    const sim = d.simulation || {};
+    const b = sim.baseline || {}, m = sim.ml || {}, imp = sim.improvement || {};
+    const eta = (d.eta_model || {}).test_metrics || {};
+    const rc = d.routing_comparison || [];
+
+    const el = document.getElementById('overview-content');
+    el.innerHTML = `
+      <!-- KPI row 1 -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        ${kpiCard('SLA — Baseline',    b.sla_compliance_pct + '%',  null,           'text-slate-300')}
+        ${kpiCard('SLA — ML Pipeline', m.sla_compliance_pct + '%',  '+' + imp.sla_pct_gain + ' pp', 'text-emerald-400')}
+        ${kpiCard('Distance Saved',    imp.dist_saved_pct + '%',     'ML vs Baseline','text-emerald-400')}
+        ${kpiCard('ETA MAE (ML)',       eta.mae + ' min',             'naive: ' + eta.naive_mae + ' min','text-blue-400')}
+      </div>
+      <!-- KPI row 2 -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        ${kpiCard('Avg Delivery — Baseline', b.avg_actual_min + ' min', null, 'text-slate-300')}
+        ${kpiCard('Avg Delivery — ML',       m.avg_actual_min + ' min', '−' + Math.abs(imp.avg_time_saved_min) + ' min', 'text-emerald-400')}
+        ${kpiCard('Within 10 min (ETA)',     eta.within_10min_pct + '%', null, 'text-blue-400')}
+        ${kpiCard('Orders Simulated',        (m.orders || 0).toLocaleString(), null, 'text-slate-300')}
+      </div>
+      <!-- Algorithm charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="chart-box"><div id="chart-alg-dist" style="height:320px"></div></div>
+        <div class="chart-box"><div id="chart-alg-sla" style="height:320px"></div></div>
+      </div>
+    `;
+
+    // Algorithm comparison charts
+    if (rc.length) {
+      const names = rc.map(r => r.Algorithm.replace('Clarke-Wright','CW').replace('Nearest-Neighbour','NN'));
+      const dists = rc.map(r => r['Total Distance (km)']);
+      const slas  = [b.sla_compliance_pct, null, m.sla_compliance_pct].filter(v => v != null);
+      const colors = [C.baseline, C.warn, C.ml];
+
+      Plotly.newPlot('chart-alg-dist', [{
+        type:'bar', x: names, y: dists,
+        marker: { color: colors },
+        text: dists.map(v => v + ' km'), textposition:'outside',
+      }], { ...DARK, title:'Total Route Distance by Algorithm', yaxis:{...DARK.yaxis, title:'km'} }, PLOTLY_CFG);
+
+      const slaVals = [b.sla_compliance_pct, ((b.sla_compliance_pct||0)+(m.sla_compliance_pct||0))/2, m.sla_compliance_pct];
+      Plotly.newPlot('chart-alg-sla', [{
+        type:'bar', x: names, y: slaVals,
+        marker: { color: colors },
+        text: slaVals.map(v => v?.toFixed(1) + '%'), textposition:'outside',
+      }], { ...DARK, title:'SLA Compliance by Algorithm', yaxis:{...DARK.yaxis, title:'%', range:[0,105]} }, PLOTLY_CFG);
+    }
+  } catch (e) {
+    document.getElementById('overview-content').innerHTML = noData();
+  }
+}
+
+function kpiCard(label, value, delta, deltaClass) {
+  return `<div class="kpi-card">
+    <div class="text-xs text-slate-400 mb-1">${label}</div>
+    <div class="kpi-value">${value ?? '—'}</div>
+    ${delta ? `<div class="kpi-delta ${deltaClass}">${delta}</div>` : ''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROUTES TAB — Leaflet map
+// ═══════════════════════════════════════════════════════════════════════════
+
+const HUBS = [
+  { name:'Hub Central', lat:51.495, lon:-0.133 },
+  { name:'Hub East',    lat:51.523, lon:-0.042 },
+  { name:'Hub South',   lat:51.448, lon:-0.098 },
+];
+const DRIVER_COLORS = [
+  '#ef4444','#f97316','#eab308','#22c55e','#14b8a6',
+  '#3b82f6','#8b5cf6','#ec4899','#06b6d4','#84cc16',
+  '#f43f5e','#a855f7','#0ea5e9','#10b981','#fb923c',
+];
+
+async function loadRoutes(pipeline) {
+  mapPipeline = pipeline;
+  document.getElementById('btn-ml').className =
+    pipeline === 'ml' ? 'badge badge-green px-4 py-1.5 cursor-pointer'
+                      : 'badge bg-slate-700 text-slate-300 px-4 py-1.5 cursor-pointer';
+  document.getElementById('btn-baseline').className =
+    pipeline === 'baseline' ? 'badge badge-red px-4 py-1.5 cursor-pointer'
+                            : 'badge bg-slate-700 text-slate-300 px-4 py-1.5 cursor-pointer';
+  try {
+    const data = await fetchAPI('/api/routes/' + pipeline);
+    renderLeafletMap(data);
+    renderRouteTable(data);
+  } catch {
+    document.getElementById('map').innerHTML = noData();
+  }
+}
+
+function renderLeafletMap(rows) {
+  if (leafletMap) { leafletMap.remove(); leafletMap = null; }
+  leafletMap = L.map('map').setView([51.505, -0.09], 11);
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution:'© OpenStreetMap © CARTO', maxZoom:19, subdomains:'abcd',
+  }).addTo(leafletMap);
+
+  // Driver color index
+  const drivers = [...new Set(rows.map(r => r.driver_id))].sort();
+  const dColor = d => DRIVER_COLORS[drivers.indexOf(d) % DRIVER_COLORS.length];
+
+  // Group stops by driver, sorted by stop_number
+  const byDriver = {};
+  rows.forEach(r => {
+    if (!r.dropoff_lat || !r.dropoff_lon) return;
+    (byDriver[r.driver_id] = byDriver[r.driver_id] || []).push(r);
+  });
+
+  Object.entries(byDriver).forEach(([drv, stops]) => {
+    const col = dColor(drv);
+    const sorted = stops.sort((a, b) => a.stop_number - b.stop_number);
+    const latlngs = sorted.map(s => [s.dropoff_lat, s.dropoff_lon]);
+
+    // Route polyline
+    L.polyline(latlngs, { color: col, weight: 2, opacity: 0.55, dashArray:'4 4' }).addTo(leafletMap);
+
+    // Stop markers
+    sorted.forEach(s => {
+      const onTime = s.was_on_time;
+      L.circleMarker([s.dropoff_lat, s.dropoff_lon], {
+        radius: 6, fillColor: col, color: onTime ? col : '#ef4444',
+        weight: onTime ? 1 : 2, fillOpacity: 0.85,
+      })
+      .bindPopup(`
+        <div style="font:13px system-ui;min-width:180px">
+          <b>${s.order_id}</b><br/>
+          Driver: ${drv} · Stop #${s.stop_number}<br/>
+          Zone: ${s.zone} · ${s.urgency}<br/>
+          Time: ${s.actual_minutes} min · Dist: ${s.distance_km} km<br/>
+          SLA: <b style="color:${onTime?'#34d399':'#f87171'}">${onTime?'✓ On-time':'✗ Late'}</b>
+        </div>`)
+      .addTo(leafletMap);
+    });
+  });
+
+  // Hub markers
+  const hubIcon = L.divIcon({
+    html: '<div style="background:#fbbf24;border:2px solid #fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px">🏭</div>',
+    iconSize: [18, 18], iconAnchor: [9, 9],
+  });
+  HUBS.forEach(h => {
+    L.marker([h.lat, h.lon], { icon: hubIcon })
+      .bindPopup(`<b>${h.name}</b>`)
+      .addTo(leafletMap);
+  });
+}
+
+function renderRouteTable(rows) {
+  const byDriver = {};
+  rows.forEach(r => {
+    const d = byDriver[r.driver_id] = byDriver[r.driver_id] || { stops:0, onTime:0, time:0, dist:0 };
+    d.stops++; d.onTime += r.was_on_time ? 1 : 0;
+    d.time += r.actual_minutes; d.dist += r.distance_km;
+  });
+  const sorted = Object.entries(byDriver)
+    .map(([id, s]) => ({ id, stops:s.stops, sla:(s.onTime/s.stops*100).toFixed(0)+'%',
+                         avg:(s.time/s.stops).toFixed(1)+' min', dist:s.dist.toFixed(1)+' km' }))
+    .sort((a,b) => parseFloat(b.sla) - parseFloat(a.sla));
+
+  document.getElementById('route-table').innerHTML = `
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-slate-400 border-b border-slate-700">
+        <th class="py-2 pr-4">Driver</th><th class="py-2 pr-4">Stops</th>
+        <th class="py-2 pr-4">SLA %</th><th class="py-2 pr-4">Avg Time</th><th class="py-2">Total Dist</th>
+      </tr></thead>
+      <tbody>${sorted.map(r => `
+        <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+          <td class="py-1.5 pr-4 font-mono text-slate-300">${r.id}</td>
+          <td class="py-1.5 pr-4">${r.stops}</td>
+          <td class="py-1.5 pr-4 font-semibold ${parseFloat(r.sla)>=90?'text-emerald-400':'text-amber-400'}">${r.sla}</td>
+          <td class="py-1.5 pr-4">${r.avg}</td>
+          <td class="py-1.5">${r.dist}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ETA MODEL TAB
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadETA() {
+  try {
+    const d = await fetchAPI('/api/eta-analysis');
+    const tm = (d.metrics?.test_metrics) || {};
+    const el = document.getElementById('eta-content');
+    el.innerHTML = `
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        ${kpiCard('MAE',           tm.mae + ' min',            null, 'text-blue-400')}
+        ${kpiCard('RMSE',          tm.rmse + ' min',           null, 'text-blue-400')}
+        ${kpiCard('MAPE',          tm.mape + '%',              null, 'text-amber-400')}
+        ${kpiCard('Within 10 min', tm.within_10min_pct + '%',  null, 'text-emerald-400')}
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="chart-box"><div id="chart-scatter" style="height:360px"></div></div>
+        <div class="chart-box"><div id="chart-err-hist" style="height:360px"></div></div>
+      </div>
+      <div class="chart-box">
+        <div id="chart-fi" style="height:400px"></div>
+      </div>`;
+
+    const preds = d.predictions_sample || [];
+    const actual = preds.map(p => p.actual_minutes);
+    const pred   = preds.map(p => p.predicted_minutes);
+    const errs   = preds.map(p => p.error);
+    const mx     = Math.max(...actual, ...pred);
+
+    Plotly.newPlot('chart-scatter', [
+      { type:'scatter', mode:'markers', x:actual, y:pred, opacity:0.4,
+        marker:{ color:C.neutral, size:4 }, name:'Prediction' },
+      { type:'scatter', mode:'lines', x:[0,mx], y:[0,mx],
+        line:{ color:'#64748b', dash:'dot' }, name:'Perfect' },
+    ], { ...DARK, title:'Actual vs Predicted Delivery Time',
+         xaxis:{...DARK.xaxis, title:'Actual (min)'}, yaxis:{...DARK.yaxis, title:'Predicted (min)'} }, PLOTLY_CFG);
+
+    Plotly.newPlot('chart-err-hist', [{
+      type:'histogram', x:errs, nbinsx:55,
+      marker:{ color:C.ml }, opacity:0.8,
+    }], { ...DARK, title:'ETA Error Distribution',
+         xaxis:{...DARK.xaxis, title:'Error (min)'}, yaxis:{...DARK.yaxis, title:'Count'},
+         shapes:[{ type:'line', x0:0, x1:0, y0:0, y1:1, yref:'paper', line:{color:'#94a3b8',dash:'dot'} }] }, PLOTLY_CFG);
+
+    const fi = d.feature_importance || [];
+    if (fi.length) {
+      Plotly.newPlot('chart-fi', [{
+        type:'bar', orientation:'h',
+        x: fi.map(f => f.importance), y: fi.map(f => f.feature),
+        marker:{ color:fi.map(f => f.importance), colorscale:'Teal' },
+      }], { ...DARK, title:'XGBoost Feature Importances (top 15)',
+           margin:{...DARK.margin, l:160},
+           yaxis:{...DARK.yaxis, categoryorder:'total ascending'} }, PLOTLY_CFG);
+    }
+
+    // Naive vs ML comparison
+    if (tm.naive_mae) {
+      const naiveEl = document.createElement('div');
+      naiveEl.className = 'chart-box mt-4';
+      naiveEl.innerHTML = '<div id="chart-naive" style="height:280px"></div>';
+      el.appendChild(naiveEl);
+      Plotly.newPlot('chart-naive', [{
+        type:'bar', x:['Naive (dist/speed)','XGBoost ML'],
+        y:[tm.naive_mae, tm.mae],
+        marker:{ color:[C.baseline, C.ml] },
+        text:[tm.naive_mae + ' min', tm.mae + ' min'], textposition:'outside',
+      }], { ...DARK, title:'Mean Absolute Error: Naive vs ML Model',
+           yaxis:{...DARK.yaxis, title:'MAE (min)'} }, PLOTLY_CFG);
+    }
+
+  } catch(e) {
+    document.getElementById('eta-content').innerHTML = noData();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OPERATIONS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadOperations() {
+  try {
+    const [ops, drivers] = await Promise.all([
+      fetchAPI('/api/operations'), fetchAPI('/api/drivers'),
+    ]);
+
+    document.getElementById('ops-content').innerHTML = `
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="chart-box"><div id="chart-zone-sla" style="height:360px"></div></div>
+        <div class="chart-box"><div id="chart-urg-sla" style="height:360px"></div></div>
+      </div>
+      <div class="chart-box mb-4"><div id="chart-drv-scatter" style="height:400px"></div></div>
+      <details class="chart-box">
+        <summary class="cursor-pointer section-title">Driver Table</summary>
+        <div id="drv-table" class="mt-3 overflow-x-auto"></div>
+      </details>`;
+
+    // Zone SLA horizontal bar
+    const zones = ops.zone_sla || [];
+    Plotly.newPlot('chart-zone-sla', [{
+      type:'bar', orientation:'h',
+      x: zones.map(z => z.sla_pct), y: zones.map(z => z.zone),
+      marker: { color: zones.map(z => z.sla_pct < 85 ? C.baseline : z.sla_pct < 95 ? C.warn : C.ml) },
+      text: zones.map(z => z.sla_pct + '%'), textposition:'outside',
+    }], { ...DARK, title:'SLA Compliance by Zone (ML Pipeline)',
+         xaxis:{...DARK.xaxis, title:'%', range:[0,110]},
+         yaxis:{...DARK.yaxis}, margin:{...DARK.margin, l:90} }, PLOTLY_CFG);
+
+    // Urgency SLA
+    const urgMap = { same_day:C.baseline, express:C.warn, standard:C.ml };
+    const urgs = ops.urgency_sla || [];
+    Plotly.newPlot('chart-urg-sla', [{
+      type:'bar', x: urgs.map(u => u.urgency), y: urgs.map(u => u.sla_pct),
+      marker: { color: urgs.map(u => urgMap[u.urgency] || C.neutral) },
+      text: urgs.map(u => u.sla_pct + '%'), textposition:'outside',
+    }], { ...DARK, title:'SLA % by Urgency Level',
+         yaxis:{...DARK.yaxis, range:[0,110], title:'%'} }, PLOTLY_CFG);
+
+    // Driver scatter
+    if (drivers.length) {
+      Plotly.newPlot('chart-drv-scatter', [{
+        type:'scatter', mode:'markers',
+        x: drivers.map(d => d.stops),
+        y: drivers.map(d => d.sla_pct),
+        marker: {
+          size: drivers.map(d => Math.sqrt(d.total_dist) * 2.5 + 8),
+          color: drivers.map(d => d.avg_time),
+          colorscale:'Bluered_r', showscale:true,
+          colorbar:{ title:'Avg Time<br>(min)', thickness:14 },
+        },
+        text: drivers.map(d => d.driver_id),
+        hovertemplate:'<b>%{text}</b><br>Stops: %{x}<br>SLA: %{y}%<extra></extra>',
+      }], { ...DARK, title:'Driver Performance: Stops vs SLA% (bubble = total dist)',
+           xaxis:{...DARK.xaxis, title:'Stops Completed'},
+           yaxis:{...DARK.yaxis, title:'SLA %', range:[0,105]} }, PLOTLY_CFG);
+
+      document.getElementById('drv-table').innerHTML = `
+        <table class="w-full text-sm">
+          <thead><tr class="text-slate-400 text-left border-b border-slate-700">
+            <th class="py-2 pr-4">Driver</th><th class="py-2 pr-4">Stops</th>
+            <th class="py-2 pr-4">SLA %</th><th class="py-2 pr-4">Avg Time</th>
+            <th class="py-2 pr-4">Total Dist</th><th class="py-2">Hub</th>
+          </tr></thead>
+          <tbody>${drivers.map(d => `
+            <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+              <td class="py-1.5 pr-4 font-mono">${d.driver_id}</td>
+              <td class="py-1.5 pr-4">${d.stops}</td>
+              <td class="py-1.5 pr-4 font-semibold ${d.sla_pct>=90?'text-emerald-400':'text-amber-400'}">${d.sla_pct}%</td>
+              <td class="py-1.5 pr-4">${d.avg_time} min</td>
+              <td class="py-1.5 pr-4">${d.total_dist} km</td>
+              <td class="py-1.5 text-slate-400 text-xs">${d.home_hub_id||'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+  } catch(e) {
+    document.getElementById('ops-content').innerHTML = noData();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TRENDS TAB
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadTrends() {
+  try {
+    const d = await fetchAPI('/api/trends');
+    const daily = d.daily || d || [];
+    const el = document.getElementById('trends-content');
+
+    el.innerHTML = `
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div class="chart-box"><div id="chart-sla-trend" style="height:300px"></div></div>
+        <div class="chart-box"><div id="chart-time-trend" style="height:300px"></div></div>
+      </div>
+      <div class="chart-box mb-4"><div id="chart-vol" style="height:280px"></div></div>
+      ${d.zone_dow?.length ? '<div class="chart-box"><div id="chart-heatmap" style="height:380px"></div></div>' : ''}
+    `;
+
+    const dates = daily.map(r => r.date);
+    Plotly.newPlot('chart-sla-trend', [
+      { type:'scatter', mode:'lines+markers', x:dates, y:daily.map(r => r.sla_pct),
+        line:{ color:C.ml, width:2 }, marker:{ size:4 }, name:'SLA %' },
+    ], { ...DARK, title:'Daily SLA Compliance (30-day history)',
+         yaxis:{...DARK.yaxis, range:[50,105], title:'%'},
+         shapes:[{ type:'line', x0:dates[0], x1:dates.at(-1), y0:90, y1:90,
+                   line:{color:C.warn, dash:'dot'}, name:'90% target' }] }, PLOTLY_CFG);
+
+    Plotly.newPlot('chart-time-trend', [
+      { type:'scatter', mode:'lines+markers', x:dates, y:daily.map(r => r.avg_time_min),
+        line:{ color:C.neutral, width:2 }, marker:{ size:4 } },
+    ], { ...DARK, title:'Daily Average Delivery Time',
+         yaxis:{...DARK.yaxis, title:'min'} }, PLOTLY_CFG);
+
+    Plotly.newPlot('chart-vol', [{
+      type:'bar', x:dates, y:daily.map(r => r.orders),
+      marker:{ color:daily.map(r => r.orders), colorscale:'Blues' },
+    }], { ...DARK, title:'Daily Order Volume', yaxis:{...DARK.yaxis, title:'Orders'} }, PLOTLY_CFG);
+
+    // Zone × day heatmap
+    if (d.zone_dow?.length) {
+      const zones = [...new Set(d.zone_dow.map(r => r.dropoff_zone))];
+      const days  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const z = zones.map(zone =>
+        days.map(day => {
+          const row = d.zone_dow.find(r => r.dropoff_zone===zone && r.dow===day);
+          return row ? row.sla_pct : null;
+        })
+      );
+      Plotly.newPlot('chart-heatmap', [{
+        type:'heatmap', x:days, y:zones, z,
+        colorscale:'RdYlGn', zmin:60, zmax:100,
+        hovertemplate:'%{y} · %{x}<br>SLA: %{z}%<extra></extra>',
+      }], { ...DARK, title:'SLA % Heatmap — Zone × Day of Week',
+           margin:{...DARK.margin, l:100} }, PLOTLY_CFG);
+    }
+  } catch(e) {
+    document.getElementById('trends-content').innerHTML = noData();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LIVE FEED TAB (SSE)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const urgColor = { same_day:'badge-red', express:'badge-orange', standard:'badge-blue' };
+
+function startLiveFeed() {
+  liveSSE = new EventSource(API + '/api/live/stream');
+  document.getElementById('live-indicator').classList.remove('hidden');
+
+  liveSSE.onmessage = e => {
+    const ev = JSON.parse(e.data);
+    liveEvents.unshift(ev);
+    if (liveEvents.length > 100) liveEvents.pop();
+    liveStats.total++;
+    if (ev.was_on_time) liveStats.onTime++;
+    liveStats.errSum += ev.eta_error;
+    updateLiveUI();
+  };
+
+  liveSSE.onerror = () => {
+    document.getElementById('live-indicator').classList.add('hidden');
+    setTimeout(startLiveFeed, 5000);
+  };
+
+  // Init chart placeholder
+  Plotly.newPlot('live-chart', [
+    { type:'scatter', mode:'lines+markers', x:[], y:[],
+      line:{ color:C.ml, width:2 }, marker:{ size:5 }, name:'On-Time Rate %' },
+    { type:'scatter', mode:'lines', x:[], y:[90,90],
+      line:{ color:C.warn, dash:'dot' }, name:'90% target' },
+  ], { ...DARK, yaxis:{...DARK.yaxis, range:[0,105], title:'On-Time %'}, xaxis:{...DARK.xaxis, showticklabels:false} }, PLOTLY_CFG);
+}
+
+function updateLiveUI() {
+  if (activeTab !== 'live') return;
+  updateLiveStats();
+  renderTicker();
+  updateLiveChart();
+}
+
+function updateLiveStats() {
+  const rate = liveStats.total ? (liveStats.onTime / liveStats.total * 100).toFixed(1) : '0.0';
+  const avgErr = liveStats.total ? (liveStats.errSum / liveStats.total).toFixed(1) : '0.0';
+  document.getElementById('live-stats').innerHTML = `
+    ${kpiCard('Orders Dispatched', liveStats.total.toLocaleString(), null, 'text-blue-400')}
+    ${kpiCard('On-Time Rate', rate + '%', null, rate>=90?'text-emerald-400':'text-amber-400')}
+    ${kpiCard('Avg ETA Error', avgErr + ' min', null, 'text-blue-400')}
+    ${kpiCard('Late Deliveries', (liveStats.total - liveStats.onTime).toLocaleString(), null, 'text-red-400')}
+  `;
+}
+
+function renderTicker() {
+  const ticker = document.getElementById('live-ticker');
+  ticker.innerHTML = liveEvents.slice(0, 40).map(ev => `
+    <div class="live-row">
+      <span class="font-mono text-slate-400 text-xs w-20 shrink-0">${ev.timestamp.slice(11,19)}</span>
+      <span class="font-mono text-slate-200 w-28 shrink-0">${ev.order_id}</span>
+      <span class="badge ${urgColor[ev.urgency]||'badge-blue'} shrink-0">${ev.urgency}</span>
+      <span class="text-slate-400 text-xs shrink-0">${ev.zone}</span>
+      <span class="text-slate-300 text-xs shrink-0">${ev.actual_minutes} min</span>
+      <span class="ml-auto badge ${ev.was_on_time?'badge-green':'badge-red'}">${ev.was_on_time?'✓':'✗'}</span>
+    </div>`).join('');
+}
+
+function updateLiveChart() {
+  const recent = liveEvents.slice(0, 50).reverse();
+  if (recent.length < 2) return;
+
+  // Rolling on-time rate over the last 50 events
+  const rates = recent.map((_, i) => {
+    const window = recent.slice(0, i + 1);
+    return (window.filter(e => e.was_on_time).length / window.length * 100).toFixed(1);
+  });
+
+  const chartEl = document.getElementById('live-chart');
+  if (!chartEl) return;
+  Plotly.react('live-chart', [
+    { type:'scatter', mode:'lines+markers', x:[...rates.keys()], y:rates.map(Number),
+      fill:'tozeroy', fillcolor:'rgba(52,211,153,0.1)',
+      line:{ color:C.ml, width:2 }, marker:{ size:5 }, name:'On-Time %' },
+    { type:'scatter', mode:'lines', x:[0, rates.length-1], y:[90,90],
+      line:{ color:C.warn, dash:'dot' }, name:'90% target' },
+  ], { ...DARK, yaxis:{...DARK.yaxis, range:[0,105], title:'On-Time %'},
+       xaxis:{...DARK.xaxis, showticklabels:false, title:'Events (oldest → newest)'} }, PLOTLY_CFG);
+}
+
+// ── Utility ────────────────────────────────────────────────────────────────
+function noData() {
+  return `<div class="text-center py-16 text-slate-500">
+    <div class="text-4xl mb-3">📭</div>
+    <div class="text-lg mb-2">No data found</div>
+    <div class="text-sm">Run <code class="bg-slate-800 px-2 py-0.5 rounded">python run.py</code> to generate data and train the model.</div>
+  </div>`;
+}
+
+// ── Auto-refresh every 60 s ────────────────────────────────────────────────
+setInterval(() => {
+  if (activeTab !== 'live') {
+    tabLoaded[activeTab] = false;
+    showTab(activeTab);
+  }
+}, 60_000);
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+checkHealth();
+loadOverview();
+
+</script>
+</body>
+</html>

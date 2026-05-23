@@ -114,6 +114,17 @@ def step_dashboard():
     )
 
 
+def step_api():
+    _header(7, "Launching Live Dashboard  (FastAPI + HTML Frontend)")
+    print(f"\n  Dashboard : http://localhost:8000")
+    print(f"  API docs  : http://localhost:8000/docs\n")
+    os.execv(
+        sys.executable,
+        [sys.executable, "-m", "uvicorn", "api.app:app",
+         "--host", "0.0.0.0", "--port", "8000", "--reload"],
+    )
+
+
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
 STEP_MAP = {
@@ -124,6 +135,7 @@ STEP_MAP = {
     "simulate":  step_simulate,
     "evaluate":  step_evaluate,
     "dashboard": step_dashboard,
+    "api":       step_api,
 }
 
 ALL_STEPS = ["generate", "features", "train", "optimise", "simulate", "evaluate"]
@@ -137,7 +149,8 @@ def main():
         help="Steps to run (default: all)",
     )
     parser.add_argument("--no-dashboard", action="store_true", help="Skip dashboard launch")
-    parser.add_argument("--dashboard",    action="store_true", help="Launch dashboard only")
+    parser.add_argument("--dashboard",    action="store_true", help="Launch Streamlit dashboard only")
+    parser.add_argument("--api",          action="store_true", help="Launch FastAPI + HTML live dashboard")
     args = parser.parse_args()
 
     print(f"\n{'╔' + '═'*64 + '╗'}")
@@ -146,6 +159,10 @@ def main():
 
     if args.dashboard:
         step_dashboard()
+        return
+
+    if args.api:
+        step_api()
         return
 
     steps = ALL_STEPS if "all" in args.steps else args.steps
