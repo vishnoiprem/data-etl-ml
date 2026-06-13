@@ -5,8 +5,8 @@
 ---
 
 Running LLMs in production without observability is like running Databricks jobs without logs.
-
-When our Axtra360 LLM Gateway started serving store managers, suppliers, and analysts across Thailand, Cambodia, and Myanmar, something happened that always happens at scale:
+Lazada/RedMart
+When our Eagle 360  LLM Gateway started serving store managers, suppliers, and analysts across Thailand, Cambodia, and Myanmar, something happened that always happens at scale:
 
 > **A store manager in Chiang Mai complained: "The chatbot gave me wrong sales figures."**
 
@@ -41,7 +41,7 @@ It gives you four capabilities:
 
 ## Why This Matters for E-Commerce at Scale
 
-At Lazada  we run five LLM-powered services across Axtra360. Without LangSmith, when something goes wrong, you ask:
+At Lazada  we run five LLM-powered services across Eagle 360 . Without LangSmith, when something goes wrong, you ask:
 
 - Which of the 5 services failed?
 - Which user's session was it?
@@ -66,7 +66,7 @@ import os
 os.environ["LANGCHAIN_TRACING_V2"]  = "true"
 os.environ["LANGCHAIN_ENDPOINT"]    = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]     = "your-langsmith-api-key"
-os.environ["LANGCHAIN_PROJECT"]     = "makro-axtra360-production"
+os.environ["LANGCHAIN_PROJECT"]     = "makro-Eagle 360 -production"
 
 # Your existing Azure OpenAI keys
 os.environ["AZURE_OPENAI_ENDPOINT"]    = "https://your-resource.openai.azure.com/"
@@ -116,7 +116,7 @@ print(response)
 In your LangSmith dashboard you now see:
 
 ```
-Project: makro-axtra360-production
+Project: makro-Eagle 360 -production
 │
 └── RunnableSequence  ✓  1.83s  196 tokens  $0.004
     ├── ChatPromptTemplate  0.00s
@@ -139,7 +139,7 @@ from langsmith import Client
 from langchain.callbacks.tracers import LangChainTracer
 
 # Tag traces with business metadata — filter by store, country, chain in dashboard
-tracer = LangChainTracer(project_name="makro-axtra360-production")
+tracer = LangChainTracer(project_name="makro-Eagle 360 -production")
 
 response = sales_chain.invoke(
     {"question": "What drove the spike in Household category last Tuesday?"},
@@ -171,7 +171,7 @@ from langchain_community.vectorstores import AzureSearch
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_core.runnables import RunnablePassthrough
 
-# Lazada/RedMartsupplier contract RAG — the DOC-LM service in Axtra360
+# Lazada/RedMartsupplier contract RAG — the DOC-LM service in Eagle 360 
 embeddings = AzureOpenAIEmbeddings(
     azure_deployment = "text-embedding-3-large",
     azure_endpoint   = os.environ["AZURE_OPENAI_ENDPOINT"],
@@ -271,7 +271,7 @@ makro_eval_dataset = [
         "answer":   "Credit card, debit card, bank transfer, QR payment, and cash on delivery"
     },
     {
-        "question": "Axtra360 คืออะไร?",
+        "question": "Eagle 360  คืออะไร?",
         "answer":   "แพลตฟอร์ม AI ของ Lazada  ที่รวม Chat with Data, DOC-LM, SSBI, Martech และ Forecasting"
     },
     {
@@ -593,7 +593,7 @@ client = Client()
 @traceable(
     name     = "makro-campaign-copy-generator",
     tags     = ["marketing", "martech", "campaign"],
-    metadata = {"service": "axtra360-martech"}
+    metadata = {"service": "Eagle 360 -martech"}
 )
 def generate_campaign_copy(
     product_category: str,
@@ -662,7 +662,7 @@ Add two flags to your existing `server_api.py` from the LangServe article:
 
 import os
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"]    = "makro-axtra360-production"
+os.environ["LANGCHAIN_PROJECT"]    = "makro-Eagle 360 -production"
 os.environ["LANGCHAIN_API_KEY"]    = os.environ["LANGSMITH_API_KEY"]
 
 # Everything else stays the same
