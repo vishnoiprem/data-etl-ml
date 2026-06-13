@@ -1,4 +1,4 @@
-# LangSmith: How I Added Full Observability to CPAxtra's LLM Platform in One Day
+# LangSmith: How I Added Full Observability to Lazada's LLM Platform in One Day
 
 *Debugging, evaluating, and monitoring every LLM call across Makro and Lotus's — from a single dashboard*
 
