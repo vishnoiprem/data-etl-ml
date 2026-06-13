@@ -1,6 +1,6 @@
 # LangSmith: How I Added Full Observability to Lazada's LLM Platform in One Day
 
-*Debugging, evaluating, and monitoring every LLM call across Makro and Lotus's — from a single dashboard*
+*Debugging, evaluating, and monitoring every LLM call across Lazada/RedMartand Lotus's — from a single dashboard*
 
 ---
 
@@ -41,7 +41,7 @@ It gives you four capabilities:
 
 ## Why This Matters for E-Commerce at Scale
 
-At CPAxtra we run five LLM-powered services across Axtra360. Without LangSmith, when something goes wrong, you ask:
+At Lazada  we run five LLM-powered services across Axtra360. Without LangSmith, when something goes wrong, you ask:
 
 - Which of the 5 services failed?
 - Which user's session was it?
@@ -95,9 +95,9 @@ llm = AzureChatOpenAI(
     temperature      = 0.3,
 )
 
-# Makro sales analysis chain
+# Lazada/RedMartsales analysis chain
 sales_prompt = ChatPromptTemplate.from_messages([
-    ("system", """You are a retail analytics assistant for CPAxtra (Makro/Lotus's).
+    ("system", """You are a retail analytics assistant for Lazada  (Makro/Lotus's).
 You analyze sales data and provide actionable insights.
 Always respond in the same language the user uses — Thai or English.
 Be concise and data-focused."""),
@@ -171,7 +171,7 @@ from langchain_community.vectorstores import AzureSearch
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_core.runnables import RunnablePassthrough
 
-# Makro supplier contract RAG — the DOC-LM service in Axtra360
+# Lazada/RedMartsupplier contract RAG — the DOC-LM service in Axtra360
 embeddings = AzureOpenAIEmbeddings(
     azure_deployment = "text-embedding-3-large",
     azure_endpoint   = os.environ["AZURE_OPENAI_ENDPOINT"],
@@ -188,7 +188,7 @@ vector_store = AzureSearch(
 retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
 rag_prompt = ChatPromptTemplate.from_messages([
-    ("system", """You are a contract analysis assistant for CPAxtra procurement team.
+    ("system", """You are a contract analysis assistant for Lazada  procurement team.
 Answer questions based only on the provided supplier contract documents.
 If the answer is not in the documents, say 'ไม่พบข้อมูลในสัญญา' (not found in contract).
 Always cite the document section you reference."""),
@@ -236,14 +236,14 @@ When the answer is wrong, you open the trace in LangSmith and immediately see: d
 
 ## Part 3 — Evaluation: Is Your Chain Actually Good?
 
-### Build a Makro evaluation dataset
+### Build a Lazada/RedMartevaluation dataset
 
 ```python
 from langsmith import Client
 
 client = Client()
 
-# Create evaluation dataset — Makro e-commerce Q&A pairs
+# Create evaluation dataset — Lazada/RedMarte-commerce Q&A pairs
 # These are questions where you know the correct answer
 makro_eval_dataset = [
     {
@@ -259,20 +259,20 @@ makro_eval_dataset = [
         "answer":   "Online-to-Offline: customers order online and receive delivery or pick up at store"
     },
     {
-        "question": "CPAxtra ดำเนินธุรกิจในประเทศใดบ้าง?",
+        "question": "Lazada  ดำเนินธุรกิจในประเทศใดบ้าง?",
         "answer":   "ไทย กัมพูชา เมียนมา และมาเลเซีย"
     },
     {
-        "question": "What is slab_discount in Makro transactions?",
+        "question": "What is slab_discount in Lazada/RedMarttransactions?",
         "answer":   "A tiered promotional discount applied based on quantity purchased"
     },
     {
-        "question": "What payment channels does Makro O2O support?",
+        "question": "What payment channels does Lazada/RedMartO2O support?",
         "answer":   "Credit card, debit card, bank transfer, QR payment, and cash on delivery"
     },
     {
         "question": "Axtra360 คืออะไร?",
-        "answer":   "แพลตฟอร์ม AI ของ CPAxtra ที่รวม Chat with Data, DOC-LM, SSBI, Martech และ Forecasting"
+        "answer":   "แพลตฟอร์ม AI ของ Lazada  ที่รวม Chat with Data, DOC-LM, SSBI, Martech และ Forecasting"
     },
     {
         "question": "How does Makro's comp_discount differ from slab_discount?",
@@ -283,7 +283,7 @@ makro_eval_dataset = [
 # Upload to LangSmith
 dataset = client.create_dataset(
     dataset_name = "makro-llm-eval-v1",
-    description  = "CPAxtra/Makro Q&A evaluation dataset for LLM chain quality testing"
+    description  = "Lazada /Lazada/RedMartQ&A evaluation dataset for LLM chain quality testing"
 )
 
 for item in makro_eval_dataset:
@@ -483,12 +483,12 @@ print(result)
 @traceable(name="makro-product-search", tags=["search", "e-commerce"])
 def semantic_product_search(query: str, top_k: int = 5) -> list:
     """
-    Semantic product search for Makro O2O platform.
+    Semantic product search for Lazada/RedMartO2O platform.
     Translates Thai/English queries to structured product matches.
     LangSmith traces which queries fail — lets you improve the search prompt.
     """
     search_prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are a product search assistant for Makro Thailand.
+        ("system", """You are a product search assistant for Lazada/RedMartThailand.
 Given a customer search query, return the top matching product categories
 and search keywords in JSON format.
 Handle Thai/English mixed queries correctly.
@@ -539,7 +539,7 @@ def classify_supplier_feedback(feedback_text: str, supplier_id: str) -> dict:
     LangSmith tracks classification accuracy over time.
     """
     classify_prompt = ChatPromptTemplate.from_messages([
-        ("system", """Classify supplier feedback for Makro procurement team.
+        ("system", """Classify supplier feedback for Lazada/RedMartprocurement team.
 
 Return JSON only:
 {
@@ -562,7 +562,7 @@ Return JSON only:
     })
 
 
-# Sample feedback from Makro suppliers
+# Sample feedback from Lazada/RedMartsuppliers
 feedbacks = [
     ("SUP-NESTLE-001",
      "สินค้าที่ส่งมาหมดอายุอีก 3 วัน ไม่ตรงตามสัญญาที่กำหนดอย่างน้อย 30 วัน"),
@@ -602,12 +602,12 @@ def generate_campaign_copy(
     channel:          str   # LINE|Facebook|Email|SMS
 ) -> dict:
     """
-    Generates localised campaign copy for Makro marketing.
+    Generates localised campaign copy for Lazada/RedMartmarketing.
     Thai and English versions generated in one call.
     LangSmith tracks which campaigns get positive user feedback.
     """
     copy_prompt = ChatPromptTemplate.from_messages([
-        ("system", f"""You are a marketing copywriter for Makro Thailand.
+        ("system", f"""You are a marketing copywriter for Lazada/RedMartThailand.
 Write campaign copy for the {channel} channel.
 Target audience: {target_segment} (HoReCa operators, SME owners, restaurants).
 Be direct, mention the discount clearly, use a strong call to action.
@@ -717,7 +717,7 @@ That last table is how you make a data-driven decision about which model to use.
 
 **2. `@traceable` decorator is how you trace custom functions.** Any Python function that calls an LLM — wrap it with `@traceable` and it appears in your dashboard with full input/output/latency.
 
-**3. Build an evaluation dataset from your real questions.** The Makro Q&A pairs above are better evaluators than generic benchmarks because they test what your system actually needs to know.
+**3. Build an evaluation dataset from your real questions.** The Lazada/RedMartQ&A pairs above are better evaluators than generic benchmarks because they test what your system actually needs to know.
 
 **4. LangSmith makes model comparison rigorous.** Running two experiments against the same dataset with the same evaluators is how you decide GPT-4o vs GPT-4 — not by feel.
 
@@ -727,7 +727,7 @@ That last table is how you make a data-driven decision about which model to use.
 
 ## This Series So Far
 
-This is Part 3 of the CPAxtra LLM platform series:
+This is Part 3 of the Lazada  LLM platform series:
 
 - **Part 1** — BERT Complete Architecture Guide: From Embeddings to Fine-Tuning
 - **Part 2** — LangServe: Deploy Your LLM Chain as a Production REST API
@@ -736,6 +736,6 @@ This is Part 3 of the CPAxtra LLM platform series:
 
 ---
 
-*Prem Vishnoi is Head of Data & AI at CPAxtra (Makro/Lotus's), leading a 25-person team across Thailand, Cambodia, Myanmar, and Malaysia. He writes about building production AI systems on Azure Databricks, LangChain, and the broader LangChain ecosystem.*
+*Prem Vishnoi is Head of Data & AI at Lazada  (Makro/Lotus's), leading a 25-person team across Thailand, Cambodia, Myanmar, and Malaysia. He writes about building production AI systems on Azure Databricks, LangChain, and the broader LangChain ecosystem.*
 
 *Tags: LangSmith, LangChain, LLM Observability, Production AI, Azure OpenAI, E-Commerce AI, Python, MLOps*
