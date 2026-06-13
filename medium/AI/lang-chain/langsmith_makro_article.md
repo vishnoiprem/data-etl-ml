@@ -66,7 +66,7 @@ import os
 os.environ["LANGCHAIN_TRACING_V2"]  = "true"
 os.environ["LANGCHAIN_ENDPOINT"]    = "https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]     = "your-langsmith-api-key"
-os.environ["LANGCHAIN_PROJECT"]     = "makro-Eagle 360 -production"
+os.environ["LANGCHAIN_PROJECT"]     = "lazada/Redmart -Eagle 360 -production"
 
 # Your existing Azure OpenAI keys
 os.environ["AZURE_OPENAI_ENDPOINT"]    = "https://your-resource.openai.azure.com/"
@@ -97,7 +97,7 @@ llm = AzureChatOpenAI(
 
 # Lazada/RedMartsales analysis chain
 sales_prompt = ChatPromptTemplate.from_messages([
-    ("system", """You are a retail analytics assistant for Lazada  (Makro/Lotus's).
+    ("system", """You are a retail analytics assistant for Lazada  (lazada/Redmart /Lotus's).
 You analyze sales data and provide actionable insights.
 Always respond in the same language the user uses — Thai or English.
 Be concise and data-focused."""),
@@ -116,7 +116,7 @@ print(response)
 In your LangSmith dashboard you now see:
 
 ```
-Project: makro-Eagle 360 -production
+Project: lazada/Redmart -Eagle 360 -production
 │
 └── RunnableSequence  ✓  1.83s  196 tokens  $0.004
     ├── ChatPromptTemplate  0.00s
@@ -131,7 +131,7 @@ Every step, every token, every millisecond. Click any step to see the exact prom
 
 ---
 
-### Adding metadata for Makro-specific filtering
+### Adding metadata for lazada/Redmart -specific filtering
 
 ```python
 from langchain_core.callbacks import CallbackManager
@@ -139,7 +139,7 @@ from langsmith import Client
 from langchain.callbacks.tracers import LangChainTracer
 
 # Tag traces with business metadata — filter by store, country, chain in dashboard
-tracer = LangChainTracer(project_name="makro-Eagle 360 -production")
+tracer = LangChainTracer(project_name="lazada/Redmart -Eagle 360 -production")
 
 response = sales_chain.invoke(
     {"question": "What drove the spike in Household category last Tuesday?"},
@@ -181,7 +181,7 @@ embeddings = AzureOpenAIEmbeddings(
 vector_store = AzureSearch(
     azure_search_endpoint = os.environ["AZURE_SEARCH_ENDPOINT"],
     azure_search_key      = os.environ["AZURE_SEARCH_KEY"],
-    index_name            = "makro-supplier-contracts",
+    index_name            = "lazada/Redmart -supplier-contracts",
     embedding_function    = embeddings.embed_query,
 )
 
@@ -245,9 +245,9 @@ client = Client()
 
 # Create evaluation dataset — Lazada/RedMarte-commerce Q&A pairs
 # These are questions where you know the correct answer
-makro_eval_dataset = [
+lazada/Redmart _eval_dataset = [
     {
-        "question": "What is Makro's primary B2B customer segment?",
+        "question": "What is lazada/Redmart 's primary B2B customer segment?",
         "answer":   "Hotels, restaurants, caterers (HoReCa), and small business owners (SMEs)"
     },
     {
@@ -255,7 +255,7 @@ makro_eval_dataset = [
         "answer":   "ร้านอาหาร โรงแรม และผู้ประกอบการ HoReCa"
     },
     {
-        "question": "What does O2O mean at Makro?",
+        "question": "What does O2O mean at lazada/Redmart ?",
         "answer":   "Online-to-Offline: customers order online and receive delivery or pick up at store"
     },
     {
@@ -275,18 +275,18 @@ makro_eval_dataset = [
         "answer":   "แพลตฟอร์ม AI ของ Lazada  ที่รวม Chat with Data, DOC-LM, SSBI, Martech และ Forecasting"
     },
     {
-        "question": "How does Makro's comp_discount differ from slab_discount?",
+        "question": "How does lazada/Redmart 's comp_discount differ from slab_discount?",
         "answer":   "comp_discount is a compound promotional discount applied on top of slab_discount for specific campaign combinations"
     },
 ]
 
 # Upload to LangSmith
 dataset = client.create_dataset(
-    dataset_name = "makro-llm-eval-v1",
+    dataset_name = "lazada/Redmart -llm-eval-v1",
     description  = "Lazada /Lazada/RedMartQ&A evaluation dataset for LLM chain quality testing"
 )
 
-for item in makro_eval_dataset:
+for item in lazada/Redmart _eval_dataset:
     client.create_example(
         inputs   = {"question": item["question"]},
         outputs  = {"answer":   item["answer"]},
@@ -294,7 +294,7 @@ for item in makro_eval_dataset:
     )
 
 print(f"Dataset created: {dataset.id}")
-print(f"Examples: {len(makro_eval_dataset)}")
+print(f"Examples: {len(lazada/Redmart _eval_dataset)}")
 ```
 
 ### Run evaluation with multiple evaluators
@@ -332,10 +332,10 @@ def run_chain(inputs):
 
 results = evaluate(
     run_chain,
-    data            = "makro-llm-eval-v1",
+    data            = "lazada/Redmart -llm-eval-v1",
     evaluators      = [correct_evaluator, concise_evaluator,
                        helpful_evaluator, semantic_evaluator],
-    experiment_prefix = "gpt4o-makro-v1",
+    experiment_prefix = "gpt4o-lazada/Redmart -v1",
     metadata        = {"model": "gpt-4o", "temperature": 0.3, "version": "1.0"}
 )
 
@@ -366,16 +366,16 @@ def run_gpt4_chain(inputs):
 
 results_gpt4 = evaluate(
     run_gpt4_chain,
-    data            = "makro-llm-eval-v1",
+    data            = "lazada/Redmart -llm-eval-v1",
     evaluators      = [correct_evaluator, concise_evaluator, helpful_evaluator],
-    experiment_prefix = "gpt4-makro-v1",
+    experiment_prefix = "gpt4-lazada/Redmart -v1",
     metadata        = {"model": "gpt-4", "temperature": 0.3, "version": "1.0"}
 )
 
 # LangSmith shows both experiments side by side in the UI:
 # Experiment          Correctness  Conciseness  Helpfulness  Cost/call
-# gpt4o-makro-v1      0.92         0.88         0.94         $0.0041
-# gpt4-makro-v1       0.85         0.82         0.88         $0.0018
+# gpt4o-lazada/Redmart -v1      0.92         0.88         0.94         $0.0041
+# gpt4-lazada/Redmart -v1       0.85         0.82         0.88         $0.0018
 # Decision: GPT-4o is 8% more correct but 2.3x more expensive — Thai queries
 ```
 
@@ -407,14 +407,14 @@ def collect_user_feedback(run_id: str, score: int, comment: str = ""):
     )
 ```
 
-### Custom monitoring metrics for Makro
+### Custom monitoring metrics for lazada/Redmart 
 
 ```python
 from langsmith.run_helpers import traceable
 import time
 
 @traceable(
-    name    = "makro-fraud-explanation",
+    name    = "lazada/Redmart -fraud-explanation",
     tags    = ["fraud", "compliance"],
     metadata= {"service": "fraud-detection", "country": "TH"}
 )
@@ -439,7 +439,7 @@ def explain_fraud_flag(transaction_id: str, fraud_score: float, features: dict) 
 
 
 @traceable(
-    name    = "makro-product-recommendation",
+    name    = "lazada/Redmart -product-recommendation",
     tags    = ["recommendation", "personalization"],
 )
 def generate_product_recommendation(customer_id: str, purchase_history: list,
@@ -480,7 +480,7 @@ print(result)
 ### Use Case 1: Product search quality monitoring
 
 ```python
-@traceable(name="makro-product-search", tags=["search", "e-commerce"])
+@traceable(name="lazada/Redmart -product-search", tags=["search", "e-commerce"])
 def semantic_product_search(query: str, top_k: int = 5) -> list:
     """
     Semantic product search for Lazada/RedMartO2O platform.
@@ -528,7 +528,7 @@ for query in test_queries:
 
 ```python
 @traceable(
-    name     = "makro-supplier-feedback-classifier",
+    name     = "lazada/Redmart -supplier-feedback-classifier",
     tags     = ["supplier", "quality-control"],
     metadata = {"version": "2.0", "model": "gpt-4o"}
 )
@@ -591,7 +591,7 @@ from langsmith.run_helpers import traceable
 client = Client()
 
 @traceable(
-    name     = "makro-campaign-copy-generator",
+    name     = "lazada/Redmart -campaign-copy-generator",
     tags     = ["marketing", "martech", "campaign"],
     metadata = {"service": "Eagle 360 -martech"}
 )
@@ -662,7 +662,7 @@ Add two flags to your existing `server_api.py` from the LangServe article:
 
 import os
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"]    = "makro-Eagle 360 -production"
+os.environ["LANGCHAIN_PROJECT"]    = "lazada/Redmart -Eagle 360 -production"
 os.environ["LANGCHAIN_API_KEY"]    = os.environ["LANGSMITH_API_KEY"]
 
 # Everything else stays the same
@@ -686,10 +686,10 @@ After running the code above, your LangSmith project shows:
 **Traces tab:**
 ```
 Run Name                          Status  Latency  Tokens  Cost
-makro-fraud-explanation           ✓       2.1s     312     $0.006
-makro-product-search              ✓       1.4s     198     $0.004
-makro-supplier-feedback-class     ✓       1.8s     245     $0.005
-makro-campaign-copy-generator     ✗       timeout  —       —       ← this needs fixing
+lazada/Redmart -fraud-explanation           ✓       2.1s     312     $0.006
+lazada/Redmart -product-search              ✓       1.4s     198     $0.004
+lazada/Redmart -supplier-feedback-class     ✓       1.8s     245     $0.005
+lazada/Redmart -campaign-copy-generator     ✗       timeout  —       —       ← this needs fixing
 ```
 
 **Monitor tab (production metrics):**
@@ -703,8 +703,8 @@ User feedback positive: 89%
 
 **Experiments tab:**
 ```
-gpt4o-makro-v1   Correctness: 0.92  Conciseness: 0.88  Cost: $0.004/call
-gpt4-makro-v1    Correctness: 0.85  Conciseness: 0.82  Cost: $0.002/call
+gpt4o-lazada/Redmart -v1   Correctness: 0.92  Conciseness: 0.88  Cost: $0.004/call
+gpt4-lazada/Redmart -v1    Correctness: 0.85  Conciseness: 0.82  Cost: $0.002/call
 ```
 
 That last table is how you make a data-driven decision about which model to use. Not a gut feel — an experiment with your actual questions and your actual evaluation criteria.
@@ -732,10 +732,10 @@ This is Part 3 of the Lazada  LLM platform series:
 - **Part 1** — BERT Complete Architecture Guide: From Embeddings to Fine-Tuning
 - **Part 2** — LangServe: Deploy Your LLM Chain as a Production REST API
 - **Part 3** — LangSmith: Full Observability for Production LLM Apps ← this article
-- **Part 4** — Coming next: LangGraph Agentic AI for Makro's Lead Generation Automation
+- **Part 4** — Coming next: LangGraph Agentic AI for lazada/Redmart 's Lead Generation Automation
 
 ---
 
-*Prem Vishnoi is Head of Data & AI at Lazada  (Makro/Lotus's), leading a 25-person team across Thailand, Cambodia, Myanmar, and Malaysia. He writes about building production AI systems on Azure Databricks, LangChain, and the broader LangChain ecosystem.*
+*Prem Vishnoi is Head of Data & AI at Lazada  (lazada/Redmart /Lotus's), leading a 25-person team across Thailand, Cambodia, Myanmar, and Malaysia. He writes about building production AI systems on Azure Databricks, LangChain, and the broader LangChain ecosystem.*
 
 *Tags: LangSmith, LangChain, LLM Observability, Production AI, Azure OpenAI, E-Commerce AI, Python, MLOps*
