@@ -14,7 +14,11 @@
       <excludeFolder url="file://$MODULE_DIR$/ml/system_design/path_to_save_model/stages/3_LogisticRegression_927538a5dd9c/data" />
       <excludeFolder url="file://$MODULE_DIR$/.env" />
     </content>
+<<<<<<< HEAD
     <orderEntry type="jdk" jdkName="Python 3.13 (data-etl-ml)" jdkType="Python SDK" />
+=======
+    <orderEntry type="inheritedJdk" />
+>>>>>>> b88d06af6f0d3fd5c4755abc0d602c02a146ef44
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
