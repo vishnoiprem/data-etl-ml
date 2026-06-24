@@ -351,5 +351,107 @@ Lookup     Processing     Creation
 
 ---
 
+---
+
+## Learning Resources — Study Before Each Round
+
+### AWS Official (Free)
+
+| Topic | Resource | Link |
+|-------|----------|-------|
+| Bedrock deep-dive | AWS Bedrock Getting Started | https://aws.amazon.com/bedrock/getting-started |
+| Bedrock Agents | AWS Bedrock Agents Workshop | https://catalog.workshops.aws/amazon-bedrock-agents |
+| SageMaker end-to-end | SageMaker Immersion Day | https://catalog.workshops.aws/sagemaker-immersion-day |
+| RAG on AWS | Build RAG with Bedrock Knowledge Bases | https://catalog.workshops.aws/amazon-bedrock |
+| ML Well-Architected | Machine Learning Lens Whitepaper | https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens |
+| GenAI on AWS best practices | Generative AI on AWS Whitepaper | https://aws.amazon.com/whitepapers/generative-ai |
+| Responsible AI | Responsible AI Whitepaper | https://aws.amazon.com/machine-learning/responsible-ai |
+| AgentCore overview | AWS AgentCore Docs | https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html |
+| Inferentia2 / Trainium | AWS Neuron SDK Docs | https://awsdocs-neuron.readthedocs-hosted.com |
+| Security for AI | AWS Security Best Practices | https://docs.aws.amazon.com/security |
+
+---
+
+### Certification Prep
+
+| Cert | Best Course | Link | Time |
+|------|-------------|-------|------|
+| **AWS ML Specialty** (priority) | Adrian Cantrill or Stephane Maarek on Udemy | https://www.udemy.com/course/aws-machine-learning | 30–40 hrs |
+| **AWS ML Specialty** practice exams | Tutorials Dojo | https://tutorialsdojo.com/courses/aws-certified-machine-learning-specialty-practice-exams | 6 hrs |
+| **AWS SA Professional** | Adrian Cantrill (most thorough) | https://learn.cantrill.io/p/aws-certified-solutions-architect-professional | 40–50 hrs |
+| **AWS AI Practitioner** (fastest win) | AWS Skill Builder | https://skillbuilder.aws/learn/course/aws-certified-ai-practitioner | 10 hrs |
+
+---
+
+### GenAI / LLM Deep-Dive Courses
+
+| Topic | Course | Link | Level |
+|-------|--------|-------|-------|
+| LLM fundamentals + fine-tuning | DeepLearning.AI — Generative AI with LLMs | https://www.coursera.org/learn/generative-ai-with-llms | Intermediate |
+| RAG from scratch | DeepLearning.AI — Building and Evaluating Advanced RAG | https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag | Intermediate |
+| LangChain + Agents | DeepLearning.AI — LangChain for LLM Application Development | https://www.deeplearning.ai/short-courses/langchain-for-llm-application-development | Beginner |
+| Agentic AI patterns | DeepLearning.AI — AI Agents in LangGraph | https://www.deeplearning.ai/short-courses/ai-agents-in-langgraph | Intermediate |
+| Fine-tuning LoRA/QLoRA | Hugging Face PEFT Docs | https://huggingface.co/docs/peft/index | Advanced |
+| Prompt / context engineering | DeepLearning.AI — ChatGPT Prompt Engineering for Devs | https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers | Beginner |
+| Evaluating LLMs (RAGAS) | RAGAS Documentation | https://docs.ragas.io | Intermediate |
+| MLOps for LLMs | Full Stack LLM Bootcamp (free) | https://fullstackdeeplearning.com/llm-bootcamp | Intermediate |
+
+---
+
+### Architecture & System Design
+
+| Topic | Resource | Link |
+|-------|----------|-------|
+| AWS GenAI reference architectures | AWS Solutions Library | https://aws.amazon.com/solutions/generative-ai |
+| Vector DB comparison | Pinecone Learning Center | https://www.pinecone.io/learn |
+| OpenSearch vector search | OpenSearch k-NN Plugin Docs | https://opensearch.org/docs/latest/search-plugins/knn/index |
+| SageMaker MLOps patterns | SageMaker MLOps Workshop | https://catalog.workshops.aws/mlops-sagemaker |
+| Distributed LLM inference | vLLM Docs | https://docs.vllm.ai |
+
+---
+
+### Free YouTube Channels (Watch on 1.5x Speed)
+
+| Channel | Best For | Link |
+|---------|---------|-------|
+| AWS re:Invent (official) | Deep architecture sessions — search "Bedrock re:Invent 2024" | https://www.youtube.com/@AWSEventsChannel |
+| Andrej Karpathy | LLM internals — "Let's build GPT" | https://www.youtube.com/@AndrejKarpathy |
+| Yannic Kilcher | Paper walkthroughs (attention, transformers) | https://www.youtube.com/@YannicKilcher |
+| AWS Online Tech Talks | Service-specific deep dives | https://www.youtube.com/@AWSOnlineTechTalks |
+
+---
+
+### Reading List (1–2 Articles Per Day)
+
+| Paper / Article | Why Read It | Link |
+|----------------|-------------|-------|
+| Attention Is All You Need | Foundation of all LLMs | https://arxiv.org/abs/1706.03762 |
+| RLHF — Training language models to follow instructions | InstructGPT — basis for fine-tuning with RLHF | https://arxiv.org/abs/2203.02155 |
+| RAG — Retrieval-Augmented Generation for NLP | Original RAG paper | https://arxiv.org/abs/2005.11401 |
+| LoRA — Low-Rank Adaptation of LLMs | Basis of parameter-efficient fine-tuning | https://arxiv.org/abs/2106.09685 |
+| AWS Bedrock Blog | Latest features and patterns | https://aws.amazon.com/blogs/machine-learning/category/artificial-intelligence/amazon-bedrock |
+| The Batch (Andrew Ng) | Weekly AI news digest | https://www.deeplearning.ai/the-batch |
+
+---
+
+### Priority Study Plan (2 Weeks Before Interview)
+
+```
+Week 1 — AWS Depth
+  Day 1-2:  Bedrock Workshop (catalog.workshops.aws/amazon-bedrock)
+  Day 3-4:  SageMaker Immersion Day labs
+  Day 5:    ML Lens Whitepaper + GenAI Whitepaper (skim)
+  Day 6-7:  AWS ML Specialty practice exams (Tutorials Dojo)
+
+Week 2 — GenAI + Mock
+  Day 1-2:  DeepLearning.AI — Generative AI with LLMs (first 3 modules)
+  Day 3:    DeepLearning.AI — Advanced RAG (full)
+  Day 4:    DeepLearning.AI — AI Agents in LangGraph
+  Day 5:    Mock architecture design (draw 3 systems from memory)
+  Day 6-7:  Practice STAR stories out loud — record yourself
+```
+
+---
+
 *File location: `/Users/prem/PycharmProjects/data-etl-ml/medium/aws/AWS_Interview_Prep.md`*
 *Last updated: June 2026*
