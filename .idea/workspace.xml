@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bf8cce61-e65b-4aae-879c-4c6b319f5bed" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/medium/google/1-round-failed.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/medium/google/python/1-TIER 1 —CORE WARM-UPS (do ALL of these first; they map directly to DE work).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/medium/google/python/1-TIER 1 —CORE WARM-UPS (do ALL of these first; they map directly to DE work).ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/medium/google/python/2-TIER 2 — MEDIUM STAPLES (do these next high-frequency Google mediums that fit DE).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/medium/google/python/2-TIER 2 — MEDIUM STAPLES (do these next high-frequency Google mediums that fit DE).ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/medium/google/python/4.practice-datadriven-python.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/medium/google/python/4.practice-datadriven-python.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -445,7 +442,7 @@
       <workItem from="1782376242641" duration="5000" />
       <workItem from="1782376262862" duration="6037000" />
       <workItem from="1782548594456" duration="9000" />
-      <workItem from="1782548613014" duration="10584000" />
+      <workItem from="1782548613014" duration="11958000" />
     </task>
     <servers />
   </component>
