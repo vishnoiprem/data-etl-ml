@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="bf8cce61-e65b-4aae-879c-4c6b319f5bed" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/medium/google/1-round-failed.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/medium/google/python/1-TIER 1 —CORE WARM-UPS (do ALL of these first; they map directly to DE work).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/medium/google/python/1-TIER 1 —CORE WARM-UPS (do ALL of these first; they map directly to DE work).ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/medium/google/python/2-TIER 2 — MEDIUM STAPLES (do these next high-frequency Google mediums that fit DE).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/medium/google/python/2-TIER 2 — MEDIUM STAPLES (do these next high-frequency Google mediums that fit DE).ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/medium/google/python/4.practice-datadriven-python.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/medium/google/python/4.practice-datadriven-python.ipynb" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="Jupyter Notebook" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;vishnoiprem&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/vishnoiprem/data-etl-ml.git&quot;,
+    &quot;accountId&quot;: &quot;a323e574-48e4-43e5-bfc8-34f874c38794&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="2krxdCUy2Y6VRo6usE1PQDK8M2I" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.02_seed_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Find customers who placed an order in January but not in February.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Neuron.executor&quot;: &quot;Run&quot;,
+    &quot;Python.StreamDeduplicator.executor&quot;: &quot;Run&quot;,
+    &quot;Python.backward_pass.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bert_text.executor&quot;: &quot;Run&quot;,
+    &quot;Python.boolean_model.executor&quot;: &quot;Run&quot;,
+    &quot;Python.contracts_with_cycle.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_streamlit_app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.dask_app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.databrocks_ml_pipline.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fatcherc20.executor&quot;: &quot;Run&quot;,
+    &quot;Python.flatmap.executor&quot;: &quot;Run&quot;,
+    &quot;Python.flatmapdf.executor&quot;: &quot;Run&quot;,
+    &quot;Python.food_model_traini.executor&quot;: &quot;Run&quot;,
+    &quot;Python.full_justify.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.has_cycle.executor&quot;: &quot;Run&quot;,
+    &quot;Python.hashing_encoding.executor&quot;: &quot;Run&quot;,
+    &quot;Python.hashtag_encoding_df.executor&quot;: &quot;Run&quot;,
+    &quot;Python.hybrid_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.index_elasticsearch.executor&quot;: &quot;Run&quot;,
+    &quot;Python.length_of_longest_substring.executor&quot;: &quot;Run&quot;,
+    &quot;Python.llm_model_selection.executor&quot;: &quot;Run&quot;,
+    &quot;Python.llm_training.executor&quot;: &quot;Run&quot;,
+    &quot;Python.map.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mapdf.executor&quot;: &quot;Run&quot;,
+    &quot;Python.missing_number.executor&quot;: &quot;Run&quot;,
+    &quot;Python.model_training.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multi_agent_travel.executor&quot;: &quot;Run&quot;,
+    &quot;Python.nested_integers.executor&quot;: &quot;Run&quot;,
+    &quot;Python.nested_iterator.executor&quot;: &quot;Run&quot;,
+    &quot;Python.neural-network-example.executor&quot;: &quot;Run&quot;,
+    &quot;Python.one_hot_coding.executor&quot;: &quot;Run&quot;,
+    &quot;Python.produce_gpu_events.executor&quot;: &quot;Run&quot;,
+    &quot;Python.query_elasticsearch.executor&quot;: &quot;Run&quot;,
+    &quot;Python.query_solr.executor&quot;: &quot;Run&quot;,
+    &quot;Python.rag_pipeline.executor&quot;: &quot;Run&quot;,
+    &quot;Python.regex_fuzzy_search.executor&quot;: &quot;Run&quot;,
+    &quot;Python.schema_loader.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sigmoid.executor&quot;: &quot;Run&quot;,
+    &quot;Python.solr_index.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tensors_basics.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tfidf_vsm.executor&quot;: &quot;Run&quot;,
+    &quot;Python.tokenization_demo.executor&quot;: &quot;Run&quot;,
+    &quot;Python.top_k_frequent.executor&quot;: &quot;Run&quot;,
+    &quot;Python.txn_sum.executor&quot;: &quot;Run&quot;,
+    &quot;Python.vgg.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/pvishnoi/PycharmProjects/data-etl-ml/medium/google/past-questation&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;terminal&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;documentdb&quot;,
+      &quot;oracle&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/medium/google/past-questation" />
+      <recent name="$PROJECT_DIR$/medium" />
+      <recent name="$PROJECT_DIR$/ml/GenAI-Pinnacle-Master/Learning-Foundations to Human Feedback" />
+      <recent name="$PROJECT_DIR$/ai-engineering" />
+      <recent name="$PROJECT_DIR$/ml/GenAI-Pinnacle-Master/Mastering-LLMOps- From-Build-Deployment" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/medium/google/sql" />
+      <recent name="$PROJECT_DIR$/data-engineering/financial-reporting-platform/src/processing" />
+      <recent name="$PROJECT_DIR$/Spark/document-processing" />
+      <recent name="$PROJECT_DIR$/ml/ai-agent" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.test">
+    <configuration name="Find customers who placed an order in January but not in February" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="data-etl-ml" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/medium/google/sql" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/medium/google/sql/Find customers who placed an order in January but not in February.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="hybrid_search" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="data-etl-ml" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ml/deep_Learning" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ml/deep_Learning/hybrid_search.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="rag_pipeline" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="data-etl-ml" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ml/deep_Learning" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ml/deep_Learning/rag_pipeline.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="data-etl-ml" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/medium/google/python" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/medium/google/python/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="tokenization_demo" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="data-etl-ml" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ml/deep_Learning" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/ml/deep_Learning/tokenization_demo.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.Find customers who placed an order in January but not in February" />
+        <item itemvalue="Python.hybrid_search" />
+        <item itemvalue="Python.tokenization_demo" />
+        <item itemvalue="Python.rag_pipeline" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-PY-261.24374.152" />
+        <option value="bundled-python-sdk-c59985aa861c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.24374.152" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bf8cce61-e65b-4aae-879c-4c6b319f5bed" name="Changes" comment="" />
+      <created>1724055581954</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1724055581954</updated>
+      <workItem from="1724055583044" duration="608000" />
+      <workItem from="1724941058129" duration="627000" />
+      <workItem from="1725584174976" duration="1360000" />
+      <workItem from="1726281407151" duration="1850000" />
+      <workItem from="1728027145678" duration="5527000" />
+      <workItem from="1728485500219" duration="1999000" />
+      <workItem from="1728522497871" duration="1834000" />
+      <workItem from="1728633403688" duration="907000" />
+      <workItem from="1728666682308" duration="1698000" />
+      <workItem from="1728668386413" duration="3804000" />
+      <workItem from="1728750898743" duration="597000" />
+      <workItem from="1728797917405" duration="596000" />
+      <workItem from="1728870274331" duration="2587000" />
+      <workItem from="1732330517112" duration="2000" />
+      <workItem from="1734141829009" duration="2102000" />
+      <workItem from="1734327563174" duration="6587000" />
+      <workItem from="1735098504099" duration="2000" />
+      <workItem from="1735098811569" duration="2263000" />
+      <workItem from="1735291247533" duration="1336000" />
+      <workItem from="1735613481690" duration="973000" />
+      <workItem from="1735700308483" duration="599000" />
+      <workItem from="1737272033406" duration="5761000" />
+      <workItem from="1737716950352" duration="1385000" />
+      <workItem from="1738310600927" duration="4271000" />
+      <workItem from="1738940820836" duration="2526000" />
+      <workItem from="1738993676281" duration="1229000" />
+      <workItem from="1739093788027" duration="1579000" />
+      <workItem from="1742912957261" duration="39000" />
+      <workItem from="1742913062924" duration="6318000" />
+      <workItem from="1743299012638" duration="159000" />
+      <workItem from="1743299177484" duration="27000" />
+      <workItem from="1743299665349" duration="7016000" />
+      <workItem from="1743514347039" duration="1791000" />
+      <workItem from="1743562672616" duration="2406000" />
+      <workItem from="1743842805164" duration="5479000" />
+      <workItem from="1744121925775" duration="3419000" />
+      <workItem from="1744182985537" duration="79000" />
+      <workItem from="1745045066324" duration="1000" />
+      <workItem from="1746240164365" duration="4197000" />
+      <workItem from="1752062905252" duration="1813000" />
+      <workItem from="1752075690490" duration="598000" />
+      <workItem from="1752297676678" duration="4000" />
+      <workItem from="1753531421146" duration="609000" />
+      <workItem from="1753532154091" duration="1649000" />
+      <workItem from="1753714539234" duration="3645000" />
+      <workItem from="1753753787001" duration="1212000" />
+      <workItem from="1753794040387" duration="1371000" />
+      <workItem from="1754204756896" duration="4155000" />
+      <workItem from="1754295644893" duration="4429000" />
+      <workItem from="1754390809547" duration="2619000" />
+      <workItem from="1754394433112" duration="8115000" />
+      <workItem from="1754570390430" duration="4912000" />
+      <workItem from="1754832069619" duration="1280000" />
+      <workItem from="1754979552174" duration="601000" />
+      <workItem from="1755423776903" duration="11000" />
+      <workItem from="1755930494234" duration="2025000" />
+      <workItem from="1755997122363" duration="2771000" />
+      <workItem from="1756509073311" duration="226000" />
+      <workItem from="1756509326525" duration="3928000" />
+      <workItem from="1756654116330" duration="6000" />
+      <workItem from="1769255570474" duration="4341000" />
+      <workItem from="1769316188518" duration="7192000" />
+      <workItem from="1769441484060" duration="2612000" />
+      <workItem from="1769524118724" duration="23000" />
+      <workItem from="1769555878761" duration="2115000" />
+      <workItem from="1769563557484" duration="808000" />
+      <workItem from="1769603186698" duration="43000" />
+      <workItem from="1769724966490" duration="681000" />
+      <workItem from="1769727873289" duration="12748000" />
+      <workItem from="1770104607791" duration="2626000" />
+      <workItem from="1770210397374" duration="13208000" />
+      <workItem from="1770352173084" duration="1000" />
+      <workItem from="1770533958481" duration="4815000" />
+      <workItem from="1770965353096" duration="1470000" />
+      <workItem from="1771115255257" duration="1545000" />
+      <workItem from="1771134475876" duration="634000" />
+      <workItem from="1771140813843" duration="2557000" />
+      <workItem from="1771249921052" duration="1151000" />
+      <workItem from="1771296666454" duration="413000" />
+      <workItem from="1771303443195" duration="11560000" />
+      <workItem from="1771688771975" duration="4000" />
+      <workItem from="1772174774110" duration="4363000" />
+      <workItem from="1772966619664" duration="1920000" />
+      <workItem from="1772972264358" duration="1613000" />
+      <workItem from="1773046658679" duration="1960000" />
+      <workItem from="1773070778249" duration="3295000" />
+      <workItem from="1773112736044" duration="5670000" />
+      <workItem from="1773137122347" duration="894000" />
+      <workItem from="1773145414995" duration="352000" />
+      <workItem from="1773146011119" duration="1933000" />
+      <workItem from="1773149865646" duration="2627000" />
+      <workItem from="1773186964822" duration="2251000" />
+      <workItem from="1773242663842" duration="9259000" />
+      <workItem from="1773295354736" duration="1344000" />
+      <workItem from="1773320581720" duration="1217000" />
+      <workItem from="1773325663670" duration="1200000" />
+      <workItem from="1773444441144" duration="384000" />
+      <workItem from="1773448222205" duration="1580000" />
+      <workItem from="1773758705860" duration="64000" />
+      <workItem from="1774156364133" duration="2085000" />
+      <workItem from="1774911905134" duration="612000" />
+      <workItem from="1775234149301" duration="231000" />
+      <workItem from="1775330295898" duration="2409000" />
+      <workItem from="1776150864102" duration="1972000" />
+      <workItem from="1776480143176" duration="5000" />
+      <workItem from="1776480491657" duration="16000" />
+      <workItem from="1776480577465" duration="11000" />
+      <workItem from="1776480605935" duration="61000" />
+      <workItem from="1776480678677" duration="1420000" />
+      <workItem from="1776509230983" duration="15000" />
+      <workItem from="1776509274361" duration="4608000" />
+      <workItem from="1776614169752" duration="65000" />
+      <workItem from="1776697975095" duration="2087000" />
+      <workItem from="1777601053371" duration="4210000" />
+      <workItem from="1777736256908" duration="38000" />
+      <workItem from="1777736300593" duration="1391000" />
+      <workItem from="1778059274627" duration="873000" />
+      <workItem from="1778060410212" duration="3251000" />
+      <workItem from="1778119488700" duration="229000" />
+      <workItem from="1778255664996" duration="3059000" />
+      <workItem from="1778861309312" duration="2610000" />
+      <workItem from="1778925697671" duration="1874000" />
+      <workItem from="1779234530430" duration="932000" />
+      <workItem from="1779531706719" duration="5482000" />
+      <workItem from="1780583807895" duration="1957000" />
+      <workItem from="1780669933848" duration="2104000" />
+      <workItem from="1780961443793" duration="475000" />
+      <workItem from="1780963738586" duration="592000" />
+      <workItem from="1781183299437" duration="6009000" />
+      <workItem from="1781192668573" duration="256000" />
+      <workItem from="1781220664458" duration="597000" />
+      <workItem from="1781268284275" duration="16989000" />
+      <workItem from="1781683922754" duration="22000" />
+      <workItem from="1781698321274" duration="18000" />
+      <workItem from="1781698382138" duration="31000" />
+      <workItem from="1781843794658" duration="2355000" />
+      <workItem from="1781874140571" duration="134000" />
+      <workItem from="1781874278821" duration="85000" />
+      <workItem from="1781874368829" duration="31000" />
+      <workItem from="1781874405441" duration="62000" />
+      <workItem from="1781874470479" duration="397000" />
+      <workItem from="1781874871585" duration="240000" />
+      <workItem from="1781877632966" duration="55000" />
+      <workItem from="1781877701897" duration="386000" />
+      <workItem from="1782108007735" duration="25940000" />
+      <workItem from="1782276767210" duration="4392000" />
+      <workItem from="1782312843820" duration="1642000" />
+      <workItem from="1782376242641" duration="5000" />
+      <workItem from="1782376262862" duration="6037000" />
+      <workItem from="1782548594456" duration="9000" />
+      <workItem from="1782548613014" duration="10584000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TerminalProjectNonSharedOptionsProvider">
+    <option name="startingDirectory" value="$PROJECT_DIR$" />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="python:apache-flink" />
+    <option featureType="dependencySupport" implementationName="executable:docker" />
+    <option featureType="dependencySupport" implementationName="executable:kubectl" />
+    <option featureType="dependencySupport" implementationName="python:pyspark" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/data_etl_ml$food_model_traini.coverage" NAME="food_model_traini Coverage Results" MODIFIED="1734141990550" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/system_design/fda" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$llm_training.coverage" NAME="llm_training Coverage Results" MODIFIED="1728485697828" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/LLM" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$nested_integers.coverage" NAME="nested_integers Coverage Results" MODIFIED="1746240310498" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nextflix" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$tensors_basics.coverage" NAME="tensors_basics Coverage Results" MODIFIED="1738945683182" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning/vector" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$databrocks_ml_pipline.coverage" NAME="databrocks_ml_pipline Coverage Results" MODIFIED="1737273971438" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/system_design" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$hashing_encoding.coverage" NAME="hashing_encoding Coverage Results" MODIFIED="1728882222660" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/system_design" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$query_elasticsearch.coverage" NAME="query_elasticsearch Coverage Results" MODIFIED="1773072677719" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data-engineering/scb_aml_platform/example_solr_elastic_search" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$rag_pipeline.coverage" NAME="rag_pipeline Coverage Results" MODIFIED="1773147680610" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$boolean_model.coverage" NAME="boolean_model Coverage Results" MODIFIED="1773146024924" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$multi_agent_travel.coverage" NAME="multi_agent_travel Coverage Results" MODIFIED="1754396232997" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/multi-agent" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$regex_fuzzy_search.coverage" NAME="regex_fuzzy_search Coverage Results" MODIFIED="1773147087859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$tokenization_demo.coverage" NAME="tokenization_demo Coverage Results" MODIFIED="1773150462051" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$Neuron.coverage" NAME="Neuron Coverage Results" MODIFIED="1752064222877" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/neural_network" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$dask_app.coverage" NAME="dask_app Coverage Results" MODIFIED="1754299397249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/Dask" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$Find_customers_who_placed_an_order_in_January_but_not_in_February.coverage" NAME="Find customers who placed an order in January but not in February Coverage Results" MODIFIED="1781279819751" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/medium/google/sql" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$map.coverage" NAME="map Coverage Results" MODIFIED="1726281598329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Spark/basic" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$StreamDeduplicator.coverage" NAME="StreamDeduplicator Coverage Results" MODIFIED="1755998460014" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nvidia" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$txn_sum.coverage" NAME="txn_sum Coverage Results" MODIFIED="1737272891900" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Spark/agg" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$one_hot_coding.coverage" NAME="one_hot_coding Coverage Results" MODIFIED="1728672690178" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/system_design" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$hybrid_search.coverage" NAME="hybrid_search Coverage Results" MODIFIED="1773150511511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$mapdf.coverage" NAME="mapdf Coverage Results" MODIFIED="1726281864258" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Spark/basic" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$length_of_longest_substring.coverage" NAME="length_of_longest_substring Coverage Results" MODIFIED="1755997774520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nvidia" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$generate_data.coverage" NAME="generate_data Coverage Results" MODIFIED="1773071787866" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data-engineering/scb_aml_platform/example_solr_elastic_search" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$contracts_with_cycle.coverage" NAME="contracts_with_cycle Coverage Results" MODIFIED="1742914469604" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$nested_iterator.coverage" NAME="nested_iterator Coverage Results" MODIFIED="1746240338586" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nextflix" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$fatcherc20.coverage" NAME="fatcherc20 Coverage Results" MODIFIED="1742913979471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$hashtag_encoding_df.coverage" NAME="hashtag_encoding_df Coverage Results" MODIFIED="1728882246687" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/system_design" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$02_seed_data.coverage" NAME="02_seed_data Coverage Results" MODIFIED="1772973704351" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data-engineering/e-commerce-end-2end/source_mysql/dummy_data" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$query_solr.coverage" NAME="query_solr Coverage Results" MODIFIED="1773072836719" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data-engineering/scb_aml_platform/example_solr_elastic_search" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$index_elasticsearch.coverage" NAME="index_elasticsearch Coverage Results" MODIFIED="1773072193277" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data-engineering/scb_aml_platform/example_solr_elastic_search" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$sigmoid.coverage" NAME="sigmoid Coverage Results" MODIFIED="1752062943057" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/neural_network" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$has_cycle.coverage" NAME="has_cycle Coverage Results" MODIFIED="1742914141084" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$flatmap.coverage" NAME="flatmap Coverage Results" MODIFIED="1726281711457" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Spark/basic" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$produce_gpu_events.coverage" NAME="produce_gpu_events Coverage Results" MODIFIED="1755999018733" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nvidia" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$test.coverage" NAME="test Coverage Results" MODIFIED="1782378753095" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/medium/google/python" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$create_streamlit_app.coverage" NAME="create_streamlit_app Coverage Results" MODIFIED="1753794071309" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/vector-ebedding/job-application-bert" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$flatmapdf.coverage" NAME="flatmapdf Coverage Results" MODIFIED="1726281987471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Spark/basic" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$llm_model_selection.coverage" NAME="llm_model_selection Coverage Results" MODIFIED="1728027696468" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/LLM" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$full_justify.coverage" NAME="full_justify Coverage Results" MODIFIED="1755998452540" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nvidia" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$model_training.coverage" NAME="model_training Coverage Results" MODIFIED="1734141942108" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/system_design/fda" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$missing_number.coverage" NAME="missing_number Coverage Results" MODIFIED="1755997207024" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nvidia" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$neural_network_example.coverage" NAME="neural-network-example Coverage Results" MODIFIED="1739093801004" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$backward_pass.coverage" NAME="backward_pass Coverage Results" MODIFIED="1752063853812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/neural_network" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$top_k_frequent.coverage" NAME="top_k_frequent Coverage Results" MODIFIED="1755997985613" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/Python/nvidia" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$bert_text.coverage" NAME="bert_text Coverage Results" MODIFIED="1756516478341" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/vector-ebedding/BERT-TExt" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$vgg.coverage" NAME="vgg Coverage Results" MODIFIED="1743912967247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$solr_index.coverage" NAME="solr_index Coverage Results" MODIFIED="1773072338956" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data-engineering/scb_aml_platform/example_solr_elastic_search" />
+    <SUITE FILE_PATH="coverage/data_etl_ml$tfidf_vsm.coverage" NAME="tfidf_vsm Coverage Results" MODIFIED="1773146850096" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ml/deep_Learning" />
+  </component>
+</project>
