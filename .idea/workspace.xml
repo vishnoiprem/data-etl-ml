@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bf8cce61-e65b-4aae-879c-4c6b319f5bed" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/medium/aws/~$S Senior AI Architect.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -444,6 +444,10 @@
       <workItem from="1782548594456" duration="9000" />
       <workItem from="1782548613014" duration="11958000" />
       <workItem from="1782624386775" duration="2744000" />
+      <workItem from="1783011223182" duration="906000" />
+      <workItem from="1783038772772" duration="1162000" />
+      <workItem from="1783270492610" duration="493000" />
+      <workItem from="1783356029494" duration="6000" />
     </task>
     <servers />
   </component>
