@@ -1,0 +1,7 @@
+include LICENSE
+include THIRD-PARTY-LICENSES
+recursive-include samcli *
+prune tests
+prune installer
+global-exclude *.py[cod]
+global-exclude *.DS_Store
