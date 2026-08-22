@@ -1,7 +1,10 @@
-fastapi==0.115.8
-uvicorn==0.34.0
-pydantic==2.10.6
-scikit-learn==1.6.1
-numpy==2.2.3
-pytest==8.3.5
-httpx==0.28.1
+# Lower bounds rather than exact pins, so installing this project does not
+# downgrade packages in a shared environment. Pin exactly in a deployment
+# lockfile, not in a demo's requirements file.
+fastapi>=0.115
+uvicorn>=0.34
+pydantic>=2.10
+scikit-learn>=1.6
+numpy>=2.0
+pytest>=8.3
+httpx>=0.28

@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.env" />
       <excludeFolder url="file://$MODULE_DIR$/ml/GenAI-Pinnacle-Master/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/agentic-ai/2-enterprise-search-agent-full/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9 virtualenv at ~/PycharmProjects/data-etl-ml/.env" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
