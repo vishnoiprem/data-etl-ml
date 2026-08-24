@@ -1,12 +1,6 @@
 --- aws key for 1 hoour window 
 
-user name :ed-user-e9e4de19
 
-password : gV&M8kXE3A|k"}!
-access id : AKIAYSPQFGXHVTOSO6NL
-secrect key : TjagnEwzPXrCACjhoGNOPKwPNOQDzHcesvH921el
-
-KNOWLEDGE_BASE_ID :DZFFHW5JQL
 
 
 
