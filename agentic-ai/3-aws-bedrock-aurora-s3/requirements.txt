@@ -1,0 +1,10 @@
+# Installed into the shared parent venv at ../../.env
+#
+# This venv runs LangChain v1, so the legacy RetrievalQA chain and the conversation
+# memory classes come from langchain-classic rather than the langchain package.
+boto3>=1.40
+langchain-aws>=1.7
+langchain-classic>=1.0
+langchain-core>=1.0
+python-dotenv>=1.0
+streamlit>=1.40
