@@ -1,0 +1,30 @@
+.redactedText1
+{
+    position: absolute;
+    margin-left: 6%;
+    margin-top: 61%;
+    color:white;
+
+}
+.redactedText2
+{
+    position: absolute;
+    margin-left: 6%;
+    margin-top: 65%;
+    color:white;
+
+}
+.recorder
+{
+    position: absolute;
+    margin-left: 5%;
+    margin-top: 53%;
+    
+}
+
+.recorder-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
