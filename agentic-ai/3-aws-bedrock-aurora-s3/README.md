@@ -1,8 +1,4 @@
 
-
-
-
-
 How I Built a RAG Chatbot Using LangChain and Amazon Bedrock 
 In this Cloud Lab, you'll learn to create a RAG chatbot using Bedrock Knowledge Bases and base models. You'll also explore utilizing these resources to build a LangChain chatbot.
 Learning Objectives
