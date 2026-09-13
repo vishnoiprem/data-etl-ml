@@ -1,0 +1,8 @@
+command: ["uv", "run", "start-server"]
+env:
+  - name: SERVING_ENDPOINT
+    valueFrom: serving-endpoint
+  - name: MLFLOW_EXPERIMENT_ID
+    valueFrom: experiment
+  - name: APP_ENV
+    value: production
