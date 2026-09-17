@@ -11,7 +11,9 @@ pip install -r requirements.txt
 cp apikeys.example.yml apikeys.yml
 ```
 
-Edit `apikeys.yml` and add your key. Never commit this file. Alternatively, set `OPENAI_API_KEY` in your environment.
+Edit `apikeys.yml` and add your key. Never commit this file. Alternatively, put `OPENAI_API_KEY=...` in `.env` (both files are gitignored).
+
+The chat model must be one that `llama-index-llms-openai` 0.1.x recognises — `gpt-4o-mini` (default) or `gpt-4o`. Passing `gpt-5-nano` raises `ValueError: Unknown model`.
 
 ## 2. Verify the key
 
@@ -31,7 +33,8 @@ Example input:
 Please index: 2023 United States banking crisis
 ```
 
-The first run downloads `BAAI/bge-small-en-v1.5`.
+Titles are taken from the text after `:`, split on commas — no LLM call, so indexing
+works without an API key. The first run downloads `BAAI/bge-small-en-v1.5`.
 
 ## 4. Launch the app
 
