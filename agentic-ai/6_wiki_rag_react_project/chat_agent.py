@@ -11,6 +11,9 @@ from utils import get_apikey
 
 os.environ["OPENAI_API_KEY"] = get_apikey()
 
+# Models known to llama-index-llms-openai 0.1.x; "gpt-5-*" is rejected by it.
+MODELS = ["gpt-4o-mini", "gpt-4o"]
+
 
 def wikisearch_engine(index):
     return index.as_query_engine(
@@ -39,7 +42,7 @@ def create_react_agent(index, model_name: str):
 
 async def configure_agent(settings: dict):
     request_query = settings.get("WIKIPAGES", "").strip()
-    model_name = settings.get("MODEL", "gpt-5-nano")
+    model_name = settings.get("MODEL") or MODELS[0]
     if not request_query:
         raise ValueError("Enter a request such as: Please index: 2023 United States banking crisis")
 
@@ -48,7 +51,8 @@ async def configure_agent(settings: dict):
     index = await cl.make_async(create_index)(request_query)
     agent = create_react_agent(index, model_name)
     cl.user_session.set("agent", agent)
-    await status.update(content="Wikipedia pages indexed. You can now ask grounded questions.")
+    status.content = "Wikipedia pages indexed. You can now ask grounded questions."
+    await status.update()
 
 
 @cl.on_chat_start
@@ -58,7 +62,7 @@ async def on_chat_start():
             Select(
                 id="MODEL",
                 label="OpenAI model",
-                values=["gpt-5-nano"],
+                values=MODELS,
                 initial_index=0,
             ),
             TextInput(
