@@ -1,16 +1,15 @@
 import os
 from pathlib import Path
+
 import yaml
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
-
-
 def get_apikey() -> str:
-    """Read OPENAI_API_KEY from the environment or apikeys.yml."""
+    """Read OPENAI_API_KEY from the environment (.env) or apikeys.yml."""
     env_key = os.getenv("OPENAI_API_KEY")
-    print(env_key)
     if env_key:
         return env_key
 
@@ -18,12 +17,10 @@ def get_apikey() -> str:
     if not key_file.exists():
         raise FileNotFoundError(
             "Missing apikeys.yml. Copy apikeys.example.yml to apikeys.yml "
-            "and add your key, or set OPENAI_API_KEY."
+            "and add your key, or set OPENAI_API_KEY in .env."
         )
 
-    with key_file.open("r", encoding="utf-8") as stream:
-        config = yaml.safe_load(stream) or {}
-
+    config = yaml.safe_load(key_file.read_text(encoding="utf-8")) or {}
     key = config.get("OPENAI_API_KEY") or config.get("openai_api_key")
     if not key or str(key).startswith("replace-"):
         raise ValueError("OPENAI_API_KEY is missing or still contains the placeholder.")
