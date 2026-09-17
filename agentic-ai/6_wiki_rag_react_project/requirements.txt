@@ -1,4 +1,5 @@
-chainlit>=1.1,<2.0
+# chainlit 1.x fails to import on pydantic >=2.10 ("CodeSettings is not fully defined")
+chainlit>=2.4,<3
 llama-index>=0.10.65,<0.11
 llama-index-llms-openai>=0.1.27,<0.2
 llama-index-readers-wikipedia>=0.1.4,<0.2

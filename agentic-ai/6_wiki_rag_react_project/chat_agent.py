@@ -1,43 +1,12 @@
-import os
+"""Host 1: Chainlit. The browser is the client; this process serves it.
+
+Run with:  chainlit run chat_agent.py -h
+"""
+
 import chainlit as cl
 from chainlit.input_widget import Select, TextInput
 
-from llama_index.core.agent import ReActAgent
-from llama_index.core.tools import QueryEngineTool, ToolMetadata
-from llama_index.llms.openai import OpenAI
-
-from index_wikipages import create_index
-from utils import get_apikey
-
-os.environ["OPENAI_API_KEY"] = get_apikey()
-
-# Models known to llama-index-llms-openai 0.1.x; "gpt-5-*" is rejected by it.
-MODELS = ["gpt-4o-mini", "gpt-4o"]
-
-
-def wikisearch_engine(index):
-    return index.as_query_engine(
-        response_mode="compact",
-        verbose=True,
-        similarity_top_k=10,
-    )
-
-
-def create_react_agent(index, model_name: str):
-    wikipedia_tool = QueryEngineTool(
-        query_engine=wikisearch_engine(index),
-        metadata=ToolMetadata(
-            name="Wikipedia",
-            description="Useful for performing searches on the indexed Wikipedia knowledge base.",
-        ),
-    )
-    llm = OpenAI(model=model_name, temperature=0)
-    return ReActAgent.from_tools(
-        tools=[wikipedia_tool],
-        llm=llm,
-        verbose=True,
-        max_iterations=10,
-    )
+from rag_agent import MODELS, build_agent
 
 
 async def configure_agent(settings: dict):
@@ -48,9 +17,12 @@ async def configure_agent(settings: dict):
 
     status = cl.Message(content="Indexing the requested Wikipedia pages...")
     await status.send()
-    index = await cl.make_async(create_index)(request_query)
-    agent = create_react_agent(index, model_name)
+
+    # build_agent blocks (Wikipedia fetch + local embeddings), so keep the
+    # event loop free by running it in a worker thread.
+    agent = await cl.make_async(build_agent)(request_query, model_name)
     cl.user_session.set("agent", agent)
+
     status.content = "Wikipedia pages indexed. You can now ask grounded questions."
     await status.update()
 
