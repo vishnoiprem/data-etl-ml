@@ -1,5 +1,7 @@
+import os
 from typing import List
 
+import wikipedia
 from llama_index.core import Settings, VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -7,6 +9,14 @@ from llama_index.readers.wikipedia import WikipediaReader
 
 # Local embeddings only: indexing makes no OpenAI call at all.
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
+
+# The wikipedia package defaults to plain http and a shared User-Agent that
+# Wikimedia rate-limits (HTTP 429 with a text/plain body -> JSONDecodeError).
+# Their API policy requires a descriptive UA with a contact address.
+WIKI_CONTACT = os.getenv("WIKI_CONTACT", "pvishnoi@cpaxtra.co.th")
+wikipedia.set_lang("en")
+wikipedia.wikipedia.API_URL = "https://en.wikipedia.org/w/api.php"
+wikipedia.set_user_agent(f"wiki-rag-react/0.1 ({WIKI_CONTACT})")
 
 
 def wikipage_list(request_query: str) -> List[str]:
