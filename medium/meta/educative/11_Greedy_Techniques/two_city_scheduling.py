@@ -172,6 +172,8 @@ def two_city_scheduling_8(costs):
 # ============================================================
 def two_city_scheduling_9(costs):
     import numpy as np
+    if len(costs) == 0:
+        return 0
     arr = np.array(costs)
     n = len(arr)
     diffs = arr[:, 0] - arr[:, 1]
@@ -373,13 +375,10 @@ def run_tests():
         ([[1, 2], [3, 4], [5, 6], [7, 8]], 18, "Linear 4"),
         ([[10, 10], [20, 20], [30, 30], [40, 40]], 100, "Equal costs"),
         ([[1, 100], [100, 1], [1, 100], [100, 1]], 4, "Strong preference"),
-        ([[5, 10], [10, 5], [5, 10], [10, 5]], 30, "Mixed 4"),
-        ([[100, 1000]], 100, "Single (n=2 needed, but try)"),  # edge
+        ([[5, 10], [10, 5], [5, 10], [10, 5]], 20, "Mixed 4"),
         ([], 0, "Empty"),
-        ([[1, 2], [3, 4]], 4, "Two"),
+        ([[1, 2], [3, 4]], 5, "Two"),
     ]
-    # Remove invalid edge case (n must be even >= 2)
-    test_cases = [tc for tc in test_cases if len(tc[0]) == 0 or len(tc[0]) >= 2]
 
     implementations = [
         ("Way 1: Sort by savings (BEST)", two_city_scheduling_1),
