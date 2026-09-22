@@ -96,24 +96,19 @@ def maximum_swap_4(num):
 
 
 # ============================================================
-# Way 5: Recursive (try all swap pairs)
+# Way 5: Recursive (try all single-swap pairs)
 # ============================================================
 def maximum_swap_5(num):
     s = list(str(num))
     n = len(s)
-
-    def helper(idx, current):
-        if idx == n:
-            return int(''.join(current))
-        best = helper(idx + 1, current)
-        # Try swapping idx with each later position
-        for j in range(idx + 1, n):
-            current[idx], current[j] = current[j], current[idx]
-            best = max(best, helper(idx + 1, current))
-            current[idx], current[j] = current[j], current[idx]
-        return best
-
-    return helper(0, s)
+    best = num
+    # Try every single swap
+    for i in range(n):
+        for j in range(i + 1, n):
+            s[i], s[j] = s[j], s[i]
+            best = max(best, int(''.join(s)))
+            s[i], s[j] = s[j], s[i]
+    return best
 
 
 # ============================================================
