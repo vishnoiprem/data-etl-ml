@@ -268,26 +268,35 @@ def partition_labels_8(s):
 
 
 # =============================================================================
-# WAY 9: Greedy with character count technique
+# WAY 9: Greedy with character count technique (per-partition)
 # =============================================================================
 def partition_labels_9(s):
     """
-    Use Counter to count remaining occurrences.
-    Decrease as we go. Track count of chars still > 0.
-    When that count is 0, partition ends.
+    Track chars in current partition and chars seen outside (to the right).
+    When char count in partition reaches its global count, partition ends.
+
+    Algorithm:
+    1. last[c] = total count of c.
+    2. seen[c] = count of c in current partition.
+    3. When seen[c] == last[c] for all c in partition, partition ends.
     """
     from collections import Counter
-    counts = Counter(s)
+    total = Counter(s)
+    seen = Counter()
     result = []
-    active = len(counts)  # number of distinct chars with count > 0
     start = 0
+    # Track chars in current partition whose seen count is fully filled.
+    partition_chars = set()
     for i, c in enumerate(s):
-        counts[c] -= 1
-        if counts[c] == 0:
-            active -= 1
-        if active == 0:
+        seen[c] += 1
+        partition_chars.add(c)
+        # For each char in partition, check if seen == total.
+        all_complete = all(seen[c] == total[c] for c in partition_chars)
+        if all_complete:
             result.append(i - start + 1)
             start = i + 1
+            partition_chars = set()
+            seen = Counter()
     return result
 
 

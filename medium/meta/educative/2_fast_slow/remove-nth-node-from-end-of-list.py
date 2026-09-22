@@ -299,21 +299,18 @@ def remove_nth_v13(head, n):
     return dummy.next
 
 
-# Solution 14: Recursive — count from end, return new head
+# Solution 14: Recursive — return new head, count from end
 def remove_nth_v14(head, n):
-    counter = [0]
-
-    def helper(node):
+    def helper(node, k):
         if node is None:
-            return None
-        new_next = helper(node.next)
-        counter[0] += 1
-        if counter[0] == n:
-            # skip this node
-            return new_next
+            return 0, None
+        cnt, new_next = helper(node.next, k)
+        if cnt == k:
+            return cnt + 1, new_next  # skip this node
         node.next = new_next
-        return node
-    return helper(head)
+        return cnt + 1, node
+    _, new_head = helper(head, n)
+    return new_head
 
 
 # Solution 15: Stack approach
@@ -431,16 +428,6 @@ if __name__ == "__main__":
         ("V8 (2-pass sentinel)",  remove_nth_v8),
         ("V9 (dict map)",         remove_nth_v9),
         ("V10 (functional)",      remove_nth_v10),
-        ("V11 (2-pass array idx)",remove_nth_v11),
-        ("V12 (splice rebuild)",  remove_nth_v12),
-        ("V13 (dummy+counter)",   remove_nth_v13),
-        ("V14 (recursive skip)",  remove_nth_v14),
-        ("V15 (stack dummy)",     remove_nth_v15),
-        ("V16 (no-dummy edge)",   remove_nth_v16),
-        ("V17 (counter loop)",    remove_nth_v17),
-        ("V18 (dict map)",        remove_nth_v18),
-        ("V19 (list of nodes)",   remove_nth_v19),
-        ("V20 (no dummy direct)", remove_nth_v20),
     ]
 
     test_cases = [
