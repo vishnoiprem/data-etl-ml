@@ -67,14 +67,15 @@ INTERVIEW THINKING (10 STEPS):
 10. MENTAL TRACE:
     people = [1, 2], limit = 3
     After sort: [1, 2], left=0, right=1
-    Iteration 1: boats=1; 1+2=3<=3, left=1, right=0 -> loop ends
+    Iteration 1: right=0, boats=1; 1+2=3<=3, left=1 -> loop ends (1 <= 0 false)
     Answer: 1 ✓
 
     people = [3, 2, 2, 1], limit = 3
     After sort: [1, 2, 2, 3], left=0, right=3
-    Iter 1: boats=1; 1+3=4>3, right=2
-    Iter 2: boats=2; 1+2=3<=3, left=1, right=1 -> loop ends
-    Answer: 2 ✓
+    Iter 1: right=2, boats=1; 1+3=4>3 -> no pair
+    Iter 2: right=1, boats=2; people[0]+people[2]=1+2=3<=3 -> pair, left=1
+    Iter 3: right=0, boats=3; left=1 > right=0 -> no pair
+    Answer: 3 ✓ (boats: {3}, {1,2}, {2})
 """
 
 
@@ -87,12 +88,12 @@ def rescue_boats_v1(people, limit):
     left, right = 0, len(people) - 1
     boats = 0
     while left <= right:
-        boats += 1
-        if left == right:
-            break
-        if people[left] + people[right] <= limit:
-            left += 1
+        # Heaviest (right) always gets on a boat
         right -= 1
+        boats += 1
+        # If lightest (left) can fit on the same boat, pair them
+        if left <= right and people[left] + people[right + 1] <= limit:
+            left += 1
     return boats
 
 
@@ -105,12 +106,10 @@ def rescue_boats_v2(people, limit):
     left, right = 0, len(sorted_people) - 1
     boats = 0
     while left <= right:
-        boats += 1
-        if left == right:
-            break
-        if sorted_people[left] + sorted_people[right] <= limit:
-            left += 1
         right -= 1
+        boats += 1
+        if left <= right and sorted_people[left] + sorted_people[right + 1] <= limit:
+            left += 1
     return boats
 
 
@@ -120,9 +119,8 @@ def rescue_boats_v2(people, limit):
 def rescue_boats_v3(people, limit):
     """
     Counting sort / bucket-based approach. Since weights <= limit, use a
-    freq array. Walk from heaviest down; for each heavy person, the
-    remaining capacity is limit - heavy. Greedily assign the heaviest
-    light person who fits in that capacity.
+    freq array. For each heavy person, try to pair with the heaviest
+    available person that fits below or equal to (limit - heavy).
     """
     if not people:
         return 0
@@ -140,16 +138,17 @@ def rescue_boats_v3(people, limit):
         # Take one heavy person
         freq[heavy] -= 1
         boats += 1
-        # Find the heaviest light person that fits in remaining capacity
-        need = limit - heavy
-        light = min(heavy, need)
-        # Find largest light <= need (and <= heavy to avoid double-decrement
-        # when heavy == light: in that case we already used freq[heavy] above,
-        # but need becomes 0; we should NOT pair with another of the same weight)
-        while light > 0 and freq[light] == 0:
-            light -= 1
-        if light > 0 and light <= need and light < heavy:
-            freq[light] -= 1
+        # Find the heaviest partner weight that fits (light + heavy <= limit)
+        # and is <= the remaining capacity
+        target = limit - heavy
+        if target > 0:
+            light = min(target, heavy)  # can't be > heavy (would be a heavier partner)
+            while light > 0 and freq[light] == 0:
+                light -= 1
+            if light > 0:
+                freq[light] -= 1
+        # If light == heavy, we already took one (above); if there's another
+        # at same weight, freq[heavy] still > 0 and we'll get it next iter.
     return boats
 
 
@@ -157,26 +156,42 @@ def rescue_boats_v3(people, limit):
 # Solution 4: Using Counter (O(n log n) but elegant)
 # ==============================================================
 def rescue_boats_v4(people, limit):
-    """Use a sorted Counter for pairing."""
+    """
+    Use Counter but two-pointer-like: each iteration consumes one 'heavy'
+    and possibly one 'light'. We track counts separately.
+    """
     from collections import Counter
-    weights = sorted(Counter(people).items())
+    counts = Counter(people)
+    weights = sorted(counts.keys())  # unique weights, ascending
     boats = 0
     left, right = 0, len(weights) - 1
     while left <= right:
+        heavy = weights[right]
+        # Take one heavy person
+        counts[heavy] -= 1
+        if counts[heavy] == 0:
+            right -= 1
         boats += 1
-        light_w, light_count = weights[left]
-        if left == right:
-            # All remaining same weight; each needs own boat
-            boats += light_count - 1
-            break
-        heavy_w, heavy_count = weights[right]
-        if light_w + heavy_w <= limit:
-            # Pair as many light as we can with each heavy
-            pairs = min(light_count, heavy_count)
-            weights[left] = (light_w, light_count - pairs)
-            weights[right] = (heavy_w, heavy_count - pairs)
-            boats += (max(light_count, heavy_count) - pairs)  # remaining go alone
-        right -= 1
+        # Find heaviest partner weight that fits (light + heavy <= limit).
+        # We want the largest light_w <= (limit - heavy).
+        max_light = limit - heavy
+        if left <= right and weights[left] <= max_light:
+            # Binary search for largest weight <= max_light
+            lo, hi = left, right
+            best = left
+            while lo <= hi:
+                mid = (lo + hi) // 2
+                if weights[mid] <= max_light:
+                    best = mid
+                    lo = mid + 1
+                else:
+                    hi = mid - 1
+            light = weights[best]
+            counts[light] -= 1
+            if counts[light] == 0:
+                # Advance left pointer past all used-up weights
+                while left <= right and (weights[left] not in counts):
+                    left += 1
     return boats
 
 
@@ -233,7 +248,7 @@ def rescue_boats_v6(people, limit):
             return 0
         if lo == hi:
             return 1
-        # Try to pair lo with hi
+        # Heaviest (hi) goes on a boat. If lightest (lo) can pair, take both.
         if sorted_p[lo] + sorted_p[hi] <= limit:
             return 1 + helper(lo + 1, hi - 1)
         return 1 + helper(lo, hi - 1)
@@ -250,12 +265,10 @@ def rescue_boats_v7(people, limit):
     boats = 0
     left, right = 0, len(sorted_p) - 1
     while left <= right:
-        boats += 1
-        if left == right:
-            break
-        if sorted_p[left] + sorted_p[right] <= limit:
-            left += 1
         right -= 1
+        boats += 1
+        if left <= right and sorted_p[left] + sorted_p[right + 1] <= limit:
+            left += 1
     return boats
 
 
@@ -286,12 +299,10 @@ def rescue_boats_v9(people, limit):
         boats = 0
         left, right = 0, len(arr) - 1
         while left <= right:
-            boats += 1
-            if left == right:
-                break
-            if arr[left] + arr[right] <= limit:
-                left += 1
             right -= 1
+            boats += 1
+            if left <= right and arr[left] + arr[right + 1] <= limit:
+                left += 1
         return boats
     except ImportError:
         return rescue_boats_v1(people, limit)
@@ -302,21 +313,20 @@ def rescue_boats_v9(people, limit):
 # ==============================================================
 def rescue_boats_v10(people, limit):
     """
-    Sort, then split at median. Count pairs from each half.
-    If limit >= 2*median_weight, then most pair up.
+    Two-pointer with simplified structure. Decrement right and increment
+    boats first (heaviest goes), then optionally pair lightest.
     """
     sorted_p = sorted(people)
     n = len(sorted_p)
     if n == 0:
         return 0
-    # Simple two-pointer (similar to V1 but written differently)
     left, right = 0, n - 1
     boats = 0
     while left <= right:
-        if sorted_p[left] + sorted_p[right] <= limit:
-            left += 1
         right -= 1
         boats += 1
+        if left <= right and sorted_p[left] + sorted_p[right + 1] <= limit:
+            left += 1
     return boats
 
 
@@ -339,7 +349,7 @@ if __name__ == "__main__":
 
     test_cases = [
         ([1, 2],                3, 1),
-        ([3, 2, 2, 1],          3, 2),     # (3 alone), (1+2) -> 2 boats
+        ([3, 2, 2, 1],          3, 3),     # (3 alone), (1+2), (2 alone)
         ([3, 5, 3, 4],          5, 4),     # all alone
         ([1, 2, 3, 4],          5, 2),     # (1,4), (2,3)
         ([5, 1, 4, 2],          6, 2),     # (1,5), (2,4)
