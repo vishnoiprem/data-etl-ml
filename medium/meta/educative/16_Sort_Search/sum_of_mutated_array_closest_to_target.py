@@ -120,20 +120,34 @@ def find_best_value_3(arr, target):
 
 
 # =============================================================================
-# WAY 4: Linear search with smart candidates (sorted unique + 0 + max+1)
+# WAY 4: Iterate sorted unique + estimate + nearby range
 # =============================================================================
 def find_best_value_4(arr, target):
-    """Only check critical values: 0 and unique sorted values, plus boundaries."""
+    """
+    Check 0, every value in arr, and a range around target/n.
+    """
     sorted_unique = sorted(set(arr))
+    n = len(arr)
+    estimate = max(0, target // n)
 
     def compute(v):
         return sum(min(x, v) for x in arr)
 
+    candidates = set([0, estimate, estimate + 1])
+    candidates.update(sorted_unique)
+    for v in sorted_unique:
+        if v > 0:
+            candidates.add(v - 1)
+        candidates.add(v + 1)
+    # Add a range around estimate (covers cases where optimal v is between values)
+    for v in range(max(0, estimate - 2), estimate + 5):
+        candidates.add(v)
+
     best_v = 0
     best_diff = abs(compute(0) - target)
-    # Check 0 and every value in arr
-    candidates = [0] + sorted_unique
-    for v in candidates:
+    for v in sorted(candidates):
+        if v < 0:
+            continue
         s = compute(v)
         diff = abs(s - target)
         if diff < best_diff:
@@ -141,18 +155,6 @@ def find_best_value_4(arr, target):
             best_v = v
         elif diff == best_diff:
             best_v = min(best_v, v)
-    # Also check max(arr) - 1 (often optimal when target ≈ sum/2 * n / something)
-    if max(arr) > 0:
-        for v in [max(arr) - 1, max(arr)]:
-            if v in candidates:
-                continue
-            s = compute(v)
-            diff = abs(s - target)
-            if diff < best_diff:
-                best_diff = diff
-                best_v = v
-            elif diff == best_diff:
-                best_v = min(best_v, v)
     return best_v
 
 
@@ -296,15 +298,18 @@ def find_best_value_8(arr, target):
 
 
 # =============================================================================
-# WAY 9: Sort + iterate prefix on the fly
+# WAY 9: Sort + iterate prefix on the fly (with actual sum)
 # =============================================================================
 def find_best_value_9(arr, target):
-    """Iterate sorted, compute prefix on the fly."""
+    """Iterate sorted, compute prefix on the fly. Use actual cap_sum for comparison."""
     a = sorted(arr)
     n = len(a)
     total = sum(a)
     if total <= target:
         return a[-1]
+
+    def cap_sum(v):
+        return sum(min(x, v) for x in a)
 
     best_v = 0
     best_diff = abs(total - target)
@@ -316,7 +321,7 @@ def find_best_value_9(arr, target):
         for v in [v_floor, v_floor + 1]:
             if v < 0:
                 continue
-            s = prefix + remaining * v
+            s = cap_sum(v)
             diff = abs(s - target)
             if diff < best_diff:
                 best_diff = diff
