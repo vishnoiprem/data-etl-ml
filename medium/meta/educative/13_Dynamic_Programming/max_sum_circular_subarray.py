@@ -228,31 +228,23 @@ from functools import lru_cache
 
 
 def maxSubarraySumCircular_8(nums):
-    # Use DP: max subarray ending at i (no wrap), max subarray starting at i (no wrap)
-    # For wrap, we can split into prefix + suffix where neither is empty
     n = len(nums)
     if n == 1:
         return nums[0]
 
-    # max subarray ending at i (no wrap)
-    end_at = [0] * n
-    end_at[0] = nums[0]
+    # Kadane's max
+    max_ending = max_sofar = nums[0]
+    min_ending = min_sofar = nums[0]
     for i in range(1, n):
-        end_at[i] = max(nums[i], end_at[i - 1] + nums[i])
+        x = nums[i]
+        max_ending = max(x, max_ending + x)
+        max_sofar = max(max_sofar, max_ending)
+        min_ending = min(x, min_ending + x)
+        min_sofar = min(min_sofar, min_ending)
 
-    # max subarray starting at i (no wrap)
-    start_at = [0] * n
-    start_at[n - 1] = nums[n - 1]
-    for i in range(n - 2, -1, -1):
-        start_at[i] = max(nums[i], start_at[i + 1] + nums[i])
-
-    # max non-wrap is max(end_at)
-    max_no_wrap = max(end_at)
-
-    # max wrap = max over i (end_at[i] + start_at[i+1]) for i in [0..n-2]
-    max_wrap = max(end_at[i] + start_at[i + 1] for i in range(n - 1))
-
-    return max(max_no_wrap, max_wrap)
+    if max_sofar < 0:
+        return max_sofar
+    return max(max_sofar, sum(nums) - min_sofar)
 
 
 # ============================================================
@@ -447,10 +439,10 @@ def maxSubarraySumCircular_15(nums):
 # Way 16: Single pass inline
 # ============================================================
 def maxSubarraySumCircular_16(nums):
-    total = 0
+    total = nums[0]
     max_e = max_s = nums[0]
     min_e = min_s = nums[0]
-    for x in nums:
+    for x in nums[1:]:
         max_e = max(x, max_e + x)
         max_s = max(max_s, max_e)
         min_e = min(x, min_e + x)
@@ -607,10 +599,10 @@ def run_tests():
         ([3, -1, 2, -1], 4, "Standard 2"),
         ([1, 2, 3, 4, 5], 15, "All positive"),
         ([-1, -2, -3, -4], -1, "All negative ascending"),
-        ([5, -2, 5], 8, "Wrap partial"),
+        ([5, -2, 5], 10, "Wrap partial: [5,5]=10"),
         ([2, -2, 2, -2, 2], 4, "Alternating"),
         ([8, -1, 3, 4], 15, "Wrap: [3,4,8]"),
-        ([1, -2, 3, -2, 4], 5, "Wrap example"),
+        ([1, -2, 3, -2, 4], 6, "Wrap example: [3,-2,4,1]=6"),
     ]
 
     implementations = [

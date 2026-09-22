@@ -318,28 +318,33 @@ def max_profit_iii_13(prices):
     if n < 2:
         return 0
     best = 0
-    for i in range(n):
-        # First transaction in [0..i]
-        if i >= 1:
-            mn = prices[0]
-            mx = prices[0]
-            for j in range(i + 1):
-                mn = min(mn, prices[j])
-                mx = max(mx, prices[j])
-            first = mx - mn
-        else:
-            first = 0
-        # Second transaction in [i..n-1]
-        if i < n - 1:
-            mn2 = prices[i]
-            mx2 = prices[i]
-            for j in range(i, n):
-                mn2 = min(mn2, prices[j])
-                mx2 = max(mx2, prices[j])
-            second = mx2 - mn2
-        else:
+    # First compute the best 1-tx profit overall (no 2nd tx).
+    overall_lo = prices[0]
+    overall_best = 0
+    for p in prices:
+        overall_lo = min(overall_lo, p)
+        overall_best = max(overall_best, p - overall_lo)
+    best = overall_best
+
+    # Two non-overlapping transactions:
+    # first in [0..i1], second in [i2..n-1], i1 < i2.
+    # Try all splits between first-sell and second-buy.
+    for i1 in range(n - 1):
+        # Best 1-tx profit in [0..i1]
+        first = 0
+        if i1 >= 1:
+            lo = prices[0]
+            for j in range(i1 + 1):
+                lo = min(lo, prices[j])
+                first = max(first, prices[j] - lo)
+        # Best 1-tx profit in [i1+1..n-1]  (strictly after first)
+        if i1 + 1 <= n - 2:
             second = 0
-        best = max(best, first + second)
+            lo2 = prices[i1 + 1]
+            for j in range(i1 + 1, n):
+                lo2 = min(lo2, prices[j])
+                second = max(second, prices[j] - lo2)
+            best = max(best, first + second)
     return best
 
 
@@ -499,8 +504,9 @@ def max_profit_iii_20(prices):
     """
     if not prices:
         return 0
-    buy1 = sell1 = buy2 = sell2 = 0
-    buy1 = -prices[0]
+    # Initialize buy1 and buy2 as if we bought on day 0.
+    buy1 = buy2 = -prices[0]
+    sell1 = sell2 = 0
     for p in prices[1:]:
         buy1 = max(buy1, -p)
         sell1 = max(sell1, buy1 + p)
