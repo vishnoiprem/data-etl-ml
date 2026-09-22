@@ -287,16 +287,17 @@ def number_of_clean_rooms_7(room):
         visited.add((r, c, d))
         cleaned.add((r, c))
 
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
-
-        r, c = nr, nc
+            d = (d + 1) % 4
+        if not moved:
+            break
 
     return len(cleaned)
 
@@ -309,7 +310,6 @@ class CleaningRobot:
         self.room = room
         self.m = len(room)
         self.n = len(room[0]) if room else 0
-        # Direction: 0=right, 1=down, 2=left, 3=up
         self.deltas = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     def is_blocked(self, r, c):
@@ -324,14 +324,16 @@ class CleaningRobot:
             visited.add((r, c, d))
             cleaned.add((r, c))
 
-            dr, dc = self.deltas[d]
-            if self.is_blocked(r + dr, c + dc):
-                d = (d + 1) % 4
+            moved = False
+            for _ in range(4):
                 dr, dc = self.deltas[d]
-                if self.is_blocked(r + dr, c + dc):
+                if not self.is_blocked(r + dr, c + dc):
+                    r, c = r + dr, c + dc
+                    moved = True
                     break
-
-            r, c = r + dr, c + dc
+                d = (d + 1) % 4
+            if not moved:
+                break
 
         return len(cleaned)
 
@@ -344,7 +346,7 @@ def number_of_clean_rooms_8(room):
 
 
 # =============================================================================
-# WAY 9: Recursive - too deep, use iterative instead
+# WAY 9: Recursive simulation
 # =============================================================================
 def number_of_clean_rooms_9(room):
     """Recursive simulation."""
@@ -362,16 +364,13 @@ def number_of_clean_rooms_9(room):
         visited.add((r, c, d))
         cleaned.add((r, c))
 
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-                return  # Stuck
-
-        step(nr, nc, d)
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                step(nr, nc, d)
+                return
+            d = (d + 1) % 4
 
     step(0, 0, 0)
     return len(cleaned)
@@ -392,18 +391,18 @@ def number_of_clean_rooms_10(room):
     space_visited = {(0, 0)}
 
     while True:
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-
-        # Try to move, turn if blocked
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
+            d = (d + 1) % 4
+        if not moved:
+            break
 
-        r, c = nr, nc
         if (r, c, d) in state_visited:
             break
         state_visited.add((r, c, d))
@@ -429,16 +428,17 @@ def number_of_clean_rooms_11(room):
     while (r, c, d) not in state_visited:
         state_visited.add((r, c, d))
 
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
-
-        r, c = nr, nc
+            d = (d + 1) % 4
+        if not moved:
+            break
         path.append((r, c))
 
     return len(set(path))
@@ -455,7 +455,7 @@ def number_of_clean_rooms_12(room):
 
     deltas = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     r, c, d = 0, 0, 0
-    visited = {}  # (r,c,d) -> True
+    visited = {}
     cleaned = {}
 
     while True:
@@ -465,16 +465,17 @@ def number_of_clean_rooms_12(room):
         visited[key] = True
         cleaned[(r, c)] = True
 
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
-
-        r, c = nr, nc
+            d = (d + 1) % 4
+        if not moved:
+            break
 
     return len(cleaned)
 
@@ -500,16 +501,17 @@ def number_of_clean_rooms_13(room):
         visited.add(state)
         cleaned.add((r, c))
 
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
-
-        r, c = nr, nc
+            d = (d + 1) % 4
+        if not moved:
+            break
 
     return len(cleaned)
 
@@ -529,16 +531,18 @@ def number_of_clean_rooms_14(room):
     cleaned = {(0, 0)}
 
     while True:
-        dr, dc = DIRS[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc]:
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = DIRS[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc]:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
+            d = (d + 1) % 4
+        if not moved:
+            break
 
-        r, c = nr, nc
         if (r, c, d) in states:
             break
         states.add((r, c, d))
@@ -563,13 +567,16 @@ def number_of_clean_rooms_15(room):
         return 0 <= nr < m and 0 <= nc < n and not room[nr][nc]
 
     while True:
-        dr, dc = ds[d]
-        if not ok(r + dr, c + dc):
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = ds[d]
-            if not ok(r + dr, c + dc):
+            if ok(r + dr, c + dc):
+                r, c = r + dr, c + dc
+                moved = True
                 break
-        r, c = r + dr, c + dc
+            d = (d + 1) % 4
+        if not moved:
+            break
         if (r, c, d) in vis:
             break
         vis.add((r, c, d))
@@ -599,16 +606,17 @@ def number_of_clean_rooms_16(room):
             visited.add((r, c, d))
             cleaned.add((r, c))
 
-            dr, dc = deltas[d]
-            nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or grid[nr][nc] == 1:
-                d = (d + 1) % 4
+            moved = False
+            for _ in range(4):
                 dr, dc = deltas[d]
                 nr, nc = r + dr, c + dc
-                if not (0 <= nr < m and 0 <= nc < n) or grid[nr][nc] == 1:
+                if 0 <= nr < m and 0 <= nc < n and grid[nr][nc] == 0:
+                    r, c = nr, nc
+                    moved = True
                     break
-
-            r, c = nr, nc
+                d = (d + 1) % 4
+            if not moved:
+                break
 
         return len(cleaned)
     except ImportError:
@@ -640,13 +648,16 @@ def number_of_clean_rooms_17(room):
         visited.add((r, c, d))
         cleaned.add((r, c))
 
-        if not can_move(r, c, d):
-            d = turn(d)
-            if not can_move(r, c, d):
+        moved = False
+        for _ in range(4):
+            if can_move(r, c, d):
+                dr, dc = deltas[d]
+                r, c = r + dr, c + dc
+                moved = True
                 break
-
-        dr, dc = deltas[d]
-        r, c = r + dr, c + dc
+            d = turn(d)
+        if not moved:
+            break
 
     return len(cleaned)
 
@@ -672,14 +683,16 @@ def number_of_clean_rooms_18(room):
         visited.add((r, c, d))
         cleaned.add((r, c))
 
-        dr, dc = deltas[d]
-        if blocked(r + dr, c + dc):
-            d = (d + 1) % 4
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
-            if blocked(r + dr, c + dc):
+            if not blocked(r + dr, c + dc):
+                r, c = r + dr, c + dc
+                moved = True
                 break
-
-        r, c = r + dr, c + dc
+            d = (d + 1) % 4
+        if not moved:
+            break
 
     return len(cleaned)
 
@@ -702,13 +715,16 @@ def number_of_clean_rooms_19(room):
         nonlocal r, c, d
         while True:
             yield (r, c, d)
-            dr, dc = deltas[d]
-            if not (0 <= r + dr < m and 0 <= c + dc < n) or room[r + dr][c + dc] == 1:
-                d = (d + 1) % 4
+            moved = False
+            for _ in range(4):
                 dr, dc = deltas[d]
-                if not (0 <= r + dr < m and 0 <= c + dc < n) or room[r + dr][c + dc] == 1:
-                    return  # Stop iteration
-            r, c = r + dr, c + dc
+                if 0 <= r + dr < m and 0 <= c + dc < n and room[r + dr][c + dc] == 0:
+                    r, c = r + dr, c + dc
+                    moved = True
+                    break
+                d = (d + 1) % 4
+            if not moved:
+                return
 
     for state in state_iter():
         if state in visited:
@@ -736,7 +752,6 @@ def number_of_clean_rooms_20(room):
     if not room or not room[0]:
         return 0
     m, n = len(room), len(room[0])
-    # 0=right, 1=down, 2=left, 3=up
     deltas = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     r, c, d = 0, 0, 0
@@ -747,17 +762,18 @@ def number_of_clean_rooms_20(room):
         visited.add((r, c, d))
         cleaned.add((r, c))
 
-        # Try to move forward; if blocked, turn right (clockwise)
-        dr, dc = deltas[d]
-        nr, nc = r + dr, c + dc
-        if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
-            d = (d + 1) % 4
+        # Keep turning clockwise until we can move
+        moved = False
+        for _ in range(4):
             dr, dc = deltas[d]
             nr, nc = r + dr, c + dc
-            if not (0 <= nr < m and 0 <= nc < n) or room[nr][nc] == 1:
+            if 0 <= nr < m and 0 <= nc < n and room[nr][nc] == 0:
+                r, c = nr, nc
+                moved = True
                 break
-
-        r, c = nr, nc
+            d = (d + 1) % 4
+        if not moved:
+            break
 
     return len(cleaned)
 
@@ -860,44 +876,33 @@ if __name__ == "__main__":
     ]
 
     test_cases = [
-        # Educative example
+        # Educative quiz example
         (
-            [[1, 1, 1, 1, 1, 0, 1, 1],
-             [1, 1, 1, 1, 1, 0, 1, 1],
-             [1, 0, 1, 1, 1, 1, 1, 1],
-             [1, 1, 1, 1, 1, 1, 1, 1]],
-            33
+            [[0, 0, 0],
+             [0, 1, 0],
+             [0, 0, 0]],
+            8
         ),
-        # Simple 2x2: empty - robot goes right (hits edge), down (hits edge),
-        # left (blocked by edge from r=0 c=1), so turns down (already at row 1),
-        # up - all blocked in 2x2 with no obstacles?
-        # Actually starts at (0,0). Move right: (0,1). Move right: blocked (edge).
-        # Turn down: (1,1). Move left: (1,0). Move left: blocked. Turn up: (0,0).
-        # Move left: blocked. Turn right: (0,1) - already visited state.
-        # Cleaned: (0,0), (0,1), (1,1), (1,0). 4 cells.
+        # Simple 2x2 empty: 4 cells visited in cycle
         ([[0, 0], [0, 0]], 4),
         # Single cell empty
         ([[0]], 1),
-        # Single cell obstacle (unusual - robot starts there which is obstacle?)
-        # Skip - assume start is empty.
-        # 2x2 with corner obstacle
-        # Start (0,0). Move right to (0,1). Blocked right (edge). Turn down to (1,1).
-        # Blocked down (edge). Turn left to (1,0). Blocked left (edge). Turn up to (0,0).
-        # State (0,0,3) visited? Yes! Cycle.
-        # Cleaned: (0,0), (0,1), (1,1), (1,0). 4 cells.
-        ([[0, 0], [0, 1]], 4),
-        # 3x3 empty - all 9 cells
-        ([[0, 0, 0], [0, 0, 0], [0, 0, 0]], 9),
-        # L-shape obstacle (wall on right column)
-        # [[0,0,1],[0,0,1],[0,0,1]]
-        # Start (0,0). Move right to (0,1). Move right: blocked (1). Turn down (1,1).
-        # Down to (2,1). Blocked down (edge). Turn left to (2,0).
-        # Left blocked (edge). Turn up to (1,0). Up to (0,0).
-        # Up blocked (edge). Turn right to (0,1). State (0,1,0) - already visited!
-        # Cleaned: (0,0), (0,1), (1,1), (2,1), (2,0), (1,0). 6 cells.
+        # 2x2 with corner obstacle: visits 2 cells (cycles between (0,0) and (0,1))
+        # (0,0)->(0,1)->turn down, blocked, turn left, back to (0,0)->turn up, blocked,
+        # turn right, back to (0,1). Cycle.
+        ([[0, 0], [0, 1]], 2),
+        # 3x3 empty: visits outer ring (8 cells)
+        ([[0, 0, 0], [0, 0, 0], [0, 0, 0]], 8),
+        # L-shape obstacle (wall on right column): 6 cells
         ([[0, 0, 1], [0, 0, 1], [0, 0, 1]], 6),
         # Empty grid (treat as 0)
         ([], 0),
+        # 4x4 empty: visits outer ring + 1 inner row/col
+        # Trace: (0,0)->(0,1)->(0,2)->(0,3)->(1,3)->(2,3)->(3,3)->(3,2)->(3,1)->(3,0)->(2,0)->(1,0)->(0,0). Cycle.
+        # Cleaned: 12 cells (perimeter).
+        ([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]], 12),
+        # Single row: 2 cells
+        ([[0, 0]], 2),
     ]
 
     print("=" * 70)
