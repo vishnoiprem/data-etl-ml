@@ -46,18 +46,22 @@ Constraints:
 def second_greater_element_1(nums):
     n = len(nums)
     res = [-1] * n
-    # s1: indices looking for first greater
+    # s1: indices looking for first greater (decreasing values)
     # s2: indices that got their first greater, looking for second
     s1 = []
     s2 = []
 
     for i, num in enumerate(nums):
-        # Resolve indices in s2 first (they get 2nd greater)
+        # Resolve s2 first (they get 2nd greater = num)
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
-        # Move indices from s1 to s2 (they got 1st greater)
+        # Pop from s1 (they got 1st greater = num), push to s2 in REVERSE order
+        # to maintain decreasing order in s2
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
 
     return res
@@ -116,8 +120,11 @@ def second_greater_element_2(nums):
             idx = s2.pop()
             res[idx] = num
         # Promote s1 to s2
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         # Add current to s1
         s1.append(i)
 
@@ -140,8 +147,11 @@ def second_greater_element_3(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
         # Promote s1 to s2
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
 
     return res
@@ -200,8 +210,11 @@ def second_greater_element_5(nums):
         s2 = []
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
         # We need to add to existing - but res is fresh
         res[i] = -1  # Just place initial
@@ -226,8 +239,11 @@ def second_greater_element_5b(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
         # Promote 1st greater to 2nd
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
 
     return res
@@ -249,8 +265,11 @@ def second_greater_element_6(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
         # Promote 1st pending to 2nd pending
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
 
     return res
@@ -268,8 +287,11 @@ def second_greater_element_7(nums):
     for i, num in enumerate(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
 
     return res
@@ -361,8 +383,11 @@ def second_greater_element_10b(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
         # Promote 1st pending to 2nd
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         # Add current to 1st pending
         s1.append(i)
 
@@ -384,8 +409,11 @@ def second_greater_element_11(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
         # Promote from s1 to s2
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
 
     return res
@@ -523,8 +551,11 @@ def second_greater_element_17(nums):
     for i, num in enumerate(nums):
         while s2 and num > nums[s2[-1]]:
             res[s2.pop()] = num
+        temp = []
         while s1 and num > nums[s1[-1]]:
-            s2.append(s1.pop())
+            temp.append(s1.pop())
+        while temp:
+            s2.append(temp.pop())
         s1.append(i)
     return res
 
