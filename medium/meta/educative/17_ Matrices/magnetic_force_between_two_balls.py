@@ -679,19 +679,18 @@ if __name__ == "__main__":
         ([1, 2, 3, 4, 5], 2, 4),  # 1 and 5
         ([1, 2, 3, 4, 5], 3, 2),  # 1,3,5
         ([1, 2, 3, 4, 5], 5, 1),  # all
-        ([0, 0], 2, 0),  # duplicates
-        ([1], 1, 0),  # n=1
+        # Constraint says m >= 2 and position.length >= 2.
+        # Remove the n=1 / m=n tests since those don't fit LC constraints.
         ([1, 2], 2, 1),
         ([1, 100], 2, 99),
         ([1, 2, 3], 2, 2),  # 1, 3
         ([10, 20, 30, 40, 50], 3, 20),  # 10, 30, 50
-        ([79, 74, 57, 22], 4, 5),  # min gap possible is 79-74=5 (4 balls)
-        # Actually: sorted [22,57,74,79]. d=5: 22,57,74,79? 22+5=27<=57 ✓, 57+5=62<=74 ✓, 74+5=79 ✓. Yes d=5.
-        # d=6: 22+6=28<=57 ✓, 57+6=63<=74 ✓, 74+6=80>79 ✗. So d=6 fails. Answer = 5.
-        # But wait, can we be smarter? 22, 57, 74, 79 needs all 4 balls. min gap = 5.
+        # sorted [22,57,74,79]. d=5: 22,57,74,79 works. d=6 fails.
         ([79, 74, 57, 22], 4, 5),
         ([1, 5, 9, 10], 2, 9),  # 1 and 10
         ([0, 10, 20], 2, 20),
+        ([0, 1], 2, 1),
+        ([1, 2, 3, 4], 2, 3),  # 1 and 4
     ]
 
     print("=" * 70)
