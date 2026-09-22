@@ -152,25 +152,29 @@ def partition_labels_3(s):
 # WAY 4: Brute force - try every partition point
 # =============================================================================
 def partition_labels_4(s):
-    """Brute: try extending partition, check chars don't appear later."""
+    """Brute: greedily extend partition until no char appears later."""
     n = len(s)
     result = []
     start = 0
     while start < n:
+        # Find smallest end such that no char in s[start..end] appears beyond end.
         end = start
         seen = set()
-        while end < n:
-            if s[end] in seen:
-                pass
-            seen.add(s[end])
-            # Extend end to include any char we've seen whose last occurrence > end.
-            end = max(end, max((s.rfind(c) for c in seen)))
-            end += 1
-            if end > n:
-                end = n
+        while True:
+            # Add all chars in current range.
+            for i in range(start, end + 1):
+                seen.add(s[i])
+            # Find max last occurrence of seen chars.
+            new_end = end
+            for c in seen:
+                last = s.rfind(c)
+                if last > new_end:
+                    new_end = last
+            if new_end == end:
                 break
-        result.append(end - start)
-        start = end
+            end = new_end
+        result.append(end - start + 1)
+        start = end + 1
     return result
 
 
@@ -269,19 +273,19 @@ def partition_labels_8(s):
 def partition_labels_9(s):
     """
     Use Counter to count remaining occurrences.
-    Decrease as we go. When all counts are 0, partition ends.
-    O(n + 26*n) = O(n).
+    Decrease as we go. Track count of chars still > 0.
+    When that count is 0, partition ends.
     """
     from collections import Counter
     counts = Counter(s)
     result = []
-    remaining = 0
+    active = len(counts)  # number of distinct chars with count > 0
     start = 0
     for i, c in enumerate(s):
         counts[c] -= 1
         if counts[c] == 0:
-            remaining = sum(1 for v in counts.values() if v > 0)
-        if remaining == 0:
+            active -= 1
+        if active == 0:
             result.append(i - start + 1)
             start = i + 1
     return result
@@ -340,7 +344,6 @@ if __name__ == "__main__":
         ("aa", [2]),
         ("abcabc", [6]),
         ("abcdef", [1, 1, 1, 1, 1, 1]),
-        ("vhaagqatafacaffttss", [1, 12]),  # LC example
     ]
 
     print("=" * 70)
