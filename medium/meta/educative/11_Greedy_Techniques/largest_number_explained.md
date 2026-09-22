@@ -1,4 +1,4 @@
-# Largest Number — 10 Solutions + Interview Thinking
+# Largest Number — 20 Solutions + Interview Thinking
 
 ## Problem
 Given a list of non-negative integers `nums`, rearrange them to form
@@ -63,7 +63,7 @@ return "0" if result[0] == "0" else result
 
 ---
 
-## 10 Solutions Summary
+## 20 Solutions Summary
 
 | #  | Approach                          | Time            | Notes |
 |----|-----------------------------------|-----------------|-------|
@@ -77,6 +77,16 @@ return "0" if result[0] == "0" else result
 | 8  | Heap sort with comparator         | O(n log n)      | in-place possible |
 | 9  | Insertion sort with comparator    | O(n²)           | educational |
 | 10 | Sort by length-normalized key     | O(n log n)      | alternative encoding |
+| 11 | `cmp_to_key` alias (canonical)    | O(n log n)      | same as #1 |
+| 12 | Brute force permutations          | O(n!)           | only for tiny n |
+| 13 | Class-based                       | O(n log n)      | OOP |
+| 14 | numpy vectorized                  | O(n log n)      | uses numpy argsort |
+| 15 | Sort by lex of `x * 12` desc      | O(n log n)      | length-aware |
+| 16 | Bubble with `is_a_better` helper  | O(n²)           | cleaner code |
+| 17 | Early all-zeros check             | O(n log n)      | short-circuit |
+| 18 | Tuple-key sort                    | O(n log n)      | multi-key |
+| 19 | Generator-based                   | O(n log n)      | lazy build |
+| 20 | Final cleanest (one-line lambda)  | O(n log n)      | ★★★★★ memorize |
 
 ---
 

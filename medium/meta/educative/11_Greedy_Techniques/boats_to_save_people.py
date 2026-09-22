@@ -157,41 +157,29 @@ def rescue_boats_v3(people, limit):
 # ==============================================================
 def rescue_boats_v4(people, limit):
     """
-    Use Counter but two-pointer-like: each iteration consumes one 'heavy'
-    and possibly one 'light'. We track counts separately.
+    Counter-based variant: walk weights from heaviest to lightest.
+    For each non-empty weight, take one person; if a lighter person
+    still exists that fits, take that too. Continue until weights exhausted.
     """
     from collections import Counter
     counts = Counter(people)
-    weights = sorted(counts.keys())  # unique weights, ascending
     boats = 0
-    left, right = 0, len(weights) - 1
-    while left <= right:
-        heavy = weights[right]
-        # Take one heavy person
+    while counts:
+        # Heaviest weight currently present
+        heavy = max(counts.keys())
         counts[heavy] -= 1
-        if counts[heavy] == 0:
-            right -= 1
         boats += 1
-        # Find heaviest partner weight that fits (light + heavy <= limit).
-        # We want the largest light_w <= (limit - heavy).
-        max_light = limit - heavy
-        if left <= right and weights[left] <= max_light:
-            # Binary search for largest weight <= max_light
-            lo, hi = left, right
-            best = left
-            while lo <= hi:
-                mid = (lo + hi) // 2
-                if weights[mid] <= max_light:
-                    best = mid
-                    lo = mid + 1
-                else:
-                    hi = mid - 1
-            light = weights[best]
-            counts[light] -= 1
-            if counts[light] == 0:
-                # Advance left pointer past all used-up weights
-                while left <= right and (weights[left] not in counts):
-                    left += 1
+        if counts[heavy] == 0:
+            del counts[heavy]
+        # Try to pair with the heaviest remaining weight <= limit - heavy
+        remaining = limit - heavy
+        if remaining > 0 and counts:
+            candidates = [w for w in counts.keys() if w <= remaining]
+            if candidates:
+                light = max(candidates)
+                counts[light] -= 1
+                if counts[light] == 0:
+                    del counts[light]
     return boats
 
 

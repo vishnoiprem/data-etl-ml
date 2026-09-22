@@ -312,6 +312,186 @@ def largest_number_v10(nums):
 
 
 # ==============================================================
+# Solution 11-20: Additional variants
+# ==============================================================
+
+# ==============================================================
+# Solution 11: Standard cmp_to_key (alias for canonical)
+# ==============================================================
+def largest_number_11(nums):
+    """Standard cmp_to_key sort - same as Way 1."""
+    s = list(map(str, nums))
+
+    def compare(a, b):
+        if a + b > b + a:
+            return -1
+        if a + b < b + a:
+            return 1
+        return 0
+
+    s.sort(key=cmp_to_key(compare))
+    result = "".join(s)
+    return "0" if result[0] == "0" else result
+
+
+# ==============================================================
+# Solution 12: Brute force permutations
+# ==============================================================
+def largest_number_12(nums):
+    """Try all permutations (small n only)."""
+    from itertools import permutations
+    if not nums:
+        return "0"
+    s_list = list(map(str, nums))
+    best = ""
+    for perm in permutations(s_list):
+        candidate = "".join(perm)
+        if candidate > best:
+            best = candidate
+    return "0" if best[0] == "0" else best
+
+
+# ==============================================================
+# Solution 13: Class-based
+# ==============================================================
+class LargestNumberComputer_13:
+    def __init__(self, nums):
+        self.nums = nums
+
+    def compute(self):
+        s = list(map(str, self.nums))
+
+        def compare(a, b):
+            if a + b > b + a:
+                return -1
+            if a + b < b + a:
+                return 1
+            return 0
+
+        s.sort(key=cmp_to_key(compare))
+        result = "".join(s)
+        return "0" if result[0] == "0" else result
+
+
+def largest_number_13(nums):
+    return LargestNumberComputer_13(nums).compute()
+
+
+# ==============================================================
+# Solution 14: numpy-based (with custom sort)
+# ==============================================================
+def largest_number_14(nums):
+    """numpy-based approach using argsort on key strings."""
+    import numpy as np
+    if not nums:
+        return "0"
+    s_list = list(map(str, nums))
+    # Use a sort key that mimics the comparator
+    # For each string, repeat to a uniform length
+    max_len = max(len(x) for x in s_list)
+    keys = np.array([int(x * (max_len * 12 // len(x))) for x in s_list])
+    arr = np.array(s_list)
+    order = np.argsort(-keys)  # descending
+    result = "".join(arr[order])
+    return "0" if result[0] == "0" else result
+
+
+# ==============================================================
+# Solution 15: Sort by lex of repeated string (descending)
+# ==============================================================
+def largest_number_15(nums):
+    """Sort strings by repeated version in descending order."""
+    s = list(map(str, nums))
+    s.sort(key=lambda x: x * 12, reverse=True)
+    result = "".join(s)
+    return "0" if result[0] == "0" else result
+
+
+# ==============================================================
+# Solution 16: Stable sort with explicit "is_a_better" helper
+# ==============================================================
+def largest_number_16(nums):
+    s = list(map(str, nums))
+
+    def is_a_better(a, b):
+        return a + b > b + a
+
+    n = len(s)
+    for i in range(n):
+        for j in range(n - 1 - i):
+            if not is_a_better(s[j], s[j + 1]):
+                s[j], s[j + 1] = s[j + 1], s[j]
+    result = "".join(s)
+    return "0" if result[0] == "0" else result
+
+
+# ==============================================================
+# Solution 17: With explicit all-zeros check first
+# ==============================================================
+def largest_number_17(nums):
+    if not nums:
+        return "0"
+    if all(n == 0 for n in nums):
+        return "0"
+    s = list(map(str, nums))
+
+    def compare(a, b):
+        if a + b > b + a:
+            return -1
+        if a + b < b + a:
+            return 1
+        return 0
+
+    s.sort(key=cmp_to_key(compare))
+    return "".join(s)
+
+
+# ==============================================================
+# Solution 18: Tuple-key sort (length, value) - simplified
+# ==============================================================
+def largest_number_18(nums):
+    """Sort by (length desc, value desc). Approximation."""
+    s = list(map(str, nums))
+    # Sort by descending repetition
+    s.sort(key=lambda x: (x * 12, x), reverse=True)
+    result = "".join(s)
+    return "0" if result[0] == "0" else result
+
+
+# ==============================================================
+# Solution 19: Generator-based
+# ==============================================================
+def largest_number_19(nums):
+    """Use a generator to yield sorted elements one at a time."""
+    s = list(map(str, nums))
+
+    def compare(a, b):
+        if a + b > b + a:
+            return -1
+        if a + b < b + a:
+            return 1
+        return 0
+
+    sorted_s = sorted(s, key=cmp_to_key(compare))
+    # Build result via generator
+    def gen():
+        for x in sorted_s:
+            yield x
+
+    result = "".join(gen())
+    return "0" if result[0] == "0" else result
+
+
+# ==============================================================
+# Solution 20: Final cleanest (canonical with edge case)
+# ==============================================================
+def largest_number_20(nums):
+    """The cleanest one-line-ish solution."""
+    s = sorted(map(str, nums), key=cmp_to_key(lambda a, b: -1 if a + b > b + a else (1 if a + b < b + a else 0)))
+    return "0" if s[0] == "0" else "".join(s)
+
+
+# ==============================================================
 # Test runner
 # ==============================================================
 if __name__ == "__main__":
@@ -326,6 +506,16 @@ if __name__ == "__main__":
         ("V8 (heap sort)",            largest_number_v8),
         ("V9 (insertion sort)",       largest_number_v9),
         ("V10 (length+value sort)",   largest_number_v10),
+        ("V11 (cmp_to_key alias)",    largest_number_11),
+        ("V12 (brute permutations)",  largest_number_12),
+        ("V13 (class-based)",         largest_number_13),
+        ("V14 (numpy)",               largest_number_14),
+        ("V15 (lex repeat desc)",      largest_number_15),
+        ("V16 (bubble is_a_better)",  largest_number_16),
+        ("V17 (early zeros check)",   largest_number_17),
+        ("V18 (tuple-key)",           largest_number_18),
+        ("V19 (generator)",           largest_number_19),
+        ("V20 (final cleanest)",      largest_number_20),
     ]
 
     test_cases = [
