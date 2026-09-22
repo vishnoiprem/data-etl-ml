@@ -312,30 +312,27 @@ def swimInWater_8(grid):
 
 
 # =============================================================================
-# WAY 9: Binary search on time with in-place DFS (modified visited)
+# WAY 9: Binary search on time with virtual visited
 # =============================================================================
 def swimInWater_9(grid):
-    """Use -1 to mark visited cells to save space."""
+    """Binary search + DFS, marking visited via set to avoid modifying grid."""
     n = len(grid)
 
     def can_swim(t):
         if grid[0][0] > t:
             return False
+        visited = set()
+        visited.add((0, 0))
         stack = [(0, 0)]
-        # Mark visited by negating, restore later
-        original = grid[0][0]
-        grid[0][0] = -1  # mark
         while stack:
             r, c = stack.pop()
             if r == n - 1 and c == n - 1:
-                grid[0][0] = original
                 return True
             for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
                 nr, nc = r + dr, c + dc
-                if 0 <= nr < n and 0 <= nc < n and grid[nr][nc] != -1 and grid[nr][nc] <= t:
-                    grid[nr][nc] = -1
+                if 0 <= nr < n and 0 <= nc < n and (nr, nc) not in visited and grid[nr][nc] <= t:
+                    visited.add((nr, nc))
                     stack.append((nr, nc))
-        grid[0][0] = original
         return False
 
     lo, hi = 0, n * n - 1
@@ -349,48 +346,36 @@ def swimInWater_9(grid):
 
 
 # =============================================================================
-# WAY 10: BFS with elevation ordering (like Union-Find but BFS-based)
+# WAY 10: BFS with elevation ordering (Union-Find style with BFS check)
 # =============================================================================
 def swimInWater_10(grid):
     """
-    Process cells in order of increasing elevation.
-    Use BFS to expand the 'reachable region' starting from (0,0).
+    Process cells in order of increasing elevation. After adding each cell,
+    BFS to see if (0,0) is connected to (n-1,n-1) via added cells.
     """
     n = len(grid)
-    visited = [[False] * n for _ in range(n)]
-    visited[0][0] = True
-    q = deque([(0, 0)])
+    added = [[False] * n for _ in range(n)]
     cells_sorted = sorted([(grid[i][j], i, j) for i in range(n) for j in range(n)])
 
-    def in_bounds(r, c):
-        return 0 <= r < n and 0 <= c < n
-
-    # Add cells in elevation order, then check connectivity via BFS
     for elev, r, c in cells_sorted:
-        # When we add this cell, connect it to any added neighbors via BFS-like merge
-        visited[r][c] = True
-        # BFS to expand the reachable region if (0,0) can reach (n-1,n-1)
-        if can_reach_end(visited, n):
-            return elev
+        added[r][c] = True
+        # Only check connectivity if start AND end are added
+        if not added[0][0] or not added[n - 1][n - 1]:
+            continue
+        # BFS from (0,0)
+        visited = [[False] * n for _ in range(n)]
+        visited[0][0] = True
+        q = deque([(0, 0)])
+        while q:
+            cr, cc = q.popleft()
+            if cr == n - 1 and cc == n - 1:
+                return elev
+            for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                nr, nc = cr + dr, cc + dc
+                if 0 <= nr < n and 0 <= nc < n and added[nr][nc] and not visited[nr][nc]:
+                    visited[nr][nc] = True
+                    q.append((nr, nc))
     return -1
-
-
-def can_reach_end(visited, n):
-    """Check if (0,0) and (n-1,n-1) are connected via visited cells."""
-    if not visited[0][0] or not visited[n - 1][n - 1]:
-        return False
-    seen = {(0, 0)}
-    q = deque([(0, 0)])
-    while q:
-        r, c = q.popleft()
-        if r == n - 1 and c == n - 1:
-            return True
-        for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            nr, nc = r + dr, c + dc
-            if 0 <= nr < n and 0 <= nc < n and visited[nr][nc] and (nr, nc) not in seen:
-                seen.add((nr, nc))
-                q.append((nr, nc))
-    return False
 
 
 # =============================================================================
@@ -444,76 +429,65 @@ def swimInWater_12(grid):
 
 
 # =============================================================================
-# WAY 13: Recursive DFS with memoization (top-down)
+# WAY 13: Iterative DP bottom-up via Dijkstra-like relaxation
 # =============================================================================
 def swimInWater_13(grid):
-    """Top-down DFS with memoization: min_max[r][c] = answer from (r,c) to end."""
+    """
+    Dijkstra-style with sorted cells: process cells in order of best-known
+    max-elevation. When we pop (n-1, n-1), return its best-known value.
+    """
     n = len(grid)
-    memo = {}
+    INF = float('inf')
+    best = [[INF] * n for _ in range(n)]
+    best[0][0] = grid[0][0]
+    heap = [(grid[0][0], 0, 0)]
 
-    def dfs(r, c):
-        if (r, c) in memo:
-            return memo[(r, c)]
+    while heap:
+        t, r, c = heapq.heappop(heap)
+        if t > best[r][c]:
+            continue
         if r == n - 1 and c == n - 1:
-            return grid[r][c]
-        best = float('inf')
+            return t
         for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             nr, nc = r + dr, c + dc
             if 0 <= nr < n and 0 <= nc < n:
-                # Need: max(grid[r][c], dfs(nr,nc)) but only if min in path
-                # Actually: ans from (r,c) = max(grid[r][c], min over neighbors of ans)
-                cand = max(grid[r][c], dfs(nr, nc))
-                # But we want MIN over paths, so:
-                # Take MIN of max(grid[r][c], dfs(neighbor))
-                # WAIT: this doesn't quite work because we can't revisit
-                # For 4-connectivity with uniqueness, simpler is to use Dijkstra
-                # This approach is flawed for non-trivial cases
-                best = min(best, cand)
-        memo[(r, c)] = best
-        return best
-
-    return dfs(0, 0)
+                nt = max(t, grid[nr][nc])
+                if nt < best[nr][nc]:
+                    best[nr][nc] = nt
+                    heapq.heappush(heap, (nt, nr, nc))
+    return -1
 
 
 # =============================================================================
 # WAY 14: BFS from low elevations (process cells like Union-Find, simpler)
 # =============================================================================
 def swimInWater_14(grid):
-    """Simpler Union-Find style: sort cells by elevation, BFS-expand."""
+    """Process cells in elevation order, expanding reachable region via BFS."""
     n = len(grid)
-    # Group cells by elevation
-    by_elev = {}
-    for i in range(n):
-        for j in range(n):
-            by_elev.setdefault(grid[i][j], []).append((i, j))
+    added = [[False] * n for _ in range(n)]
+    cells = sorted([(grid[i][j], i, j) for i in range(n) for j in range(n)])
 
-    # Reachable set
-    reachable = {(0, 0)}
-    if grid[0][0] != 0:
-        return -1
-
-    for t in range(n * n):
-        # Add all cells with elevation == t
-        if t in by_elev:
-            for r, c in by_elev[t]:
-                # Try to expand reachable region through this new cell
+    for elev, r, c in cells:
+        added[r][c] = True
+        # Check if (0,0) connects to (n-1,n-1)
+        if added[0][0] and added[n - 1][n - 1]:
+            # BFS from (0,0)
+            visited = [[False] * n for _ in range(n)]
+            visited[0][0] = True
+            q = deque([(0, 0)])
+            found = False
+            while q:
+                cr, cc = q.popleft()
+                if cr == n - 1 and cc == n - 1:
+                    found = True
+                    break
                 for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-                    nr, nc = r + dr, c + dc
-                    if (nr, nc) in reachable:
-                        reachable.add((r, c))
-                        break
-        # Now do BFS to propagate reachability
-        changed = True
-        while changed:
-            changed = False
-            for (r, c) in list(reachable):
-                for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-                    nr, nc = r + dr, c + dc
-                    if 0 <= nr < n and 0 <= nc < n and grid[nr][nc] <= t and (nr, nc) not in reachable:
-                        reachable.add((nr, nc))
-                        changed = True
-        if (n - 1, n - 1) in reachable:
-            return t
+                    nr, nc = cr + dr, cc + dc
+                    if 0 <= nr < n and 0 <= nc < n and added[nr][nc] and not visited[nr][nc]:
+                        visited[nr][nc] = True
+                        q.append((nr, nc))
+            if found:
+                return elev
     return -1
 
 
@@ -830,31 +804,38 @@ if __name__ == "__main__":
     ]
 
     test_cases = [
-        # Standard example
+        # Standard example from problem
         ([[0, 1, 2, 3],
           [12, 11, 10, 4],
           [13, 14, 9, 5],
           [15, 8, 7, 6]], 6),
         # Trivial n=1
         ([[0]], 0),
-        # 2x2 grid
-        ([[0, 1], [3, 2]], 3),
+        # 2x2: [[0,1],[3,2]]: top path max=2, left path max=3. Min=2
+        ([[0, 1], [3, 2]], 2),
+        # 2x2: [[0,2],[1,3]]: top max=3, left max=3. Min=3
         ([[0, 2], [1, 3]], 3),
-        ([[0, 1], [2, 3]], 2),
-        # 3x3 grid
+        # 2x2: [[0,1],[2,3]]: top max=3, left max=3. Min=3
+        ([[0, 1], [2, 3]], 3),
+        # 3x3 monotonic - max along any path = 8
         ([[0, 1, 2], [3, 4, 5], [6, 7, 8]], 8),
-        ([[0, 2, 1], [3, 4, 5], [6, 7, 8]], 4),
-        # Direct path
-        ([[0, 1], [5, 6], [10, 11]], 10),  # must go via max along the path
-        # Already connected
-        ([[0, 1, 2, 3]], 3),
-        # Reverse sorted
-        ([[15, 14, 13, 12], [11, 10, 9, 8], [7, 6, 5, 4], [3, 2, 1, 0]], 15),
-        # Educative example 4x4
-        ([[0, 1, 3, 2],
-          [4, 7, 6, 5],
-          [8, 9, 11, 10],
-          [12, 13, 15, 14]], 11),
+        # 3x3 reversed - max along any path = 8
+        ([[8, 7, 6], [5, 4, 3], [2, 1, 0]], 8),
+        # 3x3 [[0,1,2],[5,4,3],[6,7,8]]:
+        #   All paths must include (2,2)=8, so answer = 8
+        ([[0, 1, 2], [5, 4, 3], [6, 7, 8]], 8),
+        # 3x3 [[0,3,2],[4,5,1],[6,7,8]]:
+        #   All paths include (2,2)=8, answer=8
+        ([[0, 3, 2], [4, 5, 1], [6, 7, 8]], 8),
+        # Better 3x3: [[0,3,5],[1,4,2],[7,8,6]]
+        #   (0,0)->(1,0)->(1,1)->(2,1)->(2,2): max=8
+        #   (0,0)->(1,0)->(1,1)->(1,2)->(2,2): max=6
+        #   (0,0)->(0,1)->(1,1)->(1,2)->(2,2): max=6
+        #   (0,0)->(0,1)->(1,1)->(2,1)->(2,2): max=8
+        #   Min=6
+        ([[0, 3, 5], [1, 4, 2], [7, 8, 6]], 6),
+        # 2x2 [[0,1],[4,3]]: top max=3, left max=4. Min=3
+        ([[0, 1], [4, 3]], 3),
     ]
 
     print("=" * 70)
