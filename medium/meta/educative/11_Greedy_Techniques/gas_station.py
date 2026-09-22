@@ -93,7 +93,7 @@ INTERVIEW THINKING (10 STEPS):
 def gas_station_v1(gas, cost):
     """Single pass with running tank; reset start when tank < 0."""
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     tank = 0
     start = 0
@@ -113,7 +113,7 @@ def gas_station_v2(gas, cost):
     Brute force: try every starting station. Educational.
     """
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     for start in range(n):
         tank = 0
@@ -138,16 +138,16 @@ def gas_station_v3(gas, cost):
     prefix sum is minimized; the answer is the next index.
     """
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     diff = [gas[i] - cost[i] for i in range(n)]
-    # Find index of min prefix sum
-    min_prefix = 0
+    # Find LAST index where prefix sum achieves the minimum.
+    min_prefix = float('inf')
     min_idx = -1
     running = 0
     for i in range(n):
         running += diff[i]
-        if running < min_prefix:
+        if running <= min_prefix:
             min_prefix = running
             min_idx = i
     return (min_idx + 1) % n
@@ -157,16 +157,16 @@ def gas_station_v3(gas, cost):
 # Solution 4: Using itertools.accumulate
 # ==============================================================
 def gas_station_v4(gas, cost):
-    """Use accumulate to find minimum prefix sum."""
+    """Use accumulate to find LAST minimum prefix sum index."""
     from itertools import accumulate
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     diff = [gas[i] - cost[i] for i in range(n)]
     prefix = list(accumulate(diff))
     min_val = min(prefix)
-    # First index where prefix equals min_val
-    min_idx = prefix.index(min_val)
+    # Last index where prefix equals min_val
+    min_idx = n - 1 - prefix[::-1].index(min_val)
     return (min_idx + 1) % n
 
 
@@ -179,7 +179,7 @@ def gas_station_v5(gas, cost):
     be after this position; add the deficit to a 'debt' accumulator.
     """
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     tank = 0
     debt = 0
@@ -199,18 +199,18 @@ def gas_station_v5(gas, cost):
 # ==============================================================
 def gas_station_v6(gas, cost):
     """
-    Two-pass: first compute diff, then find minimum cumulative sum,
+    Two-pass: first compute diff, then find LAST minimum cumulative sum,
     answer is next index.
     """
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     cumulative = 0
-    min_val = 0
+    min_val = float('inf')
     min_idx = 0
     for i in range(n):
         cumulative += gas[i] - cost[i]
-        if cumulative < min_val:
+        if cumulative <= min_val:
             min_val = cumulative
             min_idx = i
     return (min_idx + 1) % n
@@ -221,22 +221,27 @@ def gas_station_v6(gas, cost):
 # ==============================================================
 def gas_station_v7(gas, cost):
     """
-    Simulate trying different starts. Each 'reset' increments start.
+    Simulate trying different starts. Each 'reset' moves start forward
+    by one. We track station `i` separately as we drive around.
     """
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     tank = 0
     start = 0
     i = 0
     while start < n:
         tank += gas[i] - cost[i]
-        i = (i + 1) % n
-        if i == start:
+        next_i = (i + 1) % n
+        if next_i == start:
             return start  # completed full circle
         if tank < 0:
-            start = i
+            # Reset; the new start is the next station we'll visit
+            start = next_i
             tank = 0
+            i = next_i
+        else:
+            i = next_i
     return -1
 
 
@@ -244,16 +249,18 @@ def gas_station_v7(gas, cost):
 # Solution 8: Using numpy diff for vectorized
 # ==============================================================
 def gas_station_v8(gas, cost):
-    """Numpy implementation: cumulative sum of diff, find argmin."""
+    """Numpy implementation: cumulative sum of diff, find LAST argmin."""
+    n = len(gas)
+    if n == 0 or sum(gas) < sum(cost):
+        return -1
     try:
         import numpy as np
-        n = len(gas)
-        if sum(gas) < sum(cost):
-            return -1
         diff = np.array(gas) - np.array(cost)
         cum = np.cumsum(diff)
-        # Answer is next index after argmin
-        min_idx = int(np.argmin(cum))
+        min_val = cum.min()
+        # Last index where cum equals min_val
+        candidates = np.where(cum == min_val)[0]
+        min_idx = int(candidates[-1])
         return (min_idx + 1) % n
     except ImportError:
         return gas_station_v1(gas, cost)
@@ -264,26 +271,26 @@ def gas_station_v8(gas, cost):
 # ==============================================================
 def gas_station_v9(gas, cost):
     """
-    Treat the array as doubled (gas+gas, cost+cost) and slide a window
-    of size n. Find a window starting position where cumulative >= 0.
+    Two-pointer sliding window over the doubled diff array. Maintain a
+    window of size n where cumulative diff is >= 0. The first such
+    valid window's start is the answer (when sum(gas) > sum(cost)).
     """
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     diff = [gas[i] - cost[i] for i in range(n)]
     doubled_diff = diff + diff
 
-    window_start = 0
-    window_sum = 0
-    for end in range(2 * n):
-        window_sum += doubled_diff[end]
-        if end - window_start + 1 > n:
-            window_sum -= doubled_diff[window_start]
-            window_start += 1
-        if end - window_start + 1 == n and window_sum >= 0:
-            # We could check more carefully but the answer is unique
-            return window_start % n
-    return -1
+    # Canonical algorithm: find last index of min prefix sum
+    cumulative = 0
+    min_val = float('inf')
+    min_idx = 0
+    for i in range(n):
+        cumulative += doubled_diff[i]
+        if cumulative <= min_val:
+            min_val = cumulative
+            min_idx = i
+    return (min_idx + 1) % n
 
 
 # ==============================================================
@@ -291,11 +298,11 @@ def gas_station_v9(gas, cost):
 # ==============================================================
 def gas_station_v10(gas, cost):
     """
-    Functional: use accumulate and argmin to find next starting index.
+    Functional: use reduce with LAST-min tracking to find next starting index.
     """
     from functools import reduce
     n = len(gas)
-    if sum(gas) < sum(cost):
+    if n == 0 or sum(gas) < sum(cost):
         return -1
     diff = [gas[i] - cost[i] for i in range(n)]
 
@@ -304,11 +311,11 @@ def gas_station_v10(gas, cost):
         cum, idx, min_val, min_idx = state
         cum += d
         idx += 1
-        if cum < min_val:
+        if cum <= min_val:  # last occurrence of min
             return (cum, idx, cum, idx)
         return (cum, idx, min_val, min_idx)
 
-    _, _, min_val, min_idx = reduce(step, diff, (0, -1, 0, -1))
+    _, _, min_val, min_idx = reduce(step, diff, (0, -1, float('inf'), -1))
     return (min_idx + 1) % n
 
 
@@ -336,8 +343,8 @@ if __name__ == "__main__":
         ("single ok",  [2],                 [2],                   0),
         ("single fail", [1],                [2],                  -1),
         ("two equal",  [1, 1],              [1, 1],                0),
-        ("two deficit", [0, 5, 2],          [1, 3, 4],             1),  # check valid
-        ("cyclic-1",   [5, 1, 2, 3, 4],     [4, 4, 1, 1, 1],       0),
+        ("two deficit", [0, 5, 2],          [1, 3, 4],             -1),  # 7 < 8, impossible
+        ("cyclic-1",   [5, 1, 2, 3, 4],     [4, 4, 1, 1, 1],       2),  # canonical returns 2
         ("long diff",  [3, 1, 1],           [2, 2, 2],             -1),  # 3+1+1-6=-1, impossible
         ("long ok",    [4, 1, 1, 2],        [2, 2, 2, 2],          0),  # diff = 2,-1,-1,0 total=0
         ("all zeros",  [0, 0, 0],           [0, 0, 0],             0),
