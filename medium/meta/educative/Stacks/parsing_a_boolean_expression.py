@@ -40,7 +40,7 @@ def parse_bool_expr_1(expression):
             # Pop operands until we find '('
             operands = []
             while stack and stack[-1] != '(':
-                operands.append(stack.pop())
+                operands.append(stack.pop() == 't')
             stack.pop()  # Remove '('
             # Get the operator (it's now on top)
             op = stack.pop()
@@ -75,8 +75,8 @@ def parse_bool_expr_2(expression):
                 result = all(operands)
             else:  # '|'
                 result = any(operands)
-            stack.append(result)
-        elif char not in (',', '('):
+            stack.append('t' if result else 'f')
+        elif char not in (',', ' '):
             stack.append(char)
     return stack[-1] == 't'
 
@@ -187,6 +187,7 @@ def parse_bool_expr_6(expression):
             return False, i + 1
         # Operator
         op = expr[i]
+        i += 1  # skip op
         i += 1  # skip '('
         operands = []
         while expr[i] != ')':
@@ -235,37 +236,53 @@ def parse_bool_expr_7(expression):
 # WAY 8: With string replacement (clean first)
 # =============================================================================
 def parse_bool_expr_8(expression):
-    # Repeatedly simplify
-    while len(expression) > 1:
-        # Find innermost (op,...,)
-        # Replace innermost first
-        for i in range(len(expression) - 1, -1, -1):
+    # Repeatedly simplify innermost expressions
+    # Pattern: op(a,b,...) where a,b,c are 't' or 'f' (after processing)
+    # or op(sub_expression, ...)
+
+    def eval_simple(expr):
+        # expr is like "&(t,f)" or "!(t)" - simple cases
+        if not expr or len(expr) < 4:
+            return expr
+        op = expr[0]
+        inner = expr[2:-1]  # between ( and )
+        parts = inner.split(',')
+        if op == '!':
+            return 't' if not (parts[0] == 't') else 'f'
+        elif op == '&':
+            return 't' if all(p == 't' for p in parts) else 'f'
+        else:  # '|'
+            return 't' if any(p == 't' for p in parts) else 'f'
+
+    # Find patterns that can be evaluated (innermost first)
+    changed = True
+    while changed and len(expression) > 1:
+        changed = False
+        # Look for "!(single)" or "&(vals...)" or "|(vals...)" patterns
+        # where all "operands" are single chars 't' or 'f'
+        n = len(expression)
+        for i in range(n):
             if expression[i] == ')':
-                # Find matching '('
-                depth = 1
-                j = i - 1
-                while depth > 0:
-                    j -= 1
+                # Found end of innermost expr - find matching '('
+                depth = 0
+                for j in range(i, -1, -1):
                     if expression[j] == ')':
                         depth += 1
                     elif expression[j] == '(':
                         depth -= 1
-                # j is index of '('
-                # expression[j-1] should be operator
-                op = expression[j - 1]
-                inner = expression[j + 1:i]
-                # Parse inner comma-separated values
-                operands = [v == 't' for v in inner.split(',')]
-                if op == '!':
-                    val = not operands[0]
-                elif op == '&':
-                    val = all(operands)
-                else:
-                    val = any(operands)
-                expression = expression[:j - 1] + ('t' if val else 'f') + expression[i + 1:]
-                break
-        else:
-            break  # No ')' found
+                        if depth == 0:
+                            break
+                # expression[j] is '(', expression[j-1] is operator
+                if j > 0 and expression[j - 1] in '!&|':
+                    inner = expression[j + 1:i]
+                    # Check if all operands are 't' or 'f'
+                    if all(c in 'tf' for c in inner.replace(',', '')):
+                        op = expression[j - 1]
+                        eval_str = op + '(' + inner + ')'
+                        result = eval_simple(eval_str)
+                        expression = expression[:j - 1] + result + expression[i + 1:]
+                        changed = True
+                        break
     return expression == 't'
 
 
@@ -300,17 +317,17 @@ def _eval_simple(op, inner):
 # WAY 10: Using dictionary for operators
 # =============================================================================
 def parse_bool_expr_10(expression):
-    ops = {'!': lambda x: not x, '&': all, '|': any}
+    ops = {'!': lambda args: not args[0], '&': all, '|': any}
     stack = []
     for char in expression:
         if char == ')':
             args = []
-            while stack[-1] != '(':
+            while stack and stack[-1] != '(':
                 args.append(stack.pop() == 't')
             stack.pop()
             op = stack.pop()
             stack.append('t' if ops[op](args) else 'f')
-        elif char not in ',( ':
+        elif char not in ', ':
             stack.append(char)
     return stack[-1] == 't'
 
@@ -359,7 +376,7 @@ def parse_bool_expr_12(expression):
         if char == ')':
             operands = []
             while stack and stack[-1] != '(':
-                operands.append(stack.pop())
+                operands.append(stack.pop() == 't')
             stack.pop()  # '('
             op = stack.pop()
             if op == '!':
@@ -414,7 +431,7 @@ class BoolExprParser:
             if char == ')':
                 operands = []
                 while self.stack and self.stack[-1] != '(':
-                    operands.append(self.stack.pop())
+                    operands.append(self.stack.pop() == 't')
                 self.stack.pop()
                 op = self.stack.pop()
                 if op == '!':
@@ -471,7 +488,7 @@ def parse_bool_expr_16(expression):
         if char == ')':
             values = []
             while stack and stack[-1] != '(':
-                values.append(stack.pop())
+                values.append(stack.pop() == 't')
             stack.pop()
             op = stack.pop()
             if op == '!':
@@ -481,7 +498,7 @@ def parse_bool_expr_16(expression):
             else:
                 r = any(values)
             stack.append('t' if r else 'f')
-        elif char not in (',', ' ', '('):
+        elif char not in (',', ' '):
             stack.append(char)
     return stack.pop() == 't'
 
@@ -687,25 +704,8 @@ if __name__ == "__main__":
         ("Way 20: Final cleanest", parse_bool_expr_20),
     ]
 
-    test_cases = [
-        ("!(f)", True),
-        ("|(f,t)", True),
-        ("&(t,f)", False),
-        ("|(&(t,f,t),!(t))", False),
-        ("!(&(t,t))", False),
-        ("&(|(t,!(t)),t)", True),
-        ("t", True),
-        ("f", False),
-        ("!(t)", False),
-        ("!(t,f)|...", None),  # Skip - invalid expression
-        ("&(t,t,t)", True),
-        ("|(f,f,f)", False),
-        ("&(t,f,t)", False),
-        ("!(|(t,f))", False),
-        ("|(&(t,t),!(t,f))", True),  # &(t,t)=t, !(t,f)... wait !(t,f) is invalid
-    ]
-
-    # Let me fix the test cases - skipping invalid ones
+    # Test cases - all are valid boolean expressions
+    # !(&(t,t,f)) = !(t&t&f) = !(F) = True
     test_cases = [
         ("!(f)", True),
         ("|(f,t)", True),
@@ -721,10 +721,9 @@ if __name__ == "__main__":
         ("|(f,f,f)", False),
         ("&(t,f,t)", False),
         ("!(|(t,f))", False),
-        ("!(&(t,t,f))", False),  # &(t,t,f)=f, !f=t
-        ("|(&(t,f),|)", None),  # Skip - invalid
-        ("!(|(t,f))", False),
-        ("&(!(t),f)", False),  # !(t)=f, f&f=f
+        ("!(&(t,t,f))", True),
+        ("&(!(t),f)", False),
+        ("&(!(t),!(f))", False),
     ]
 
     print("=" * 70)
