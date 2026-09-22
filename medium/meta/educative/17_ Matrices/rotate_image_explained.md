@@ -1,341 +1,412 @@
-# Rotate Image - 20 Ways
+# Rotate Image — 0.0001% Expert Guide
 
-**Reference:** https://www.educative.io/courses/grokking-coding-interview-in-python/rotate-image
-
-## The Problem
-```
-Given an n x n matrix, rotate it 90 degrees clockwise IN PLACE.
-The function returns the modified input matrix.
-
-Examples:
-    [[1,2,3],       [[7,4,1],
-     [4,5,6],   ->   [8,5,2],
-     [7,8,9]]        [9,6,3]]
-    [[2,6,8],       [[9,3,2],
-     [3,4,8],   ->   [8,4,6],
-     [9,8,8]]        [8,8,8]]
-
-Constraints:
-- n == matrix.length == matrix[i].length
-- 1 <= n <= 20
-- -10^3 <= matrix[i][j] <= 10^3
-```
-
-## How I Think (The Mental Process)
-
-### Step 1: Understand the Problem
-```
-For 90° CW rotation:
-- Position (i, j) moves to (j, n-1-i).
-- We must do this IN PLACE - no extra matrix.
-```
-
-### Step 2: The Trick
-> "KEY INSIGHT: 90° CW rotation = TRANSPOSE + REVERSE each row.
->
-> - Transpose: swap matrix[i][j] with matrix[j][i] for i < j.
-> - Reverse each row: each row reversed left-to-right.
->
-> Composition: (i, j) -> (j, i) [transpose] -> (j, n-1-i) [reverse row].
-> That's exactly the 90° CW rotation formula."
-
-### Step 3: Why it works
-> "Transpose moves element at (i, j) to position (j, i).
-> Reversing row j moves (j, i) to (j, n-1-i).
-> So composed: (i, j) ends up at (j, n-1-i). ✓"
-
-### Step 4: In-place?
-> "Yes! Both transpose and reverse are in-place operations.
-> Total space: O(1)."
-
-### Step 5: Algorithm
-> "1. Transpose: for i in [0, n), for j in [i+1, n): swap matrix[i][j], matrix[j][i].
-> 2. Reverse each row: row.reverse() for each row.
-> 3. Return matrix."
+> **LeetCode 48** | **Difficulty:** Medium | **Avg Solve Time:** 30 min
+> **Reference:** https://www.educative.io/courses/grokking-coding-interview-in-python/rotate-image
+> **Problem:** `rotate(matrix)` — rotate an n×n matrix 90° clockwise in place
 
 ---
 
-## What to Say Aloud in the Interview
+## 📋 WHAT THE QUESTION ASKS
 
-**Opening:**
-> "I need to rotate an n x n matrix 90 degrees clockwise IN PLACE."
+Given an `n×n` 2D matrix representing an image, rotate it by **90 degrees clockwise**, in place.
 
-**Key Insight:**
-> "90° CW rotation = TRANSPOSE + REVERSE each row.
-> - Transpose: swap matrix[i][j] and matrix[j][i].
-> - Reverse each row: row[i], row[n-1-i] = row[n-1-i], row[i].
-> - Composition gives the rotation."
+### Constraints
+- `n == matrix.length == matrix[i].length`
+- `1 <= n <= 200`
+- `-1000 <= matrix[i][j] <= 1000`
 
-**Algorithm:**
-> "1. Transpose: nested loop swap upper-triangular elements.
-> 2. Reverse each row: in-place row reversal.
-> 3. Return matrix."
+### Example
 
-**Why this works:**
-> "Element at (i, j) under transpose goes to (j, i).
-> Element at (j, i) under reverse row goes to (j, n-1-i).
-> Composed: (i, j) -> (j, n-1-i). ✓"
+```
+Input: [[1,2,3],
+        [4,5,6],
+        [7,8,9]]
 
-**Edge cases:**
-- 1x1: no change.
-- 2x2: transpose = reverse, so just transpose.
-- n is odd: center element stays.
+Output: [[7,4,1],
+         [8,5,2],
+         [9,6,3]]
+```
 
-**Complexity:**
-- Time:  O(n^2).
-- Space: O(1) - in place.
+### Why This Is "Medium"
+- Requires understanding of matrix transposition.
+- In-place rotation is trickier than using extra space.
+- The "transpose + reverse" trick is elegant but not obvious.
 
 ---
 
-## The 20 Implementations (Simple to Complex)
+## 🧠 HOW TO THINK — STEP BY STEP (Expert Framework)
 
-### Way 1: Transpose + reverse (BEST - Memorize!)
+### Step 1: Understand the Question (1 min)
+> "Rotate an n×n matrix 90° clockwise, in place."
+
+### Step 2: Identify the Algorithm (3 min)
+> "Three approaches:
+> 1. **Transpose + reverse:** transpose the matrix, then reverse each row. O(1) extra space.
+> 2. **Rotate layer by layer:** swap 4 cells at a time for each ring. O(1) extra space.
+> 3. **New matrix:** build a new rotated matrix. O(n²) extra space.
+
+> Best: Transpose + reverse. Cleanest."
+
+### Step 3: Why Transpose + Reverse Works (3 min)
+> "Rotating 90° clockwise = transpose + reverse each row.
+> - Transpose: swap (r, c) with (c, r).
+> - Reverse: flip each row.
+> 
+> This works because rotating clockwise moves the top row to the right column."
+
+### Step 4: Layer-by-Layer Alternative (3 min)
+> "For each ring (outer, inner, etc.):
+> - For each cell in the top row of the ring, swap with 3 other cells (right, bottom, left).
+> - 4-way swap pattern.
+
+> More complex but useful when you can't transpose."
+
+### Step 5: Edge Cases (2 min)
+- 1x1: unchanged.
+- 2x2: just transpose and reverse.
+
+### Step 6: Code It — Transpose + Reverse (5 min)
+
 ```python
-def rotate_image_1(matrix):
+def rotate(matrix):
     n = len(matrix)
     # Transpose
-    for i in range(n):
-        for j in range(i + 1, n):
-            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+    for r in range(n):
+        for c in range(r + 1, n):
+            matrix[r][c], matrix[c][r] = matrix[c][r], matrix[r][c]
     # Reverse each row
-    for row in matrix:
-        row.reverse()
-    return matrix
+    for r in range(n):
+        matrix[r].reverse()
 ```
 
-### Way 2: Verbose version
-### Way 3: Layer-by-layer 4-way swap
-### Way 4: zip + reverse
-### Way 5: New matrix with formula
-### Way 6: enumerate for transpose
-### Way 7: numpy.rot90
-### Way 8: reversed + zip
-### Way 9: Direct formula into new list
-### Way 10: Single loop with reversed()
-### Way 11: Recursive
-### Way 12: Class-based
-### Way 13: itertools
-### Way 14: Slicing + list comp
-### Way 15: Helper functions
-### Way 16: Layer with cleaner offset
-### Way 17: reversed builtin
-### Way 18: Matrix slicing transpose
-### Way 19: One-liner
-### Way 20: Final cleanest (the one to memorize)
-
----
-
-## Decision Tree
-
-```
-+--------------------+----------+--------------+
-| Scenario           | Best     | Why          |
-+--------------------+----------+--------------+
-| Most efficient     | Way 1    | O(n^2) in-pl |
-| Want simple code   | Way 19   | One-liner    |
-| numpy available    | Way 7    | Built-in     |
-| Educational        | Way 3    | Layer-by-lay |
-+--------------------+----------+--------------+
-```
-
-## Complexity
-
-| Approach | Time | Space | Notes |
-|----------|------|-------|-------|
-| Transpose+Reverse (Way 1) | O(n^2) | O(1) | Best general |
-| Layer-by-layer (Way 3) | O(n^2) | O(1) | One-pass |
-| New matrix (Way 5) | O(n^2) | O(n^2) | Easier but more space |
-| numpy (Way 7) | O(n^2) | O(n^2) | Built-in |
-
----
-
-## Walkthrough Example
-
-```
-matrix = [[1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9]]
-
-Step 1: Transpose
-[[1, 4, 7],
- [4, 5, 8],  <- swap matrix[0][1]=2 with matrix[1][0]=4
- [7, 8, 9]]  <- swap matrix[0][2]=3 with matrix[2][0]=7, matrix[1][2]=6 with matrix[2][1]=8
-
-After transpose:
-[[1, 4, 7],
- [2, 5, 8],
- [3, 6, 9]]
-
-Step 2: Reverse each row
-Row 0: [1, 4, 7] -> [7, 4, 1]
-Row 1: [2, 5, 8] -> [8, 5, 2]
-Row 2: [3, 6, 9] -> [9, 6, 3]
-
-Result:
-[[7, 4, 1],
- [8, 5, 2],
- [9, 6, 3]]
-```
-
-```
-matrix = [[2, 6, 8],
-          [3, 4, 8],
-          [9, 8, 8]]
-
-Step 1: Transpose
-[[2, 3, 9],
- [6, 4, 8],
- [8, 8, 8]]
-
-Step 2: Reverse each row
-[[9, 3, 2],
- [8, 4, 6],
- [8, 8, 8]]
-```
-
----
-
-## Best Answer to Memorize
+### Step 7: Code It — Layer by Layer (5 min)
 
 ```python
-def rotate_image(matrix):
+def rotate(matrix):
+    n = len(matrix)
+    for layer in range(n // 2):
+        first, last = layer, n - 1 - layer
+        for i in range(first, last):
+            offset = i - first
+            top = matrix[first][i]
+            # left → top
+            matrix[first][i] = matrix[last - offset][first]
+            # bottom → left
+            matrix[last - offset][first] = matrix[last][last - offset]
+            # right → bottom
+            matrix[last][last - offset] = matrix[i][last]
+            # top → right
+            matrix[i][last] = top
+```
+
+### Step 8: Verify with Example (2 min)
+For 3x3 `[[1,2,3],[4,5,6],[7,8,9]]`:
+- Transpose: `[[1,4,7],[2,5,8],[3,6,9]]`.
+- Reverse each row: `[[7,4,1],[8,5,2],[9,6,3]]`. ✓
+
+### Step 9: Discuss Trade-offs (5 min)
+> "Three approaches:
+> 1. **Transpose + reverse:** O(n²) time, O(1) space. **Cleanest.**
+> 2. **Layer-by-layer:** O(n²) time, O(1) space. More complex.
+> 3. **New matrix:** O(n²) time, O(n²) space. Easy but uses memory.
+
+> I'll use transpose + reverse."
+
+### Step 10: Final Clean Code (5 min)
+Memorize the 8-line solution.
+
+---
+
+## 🎯 THE GOLDEN INTERVIEW SCRIPT (Memorize This!)
+
+```
+"I need to rotate an n×n matrix 90° clockwise, in place.
+
+KEY INSIGHT: 90° clockwise rotation = TRANSPOSE + REVERSE EACH ROW.
+- Transpose: swap (r, c) with (c, r).
+- Reverse: flip each row.
+
+ALGORITHM:
+1. For r in range(n):
+   For c in range(r+1, n):
+       swap matrix[r][c] and matrix[c][r]
+2. For r in range(n):
+       reverse matrix[r]
+
+COMPLEXITY: O(n²) time, O(1) extra space.
+
+ALTERNATIVE: Layer-by-layer rotation. For each ring, do a 4-way swap.
+
+EDGE CASES: 1x1 unchanged. 2x2 just transpose."
+```
+
+---
+
+## 🔬 THE 20 SOLUTIONS — TECHNIQUE LADDER
+
+### 🟢 TIER 1: Transpose + Reverse (BEST — Memorize!)
+
+| Way | Technique | Time | Space | When to Use |
+|-----|-----------|------|-------|-------------|
+| 1 | Transpose + reverse (BEST) | O(n²) | O(1) | **THE ANSWER** |
+| 2 | Verbose | O(n²) | O(1) | Educational |
+| 8 | One-liner | O(n²) | O(1) | Pythonic |
+| 10 | Transpose + zip reverse | O(n²) | O(1) | Pythonic |
+| 12 | Most concise | O(n²) | O(1) | One-liner |
+| 19 | One-liner | O(n²) | O(1) | Variant |
+| 20 | Final cleanest | O(n²) | O(1) | **THE ONE TO MEMORIZE** |
+
+### 🟡 TIER 2: Layer-by-Layer
+
+| Way | Technique | Time | Space | When to Use |
+|-----|-----------|------|-------|-------------|
+| 3 | Layer-by-layer 4-swap | O(n²) | O(1) | Educational |
+| 4 | With offset | O(n²) | O(1) | Variant |
+| 11 | Ring traversal | O(n²) | O(1) | Variant |
+
+### 🟣 TIER 3: Extra Space
+
+| Way | Technique | Time | Space | When to Use |
+|-----|-----------|------|-------|-------------|
+| 5 | New matrix | O(n²) | O(n²) | Easy |
+| 6 | Numpy rot90 | O(n²) | O(n²) | Fast in practice |
+| 7 | Numpy transpose | O(n²) | O(n²) | Variant |
+| 9 | Functional zip | O(n²) | O(n²) | Functional |
+| 13 | Itertools | O(n²) | O(n²) | Functional |
+| 17 | With helpers | O(n²) | O(n²) | Readable |
+| 18 | Numpy k=1 | O(n²) | O(n²) | Variant |
+
+### ⚪ TIER 4: Specialized
+
+| Way | Technique | Time | Space | When to Use |
+|-----|-----------|------|-------|-------------|
+| 14 | Recursive | O(n²) | O(log n) | Educational |
+| 15 | Class OOP | O(n²) | O(1) | Reusable |
+| 16 | Generator | O(n²) | O(1) | Pythonic |
+
+---
+
+## 💎 THE 8-LINE SOLUTION (Memorize!)
+
+```python
+def rotate(matrix):
     n = len(matrix)
     # Transpose
-    for i in range(n):
-        for j in range(i + 1, n):
-            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+    for r in range(n):
+        for c in range(r + 1, n):
+            matrix[r][c], matrix[c][r] = matrix[c][r], matrix[r][c]
     # Reverse each row
-    for row in matrix:
-        row.reverse()
-    return matrix
+    for r in range(n):
+        matrix[r].reverse()
 ```
 
-**~5 lines. O(n^2) time. O(1) space. Interview-ready!**
+**Time:** `O(n²)`
+**Space:** `O(1)` (in-place)
 
 ---
 
-## Key Insights
+## 🤖 HOW A 0.0001% DATA/AI EXPERT THINKS
 
-### Why transpose + reverse each row?
-> "Composition of two operations: transpose then row-reverse.
-> (i, j) -> (j, i) [transpose] -> (j, n-1-i) [row reverse].
-> That's the 90° CW rotation formula."
+### Insight 1: Transpose is the Foundation
 
-### Why in-place?
-> "Both operations (transpose and reverse) can be done in-place.
-> No need for extra matrix."
+> A matrix transpose swaps row index with column index: `(r, c) → (c, r)`.
 
-### Why only swap upper-triangular in transpose?
-> "Transpose swaps (i, j) and (j, i). Swapping the lower-triangular
-> too would un-transpose. Only swap when i < j (upper triangle)."
+This is the **most fundamental matrix operation**. Rotate 90° is built on it.
 
-### Why reverse rows, not columns?
-> "For 90° CW: column-reverse would give 90° CCW. We want CW, so reverse rows."
+**Connection to:**
+- **Linear algebra:** Transpose matrix Aᵀ.
+- **Symmetric matrices:** S = Aᵀ = A.
+- **Strassen's algorithm:** Uses transpose for fast multiplication.
+
+### Insight 2: Why Transpose + Reverse = Rotate 90° CW
+
+> Take a cell `(r, c)`. After transpose: `(c, r)`. After row reverse: `(c, n-1-r)`.
+
+So `(r, c) → (c, n-1-r)`. This is exactly 90° CW rotation.
+
+**Connection to:**
+- **Coordinate transforms:** Rotation matrices.
+- **Computer graphics:** 2D/3D rotations.
+- **Physics:** Frame transformations.
+
+### Insight 3: Layer-by-Layer Approach
+
+> An n×n matrix has `n // 2` "rings" (layers). Each ring is a square border.
+
+For each ring, swap 4 cells in a cycle. Move 4 elements in 4 swaps = 0 extra space.
+
+**Connection to:**
+- **Cache-oblivious algorithms:** Block decomposition.
+- **Sparse matrices:** Block matrix operations.
+- **Convolutional networks:** Same structure.
+
+### Insight 4: Rotation Matrix in Linear Algebra
+
+> The 2D rotation matrix is `[[cos θ, -sin θ], [sin θ, cos θ]]`.
+
+For θ = 90°: `[[0, -1], [1, 0]]`. Applying this to each cell gives the rotation.
+
+But in-place rotation needs **discrete swaps**, not matrix multiplication.
+
+**Connection to:**
+- **Computer graphics:** OpenGL, DirectX use rotation matrices.
+- **Robotics:** Forward kinematics.
+- **Quantum computing:** Qubit rotations.
+
+### Insight 5: Why In-Place is Hard
+
+> A naive rotation creates a new matrix. In-place requires careful tracking.
+
+The transpose is in-place (one swap per pair). Reverse is in-place. Together, O(1) extra space.
+
+**Connection to:**
+- **In-place algorithms:** Always consider the data structure.
+- **Memory constraints:** Embedded systems.
+- **Streaming:** When you can't buffer.
+
+### Insight 6: Generalization to k×90° Rotations
+
+> 90° CW = transpose + reverse.
+> 180° = reverse rows + reverse columns (or just reverse all).
+> 270° CW = reverse + transpose.
+> 90° CCW = reverse + transpose (CW) = transpose + reverse (CCW).
+
+**Connection to:**
+- **Group theory:** Rotations form a cyclic group of order 4.
+- **Crystallography:** 90° rotations are symmetry operations.
+- **Image processing:** All rotations needed.
+
+### Insight 7: Connection to Image Processing
+
+> Image rotation in OpenCV/PIL uses similar tricks.
+
+But for non-square images, you need to crop or pad, since 90° rotates change dimensions.
+
+**Connection to:**
+- **EXIF orientation:** Images stored with rotation metadata.
+- **TensorFlow image ops:** `tf.image.rot90`.
+- **Photo apps:** Rotate buttons.
+
+### Insight 8: Real-World Applications
+
+| Application | Use |
+|-------------|-----|
+| **Image processing** | Rotate photos |
+| **Computer graphics** | 2D game rotations |
+| **Display drivers** | Screen orientation |
+| **Printers** | Page rotation |
+| **Robotics** | Coordinate frame transforms |
+| **Crystallography** | Molecular structure |
+| **Game development** | Sprite rotation |
+| **Map rendering** | Tile rotation |
+
+**Smartphone rotation** uses similar logic. The OS rotates the framebuffer.
+
+### Insight 9: Connection to Bit Manipulation
+
+> Both transpose and reverse are O(1) extra space. Both work on the data structure itself.
+
+**Connection to:**
+- **Game of Life:** Bit encoding.
+- **Set Matrix Zeroes:** First row/col markers.
+- **In-place string reversal:** Two-pointer.
+
+### Insight 10: Why This Is Interview Favorite
+
+This problem tests:
+1. **Matrix operations** — transpose, reverse.
+2. **In-place algorithms** — O(1) extra space.
+3. **Spatial reasoning** — visualize the rotation.
+4. **Multiple solutions** — transpose+reverse vs layer-by-layer.
+
+**Connection to:**
+- **Teaching:** Used in algorithms courses.
+- **Interview prep:** Universal medium-difficulty problem.
+- **Spatial reasoning:** Important in robotics, graphics.
 
 ---
 
-## Test Cases
+## 🧪 TEST CASES
 
-| matrix | Expected |
-|--------|----------|
-| [[1,2,3],[4,5,6],[7,8,9]] | [[7,4,1],[8,5,2],[9,6,3]] |
-| [[2,6,8],[3,4,8],[9,8,8]] | [[9,3,2],[8,4,6],[8,8,8]] |
-| [[42]] | [[42]] |
-| [[1,2],[3,4]] | [[3,1],[4,2]] |
-| [[1..4],[5..8],[9..12],[13..16]] | [[13,9,5,1],[14,10,6,2],[15,11,7,3],[16,12,8,4]] |
-| [[5,5],[5,5]] | [[5,5],[5,5]] |
-
----
-
-## Common Pitfalls
-
-1. **Swapping both triangles**: Only swap i < j (upper triangle).
-2. **Confusing CW vs CCW**: Row-reverse = CW. Column-reverse = CCW.
-3. **Modifying original**: Need to modify input, not return new.
-4. **Off-by-one in transpose**: range(i+1, n), not range(0, n).
-5. **Not returning**: Function should return matrix.
+| Matrix | Expected | Note |
+|--------|----------|------|
+| `[[1,2,3],[4,5,6],[7,8,9]]` | `[[7,4,1],[8,5,2],[9,6,3]]` | Standard 3x3 |
+| `[[1,2],[3,4]]` | `[[3,1],[4,2]]` | 2x2 |
+| `[[1]]` | `[[1]]` | 1x1 |
+| `[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]]` | 4x4 rotated | Standard |
+| 5x5 | rotated 5x5 | General |
 
 ---
 
-## Why This Problem Matters
+## 📊 COMPLEXITY SUMMARY
 
-> "Tests:
-> 1. In-place matrix manipulation.
-> 2. Two-step composition (transpose + reverse).
-> 3. Index calculation.
-> 4. Foundation for: image rotation, matrix algorithms, computer graphics."
-
----
-
-## Beyond This Problem: Related Patterns
-
-### 1. Transpose Matrix (LC 867)
-```python
-# Just the transpose step.
-```
-
-### 2. Rotate List (LC 189)
-```python
-# 1D rotation - different algorithm.
-```
-
-### 3. Spiral Matrix (LC 54)
-```python
-# Traverse in spiral - different.
-```
-
-### 4. Image Rotation (in graphics)
-```python
-# Same principle: rotate pixel coordinates.
-```
+| Approach | Time | Space | Verdict |
+|----------|------|-------|---------|
+| **Transpose + reverse** | **O(n²)** | **O(1)** | **✅ BEST** |
+| Layer-by-layer | O(n²) | O(1) | ✅ Alternative |
+| New matrix | O(n²) | O(n²) | ✅ Easy |
 
 ---
 
-## Connection to Matrix Transformations
+## 🔗 RELATED PROBLEMS
 
-This problem uses "decomposition into simple operations":
-
-```
-90° CW rotation = TRANSPOSE + REVERSE each row
-90° CCW rotation = TRANSPOSE + REVERSE each column
-180° rotation = REVERSE each row + REVERSE each column
-```
-
-This decomposition is clean and efficient. The principle:
-- Transpose swaps (i, j) and (j, i).
-- Reversing rows moves elements horizontally.
-- Reversing columns moves elements vertically.
-- Various combinations give various rotations.
+| Problem | Technique | Link |
+|---------|-----------|------|
+| Spiral Matrix (LC 54) | Boundary shrinking | https://leetcode.com/problems/spiral-matrix/ |
+| Set Matrix Zeroes (LC 73) | First row/col markers | https://leetcode.com/problems/set-matrix-zeroes/ |
+| Transpose Matrix (LC 867) | Swap indices | https://leetcode.com/problems/transpose-matrix/ |
+| Rotate Image (LC 48) | **This problem** | https://leetcode.com/problems/rotate-image/ |
 
 ---
 
-## Quick Checklist
+## 🎓 EXPERT TAKEAWAYS
 
-When given a similar problem:
-- [ ] What's the rotation angle? (CW = row reverse, CCW = col reverse)
-- [ ] In-place required? (use transpose + reverse)
-- [ ] What dimensions? (square vs rectangular - transpose works for any, reverse needs square for rotation)
-- [ ] Can I use numpy? (Way 7)
-- [ ] Is the formula enough? (new[j][n-1-i] = old[i][j])
-
----
-
-## Alternative: Direct Formula
-
-```python
-def rotate_image_direct(matrix):
-    n = len(matrix)
-    new = [[matrix[n - 1 - j][i] for j in range(n)] for i in range(n)]
-    matrix[:] = new
-    return matrix
-```
-
-This uses the formula `new[i][j] = old[n-1-j][i]` directly.
-O(n^2) extra space, but easier to understand.
+1. **90° CW = transpose + reverse each row.** Memorize this.
+2. **Transpose swaps (r, c) with (c, r).** Only iterate `c > r` to avoid double-swap.
+3. **Layer-by-layer** is an alternative — 4-way swap for each ring.
+4. **O(1) extra space** is achievable — don't allocate a new matrix.
+5. **Generalizes to k×90°** — group of order 4.
+6. **Rotation matrix** in linear algebra is `[[0,-1],[1,0]]` for 90° CW.
+7. **Image rotation in OpenCV/PIL** uses similar tricks.
+8. **Connection to robotics, graphics, crystallography.**
+9. **Test cases:** 1x1, 2x2, 3x3, 4x4.
+10. **The transpose + reverse is THE interview answer.**
 
 ---
 
-## Sources
+## 🚀 AI / DATA ENGINEERING CONNECTIONS
 
-- [Educative - Grokking the Coding Interview Patterns](https://www.educative.io/courses/grokking-coding-interview-in-python/)
-- [LeetCode 48 - Rotate Image](https://leetcode.com/problems/rotate-image/)
+| Domain | Connection |
+|--------|------------|
+| **Image processing** | Rotate photos, EXIF orientation |
+| **Computer graphics** | 2D game rotations |
+| **Linear algebra** | Rotation matrices, transpose |
+| **Robotics** | Coordinate frame transforms |
+| **Crystallography** | Molecular symmetry |
+| **Display drivers** | Screen orientation |
+| **Game development** | Sprite rotation |
+| **Map rendering** | Tile rotation |
+| **Quantum computing** | Qubit rotations |
+| **Convolutional networks** | Filter rotations |
+
+---
+
+## ✅ FINAL CHECKLIST
+
+- [x] Can explain the problem in 30 seconds
+- [x] Can derive transpose + reverse in 60 seconds
+- [x] Can code the 8-line solution in 90 seconds
+- [x] Know the complexity: O(n²) time, O(1) space
+- [x] Know the layer-by-layer alternative
+- [x] Know the rotation matrix in linear algebra
+- [x] Know how to generalize to k×90° rotations
+- [x] Can list 5 real-world applications
+- [x] Can explain why in-place is non-trivial
+- [x] Can compare with the 3 main approaches
+
+---
+
+**Status:** ✅ Mastered at 0.0001% expert level.
+**Time to solve in interview:** < 8 minutes.
+**Lines of code to write:** 8 (transpose + reverse).
+**Insight:** "90° CW rotation = transpose + reverse each row. In-place, O(1) extra space."
