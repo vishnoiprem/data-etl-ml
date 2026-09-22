@@ -145,6 +145,8 @@ def construct_2d_array_9(original, m, n):
     from operator import itemgetter
     if len(original) != m * n:
         return []
+    if n == 1:
+        return [[original[i]] for i in range(m)]
     return [list(itemgetter(*range(i * n, (i + 1) * n))(original))
             for i in range(m)]
 
