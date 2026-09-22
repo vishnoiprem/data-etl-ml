@@ -16,7 +16,11 @@ So we simulate the operations directly on the binary representation.
 ### Algorithm
 1. Reverse the string so the LSB is at index 0 (easy to drop / carry).
 2. Convert each character to int.
-3. While the number is not exactly `[1]`:
+3. While the number is not exactly `[1]`:def reverse_words(sentence):
+
+    # Replace this placeholder return statement with your code
+    return ""
+
    - If LSB == 0 → pop the LSB (one division-by-2 step).
    - If LSB == 1 → add 1 by carry propagation.
 
