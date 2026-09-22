@@ -102,27 +102,24 @@ def second_greater_element_2(nums):
     return res
 
 
-# Simpler version using tuple stack
+# Simpler version using tuple stack - properly tracks 1st and 2nd pending
 def second_greater_element_2(nums):
-    """Simpler: each stack entry is (idx, found_count)"""
+    """Two-stack with tuples"""
     n = len(nums)
     res = [-1] * n
-    # Track indices with how many greater found so far
-    pending = []  # stack of (idx, greater_count)
+    s1 = []  # (idx,) waiting for 1st greater
+    s2 = []  # (idx,) waiting for 2nd greater
 
     for i, num in enumerate(nums):
-        new_pending = []
-        # Resolve top of stack
-        while pending and num > nums[pending[-1][0]]:
-            idx, gc = pending.pop()
-            new_gc = gc + 1
-            if new_gc == 2:
-                res[idx] = num
-            else:
-                new_pending.append((idx, new_gc))
-        # After popping, push remaining back (they're still waiting)
-        # Now add current index
-        pending = pending + new_pending + [(i, 0)]
+        # Resolve s2
+        while s2 and num > nums[s2[-1]]:
+            idx = s2.pop()
+            res[idx] = num
+        # Promote s1 to s2
+        while s1 and num > nums[s1[-1]]:
+            s2.append(s1.pop())
+        # Add current to s1
+        s1.append(i)
 
     return res
 
@@ -240,39 +237,21 @@ def second_greater_element_5b(nums):
 # WAY 6: One stack with explicit counters in pairs
 # =============================================================================
 def second_greater_element_6(nums):
+    """Single stack with explicit count tracking."""
     n = len(nums)
     res = [-1] * n
-    # Each stack entry: [index, num_greater_found]
-    stack = []
+    # Two stacks: [idx] for stage 0 (1st pending) and stage 1 (2nd pending)
+    s1 = []
+    s2 = []
 
     for i, num in enumerate(nums):
-        # Pop entries we beat, then re-add with updated count
-        temp = []
-        while stack and num > nums[stack[-1][0]]:
-            idx, gc = stack.pop()
-            new_gc = gc + 1
-            if new_gc == 2:
-                res[idx] = num
-            else:
-                # Will be re-added
-                pass  # Actually drop, since this index's "1st" was used
-        # We DON'T re-add: if an element is popped and count becomes 1,
-        # it's no longer waiting. Just resolved (count = 1 means 1st greater found,
-        # but the 2nd greater is the NEXT pop, not this one).
-        # Wait - when we pop and gc becomes 2, that's the 2nd greater.
-        # When gc becomes 1, that's the 1st greater - we need to wait for 2nd.
-        # Bug here: we need to keep them in s2 (1st greater found, waiting for 2nd)
-        # Let me fix:
-        while stack and num > nums[stack[-1][0]]:
-            idx, gc = stack.pop()
-            new_gc = gc + 1
-            if new_gc == 2:
-                res[idx] = num
-            else:
-                # Found 1st greater, push back as stage-1
-                stack.append([idx, 1])  # waiting for 2nd
-        # Add current with 0 greater found
-        stack.append([i, 0])
+        # Resolve 2nd pending
+        while s2 and num > nums[s2[-1]]:
+            res[s2.pop()] = num
+        # Promote 1st pending to 2nd pending
+        while s1 and num > nums[s1[-1]]:
+            s2.append(s1.pop())
+        s1.append(i)
 
     return res
 
@@ -374,22 +353,18 @@ def second_greater_element_10(nums):
 def second_greater_element_10b(nums):
     n = len(nums)
     res = [-1] * n
-    pending = []  # (idx, count_of_greater)
+    s1 = []
+    s2 = []
 
     for i, num in enumerate(nums):
-        # Resolve items where we found a greater
-        new_pending = []
-        while pending and num > nums[pending[-1][0]]:
-            idx, count = pending.pop()
-            new_count = count + 1
-            if new_count == 2:
-                res[idx] = num
-            else:
-                new_pending.append((idx, new_count))
-        # Re-add remaining pending
-        pending.extend(new_pending)
-        # Add current
-        pending.append((i, 0))
+        # Resolve 2nd pending first
+        while s2 and num > nums[s2[-1]]:
+            res[s2.pop()] = num
+        # Promote 1st pending to 2nd
+        while s1 and num > nums[s1[-1]]:
+            s2.append(s1.pop())
+        # Add current to 1st pending
+        s1.append(i)
 
     return res
 
@@ -723,7 +698,7 @@ if __name__ == "__main__":
     #   i=4 (9): none, -1.
     #   i=5 (4): anything >4 after? 6 at idx 6. So 1st greater = 6. 2nd = -1. res[5] = -1.
     #   i=6 (6): -1.
-    # Result: [9, 9, 6, 6, -1, -1, -1]
+    # Result: [9, 9, 6, 4, -1, -1, -1]
 
     # [1, 3, 2, 4]:
     #   i=0 (1): 1st greater = 3 at idx 1. 2nd greater = ? After idx 1, anything >1. nums[2]=2, nums[3]=4. First >1 = idx 2 (2). 2nd = idx 3 (4). res[0] = 4.
@@ -737,7 +712,7 @@ if __name__ == "__main__":
         ([1, 2, 3, 4, 5], [3, 4, 5, -1, -1]),
         ([2, 4, 0, 9, 6], [9, 9, -1, -1, -1]),
         ([1], [-1]),
-        ([3, 1, 5, 0, 9, 4, 6], [9, 9, 6, 6, -1, -1, -1]),
+        ([3, 1, 5, 0, 9, 4, 6], [9, 9, 6, 4, -1, -1, -1]),
         ([0, 0, 0, 0], [-1, -1, -1, -1]),
         ([3, 3, 3], [-1, -1, -1]),
         ([1, 3, 2, 4], [4, -1, -1, -1]),
@@ -761,7 +736,7 @@ if __name__ == "__main__":
         ([1, 2, 3, 4, 5], [3, 4, 5, -1, -1]),
         ([2, 4, 0, 9, 6], [9, 6, 6, -1, -1]),
         ([1], [-1]),
-        ([3, 1, 5, 0, 9, 4, 6], [9, 9, 6, 6, -1, -1, -1]),
+        ([3, 1, 5, 0, 9, 4, 6], [9, 9, 6, 4, -1, -1, -1]),
         ([0, 0, 0, 0], [-1, -1, -1, -1]),
         ([3, 3, 3], [-1, -1, -1]),
         ([1, 3, 2, 4], [2, -1, -1, -1]),
