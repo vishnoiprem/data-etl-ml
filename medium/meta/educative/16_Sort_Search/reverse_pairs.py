@@ -393,7 +393,7 @@ def reverse_pairs_12(nums):
                 j += 1
         merged.extend(left[i:])
         merged.extend(right[j:])
-        return merged, count
+        return merged, lc + rc + count
 
     _, count = merge_count(nums)
     return count
@@ -464,7 +464,7 @@ def reverse_pairs_15(nums):
                 j += 1
         merged.extend(left[i:])
         merged.extend(right[j:])
-        return merged, count
+        return merged, lc + rc + count
 
     _, count = merge_count(nums)
     return count

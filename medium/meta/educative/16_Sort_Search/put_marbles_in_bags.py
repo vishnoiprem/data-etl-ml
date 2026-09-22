@@ -80,32 +80,31 @@ def put_marbles_3(weights, k):
 # WAY 4: Brute force (DP) - exponential
 # =============================================================================
 def put_marbles_4(weights, k):
-    """Brute force via recursion (TLE for large)."""
+    """Brute force DP. Returns (min_score, max_score)."""
     n = len(weights)
-    memo = {}
 
-    def helper(i, bags_left):
-        if (i, bags_left) in memo:
-            return memo[(i, bags_left)]
+    def compute_min(i, bags_left):
+        # Returns min score for distributing weights[i:] into bags_left bags
         if bags_left == 1:
-            return weights[i] + weights[-1]
-        best_min = float('inf')
-        best_max = float('-inf')
-        # Try each split point j (where bag i..j ends)
+            return weights[i] + weights[n - 1]
+        best = float('inf')
         for j in range(i, n - bags_left + 1):
-            score = weights[i] + weights[j]
-            if j + 1 < n:
-                rest_min, rest_max = helper(j + 1, bags_left - 1)
-                best_min = min(best_min, score + rest_min)
-                best_max = max(best_max, score + rest_max)
-            else:
-                best_min = min(best_min, score)
-                best_max = max(best_max, score)
-        memo[(i, bags_left)] = (best_min, best_max)
-        return (best_min, best_max)
+            score = weights[i] + weights[j] + compute_min(j + 1, bags_left - 1)
+            if score < best:
+                best = score
+        return best
 
-    min_s, max_s = helper(0, k)
-    return max_s - min_s
+    def compute_max(i, bags_left):
+        if bags_left == 1:
+            return weights[i] + weights[n - 1]
+        best = float('-inf')
+        for j in range(i, n - bags_left + 1):
+            score = weights[i] + weights[j] + compute_max(j + 1, bags_left - 1)
+            if score > best:
+                best = score
+        return best
+
+    return compute_max(0, k) - compute_min(0, k)
 
 
 # =============================================================================
@@ -115,6 +114,8 @@ def put_marbles_5(weights, k):
     n = len(weights)
     cuts = [weights[i] + weights[i + 1] for i in range(n - 1)]
     cuts.sort(reverse=True)
+    if k - 1 == 0:
+        return 0
     # Top k-1 are now at front, bottom k-1 at end
     return sum(cuts[:k - 1]) - sum(cuts[-(k - 1):])
 
@@ -147,14 +148,14 @@ def put_marbles_7(weights, k):
     cuts = [weights[i] + weights[i + 1] for i in range(n - 1)]
 
     # k-1 smallest via heapreplace
-    smallest = cuts[:k - 1]
+    smallest = list(cuts[:k - 1])
     heapq.heapify(smallest)
     for c in cuts[k - 1:]:
         if c < smallest[0]:
             heapq.heapreplace(smallest, c)
     min_sum = sum(smallest)
 
-    # k-1 largest (negate)
+    # k-1 largest (use max-heap via negative)
     largest = [-c for c in cuts[:k - 1]]
     heapq.heapify(largest)
     for c in cuts[k - 1:]:
