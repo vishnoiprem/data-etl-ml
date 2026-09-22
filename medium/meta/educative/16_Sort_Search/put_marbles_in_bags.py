@@ -147,21 +147,21 @@ def put_marbles_7(weights, k):
         return 0
     cuts = [weights[i] + weights[i + 1] for i in range(n - 1)]
 
-    # k-1 smallest via heapreplace
-    smallest = list(cuts[:k - 1])
+    # k-1 smallest via MAX-heap of size k-1
+    smallest = [-c for c in cuts[:k - 1]]  # negate for max-heap behavior
     heapq.heapify(smallest)
     for c in cuts[k - 1:]:
-        if c < smallest[0]:
-            heapq.heapreplace(smallest, c)
-    min_sum = sum(smallest)
+        if -c > smallest[0]:  # if c > smallest of remaining, replace
+            heapq.heapreplace(smallest, -c)
+    min_sum = -sum(smallest)
 
-    # k-1 largest (use max-heap via negative)
-    largest = [-c for c in cuts[:k - 1]]
+    # k-1 largest via MIN-heap of size k-1 (top is smallest of top k-1)
+    largest = list(cuts[:k - 1])
     heapq.heapify(largest)
     for c in cuts[k - 1:]:
-        if -c > largest[0]:
-            heapq.heapreplace(largest, -c)
-    max_sum = -sum(largest)
+        if c > largest[0]:  # replace smallest of top k-1 if larger
+            heapq.heapreplace(largest, c)
+    max_sum = sum(largest)
 
     return max_sum - min_sum
 
@@ -292,15 +292,9 @@ def put_marbles_16(weights, k):
     if k - 1 == 0:
         return 0
     cuts = sorted(weights[i] + weights[i + 1] for i in range(n - 1))
-    # Smallest k-1 cuts
-    smallest = []
-    for i in range(k - 1):
-        smallest.append(cuts[i])
-    # Largest k-1 cuts
-    largest = []
-    for i in range(n - 2, n - 1 - (k - 1), -1):
-        largest.append(cuts[i])
-    return sum(largest) - sum(smallest)
+    smallest = sum(cuts[:k - 1])
+    largest = sum(cuts[-(k - 1):])
+    return largest - smallest
 
 
 # =============================================================================
@@ -368,6 +362,8 @@ def put_marbles_20(weights, k):
     Space: O(n)
     """
     n = len(weights)
+    if k - 1 == 0:
+        return 0
     cuts = sorted(weights[i] + weights[i + 1] for i in range(n - 1))
     return sum(cuts[-(k - 1):]) - sum(cuts[:k - 1])
 
