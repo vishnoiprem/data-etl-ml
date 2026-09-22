@@ -206,28 +206,16 @@ def maximum_swap_9(num):
 # Way 10: With helper for max position
 # ============================================================
 def maximum_swap_10(num):
-    def find_max_digit_pos(s, start):
-        max_digit = s[start]
-        max_pos = start
-        for i in range(start + 1, len(s)):
-            if s[i] >= max_digit:
-                max_digit = s[i]
-                max_pos = i
-        return max_pos
-
     s = list(str(num))
     n = len(s)
-    for i in range(n):
-        # Find the rightmost max digit from position i+1 onwards
-        max_pos = i
-        max_digit = s[i]
-        for j in range(i + 1, n):
-            if s[j] > max_digit:
-                max_digit = s[j]
-                max_pos = j
-        if max_pos > i:
-            s[i], s[max_pos] = s[max_pos], s[i]
-            return int(''.join(s))
+    # Pre-compute last occurrence of each digit
+    last = {int(d): i for i, d in enumerate(s)}
+    for i, d in enumerate(s):
+        for larger in range(9, int(d), -1):
+            pos = last.get(larger, -1)
+            if pos > i:
+                s[i], s[pos] = s[pos], s[i]
+                return int(''.join(s))
     return num
 
 
@@ -261,9 +249,7 @@ def maximum_swap_12(num):
         for larger in range(9, int(d), -1):
             pos = last.get(larger, -1)
             if pos > i:
-                digits[i], digits[pos] = digits[larger], d
-                # Wait, this is wrong. Use the actual char.
-                digits[i], digits[pos] = digits[pos], digits[i]
+                digits[i], digits[pos] = str(larger), digits[i]
                 return int(''.join(digits))
     return num
 
