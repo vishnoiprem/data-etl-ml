@@ -119,37 +119,37 @@ def rescue_boats_v2(people, limit):
 # ==============================================================
 def rescue_boats_v3(people, limit):
     """
-    Since weights <= limit <= 3000, use counting sort for O(n) time.
+    Counting sort / bucket-based approach. Since weights <= limit, use a
+    freq array. Walk from heaviest down; for each heavy person, the
+    remaining capacity is limit - heavy. Greedily assign the heaviest
+    light person who fits in that capacity.
     """
     if not people:
         return 0
-    # Frequency array: count of each weight
     max_w = max(people)
     freq = [0] * (max_w + 1)
     for w in people:
         freq[w] += 1
 
     boats = 0
-    light, heavy = 0, max_w
-    while light <= heavy:
-        if freq[light] == 0:
-            light += 1
+    heavy = max_w
+    while heavy > 0:
+        if freq[heavy] == 0:
+            heavy -= 1
             continue
-        # Find heaviest available person
-        while heavy > light and freq[heavy] == 0:
-            heavy -= 1
-        if heavy < light:
-            break
-        # Pair lightest with heaviest if possible
+        # Take one heavy person
+        freq[heavy] -= 1
         boats += 1
-        freq[light] -= 1
-        if light + heavy <= limit and heavy != light:
-            freq[heavy] -= 1
-        # Adjust pointers
-        while light <= heavy and freq[light] == 0:
-            light += 1
-        while heavy > light and freq[heavy] == 0:
-            heavy -= 1
+        # Find the heaviest light person that fits in remaining capacity
+        need = limit - heavy
+        light = min(heavy, need)
+        # Find largest light <= need (and <= heavy to avoid double-decrement
+        # when heavy == light: in that case we already used freq[heavy] above,
+        # but need becomes 0; we should NOT pair with another of the same weight)
+        while light > 0 and freq[light] == 0:
+            light -= 1
+        if light > 0 and light <= need and light < heavy:
+            freq[light] -= 1
     return boats
 
 
@@ -253,7 +253,7 @@ def rescue_boats_v7(people, limit):
         boats += 1
         if left == right:
             break
-        if sorted_p[left] + sorted_p[hi] := sorted_p[left] + sorted_p[right] <= limit:  # noqa
+        if sorted_p[left] + sorted_p[right] <= limit:
             left += 1
         right -= 1
     return boats
@@ -339,14 +339,14 @@ if __name__ == "__main__":
 
     test_cases = [
         ([1, 2],                3, 1),
-        ([3, 2, 2, 1],          3, 3),     # pairs (1,2) and (2,3)
-        ([3, 5, 3, 4],          5, 4),     # 3+5? no. 3+4? no. all alone.
+        ([3, 2, 2, 1],          3, 2),     # (3 alone), (1+2) -> 2 boats
+        ([3, 5, 3, 4],          5, 4),     # all alone
         ([1, 2, 3, 4],          5, 2),     # (1,4), (2,3)
         ([5, 1, 4, 2],          6, 2),     # (1,5), (2,4)
         ([1],                   1, 1),
         ([1, 1, 1, 1],          2, 2),     # pairs
         ([2, 2],                6, 1),
-        ([2, 2],                3, 1),
+        ([2, 2],                3, 2),     # 2+2=4 > 3 -> each alone
         ([3, 3, 3],             5, 3),     # 3+3=6 > 5
         ([3, 3, 3],             6, 2),     # 3+3=6 <= 6
     ]

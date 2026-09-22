@@ -385,25 +385,18 @@ def maximum_swap_18(num):
 def maximum_swap_19(num):
     s = list(str(num))
     n = len(s)
-    # right_max[i] = index of maximum digit in s[i..n-1]
-    right_max = [n - 1] * n
+    # For each i, max_suffix_pos[i] = rightmost index of max digit in s[i..n-1]
+    max_suffix_pos = [n - 1] * n
     for i in range(n - 2, -1, -1):
-        if s[i + 1] >= s[right_max[i + 1]]:
-            right_max[i] = i + 1
+        if s[i + 1] > s[max_suffix_pos[i + 1]]:
+            # s[i+1] is bigger. The new position is more to the right (later).
+            max_suffix_pos[i] = i + 1
         else:
-            right_max[i] = right_max[i + 1]
-
-    # Actually simpler: for each i, want the rightmost max digit
-    # Let me redo
-    max_from_right = [n - 1] * (n + 1)
-    for i in range(n - 1, -1, -1):
-        if s[i] >= s[max_from_right[i + 1]]:
-            max_from_right[i] = i
-        else:
-            max_from_right[i] = max_from_right[i + 1]
+            # Equal or smaller: keep the existing (rightmost) max position.
+            max_suffix_pos[i] = max_suffix_pos[i + 1]
 
     for i in range(n):
-        j = max_from_right[i]
+        j = max_suffix_pos[i]
         if s[j] > s[i] and j > i:
             s[i], s[j] = s[j], s[i]
             return int(''.join(s))
