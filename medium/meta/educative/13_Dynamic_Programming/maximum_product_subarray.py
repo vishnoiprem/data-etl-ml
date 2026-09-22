@@ -170,50 +170,57 @@ def max_product_v5(nums):
 # ==============================================================
 def max_product_v6(nums):
     """
-    Zeros break any product; reset there. For each zero-free segment,
-    the max product is either the whole segment or the suffix after
-    the first negative (or before the last negative) — whichever is
-    larger.
+    Zeros break any product. For each zero-free segment, the max
+    product is either:
+        - the whole segment
+        - the segment with prefix up to and including the first negative removed
+        - the segment with suffix from the last negative removed
+    Note: when the only negative is at one of the ends, dropping
+    the prefix/suffix leaves an empty product (= 1), but the original
+    total is negative; in such cases, total is the better answer.
     """
     if not nums:
         return 0
 
     best = float("-inf")
     i = 0
-    while i < len(nums):
+    n = len(nums)
+    while i < n:
         if nums[i] == 0:
             best = max(best, 0)
             i += 1
             continue
         j = i
-        while j < len(nums) and nums[j] != 0:
+        # Walk forward to find end of zero-free segment (stops AT zero or end)
+        while j < n and nums[j] != 0:
             j += 1
         segment = nums[i:j]
-        # Compute whole product, then drop from one end if needed.
-        # Strategy: max product is the whole segment, OR
-        #           segment after first negative, OR
-        #           segment before last negative.
-        prod_total = 1
+        # segment is non-empty since nums[i] != 0
+        total = 1
         for x in segment:
-            prod_total *= x
-        prod_no_first_neg = prod_total
-        prod_no_last_neg = prod_total
-        for k, x in enumerate(segment):
-            if x < 0:
-                prod_no_first_neg //= x  # divide out (since x divides prod)
-                # But to be safe with floats, recompute:
-                prod_no_first_neg = 1
-                for y in segment[k + 1:]:
-                    prod_no_first_neg *= y
-                break
-        for k in range(len(segment) - 1, -1, -1):
-            if segment[k] < 0:
-                prod_no_last_neg = 1
-                for y in segment[:k]:
-                    prod_no_last_neg *= y
-                break
-        best = max(best, prod_total, prod_no_first_neg, prod_no_last_neg)
-        i = j + 1
+            total *= x
+        neg_count = sum(1 for x in segment if x < 0)
+        candidate = total
+        if neg_count % 2 == 1 and len(segment) > 1:
+            # Drop prefix up to and including first negative
+            first_neg = next(k for k, x in enumerate(segment) if x < 0)
+            prod_drop_pref = 1
+            for x in segment[first_neg + 1:]:
+                prod_drop_pref *= x
+            # Drop suffix from last negative
+            last_neg = max(k for k, x in enumerate(segment) if x < 0)
+            prod_drop_suff = 1
+            for x in segment[:last_neg]:
+                prod_drop_suff *= x
+            # Both products are positive (we removed one negative).
+            candidate = max(prod_drop_pref, prod_drop_suff)
+        best = max(best, candidate)
+        # Move past zero if there is one
+        if j < n:
+            best = max(best, 0)
+            i = j + 1
+        else:
+            i = j
     return best
 
 
@@ -304,13 +311,15 @@ def max_product_v9(nums):
 
 
 # ==============================================================
-# Solution 10: BFS-like enumeration of all valid subarrays using prefix
+# Solution 10: Prefix-product ratio enumeration — O(n^2)
 # ==============================================================
 def max_product_v10(nums):
     """
-    Compute prefix products. Then for each position j, find the
-    smallest (most negative) prefix[j'] < j and the largest prefix
-    that maximizes prefix[j] / prefix[j']. Uses prefix product ratio.
+    Compute prefix products. For each pair (i, j) with i < j, the
+    product of nums[i:j] equals prefix[j] / prefix[i]. When prefix[i]
+    is zero, the subarray product is zero (unless the subarray itself
+    contains no zeros). Handle this by computing product directly
+    when there's a zero in nums[i:j].
     """
     if not nums:
         return 0
@@ -319,10 +328,16 @@ def max_product_v10(nums):
     for i in range(n):
         prefix[i + 1] = prefix[i] * nums[i]
 
-    best = prefix[1]  # subarray = nums[0:1]
+    best = float("-inf")
     for j in range(1, n + 1):
         for i in range(j):
-            cand = prefix[j] // prefix[i] if prefix[i] != 0 else 0
+            if prefix[i] == 0:
+                # Recompute product directly to handle zeros
+                cand = 1
+                for x in nums[i:j]:
+                    cand *= x
+            else:
+                cand = prefix[j] // prefix[i]
             if cand > best:
                 best = cand
     return best
@@ -347,10 +362,10 @@ if __name__ == "__main__":
 
     test_cases = [
         ([2, 3, -2, 4],                6),     # [2,3]
-        ([-2, 0, -1],                  0),     # any single 0
+        ([-2, 0, -1],                  0),     # 0 breaks product; max(0, 0, -1, 0) = 0
         ([-2],                         -2),
         ([-1, -2, -3, -4],             24),    # whole array
-        ([-1, -2, -3, 0, -4],          24),    # [-1,-2,-3,-4] or [-4]
+        ([-1, -2, -3, 0, -4],          6),     # [-2,-3] = 6 is the max
         ([1, -2, 3, -4, 5],            120),   # whole
         ([0, 2],                       2),
         ([1],                          1),
