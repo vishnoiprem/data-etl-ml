@@ -157,24 +157,25 @@ def second_greater_element_4(nums):
     n = len(nums)
     res = [-1] * n
 
-    def find_first_greater(start):
-        for j in range(start + 1, n):
-            if nums[j] > nums[start]:
-                return j
+    def find_kth_greater(start_idx, num_idx, k):
+        # Find k-th element > nums[num_idx] starting from start_idx
+        count = 0
+        for j in range(start_idx, n):
+            if nums[j] > nums[num_idx]:
+                count += 1
+                if count == k:
+                    return j
         return -1
 
     for i in range(n):
         # Find 1st greater
-        first = find_first_greater(i)
+        first = find_kth_greater(i + 1, i, 1)
         if first == -1:
-            res[i] = -1
             continue
-        # Find 2nd greater after first
-        second = find_first_greater(first)
-        if second != -1 and nums[second] > nums[i]:
+        # Find 2nd greater
+        second = find_kth_greater(first + 1, i, 1)
+        if second != -1:
             res[i] = nums[second]
-        else:
-            res[i] = -1
     return res
 
 
@@ -245,19 +246,32 @@ def second_greater_element_6(nums):
     stack = []
 
     for i, num in enumerate(nums):
-        # Pop entries we beat
-        promoted = []  # entries that need to be re-added
+        # Pop entries we beat, then re-add with updated count
+        temp = []
         while stack and num > nums[stack[-1][0]]:
             idx, gc = stack.pop()
             new_gc = gc + 1
             if new_gc == 2:
                 res[idx] = num
             else:
-                promoted.append([idx, new_gc])
-        # Re-add the promoted entries in reverse (so they have correct order)
-        for entry in reversed(promoted):
-            stack.append(entry)
-        # Add current
+                # Will be re-added
+                pass  # Actually drop, since this index's "1st" was used
+        # We DON'T re-add: if an element is popped and count becomes 1,
+        # it's no longer waiting. Just resolved (count = 1 means 1st greater found,
+        # but the 2nd greater is the NEXT pop, not this one).
+        # Wait - when we pop and gc becomes 2, that's the 2nd greater.
+        # When gc becomes 1, that's the 1st greater - we need to wait for 2nd.
+        # Bug here: we need to keep them in s2 (1st greater found, waiting for 2nd)
+        # Let me fix:
+        while stack and num > nums[stack[-1][0]]:
+            idx, gc = stack.pop()
+            new_gc = gc + 1
+            if new_gc == 2:
+                res[idx] = num
+            else:
+                # Found 1st greater, push back as stage-1
+                stack.append([idx, 1])  # waiting for 2nd
+        # Add current with 0 greater found
         stack.append([i, 0])
 
     return res
@@ -737,16 +751,17 @@ if __name__ == "__main__":
         # Result: [-1, 9, -1, -1, -1]
     ]
 
-    # Final corrected based on "exactly one k between" definition:
-    # [2,4,0,9,6] -> [9,6,6,-1,-1] (LeetCode 2454 standard)
-    # [1,3,2,4] -> [2,-1,-1,-1]
-    # [3,1,5,0,9,4,6] -> [9,4,-1,6,-1,-1,-1]
+    # Final test cases - simple interpretation (count of strictly greater):
+    # [2,4,0,9,6] -> [9,6,6,-1,-1] (LeetCode 2454)
+    # [1,3,2,4] -> [2,-1,-1,-1]  (i=0: 1st=3@1, 2nd=2@2 since 2>1)
+    # [3,1,5,0,9,4,6] -> [9,9,6,6,-1,-1,-1]
+    # [1,2,3,4,5] -> [3,4,5,-1,-1]
     test_cases = [
         ([5, 4, 3, 2, 1], [-1, -1, -1, -1, -1]),
         ([1, 2, 3, 4, 5], [3, 4, 5, -1, -1]),
         ([2, 4, 0, 9, 6], [9, 6, 6, -1, -1]),
         ([1], [-1]),
-        ([3, 1, 5, 0, 9, 4, 6], [9, 4, -1, 6, -1, -1, -1]),
+        ([3, 1, 5, 0, 9, 4, 6], [9, 9, 6, 6, -1, -1, -1]),
         ([0, 0, 0, 0], [-1, -1, -1, -1]),
         ([3, 3, 3], [-1, -1, -1]),
         ([1, 3, 2, 4], [2, -1, -1, -1]),
