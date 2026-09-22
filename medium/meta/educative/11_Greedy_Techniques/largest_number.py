@@ -239,15 +239,24 @@ def largest_number_v7(nums):
 # ==============================================================
 def largest_number_v8(nums):
     """
-    Heap-based selection with the canonical x*4 trick used as sort key.
-    Negate keys so largest pops first.
+    Heap-based selection. We push strings with a sort priority such
+    that popping the heap gives the largest-first order.
+    Trick: repeat each string to a uniform length (lcm of 1..max_len),
+    then convert to int for comparison.
     """
     import heapq
     s = list(map(str, nums))
-    # Sort key: x*4 makes longer strings with same prefix win.
-    # Negate so Python's min-heap pops the largest.
-    heap = [(-int(x * 4), idx, x) for idx, x in enumerate(s)]
-    heapq.heapify(heap)
+    if not s:
+        return "0"
+    max_len = max(len(x) for x in s)
+    # lcm(1..max_len) gives a length divisible by every len(x).
+    # For max_len <= 4, lcm(1..4) = 12, so target_len = max_len * 12.
+    target_len = max_len * 12  # safe for max_len up to 4
+    heap = []
+    for idx, x in enumerate(s):
+        repeat = target_len // len(x)
+        key_str = x * repeat
+        heapq.heappush(heap, (-int(key_str), idx, x))
     out = []
     while heap:
         _, _, x = heapq.heappop(heap)
@@ -278,24 +287,23 @@ def largest_number_v9(nums):
 
 
 # ==============================================================
-# Solution 10: Sort by x*max_len trick (length-normalized)
+# Solution 10: Sort by x*max_len (length-normalized, fixed)
 # ==============================================================
 def largest_number_v10(nums):
     """
-    Insight: For each string x, repeat it (max_len / len(x)) times
-    to make a length-normalized comparison key. Sorting by this key
-    descending gives the same order as the canonical comparator
-    for this problem's constraints (nums < 10^3).
+    Sort by repeating x so it matches max_len. For nums < 10^3,
+    max_len <= 4 and lcm(1..4) = 12, so we use target = max_len * 12
+    which is divisible by every possible len(x).
     """
     if all(n == 0 for n in nums):
         return "0"
 
     s = list(map(str, nums))
     max_len = max(len(x) for x in s) if s else 1
+    target_len = max_len * 12  # divisible by 1, 2, 3, 4
 
     def key(x):
-        # Repeat x so its length equals max_len.
-        repeat = (max_len + len(x) - 1) // len(x)
+        repeat = target_len // len(x)
         return x * repeat
 
     s.sort(key=key, reverse=True)

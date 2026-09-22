@@ -130,10 +130,9 @@ def removeKdigits_6(num, k):
 
     def helper(s, kk):
         if kk == 0:
-            stripped = s.lstrip('0')
-            return stripped if stripped else '0'
+            return s
         if kk >= len(s):
-            return '0'
+            return ''
         if (s, kk) in memo:
             return memo[(s, kk)]
         # Pick the smallest digit in s[0..kk]. Drop everything before it.
@@ -146,7 +145,8 @@ def removeKdigits_6(num, k):
         memo[(s, kk)] = result
         return result
 
-    return helper(num, k)
+    result = helper(num, k).lstrip('0')
+    return result if result else '0'
 
 
 # ============================================================
@@ -177,17 +177,17 @@ def removeKdigits_8(num, k):
     @lru_cache(maxsize=None)
     def helper(s, kk):
         if kk == 0:
-            stripped = s.lstrip('0')
-            return stripped if stripped else '0'
+            return s
         if kk >= len(s):
-            return '0'
+            return ''
         min_idx = 0
         for i in range(min(kk + 1, len(s))):
             if s[i] < s[min_idx]:
                 min_idx = i
         return s[min_idx] + helper(s[min_idx + 1:], kk - min_idx)
 
-    return helper(num, k)
+    result = helper(num, k).lstrip('0')
+    return result if result else '0'
 
 
 # ============================================================
@@ -198,13 +198,15 @@ def removeKdigits_9(num, k):
     if k == n:
         return '0'
     best = None
-    # Generate all combinations of positions to keep
     from itertools import combinations
     for keep_idx in combinations(range(n), n - k):
-        candidate = ''.join(num[i] for i in keep_idx).lstrip('0')
-        candidate = candidate if candidate else '0'
-        if best is None or candidate < best:
+        candidate = ''.join(num[i] for i in keep_idx).lstrip('0') or '0'
+        # Compare as integers (len first, then lex)
+        if best is None:
             best = candidate
+        else:
+            if (len(candidate), candidate) < (len(best), best):
+                best = candidate
     return best
 
 
@@ -214,10 +216,9 @@ def removeKdigits_9(num, k):
 def removeKdigits_10(num, k):
     def remove_helper(s, kk):
         if kk == 0:
-            stripped = s.lstrip('0')
-            return stripped if stripped else '0'
+            return s
         if kk >= len(s):
-            return '0'
+            return ''
         # Find leftmost smallest digit within first kk+1 positions
         min_idx = 0
         for i in range(min(kk + 1, len(s))):
@@ -226,7 +227,8 @@ def removeKdigits_10(num, k):
         # Keep this digit and drop everything before it
         return s[min_idx] + remove_helper(s[min_idx + 1:], kk - min_idx)
 
-    return remove_helper(num, k)
+    result = remove_helper(num, k).lstrip('0')
+    return result if result else '0'
 
 
 # ============================================================
@@ -271,13 +273,16 @@ def removeKdigits_12(num, k):
 # ============================================================
 def removeKdigits_13(num, k):
     def build_stack():
+        remaining = [k]  # use list for mutability
         stack = []
         for d in num:
-            while k > 0 and stack and stack[-1] > d:
+            while remaining[0] > 0 and stack and stack[-1] > d:
                 stack.pop()
-                k -= 1
+                remaining[0] -= 1
             stack.append(d)
-        return stack[:len(stack) - k] if k else stack
+        if remaining[0]:
+            stack = stack[:-remaining[0]]
+        return stack
 
     result = ''.join(build_stack()).lstrip('0')
     return result if result else '0'
