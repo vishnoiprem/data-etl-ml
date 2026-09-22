@@ -353,7 +353,7 @@ def min_camera_9(root):
 # =============================================================================
 def min_camera_10(root):
     """Greedy BFS: process in reverse BFS order, installing cameras at
-    parents of uncovered nodes."""
+    nodes with uncovered children; also handle root."""
     if root is None:
         return 0
     from collections import deque
@@ -373,8 +373,7 @@ def min_camera_10(root):
     for node in reversed(bfs_order):
         if node in covered:
             continue
-        # If this node has any uncovered child, install camera on THIS node
-        # (not the parent). This is greedy: cover as many as possible.
+        # If this node has any uncovered child, install camera here.
         needs_camera = False
         for child in (node.left, node.right):
             if child is not None and child not in covered:
@@ -389,6 +388,9 @@ def min_camera_10(root):
                 covered.add(node.right)
             if parent[node]:
                 covered.add(parent[node])
+    # Final: if root is not covered, install camera on root.
+    if root not in covered:
+        cameras += 1
     return cameras
 
 
@@ -446,7 +448,6 @@ def min_camera_12(root):
     count = 0
     for node in reversed(nodes):
         i = idx[node]
-        # If this node has any uncovered child, install camera here.
         needs = False
         if node.left and not covered[idx[node.left]]:
             needs = True
@@ -461,6 +462,8 @@ def min_camera_12(root):
                 covered[idx[node.right]] = True
             if parent[node]:
                 covered[idx[parent[node]]] = True
+    if not covered[idx[root]]:
+        count += 1
     return count
 
 
@@ -623,7 +626,6 @@ def min_camera_18(root):
     for node in reversed(nodes):
         if node in covered:
             continue
-        # If any child not covered, install camera here.
         needs = False
         if node.left and node.left not in covered:
             needs = True
@@ -638,6 +640,8 @@ def min_camera_18(root):
                 covered.add(node.right)
             if parent[node]:
                 covered.add(parent[node])
+    if root not in covered:
+        count += 1
     return count
 
 
