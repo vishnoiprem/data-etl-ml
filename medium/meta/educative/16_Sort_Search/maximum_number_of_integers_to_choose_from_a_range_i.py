@@ -123,26 +123,61 @@ def max_count_5(banned, n, max_sum):
 
 
 # =============================================================================
-# WAY 6: Mathematical - find largest m where 1+2+...+m <= max_sum
+# WAY 6: Mathematical binary search on count
 # =============================================================================
 def max_count_6(banned, n, max_sum):
     """
-    Find largest m such that sum(1..m) - sum(banned_in_range) <= max_sum.
-    """
-    banned_set = set(banned)
-    # Sum of first m integers: m*(m+1)/2
-    # Subtract banned integers in [1, m]
-    # Find largest m fitting constraint
+    Binary search on count m. For each m, check if greedy can pick m integers.
+    Greedy picks smallest m non-banned integers; their sum is sum of first m
+    non-banned integers in [1, n].
 
-    lo, hi = 0, n
-    while lo < hi:
-        mid = (lo + hi + 1) // 2  # upper mid to avoid infinite loop
-        # Sum of 1..mid minus banned in [1..mid]
-        total = mid * (mid + 1) // 2
-        for b in banned:
-            if 1 <= b <= mid:
+    Find largest m such that sum <= max_sum.
+
+    To compute sum of smallest m non-banned integers in [1, n]:
+    - Sum of 1..(m + count_banned_in_first_k) = m*(m+1)/2 + sum of skipped values
+    - But this is complex. Easier: greedy simulate.
+    """
+    sorted_banned = sorted(set(b for b in banned if 1 <= b <= n))
+
+    def smallest_sum(m):
+        """Sum of smallest m non-banned integers in [1, n]."""
+        # The smallest m non-banned integers fit in [1, m + len(banned_in_range)]
+        upper = m + len(sorted_banned)
+        # In range [1, upper], pick smallest m non-banned
+        total = m * (m + 1) // 2  # sum of 1..m
+        # Add back the banned values that got pushed up
+        # Actually, easier: simulate greedy
+        # But for binary search, this is slow. Let me use a direct approach.
+        # The smallest m non-banned integers are 1, 2, ... excluding some banned.
+        # If k banned values are in [1, upper], the smallest m non-banned are 1..(m+k) minus banned.
+        # sum = (m+k)(m+k+1)/2 - sum(banned_in_[1,m+k])
+        # We want to find k such that exactly m non-banned are in [1, m+k].
+        # Equivalent: count non-banned in [1, X] = m. Find X.
+        # Easier: just compute directly
+        if m == 0:
+            return 0
+        # Find smallest X such that X - count(banned in [1, X]) >= m
+        # Binary search on X
+        lo_x, hi_x = m, m + len(sorted_banned) + 10
+        while lo_x < hi_x:
+            mid_x = (lo_x + hi_x) // 2
+            cnt_banned = sum(1 for b in sorted_banned if b <= mid_x)
+            if mid_x - cnt_banned >= m:
+                hi_x = mid_x
+            else:
+                lo_x = mid_x + 1
+        X = lo_x
+        # Sum of 1..X minus banned in [1..X]
+        total = X * (X + 1) // 2
+        for b in sorted_banned:
+            if b <= X:
                 total -= b
-        if total <= max_sum:
+        return total
+
+    lo, hi = 0, n - len(set(b for b in banned if 1 <= b <= n))
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if smallest_sum(mid) <= max_sum:
             lo = mid
         else:
             hi = mid - 1
