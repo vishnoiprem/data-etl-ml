@@ -425,51 +425,42 @@ def min_camera_11(root):
 # WAY 12: Use tree-to-list, then DP
 # =============================================================================
 def min_camera_12(root):
-    """Convert to parent array, then greedy."""
+    """Greedy: process in reverse BFS order, install camera on any node
+    with uncovered child."""
     if root is None:
         return 0
     from collections import deque
+    parent = {root: None}
+    queue = deque([root])
     nodes = []
-    parent_map = {}
-    queue = deque([(root, None)])
     while queue:
-        node, par = queue.popleft()
+        node = queue.popleft()
         nodes.append(node)
-        parent_map[node] = par
-        if node.left:
-            queue.append((node.left, node))
-        if node.right:
-            queue.append((node.right, node))
+        for child in (node.left, node.right):
+            if child:
+                parent[child] = node
+                queue.append(child)
     n = len(nodes)
     covered = [False] * n
-    has_cam = [False] * n
     idx = {node: i for i, node in enumerate(nodes)}
     count = 0
-    # Process in reverse order (deepest first).
     for node in reversed(nodes):
         i = idx[node]
-        if node.left is None and node.right is None:
-            # Leaf
-            par = parent_map[node]
-            if par is None:
-                # Root is leaf -> install camera.
-                if not has_cam[i] and not covered[i]:
-                    count += 1
-                    has_cam[i] = True
-                    covered[i] = True
-            else:
-                # Install camera on parent if not covered.
-                pi = idx[par]
-                if not covered[i]:
-                    count += 1
-                    has_cam[pi] = True
-                    covered[pi] = True
-                    if par.left:
-                        covered[idx[par.left]] = True
-                    if par.right:
-                        covered[idx[par.right]] = True
-                    if parent_map[par] is not None:
-                        covered[idx[parent_map[par]]] = True
+        # If this node has any uncovered child, install camera here.
+        needs = False
+        if node.left and not covered[idx[node.left]]:
+            needs = True
+        if node.right and not covered[idx[node.right]]:
+            needs = True
+        if needs:
+            count += 1
+            covered[i] = True
+            if node.left:
+                covered[idx[node.left]] = True
+            if node.right:
+                covered[idx[node.right]] = True
+            if parent[node]:
+                covered[idx[parent[node]]] = True
     return count
 
 
@@ -611,14 +602,16 @@ def min_camera_17(root):
 # WAY 18: Iterative BFS using parent map
 # =============================================================================
 def min_camera_18(root):
-    """Build parent map, then greedy from deepest leaves first."""
+    """Build parent map, then greedy in reverse BFS order."""
     if root is None:
         return 0
     from collections import deque
     parent = {root: None}
     queue = deque([root])
+    nodes = []
     while queue:
         node = queue.popleft()
+        nodes.append(node)
         if node.left:
             parent[node.left] = node
             queue.append(node.left)
@@ -627,23 +620,24 @@ def min_camera_18(root):
             queue.append(node.right)
     covered = set()
     count = 0
-    # Process nodes in reverse BFS order (deepest first).
-    nodes_bfs = list(parent.keys())
-    for leaf in reversed(nodes_bfs):
-        if leaf in covered:
+    for node in reversed(nodes):
+        if node in covered:
             continue
-        # Place camera on parent (or self if no parent).
-        target = parent[leaf] if parent[leaf] else leaf
-        if target in covered:
-            continue
-        count += 1
-        covered.add(target)
-        if target.left:
-            covered.add(target.left)
-        if target.right:
-            covered.add(target.right)
-        if parent[target]:
-            covered.add(parent[target])
+        # If any child not covered, install camera here.
+        needs = False
+        if node.left and node.left not in covered:
+            needs = True
+        if node.right and node.right not in covered:
+            needs = True
+        if needs:
+            count += 1
+            covered.add(node)
+            if node.left:
+                covered.add(node.left)
+            if node.right:
+                covered.add(node.right)
+            if parent[node]:
+                covered.add(parent[node])
     return count
 
 

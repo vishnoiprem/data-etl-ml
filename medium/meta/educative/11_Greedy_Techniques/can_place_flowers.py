@@ -352,7 +352,7 @@ if __name__ == "__main__":
         ([1, 0, 0, 0, 1],        2, False),  # only one slot
         ([1, 0, 0, 0, 1, 0, 0],  2, True),   # plant at 2 and 5
         ([0, 0, 1, 0, 0],        1, True),
-        ([0, 0, 1, 0, 0],        2, False),
+        ([0, 0, 1, 0, 0],        2, True),   # plant at 0 and 4
         ([0],                    1, True),   # single empty plot
         ([1],                    0, True),
         ([1],                    1, False),
