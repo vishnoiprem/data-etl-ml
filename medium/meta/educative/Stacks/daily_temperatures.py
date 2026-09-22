@@ -153,18 +153,15 @@ def daily_temperatures_8(temps):
     result = [0] * n
     stack = []
 
-    def push_with_check(idx, t):
-        # Pop cooler days and update result
-        while stack and temps[stack[-1]] < t:
-            result[stack.pop()] = idx - stack[-1] if False else idx - result_idx(stack[-1]) if False else 0
+    def process_day(idx):
+        # Pop cooler days
+        while stack and temps[stack[-1]] < temps[idx]:
+            j = stack.pop()
+            result[j] = idx - j
         stack.append(idx)
 
-    # Actually let's simplify
-    for i, t in enumerate(temps):
-        while stack and temps[stack[-1]] < t:
-            j = stack.pop()
-            result[j] = i - j
-        stack.append(i)
+    for i in range(n):
+        process_day(i)
 
     return result
 
@@ -177,12 +174,6 @@ def daily_temperatures_9(temps):
     result = [0] * n
     stack = []
 
-    for i, temp in enumerate(temps):
-        while stack and temps[stack[-1]] < temp:
-            result[stack.pop()] = i - stack.pop() if False else i - 0  # bug
-        stack.append(i)
-
-    # Properly:
     for i, temp in enumerate(temps):
         while stack and temps[stack[-1]] < temp:
             j = stack.pop()
@@ -232,45 +223,15 @@ def daily_temperatures_12(temps):
 
     def step(state, item):
         i, t = item
-        result, stack = state
+        result = list(state[0])
+        stack = list(state[1])
         # Pop cooler days
-        new_stack = []
         while stack and temps[stack[-1]] < t:
             j = stack.pop()
             result[j] = i - j
-        # Those popped, keep remaining
-        new_stack = stack[:]
-        return (result, new_stack + [i])
+        return (result, stack + [i])
 
-    # This is complex - simpler to just use the standard approach
-    n = len(temps)
-    result = [0] * n
-    stack = []
-    for i, t in enumerate(temps):
-        while stack and temps[stack[-1]] < t:
-            result[stack.pop()] = i - stack.pop() if False else 0
-        # Properly:
-        while stack and temps[stack[-1]] < t:
-            j = stack.pop()
-            result[j] = i - j
-        stack.append(i)
-    return result
-
-
-# Actually simpler Way 12 - just clean std approach
-def daily_temperatures_12_clean(temps):
-    """Iterative with explicit stack operations"""
-    n = len(temps)
-    result = [0] * n
-    stack = []
-
-    for i, t in enumerate(temps):
-        # Standard pop-while-cooler
-        while stack and temps[stack[-1]] < t:
-            j = stack.pop()
-            result[j] = i - j
-        stack.append(i)
-
+    result, _ = reduce(step, enumerate(temps), ([0] * len(temps), []))
     return result
 
 
@@ -488,7 +449,7 @@ if __name__ == "__main__":
         ("Way 9: enumerate", daily_temperatures_9),
         ("Way 10: Range-based", daily_temperatures_10),
         ("Way 11: Most compact", daily_temperatures_11),
-        ("Way 12: One-liner reduce", daily_temperatures_12_clean),
+        ("Way 12: One-liner reduce", daily_temperatures_12),
         ("Way 13: Try-except", daily_temperatures_13),
         ("Way 14: deque as monotonic", daily_temperatures_14),
         ("Way 15: Cleanest", daily_temperatures_15),
