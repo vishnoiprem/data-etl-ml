@@ -161,33 +161,21 @@ def lowest_common_ancestor_3(p, q):
 
 
 # =============================================================================
-# WAY 4: Iterative walk with seen set
+# WAY 4: Two-pointer meeting (same as Way 1, explicit counter)
 # =============================================================================
 def lowest_common_ancestor_4(p, q):
-    """Track visited nodes; first revisit is LCA."""
-    seen = set()
+    """
+    Same as Way 1 but with explicit iteration limit
+    to make the algorithm's bound visible.
+    """
     a, b = p, q
-    # Add up to 2*(h+1) nodes. They MUST meet.
-    for _ in range(2000):  # generous upper bound
-        if a is not None:
-            if a in seen:
-                return a
-            seen.add(a)
-            a = a.parent
-        if b is not None:
-            if b in seen:
-                return b
-            seen.add(b)
-            b = b.parent
-        if a is None and b is None:
-            # Both walked off; shouldn't happen with valid input.
-            return None
-        # When a becomes None, jump to q's start.
-        if a is None:
-            a = q
-        if b is None:
-            b = p
-    return None
+    # At most 2*(h+1) iterations: one full walk plus second walk.
+    for _ in range(2 * 501):  # 2*(max nodes = 500)
+        if a is b:
+            return a
+        a = a.parent if a else q
+        b = b.parent if b else p
+    return a  # Should reach here only if a is b.
 
 
 # =============================================================================
