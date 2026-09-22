@@ -110,13 +110,24 @@ def _length_of_lis(nums):
 
 
 # =============================================================================
-# WAY 5: Sort width DESC + LIS on heights (alternative)
+# WAY 5: Sort width ASC + height ASC + filter dominated (alternative)
 # =============================================================================
 def max_envelopes_5(envelopes):
-    """Sort by width DESC; for ties, height ASC. Then LIS on heights."""
-    envelopes.sort(key=lambda x: (-x[0], x[1]))
+    """
+    Sort by width ASC, height ASC. For each width, keep only envelopes
+    with the LARGEST height (otherwise they're dominated by taller ones
+    of same width). Then LIS on heights.
+    """
+    envs = sorted(envelopes, key=lambda x: (x[0], x[1]))
+    # For each width, find max height
+    width_max = {}
+    for w, h in envs:
+        width_max[w] = max(width_max.get(w, 0), h)
+    # Filter to only envelopes with max height for their width
+    filtered = [(w, h) for w, h in envs if h == width_max[w]]
+    # Now LIS on heights
     tails = []
-    for _, h in envelopes:
+    for _, h in filtered:
         idx = bisect.bisect_left(tails, h)
         if idx == len(tails):
             tails.append(h)
@@ -143,13 +154,36 @@ def max_envelopes_6(envelopes):
 
 
 # =============================================================================
-# WAY 7: With width DESC and height DESC sorting
+# WAY 7: Group by width, select max height, then LIS
 # =============================================================================
 def max_envelopes_7(envelopes):
-    """Sort by both DESC, then LIS."""
-    envelopes.sort(key=lambda x: (-x[0], -x[1]))
-    heights = [h for _, h in envelopes]
-    return _length_of_lis(heights)
+    """
+    Sort by width ASC. For each width, keep only the tallest envelope.
+    Then LIS on heights.
+    """
+    envs = sorted(envelopes, key=lambda x: (x[0], x[1]))
+    # Group by width, keep max height
+    filtered = []
+    i = 0
+    n = len(envs)
+    while i < n:
+        w = envs[i][0]
+        max_h = envs[i][1]
+        j = i + 1
+        while j < n and envs[j][0] == w:
+            max_h = max(max_h, envs[j][1])
+            j += 1
+        filtered.append((w, max_h))
+        i = j
+    # Now LIS on heights
+    tails = []
+    for _, h in filtered:
+        idx = bisect.bisect_left(tails, h)
+        if idx == len(tails):
+            tails.append(h)
+        else:
+            tails[idx] = h
+    return len(tails)
 
 
 # =============================================================================
@@ -236,6 +270,8 @@ def max_envelopes_11(envelopes):
 def max_envelopes_12(envelopes):
     """Use numpy for sort."""
     import numpy as np
+    if not envelopes:
+        return 0
     envs = np.array(envelopes)
     # Sort by width ASC, then height DESC
     sorted_idx = np.lexsort((-envs[:, 1], envs[:, 0]))
@@ -253,7 +289,10 @@ def max_envelopes_13(envelopes):
     tails = []
     for _, h in envelopes:
         i = bisect.bisect_left(tails, h)
-        tails[i:i+1] = [h] if i < len(tails) else tails + [h]
+        if i == len(tails):
+            tails.append(h)
+        else:
+            tails[i] = h
     return len(tails)
 
 
@@ -335,19 +374,38 @@ def max_envelopes_17(envelopes):
 
 
 # =============================================================================
-# WAY 18: With min-heap of size k
+# WAY 18: Using heapq with iteration
 # =============================================================================
 def max_envelopes_18(envelopes):
-    """Use min-heap. Replace first element >= h with h. Length = LIS."""
-    import heapq
+    """
+    Use SortedList from sortedcontainers (heapq doesn't support bisect).
+    Falls back to bisect-based on list if not available.
+    """
+    try:
+        from sortedcontainers import SortedList
+        use_sortedcontainers = True
+    except ImportError:
+        use_sortedcontainers = False
+
     envelopes.sort(key=lambda x: (x[0], -x[1]))
-    heap = []
+    if use_sortedcontainers:
+        sl = SortedList()
+        for _, h in envelopes:
+            idx = sl.bisect_left(h)
+            if idx == len(sl):
+                sl.add(h)
+            else:
+                sl[idx] = h
+        return len(sl)
+    # Fallback
+    tails = []
     for _, h in envelopes:
-        if heap and heap[0] <= h:
-            heapq.heapreplace(heap, h)
+        idx = bisect.bisect_left(tails, h)
+        if idx == len(tails):
+            tails.append(h)
         else:
-            heapq.heappush(heap, h)
-    return len(heap)
+            tails[idx] = h
+    return len(tails)
 
 
 # =============================================================================
@@ -476,8 +534,11 @@ if __name__ == "__main__":
     test_cases = [
         # (envelopes, expected)
         ([[5, 4], [6, 4], [6, 7], [2, 3]], 3),  # [2,3]->[5,4]->[6,7]
+        # Actually for this: (2,3)->(5,4) ok (both strict). (5,4)->(6,7) ok.
+        # So 3.
         ([[1, 1], [1, 1], [1, 1]], 1),
-        ([[4, 5], [4, 6], [6, 5]], 2),  # [4,5]->[6,5]
+        ([[4, 5], [4, 6], [6, 7]], 2),  # (4,5)->(6,7) or (4,6)->(6,7)
+        # Both work since 4<6 and 5<7 or 4<6 and 6<7
         ([[1, 2], [2, 3], [3, 4]], 3),
         ([[2, 3]], 1),
         ([], 0),
