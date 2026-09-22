@@ -338,13 +338,12 @@ def max_envelopes_17(envelopes):
 # WAY 18: With min-heap of size k
 # =============================================================================
 def max_envelopes_18(envelopes):
-    """Use min-heap to track current chain."""
+    """Use min-heap. Replace first element >= h with h. Length = LIS."""
     import heapq
     envelopes.sort(key=lambda x: (x[0], -x[1]))
     heap = []
     for _, h in envelopes:
-        # If top of heap < h, we can extend
-        if heap and heap[0] < h:
+        if heap and heap[0] <= h:
             heapq.heapreplace(heap, h)
         else:
             heapq.heappush(heap, h)
