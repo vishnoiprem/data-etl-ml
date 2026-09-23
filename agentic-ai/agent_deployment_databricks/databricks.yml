@@ -1,0 +1,44 @@
+bundle:
+  name: agent-deployment-demo
+
+databricks_cli_version: ">= 0.250.0"
+
+variables:
+  serving_endpoint_name:
+    description: Existing model serving endpoint queried by the app
+    default: databricks-meta-llama-3-3-70b-instruct
+  experiment_id:
+    description: Existing MLflow experiment ID used for tracing
+
+sync:
+  include:
+    - src/**
+    - pyproject.toml
+    - app.yaml
+
+resources:
+  apps:
+    agent_app:
+      name: agent-deployment-demo-${bundle.target}
+      description: FastAPI generative AI agent with MLflow tracing
+      source_code_path: .
+      resources:
+        - name: serving-endpoint
+          serving_endpoint:
+            name: ${var.serving_endpoint_name}
+            permission: CAN_QUERY
+        - name: experiment
+          experiment:
+            experiment_id: ${var.experiment_id}
+            permission: CAN_EDIT
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      host: https://YOUR-WORKSPACE.azuredatabricks.net
+  prod:
+    mode: production
+    workspace:
+      host: https://YOUR-PROD-WORKSPACE.azuredatabricks.net
