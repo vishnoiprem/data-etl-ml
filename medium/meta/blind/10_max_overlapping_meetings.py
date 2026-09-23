@@ -47,9 +47,35 @@ Follow-ups
   increment on start, decrement on end.
 """
 
+import heapq
 from typing import List, Tuple
 
 
+# ----------------------------------------------------------------------
+# L0 — Easy / brute force: pairwise check.
+# How to think: "For each meeting, count how many others overlap it
+# using two nested loops. O(n²). Start here to show the answer, then
+# improve."
+# ----------------------------------------------------------------------
+def max_overlapping_l0(meetings: List[Tuple[int, int]]) -> int:
+    if not meetings:
+        return 0
+    best = 0
+    # Check every (meeting, instant) pair — true brute force.
+    lo = min(s for s, _ in meetings)
+    hi = max(e for _, e in meetings)
+    for t in range(lo, hi):
+        c = sum(1 for s, e in meetings if s <= t < e)
+        if c > best:
+            best = c
+    return best
+
+
+# ----------------------------------------------------------------------
+# L1 — Medium / interview-canonical: sweep line.
+# How to think: "Two events per meeting, sweep. The 'end before start
+# on tie' rule is the bug to call out loud."
+# ----------------------------------------------------------------------
 def max_overlapping(meetings: List[Tuple[int, int]]) -> int:
     """Return the maximum number of meetings overlapping at any instant."""
     if not meetings:
@@ -72,15 +98,43 @@ def max_overlapping(meetings: List[Tuple[int, int]]) -> int:
     return best
 
 
+# ----------------------------------------------------------------------
+# L2 — Hard / min-heap (LeetCode-canonical).
+# How to think: "Sort by start; keep a heap of active end times; pop
+# expired meetings; push current end. Heap size = rooms needed.
+# Same complexity, more explicit 'active meetings' set — easier to
+# extend for follow-ups (which meeting overlaps which)."
+# ----------------------------------------------------------------------
+def max_overlapping_l2(meetings: List[Tuple[int, int]]) -> int:
+    if not meetings:
+        return 0
+    ends: list[int] = []
+    best = 0
+    for s, e in sorted(meetings):
+        # Release meetings that ended at or before this start
+        while ends and ends[0] <= s:
+            heapq.heappop(ends)
+        heapq.heappush(ends, e)
+        if len(ends) > best:
+            best = len(ends)
+    return best
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod(verbose=True)
-    # All overlap
-    assert max_overlapping([(0, 10), (0, 10), (0, 10)]) == 3
-    # Touching at boundary — t=10 is end of first, start of second
-    assert max_overlapping([(0, 10), (10, 20)]) == 1
-    # Triple overlap: [15,20] has all three meetings active
-    assert max_overlapping([(0, 100), (10, 20), (15, 30)]) == 3
-    # No triple overlap (each small meets only the long; never all 3)
-    assert max_overlapping([(0, 100), (10, 20), (30, 40)]) == 2
-    print("All tests passed for max_overlapping.")
+    samples = [
+        ([(0, 10), (5, 15), (10, 20)], 2),
+        ([(0, 30), (5, 10), (15, 20)], 2),
+        ([], 0),
+        ([(0, 5)], 1),
+        ([(0, 10), (0, 10), (0, 10)], 3),
+        ([(0, 10), (10, 20)], 1),
+        ([(0, 100), (10, 20), (15, 30)], 3),
+        ([(0, 100), (10, 20), (30, 40)], 2),
+    ]
+    for ms, expected in samples:
+        assert max_overlapping_l0(ms) == expected, ms
+        assert max_overlapping(ms) == expected, ms
+        assert max_overlapping_l2(ms) == expected, ms
+    print("All tests passed for max_overlapping (L0 + L1 + L2).")

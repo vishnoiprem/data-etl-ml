@@ -36,6 +36,24 @@ Follow-ups
 """
 
 
+# ----------------------------------------------------------------------
+# L0 — Easy / brute force: built-in `.index()`.
+# How to think: "`list.index` is built-in; O(n), returns -1 on miss via
+# try/except. Looks too easy to write in an interview — that's the
+# point: say it out loud, then show you can do the explicit version."
+# ----------------------------------------------------------------------
+def search_l0(lst: list, target) -> int:
+    try:
+        return lst.index(target)
+    except ValueError:
+        return -1
+
+
+# ----------------------------------------------------------------------
+# L1 — Medium / interview-canonical: explicit enumerate loop.
+# How to think: "Same complexity, but readable. Use this in interviews
+# — `.index` looks too easy."
+# ----------------------------------------------------------------------
 def search(lst: list, target) -> int:
     """Return the index of `target` in `lst`, or -1 if not found."""
     for i, x in enumerate(lst):
@@ -44,12 +62,41 @@ def search(lst: list, target) -> int:
     return -1
 
 
+# ----------------------------------------------------------------------
+# L2 — Hard / production-grade: build a {value: index} dict once for
+# O(1) repeated lookups (the list is static).
+# How to think: "If the same list gets searched many times, build an
+# index dict in O(n) preprocessing; subsequent lookups are O(1).
+# Memory trade — say so in the interview."
+# ----------------------------------------------------------------------
+class SearchIndex:
+    """O(1) lookups against a static unsorted list, at the cost of O(n) extra memory."""
+
+    def __init__(self, lst: list) -> None:
+        self._index: dict = {}
+        for i, x in enumerate(lst):
+            # First occurrence wins; if you want ALL indices, store a list.
+            self._index.setdefault(x, i)
+
+    def find(self, target) -> int:
+        return self._index.get(target, -1)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod(verbose=True)
-    # Duplicates: returns first occurrence
-    assert search([1, 2, 1, 2], 2) == 1
-    # Single element
-    assert search([42], 42) == 0
-    assert search([42], 0) == -1
-    print("All tests passed for search.")
+    samples = [
+        ([4, 2, 9, 7], 9, 2),
+        ([4, 2, 9, 7], 5, -1),
+        ([], 1, -1),
+        ([1, 2, 1, 2], 2, 1),
+        ([42], 42, 0),
+        ([42], 0, -1),
+    ]
+    for lst, target, expected in samples:
+        assert search_l0(lst, target) == expected, (lst, target)
+        assert search(lst, target) == expected, (lst, target)
+        # L2: SearchIndex
+        idx = SearchIndex(lst)
+        assert idx.find(target) == expected, (lst, target)
+    print("All tests passed for search (L0 + L1 + L2).")

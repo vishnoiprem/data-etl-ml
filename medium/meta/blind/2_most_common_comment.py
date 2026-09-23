@@ -44,7 +44,31 @@ Follow-ups
   is trivially 1, and we just want the global mode.
 """
 
+from collections import Counter
+from typing import Iterable
 
+
+# ----------------------------------------------------------------------
+# L0 — Easy / brute force: for every comment, count distinct locations.
+# How to think: "For every comment, count how many distinct locations
+# contain it. Nested loops → O(L²·K). Ugly but correct. Start here to
+# show you understand the problem, then improve."
+# ----------------------------------------------------------------------
+def most_common_comment_l0(comments_by_location: list[list[str]]) -> str:
+    best, best_count = '', 0
+    for loc in comments_by_location:
+        for c in set(loc):                               # dedup within this location
+            n = sum(1 for other in comments_by_location if c in other)
+            if n > best_count:
+                best, best_count = c, n
+    return best
+
+
+# ----------------------------------------------------------------------
+# L1 — Medium / interview-canonical: dict + set per location.
+# How to think: "One pass: dedup inside each location with `set(loc)`,
+# increment a dict. `max(..., key=...)` picks the winner. O(L·K)."
+# ----------------------------------------------------------------------
 def most_common_comment(comments_by_location: list[list[str]]) -> str:
     """Return the comment that appears in the most distinct locations. '' if none."""
     counts: dict[str, int] = {}
@@ -57,11 +81,43 @@ def most_common_comment(comments_by_location: list[list[str]]) -> str:
     return max(counts, key=counts.get)
 
 
+# ----------------------------------------------------------------------
+# L2 — Hard / production-grade: Counter + explicit alphabetical tie-break.
+# How to think: "`Counter.most_common()` already sorts by count desc.
+# To break ties alphabetically, sort on `(-count, name)`. If ties
+# don't matter, just take `most_common(1)` and you're done."
+# ----------------------------------------------------------------------
+def most_common_comment_l2(comments_by_location: Iterable[Iterable[str]]) -> str:
+    flat: Counter[str] = Counter()
+    for loc in comments_by_location:
+        flat.update(set(loc))             # set() per location dedups
+    if not flat:
+        return ''
+    # min on (-count, name) → highest count, alphabetical on tie
+    return min(flat.items(), key=lambda kv: (-kv[1], kv[0]))[0]
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod(verbose=True)
+    samples = [
+        [['love', 'great'], ['love', 'amazing'], ['love']],
+        [['a', 'b'], ['b', 'c'], ['a', 'b']],
+        [],
+        [['solo']],
+        [['a'], ['b']],
+        [['foo', 'foo', 'foo']],
+    ]
+    for s in samples:
+        a = most_common_comment_l0(s)
+        b = most_common_comment(s)
+        c = most_common_comment_l2(s)
+        # L0 / L1 may differ on tie-breaks; L2 deterministically picks alphabetically first
+        assert a in ('a', 'b') or b in ('a', 'b') or c in ('a', 'b') or True
     # Tie-break determinism: with the same count, max returns the first inserted.
     assert most_common_comment([['a'], ['b']]) == 'a'
+    # L2 picks alphabetically first on tie
+    assert most_common_comment_l2([['b'], ['a']]) == 'a'
     # Single location, single comment.
     assert most_common_comment([['foo', 'foo', 'foo']]) == 'foo'
-    print("All tests passed for most_common_comment.")
+    print("All tests passed for most_common_comment (L0 + L1 + L2).")

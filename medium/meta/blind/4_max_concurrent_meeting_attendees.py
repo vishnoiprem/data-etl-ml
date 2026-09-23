@@ -43,6 +43,14 @@ Follow-ups
 
 from dataclasses import dataclass
 
+# sortedcontainers is an optional dep; import lazily inside L2.
+try:
+    from sortedcontainers import SortedList  # type: ignore
+    _HAS_SORTED_LIST = True
+except ImportError:  # pragma: no cover
+    SortedList = None  # type: ignore
+    _HAS_SORTED_LIST = False
+
 
 @dataclass
 class Meeting:
@@ -51,12 +59,36 @@ class Meeting:
     people: int
 
 
+# ----------------------------------------------------------------------
+# L0 — Easy / brute force: scan every integer instant between the
+# earliest start and the latest end.
+# How to think: "For every instant t, sum people whose start <= t < end.
+# O(n · range). Only viable for tiny ranges; never ship this."
+# ----------------------------------------------------------------------
+def max_attendees_l0(meetings: list[Meeting]) -> int:
+    if not meetings:
+        return 0
+    lo = min(m.start for m in meetings)
+    hi = max(m.end for m in meetings)
+    best = 0
+    for t in range(lo, hi):
+        s = sum(m.people for m in meetings if m.start <= t < m.end)
+        if s > best:
+            best = s
+    return best
+
+
+# ----------------------------------------------------------------------
+# L1 — Medium / interview-canonical: sweep line.
+# How to think: "Two events per meeting, sort, sweep. End events first
+# on tie — that's the classic bug to call out loud."
+# ----------------------------------------------------------------------
 def max_attendees(meetings: list[Meeting]) -> int:
     """Return the max total attendees at any instant across all meetings."""
     if not meetings:
         return 0
-    # Event = (time, delta). End events use -inf-priority so they sort
-    # BEFORE start events at the same time (no double-counting).
+    # Event = (time, delta). End events use a smaller delta so they
+    # sort BEFORE start events at the same time (no double-counting).
     events: list[tuple[int, int]] = []
     for m in meetings:
         if m.end < m.start:
@@ -75,15 +107,46 @@ def max_attendees(meetings: list[Meeting]) -> int:
     return best
 
 
+# ----------------------------------------------------------------------
+# L2 — Hard / streaming: SortedList keyed by end time. Add on start,
+# remove on end, peak over the running sum.
+# How to think: "If meetings arrive as a stream and you can't fit all
+# events in memory at once, you need a structure that supports
+# add/remove-by-key in O(log n). SortedList does that. Mention this
+# only if the interviewer asks about streaming or memory."
+# ----------------------------------------------------------------------
+def max_attendees_l2(meetings: list[Meeting]) -> int:
+    if not meetings:
+        return 0
+    if not _HAS_SORTED_LIST:
+        # Fall back to the L1 sweep-line implementation if the optional
+        # dependency isn't installed. Same answer, different shape.
+        return max_attendees(meetings)
+    active = SortedList()                    # entries: (end, people)
+    peak = 0
+    for m in sorted(meetings, key=lambda m: m.start):
+        # Remove meetings that ended at or before this start
+        while active and active[0][0] <= m.start:
+            active.pop(0)
+        active.add((m.end, m.people))
+        current = sum(p for _, p in active)
+        if current > peak:
+            peak = current
+    return peak
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod(verbose=True)
-    # All-overlap sanity
-    assert max_attendees([Meeting(0, 10, 1), Meeting(0, 10, 1), Meeting(0, 10, 1)]) == 3
-    # No overlap
-    assert max_attendees([Meeting(0, 5, 1), Meeting(5, 10, 1)]) == 1
-    # Single meeting
-    assert max_attendees([Meeting(0, 5, 42)]) == 42
-    # Empty
-    assert max_attendees([]) == 0
-    print("All tests passed for max_attendees.")
+    samples = [
+        ([Meeting(0, 10, 3), Meeting(5, 15, 4), Meeting(10, 20, 2)], 7),
+        ([Meeting(0, 10, 1), Meeting(0, 10, 1), Meeting(0, 10, 1)], 3),
+        ([Meeting(0, 5, 1), Meeting(5, 10, 1)], 1),
+        ([Meeting(0, 5, 42)], 42),
+        ([], 0),
+    ]
+    for ms, expected in samples:
+        assert max_attendees_l0(ms) == expected, ms
+        assert max_attendees(ms) == expected, ms
+        assert max_attendees_l2(ms) == expected, ms
+    print("All tests passed for max_attendees (L0 + L1 + L2).")
