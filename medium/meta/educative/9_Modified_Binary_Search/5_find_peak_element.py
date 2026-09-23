@@ -13,7 +13,7 @@ Examples
 >>> find_peak_element([1, 2, 3, 1])
 2
 >>> find_peak_element([1, 2, 1, 3, 5, 6, 4])
-1   # or 5 — both are valid peaks
+5
 
 How to think (interview script)
 ------------------------------

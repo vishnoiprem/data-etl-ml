@@ -8,9 +8,9 @@ return the kth missing positive integer. The algorithm must be O(log n).
 Examples
 --------
 >>> kth_missing([2, 3, 4, 7, 11], 5)
-9       # missing: 1, 5, 6, 8, 9, 10, ... -> 5th is 9
+9
 >>> kth_missing([1, 2, 3, 4], 5)
-9       # no gaps in arr; 5th missing is 9 (after 1..4, missing are 5,6,7,8,9,...)
+9
 >>> kth_missing([2], 1)
 1
 
