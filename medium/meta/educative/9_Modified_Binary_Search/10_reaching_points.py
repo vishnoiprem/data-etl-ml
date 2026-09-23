@@ -65,21 +65,32 @@ Follow-ups the interviewer may ask
 
 def reaching_points(sx: int, sy: int, tx: int, ty: int) -> bool:
     """Determine if (tx, ty) is reachable from (sx, sy)."""
+    if sx == tx and sy == ty:
+        return True
+    if sx == 0 and sy == 0:
+        # From origin, every move produces (0, 0). Only reachable target is origin.
+        return False
+
     # Walk backwards from (tx, ty) to (sx, sy) using modular skipping.
     while tx > sx and ty > sy and tx != ty:
         if tx > ty:
             # Previous step was (tx % ty, ty) — but only if we didn't overshoot.
             tx %= ty
+            if tx == 0:
+                # Reached exactly (0, ty); tx can't go below sy; treat as base.
+                break
         else:
             ty %= tx
+            if ty == 0:
+                break
 
     # Handle base cases when one coordinate matches or exceeds the start.
     if tx == sx and ty == sy:
         return True
-    if tx == sx:
-        # (sx, sy) -> ... -> (sx, ty). Need ty >= sy and (ty - sy) % sx == 0.
+    if tx == sx and sx != 0:
+        # Need ty >= sy and (ty - sy) % sx == 0
         return ty >= sy and (ty - sy) % sx == 0
-    if ty == sy:
+    if ty == sy and sy != 0:
         return tx >= sx and (tx - sx) % sy == 0
     return False
 
@@ -120,7 +131,7 @@ if __name__ == "__main__":
     assert f(1, 1, 1, 1) is True
     assert f(1, 2, 1, 2) is True
     assert f(9, 5, 12, 17) is False  # unreachable: forward simulation confirms
-    assert f(0, 0, 1, 1) is True
+    assert f(0, 0, 1, 1) is False  # from origin only (0,0) is reachable
     assert f(0, 0, 0, 1) is False
     assert f(1, 1, 1000000000, 1) is True  # (1,1) -> ... -> (1e9, 1) by additions along x
     print("All tests passed for reaching_points.")

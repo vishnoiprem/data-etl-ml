@@ -105,5 +105,5 @@ if __name__ == "__main__":
     assert f([], 5) == 5
     assert f([3, 5, 9], 4) == 6
     assert f([1, 2, 3, 4], 2) == 6   # missing: 5, 6 -> 2nd is 6
-    assert f([2, 3, 7, 11], 5) == 9  # 1, 4, 5, 6, 8 -> 5th is 9 (after 11)
+    assert f([2, 3, 7, 11], 5) == 8  # missing: 1, 4, 5, 6, 8 -> 5th is 8
     print("All tests passed for kth_missing_positive.")
