@@ -251,9 +251,9 @@ def count_fixed_bounds_v6(nums, minK, maxK):
     return ans
 
 
-# Solution 7: Using position lists with two pointers and last-bad tracking
+# Solution 7: Iterate all positions, count min/max in window
 def count_fixed_bounds_v7(nums, minK, maxK):
-    n = len(nums)
+    import bisect
     min_positions = []
     max_positions = []
     bad_positions = []
@@ -264,42 +264,39 @@ def count_fixed_bounds_v7(nums, minK, maxK):
             max_positions.append(i)
         if x < minK or x > maxK:
             bad_positions.append(i)
-    # For each max_pos p, count subarrays ending at p with both a minK and maxK
-    # and no bad element. A subarray ending at p must start in (last_bad, min_pos_for_subarray].
-    # last_bad is the latest bad element < p.
-    # The number of valid starts = number of min_pos <= p, minus those <= last_bad.
-    # i.e., the count of minK positions in (last_bad, p].
     ans = 0
-    bad_idx = 0
-    # Use pointers: count min_positions[k] in (last_bad, p].
-    def bisect_left_ge(arr, target):
-        """First index in arr with value >= target."""
-        lo, hi = 0, len(arr)
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if arr[mid] < target:
-                lo = mid + 1
-            else:
-                hi = mid
-        return lo
-    import bisect
-    last_bad = -1
-    for i, b in enumerate(bad_positions + [n]):  # virtual bad at n
-        # Process all max_positions with index < b
-        while bad_idx < len(bad_positions) and bad_positions[bad_idx] == b:
-            pass
-    # Cleaner approach: for each max_pos, compute contribution.
-    # Number of minK positions in (last_bad, max_pos] = bisect_right(min_positions, max_pos) - bisect_right(min_positions, last_bad).
+    # For each index i in range, the contribution is the number of valid
+    # starts in (last_bad, min(min_pos <= i, max_pos <= i)].
+    # = min(bisect_right(min_positions, i), bisect_right(max_positions, i)) - bisect_right(bad_positions, last_bad_value)
+    # But "last bad" is dynamic, so we maintain it as we sweep.
     last_bad = -1
     b_ptr = 0
-    for p in max_positions:
-        # Update last_bad to the largest bad position < p
-        while b_ptr < len(bad_positions) and bad_positions[b_ptr] < p:
+    n = len(nums)
+    for i in range(n):
+        # Update last_bad to largest bad <= i
+        while b_ptr < len(bad_positions) and bad_positions[b_ptr] <= i:
             last_bad = bad_positions[b_ptr]
             b_ptr += 1
-        # Count min_positions > last_bad and <= p.
-        count_min = bisect.bisect_right(min_positions, p) - bisect.bisect_right(min_positions, last_bad)
-        ans += count_min
+        # How many min_positions and max_positions are <= i, after last_bad?
+        mn_count = bisect.bisect_right(min_positions, i) - bisect.bisect_right(min_positions, last_bad)
+        mx_count = bisect.bisect_right(max_positions, i) - bisect.bisect_right(max_positions, last_bad)
+        # Subarrays ending at i: starts in (last_bad, i] such that subarray contains both mn and mx.
+        # These subarrays are: starts in (last_bad, min(mn_pos, mx_pos)] where mn_pos and mx_pos are the smallest >= last_bad+1 (correctly bounded).
+        # Actually simpler: count = min(mn_count, mx_count) since "min(mn_pos, mx_pos) <= i"
+        # Hmm wait, we need subarray to CONTAIN both, meaning start <= min_pos AND start <= max_pos AND start > last_bad.
+        # The latest valid start is min(rightmost_min_so_far, rightmost_max_so_far) — but that's V1.
+        # Actually no: latest start that includes BOTH is min(min_pos, max_pos). But min_pos and max_pos here are the rightmost seen.
+        # Wait, we're looking at starts > last_bad. Subarray [start..i] contains both iff start <= min_pos_for_subarray AND start <= max_pos_for_subarray — but min_pos_for_subarray and max_pos_for_subarray depend on start.
+        # Hmm, easier: each start > last_bad has subarray [start..i]. It contains both a minK and a maxK iff there exists min_pos in [start, i] AND max_pos in [start, i].
+        # The first valid start is max(last_bad+1, max(first_min_in_[start,i], first_max_in_[start,i])).
+        # Hmm, this is getting complex. Let's match V1:
+        # For each i, contribution = min(rightmost_min_in_[0,i], rightmost_max_in_[0,i]) - last_bad.
+        # = (rightmost_min_seen_so_far, rightmost_max_seen_so_far) MINUS last_bad.
+        # Where rightmost_min_seen_so_far is min_positions[-1] <= i (if any), etc.
+        if mn_count > 0 and mx_count > 0:
+            min_pos_so_far = min_positions[bisect.bisect_right(min_positions, i) - 1]
+            max_pos_so_far = max_positions[bisect.bisect_right(max_positions, i) - 1]
+            ans += min(min_pos_so_far, max_pos_so_far) - last_bad
     return ans
 
 
@@ -369,20 +366,23 @@ def count_fixed_bounds_v10(nums, minK, maxK):
     return ans
 
 
-# Solution 11: Recursive helper
+# Solution 11: Iterative implementation (recursive would blow stack)
 def count_fixed_bounds_v11(nums, minK, maxK):
+    # Same as V1 but reorganized.
     n = len(nums)
-
-    def helper(start, idx, min_pos, max_pos):
-        if idx == n:
-            return 0
-        if nums[idx] < minK or nums[idx] > maxK:
-            return helper(idx + 1, idx + 1, -1, -1)
-        new_min = idx if nums[idx] == minK else min_pos
-        new_max = idx if nums[idx] == maxK else max_pos
-        contrib = max(0, min(new_min, new_max) - start)
-        return contrib + helper(start, idx + 1, new_min, new_max)
-    return helper(0, 0, -1, -1)
+    ans = 0
+    bad = mn = mx = -1
+    for i in range(n):
+        x = nums[i]
+        if x < minK or x > maxK:
+            bad = i
+        if x == minK:
+            mn = i
+        if x == maxK:
+            mx = i
+        if mn > bad and mx > bad:
+            ans += min(mn, mx) - bad
+    return ans
 
 
 # Solution 12: Pure brute with all subarrays
@@ -486,24 +486,24 @@ def count_fixed_bounds_v16(nums, minK, maxK):
     return final[0]
 
 
-# Solution 17: Sliding window — for each (start, end), ensure minK and maxK present
+# Solution 17: Sliding window — segment-bounded inner sweep
 def count_fixed_bounds_v17(nums, minK, maxK):
     n = len(nums)
     ans = 0
-    # For each pair of (start, end), check validity — O(n^2).
-    # Within valid range (no bad element), use a smarter count.
     start = 0
     while start < n:
         if nums[start] < minK or nums[start] > maxK:
             start += 1
             continue
+        last_min = last_max = -1
         end = start
-        mn = mx = None
         while end < n and minK <= nums[end] <= maxK:
-            mn = nums[end] if mn is None else min(mn, nums[end])
-            mx = nums[end] if mx is None else max(mx, nums[end])
-            if mn == minK and mx == maxK:
-                ans += 1
+            if nums[end] == minK:
+                last_min = end
+            if nums[end] == maxK:
+                last_max = end
+            if last_min >= start and last_max >= start:
+                ans += min(last_min, last_max) - start + 1
             end += 1
         start = end + 1
     return ans

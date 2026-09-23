@@ -72,6 +72,8 @@ def middle_node_2(head):
 # Way 3: Array of nodes
 # ============================================================
 def middle_node_3(head):
+    if not head:
+        return None
     nodes = []
     cur = head
     while cur:
@@ -84,6 +86,8 @@ def middle_node_3(head):
 # Way 4: Convert to array of values
 # ============================================================
 def middle_node_4(head):
+    if not head:
+        return None
     arr = []
     cur = head
     while cur:
@@ -96,12 +100,14 @@ def middle_node_4(head):
 # Way 5: Fast/slow, single-condition loop
 # ============================================================
 def middle_node_5(head):
+    if not head:
+        return None
     slow = fast = head
-    while fast.next and fast.next.next:
+    while fast and fast.next and fast.next.next:
         slow = slow.next
         fast = fast.next.next
     # If fast.next exists (even length), advance slow once more
-    if fast.next:
+    if fast and fast.next:
         slow = slow.next
     return slow
 
@@ -145,6 +151,8 @@ def middle_node_7(head):
 # ============================================================
 def middle_node_8(head):
     """Push all nodes; pop until middle reached."""
+    if not head:
+        return None
     stack = []
     cur = head
     while cur:

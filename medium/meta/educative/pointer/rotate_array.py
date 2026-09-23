@@ -276,6 +276,177 @@ RELATED PROBLEMS:
 """
 
 
+# =====================================================
+# Solutions 11-20
+# =====================================================
+
+
+# Solution 11: Three-reversal with slice assignment
+def rotate_11(nums, k):
+    n = len(nums)
+    if n <= 1:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    nums.reverse()
+    nums[:k] = nums[:k][::-1]
+    nums[k:] = nums[k:][::-1]
+    return nums
+
+
+# Solution 12: Save last k, shift right by k, place at front
+def rotate_12(nums, k):
+    n = len(nums)
+    if n <= 1:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    tail = list(nums[-k:])
+    for i in range(n - k - 1, -1, -1):
+        nums[i + k] = nums[i]
+    nums[:k] = tail
+    return nums
+
+
+# Solution 13: Cyclic replacements with gcd, walking -k direction
+def rotate_13(nums, k):
+    n = len(nums)
+    if n <= 1:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    def gcd(a, b):
+        while b:
+            a, b = b, a % b
+        return a
+    g = gcd(n, k)
+    for start in range(g):
+        # Walk the cycle backwards: at each position j, place nums[(j-k) % n].
+        j = start
+        tmp = nums[j]
+        prev_pos = j
+        while True:
+            nxt = (prev_pos - k) % n
+            if nxt == start:
+                nums[prev_pos] = tmp
+                break
+            nums[prev_pos] = nums[nxt]
+            prev_pos = nxt
+    return nums
+
+
+# Solution 14: Using deque.rotate
+def rotate_14(nums, k):
+    from collections import deque
+    n = len(nums)
+    if n == 0:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    dq = deque(nums)
+    dq.rotate(k)
+    nums[:] = list(dq)
+    return nums
+
+
+# Solution 15: Extra array with modular indexing
+def rotate_15(nums, k):
+    n = len(nums)
+    if n == 0:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    out = [0] * n
+    for i in range(n):
+        out[(i + k) % n] = nums[i]
+    nums[:] = out
+    return nums
+
+
+# Solution 16: numpy rotate
+def rotate_16(nums, k):
+    try:
+        import numpy as np
+        n = len(nums)
+        if n == 0:
+            return nums
+        k = k % n
+        if k == 0:
+            return nums
+        arr = np.array(nums)
+        out = np.concatenate([arr[-k:], arr[:-k]])
+        nums[:] = list(out)
+        return nums
+    except ImportError:
+        # Fallback
+        nums.reverse()
+        return nums
+
+
+# Solution 17: Recursive three-reversal
+def rotate_17(nums, k):
+    n = len(nums)
+    if n <= 1:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+
+    def rev(lo, hi):
+        if lo >= hi:
+            return
+        nums[lo], nums[hi] = nums[hi], nums[lo]
+        rev(lo + 1, hi - 1)
+    rev(0, n - 1)
+    rev(0, k - 1)
+    rev(k, n - 1)
+    return nums
+
+
+# Solution 18: Builtin reversed
+def rotate_18(nums, k):
+    n = len(nums)
+    if n <= 1:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    nums[:] = list(reversed(nums))
+    nums[:k] = list(reversed(nums[:k]))
+    nums[k:] = list(reversed(nums[k:]))
+    return nums
+
+
+# Solution 19: Pop+insert k times
+def rotate_19(nums, k):
+    n = len(nums)
+    if n == 0:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    for _ in range(k):
+        nums.insert(0, nums.pop())
+    return nums
+
+
+# Solution 20: List comprehension (extra array)
+def rotate_20(nums, k):
+    n = len(nums)
+    if n == 0:
+        return nums
+    k = k % n
+    if k == 0:
+        return nums
+    nums[:] = [nums[(i - k) % n] for i in range(n)]
+    return nums
+
+
 # ============================================================
 # TEST CASES
 # ============================================================
@@ -306,6 +477,16 @@ def run_tests():
         ("Way 8: numpy.roll", rotate_8),
         ("Way 9: Class-based", rotate_9),
         ("Way 10: Final cleanest", rotate_10),
+        ("Way 11: Slice reverse", rotate_11),
+        ("Way 12: Save tail + shift", rotate_12),
+        ("Way 13: GCD cycle swap", rotate_13),
+        ("Way 14: Deque rotate", rotate_14),
+        ("Way 15: Extra array", rotate_15),
+        ("Way 16: numpy", rotate_16),
+        ("Way 17: Recursive rev", rotate_17),
+        ("Way 18: builtin reversed", rotate_18),
+        ("Way 19: Pop+insert", rotate_19),
+        ("Way 20: List comp", rotate_20),
     ]
 
     all_pass = True

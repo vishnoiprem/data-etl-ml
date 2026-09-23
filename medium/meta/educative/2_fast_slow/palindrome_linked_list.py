@@ -143,13 +143,13 @@ def is_palindrome_5(head):
     front = head
 
     def helper(cur):
+        nonlocal front
         if cur is None:
             return True
         if not helper(cur.next):
             return False
         if cur.val != front.val:
             return False
-        nonlocal front
         front = front.next
         return True
 

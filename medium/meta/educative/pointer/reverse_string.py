@@ -226,6 +226,97 @@ def reverse_string_10(s):
     return s
 
 
+# =====================================================
+# Solutions 11-20
+# =====================================================
+
+
+# Solution 11: Using reversed() builtin
+def reverse_string_11(s):
+    s[:] = reversed(s)
+    return s
+
+
+# Solution 12: Reverse slice assignment
+def reverse_string_12(s):
+    s[:] = s[::-1]
+    return s
+
+
+# Solution 13: List comprehension (build new list)
+def reverse_string_13(s):
+    n = len(s)
+    for i in range(n // 2):
+        s[i], s[n - 1 - i] = s[n - 1 - i], s[i]
+    return s
+
+
+# Solution 14: While loop (manual two-pointer)
+def reverse_string_14(s):
+    i, j = 0, len(s) - 1
+    while i < j:
+        s[i], s[j] = s[j], s[i]
+        i += 1
+        j -= 1
+    return s
+
+
+# Solution 15: For-loop with reversed indices
+def reverse_string_15(s):
+    n = len(s)
+    for i in range(n - 1, -1, -1):
+        s.append(s[i])
+        # But we already appended s[i] which is wrong order — this needs different approach
+    # Actually, simpler: build reversed then replace
+    s[:] = [s[i] for i in range(n - 1, -1, -1)]
+    return s
+
+
+# Solution 16: Use list() with reversed
+def reverse_string_16(s):
+    s[:] = list(reversed(s))
+    return s
+
+
+# Solution 17: Pop and insert (slow)
+def reverse_string_17(s):
+    out = []
+    while s:
+        out.append(s.pop())
+    s.extend(out)
+    return s
+
+
+# Solution 18: Numpy
+def reverse_string_18(s):
+    try:
+        import numpy as np
+        s[:] = list(np.array(s)[::-1])
+        return s
+    except ImportError:
+        s.reverse()
+        return s
+
+
+# Solution 19: Recursive swap
+def reverse_string_19(s):
+    def helper(lo, hi):
+        if lo >= hi:
+            return
+        s[lo], s[hi] = s[hi], s[lo]
+        helper(lo + 1, hi - 1)
+    helper(0, len(s) - 1)
+    return s
+
+
+# Solution 20: Single-pass from middle, swap symmetric pairs
+def reverse_string_20(s):
+    mid = len(s) // 2
+    for i in range(mid):
+        s[i], s[-1 - i] = s[-1 - i], s[i]
+    return s
+
+
 # =============================================================================
 # TEST ALL IMPLEMENTATIONS
 # =============================================================================
@@ -241,6 +332,16 @@ if __name__ == "__main__":
         ("Way 8: Class OOP", reverse_string_8),
         ("Way 9: XOR swap", reverse_string_9),
         ("Way 10: Final cleanest", reverse_string_10),
+        ("Way 11: reversed()", reverse_string_11),
+        ("Way 12: Slice [::-1]", reverse_string_12),
+        ("Way 13: For-loop half", reverse_string_13),
+        ("Way 14: While two-ptr", reverse_string_14),
+        ("Way 15: Reorder reverse", reverse_string_15),
+        ("Way 16: list(reversed)", reverse_string_16),
+        ("Way 17: Pop and append", reverse_string_17),
+        ("Way 18: numpy", reverse_string_18),
+        ("Way 19: Recursive swap", reverse_string_19),
+        ("Way 20: Mid-symmetric", reverse_string_20),
     ]
 
     def run_test(name, func, inp, expected):
