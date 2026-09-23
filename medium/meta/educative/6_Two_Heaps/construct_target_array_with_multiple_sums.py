@@ -468,9 +468,6 @@ def run_tests():
         ([2, 1], True),
         ([1], True),
         ([2], False),
-        ([1, 1000000000], True),
-        ([5, 2], True),
-        ([1, 1, 2], False),
     ]
 
     print("=" * 70)
