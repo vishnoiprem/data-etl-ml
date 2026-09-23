@@ -1,4 +1,4 @@
-# Meta Data Engineer (2025) — Interview Prep
+p# Meta Data Engineer (2025) — Interview Prep
 
 10 solutions + a strategy guide distilled from a real Blind interview
 experience post (e4, Seattle, TC ~$236K). The questions aren't hard —

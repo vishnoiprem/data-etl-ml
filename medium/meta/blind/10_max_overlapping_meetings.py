@@ -1,5 +1,8 @@
 """
 Problem 10 (Medium) — How many meetings can occur at the same time?
+https://algo.monster/liteproblems/253
+https://neetcode.io/problems/meeting-schedule-ii/solution
+
 
 A variant of Problem 4: given meetings with start and end times (no
 attendees), return the maximum NUMBER of meetings that overlap at any
