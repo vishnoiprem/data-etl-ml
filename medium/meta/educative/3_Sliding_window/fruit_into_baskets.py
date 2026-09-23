@@ -205,66 +205,51 @@ def total_fruit_v6(fruits):
     return best
 
 
-# Solution 7: Track current and previous fruit type and counts (alternative)
+# Solution 7: Track last index of each type (different from V4)
 def total_fruit_v7(fruits):
     n = len(fruits)
     if n == 0:
         return 0
-    # Maintain the run: (cur_type, cnt_cur), (prev_type, cnt_prev).
-    # When we encounter a new type, prev becomes cur, cur becomes new.
-    # When we encounter prev_type after a different cur, we swap.
-    cur_type = fruits[0]
-    cur_cnt = 1
-    prev_type = None
-    prev_cnt = 0
-    best = 1
-    for right in range(1, n):
-        f = fruits[right]
-        if f == cur_type:
-            cur_cnt += 1
-        elif f == prev_type:
-            # prev_type takes over as cur_type
-            cur_type, prev_type = prev_type, cur_type
-            cur_cnt, prev_cnt = prev_cnt, cur_cnt
-            cur_cnt += 1
-        else:
-            # New type
-            prev_type = cur_type
-            prev_cnt = cur_cnt
-            cur_type = f
-            cur_cnt = 1
-        if cur_cnt + prev_cnt > best:
-            best = cur_cnt + prev_cnt
+    # Track only the LAST index of each type in the current window.
+    # When we exceed 2 types, drop the type with the smallest last index
+    # and set left to its index + 1.
+    last_idx = {}
+    left = 0
+    best = 0
+    for right, f in enumerate(fruits):
+        last_idx[f] = right
+        if len(last_idx) > 2:
+            # Find type with smallest last index
+            oldest_type = min(last_idx, key=lambda k: last_idx[k])
+            left = last_idx[oldest_type] + 1
+            del last_idx[oldest_type]
+        if right - left + 1 > best:
+            best = right - left + 1
     return best
 
 
-# Solution 8: Maintain two fruit types as tuple (cleanest variant)
+# Solution 8: Track last index, find min via linear scan
 def total_fruit_v8(fruits):
     n = len(fruits)
     if n == 0:
         return 0
-    # Use a tuple (cur_type, prev_type, cur_cnt, prev_cnt).
-    cur_type = fruits[0]
-    cur_cnt = 1
-    prev_type = None
-    prev_cnt = 0
-    best = 1
-    for right in range(1, n):
-        f = fruits[right]
-        if f == cur_type:
-            cur_cnt += 1
-        elif f == prev_type:
-            # swap cur and prev; cur_cnt becomes 1 (continuation)
-            cur_type, prev_type = prev_type, cur_type
-            cur_cnt, prev_cnt = prev_cnt, cur_cnt
-            cur_cnt += 1
-        else:
-            prev_type = cur_type
-            prev_cnt = cur_cnt
-            cur_type = f
-            cur_cnt = 1
-        if cur_cnt + prev_cnt > best:
-            best = cur_cnt + prev_cnt
+    last_idx = {}
+    left = 0
+    best = 0
+    for right, f in enumerate(fruits):
+        last_idx[f] = right
+        if len(last_idx) > 2:
+            # Find smallest last_idx manually
+            min_pos = float('inf')
+            min_f = None
+            for k, v in last_idx.items():
+                if v < min_pos:
+                    min_pos = v
+                    min_f = k
+            left = min_pos + 1
+            del last_idx[min_f]
+        if right - left + 1 > best:
+            best = right - left + 1
     return best
 
 
