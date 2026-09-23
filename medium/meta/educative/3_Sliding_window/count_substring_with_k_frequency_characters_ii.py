@@ -121,24 +121,21 @@ def count_k_freq_substrings_v3(s, k):
     return result
 
 
-# Solution 4: Per-char-once optimization
+# Solution 4: Use raw string slice counter (alternative)
 def count_k_freq_substrings_v4(s, k):
     n = len(s)
     result = 0
     for i in range(n):
         cnt = [0] * 26
-        # Track which chars reached k.
-        reach_k = [False] * 26
-        bad_count = 0
         for j in range(i, n):
-            idx = ord(s[j]) - ord('a')
-            cnt[idx] += 1
-            if cnt[idx] == k:
-                reach_k[idx] = True
-                if bad_count > 0:
-                    bad_count -= 1  # Not necessarily: each bad c -> 0 when it reaches k
-            # ... this is wrong because we need to track bad chars
-        # ... too complex
+            cnt[ord(s[j]) - ord('a')] += 1
+            valid = True
+            for c in range(26):
+                if cnt[c] > 0 and cnt[c] < k:
+                    valid = False
+                    break
+            if valid:
+                result += 1
     return result
 
 
