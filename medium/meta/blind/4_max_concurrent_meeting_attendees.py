@@ -108,12 +108,12 @@ def max_attendees(meetings: list[Meeting]) -> int:
 
 
 # ----------------------------------------------------------------------
-# L2 — Hard / streaming: SortedList keyed by end time. Add on start,
-# remove on end, peak over the running sum.
-# How to think: "If meetings arrive as a stream and you can't fit all
-# events in memory at once, you need a structure that supports
-# add/remove-by-key in O(log n). SortedList does that. Mention this
-# only if the interviewer asks about streaming or memory."
+# L2 — Hard / active set: SortedList keyed by end time. Add on start,
+# drop meetings that have ended, keep a running people total.
+# How to think: "Process meetings in start order and keep only the
+# ACTIVE ones in a structure ordered by end time (O(log n) add/remove).
+# This extends naturally to 'which meetings are live right now'.
+# Mention it only if the interviewer asks for the active set."
 # ----------------------------------------------------------------------
 def max_attendees_l2(meetings: list[Meeting]) -> int:
     if not meetings:
@@ -123,13 +123,17 @@ def max_attendees_l2(meetings: list[Meeting]) -> int:
         # dependency isn't installed. Same answer, different shape.
         return max_attendees(meetings)
     active = SortedList()                    # entries: (end, people)
+    current = 0                              # people in active meetings
     peak = 0
     for m in sorted(meetings, key=lambda m: m.start):
+        if m.end < m.start:
+            continue  # invalid; skip (same rule as L1)
         # Remove meetings that ended at or before this start
         while active and active[0][0] <= m.start:
-            active.pop(0)
+            _, people = active.pop(0)
+            current -= people
         active.add((m.end, m.people))
-        current = sum(p for _, p in active)
+        current += m.people
         if current > peak:
             peak = current
     return peak

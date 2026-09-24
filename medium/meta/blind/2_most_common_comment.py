@@ -112,8 +112,12 @@ if __name__ == "__main__":
         a = most_common_comment_l0(s)
         b = most_common_comment(s)
         c = most_common_comment_l2(s)
-        # L0 / L1 may differ on tie-breaks; L2 deterministically picks alphabetically first
-        assert a in ('a', 'b') or b in ('a', 'b') or c in ('a', 'b') or True
+        # L0 / L1 / L2 may differ on tie-breaks, but each must pick a comment
+        # with the maximum location count.
+        loc_counts = Counter(c for loc in s for c in set(loc))
+        best = max(loc_counts.values(), default=0)
+        for pick in (a, b, c):
+            assert loc_counts.get(pick, 0) == best, (s, a, b, c)
     # Tie-break determinism: with the same count, max returns the first inserted.
     assert most_common_comment([['a'], ['b']]) == 'a'
     # L2 picks alphabetically first on tie

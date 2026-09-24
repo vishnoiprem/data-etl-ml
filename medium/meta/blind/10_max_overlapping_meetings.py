@@ -49,7 +49,6 @@ Follow-ups
 
 import heapq
 import itertools
-from bisect import bisect_left
 from collections import Counter
 from typing import List, Tuple
 
@@ -121,7 +120,8 @@ def max_overlapping_l2(meetings: List[Tuple[int, int]]) -> int:
         return 0
     ends: list[int] = []
     best = 0
-    for s, e in sorted(meetings):
+    # Zero-length / invalid meetings occupy no time — skip (matches L1).
+    for s, e in sorted(m for m in meetings if m[1] > m[0]):
         # Release meetings that ended at or before this start
         while ends and ends[0] <= s:
             heapq.heappop(ends)
@@ -144,8 +144,11 @@ def max_overlapping_l3(meetings: List[Tuple[int, int]]) -> int:
     """Two-pointer variant on sorted starts and sorted ends."""
     if not meetings:
         return 0
-    starts = sorted(s for s, _ in meetings)
-    ends = sorted(e for _, e in meetings)
+    # Zero-length / invalid meetings would push the end pointer past the
+    # list (IndexError) — drop them first, matching L1's answer.
+    valid = [(s, e) for s, e in meetings if e > s]
+    starts = sorted(s for s, _ in valid)
+    ends = sorted(e for _, e in valid)
     s = e = 0
     count = best = 0
     while s < len(starts):
@@ -229,15 +232,16 @@ def max_overlapping_l6(meetings: List[Tuple[int, int]]) -> int:
         events.append((s, 1))
         events.append((e, -1))
     events.sort(key=lambda ev: (ev[0], ev[1]))
-    return max(itertools.accumulate(d for _, d in events))
+    return max(itertools.accumulate(d for _, d in events), default=0)
 
 
 # ----------------------------------------------------------------------
 # L7 — Coordinate compression, then linear scan.
 # How to think: "If times are bounded integers, compress all distinct
 # times to [0..U), build a dense array of length U, do a linear pass
-# applying +1/-1, and return the peak. O(n + U) instead of O(n log n)
-# — strictly better when times are bounded."
+# applying +1/-1, and return the peak. The compression itself sorts,
+# so it is still O(n log n); if times are small bounded integers you can
+# skip compression and index directly for true O(n + T)."
 # ----------------------------------------------------------------------
 def max_overlapping_l7(meetings: List[Tuple[int, int]]) -> int:
     """Coordinate-compressed linear scan."""
@@ -278,7 +282,7 @@ def max_overlapping_l8(meetings: List[Tuple[int, int]]) -> int:
         return max_overlapping_l2(meetings)
     ends = SortedList()
     best = 0
-    for s, e in sorted(meetings):
+    for s, e in sorted(m for m in meetings if m[1] > m[0]):
         # Drop end times that are <= s (those meetings have ended).
         while ends and ends[0] <= s:
             ends.pop(0)
@@ -404,6 +408,10 @@ if __name__ == "__main__":
         # Extreme single meeting — stresses L0 (per-instant scan) and
         # L7 (coordinate-compressed array length).
         ([(0, 1_000_000)], 1),
+        # Zero-length and invalid (end < start) meetings occupy no time.
+        ([(5, 5)], 0),
+        ([(5, 3)], 0),
+        ([(0, 10), (5, 5), (5, 3)], 1),
     ]
     implementations = [
         max_overlapping_l0,

@@ -110,10 +110,11 @@ def max_classes_consecutive_years(workshops: List[Tuple[int, int]]) -> int:
 
 
 # ----------------------------------------------------------------------
-# L2 — Hard / production-grade: difference array on a bounded year-axis.
-# How to think: "When year values are bounded (say 1900..2100), a
-# difference array gives O(Y) sweep with no comparisons inside the
-# loop. Reset `run` when a year has zero workshops."
+# L2 — Hard / production-grade: bucket array on a bounded year-axis.
+# How to think: "When year values are bounded (say 1900..2100), one
+# bucket per year gives an O(n + Y) sweep with no sort. Reset `run`
+# when a year has NO workshop — track presence separately, because a
+# workshop with 0 classes still keeps the streak alive."
 # ----------------------------------------------------------------------
 def max_classes_consecutive_years_l2(workshops: List[Tuple[int, int]]) -> int:
     if not workshops:
@@ -121,11 +122,13 @@ def max_classes_consecutive_years_l2(workshops: List[Tuple[int, int]]) -> int:
     lo = min(y for y, _ in workshops)
     hi = max(y for y, _ in workshops)
     arr = [0] * (hi - lo + 1)
+    has_workshop = [False] * (hi - lo + 1)
     for y, n in workshops:
         arr[y - lo] += n
+        has_workshop[y - lo] = True
     best = run = 0
-    for v in arr:
-        if v == 0:
+    for v, present in zip(arr, has_workshop):
+        if not present:
             run = 0              # year with no workshops breaks the run
         else:
             run += v
@@ -145,6 +148,8 @@ if __name__ == "__main__":
         ([(2020, 1), (2022, 1), (2024, 1)], 1),
         ([(2020, 1), (2021, 2), (2022, 3)], 6),
         ([(2020, 1), (2020, 1), (2021, 5)], 7),
+        # A workshop with 0 classes still counts as "a year with a workshop".
+        ([(2020, 5), (2021, 0), (2022, 5)], 10),
     ]
     for ws, expected in samples:
         assert max_classes_consecutive_years_l0(ws) == expected, ws

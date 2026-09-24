@@ -82,23 +82,21 @@ def max_unique_books(prices: List[float], budget: float) -> int:
 
 
 # ----------------------------------------------------------------------
-# L2 — Hard / production-grade: heapq.nsmallest avoids sorting the
-# whole list when you stop early on a tight budget.
+# L2 — Hard / production-grade: heapify + pop cheapest until over budget.
 # How to think: "If budget is tiny relative to the prices (say budget
-# 10 but 1M books), `nsmallest` stops as soon as the heap head exceeds
-# budget. Same complexity in the worst case but better constant factor
-# when k (the answer) is small."
+# 10 but 1M books), heapify is O(n) and we pop only k+1 times, so
+# O(n + k log n) instead of a full O(n log n) sort. Same answer."
 # ----------------------------------------------------------------------
 def max_unique_books_l2(prices: Iterable[float], budget: float) -> int:
     if budget <= 0:
         return 0
+    heap = list(prices)          # materialize once — works for generators too
+    heapq.heapify(heap)          # O(n)
     spent = 0.0
     count = 0
-    # nsmallest yields ascending; stop the moment the next price breaks the budget.
-    for p in heapq.nsmallest(len(list(prices)), prices):  # materialize once for length
-        if spent + p > budget:
-            break
-        spent += p
+    # Pop the cheapest book while it still fits the budget.
+    while heap and spent + heap[0] <= budget:
+        spent += heapq.heappop(heap)
         count += 1
     return count
 
@@ -119,4 +117,6 @@ if __name__ == "__main__":
         assert max_unique_books_l0(prices, budget) == expected, prices
         assert max_unique_books(prices, budget) == expected, prices
         assert max_unique_books_l2(prices, budget) == expected, prices
+    # L2 must accept any iterable, including a one-shot generator.
+    assert max_unique_books_l2((p for p in [1.0, 2.0, 3.0]), 10) == 3
     print("All tests passed for max_unique_books (L0 + L1 + L2).")
