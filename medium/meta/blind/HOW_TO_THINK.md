@@ -32,7 +32,7 @@ Say these out loud. That *is* the interview.
 |---|---|---|---|
 | 1 | Authors with ≥ 5 books | A | join books→authors, group by author, `HAVING COUNT(*) >= 5` |
 | 2 | % sales on signup day | B | join tx→customers, case `purchase_date = registered_on` |
-| 3 | 3+ books on first AND last day | A + CTE | CTE1: first/last date per customer. CTE2: books per customer per day. Keep where day=first has ≥3 AND day=last has ≥3 AND total tx > 1 |
+| 3 | 3+ books on first AND last day | A + CTE | CTE1: first/last date per customer. CTE2: books per customer per day. Keep where day=first has ≥3 AND day=last has ≥3 AND `COUNT(DISTINCT purchase_date) > 1` (rows are books, not visits) |
 | 4 | Top 5 inviters by invitees' avg payment | join + A | invitations → invitee's transactions, `GROUP BY inviter`, `AVG(amount)`, `ORDER BY … DESC LIMIT 5` |
 | 5 | Total authors, % `.com`, % no sale | B + D | CTE: one row per author with flags (`LIKE '%.com%'`, sale count via LEFT JOIN). Then one SELECT of `COUNT(*)` and two percentages |
 | 6 | Sales + unique customers by payment type | C + D | `LEFT JOIN` payment_types→tx, `COALESCE(SUM(amount),0)`, `COUNT(DISTINCT customer_id)` |

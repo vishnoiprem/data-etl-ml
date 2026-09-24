@@ -75,8 +75,17 @@ ORDER BY r_score DESC, f_score DESC, m_score DESC, customer_id;
 -- Frequency: Rosa 8, Nina 4, Q/Oscar/Sam/Priya 3, Tariq/Uma 1
 -- Monetary: Nina highest, then Rosa, etc.
 --
--- Exact segment assignments vary with NTILE bucket boundaries; what
--- matters is the SHAPE: top spenders who bought recently are Champions.
+-- Sanity check: Nina and Rosa (most recent, most purchases, biggest
+-- spend) must come out as Champions; Priya (oldest) as Hibernating.
+-- Ties (e.g. four customers with frequency 3) are split by customer_id.
+-- (1001, 30, 4, 48.74, 4, 4, 4, 'Champions')
+-- (1005, 31, 8, 109.99, 4, 4, 4, 'Champions')
+-- (1004, 112, 3, 34.75, 3, 2, 1, 'Potential Loyalists')
+-- (1002, 138, 3, 44.75, 3, 1, 3, 'Potential Loyalists')
+-- (1008, 199, 3, 38.0, 2, 3, 3, 'At Risk')
+-- (1007, 225, 1, 13.25, 2, 1, 1, 'Other')
+-- (1006, 263, 3, 35.5, 1, 3, 2, 'At Risk')
+-- (1003, 325, 3, 35.5, 1, 2, 2, 'Hibernating')
 --
 -- Talk-track follow-ups
 -- ---------------------
