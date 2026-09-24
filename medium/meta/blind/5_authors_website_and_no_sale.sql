@@ -45,15 +45,16 @@ FROM author_flags;
 -- No sales: Feng's book 115 is never bought; every other author has at
 --   least one book that appears in transactions.
 --   -> 1 of 6 = 16.67%
+-- (6, 33.33, 16.67)
 --
 -- Talk-track follow-ups
 -- ---------------------
 -- "What if URL has 'COM' (uppercase)?"
---   -> LIKE is case-insensitive in SQLite by default for ASCII; in
---      Postgres you'd use ILIKE; in MySQL you'd lowercase both sides.
+--   -> LIKE is case-insensitive for ASCII in SQLite and in MySQL (default
+--      collation); in Postgres use ILIKE or LOWER(website_url) LIKE ...
 -- "What if the URL contains a path like '/about.com'?"
---   -> My LIKE '%\.com%' uses a literal dot, so '/about.com' WOULD match.
---      Be honest about this in the interview.
+--   -> '.' is a literal character in LIKE (only % and _ are wildcards),
+--      so '/about.com' WOULD match. Be honest about this in the interview.
 
 -- =============================================================
 -- Schema (MySQL) + sample data — make this file self-contained.

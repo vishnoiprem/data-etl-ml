@@ -44,7 +44,7 @@ The 10 problems here cover:
 | 5 | `5_authors_website_and_no_sale.sql` | Multi-aggregate + UNION ALL of percentages |
 | 6 | `6_total_sales_by_payment_type.sql` | GROUP BY + COUNT(DISTINCT) + ORDER BY |
 | 7 | `7_sum_orders_unique_customers.sql` | SUM + COUNT(DISTINCT) + CTE |
-| 8 | `8_first_last_buy_window_lag.sql` | Window LAG + CTE — onsite level |
+| 8 | `8_first_last_buy_window_lag.sql` | MIN/MAX + CTE (LAG as follow-up) — onsite level |
 | 9 | `9_running_total_sales_cte.sql` | Window SUM OVER + CTE — onsite level |
 | 10 | `10_rfm_segmentation.sql` | Multiple CTEs + NTILE — onsite level |
 

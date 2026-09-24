@@ -35,9 +35,11 @@ bucketed AS (
         recency_days,
         frequency,
         monetary,
-        NTILE(4) OVER (ORDER BY recency_days ASC) AS r_score,  -- lower recency = higher score
-        NTILE(4) OVER (ORDER BY frequency   DESC) AS f_score,  -- higher freq = higher score
-        NTILE(4) OVER (ORDER BY monetary    DESC) AS m_score
+        -- NTILE gives bucket 1 to the FIRST rows in the ORDER BY, so sort
+        -- worst -> best to make 4 the best score.
+        NTILE(4) OVER (ORDER BY recency_days DESC, customer_id) AS r_score,  -- most recent -> 4
+        NTILE(4) OVER (ORDER BY frequency    ASC,  customer_id) AS f_score,  -- most purchases -> 4
+        NTILE(4) OVER (ORDER BY monetary     ASC,  customer_id) AS m_score   -- biggest spend -> 4
     FROM metrics
 )
 SELECT
@@ -82,11 +84,15 @@ ORDER BY r_score DESC, f_score DESC, m_score DESC, customer_id;
 --   -> NTILE assigns equal-sized groups (4 each for NTILE(4)).
 --      PERCENT_RANK gives a 0..1 percentile rank — useful for
 --      continuous scores.
--- "Why reverse the order for recency?"
---   -> Lower recency_days is better. ASC means the smallest value gets
---      bucket 1 — but I want the SMALLEST recency_days (most recent) to
---      get the HIGHEST r_score. So I order ASC and the bucket number
---      lines up with recency descending. This is the convention.
+-- "Why is recency sorted DESC but frequency/monetary ASC?"
+--   -> NTILE numbers buckets in ORDER BY order: the first rows get 1.
+--      I want 4 = best. For recency, SMALLER days is better, so I sort
+--      DESC (oldest first -> bucket 1, most recent last -> bucket 4).
+--      For frequency and monetary, BIGGER is better, so I sort ASC.
+--      Sanity-check out loud: "my best customer should be a Champion."
+-- "What about ties?"
+--   -> NTILE splits tied values across buckets arbitrarily, so I add
+--      customer_id as a tie-breaker to make the result deterministic.
 --
 -- =============================================================
 -- Schema (MySQL) + sample data — make this file self-contained.

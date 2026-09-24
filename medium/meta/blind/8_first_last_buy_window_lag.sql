@@ -1,5 +1,5 @@
--- Problem 8 — Days between each customer's first and last book purchase (using LAG)
--- Difficulty: Medium | Round: Onsite | Pattern: Window function LAG + CTE
+-- Problem 8 — Days between each customer's first and last book purchase
+-- Difficulty: Medium | Round: Onsite | Pattern: MIN/MAX + CTE (LAG as the follow-up)
 --
 -- Goal
 -- ----
@@ -45,12 +45,18 @@ ORDER BY days_between DESC, customer_id ASC;
 -- Customer 1002 (Oscar):   2024-02-01 -> 2024-08-15 = 196 days, 3 txs
 -- Customer 1004 (Quentin): 2024-03-15 -> 2024-09-10 = 179 days, 3 txs
 -- Customer 1005 (Rosa):    2024-04-15 -> 2024-11-30 = 229 days, 8 txs
+-- Priya / Sam / Uma: 3 books each, all on ONE day -> 0 days.
+--   They have 2+ purchase rows, so they appear with 0. If the interviewer
+--   wants "2+ purchase DAYS", use HAVING COUNT(DISTINCT purchase_date) > 1.
+-- Tariq (1007): only 1 purchase -> excluded.
 --
 -- (1001, 4, 275)
+-- (1005, 8, 229)
 -- (1002, 3, 196)
 -- (1004, 3, 179)
--- (1005, 8, 229)
--- (sorted DESC: 1001 first, 1005 second, 1002 third, 1004 last)
+-- (1003, 3, 0)
+-- (1006, 3, 0)
+-- (1008, 3, 0)
 
 -- Talk-track follow-ups
 -- ---------------------

@@ -97,8 +97,8 @@ INSERT INTO customers VALUES
 -- Nina (1001): buys books on 2024-03-01, 2024-06-15, 2024-12-01 (first, mid, last)
 -- Oscar (1002): first day 2024-02-01 (registration day = same-day), also buys later
 -- Priya (1003): first day 2024-02-10 (reg day), buys 3 books that day
--- Sam (1006): buys 3 books on 2024-04-12 (registration day)
--- Tariq (1007): buys 5 books on 2024-05-20 (reg day) but only one transaction -- should be excluded
+-- Sam (1006): buys 3 books on 2024-04-12 (registration day) -- 3 rows, one day
+-- Tariq (1007): buys 1 book on 2024-05-20 (reg day) -- only one transaction row
 -- Quentin (1004): scattered buys
 -- Rosa (1005): buys 4 books on first day, 4 books on last day
 -- Uma (1008): one big purchase
@@ -124,7 +124,7 @@ INSERT INTO transactions VALUES
     (19, 1005, 105, 1, DATE('2024-11-30'),  8.00),
     (20, 1005, 106, 1, DATE('2024-11-30'), 14.75),
     (21, 1005, 107, 1, DATE('2024-11-30'), 22.00),
-    (22, 1006, 108, 2, DATE('2024-04-12'),  7.50),    -- Sam same-day, 3 books in ONE transaction batch below
+    (22, 1006, 108, 2, DATE('2024-04-12'),  7.50),    -- Sam same-day, 3 books (3 rows, one day)
     (23, 1006, 109, 2, DATE('2024-04-12'), 18.00),
     (24, 1006, 110, 2, DATE('2024-04-12'), 10.00),
     (25, 1007, 111, 1, DATE('2024-05-20'), 13.25),    -- Tariq same-day, but only 1 transaction row

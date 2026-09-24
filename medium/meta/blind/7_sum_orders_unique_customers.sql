@@ -28,14 +28,7 @@ SELECT * FROM order_metrics;
 -- ------------------------------------------------
 -- total_orders   = 28
 -- unique_customers = 8
-
--- Talk-track follow-ups
--- ---------------------
--- "What if I want this by month?"
---   -> GROUP BY strftime('%Y-%m', purchase_date) — or DATE_TRUNC('month', ...)
---      in Postgres.
--- "What if I want rolling 7-day unique customers?"
---   -> Window function with a date range; more advanced but worth naming.
+-- (28, 8)
 
 -- Talk-track follow-ups
 -- ---------------------

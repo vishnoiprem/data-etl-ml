@@ -33,7 +33,8 @@ ORDER BY book_count DESC, a.name ASC;
 -- Talk-track follow-ups
 -- ---------------------
 -- "What if you want all authors (including those with 0 books)?"
---   -> LEFT JOIN; move the >= 5 filter into a WHERE on the count.
+--   -> LEFT JOIN books and COUNT(b.book_id) (not COUNT(*), which would
+--      count the NULL row as 1), and drop the HAVING filter.
 -- "Why HAVING and not WHERE?"
 --   -> WHERE filters rows before aggregation; HAVING filters groups after.
 --   -> If you wrote WHERE COUNT(b.book_id) >= 5, you'd get a SQL error.

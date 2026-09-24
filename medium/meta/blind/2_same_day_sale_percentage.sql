@@ -29,7 +29,7 @@ WITH transaction_with_reg AS (
     JOIN customers    AS c ON c.customer_id = t.customer_id
 )
 SELECT
-    100.0 * SUM(is_same_day) / NULLIF(COUNT(*), 0) AS same_day_pct
+    ROUND(100.0 * SUM(is_same_day) / NULLIF(COUNT(*), 0), 2) AS same_day_pct
 FROM transaction_with_reg;
 
 -- Expected output (against schema.sql sample data)
@@ -37,12 +37,14 @@ FROM transaction_with_reg;
 -- Numerator: Oscar's 2 same-day + Priya's 3 + Sam's 3 + Tariq's 1 = 9
 -- Total transactions: 28
 -- 100.0 * 9 / 28 = 32.142857... -> 32.14
+-- (32.14,)
 
 -- Talk-track follow-ups
 -- ---------------------
 -- "Why NULLIF(COUNT(*), 0)?"
---   -> Division by zero returns NULL in SQL; I prefer a clean NULL
---      result over a runtime error so the query stays runnable.
+--   -> Division by zero raises an error in Postgres/Presto (MySQL and
+--      SQLite quietly return NULL). NULLIF turns a 0 denominator into
+--      NULL, so every engine returns a clean NULL instead of failing.
 -- "Could you also return total_sales and same_day_sales as columns?"
 --   -> Yes — add them to the SELECT.
 

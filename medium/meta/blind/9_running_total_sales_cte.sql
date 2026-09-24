@@ -13,54 +13,74 @@
 -- ----------------
 -- "The onsite question expects at least one window function. SUM OVER
 --  (ORDER BY date) gives running total trivially. The rolling distinct-
---  customer count is harder — there's no DISTINCT inside a window
---  function in standard SQL. The clean solution is: compute daily
---  unique customer counts first, then sum them with a 7-day window."
+--  customer count is harder, for two reasons:
+--   1) COUNT(DISTINCT ...) is not allowed inside a window function, and
+--      summing DAILY distinct counts double-counts a customer who buys
+--      on two days of the same week.
+--   2) ROWS BETWEEN 6 PRECEDING means the last 7 ROWS (dates that had
+--      sales), not the last 7 CALENDAR days.
+--  So I self-join each day to the transactions from the 7 days ending
+--  that day and COUNT(DISTINCT customer_id)."
 
 -- Solution
 -- --------
 WITH daily AS (
     SELECT
         purchase_date,
-        SUM(amount)                       AS daily_sales,
-        COUNT(DISTINCT customer_id)       AS daily_unique_customers
+        SUM(amount) AS daily_sales
     FROM transactions
     GROUP BY purchase_date
 ),
-with_running AS (
+rolling_customers AS (
+    -- Each sales day joined to every transaction in the 7 calendar days
+    -- ending that day (day-6 .. day), then a true DISTINCT count.
     SELECT
-        purchase_date,
-        daily_sales,
-        daily_unique_customers,
-        SUM(daily_sales) OVER (ORDER BY purchase_date
-                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total_sales,
-        SUM(daily_unique_customers) OVER (ORDER BY purchase_date
-                                          ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) AS rolling_7d_unique_customers
-    FROM daily
+        d.purchase_date,
+        COUNT(DISTINCT t.customer_id) AS rolling_7d_unique_customers
+    FROM daily AS d
+    JOIN transactions AS t
+      ON DATEDIFF(d.purchase_date, t.purchase_date) BETWEEN 0 AND 6
+    GROUP BY d.purchase_date
 )
 SELECT
-    purchase_date,
-    daily_sales,
-    running_total_sales,
-    rolling_7d_unique_customers
-FROM with_running
-ORDER BY purchase_date;
+    d.purchase_date,
+    ROUND(d.daily_sales, 2) AS daily_sales,
+    ROUND(SUM(d.daily_sales) OVER (ORDER BY d.purchase_date
+                                   ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 2) AS running_total_sales,
+    r.rolling_7d_unique_customers
+FROM daily AS d
+JOIN rolling_customers AS r ON r.purchase_date = d.purchase_date
+ORDER BY d.purchase_date;
 
--- Expected output (subset — against schema.sql sample data)
--- ----------------------------------------------------------
--- 2024-02-01 | 22.75 | 22.75  | 2 (Oscar only — distinct on this day)
--- 2024-02-10 | 35.50 | 58.25  | 3 (Priya)
--- 2024-03-01 | 22.49 | 80.74  | rolling 7 days covers ~Jan 26 .. Mar 01
--- ...
--- The windowed exact numbers depend on date distribution; the SHAPE of
--- the running_total is monotonically increasing.
+-- Expected output (against schema.sql sample data)
+-- ------------------------------------------------
+-- Sales days are weeks apart, so most 7-day windows hold 1 customer.
+-- 2024-04-15: window 04-09..04-15 has Sam (04-12) + Rosa (04-15) -> 2
+-- 2024-06-15: Nina and Uma both bought that day -> 2
+-- 2024-12-01: window 11-25..12-01 has Rosa (11-30) + Nina (12-01) -> 2
+-- ('2024-02-01', 22.75, 22.75, 1)
+-- ('2024-02-10', 35.5, 58.25, 1)
+-- ('2024-03-01', 22.49, 80.74, 1)
+-- ('2024-03-15', 13.25, 93.99, 1)
+-- ('2024-04-12', 35.5, 129.49, 1)
+-- ('2024-04-15', 53.99, 183.48, 2)
+-- ('2024-05-20', 13.25, 196.73, 1)
+-- ('2024-06-15', 53.0, 249.73, 2)
+-- ('2024-07-20', 9.5, 259.23, 1)
+-- ('2024-08-15', 22.0, 281.23, 1)
+-- ('2024-09-10', 12.0, 293.23, 1)
+-- ('2024-11-30', 56.0, 349.23, 1)
+-- ('2024-12-01', 11.25, 360.48, 2)
 --
 -- Talk-track follow-ups
 -- ---------------------
--- "What if dates are missing?"
---   -> Window frames respect actual rows; if 2024-02-05 has no
---      transactions, it's simply not in the table. If you need a
---      continuous date spine, build a calendar CTE first.
+-- "Why not SUM(...) OVER (ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)?"
+--   -> ROWS counts rows, not days: with gaps between sales days, 7 rows
+--      can span months. Use RANGE BETWEEN INTERVAL 6 DAY PRECEDING
+--      (Postgres/MySQL 8) for a true day window on sums — but distinct
+--      counts still need the self-join above.
+-- "What if you need a row for EVERY calendar day, even with no sales?"
+--   -> Build a calendar (date spine) CTE first and LEFT JOIN onto it.
 -- "Could you do monthly running totals instead?"
 --   -> Use strftime('%Y-%m', purchase_date) for grouping; same SUM OVER.
 
