@@ -15,6 +15,7 @@
 
 -- Solution
 -- --------
+
 SELECT
     a.name           AS author_name,
     COUNT(b.book_id) AS book_count

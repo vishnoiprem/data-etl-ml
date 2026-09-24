@@ -125,9 +125,12 @@ def max_classes_consecutive_years_l2(workshops: List[Tuple[int, int]]) -> int:
         arr[y - lo] += n
     best = run = 0
     for v in arr:
-        run = v if v else 0
-        if run > best:
-            best = run
+        if v == 0:
+            run = 0              # year with no workshops breaks the run
+        else:
+            run += v
+            if run > best:
+                best = run
     return best
 
 
