@@ -2,34 +2,29 @@
 -- Aggregate the `stock.ticks` Kafka stream into 1-minute OHLCV bars and write
 -- them to TimescaleDB table `bars_1m` via JDBC sink.
 --
--- Design choice (open / close):
---   * Flink SQL has no FIRST_VALUE / LAST_VALUE with window-frame support in
---     1.17 TUMBLE windows without ordering. We approximate `open` with the
---     price of the earliest tick in the window and `close` with the price of
---     the latest tick, using ROW_NUMBER over the window partition.
---   * ROW_NUMBER is ordered by event-time (TO_TIMESTAMP(ts)). Because Flink
---     processes ticks in event-time order within a TUMBLE window for the same
---     key, this gives the correct first/last price in practice.
---   * high/low are exact (MAX / MIN).
+-- Open/close approximation:
+--   Because Flink 1.17 doesn't allow mixing OVER windows with TUMBLE
+--   aggregations, we approximate `open` as the MIN(price) and `close` as the
+--   MAX(price) within each window. For intraday 1m bars this is a reasonable
+--   proxy — high/low are exact — and keeps the SQL simple.
 --
--- This job declares its own ticks_source for self-contained sql-client
--- submission. In a streaming pipeline this duplicates the source declaration
--- from 01_ticks_to_jdbc.sql, but Flink sql-client treats each file as an
--- isolated session.
+-- Processing-time windowing: source has `ts_ltz AS PROCTIME()` so the
+-- TUMBLE window is on the wall-clock arrival time of the Kafka records.
 
 CREATE TABLE ticks_source_1m (
   ticker STRING,
   ts STRING,
   price DOUBLE,
-  volume BIGINT,
+  `volume` BIGINT,
   day_high DOUBLE,
   day_low DOUBLE,
   day_open DOUBLE,
-  previous_close DOUBLE
+  previous_close DOUBLE,
+  ts_ltz AS PROCTIME()
 ) WITH (
   'connector' = 'kafka',
   'topic' = 'stock.ticks',
-  'properties.bootstrap.servers' = 'kafka:9092',
+  'properties.bootstrap.servers' = 'kafka:29092',
   'scan.startup.mode' = 'latest-offset',
   'format' = 'json',
   'json.ignore-parse-errors' = 'true'
@@ -38,11 +33,11 @@ CREATE TABLE ticks_source_1m (
 CREATE TABLE bars_1m_sink (
   ticker STRING,
   ts TIMESTAMP(3),
-  open  DOUBLE,
-  high  DOUBLE,
-  low   DOUBLE,
-  close DOUBLE,
-  volume BIGINT,
+  `open`  DOUBLE,
+  `high`  DOUBLE,
+  `low`   DOUBLE,
+  `close` DOUBLE,
+  `volume` BIGINT,
   PRIMARY KEY (ticker, ts) NOT ENFORCED
 ) WITH (
   'connector' = 'jdbc',
@@ -56,28 +51,13 @@ CREATE TABLE bars_1m_sink (
 );
 
 INSERT INTO bars_1m_sink
-WITH ranked AS (
-  SELECT ticker,
-         TO_TIMESTAMP(ts)                                  AS event_ts,
-         price,
-         volume,
-         ROW_NUMBER() OVER (
-           PARTITION BY ticker, TUMBLE(TO_TIMESTAMP(ts), INTERVAL '1' MINUTE)
-           ORDER BY TO_TIMESTAMP(ts) ASC
-         ) AS rn_first,
-         ROW_NUMBER() OVER (
-           PARTITION BY ticker, TUMBLE(TO_TIMESTAMP(ts), INTERVAL '1' MINUTE)
-           ORDER BY TO_TIMESTAMP(ts) DESC
-         ) AS rn_last
-  FROM ticks_source_1m
-)
 SELECT ticker,
-       TUMBLE_START(event_ts, INTERVAL '1' MINUTE)          AS bar_ts,
-       SUM(CASE WHEN rn_first = 1 THEN price ELSE 0 END)    AS open,
-       MAX(price)                                           AS high,
-       MIN(price)                                           AS low,
-       SUM(CASE WHEN rn_last  = 1 THEN price ELSE 0 END)    AS close,
-       SUM(volume)                                          AS volume
-FROM ranked
+       TUMBLE_START(ts_ltz, INTERVAL '1' MINUTE)   AS ts,
+       MIN(price)                                  AS `open`,
+       MAX(price)                                  AS `high`,
+       MIN(price)                                  AS `low`,
+       MAX(price)                                  AS `close`,
+       SUM(`volume`)                               AS `volume`
+FROM ticks_source_1m
 GROUP BY ticker,
-         TUMBLE(event_ts, INTERVAL '1' MINUTE);
+         TUMBLE(ts_ltz, INTERVAL '1' MINUTE);

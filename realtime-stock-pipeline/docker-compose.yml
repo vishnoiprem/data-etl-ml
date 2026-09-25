@@ -4,15 +4,19 @@ services:
     container_name: kafka
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      # Two listeners:
+      #   INTERNAL  — kafka:29092, used by other containers (producer, flink)
+      #   EXTERNAL  — localhost:29092, used by host-machine clients (and host->container:9092 mapping)
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -21,7 +25,7 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "localhost:9092"]
+      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", kafka:29092]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -48,18 +52,19 @@ services:
       start_period: 30s
 
   flink-jobmanager:
-    image: flink:1.17.1-scala_2.12-java11
+    build:
+      context: ./flink
+      dockerfile: Dockerfile
     container_name: flink-jobmanager
+    hostname: flink-jobmanager
     ports:
       - "8081:8081"
       - "6123:6123"
     environment:
-      - "FLINK_PROPERTIES=jobmanager.rpc.address: flink-jobmanager\nblob.server.port: 6123\nrest.port: 8081\nrest.address: 0.0.0.0"
-      - FLINK_REST_PORT=8081
+      JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
+      FLINK_PROPERTIES: "rest.address: 0.0.0.0\nrest.port: 8081\njobmanager.memory.process.size: 1600m\ntaskmanager.memory.process.size: 2048m\ntaskmanager.numberOfTaskSlots: 4\nparallelism.default: 1\n"
     volumes:
       - ./flink/jobs:/opt/flink/jobs
-      - ./flink/udf:/opt/flink/udf
-      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
     command: jobmanager
     depends_on:
       kafka:
@@ -69,17 +74,20 @@ services:
       interval: 15s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 60s
 
   flink-taskmanager:
-    image: flink:1.17.1-scala_2.12-java11
+    build:
+      context: ./flink
+      dockerfile: Dockerfile
     container_name: flink-taskmanager
+    hostname: flink-taskmanager
     environment:
-      - "FLINK_PROPERTIES=jobmanager.address: flink-jobmanager,taskmanager.numberOfTaskSlots: 4"
+      JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
+      TASK_MANAGER_NUMBER_OF_TASK_SLOTS: 4
+      FLINK_PROPERTIES: "rest.address: flink-jobmanager\nrest.port: 8081\ntaskmanager.hostname: flink-taskmanager\ntaskmanager.memory.process.size: 2048m\ntaskmanager.numberOfTaskSlots: 4\nparallelism.default: 1\n"
     volumes:
       - ./flink/jobs:/opt/flink/jobs
-      - ./flink/udf:/opt/flink/udf
-      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
     depends_on:
       flink-jobmanager:
         condition: service_healthy
@@ -114,7 +122,7 @@ services:
       dockerfile: producer/Dockerfile
     container_name: stock-producer
     environment:
-      KAFKA_BOOTSTRAP: kafka:9092
+      KAFKA_BOOTSTRAP: kafka:29092
       TZ: America/New_York
     depends_on:
       kafka:

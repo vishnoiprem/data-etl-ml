@@ -117,12 +117,17 @@ def _extract_latest(data: pd.DataFrame, symbol: str) -> dict | None:
         return None
 
     ts = sub.index[-1]
-    # Normalize to ISO-8601 with NY offset so downstream Flink can parse it.
+    # Normalize to ISO-8601 with timezone offset so downstream Flink
+    # TO_TIMESTAMP can parse it. Tz-naive pandas timestamps get UTC attached
+    # (yfinance quotes are normally NY-local; UTC offset is acceptable for
+    # our processing-time windows).
     if isinstance(ts, pd.Timestamp):
-        ts_str = ts.tz_convert("America/New_York").isoformat() if ts.tz is not None \
-            else ts.isoformat()
+        if ts.tz is not None:
+            ts_str = ts.tz_convert("America/New_York").isoformat()
+        else:
+            ts_str = ts.tz_localize("UTC").isoformat()
     else:
-        ts_str = datetime.utcnow().isoformat()
+        ts_str = datetime.utcnow().isoformat() + "+00:00"
 
     return {
         "ticker": symbol,

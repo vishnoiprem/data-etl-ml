@@ -38,8 +38,8 @@ ticks on a Kafka topic.
   Computes `open`, `high`, `low`, `close`, `volume` per bar and writes to TimescaleDB.
 - **Job B — `signals`**: Continuous query over `bars_1m` computing intraday_return_5m,
   vol_15m, range_pct, expected_move_pct, confidence, target_price, and action
-  (BUY/WATCH/HOLD). Writes to the `signals` hypertable.
-- **UDFs** (`flink/udf/`) for any feature not expressible in pure SQL.
+  (BUY/WATCH/HOLD). Writes to the `signals` hypertable. Implemented as pure
+  Flink SQL — no Python UDFs in the running pipeline.
 
 The SQL Client submits jobs declared in `flink/jobs/*.sql` — see `3_register_flink_jobs.sh`.
 

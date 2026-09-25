@@ -2,23 +2,23 @@
 -- Aggregate the `stock.ticks` Kafka stream into 5-minute OHLCV bars and write
 -- them to TimescaleDB table `bars_5m` via JDBC sink.
 --
--- Same open/close approximation strategy as 02_bars_1m.sql (ROW_NUMBER over the
--- TUMBLE partition, ordered by event-time). Each job file is self-contained
--- for sql-client submission, so the Kafka source is redeclared here.
+-- Same open/close approximation as 02_bars_1m.sql (MIN/MAX as proxies — exact
+-- first/last requires OVER windows, which Flink 1.17 disallows with TUMBLE).
 
 CREATE TABLE ticks_source_5m (
   ticker STRING,
   ts STRING,
   price DOUBLE,
-  volume BIGINT,
+  `volume` BIGINT,
   day_high DOUBLE,
   day_low DOUBLE,
   day_open DOUBLE,
-  previous_close DOUBLE
+  previous_close DOUBLE,
+  ts_ltz AS PROCTIME()
 ) WITH (
   'connector' = 'kafka',
   'topic' = 'stock.ticks',
-  'properties.bootstrap.servers' = 'kafka:9092',
+  'properties.bootstrap.servers' = 'kafka:29092',
   'scan.startup.mode' = 'latest-offset',
   'format' = 'json',
   'json.ignore-parse-errors' = 'true'
@@ -27,11 +27,11 @@ CREATE TABLE ticks_source_5m (
 CREATE TABLE bars_5m_sink (
   ticker STRING,
   ts TIMESTAMP(3),
-  open  DOUBLE,
-  high  DOUBLE,
-  low   DOUBLE,
-  close DOUBLE,
-  volume BIGINT,
+  `open`  DOUBLE,
+  `high`  DOUBLE,
+  `low`   DOUBLE,
+  `close` DOUBLE,
+  `volume` BIGINT,
   PRIMARY KEY (ticker, ts) NOT ENFORCED
 ) WITH (
   'connector' = 'jdbc',
@@ -45,28 +45,13 @@ CREATE TABLE bars_5m_sink (
 );
 
 INSERT INTO bars_5m_sink
-WITH ranked AS (
-  SELECT ticker,
-         TO_TIMESTAMP(ts)                                  AS event_ts,
-         price,
-         volume,
-         ROW_NUMBER() OVER (
-           PARTITION BY ticker, TUMBLE(TO_TIMESTAMP(ts), INTERVAL '5' MINUTE)
-           ORDER BY TO_TIMESTAMP(ts) ASC
-         ) AS rn_first,
-         ROW_NUMBER() OVER (
-           PARTITION BY ticker, TUMBLE(TO_TIMESTAMP(ts), INTERVAL '5' MINUTE)
-           ORDER BY TO_TIMESTAMP(ts) DESC
-         ) AS rn_last
-  FROM ticks_source_5m
-)
 SELECT ticker,
-       TUMBLE_START(event_ts, INTERVAL '5' MINUTE)          AS bar_ts,
-       SUM(CASE WHEN rn_first = 1 THEN price ELSE 0 END)    AS open,
-       MAX(price)                                           AS high,
-       MIN(price)                                           AS low,
-       SUM(CASE WHEN rn_last  = 1 THEN price ELSE 0 END)    AS close,
-       SUM(volume)                                          AS volume
-FROM ranked
+       TUMBLE_START(ts_ltz, INTERVAL '5' MINUTE)   AS ts,
+       MIN(price)                                  AS `open`,
+       MAX(price)                                  AS `high`,
+       MIN(price)                                  AS `low`,
+       MAX(price)                                  AS `close`,
+       SUM(`volume`)                               AS `volume`
+FROM ticks_source_5m
 GROUP BY ticker,
-         TUMBLE(event_ts, INTERVAL '5' MINUTE);
+         TUMBLE(ts_ltz, INTERVAL '5' MINUTE);

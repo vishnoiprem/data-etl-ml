@@ -1,28 +1,18 @@
-# Flink configuration overrides for the realtime stock pipeline.
-# Mounted into /opt/flink/conf/flink-conf.yaml inside the JobManager + TaskManager.
+# Flink configuration for the realtime stock pipeline.
+# Mounted into /opt/flink/conf/flink-conf.yaml inside the JobManager container
+# to override runtime settings. Note: this file replaces (does not merge with)
+# the image's default flink-conf.yaml, so it includes the full set of properties.
 
-# --- Python UDF support ---
-# Loads the signal_udf.py module so `TSignalUDF` is registered when sql-client
-# parses jobs that reference it.
-python.files: /opt/flink/udf/signal_udf.py
-python.client.executable: python3
-
-# --- Required for PyFlink UDFs to work ---
-env.python.executable: python3
-python.requirements: /opt/flink/udf/flink_udf_requirements.txt
-
-# --- Networking ---
 jobmanager.rpc.address: flink-jobmanager
+jobmanager.bind-host: 0.0.0.0
 rest.address: 0.0.0.0
+rest.bind-address: 0.0.0.0
 rest.port: 8081
 
-# --- State backend (files for simplicity; for prod use RocksDB) ---
-state.backend: filesystem
-state.checkpoints.dir: file:///tmp/flink-checkpoints
-
-# --- Parallelism ---
-parallelism.default: 2
+jobmanager.memory.process.size: 1600m
+taskmanager.memory.process.size: 2048m
 taskmanager.numberOfTaskSlots: 4
+parallelism.default: 2
 
-# --- Table planner ---
-table.exec.resource.default-parallelism: 2
+# Disable noisy Akka logging
+akka.loglevel: WARNING

@@ -14,35 +14,35 @@ real time using Kafka, Flink, and TimescaleDB.
 ```
                 +---------------------+
                 |  stock-producer     |   yfinance → Kafka
-                |  (Python, asyncio)  |   topic: ticks.raw
+                |  (Python, asyncio)  |   topic: stock.ticks
                 +----------+----------+
                            |
                            v
                 +---------------------+
-                |       Kafka         |   ticks.raw
+                |       Kafka         |   stock.ticks
                 |  (Confluent / KRaft)|
                 +----------+----------+
                            |
                            v
                 +---------------------+
                 |   Flink JobManager  |
-                |  +  TaskManager     |   SQL jobs:
-                |                     |     - tumble 1m -> bars_1m
-                |                     |     - signal rules -> signals
+                |  +  TaskManager     |   SQL jobs (3 of 4 task slots):
+                |                     |     - 02_bars_1m  -> bars_1m
+                |                     |     - 03_bars_5m  -> bars_5m
+                |                     |     - 04_signals  -> signals
                 +----+-----------+----+
                      |           |
                      v           v
               +-----------------------+
-              |       TimescaleDB     |   hypertables:
-              |  ticks, bars_1m,      |     ticks, bars_1m, signals
-              |  signals             |
+              |       TimescaleDB     |   tables:
+              |  bars_1m, bars_5m,    |     bars_1m, bars_5m, signals
+              |  signals             |     + view latest_prices
               +----------+------------+
                          |
                          v
               +-----------------------+
-              |        Grafana        |   dashboards:
+              |        Grafana        |   dashboard:
               |   provisioning YAML   |     - US Stocks Live
-              |                       |     - Buy Signals
               +-----------------------+
 ```
 
@@ -82,17 +82,44 @@ docker compose logs -f stock-producer
 ## Pipeline components
 
 - **producer/** — Python service that polls yfinance for ~100 tickers, emits JSON ticks
-  to the `ticks.raw` Kafka topic. Async + batching.
-- **flink/jobs/** — SQL jobs that read `ticks.raw`, build 1-minute OHLCV bars
-  (`bars_1m`), and emit `signals` rows (BUY / WATCH / HOLD) using intraday rules.
-- **db/** — TimescaleDB schema: hypertables for `ticks`, `bars_1m`, `signals`, plus
-  convenience views (`latest_prices`, etc.).
+  to the `stock.ticks` Kafka topic. Async + batching. Each tick is a tz-aware ISO 8601
+  timestamp so Flink's `TO_TIMESTAMP` parses cleanly.
+- **flink/jobs/** — SQL jobs that consume `stock.ticks` and write to TimescaleDB:
+  - `02_bars_1m.sql` — TUMBLE 1-min OHLCV → `bars_1m`
+  - `03_bars_5m.sql` — TUMBLE 5-min OHLCV → `bars_5m`
+  - `04_signals.sql` — HOP 15-min features (momentum, volatility) + pure-SQL
+    BUY/WATCH/HOLD classifier → `signals`
+- **db/** — TimescaleDB schema: tables for `bars_1m`, `bars_5m`, `signals`, plus
+  convenience views (`latest_prices` sources from `bars_1m` joined to the latest
+  `signals` row per ticker for `previous_close`/`day_high`/`day_low`).
 - **grafana/** — Auto-provisioned dashboards (this folder) plus datasource YAML.
 - **scripts/** — The orchestration layer you're using now.
 
 See `docs/signal-explanation.md` for the exact BUY/WATCH rules and confidence math.
 
 ---
+
+## What's running
+
+Three Flink jobs are intentionally kept alive (the cluster exposes 4 task slots,
+so we run 3 long-lived sinks and submit the 4th slot for ad-hoc experiments):
+
+| Job                       | Sink              | Notes                                     |
+|---------------------------|-------------------|-------------------------------------------|
+| `02_bars_1m_sink`         | `bars_1m`         | 1-min OHLCV per ticker.                   |
+| `03_bars_5m_sink`         | `bars_5m`         | 5-min OHLCV per ticker.                   |
+| `04_signals_jdbc_sink`    | `signals`         | BUY / WATCH / HOLD rows every ~minute.    |
+
+`01_ticks_to_jdbc.sql` (raw-tick passthrough to the `ticks` table) is shipped in
+the repo but is **not** submitted by default: the Flink 1.17 Kafka source has a
+known consumer-hang issue against KRaft-mode brokers when used inside a parallel
+source job that shares a TaskManager with other Kafka sources. The dashboard
+sources everything from `bars_1m` / `bars_5m` / `signals` so the raw `ticks` table
+isn't on the critical path.
+
+---
+
+
 
 ## Caveats
 
