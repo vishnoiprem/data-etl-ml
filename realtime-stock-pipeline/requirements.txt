@@ -1,0 +1,7 @@
+# Producer-side Python dependencies for the real-time US stock pipeline.
+# Pins chosen for API stability as of 2026-09.
+
+yfinance>=0.2.40
+confluent-kafka>=2.5.0
+pandas>=2.2.0
+python-dateutil>=2.9.0

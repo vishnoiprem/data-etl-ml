@@ -1,0 +1,128 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: stocks
+      POSTGRES_PASSWORD: stocks
+      POSTGRES_DB: stocks
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+      - ./db/01_init_timescale.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./db/02_views.sql:/docker-entrypoint-initdb.d/02_views.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stocks -d stocks"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  flink-jobmanager:
+    image: flink:1.17.1-scala_2.12-java11
+    container_name: flink-jobmanager
+    ports:
+      - "8081:8081"
+      - "6123:6123"
+    environment:
+      - "FLINK_PROPERTIES=jobmanager.rpc.address: flink-jobmanager\nblob.server.port: 6123\nrest.port: 8081\nrest.address: 0.0.0.0"
+      - FLINK_REST_PORT=8081
+    volumes:
+      - ./flink/jobs:/opt/flink/jobs
+      - ./flink/udf:/opt/flink/udf
+      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+    command: jobmanager
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8081/overview || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  flink-taskmanager:
+    image: flink:1.17.1-scala_2.12-java11
+    container_name: flink-taskmanager
+    environment:
+      - "FLINK_PROPERTIES=jobmanager.address: flink-jobmanager,taskmanager.numberOfTaskSlots: 4"
+    volumes:
+      - ./flink/jobs:/opt/flink/jobs
+      - ./flink/udf:/opt/flink/udf
+      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml:ro
+    depends_on:
+      flink-jobmanager:
+        condition: service_healthy
+    command: taskmanager
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  stock-producer:
+    build:
+      context: .
+      dockerfile: producer/Dockerfile
+    container_name: stock-producer
+    environment:
+      KAFKA_BOOTSTRAP: kafka:9092
+      TZ: America/New_York
+    depends_on:
+      kafka:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  kafka-data:
+  timescaledb-data:

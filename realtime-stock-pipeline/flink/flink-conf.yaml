@@ -1,0 +1,28 @@
+# Flink configuration overrides for the realtime stock pipeline.
+# Mounted into /opt/flink/conf/flink-conf.yaml inside the JobManager + TaskManager.
+
+# --- Python UDF support ---
+# Loads the signal_udf.py module so `TSignalUDF` is registered when sql-client
+# parses jobs that reference it.
+python.files: /opt/flink/udf/signal_udf.py
+python.client.executable: python3
+
+# --- Required for PyFlink UDFs to work ---
+env.python.executable: python3
+python.requirements: /opt/flink/udf/flink_udf_requirements.txt
+
+# --- Networking ---
+jobmanager.rpc.address: flink-jobmanager
+rest.address: 0.0.0.0
+rest.port: 8081
+
+# --- State backend (files for simplicity; for prod use RocksDB) ---
+state.backend: filesystem
+state.checkpoints.dir: file:///tmp/flink-checkpoints
+
+# --- Parallelism ---
+parallelism.default: 2
+taskmanager.numberOfTaskSlots: 4
+
+# --- Table planner ---
+table.exec.resource.default-parallelism: 2

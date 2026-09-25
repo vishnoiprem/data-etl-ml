@@ -1,0 +1,6 @@
+# Pinned to match the Flink Docker image used in this stack (Flink 1.17.x).
+# The image already has PyFlink pre-installed at /opt/flink/python; this
+# file documents the intended version for any local testing or CI runs
+# where you `pip install -r flink_udf_requirements.txt` into a virtualenv
+# with a matching Flink client.
+apache-flink==1.17.1
