@@ -37,13 +37,26 @@ w = Window.partitionBy("user_id").orderBy(col("engagement_score").desc())
 top3 = posts.withColumn("rn", row_number().over(w)).filter(col("rn") <= 3)
 top3.show()
 
-# SQL equivalent (Presto / Hive)
+# SQL equivalent (Presto / Hive). Meta asks standard SQL with a Presto flavor.
+# Note: you cannot filter on the window alias in WHERE — it is not in scope yet.
+# The window function must be computed in a subquery/CTE, then filtered outside it.
 SQL = """
-SELECT user_id, post_id, engagement_score
+SELECT user_id, post_id, engagement_score, created_at
 FROM (
-  SELECT user_id, post_id, engagement_score,
-         ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY engagement_score DESC) AS rn
-  FROM posts
-) t
-WHERE rn <= 3;
+    SELECT user_id,
+           post_id,
+           engagement_score,
+           created_at,
+           ROW_NUMBER() OVER (
+               PARTITION BY user_id
+               ORDER BY engagement_score DESC, post_id
+           ) AS rn
+    FROM posts
+) ranked
+WHERE rn <= 3
+ORDER BY user_id, rn
 """
+
+# Verify the SQL actually returns the same rows as the DataFrame API above.
+posts.createOrReplaceTempView("posts")
+spark.sql(SQL).show()

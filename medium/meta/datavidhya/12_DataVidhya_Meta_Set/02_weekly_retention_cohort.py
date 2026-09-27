@@ -1,0 +1,54 @@
+"""
+Q02: 7-Day Retention Cohort Analysis   [Hard | CTEs, Date Functions]
+
+Calculate day-1 and day-7 retention by WEEKLY signup cohort.
+
+How to Think:
+- Two groupings stacked: cohort = week of signup, offset = day since signup.
+- Cohort the user ONCE at signup; never re-cohort them by activity date.
+- DATE_TRUNC('WEEK', d) in Spark starts weeks on MONDAY. State that out loud —
+  if the business defines weeks Sunday-start your numbers silently shift.
+- LEFT JOIN each offset separately, or join once and aggregate conditionally.
+  The conditional-aggregation form below scans `activity` once instead of twice,
+  which is the version to write when the table is billions of rows.
+
+The trap:
+- Denominator must be the cohort size, not the number of users who returned.
+
+Spark note:
+- One pass over activity + one broadcastable signups side = cheap.
+  On real data, broadcast the small cohort table: /*+ BROADCAST(s) */
+"""
+from _seeds import spark, expect
+from pyspark.sql import functions as F
+
+SQL = """
+WITH cohorts AS (
+    SELECT user_id,
+           signup_date,
+           DATE_TRUNC('WEEK', signup_date) AS cohort_week
+    FROM signups
+)
+SELECT CAST(c.cohort_week AS DATE) AS cohort_week,
+       COUNT(DISTINCT c.user_id) AS cohort_size,
+       COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 1)
+                           THEN a.user_id END) AS d1_users,
+       COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 7)
+                           THEN a.user_id END) AS d7_users,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 1)
+                                         THEN a.user_id END)
+                   / COUNT(DISTINCT c.user_id), 2) AS d1_pct,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 7)
+                                         THEN a.user_id END)
+                   / COUNT(DISTINCT c.user_id), 2) AS d7_pct
+FROM cohorts c
+LEFT JOIN activity a ON a.user_id = c.user_id
+GROUP BY c.cohort_week
+ORDER BY c.cohort_week
+"""
+
+import datetime as _dt
+expect("Q02 weekly D1/D7 retention", SQL, [
+    (_dt.date(2026, 1, 5), 3, 2, 1, 66.67, 33.33),
+    (_dt.date(2026, 1, 12), 2, 1, 1, 50.00, 50.00),
+])
