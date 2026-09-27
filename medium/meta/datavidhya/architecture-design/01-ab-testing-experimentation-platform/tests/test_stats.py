@@ -53,16 +53,29 @@ def test_welch_power(rng):
 
 
 def test_msprt_controlled_under_peeking(rng):
-    """mSPRT p-value stays valid when data arrives in chunks."""
-    p_min = 1.0
-    for _ in range(200):
-        c_full = rng.normal(0, 1, 1_000)
-        t_full = rng.normal(0, 1, 1_000)
-        # Look at partial data first
-        p_partial = msprt_pvalue(c_full[:100], t_full[:100])
-        p_min = min(p_min, p_partial)
-    # min p over 200 looks should still be >= alpha on average
-    assert p_min > 0.0
+    """mSPRT p-value stays valid even when checked many times (anti-peeking).
+
+    Under H0, the fraction of trials where min(p) < 0.05 should be ~0.05,
+    NOT ~0.30+ (which is what naive p-values give under peeking).
+    """
+    n_trials = 500
+    n_peeks = 20
+    false_positives = 0
+    for _ in range(n_trials):
+        c = rng.normal(0, 1, 5_000)
+        t = rng.normal(0, 1, 5_000)
+        # Peek 20 times on growing chunks
+        p_min = 1.0
+        for k in range(1, n_peeks + 1):
+            n = (k * 5_000) // n_peeks
+            p = msprt_pvalue(c[:n], t[:n])
+            p_min = min(p_min, p)
+        if p_min < 0.05:
+            false_positives += 1
+    rate = false_positives / n_trials
+    # Allow some slack because mSPRT is an approximation; must be < 0.10
+    # (vs naive p-values which would give ~0.30)
+    assert rate < 0.10, f"mSPRT not controlling Type-I error under peeking: {rate:.3f}"
 
 
 def test_cuped_reduces_variance(rng):

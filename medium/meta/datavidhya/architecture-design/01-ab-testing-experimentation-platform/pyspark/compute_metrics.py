@@ -61,22 +61,24 @@ def compute_metrics_for_date(
     )
 
     # Compute metric value per row based on metric_type
+    # Use Spark column expressions — DO NOT use Python f-strings on column refs;
+    # those would interpolate at Python-eval time and produce a literal string.
     val = (
         when(col("metric_type") == "COUNT",      lit(1))
-        .when(col("metric_type") == "PROPORTION", col(f"properties.`{col('event_field')}`").cast("double"))
-        .when(col("metric_type") == "MEAN",       col(f"properties.`{col('event_field')}`").cast("double"))
+        .when(col("metric_type") == "PROPORTION", col("properties").getItem(col("event_field")).cast("double"))
+        .when(col("metric_type") == "MEAN",       col("properties").getItem(col("event_field")).cast("double"))
         .when(col("metric_type") == "RATIO",
-              col(f"properties.`{col('num_field')}`").cast("double") /
-              col(f"properties.`{col('denom_field')}`").cast("double"))
+              col("properties").getItem(col("num_field")).cast("double") /
+              col("properties").getItem(col("denom_field")).cast("double"))
         .alias("value")
     )
 
     per_user = (
         tagged
         .withColumn("value", val)
-        .groupBy("user_id", "experiment_id", "variant_id", "metric_id")
-        .agg(avg("value").alias("value"))
         .withColumn("dt", lit(run_date))
+        .groupBy("user_id", "experiment_id", "variant_id", "metric_id", "dt")
+        .agg(avg("value").alias("value"))
     )
 
     (

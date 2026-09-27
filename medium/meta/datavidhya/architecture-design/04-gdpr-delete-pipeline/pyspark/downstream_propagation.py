@@ -39,22 +39,25 @@ def propagate_deletions(source_tables: list[str], user_id: str) -> list[dict]:
     )
 
     visited = set()
-    frontier = set(source_tables)
+    frontier = [(t, 0) for t in source_tables]      # (table, depth)
     plan = []
 
     while frontier:
-        visited |= frontier
-        next_frontier = set()
-        for src in frontier:
+        visited |= {t for t, _ in frontier}
+        next_frontier = []
+        for src, depth in frontier:
             children = [r.downstream for r in edges.filter(col("upstream") == src).collect()]
             for child in children:
-                if child not in visited:
-                    plan.append({
-                        "table": child,
-                        "depth_from_source": 1,    # simplified
-                        "delete_method": "direct" if "ml" not in child and "redis" not in child else "soft_delete",
-                    })
-                    next_frontier.add(child)
+                if child in visited:
+                    continue
+                plan.append({
+                    "table": child,
+                    "depth_from_source": depth + 1,
+                    "delete_method": "direct"
+                        if ("ml" not in child and "redis" not in child)
+                        else "soft_delete",
+                })
+                next_frontier.append((child, depth + 1))
         frontier = next_frontier
     return plan
 

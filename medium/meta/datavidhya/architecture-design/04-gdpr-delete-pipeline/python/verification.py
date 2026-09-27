@@ -44,13 +44,18 @@ def verify_and_certify(
     methods = sorted({r.method for r in receipts if r.status == "OK"})
     systems_covered = sum(1 for r in receipts if r.status == "OK")
 
-    # Merkle root: pairwise hash of receipt hashes
+    # Merkle root — Bitcoin-style: duplicate last leaf when odd.
+    # The previous implementation dropped leaves on odd counts, producing
+    # a different root depending on sort order. With duplication, every
+    # input set deterministically produces the same root.
     hashes = sorted([r.hash() for r in receipts if r.status == "OK"])
     while len(hashes) > 1:
+        if len(hashes) % 2 == 1:
+            hashes.append(hashes[-1])            # duplicate last leaf
         hashes = [
             hashlib.sha256((hashes[i] + hashes[i + 1]).encode()).hexdigest()
-            for i in range(0, len(hashes) - 1, 2)
-        ] + ([hashes[-1]] if len(hashes) % 2 else [])
+            for i in range(0, len(hashes), 2)
+        ]
     merkle = hashes[0] if hashes else ""
 
     return ComplianceCertificate(

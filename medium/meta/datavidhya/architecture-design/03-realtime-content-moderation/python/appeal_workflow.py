@@ -36,7 +36,7 @@ class AppealWorkflow:
         self._original_reviewers: Dict[str, str] = {}    # content_id → reviewer
 
     def submit(self, content_id: str, user_id: str, reason: str,
-               severity_class: str) -> Appeal:
+               severity_class: str, original_reviewer: str | None = None) -> Appeal:
         appeal_id = f"app_{content_id}_{int(time.time())}"
         appeal = Appeal(
             appeal_id=appeal_id,
@@ -44,8 +44,11 @@ class AppealWorkflow:
             user_id=user_id,
             reason=reason,
             severity_class=severity_class,
+            original_reviewer=original_reviewer,
         )
         self._appeals[appeal_id] = appeal
+        if original_reviewer:
+            self._original_reviewers[content_id] = original_reviewer
 
         sla_minutes = 480 if severity_class != "SEVERE" else 1440   # 8h / 24h
         self.queue.enqueue(QueueItem(
@@ -61,26 +64,32 @@ class AppealWorkflow:
 
     def record_decision(self, appeal_id: str, reviewer_id: str, decision: str):
         appeal = self._appeals[appeal_id]
-        # check explicit appeal field
+        # Enforce original-reviewer exclusion from BOTH the appeal record
+        # and the content-level reviewer history.
         if appeal.original_reviewer and reviewer_id == appeal.original_reviewer:
             raise ValueError("Appeal cannot be reviewed by original reviewer")
-        # also check content-level reviewer history
         if self._original_reviewers.get(appeal.content_id) == reviewer_id:
             raise ValueError("Appeal cannot be reviewed by original reviewer")
         appeal.decisions.append((reviewer_id, decision))
 
     def is_resolved(self, appeal_id: str) -> tuple[bool, str]:
         appeal = self._appeals[appeal_id]
+        # Count decisions by type
+        approvals = sum(1 for _, d in appeal.decisions if d == "APPROVE")
+        removals  = sum(1 for _, d in appeal.decisions if d == "REMOVE")
+        escalates = sum(1 for _, d in appeal.decisions if d == "ESCALATE")
+
         if appeal.severity_class == "SEVERE":
-            # Need TWO reviewers to agree to overturn
-            overturns = sum(1 for _, d in appeal.decisions if d == "APPROVE")
-            if overturns >= 2:
+            # Two-reviewer overturn rule: need 2 APPROVE to overturn
+            if approvals >= 2:
                 return True, "OVERTURNED"
-            if len(appeal.decisions) >= 3:
+            # Otherwise UPHELD once we have 2 REMOVE/ESCALATE (any uphold consensus)
+            if removals + escalates >= 2:
                 return True, "UPHELD"
         else:
-            if any(d == "APPROVE" for _, d in appeal.decisions):
+            # Non-severe: any single APPROVE overturns; any single REMOVE upholds
+            if approvals >= 1:
                 return True, "OVERTURNED"
-            if any(d == "REMOVE" for _, d in appeal.decisions):
+            if removals >= 1:
                 return True, "UPHELD"
         return False, "PENDING"

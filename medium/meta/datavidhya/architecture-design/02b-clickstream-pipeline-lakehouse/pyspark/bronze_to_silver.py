@@ -12,7 +12,8 @@ Steps:
 import argparse
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
-    col, lit, when, count, countDistinct, broadcast, regexp_extract, lower
+    col, lit, when, count, countDistinct, broadcast, regexp_extract, lower, split
+)
 )
 from pyspark.sql.window import Window
 
@@ -109,7 +110,7 @@ def bronze_to_silver(
     """)
 
 
-from pyspark.sql.functions import split
+from pyspark.sql.functions import split  # noqa: F401  (kept for backward import)
 
 
 if __name__ == "__main__":

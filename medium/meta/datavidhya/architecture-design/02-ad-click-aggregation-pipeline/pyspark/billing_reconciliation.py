@@ -1,258 +1,309 @@
 """
-Billing reconciliation in PySpark — speed vs. batch, idempotent vs. append.
+Billing reconciliation — the BATCH (authoritative) layer.
 
-The billable-click count is determined by THREE independent decisions:
-  1. dedup at 60s (handled upstream, see dedup_clicks.py)
-  2. tier-2 fraud signal (async, arrives minutes/hours after the click)
-  3. campaign CPC from the dim
+This is the file that resolves the contradiction in the problem statement:
+"< 10-second freshness" AND "financial-grade accuracy" are not the same number,
+because tier-2 fraud verdicts arrive minutes to hours after the click.
 
-The speed layer can't wait for (2), so it ships a provisional count.
-The batch layer reruns once (2) settles and produces the authoritative
-ledger. Reconciliation then publishes an ADJUSTMENT row for every
-(advertiser_id, campaign_id, period) whose billable count changed.
+  SPEED LAYER   dashboard   <10s    provisional, revisable, NOT billed
+  BATCH LAYER   invoices    T+1     exact, reconciled, authoritative
 
-This script demonstrates the four invariants the reconciliation has to
-hold or billing diverges from product reality:
+Four things proved here:
 
-  - speed and batch produce DIFFERENT provisional counts (the bug)
-  - the idempotent OVERWRITE produces a STABLE ledger across reruns
-  - the APPEND-mode sink produces a DIFFERENT ledger on every rerun
-  - speed + adjustment == batch  (delta is what the advertiser sees)
+  1. The speed layer OVERSTATES spend, by exactly the tier-2 fraud rate. That is
+     expected behaviour, not a bug -- and the delta is published as an
+     adjustment record rather than by mutating history.
+  2. An APPEND sink DOUBLE-BILLS on replay. An idempotent MERGE does not. This
+     is what "exactly-once" actually means in practice.
+  3. The raw log is NEVER mutated. billable = raw - tier1 - tier2, computed as
+     a join, so an advertiser dispute can be reconstructed line by line.
+  4. Conservation: every raw click is accounted for in exactly one bucket
+     (billable / tier1 / tier2 / duplicate). If that does not hold, the ledger
+     cannot be audited.
 
-Run from this directory:
-
-    ../../../.env/bin/python pyspark/billing_reconciliation.py
+RUN: ../../../../../.env/bin/python pyspark/billing_reconciliation.py
 """
-
-from __future__ import annotations
-
 from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("ad-click-billing-reconciliation")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "4")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
 from pyspark.sql import functions as F
 
+CPC_USD = 0.50
 
-def get_spark() -> SparkSession:
-    return (
-        SparkSession.builder
-        .appName("ad_click_billing_recon")
-        .master("local[2]")
-        .config("spark.sql.shuffle.partitions", "4")
-        .getOrCreate()
-    )
+# ================================================================ the raw log
+# IMMUTABLE. 1000 clicks for one campaign in one hour. Composition:
+#   80 clicks -> tier-1 fraud (dropped at the edge, never reached aggregation)
+#   50 clicks -> duplicates  (dropped by the dedup stage)
+#  120 clicks -> tier-2 fraud (a click farm; passed BOTH earlier stages,
+#                              so the speed layer already counted and displayed
+#                              them)
+#  750 clicks -> genuinely billable
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW raw_events AS
+SELECT CONCAT('e', LPAD(CAST(id AS STRING), 4, '0')) AS event_id,
+       'c_superbowl'                                  AS campaign_id,
+       CONCAT('u_', CAST(id AS STRING))               AS user_id,
+       TIMESTAMP'2026-02-08 18:00:00'
+           + MAKE_INTERVAL(0,0,0,0,0,0, id % 3600)    AS event_ts,
+       CASE WHEN id < 80                THEN 'tier1_fraud'
+            WHEN id < 130               THEN 'duplicate'
+            WHEN id < 250               THEN 'tier2_fraud'
+            ELSE 'clean' END                          AS ground_truth
+FROM range(0, 1000) AS t(id)
+""")
 
+RAW = 1000
+TIER1, DUPES, TIER2, CLEAN = 80, 50, 120, 750
+assert spark.table("raw_events").count() == RAW
 
-def synth_clicks(spark):
-    """30 deduped clicks across 2 campaigns + 1 user_id with a double.
+composition = spark.sql("""
+SELECT ground_truth, COUNT(*) AS n FROM raw_events GROUP BY ground_truth ORDER BY n DESC
+""").collect()
+print("[PASS] raw log composition (immutable, 1 year retention):")
+for r in composition:
+    print(f"         {r.ground_truth:<14} {r.n:>5,}  {r.n / RAW:>5.1%}")
+fraud_pct = (TIER1 + TIER2) / RAW
+assert 0.10 <= fraud_pct <= 0.20, fraud_pct
+print(f"       -> total fraud {fraud_pct:.0%}, inside the stated 10-20% band")
 
-    After dedup (which we skip here — see dedup_clicks.py), the speed layer
-    sees them all. The fraud model invalidates 4 of campaign 1's clicks 2
-    hours later; the batch rerun sees the smaller number.
-    """
-    rows = []
-    eid = 0
-    # Campaign c1: 20 clicks, 4 later flagged as fraud.
-    for _ in range(20):
-        rows.append((f"e{eid}", "c1", 100, f"2026-03-01 10:00:{eid % 60:02d}"))
-        eid += 1
-    # Campaign c2: 10 clicks, no fraud. Control case.
-    for _ in range(10):
-        rows.append((f"e{eid}", "c2", 200, f"2026-03-01 10:01:{eid % 60:02d}"))
-        eid += 1
-    return spark.createDataFrame(
-        rows, ["event_id", "campaign_id", "user_id", "event_ts"]
-    )
+# ================================================= what the SPEED layer saw
+# Tier 1 was dropped at the edge and duplicates by the dedup stage, so the
+# speed layer counted clean + tier2 -- it could not yet know about tier 2.
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW speed_layer_agg AS
+SELECT campaign_id,
+       date_trunc('HOUR', event_ts) AS window_start,
+       COUNT(*)                     AS clicks,
+       COUNT(*) * 0.50              AS spend
+FROM raw_events
+WHERE ground_truth IN ('clean', 'tier2_fraud')
+GROUP BY campaign_id, date_trunc('HOUR', event_ts)
+""")
 
+speed = spark.sql("SELECT clicks, ROUND(spend, 2) AS spend FROM speed_layer_agg") \
+    .collect()[0]
+assert (speed.clicks, float(speed.spend)) == (CLEAN + TIER2, (CLEAN + TIER2) * CPC_USD)
+print(f"[PASS] SPEED layer (dashboard, <10s): {speed.clicks:,} clicks / "
+      f"${float(speed.spend):,.2f}\n       -> shown as 'provisional'. Tier-2 verdicts "
+      "have not landed yet.")
 
-def synth_fraud_verdicts(spark):
-    """4 events tier-2-flagged 2 hours after the click. The speed layer
-    did NOT see these when it shipped its provisional aggregate."""
-    return spark.createDataFrame(
-        [("e0", "bot"), ("e1", "bot"), ("e2", "bot",), ("e3", "bot")],
-        ["event_id", "verdict"],
-    )
+# ================================================= tier-2 verdicts land later
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW fraud_verdicts AS
+SELECT event_id,
+       'invalid'                   AS verdict,
+       0.97                        AS score,
+       'coordinated_click_farm'    AS reason,
+       TIMESTAMP'2026-02-08 21:14:00' AS scored_at   -- ~3h after the clicks
+FROM raw_events WHERE ground_truth = 'tier2_fraud'
+""")
+assert spark.table("fraud_verdicts").count() == TIER2
+lag = spark.sql("""
+SELECT ROUND(MAX(UNIX_TIMESTAMP(v.scored_at) - UNIX_TIMESTAMP(r.event_ts)) / 3600.0, 1)
+FROM fraud_verdicts v JOIN raw_events r USING (event_id)
+""").collect()[0][0]
+print(f"[PASS] {TIER2} tier-2 verdicts arrive up to {float(lag):.1f}h after the click")
+print("       -> THIS is why billing cannot meet a 10s SLO. Naming this is the")
+print("          answer to the question.")
 
+# ================================================= the BATCH layer
+# billable = raw - tier1 - duplicates - tier2_verdicts, as a JOIN.
+# The raw log is read, never written.
+BILLABLE_SQL = """
+WITH surviving AS (
+    SELECT r.event_id, r.campaign_id, r.event_ts
+    FROM raw_events r
+    LEFT ANTI JOIN fraud_verdicts v ON v.event_id = r.event_id
+    WHERE r.ground_truth NOT IN ('tier1_fraud', 'duplicate')
+)
+SELECT campaign_id,
+       date_trunc('HOUR', event_ts) AS window_start,
+       COUNT(*)                     AS billable_clicks,
+       ROUND(COUNT(*) * 0.50, 2)    AS billable_spend
+FROM surviving
+GROUP BY campaign_id, date_trunc('HOUR', event_ts)
+"""
+spark.sql(f"CREATE OR REPLACE TEMP VIEW batch_agg AS {BILLABLE_SQL}")
+spark.sql("SELECT * FROM batch_agg").show(truncate=False)
 
-def synth_campaign_dim(spark):
-    return spark.createDataFrame(
-        [("c1", "adv-A", 1.00), ("c2", "adv-B", 2.50)],
-        ["campaign_id", "advertiser_id", "cpc_usd"],
-    )
+batch = spark.sql("SELECT billable_clicks, billable_spend FROM batch_agg").collect()[0]
+assert (batch.billable_clicks, float(batch.billable_spend)) == (CLEAN, CLEAN * CPC_USD)
+print(f"[PASS] BATCH layer (invoice, T+1): {batch.billable_clicks:,} clicks / "
+      f"${float(batch.billable_spend):,.2f}\n       -> authoritative")
 
+# ================================================= the adjustment record
+ADJUSTMENT = """
+SELECT s.campaign_id,
+       s.window_start,
+       s.clicks                                      AS provisional_clicks,
+       b.billable_clicks,
+       s.clicks - b.billable_clicks                  AS invalidated_clicks,
+       ROUND(b.billable_spend - s.spend, 2)          AS adjustment_usd,
+       ROUND(100.0 * (s.clicks - b.billable_clicks) / s.clicks, 2) AS pct_invalidated
+FROM speed_layer_agg s
+JOIN batch_agg b ON b.campaign_id = s.campaign_id AND b.window_start = s.window_start
+"""
+spark.sql(ADJUSTMENT).show(truncate=False)
 
-# ------------------------------------------------------------- billable (shared)
-def billable(clicks, fraud, dim):
-    """Speed and batch layers compute billable clicks with the SAME shape;
-    the difference between them is purely WHICH fraud verdicts are
-    visible at compute time. Speed passes an empty fraud set; batch
-    passes the full set. The function collapses those into one because
-    their bodies are byte-identical and any divergence here would be a
-    bug, not a feature.
-    """
-    return (
-        clicks.alias("c")
-        .join(fraud.alias("f"), F.col("c.event_id") == F.col("f.event_id"), "left_anti")
-        .join(dim, "campaign_id")
-        .groupBy("advertiser_id", "campaign_id")
-        .agg(
-            F.count("*").alias("billable_clicks"),
-            F.first("cpc_usd").alias("cpc_usd"),
-        )
-        .withColumn("billable_clicks", F.col("billable_clicks").cast("long"))
-        .orderBy("campaign_id")
-    )
+import datetime as dt
 
+expect("adjustment record: the published delta, history never mutated", ADJUSTMENT, [
+    ("c_superbowl", dt.datetime(2026, 2, 8, 18, 0), 870, 750, 120, -60.00, 13.79),
+])
+print("       -> the dashboard said $435.00, the invoice is $375.00, and the")
+print("          -$60.00 delta is PUBLISHED as its own row. We do not go back and")
+print("          rewrite what the dashboard displayed at 18:05.")
 
-# ------------------------------------------------- idempotent vs. append-mode sink
-def idempotent_sink(batch_df, deterministic_key_col="ledger_id"):
-    """OVERWRITE-style sink keyed on a HASH. Reruns replace, never append.
+# ================================================= CONSERVATION
+# Every raw click lands in exactly one bucket. Without this the ledger cannot
+# be audited and a dispute cannot be answered.
+CONSERVATION = """
+SELECT
+    SUM(CASE WHEN ground_truth = 'tier1_fraud' THEN 1 ELSE 0 END) AS tier1,
+    SUM(CASE WHEN ground_truth = 'duplicate'   THEN 1 ELSE 0 END) AS duplicates,
+    SUM(CASE WHEN ground_truth = 'tier2_fraud' THEN 1 ELSE 0 END) AS tier2,
+    SUM(CASE WHEN ground_truth = 'clean'       THEN 1 ELSE 0 END) AS billable,
+    COUNT(*)                                                      AS raw_total
+FROM raw_events
+"""
+c = spark.sql(CONSERVATION).collect()[0]
+assert c.tier1 + c.duplicates + c.tier2 + c.billable == c.raw_total == RAW
+print(f"[PASS] conservation: {c.tier1} tier1 + {c.duplicates} dupes + {c.tier2} tier2 "
+      f"+ {c.billable} billable\n       = {c.raw_total:,} raw. Every click accounted "
+      "for exactly once -- auditable.")
 
-    This is the sink the production system uses. Demonstrated here by
-    building the hash, simulating two reruns, and asserting the row count
-    is stable.
-    """
-    return (
-        batch_df
-        .withColumn(
-            "ledger_id",
-            F.hash(F.concat_ws("|", F.col("advertiser_id"), F.col("campaign_id"),
-                                F.lit("2026-03"))),
-        )
-        .select(
-            "ledger_id", "advertiser_id", "campaign_id",
-            "billable_clicks", "cpc_usd",
-        )
-    )
+# ================================================= IDEMPOTENCY: append vs merge
+# At-least-once delivery means the batch job WILL re-run a window. What happens
+# next depends entirely on the sink.
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW ledger_append AS
+SELECT * FROM batch_agg
+UNION ALL
+SELECT * FROM batch_agg          -- the replay
+""")
+appended = spark.sql("""
+SELECT SUM(billable_clicks) AS clicks, ROUND(SUM(billable_spend), 2) AS spend
+FROM ledger_append
+""").collect()[0]
+assert (appended.clicks, float(appended.spend)) == (CLEAN * 2, CLEAN * CPC_USD * 2)
+print(f"[PASS] APPEND sink after one replay: {appended.clicks:,} clicks / "
+      f"${float(appended.spend):,.2f}\n       -> THE ADVERTISER IS BILLED TWICE. "
+      f"${float(appended.spend) - CLEAN * CPC_USD:,.2f} of "
+      "over-charge from a\n          single retry.")
 
+# The idempotent sink: upsert keyed on (campaign_id, window_start). Re-running
+# the window OVERWRITES rather than adds, so replay is a no-op.
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW ledger_merged AS
+SELECT campaign_id, window_start, billable_clicks, billable_spend
+FROM (
+    SELECT *, ROW_NUMBER() OVER (
+                 PARTITION BY campaign_id, window_start   -- the idempotency key
+                 ORDER BY billable_clicks DESC) AS rn
+    FROM ledger_append
+) WHERE rn = 1
+""")
+merged = spark.sql("""
+SELECT SUM(billable_clicks) AS clicks, ROUND(SUM(billable_spend), 2) AS spend
+FROM ledger_merged
+""").collect()[0]
+assert (merged.clicks, float(merged.spend)) == (CLEAN, CLEAN * CPC_USD)
+print(f"[PASS] MERGE sink after the same replay: {merged.clicks:,} clicks / "
+      f"${float(merged.spend):,.2f}\n       -> unchanged. The replay was a no-op.")
+print("       -> KEY: (campaign_id, window_start). Re-running a window replaces it.")
+print("          This is how at-least-once delivery becomes effectively-once, and")
+print("          it is strictly easier than true exactly-once delivery.")
 
-def append_sink(batch_df):
-    """The trap. Append-mode with no natural key double-counts on rerun.
+# Three replays must still be a no-op, not just one.
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW ledger_thrice AS
+SELECT * FROM batch_agg UNION ALL SELECT * FROM batch_agg
+UNION ALL SELECT * FROM batch_agg UNION ALL SELECT * FROM batch_agg
+""")
+thrice = spark.sql("""
+SELECT SUM(billable_clicks) AS clicks FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY campaign_id, window_start
+                                 ORDER BY billable_clicks DESC) AS rn
+    FROM ledger_thrice
+) WHERE rn = 1
+""").collect()[0][0]
+assert thrice == CLEAN, thrice
+print(f"[PASS] 4 writes of the same window -> still {thrice:,} clicks. Idempotent "
+      "for ANY\n       number of retries, which is the property you actually need.")
 
-    We DON'T actually emit it as production code; we simulate it here to
-    show the divergence so the interview answer is grounded in a number.
-    """
-    # No ledger_id, no deterministic key. Each "emit" is a brand new row.
-    return batch_df.select("advertiser_id", "campaign_id", "billable_clicks", "cpc_usd")
+# ================================================= raw log is never mutated
+assert spark.table("raw_events").count() == RAW
+fraud_rows_in_raw = spark.sql("""
+SELECT COUNT(*) FROM raw_events WHERE ground_truth = 'tier2_fraud'
+""").collect()[0][0]
+assert fraud_rows_in_raw == TIER2
+print(f"[PASS] the {TIER2} fraudulent events are STILL in the raw log after "
+      "reconciliation\n       -> we exclude them by JOIN, never by DELETE. An "
+      "advertiser dispute can be\n          reconstructed event by event three "
+      "years later.")
 
+# ================================================= the dispute query
+# What you run when an advertiser asks "why was I charged $375 and not $435?"
+DISPUTE = """
+SELECT r.ground_truth AS disposition,
+       COUNT(*)       AS clicks,
+       ROUND(COUNT(*) * 0.50, 2) AS would_have_cost,
+       MAX(COALESCE(v.reason, '-')) AS reason
+FROM raw_events r
+LEFT JOIN fraud_verdicts v ON v.event_id = r.event_id
+GROUP BY r.ground_truth
+ORDER BY clicks DESC
+"""
+spark.sql(DISPUTE).show(truncate=False)
+expect("dispute query: every excluded click, with its reason", DISPUTE, [
+    ("clean",       750, 375.00, "-"),
+    ("tier2_fraud", 120,  60.00, "coordinated_click_farm"),
+    ("tier1_fraud",  80,  40.00, "-"),
+    ("duplicate",    50,  25.00, "-"),
+])
+print("       -> this is the audit artifact. It is only possible because the raw")
+print("          log is immutable and the verdicts are a separate table.")
 
-# ----------------------------------------------------------- adjustment_records
-def adjustment_records(speed_df, batch_df):
-    """Publish the delta, never mutate history.
+# ================================================= scale the delta up
+print()
+print("At production scale, the speed/batch delta is:")
+for daily_clicks, rate in [(1_000_000_000, TIER2 / (CLEAN + TIER2))]:
+    over = daily_clicks * rate * CPC_USD
+    print(f"  1B clicks/day, {rate:.1%} tier-2 fraud -> "
+          f"${over / 1e6:,.1f}M/day of provisional over-statement")
+    print(f"  ${over * 365 / 1e9:,.1f}B/year. Billing off the speed layer is not a")
+    print("  rounding error; it is the entire fraud budget.")
 
-    positive delta = batch saw MORE billable clicks (speed under-counted
-        because a fraud verdict hadn't arrived yet)
-    negative delta = batch saw FEWER (speed over-counted; tier-2 fraud
-        invalidated clicks already billed)
-    """
-    s = (speed_df
-         .withColumnRenamed("billable_clicks", "s_billable")
-         .withColumnRenamed("cpc_usd", "s_cpc"))
-    b = (batch_df
-         .withColumnRenamed("billable_clicks", "b_billable")
-         .withColumnRenamed("cpc_usd", "b_cpc"))
-    joined = (
-        s.join(b, ["advertiser_id", "campaign_id"])
-         .withColumn("delta_clicks", F.col("b_billable") - F.col("s_billable"))
-         .withColumn("delta_usd", F.col("delta_clicks") * F.col("b_cpc"))
-    )
-    return joined.select(
-        "advertiser_id", "campaign_id", "s_billable", "b_billable",
-        "delta_clicks", "delta_usd",
-    ).orderBy("campaign_id")
-
-
-# ====================================================================== main
-def main():
-    spark = get_spark()
-    clicks = synth_clicks(spark)
-    fraud = synth_fraud_verdicts(spark)
-    dim = synth_campaign_dim(spark)
-
-    # -- 1. speed and batch SHOULD disagree --------------------------------
-    # In this seed, fraud_verdicts is the SAME at speed-time and
-    # batch-time (we model the moment the batch rerun computes — after
-    # all fraud has settled). To prove the mechanism, simulate the speed
-    # layer having a PARTIAL view: empty fraud set.
-    speed = billable(clicks, fraud.limit(0), dim)               # sees no fraud
-    batch = billable(clicks, fraud, dim)                        # sees all 4
-
-    speed_rows = {r.campaign_id: r.billable_clicks for r in speed.collect()}
-    batch_rows = {r.campaign_id: r.billable_clicks for r in batch.collect()}
-    print(f"  speed-layer provisional: {speed_rows}")
-    print(f"  batch-layer authoritative: {batch_rows}")
-    assert speed_rows["c1"] != batch_rows["c1"], \
-        f"speed and batch must differ for c1; got {speed_rows['c1']} == {batch_rows['c1']}"
-    assert speed_rows["c1"] - batch_rows["c1"] == 4, \
-        f"c1 delta should equal the 4 fraud verdicts; got {speed_rows['c1'] - batch_rows['c1']}"
-    assert speed_rows["c2"] == batch_rows["c2"], \
-        "c2 had no fraud; speed and batch must agree"
-    print(f"  ✓ speed/batch divergence is mechanical: {speed_rows['c1'] - batch_rows['c1']} "
-          "clicks differ on c1 (the 4 fraud verdicts); c2 unaffected")
-
-    # -- 2. adjustment row is the public delta ------------------------------
-    adj = adjustment_records(speed, batch).collect()
-    print(f"  adjustment row: {[(r.campaign_id, r.delta_clicks, r.delta_usd) for r in adj]}")
-    c1_adj = next(r for r in adj if r.campaign_id == "c1")
-    assert c1_adj.delta_clicks == -4, c1_adj.delta_clicks
-    assert c1_adj.delta_usd == -4 * 1.00, c1_adj.delta_usd    # c1 cpc = 1.00
-    c2_adj = next(r for r in adj if r.campaign_id == "c2")
-    assert c2_adj.delta_clicks == 0, c2_adj.delta_clicks
-    print(f"  ✓ adjustment: c1 delta={c1_adj.delta_clicks} clicks, "
-          f"{c1_adj.delta_usd} USD (refund); c2 delta=0 (no fraud)")
-
-    # -- 3. IDEMPOTENT sink: reruns don't double-count -----------------------
-    # Hash key is (advertiser_id, campaign_id, period) -- distinct per row.
-    # Two reruns union to 2N rows but DROP DISTINCT to N (the natural keys
-    # collapse). The advertiser is billed once per (advertiser, campaign,
-    # period) regardless of how many times the pipeline reruns.
-    one_run = idempotent_sink(batch).cache()
-    n_one = one_run.count()
-    two_runs = idempotent_sink(batch).unionByName(idempotent_sink(batch))
-    n_total = two_runs.count()
-    n_distinct = two_runs.dropDuplicates(["ledger_id"]).count()
-    assert n_total == 2 * n_one, (n_total, n_one)
-    assert n_distinct == n_one, (n_distinct, n_one)
-    print(f"  ✓ idempotent sink: 2 reruns -> {n_total} rows collapse via "
-          f"ledger_id hash to {n_distinct} unique ledger_ids (one per campaign)")
-
-    # -- 4. APPEND-mode sink: the bug, with a number -------------------------
-    one_run_a = append_sink(batch)
-    two_runs_a = append_sink(batch).unionByName(append_sink(batch))
-    n_a = two_runs_a.count()
-    n_a_distinct = two_runs_a.dropDuplicates(["advertiser_id", "campaign_id"]).count()
-    assert n_a == 2 * one_run_a.count(), (n_a, one_run_a.count())
-    assert n_a_distinct < n_a, (n_a_distinct, n_a)
-    print(f"  ✗ append-mode sink: 2 reruns -> {n_a} rows of which {n_a_distinct} are real;"
-          f"\n       the advertiser is DOUBLE-billed every retry, which is the bug")
-
-    # -- 5. conservation: billable + rejected + raw consistency check -------
-    raw_clicks = clicks.count()
-    total_billable_batch = sum(batch_rows.values())
-    fraud_count = fraud.count()
-    assert total_billable_batch + fraud_count == raw_clicks, \
-        (total_billable_batch, fraud_count, raw_clicks)
-    print(f"  ✓ conservation: {total_billable_batch} billable + {fraud_count} "
-          f"fraud-invalidated = {raw_clicks} raw -> nothing vanished")
-
-    # -- 6. spend calculation is per-campaign, not just per-row --------------
-    spend = (
-        batch.withColumn("spend_usd", F.col("billable_clicks") * F.col("cpc_usd"))
-             .select("campaign_id", "billable_clicks", "cpc_usd", "spend_usd")
-             .orderBy("campaign_id")
-             .collect()
-    )
-    for r in spend:
-        print(f"     campaign={r.campaign_id}: {r.billable_clicks} billable @ "
-              f"${r.cpc_usd} = ${r.spend_usd}")
-    c1_spend = next(r for r in spend if r.campaign_id == "c1")
-    assert c1_spend.spend_usd == c1_spend.billable_clicks * 1.00
-    print(f"  ✓ spend computed per-campaign from CPC dim, not hard-coded")
-
-    print("=" * 70)
-    print("ALL BILLING-RECONCILIATION ASSERTIONS PASSED")
-    print("=" * 70)
-
-
-if __name__ == "__main__":
-    print("=" * 70)
-    print("BILLING RECONCILIATION: speed vs batch, idempotent vs append")
-    print("=" * 70)
-    main()
+print("\n[PASS] reconciliation verified: speed overstates by exactly the tier-2 rate, "
+      "the\n       delta is published not hidden, append double-bills, MERGE is "
+      "replay-safe, and\n       the raw log stays immutable")

@@ -6,10 +6,13 @@ Used for:
   - ML training datasets (re-generate without user_id)
   - Any system where direct row deletion is impractical
 
-Workflow:
+Workflow (matches AWS KMS / GCP KMS semantics):
   1. Wrap KMS per-user key around PII columns at write time
-  2. To "delete", call kms:ScheduleKeyDeletion → after waiting period,
-     ciphertext becomes undecryptable
+  2. To "delete", call schedule_deletion(user, pending_window_days)
+     → status transitions ACTIVE → SCHEDULED_DELETION
+     → after pending_window expires, call force_delete to mark DELETED
+  3. cancel_deletion(user) can roll back SCHEDULED_DELETION → ACTIVE
+     (e.g. admin realizes the deletion was an error)
 """
 
 from __future__ import annotations
@@ -48,6 +51,9 @@ class CryptoKeyRegistry:
         return key
 
     def schedule_deletion(self, user_id: str, pending_window_days: int = 7):
+        """Schedule key for deletion. Status flips to SCHEDULED_DELETION.
+        Must call force_delete() after pending_window_days have elapsed to
+        finalize — mirrors AWS KMS mandatory waiting period."""
         if user_id not in self._keys:
             raise KeyError(f"no key for user {user_id}")
         key = self._keys[user_id]
@@ -55,14 +61,42 @@ class CryptoKeyRegistry:
             return key
         key.status = "SCHEDULED_DELETION"
         key.deletion_scheduled_at = time.time()
+        key._pending_window_days = pending_window_days
         return key
 
-    def force_delete(self, user_id: str):
+    def force_delete(self, user_id: str, pending_window_days: int = 7):
+        """Immediately delete the key. In production, callers should first
+        verify that pending_window_days have elapsed since schedule_deletion()."""
         if user_id not in self._keys:
             return
         key = self._keys[user_id]
+        if key.status == "ACTIVE":
+            # Implicitly schedule + delete
+            self.schedule_deletion(user_id, pending_window_days)
+        key = self._keys[user_id]
         key.status = "DELETED"
         key.deleted_at = time.time()
+
+    def cancel_deletion(self, user_id: str):
+        """Roll back a SCHEDULED_DELETION. Only allowed before force_delete."""
+        if user_id not in self._keys:
+            return
+        key = self._keys[user_id]
+        if key.status != "SCHEDULED_DELETION":
+            return
+        key.status = "ACTIVE"
+        key.deletion_scheduled_at = None
+        return key
+
+    def pending_window_expired(self, user_id: str) -> bool:
+        """True if pending window has elapsed (eligible for force_delete)."""
+        if user_id not in self._keys:
+            return False
+        key = self._keys[user_id]
+        if key.status != "SCHEDULED_DELETION" or key.deletion_scheduled_at is None:
+            return False
+        elapsed_days = (time.time() - key.deletion_scheduled_at) / 86_400
+        return elapsed_days >= getattr(key, "_pending_window_days", 7)
 
 
 def encrypt_value(plaintext: str, key_id: str) -> bytes:

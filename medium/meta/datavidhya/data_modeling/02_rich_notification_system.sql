@@ -253,70 +253,13 @@ CREATE INDEX idx_notif_created_retention ON notifications(created_at);
 -- See the explicit trigger at the bottom of this file.
 
 -- ---------------------------------------------------------------------
--- 6) notification_deliveries  (the per-channel attempts)
--- ---------------------------------------------------------------------
--- Same shape as before; the retry scheduling lives in a SEPARATE queue
--- table so the deliveries index doesn't get polluted with retry polls.
-CREATE TABLE notification_deliveries (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    notification_id     BIGINT NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
-    campaign_send_id    BIGINT,                         -- backref to campaign_sends (nullable)
-    channel             TEXT NOT NULL CHECK (channel IN ('email','push','sms','in_app')),
-    status              TEXT NOT NULL CHECK (status IN (
-                            'queued','sent','delivered','failed',
-                            'bounced','opened','clicked')),
-    provider            TEXT,                            -- 'sendgrid','fcm','twilio','apns'
-    provider_message_id TEXT,
-    attempt_count       SMALLINT NOT NULL DEFAULT 0,
-    last_error          TEXT,
-    queued_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
-    sent_at             TIMESTAMPTZ,
-    delivered_at        TIMESTAMPTZ,
-    opened_at           TIMESTAMPTZ,
-    clicked_at          TIMESTAMPTZ,
-    failed_at           TIMESTAMPTZ,
-    deleted_at          TIMESTAMPTZ,
-    FOREIGN KEY (campaign_send_id) REFERENCES campaign_sends(id) ON DELETE SET NULL
-);
-
-CREATE INDEX idx_deliveries_notif       ON notification_deliveries(notification_id);
-CREATE INDEX idx_deliveries_channel     ON notification_deliveries(channel, status);
-CREATE INDEX idx_deliveries_status      ON notification_deliveries(status) WHERE deleted_at IS NULL;
-CREATE INDEX idx_deliveries_provider_id ON notification_deliveries(provider_message_id);
-CREATE INDEX idx_deliveries_campaign    ON notification_deliveries(campaign_send_id);
-
--- ---------------------------------------------------------------------
--- 7) notification_retry_queue  (the worker polls THIS, not deliveries)
--- ---------------------------------------------------------------------
--- A delivery whose send failed becomes one row here. The retry worker
--- scans  WHERE next_retry_at <= now() ORDER BY next_retry_at LIMIT N
--- and only re-enters the deliveries table on success. The deliveries
--- table is NOT polluted with "next attempt" columns.
---
--- Exponential backoff is computed at INSERT time:
---   next_retry_at = now() + (2 ^ attempt_count) * base_delay_seconds
--- The formula lives in application code (Postgres can't store an
--- expression index on attempt_count without a generated column).
-CREATE TABLE notification_retry_queue (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    delivery_id         BIGINT NOT NULL REFERENCES notification_deliveries(id) ON DELETE CASCADE,
-    attempt_count       SMALLINT NOT NULL,                -- next attempt number, NOT current
-    next_retry_at       TIMESTAMPTZ NOT NULL,
-    last_error          TEXT,
-    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT uq_retry_delivery UNIQUE (delivery_id)        -- one outstanding retry per delivery
-);
-
--- The hot scan. Partial: only entries still due.
-CREATE INDEX idx_retry_due ON notification_retry_queue(next_retry_at);
-
--- ---------------------------------------------------------------------
--- 8) campaigns + campaign_sends  (bulk sends)
+-- 6) campaigns + campaign_sends  (bulk sends)
 -- ---------------------------------------------------------------------
 -- A campaign is the "send this to N users" template; a campaign_send
 -- is the per-(user, channel) delivery row. Materialising it means
 -- cancellation of one user is a single-row update and per-channel
--- state is independent.
+-- state is independent. Defined BEFORE notification_deliveries so the
+-- FK on delivery.campaign_send_id can resolve.
 CREATE TABLE campaigns (
     id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     title           TEXT NOT NULL,
@@ -345,6 +288,63 @@ CREATE TABLE campaign_sends (
 
 CREATE INDEX idx_campaign_sends_campaign ON campaign_sends(campaign_id);
 CREATE INDEX idx_campaign_sends_user     ON campaign_sends(user_id);
+
+-- ---------------------------------------------------------------------
+-- 7) notification_deliveries  (the per-channel attempts)
+-- ---------------------------------------------------------------------
+-- Same shape as before; the retry scheduling lives in a SEPARATE queue
+-- table so the deliveries index doesn't get polluted with retry polls.
+CREATE TABLE notification_deliveries (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    notification_id     BIGINT NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
+    campaign_send_id    BIGINT REFERENCES campaign_sends(id) ON DELETE SET NULL,
+    channel             TEXT NOT NULL CHECK (channel IN ('email','push','sms','in_app')),
+    status              TEXT NOT NULL CHECK (status IN (
+                            'queued','sent','delivered','failed',
+                            'bounced','opened','clicked')),
+    provider            TEXT,                            -- 'sendgrid','fcm','twilio','apns'
+    provider_message_id TEXT,
+    attempt_count       SMALLINT NOT NULL DEFAULT 0,
+    last_error          TEXT,
+    queued_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+    sent_at             TIMESTAMPTZ,
+    delivered_at        TIMESTAMPTZ,
+    opened_at           TIMESTAMPTZ,
+    clicked_at          TIMESTAMPTZ,
+    failed_at           TIMESTAMPTZ,
+    deleted_at          TIMESTAMPTZ
+);
+
+CREATE INDEX idx_deliveries_notif       ON notification_deliveries(notification_id);
+CREATE INDEX idx_deliveries_channel     ON notification_deliveries(channel, status);
+CREATE INDEX idx_deliveries_status      ON notification_deliveries(status) WHERE deleted_at IS NULL;
+CREATE INDEX idx_deliveries_provider_id ON notification_deliveries(provider_message_id);
+CREATE INDEX idx_deliveries_campaign    ON notification_deliveries(campaign_send_id);
+
+-- ---------------------------------------------------------------------
+-- 8) notification_retry_queue  (the worker polls THIS, not deliveries)
+-- ---------------------------------------------------------------------
+-- A delivery whose send failed becomes one row here. The retry worker
+-- scans  WHERE next_retry_at <= now() ORDER BY next_retry_at LIMIT N
+-- and only re-enters the deliveries table on success. The deliveries
+-- table is NOT polluted with "next attempt" columns.
+--
+-- Exponential backoff is computed at INSERT time:
+--   next_retry_at = now() + (2 ^ attempt_count) * base_delay_seconds
+-- The formula lives in application code (Postgres can't store an
+-- expression index on attempt_count without a generated column).
+CREATE TABLE notification_retry_queue (
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    delivery_id         BIGINT NOT NULL REFERENCES notification_deliveries(id) ON DELETE CASCADE,
+    attempt_count       SMALLINT NOT NULL,                -- next attempt number, NOT current
+    next_retry_at       TIMESTAMPTZ NOT NULL,
+    last_error          TEXT,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_retry_delivery UNIQUE (delivery_id)        -- one outstanding retry per delivery
+);
+
+-- The hot scan. Partial: only entries still due.
+CREATE INDEX idx_retry_due ON notification_retry_queue(next_retry_at);
 
 -- ---------------------------------------------------------------------
 -- 9) notification_events_audit  (append-only)
@@ -522,8 +522,10 @@ INSERT INTO notifications (
      FALSE, NULL, FALSE, NULL,
      encode(digest('campaign.bulk|5|3', 'sha256'), 'hex'));
 
--- Wire digest_root_id back to notif #7 for notifs 8/9/10.
-UPDATE notifications SET digest_root_id = 7 WHERE id IN (8, 9, 10);
+-- Wire digest_root_id. The primary digest row points to itself;
+-- the events it absorbed point to it. This makes the "show me the
+-- digest that contains this event" query a single self-join.
+UPDATE notifications SET digest_root_id = 7 WHERE id IN (7, 8, 9, 10);
 
 -- A campaign + 3 sends.
 INSERT INTO campaigns (title, event_type_code, template_id, payload, audience_filter, started_at, created_by) VALUES
@@ -560,9 +562,15 @@ INSERT INTO notification_deliveries (
     (7,  'email', 'queued',    'sendgrid', 0,
      now() + interval '3 days', NULL, NULL, NULL);
 
--- A retry queue entry for the failed email (#4).
+-- A retry queue entry for the failed email (#4). next_retry_at is in
+-- the past so the worker picks it up on the next poll — illustrative
+-- for Q3 (the worker query).
 INSERT INTO notification_retry_queue (delivery_id, attempt_count, next_retry_at, last_error) VALUES
-    (4, 3, now() + interval '8 minutes', 'smtp_421_retry');  -- 2^3 * base_delay
+    (4, 3, now() - interval '1 minute', 'smtp_421_retry');     -- already due
+
+-- Plus one scheduled in the future, to prove the WHERE filter.
+INSERT INTO notification_retry_queue (delivery_id, attempt_count, next_retry_at, last_error) VALUES
+    (4, 4, now() + interval '16 minutes', 'smtp_421_retry');   -- 2^4 * base_delay
 
 -- Some old notifications for retention testing. Use raw SQL since the
 -- trigger would maintain unread_count; we adjust after.

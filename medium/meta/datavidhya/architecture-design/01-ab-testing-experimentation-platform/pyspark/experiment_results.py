@@ -70,14 +70,19 @@ def run(experiment_id: str, metric_id: str,
         ci_lo = diff - 1.96 * se
         ci_hi = diff + 1.96 * se
 
-        # CUPED
+        # CUPED — theta MUST be computed from COMBINED control+treatment data
+        # (Deng et al. 2013). Computing on treatment only biases the estimate
+        # and produces inconsistent variance reduction across arms.
         if "pre_value" in pdf.columns and pdf["pre_value"].notna().any():
-            theta = np.cov(sub["value"], sub["pre_value"], ddof=1)[0,1] / np.var(sub["pre_value"], ddof=1)
-            pre_mean = pdf[pdf["variant_id"] == "control"]["pre_value"].mean()
-            cuped_t = sub["value"].values - theta * (sub["pre_value"].values - pre_mean)
-            cuped_c = c - theta * (pdf[pdf["variant_id"] == "control"]["pre_value"].values - pre_mean)
+            c_pre = pdf[pdf["variant_id"] == "control"]["pre_value"].values
+            t_pre = sub["pre_value"].values
+            all_metric = np.concatenate([c, t])
+            all_pre    = np.concatenate([c_pre, t_pre])
+            theta = np.cov(all_metric, all_pre, ddof=1)[0, 1] / np.var(all_pre, ddof=1)
+            pre_mean = pdf["pre_value"].mean()
+            cuped_t = t - theta * (t_pre - pre_mean)
+            cuped_c = c - theta * (c_pre - pre_mean)
             v_cuped_t = cuped_t.var(ddof=1)
-            v_cuped_c = cuped_c.var(ddof=1)
             cuped_var_reduction = 1 - v_cuped_t / v_t
         else:
             cuped_var_reduction = 0.0

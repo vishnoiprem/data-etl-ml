@@ -65,18 +65,25 @@ WITH observed AS (
     WHERE experiment_id = 'exp_feed_rank_2024q4'
     GROUP BY variant_id
 ),
+total AS (
+    SELECT SUM(n) AS total_n FROM observed
+),
 expected AS (
-    SELECT variant_id, allocation * SUM(n) OVER () AS expected_n
-    FROM observed
-    CROSS JOIN (SELECT 0.50 AS alloc_control, 0.25 AS alloc_a, 0.25 AS alloc_b) e
+    SELECT
+        o.variant_id,
+        o.n,
+        CASE o.variant_id
+            WHEN 'control'  THEN 0.50 * t.total_n
+            WHEN 'variant_a' THEN 0.25 * t.total_n
+            WHEN 'variant_b' THEN 0.25 * t.total_n
+        END AS expected_n
+    FROM observed o CROSS JOIN total t
 )
 SELECT
-    SUM( POWER(o.n - e.expected_n, 2) / e.expected_n ) AS srm_chi2,
-    -- df = k-1 = 2; critical value at alpha=0.001 is 13.82
+    SUM( POWER(n - expected_n, 2) / expected_n ) AS srm_chi2,
     CASE
-        WHEN SUM( POWER(o.n - e.expected_n, 2) / e.expected_n ) > 13.82
+        WHEN SUM( POWER(n - expected_n, 2) / expected_n ) > 13.82  -- df=2, alpha=0.001
         THEN 'SRM_DETECTED'
         ELSE 'OK'
     END AS srm_status
-FROM observed o
-JOIN expected e USING (variant_id);
+FROM expected;

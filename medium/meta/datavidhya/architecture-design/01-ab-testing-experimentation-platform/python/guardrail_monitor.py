@@ -32,6 +32,7 @@ class GuardrailRule:
     min_sample: int = 1000
     severity: str = "CRITICAL"    # WARN | CRITICAL
     auto_action: str = "PAUSE"    # NONE | PAUSE | ROLLBACK
+    p_value_threshold: float = 0.01    # required statistical confidence
 
 
 @dataclass
@@ -84,7 +85,7 @@ class GuardrailMonitor:
                     (rule.direction == "INCREASE_IS_BAD" and lift > rule.threshold_pct) or
                     (rule.direction == "DECREASE_IS_BAD" and lift < -rule.threshold_pct)
                 )
-                if bad and res.p_value < 0.01:
+                if bad and res.p_value < rule.p_value_threshold:
                     alert = GuardrailAlert(
                         experiment_id=experiment_id,
                         variant_id=variant,
@@ -105,10 +106,10 @@ class GuardrailMonitor:
 # --------------------------------------------------------------------- #
 
 DEFAULT_RULES = [
-    GuardrailRule("crash_rate",     "INCREASE_IS_BAD",  0.10, severity="CRITICAL", auto_action="PAUSE"),
-    GuardrailRule("p99_latency_ms", "INCREASE_IS_BAD",  0.05, severity="CRITICAL", auto_action="PAUSE"),
-    GuardrailRule("revenue_per_user", "DECREASE_IS_BAD", 0.02, severity="CRITICAL", auto_action="PAUSE"),
-    GuardrailRule("dau_drop_pct",   "DECREASE_IS_BAD",  0.01, severity="WARN",    auto_action="NONE"),
+    GuardrailRule("crash_rate",     "INCREASE_IS_BAD",  0.10, severity="CRITICAL", auto_action="PAUSE", p_value_threshold=0.01),
+    GuardrailRule("p99_latency_ms", "INCREASE_IS_BAD",  0.05, severity="CRITICAL", auto_action="PAUSE", p_value_threshold=0.01),
+    GuardrailRule("revenue_per_user", "DECREASE_IS_BAD", 0.02, severity="CRITICAL", auto_action="PAUSE", p_value_threshold=0.01),
+    GuardrailRule("dau_drop_pct",   "DECREASE_IS_BAD",  0.01, severity="WARN",    auto_action="NONE",  p_value_threshold=0.05),
 ]
 
 

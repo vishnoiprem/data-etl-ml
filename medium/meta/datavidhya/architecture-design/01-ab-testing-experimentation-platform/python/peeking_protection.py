@@ -59,8 +59,17 @@ class PeekSafeEngine:
         n = len(c) + len(t)
 
         can_stop = p < self.target_alpha
+        # SHIP/KILL must be decided by CI direction, not just sign of mean diff.
+        # The CI is always-valid under H0.
         if day >= self.max_days:
-            rec = "SHIP" if p < self.target_alpha and t.mean() > c.mean() else "KILL" if p < self.target_alpha else "INCONCLUSIVE"
+            if p >= self.target_alpha:
+                rec = "INCONCLUSIVE"
+            elif hi < 0:
+                rec = "KILL"
+            elif lo > 0:
+                rec = "SHIP"
+            else:
+                rec = "INCONCLUSIVE"
         elif can_stop and hi < 0:
             rec = "KILL"
         elif can_stop and lo > 0:
