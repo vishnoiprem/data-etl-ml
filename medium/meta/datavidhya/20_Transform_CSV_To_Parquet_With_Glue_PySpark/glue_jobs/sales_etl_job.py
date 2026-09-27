@@ -21,16 +21,17 @@ import sys
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col, to_date
-from pyspark.sql.types import DoubleType, IntegerType, LongType
+from pyspark.sql.types import DoubleType, IntegerType  # noqa: F401
 
 
 # Column types per the lab's "every column is text" raw table.
+# Only the *measure* columns (quantity, unit_price) are actually numeric;
+# everything else is an ID (transaction_id, customer_id, product_id) that
+# happens to look numeric. String-ID columns stay string so they survive
+# Spark's strict casting -- ``CAST('C042' AS INT)`` is null, not zero.
 _CASTS = {
-    "transaction_id": LongType(),
-    "customer_id":    IntegerType(),
-    "product_id":     IntegerType(),
-    "quantity":       IntegerType(),
-    "unit_price":     DoubleType(),
+    "quantity":   IntegerType(),
+    "unit_price": DoubleType(),
 }
 
 
