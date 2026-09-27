@@ -1,68 +1,93 @@
+# Meta Data Engineer Interview Prep — DataVidhya Set
 
-# Meta Data Engineer Interview Prep — 10 Solutions Per Pattern
+Runnable, **self-asserting** PySpark + Spark SQL solutions. Every file checks its
+query against hand-computed expected output, so a green run means the SQL is
+actually right — not merely syntactically valid.
 
-> Compiled from the DataVidhya Meta DE Interview Guide. Each folder contains **10 solutions** for one high-frequency pattern, with thinking framework, memory aid, and AI use cases.
+```bash
+./run_all.sh                 # run the whole suite
+cd 02_Retention_Cohorts && ../../../.env/bin/python 01_d1_retention.py
+```
 
-## Folder Map (11 patterns × 10 problems = 110 solutions)
+Both seed modules build a local Spark session (`local[2]`) with every table
+registered as a temp view. Seed data is deliberately tiny and hand-checkable,
+and each table carries the trap the question is really testing.
 
-| # | Folder | Pattern | Maps to Round |
-|---|--------|---------|---------------|
-| 1 | `01_SQL_Window_Functions/` | ROW_NUMBER, RANK, NTILE, LAG/LEAD, PERCENT_RANK | SQL round |
-| 2 | `02_Retention_Cohorts/` | D1 / D7 / D28 retention, weekly cohorts | SQL + Product |
-| 3 | `03_Funnel_Analysis/` | Multi-step funnels, drop-off rates | SQL + Product |
-| 4 | `04_DAU_MAU_Metrics/` | Stickiness, L7, L28, rolling metrics | SQL + Product |
-| 5 | `05_AB_Test_Metrics/` | Lift, variance, t-stat, CUPED | SQL + Product |
-| 6 | `06_Sessionization/` | Gap-and-island session detection | SQL + Python |
-| 7 | `07_Star_Schema_Modeling/` | Fact / dim / grain for Meta products | Modeling |
-| 8 | `08_SCD_Types/` | Type 1 / 2 / 3 historical tracking | Modeling |
-| 9 | `09_Python_Idempotent_ETL/` | Dedup, backfill, retry-safe jobs | Python + Pipeline |
-| 10 | `10_Product_Sense_Frameworks/` | Define → prioritize → SQL → interpret | Product Sense |
-| 11 | `11_Pipeline_Orchestration/` | Airflow DAGs, retries, partitioning | Python + Pipeline |
+## What the interview actually is
 
-## Universal Prep Framework
+Per Meta's own candidate guide, the initial loop is **two rounds**:
 
-### How to Think (apply to every problem)
-1. **Restate the goal in business terms.** "We want X to support Y decision."
-2. **Confirm definitions.** Stickiness = DAU/MAU? Or active-days-in-28? Always ask.
-3. **Pick the right grain.** One row = one what?
-4. **Build smallest correct version first.** Add partitions / SCD / streaming later.
-5. **Optimize at the end.** Mention partition pruning, broadcast joins, predicate pushdown.
+| Round | Length | Scope |
+|---|---|---|
+| Sr Leadership Screen | 30 min | Ownership, impact, scope |
+| Sr Technical Screen | 60 min | **Coding, Data Modeling, Architecture, & SQL** |
 
-### How to Remember (mnemonics)
-- **Window functions**: ROW_NUMBER vs RANK → "ROW_NUMBER breaks ties arbitrarily; RANK leaves gaps; DENSE_RANK does not."
-- **Retention**: "Signups → cohorts → Day-N-active join."
-- **Funnels**: "Self-join on event_id step-by-step OR ARRAY of events."
-- **Stickiness**: "DAU / MAU, capped at 1."
-- **A/B test**: "Mean × Variance × Sample size. Use Welch's t-test."
-- **Sessionization**: "Gap > 30 min? New session. SUM-over-flag trick."
-- **Star schema**: "One fact, many dims, one grain per fact."
-- **SCD2**: "Effective_from + effective_to + is_current."
+Calibration from reported loops: Meta holds the **hardest SQL bar** of any FAANG
+and the fastest pace (~8 min/question). Python is data manipulation — dicts,
+parsing, dedup — **not** LeetCode DSA. No trees, no DP. Skip cloud-service study;
+Meta's stack is internal (Presto, Spark, Hive-style tables, Scuba).
 
-### How to Use These in AI / ML
-- **Feature stores** depend on the same retention / funnel / sessionization queries.
-- **Recommendation systems** mirror funnel drop-off to find friction.
-- **Experiment platforms** (ML A/B testing) require the same lift / variance / CUPED math.
-- **Streaming feature pipelines** use the same idempotency and backfill patterns.
-- **Knowledge graphs** mirror SCD2 versioning for entity history.
+The most-reported rejection pattern is the **silent SQL savant**: flawless
+queries written without narration, scored as "strong technically, no product
+signal." Say *why* this metric, *why* this grain, and *what you'd check* when the
+number moves. Correct-and-silent loses to slightly-imperfect-and-narrated.
 
-## 4-Week Plan (Meta-tuned)
+## Contents
 
-| Week | Focus | Daily Mix |
-|------|-------|-----------|
-| 1 | SQL mastery | 4-5 SQL window/retention/funnel problems |
-| 2 | Modeling + Product Sense | 1 schema + 1 product sense + 1 SQL each day |
-| 3 | Python + Pipeline | 2 Python idempotent + 1 orchestration problem |
-| 4 | Mocks | 1 full mock loop (4 rounds back-to-back) |
+| Folder | Files | Covers |
+|---|---|---|
+| `01_SQL_Window_Functions/` | 2 | ROW_NUMBER top-N, LAG/LEAD deltas |
+| `02_Retention_Cohorts/` | 3 | D1 / D7 / D28 retention by cohort |
+| `03_Funnel_Analysis/` | 3 | loose vs **strict ordered** funnel, time-to-convert |
+| `04_DAU_MAU_Metrics/` | 3 | DAU series, stickiness, rolling 7-day unique, L7/L28 |
+| `05_AB_Test_Metrics/` | 3 | lift, variance, Welch t-test, **CUPED** |
+| `06_Sessionization/` | 3 | gap-and-island, session metrics, the global-id trap |
+| `07_Star_Schema_Modeling/` | 3 | Marketplace, News Feed, Reels schemas |
+| `08_SCD_Types/` | 3 | Type 1 / 2 / 3 + point-in-time attribution |
+| `09_Python_Idempotent_ETL/` | 3 | deterministic dedup, partition overwrite, backfill |
+| `10_Product_Sense_Frameworks/` | 3 | metric→grain→query chain, drop investigation |
+| `11_Pipeline_Orchestration/` | 3 | Airflow DAG shape, watermarks, retries + gates |
+| `12_DataVidhya_Meta_Set/` | 20 | the 20 Meta-tagged SQL questions, solved |
 
-## Top 5 Mistakes to Avoid
-1. Jumping to SQL before defining the metric.
-2. Saying "DAU" without checking whether it's the right metric.
-3. Skipping the grain conversation in modeling.
-4. Defaulting to Type 1 SCD when Meta wants Type 2 for history.
-5. Treating Python as LeetCode instead of production ETL.
+**Status:** the 11 pattern folders hold 3 worked problems each (not the 10 per
+folder an earlier draft of this README promised), plus all 20 Meta-tagged SQL
+questions in `12_`. Several patterns deliberately include the **wrong** answer
+asserted alongside the right one, so the failure mode is documented rather than
+discovered in production.
 
-## Naming Convention
-Each file follows: `NN_<problem_slug>.py` and `NN_<problem_slug>.md`
-- `NN` = 01–10 inside the folder.
-- `.py` = runnable, self-contained Python/SQL demo.
-- `.md` = explainer: problem, thinking, memory aid, AI use cases.
+`07_Star_Schema_Modeling/` files are DDL + reasoning only — they define schemas
+rather than run queries, so `run_all.sh` executes them as no-ops.
+
+## The universal framework
+
+**How to think** (apply to every problem):
+1. Restate the goal in business terms.
+2. **Confirm definitions.** Stickiness = DAU/MAU? L7 = active in last 7 days, or
+   7 of 7? Always ask — the asking is scored.
+3. **Pick the grain.** "One row = one what?" If you can't say it in a sentence,
+   you've already failed the modeling question.
+4. Build the smallest correct version first; add partitions/SCD/streaming after.
+5. Optimize last — partition pruning, broadcast joins, predicate pushdown.
+
+**Mnemonics:**
+- ROW_NUMBER breaks ties arbitrarily; RANK leaves gaps; DENSE_RANK doesn't.
+- Retention: "signups → cohorts → Day-N-active LEFT JOIN."
+- Sessionization: "LAG, flag, cumulative SUM."
+- SCD: "Type 1 forgets. Type 2 remembers all (rows). Type 3 remembers one (columns)."
+- SCD2 intervals are `[from, to)` — half-open, or boundary joins double-count.
+- Star schema: "One fact, many dims, one grain per fact."
+
+**Top mistakes:**
+1. Integer division — `COUNT(a)/COUNT(b)` returns 0. Multiply by `100.0`.
+2. Summing DAU to get MAU (double counts returning users).
+3. INNER JOIN in retention — silently drops churned users, inflates to 100%.
+4. Skipping the grain conversation in modeling.
+5. Defaulting to SCD Type 1 when the question needs point-in-time history.
+6. `dropDuplicates()` for dedup — non-deterministic, so the job isn't reproducible.
+7. `append` in a retryable pipeline — duplicates on every retry.
+8. Treating Python as LeetCode instead of production ETL.
+
+## Naming convention
+
+`NN_<problem_slug>.py` — runnable, self-asserting, PySpark + Spark SQL.
+Shared seeds: `_common.py` (patterns) and `12_DataVidhya_Meta_Set/_seeds.py`.

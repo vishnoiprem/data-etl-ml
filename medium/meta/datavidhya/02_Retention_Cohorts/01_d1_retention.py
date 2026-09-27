@@ -23,8 +23,7 @@ AI Use Cases:
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import exu
-pect
+from _common import expect
 
 SQL = """
 SELECT u.signup_date AS cohort,
