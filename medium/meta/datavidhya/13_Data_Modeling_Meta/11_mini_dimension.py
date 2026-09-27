@@ -111,14 +111,16 @@ AS t(user_sk, user_id, country, signup_date)
 # ---------------------------------------------------------- the fact
 # TWO foreign keys. profile_key is stamped AT EVENT TIME, which is what
 # preserves history without versioning either dimension.
+# User 1 was profile 10 (high / 1k-10k) in January and 6 (medium / 1k-10k) in
+# March -- their engagement band dropped between the two weekly recomputes.
 spark.sql("""
 CREATE OR REPLACE TEMP VIEW fact_reel_post AS
 SELECT * FROM VALUES
-    (1, 1, 2,  DATE'2026-01-10',  500),
-    (2, 1, 2,  DATE'2026-01-24',  700),
-    (3, 1, 11, DATE'2026-03-14', 9000),
-    (4, 2, 5,  DATE'2026-01-11',  300),
-    (5, 3, 2,  DATE'2026-03-02',  150)
+    (1, 1, 10, DATE'2026-01-10',  500),
+    (2, 1, 10, DATE'2026-01-24',  700),
+    (3, 1,  6, DATE'2026-03-14', 9000),
+    (4, 2, 11, DATE'2026-01-11',  300),
+    (5, 3, 10, DATE'2026-03-02',  150)
 AS t(post_id, user_sk, profile_key, post_date, views)
 """)
 
@@ -233,6 +235,6 @@ SELECT COUNT(*) FROM (
 raw_combos = spark.sql("""
 SELECT COUNT(*) FROM (SELECT DISTINCT engagement_band, follower_count FROM user_metrics)
 """).collect()[0][0]
-assert (banded_combos, raw_combos) == (10, 1000), (banded_combos, raw_combos)
+assert (banded_combos, raw_combos) == (12, 1000), (banded_combos, raw_combos)
 print(f"[PASS] Q25 banding gives {banded_combos} combinations from 1000 users; "
       f"raw follower_count gives {raw_combos} -- as large as the dimension itself")
