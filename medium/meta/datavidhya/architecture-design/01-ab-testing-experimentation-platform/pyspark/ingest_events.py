@@ -7,7 +7,13 @@ partitioned by date and hour. Handles late-arriving data via watermarking.
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
-    col, from_json, current_timestamp, to_date, hour, sha2, concat_ws
+    col, from_json, current_timestamp, to_date, hour, sha2, concat_ws, lit
+)
+
+
+# Per-deployment salt for user_id pseudonymisation. In production load from
+# a secrets manager; rotating the salt breaks rainbow-table reversibility.
+PSEUDONYM_SALT = "lakehouse-pseudo-v1"
 )
 from pyspark.sql.types import (
     StructType, StructField, StringType, TimestampType, MapType, ArrayType
@@ -58,7 +64,8 @@ def ingest(kafka_bootstrap: str, topic: str, bronze_table: str,
         .select(from_json(col("json_str"), EVENT_SCHEMA).alias("e"))
         .select("e.*")
         .withColumn("ingested_ts", current_timestamp())
-        .withColumn("user_hashed", sha2(col("user_id"), 256))   # pseudonymisation
+        .withColumn("user_hashed",
+                    sha2(concat_ws(":", col("user_id"), lit(PSEUDONYM_SALT)), 256))   # salted pseudonymisation
         .withColumn("dt",          to_date(col("event_ts")))
         .withColumn("hr",          hour(col("event_ts")))
     )

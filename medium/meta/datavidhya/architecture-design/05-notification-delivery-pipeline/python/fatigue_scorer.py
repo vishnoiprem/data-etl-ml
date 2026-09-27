@@ -48,7 +48,8 @@ def score_user(f: UserFatigueFeatures,
         "max_notifs_7d":  30,
         "min_open_rate":  0.15,
         "max_dismiss":    0.30,
-        "unsubscribe_30d_warn": 1,
+        "unsubscribe_30d_warn":     1,
+        "unsubscribe_30d_critical": 3,
     }
 
     score = 0.0
@@ -65,9 +66,15 @@ def score_user(f: UserFatigueFeatures,
     if f.dismiss_rate_7d > t["max_dismiss"]:
         score += 0.20
 
-    # Unsubscribe signal (20%)
-    if f.unsubscribe_count_30d >= t["unsubscribe_30d_warn"]:
+    # Unsubscribe signal — escalate based on severity (was previously
+    # capped at 0.20 even for heavy unsubscribers)
+    if f.unsubscribe_count_30d >= t.get("unsubscribe_30d_critical", 3):
+        score += 0.40    # pushes score past warn → critical
+    elif f.unsubscribe_count_30d >= t["unsubscribe_30d_warn"]:
         score += 0.20
+
+    # Cap at 1.0
+    score = min(score, 1.0)
 
     tier = "healthy" if score < 0.3 else "warn" if score < 0.7 else "critical"
     return FatigueScore(user_id=f.user_id, score=score, tier=tier)

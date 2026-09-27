@@ -560,17 +560,19 @@ INSERT INTO notification_deliveries (
      now() - interval '30 minutes', now() - interval '30 minutes' + interval '3 seconds',
      now() - interval '30 minutes' + interval '20 seconds', now() - interval '25 minutes'),
     (7,  'email', 'queued',    'sendgrid', 0,
-     now() + interval '3 days', NULL, NULL, NULL);
+     now() + interval '3 days', NULL, NULL, NULL),
+    -- A second failed delivery, so the retry queue can hold two entries
+    -- (one due now, one in the future) without violating UNIQUE.
+    (3,  'sms',   'failed',    'twilio',   1,
+     now() - interval '5 minutes', now() - interval '5 minutes' + interval '2 seconds',
+     NULL, NULL);
 
--- A retry queue entry for the failed email (#4). next_retry_at is in
--- the past so the worker picks it up on the next poll — illustrative
--- for Q3 (the worker query).
+-- Retry queue: one entry already due, one in the future. The worker's
+-- poll query has WHERE next_retry_at <= now(); the future entry is the
+-- negative case proving the filter works.
 INSERT INTO notification_retry_queue (delivery_id, attempt_count, next_retry_at, last_error) VALUES
-    (4, 3, now() - interval '1 minute', 'smtp_421_retry');     -- already due
-
--- Plus one scheduled in the future, to prove the WHERE filter.
-INSERT INTO notification_retry_queue (delivery_id, attempt_count, next_retry_at, last_error) VALUES
-    (4, 4, now() + interval '16 minutes', 'smtp_421_retry');   -- 2^4 * base_delay
+    (4, 3, now() - interval '1 minute',  'smtp_421_retry'),    -- due NOW (pick me up)
+    (8, 2, now() + interval '4 minutes', 'twilio_500');        -- 2^2 * base_delay, future
 
 -- Some old notifications for retention testing. Use raw SQL since the
 -- trigger would maintain unread_count; we adjust after.

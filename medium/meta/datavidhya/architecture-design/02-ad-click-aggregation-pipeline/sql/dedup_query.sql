@@ -1,73 +1,87 @@
--- =============================================================================
--- 60-second click dedup as a batch SQL query.
--- =============================================================================
--- Streaming equivalent: Flink keyed state (user_id, ad_id) with 60s TTL.
--- Batch equivalent: window function + first/last semantics on event_ts.
+-- Dedup: "same user + same ad within 60 seconds = 1 click"
 --
--- The trick: a click is a duplicate iff a previous click for the SAME
--- (user_id, ad_id) has event_ts within 60s. We pick the FIRST such click
--- as the survivor; everything else is dropped.
+-- Two forms. Both are needed, and they must agree:
+--   A) STREAMING  -- what Flink/Spark Structured Streaming runs continuously
+--   B) BATCH      -- what the reconciliation job re-runs over the raw log
 --
--- Boundary semantics asserted below:
---   "fixed from first click" — a bot that clicks every 59s gets ONE billable
---   click per 60s window.  Sliding-from-last would dedupe forever and never
---   bill, which is the WRONG behavior for an advertiser.
--- =============================================================================
+-- If A and B disagree, the dashboard and the invoice diverge for reasons that
+-- have nothing to do with fraud, which is the worst kind of bug to debug.
+-- pyspark/dedup_clicks.py asserts they agree.
 
-WITH ranked AS (
+-- ============================================================ A) STREAMING
+-- Spark Structured Streaming, 3.5+. The watermark is what bounds the state.
+--
+--   spark.readStream.format("kafka").load()
+--        .withWatermark("event_ts", "60 seconds")
+--        .dropDuplicatesWithinWatermark(["user_id", "ad_id"])
+--
+-- Flink SQL equivalent:
+--
+--   SELECT * FROM (
+--       SELECT *, ROW_NUMBER() OVER (
+--                     PARTITION BY user_id, ad_id, window_start
+--                     ORDER BY event_ts) AS rn
+--       FROM TABLE(TUMBLE(TABLE raw_clicks, DESCRIPTOR(event_ts), INTERVAL '60' SECOND))
+--   ) WHERE rn = 1;
+--
+-- DO NOT use plain dropDuplicates() on a stream: state is unbounded and the job
+-- OOMs. Over a year of clicks that is ~21 TiB of state
+-- (see python/capacity_model.py).
+
+-- ============================================================ B) BATCH
+-- Windows are FIXED-FROM-FIRST: the window opens at a key's first click and
+-- closes 60s later. Clicks inside it are one logical click.
+--
+-- The alternative (sliding-from-last, where each click extends the window) is
+-- a real bug: a bot clicking every 59s is deduped forever and billed once,
+-- ever. See python/dedup_state.py, which asserts both.
+WITH anchored AS (
     SELECT
-        event_id,
-        event_ts,
-        user_id,
-        ad_id,
-        campaign_id,
-        advertiser_id,
-        -- gap in seconds from the previous click by (user_id, ad_id)
-        LAG(event_ts) OVER (
-            PARTITION BY user_id, ad_id
-            ORDER BY event_ts
-        ) AS prev_ts,
-        ROW_NUMBER() OVER (
-            PARTITION BY user_id, ad_id
-            ORDER BY event_ts
-        ) AS rn
-    FROM raw_ad_events
+        event_id, user_id, ad_id, campaign_id, advertiser_id,
+        event_ts, cpc_usd,
+        MIN(event_ts) OVER (PARTITION BY user_id, ad_id) AS first_click_ts
+    FROM ads.raw_events
     WHERE event_type = 'click'
-      AND fraud_tier1 = FALSE          -- tier-1 already dropped these upstream
+      AND tier1_verdict = 'accept'          -- tier-1 fraud already excluded
+      AND event_date = DATE '2026-02-08'    -- partition pruning
 ),
-with_flag AS (
+windowed AS (
     SELECT
         *,
-        -- duplicate iff there was a prior click within 60s
-        CASE
-            WHEN prev_ts IS NULL THEN FALSE
-            WHEN UNIX_TIMESTAMP(event_ts) - UNIX_TIMESTAMP(prev_ts) < 60 THEN TRUE
-            ELSE FALSE
-        END AS is_duplicate
-    FROM ranked
+        -- window ordinal: clicks sharing one are the same logical click
+        CAST(FLOOR(
+            (UNIX_TIMESTAMP(event_ts) - UNIX_TIMESTAMP(first_click_ts)) / 60
+        ) AS INT) AS dedup_window
+    FROM anchored
+),
+ranked AS (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY user_id, ad_id, dedup_window
+            -- event_id as tiebreak so a REPLAY keeps the same survivor.
+            -- Without it, two clicks on the same millisecond make the billed
+            -- event_id non-deterministic and the ledger unreproducible.
+            ORDER BY event_ts, event_id
+        ) AS rn
+    FROM windowed
 )
 SELECT
-    event_id,
-    event_ts,
-    user_id,
-    ad_id,
-    campaign_id,
-    advertiser_id,
-    is_duplicate
-FROM with_flag
-WHERE rn = 1 OR is_duplicate = FALSE   -- keep the first OR any click that
-                                        -- starts a new 60s window
-ORDER BY event_ts;
+    event_id, user_id, ad_id, campaign_id, advertiser_id, event_ts, cpc_usd
+FROM ranked
+WHERE rn = 1;
 
--- -----------------------------------------------------------------------------
--- Sanity assertions (run these in a notebook or as unit tests).
---   1) COUNT(*) over the result equals the number of distinct 60s windows
---      per (user_id, ad_id) in the input.  Assert it.
---   2) COUNT(DISTINCT event_id) for duplicates that were dropped equals
---      the original minus the survivors.  Idempotency check on rerun.
--- -----------------------------------------------------------------------------
+-- ============================================================ the audit side
+-- The duplicates are WRITTEN OUT, not discarded. billable + duplicates must
+-- equal raw, or speed/batch reconciliation can never balance.
+--
+-- INSERT INTO ads.rejected_events
+-- SELECT event_id, 'duplicate', CURRENT_TIMESTAMP(), DATE(event_ts)
+-- FROM ranked WHERE rn > 1;
 
--- Idempotency proof:
---   The query is deterministic. Re-running over the same raw_ad_events
---   produces the same deduped_clicks.  Compare two runs via checksum on
---   md5(event_id ORDER BY event_id); they must match.
+-- ============================================================ the QA check
+-- Run this after every dedup batch. A non-empty result is a blocking failure.
+-- SELECT user_id, ad_id, dedup_window, COUNT(*)
+-- FROM deduped_clicks
+-- GROUP BY user_id, ad_id, dedup_window
+-- HAVING COUNT(*) > 1;

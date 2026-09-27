@@ -14,21 +14,9 @@ Writes to experiment_results table for downstream dashboarding.
 
 import argparse
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import (
-    col, lit, when, pandas_udf, PandasUDFType, current_timestamp
-)
+from pyspark.sql.functions import col
 import pandas as pd
 import numpy as np
-
-
-@pandas_udf("double", PandasUDFType.GROUPED_AGG)
-def mean_udf(s: pd.Series) -> float:
-    return float(s.mean())
-
-
-@pandas_udf("double", PandasUDFType.GROUPED_AGG)
-def std_udf(s: pd.Series) -> float:
-    return float(s.std(ddof=1)) if len(s) > 1 else 0.0
 
 
 def run(experiment_id: str, metric_id: str,

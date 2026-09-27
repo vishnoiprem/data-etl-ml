@@ -8,23 +8,9 @@ For each group, we keep the earliest delivered/opened/clicked event across chann
 
 from __future__ import annotations
 
-import json
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional
-
-
-@dataclass
-class NotificationRecord:
-    notification_id: str
-    notification_group_id: str
-    user_id: str
-    channel: str
-    sent_ts: float
-    delivered_ts: Optional[float] = None
-    opened_ts: Optional[float] = None
-    clicked_ts: Optional[float] = None
-    converted_ts: Optional[float] = None
 
 
 @dataclass
@@ -50,6 +36,16 @@ def dedup(records: List[NotificationRecord]) -> Dict[str, DedupedFact]:
 
     out = {}
     for gid, recs in grouped.items():
+        # Enforce single-user-per-group invariant. A group_id is generated at
+        # send-time per (user, content); reusing it across users indicates a
+        # upstream bug and would silently attribute engagement to the wrong
+        # user. Fail loudly.
+        users = {r.user_id for r in recs}
+        if len(users) > 1:
+            raise ValueError(
+                f"notification_group_id {gid} spans multiple users: {users}"
+            )
+
         channels = sorted({r.channel for r in recs})
         delivered = min(
             (r.delivered_ts for r in recs if r.delivered_ts is not None),

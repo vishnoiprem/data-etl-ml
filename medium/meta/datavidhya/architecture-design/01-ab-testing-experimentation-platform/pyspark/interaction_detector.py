@@ -36,12 +36,9 @@ def detect_interactions(
     assignments = spark.read.format("iceberg").load(assignments_table) \
                             .filter(col("status") == "RUNNING")
 
-    # Pivot to one row per user with one column per experiment they are in
-    user_exp = assignments.groupBy("user_id").agg(
-        # collect_list of (exp, variant) — at scale, use map<string,string>
-        # Here we pivot by selecting a few known experiments for demo
-    )
-
+    # At scale, you'd build a (user_id, experiment_id, variant_id) long table
+    # then pivot to wide with one column per active experiment. That requires
+    # knowing experiment_ids up front; for this demo we hard-code two.
     # ----- demo with two experiments -----
     A = (assignments.filter(col("experiment_id") == "exp_A")
                     .select(col("user_id"), col("variant_id").alias("variant_A")))

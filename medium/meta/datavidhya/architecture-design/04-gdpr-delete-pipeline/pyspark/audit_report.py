@@ -20,9 +20,12 @@ def build_report(receipts_path: str, request_id: str) -> dict:
     df = pd.read_parquet(receipts_path)
     sub = df[df["request_id"] == request_id]
 
+    # Receipt dataclass uses 'system'; receipts_parquet file uses 'system'
+    # (matches schema.sql: deletion_receipts.system_name — we accept both)
+    sys_col = "system_name" if "system_name" in sub.columns else "system"
     total_rows = int(sub["rows_deleted"].sum())
     total_objects = int(sub["objects_deleted"].sum())
-    systems_covered = sub[sub["status"] == "OK"]["system_name"].nunique()
+    systems_covered = sub[sub["status"] == "OK"][sys_col].nunique()
 
     manifest = {
         "report_id":     str(uuid.uuid4()),

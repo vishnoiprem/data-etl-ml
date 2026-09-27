@@ -55,17 +55,28 @@ class ReviewerQueue:
         return datetime.now(tz=timezone.utc) + timedelta(minutes=item.sla_minutes)
 
     def assign_next(self) -> Optional[tuple[QueueItem, str]]:
-        """Pop highest-priority item + find a matching reviewer."""
+        """Pop highest-priority item + find a matching reviewer.
+
+        Returns (item, reviewer_id) on success, or None if EITHER the queue
+        is empty OR no reviewer is available. To avoid an infinite loop when
+        no reviewer can be found, we use a bounded retry pass.
+        """
+        # One pass through the heap to find a matchable item
+        examined = []
         while self._heap:
             item = heapq.heappop(self._heap)
             reviewer = self._find_reviewer(item)
-            if reviewer is None:
-                # No reviewer available; put back at same priority
-                heapq.heappush(self._heap, item)
-                return None
-            self._load[reviewer] += 1
-            return item, reviewer
-
+            if reviewer is not None:
+                # Put back anything we examined that didn't match (FIFO-ish)
+                for prev in examined:
+                    heapq.heappush(self._heap, prev)
+                self._load[reviewer] += 1
+                return item, reviewer
+            examined.append(item)
+        # No reviewer for anything we examined; push them back at the front
+        # of the heap in original priority order so we retry later.
+        for prev in examined:
+            heapq.heappush(self._heap, prev)
         return None
 
     def _find_reviewer(self, item: QueueItem) -> Optional[str]:

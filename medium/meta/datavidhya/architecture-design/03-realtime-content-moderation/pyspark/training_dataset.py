@@ -31,8 +31,10 @@ def build(
                           .select("content_id", "reviewer_id",
                                   "decision", col("decided_ts").alias("label_ts")))
 
+    # Pivot scores — group by (content_id, class_label) so per-class scores
+    # are preserved (the original implementation collapsed across classes).
     scores = (spark.read.format("iceberg").load(scores_table)
-                         .groupBy("content_id")
+                         .groupBy("content_id", "class_label")
                          .pivot("modality", ["text", "image", "video_frame"])
                          .agg({"score": "max"}))
 
@@ -43,15 +45,15 @@ def build(
     labeled = (actions
                .withColumn("label", when(col("decision") == "REMOVE", 1).otherwise(0))
                .join(content, "content_id")
-               .join(scores,  "content_id")
+               .join(scores,  ["content_id", "class_label"])
                .withColumn("text_present",  when(col("text").isNotNull(),  1).otherwise(0))
                .withColumn("image_present", when(col("image").isNotNull(), 1).otherwise(0)))
 
-    # Balance classes by random sampling
-    balanced = (labeled
-                .withColumn("rand_key", rand())
-                .orderBy("label", "rand_key")
-                .limit(sample_per_class * 2))
+    # Properly balance classes via per-class sampling (the original took the
+    # first N rows after random sort, which doesn't enforce ratio).
+    pos = labeled.filter(col("label") == 1).orderBy(rand()).limit(sample_per_class)
+    neg = labeled.filter(col("label") == 0).orderBy(rand()).limit(sample_per_class)
+    balanced = pos.union(neg)
 
     (balanced.write
               .mode("overwrite")
