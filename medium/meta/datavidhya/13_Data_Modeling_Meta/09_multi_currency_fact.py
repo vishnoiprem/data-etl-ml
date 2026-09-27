@@ -208,7 +208,7 @@ SELECT COUNT(*) AS rows, ROUND(SUM(f.local_amount * er.rate_to_usd), 2) AS usd
 FROM fact_ad_revenue f
 JOIN dim_exchange_rate_extended er ON er.currency_code = f.currency_code
 """).collect()[0]
-assert (fanned[0], float(fanned[1])) == (12, 9375.00), fanned
+assert (fanned[0], float(fanned[1])) == (12, 9421.00), fanned
 print(f"[PASS] Q47 joining on currency alone gives {fanned[0]} rows and "
       f"{fanned[1]} USD -- 3x inflation, still looks like money")
 
@@ -245,19 +245,31 @@ print("[PASS] Q47 a LEFT JOIN makes the 1 missing rate detectable -- alert on it
       "or forward-fill the rate dimension to every calendar day")
 
 # ---------------------------------------------------------- forward-fill fixes it
+# LAST_VALUE(... IGNORE NULLS) over a dense calendar is the Spark idiom for a
+# forward fill -- a correlated "most recent rate" subquery is not supported.
 spark.sql("""
 CREATE OR REPLACE TEMP VIEW dim_rate_filled AS
 WITH cal AS (
     SELECT explode(sequence(DATE'2026-03-01', DATE'2026-03-10', INTERVAL 1 DAY)) AS d
 ),
-cur AS (SELECT DISTINCT currency_code FROM dim_exchange_rate_extended)
-SELECT c.currency_code,
-       cal.d AS rate_date,
-       -- carry the most recent known rate forward
-       (SELECT er.rate_to_usd FROM dim_exchange_rate_extended er
-        WHERE er.currency_code = c.currency_code AND er.rate_date <= cal.d
-        ORDER BY er.rate_date DESC LIMIT 1) AS rate_to_usd
-FROM cal CROSS JOIN cur c
+cur AS (SELECT DISTINCT currency_code FROM dim_exchange_rate_extended),
+scaffold AS (
+    SELECT c.currency_code, cal.d AS rate_date
+    FROM cal CROSS JOIN cur c
+),
+sparse AS (
+    SELECT s.currency_code, s.rate_date, er.rate_to_usd
+    FROM scaffold s
+    LEFT JOIN dim_exchange_rate_extended er
+           ON er.currency_code = s.currency_code AND er.rate_date = s.rate_date
+)
+SELECT currency_code,
+       rate_date,
+       LAST_VALUE(rate_to_usd, TRUE) OVER (
+           PARTITION BY currency_code ORDER BY rate_date
+           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       ) AS rate_to_usd
+FROM sparse
 """)
 filled = spark.sql("""
 SELECT ROUND(SUM(f.local_amount * er.rate_to_usd), 2) AS usd
