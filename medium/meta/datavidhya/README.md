@@ -53,9 +53,11 @@ number moves. Correct-and-silent loses to slightly-imperfect-and-narrated.
 | `10_Product_Sense_Frameworks/` | 3 | metric→grain→query chain, drop investigation |
 | `11_Pipeline_Orchestration/` | 3 | Airflow DAG shape, watermarks, retries + gates |
 | `12_DataVidhya_Meta_Set/` | 81 | **all 76 Meta-tagged DataVidhya problems** + 5 data-modeling questions |
+| `13_Data_Modeling_Meta/` | 12 + guide | **all 50 data-modeling interview questions**, Meta-framed |
 | `13_Ten_Methods/` | 1 | one problem solved 10 different ways, all verified |
 
-**Status:** 113 files, 409 assertions, all passing (`./run_all.sh`).
+**Status:** 126 files across `01_`–`13_`, 495 assertions, all passing
+(`./run_all.sh`). Folders `14_`–`18_` are separate AWS/Iceberg tracks.
 
 `12_DataVidhya_Meta_Set/` now covers **every problem behind DataVidhya's Meta
 company filter** — 76 problems, which is all 4 pages of that filter: 10 Easy,
@@ -69,6 +71,16 @@ not just my reading of the prose.
 
 Per-problem index with titles, difficulty, topics and site slugs:
 [`12_DataVidhya_Meta_Set/INDEX.md`](12_DataVidhya_Meta_Set/INDEX.md).
+
+`13_Data_Modeling_Meta/` covers DataVidhya's **"50 Data Modeling Interview
+Questions for DEs"** re-answered for a Meta loop:
+[`ANSWERS.md`](13_Data_Modeling_Meta/ANSWERS.md) holds all 50 — each with the
+one sentence that earns the signal and the specific way it goes wrong — plus 12
+runnable files proving the ones that can be demonstrated in code (grain
+violations, the SCD2 MERGE, Type 6, bridge double-counting, junk and
+role-playing dimensions, late-arriving dimensions, NULL foreign keys,
+multi-currency, factless coverage, mini-dimensions, Data Vault). Those files
+assert the **failure modes** too, not just the correct answers.
 
 `07_Star_Schema_Modeling/` files are DDL + reasoning only — they define schemas
 rather than run queries, so `run_all.sh` executes them as no-ops.
