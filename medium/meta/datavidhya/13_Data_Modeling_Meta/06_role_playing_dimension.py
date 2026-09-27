@@ -220,14 +220,14 @@ print("[PASS] Q34 exactly one physical date table exists -- the roles are views"
 
 # ---------------------------------------------------------- derived attrs are shared
 # is_weekend / fiscal_quarter are available in EVERY role for free.
-weekend = spark.sql("""
+WEEKEND = """
 SELECT f.order_id, o.order_day_name, o.order_is_weekend, d.delivery_is_weekend
 FROM fact_marketplace_order f
 JOIN vw_order_date o ON o.order_date_key = f.order_date_key
 LEFT JOIN vw_delivery_date d ON d.delivery_date_key = f.delivery_date_key
 ORDER BY f.order_id
-""")
-expect("Q34 derived attributes are available in every role", weekend, [
+"""
+expect("Q34 derived attributes are available in every role", WEEKEND, [
     (1, "Tuesday",   False, False),
     (2, "Wednesday", False, False),
     (3, "Thursday",  False, False),
