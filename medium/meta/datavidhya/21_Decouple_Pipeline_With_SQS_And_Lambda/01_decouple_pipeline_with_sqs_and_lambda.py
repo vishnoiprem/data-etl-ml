@@ -105,12 +105,12 @@ def run() -> int:
     # ---------------------------------------------------------- stage 4
     section("Stage 4 -- wire the queue to Lambda via event source mapping")
 
-    # Wrap the handler so we can record which batches were "processed".
+    # Wrap the handler so we can record which batches were "processed",
+    # including the ones that raised (poison-message retries).
     def recording_handler(event: Dict[str, Any], context: Any) -> Dict[str, int]:
         bodies = [json.loads(r["body"]) for r in event["Records"]]
-        out = lambda_handler(event, context)
         processed_batches.append(bodies)
-        return out
+        return lambda_handler(event, context)
 
     sim.install_event_source("orders-main-queue", recording_handler,
                               batch_size=5)
@@ -124,13 +124,14 @@ def run() -> int:
         main.enqueue(json.dumps(order))
     expect("8 good messages enqueued", main.size() == 8)
 
-    # Drive 4 polls: 5 + 5 + 5 + 2 ... actually we have 8 msgs so:
-    # poll 1: 5 good msgs (handler OK), poll 2: 3 good msgs (handler OK)
+    # Drive 2 polls: poll 1 grabs 5 (the maxReceiveCount=3 policy
+    # doesn't gate the main queue while messages are healthy).
     sim.poll("orders-main-queue")
     sim.poll("orders-main-queue")
     expect("main queue drained of good messages", main.size() == 0)
     expect("DLQ still empty", dlq.size() == 0)
-    expect("Lambda invoked exactly twice", len(processed_batches) == 2,
+    expect("Lambda invoked exactly twice for good messages",
+           len(processed_batches) == 2,
            f"got {len(processed_batches)} invocations")
     expect("first batch had 5 messages", len(processed_batches[0]) == 5)
     expect("second batch had 3 messages", len(processed_batches[1]) == 3)
@@ -138,7 +139,8 @@ def run() -> int:
     expect("all 8 good messages reached the handler",
            len(all_good_bodies) == 8)
     expect("handler saw order_id 2001..2008",
-           {b["order_id"] for b in all_good_bodies} == {str(i) for i in range(2001, 2009)})
+           {b["order_id"] for b in all_good_bodies}
+           == {str(i) for i in range(2001, 2009)})
 
     # ---------------------------------------------------------- stage 6
     section("Stage 6 -- send poison messages; trace retries -> DLQ")
@@ -146,17 +148,19 @@ def run() -> int:
         main.enqueue(json.dumps(poison))
     expect("2 poison messages enqueued", main.size() == 2)
 
-    # Three rounds of redrive: ReceiveCount climbs past 3, DLQ absorbs.
-    # Round 1: ReceiveCount becomes 1, lambda raises, message stays.
-    # Round 2: ReceiveCount becomes 2, lambda raises, message stays.
-    # Round 3: ReceiveCount becomes 3, lambda raises, message stays.
-    # Round 4: ReceiveCount becomes 4 (> max), redrive moves to DLQ.
+    # Four rounds: ReceiveCount climbs past max_receive_count=3,
+    # then redrive_poison() moves them to the DLQ. Both poisons arrive
+    # in the same batch (batch_size=5 >> 2), so each round = 1 invocation.
+    invocations_after_good = len(processed_batches)
     for round_num in range(1, 5):
         sim.poll("orders-main-queue")
         # After each poll, if redrive conditions are met, move them.
         main.redrive_poison()
-        expect(f"round {round_num}: lambda was invoked (failed)",
-               len(processed_batches) >= 2 + round_num)
+        expected = invocations_after_good + round_num
+        expect(f"round {round_num}: poison batch retried",
+               len(processed_batches) == expected,
+               f"got {len(processed_batches) - invocations_after_good} "
+               f"extra invocations")
 
     expect("main queue drained of poison (no orphan messages)",
            main.size() == 0)
@@ -184,7 +188,7 @@ def run() -> int:
            sim.event_source_mappings == {})
     expect("queues dropped", sim.queues == {})
     expect("processed_batches history preserved for inspection",
-           len(processed_batches) >= 6,
+           len(processed_batches) == 6,
            f"total Lambda invocations = {len(processed_batches)}")
 
     # ---------------------------------------------------------- summary
