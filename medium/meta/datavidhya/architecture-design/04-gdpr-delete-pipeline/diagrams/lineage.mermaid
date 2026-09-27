@@ -1,0 +1,18 @@
+%% Lineage Graph — find all descendants of a user
+flowchart LR
+    Src[bronze.events<br/>user_id column] --> S1[silver.events<br/>user_id column]
+    Src --> S2[silver.sessions<br/>user_id column]
+
+    S1 --> G1[gold.user_features_daily<br/>user_id column]
+    S1 --> G2[gold.session_metrics<br/>user_id column]
+    S1 --> G3[gold.funnel_daily<br/>aggregated<br/>(no user_id)]
+
+    G1 --> ML[ML training set<br/>TFRecords<br/>(pseudonymized)]
+    G1 --> FS[Feast Feature Store<br/>user_id lookup]
+    G1 --> WH[Snowflake<br/>user_id column]
+
+    S2 --> ES[Elasticsearch<br/>user session docs]
+    S2 --> Rec[Redis<br/>user session cache]
+    S2 --> Exp[Experimentation<br/>user_metric_daily]
+
+    Src --> Audit[Audit Log<br/>(append-only)]

@@ -30,7 +30,7 @@ EVENT_JSON_SCHEMA = {
     "type": "object",
     "required": ["event_id", "user_id", "event_ts", "event_name"],
     "properties": {
-        "event_id":    {"type": "string", "minLength": 8, "maxLength": 64},
+        "event_id":    {"type": "string", "minLength": 4, "maxLength": 64},
         "user_id":     {"type": "string", "minLength": 1, "maxLength": 64},
         "event_ts":    {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$"},
         "event_name":  {"type": "string", "minLength": 1, "maxLength": 64},

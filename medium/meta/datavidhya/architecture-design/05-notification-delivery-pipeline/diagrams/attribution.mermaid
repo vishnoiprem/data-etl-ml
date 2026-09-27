@@ -1,0 +1,20 @@
+%% Attribution Window — Stream-Stream Join
+sequenceDiagram
+    participant Send as Send Service
+    participant K as Kafka
+    participant Flink as Flink
+    participant App as User Device
+    participant Lake as Lakehouse
+
+    Send->>K: notification.sent (user_id=X, sent_ts=T)
+    Note over Flink: Window T → T+30min for user X
+
+    App->>K: app_open (user_id=X, open_ts=T+15min)
+    K->>Flink: stream-stream join
+
+    Flink->>Flink: match? open_ts ∈ [T, T+30min]
+    Flink->>Lake: attribution = notification_id
+    Note over Lake: notification.opened attributed to push
+
+    App->>K: app_open (user_id=X, open_ts=T+45min)
+    Note over Flink: Outside window — NOT attributed

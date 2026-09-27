@@ -1,0 +1,34 @@
+%% GDPR Delete Pipeline — End-to-End
+flowchart TD
+    User[User submits<br/>Delete Request] --> Intake[Intake Service<br/>+ Identity Verification]
+    Intake --> Reg[Delete Request Log<br/>(append-only, signed)]
+    Intake --> Discovery[Discovery Service]
+
+    Discovery --> Cat[Data Catalog<br/>(Hive / Glue / Unity)]
+    Discovery --> Lineage[Lineage Graph<br/>(DataHub / OpenLineage)]
+    Discovery --> Locations[User Data Locations<br/>(tables, keys, indices)]
+
+    Locations --> Coord[Delete Coordinator<br/>(Temporal workflow)]
+
+    Coord --> Ice[Iceberg Adapter<br/>DELETE WHERE user_id = X]
+    Coord --> WH[Warehouse Adapter<br/>DELETE FROM ...]
+    Coord --> Cache[Redis Adapter<br/>DEL user:X]
+    Coord --> S3[S3 Adapter<br/>lifecycle + version purge]
+    Coord --> ES[Elasticsearch Adapter<br/>delete_by_query]
+    Coord --> FS[Feature Store Adapter<br/>mark deleted]
+    Coord --> ML[ML Dataset Adapter<br/>exclude / regenerate]
+    Coord --> Crypto[Crypto-Shredding<br/>kms:ScheduleKeyDeletion]
+
+    Ice --> Receipt[Receipt Aggregator<br/>(signed, immutable)]
+    WH --> Receipt
+    Cache --> Receipt
+    S3 --> Receipt
+    ES --> Receipt
+    FS --> Receipt
+    ML --> Receipt
+    Crypto --> Receipt
+
+    Receipt --> Verify[Verification Service<br/>(re-discover = 0)]
+    Verify --> Report[Compliance Report<br/>(PDF + crypto receipt)]
+    Report --> Audit[Audit Ledger<br/>(7+ yr retention)]
+    Report --> Notify[Notify User]

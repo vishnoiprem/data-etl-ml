@@ -1,0 +1,69 @@
+# Systems Registry — every system that holds user data
+# Each system has a plug-in adapter implementing the delete interface.
+
+systems:
+  - name: iceberg_lakehouse
+    type: iceberg
+    adapter: python.adapters.iceberg
+    catalog: local
+    warehouse: s3://lakehouse/warehouse
+    pii_columns: [user_id]
+    delete_method: direct
+
+  - name: snowflake_warehouse
+    type: warehouse
+    adapter: python.adapters.warehouse
+    connection: snowflake://analytics
+    pii_columns: [user_id, email, phone]
+    delete_method: direct
+
+  - name: redis_cache
+    type: cache
+    adapter: python.adapters.redis
+    connection: redis://cluster.local:6379
+    pii_columns: [user_key]
+    delete_method: direct
+
+  - name: s3_exports
+    type: object_store
+    adapter: python.adapters.s3
+    bucket: company-data-exports
+    pii_columns: [user_id]
+    delete_method: direct
+    backup_retention_days: 90   # backups purged on rotation
+
+  - name: elasticsearch
+    type: search
+    adapter: python.adapters.elasticsearch
+    cluster: events-prod
+    pii_columns: [user_id]
+    delete_method: direct
+
+  - name: feast_feature_store
+    type: ml
+    adapter: python.adapters.ml_feature_store
+    feature_views: [user_features, session_features]
+    pii_columns: [user_id]
+    delete_method: soft_delete
+
+  - name: ml_training_datasets
+    type: ml
+    adapter: python.adapters.ml_dataset
+    format: tfrecord
+    pii_columns: [user_id_pseudonym]
+    delete_method: crypto_shred
+
+  - name: kafka_topics
+    type: stream
+    adapter: python.adapters.kafka
+    topics: [user_events, user_actions]
+    pii_columns: [user_id]
+    delete_method: direct
+
+  - name: backups_s3
+    type: backup
+    adapter: python.adapters.s3_backup
+    bucket: company-backups
+    pii_columns: [user_id]
+    delete_method: crypto_shred
+    backup_retention_days: 365

@@ -1,0 +1,53 @@
+%% Notification Pipeline Architecture
+flowchart LR
+    subgraph Send["Send Layer"]
+        TemplateSvc["Template Service"]
+        ChRouter["Channel Router<br/>(push/email/sms/in-app)"]
+        PushAPN["APNs / FCM"]
+        EmailSvc["Email Service"]
+        SMSProv["SMS Provider"]
+        InAppSvc["In-App Service"]
+    end
+
+    subgraph Stream["Streaming Pipeline (Flink)"]
+        Dedup["Multi-Channel Dedup<br/>(group_id keyed state)"]
+        Attr["Attribution Engine<br/>(stream-stream join<br/>30-min window)"]
+        Fatigue["Fatigue Scorer<br/>(rolling counters + ML)"]
+        Rollup["5-min Rollup"]
+    end
+
+    subgraph Lakehouse["Lakehouse"]
+        NotifBronze["Bronze<br/>raw send/delivery/open events"]
+        NotifSilver["Silver<br/>deduped + attributed"]
+        NotifGold["Gold<br/>notification_facts<br/>+ user_fatigue_daily"]
+    end
+
+    subgraph Serving["Serving"]
+        Dash["Dashboards<br/>(send/delivery/open/CTR)"]
+        ABSvc["A/B Test Platform<br/>(Problem 1)"]
+        FatigueUI["Fatigue Dashboard"]
+        ML["ML Training<br/>(channel mix, send-time)"]
+    end
+
+    TemplateSvc --> ChRouter
+    ChRouter --> PushAPN
+    ChRouter --> EmailSvc
+    ChRouter --> SMSProv
+    ChRouter --> InAppSvc
+
+    PushAPN --> NotifBronze
+    EmailSvc --> NotifBronze
+    SMSProv --> NotifBronze
+    InAppSvc --> NotifBronze
+
+    NotifBronze --> Dedup
+    Dedup --> Attr
+    Attr --> Fatigue
+    Fatigue --> Rollup
+    Rollup --> NotifSilver
+    NotifSilver --> NotifGold
+
+    NotifGold --> Dash
+    NotifGold --> ABSvc
+    NotifGold --> FatigueUI
+    NotifGold --> ML

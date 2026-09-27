@@ -1,0 +1,10 @@
+{"content_id":"c_000001","class_label":"hate_speech","decision":"REMOVE","reviewer_id":"rev_003","decided_ts":1758950400.0}
+{"content_id":"c_000002","class_label":"nudity_adult","decision":"APPROVE","reviewer_id":"rev_006","decided_ts":1758950460.0}
+{"content_id":"c_000003","class_label":"mild_nudity","decision":"REMOVE","reviewer_id":"rev_005","decided_ts":1758950520.0}
+{"content_id":"c_000004","class_label":"spam","decision":"REMOVE","reviewer_id":"rev_008","decided_ts":1758950580.0}
+{"content_id":"c_000005","class_label":"political_misinfo","decision":"APPROVE","reviewer_id":"rev_007","decided_ts":1758950640.0}
+{"content_id":"c_000006","class_label":"hate_speech","decision":"REMOVE","reviewer_id":"rev_003","decided_ts":1758950700.0}
+{"content_id":"c_000007","class_label":"violence_gore","decision":"ESCALATE","reviewer_id":"rev_004","decided_ts":1758950760.0}
+{"content_id":"c_000008","class_label":"spam","decision":"REMOVE","reviewer_id":"rev_008","decided_ts":1758950820.0}
+{"content_id":"c_000009","class_label":"nudity_adult","decision":"REMOVE","reviewer_id":"rev_006","decided_ts":1758950880.0}
+{"content_id":"c_000010","class_label":"hate_speech","decision":"REMOVE","reviewer_id":"rev_003","decided_ts":1758950940.0}

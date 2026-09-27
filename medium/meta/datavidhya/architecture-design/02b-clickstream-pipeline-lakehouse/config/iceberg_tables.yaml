@@ -1,0 +1,32 @@
+# Iceberg table definitions
+catalog: local
+warehouse: s3://lakehouse/warehouse
+
+tables:
+  bronze_events:
+    name: local.bronze.events
+    partition_by: days(event_ts)
+    compression: snappy
+    retention_days: 7
+    zorder: []
+
+  silver_events:
+    name: local.silver.events
+    partition_by: dt
+    compression: zstd
+    retention_days: 180
+    zorder: [user_id, event_name]
+
+  gold_user_features_daily:
+    name: local.gold.user_features_daily
+    partition_by: dt
+    compression: zstd
+    retention_days: 1095   # 3 years
+    zorder: [user_id]
+
+  gold_session_metrics:
+    name: local.gold.session_metrics
+    partition_by: dt
+    compression: zstd
+    retention_days: 365
+    zorder: [user_id]

@@ -1,0 +1,59 @@
+%% Content Moderation — End-to-End
+flowchart LR
+    subgraph Ingest["Ingestion"]
+        API["Content API"]
+        Hash["Hash Service<br/>(PhotoDNA / NCMEC)"]
+    end
+
+    subgraph Modality["Multi-Modal Inference"]
+        Text["Text Classifier<br/>(BERT / fastText)"]
+        Image["Image Classifier<br/>(ViT / CNN)"]
+        Video["Video Frame Analyzer<br/>(CNN on I-frames)"]
+    end
+
+    subgraph Decision["Decision Engine"]
+        Agg["Score Aggregator"]
+        Router["Confidence Router<br/>+ Severity-Aware Thresholds"]
+    end
+
+    subgraph Actions["Actions"]
+        AutoRmv["Auto-Remove<br/>(severe class)"]
+        AutoAppr["Auto-Approve"]
+        NCMEC["NCMEC Report<br/>(CSAM only)"]
+    end
+
+    subgraph HumanLoop["Human-in-the-Loop"]
+        Queue["Priority Review Queue"]
+        Reviewer["10K Reviewers<br/>(skill-matched)"]
+        Appeals["Appeals Queue"]
+    end
+
+    subgraph Feedback["Feedback Loop"]
+        Labels["Label Store"]
+        Train["Nightly Retrain"]
+        Registry["Model Registry"]
+        Canary["Canary Deploy"]
+    end
+
+    API --> Hash
+    Hash -- known bad --> AutoRmv
+    Hash -- clean --> Text
+    Hash -- clean --> Image
+    Hash -- clean --> Video
+    Text --> Agg
+    Image --> Agg
+    Video --> Agg
+    Agg --> Router
+    Router -- severe & confident --> AutoRmv
+    Router -- severe --> NCMEC
+    Router -- borderline --> Queue
+    Router -- safe & confident --> AutoAppr
+    Queue --> Reviewer
+    Reviewer --> Labels
+    Reviewer --> Appeals
+    Appeals --> Reviewer
+    Labels --> Train
+    Train --> Registry
+    Registry --> Canary
+    Canary -.new model.-> Text
+    Canary -.new model.-> Image

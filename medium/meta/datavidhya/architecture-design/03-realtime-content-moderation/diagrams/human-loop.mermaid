@@ -1,0 +1,14 @@
+%% Human Review Loop
+flowchart LR
+    Q[Review Queue] --> Sort[Sort by<br/>priority + age]
+    Sort --> Assign[Skill-Matched<br/>+ Workload-Balanced<br/>Assignment]
+    Assign --> Rev[Reviewer]
+    Rev --> Decision{Decision}
+    Decision -- Remove --> Action[Remove Content<br/>+ Notify User]
+    Decision -- Approve --> Pub[Publish Content]
+    Decision -- Unsure --> Senior[Senior Reviewer]
+    Decision -- Appeal --> AppealQ[Appeals Queue<br/>different reviewer]
+    Action --> Labels[(Label Store)]
+    Pub --> Labels
+    Senior --> Labels
+    AppealQ --> Labels

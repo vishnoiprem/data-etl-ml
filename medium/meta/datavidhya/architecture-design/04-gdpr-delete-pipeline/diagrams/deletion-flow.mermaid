@@ -1,0 +1,11 @@
+%% Deletion State Machine
+stateDiagram-v2
+    [*] --> Received: request submitted
+    Received --> IdentityCheck: verify user
+    IdentityCheck --> Discovered: scan lineage
+    Discovered --> Deleting: orchestrate
+    Deleting --> Verifying: each adapter returns receipt
+    Verifying --> Completed: all systems confirm 0 matches
+    Verifying --> PartialFailure: some systems failed
+    PartialFailure --> Deleting: retry failed systems
+    Completed --> [*]

@@ -24,7 +24,7 @@ from typing import Iterable, List, Optional
 # --------------------------------------------------------------------- #
 
 BOT_USER_AGENT_PATTERNS = [
-    r"headlesschrome", r"phantomjs", r"selenium", r"webdriver",
+    r"headless-?chrome", r"phantomjs", r"selenium", r"webdriver",
     r"scrapy", r"python-requests", r"curl/", r"wget/",
     r"bot(?!.*googlebot)", r"spider", r"crawler", r"facebookexternalhit",
     r"ahrefs", r"semrush", r"mj12", r"petalbot",

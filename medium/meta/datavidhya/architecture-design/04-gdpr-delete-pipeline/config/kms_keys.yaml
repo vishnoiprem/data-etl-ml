@@ -1,0 +1,24 @@
+# Per-user encryption key registry for crypto-shredding
+# Managed by AWS KMS / GCP KMS / Azure Key Vault in production
+
+key_management:
+  provider: aws_kms
+  region: us-east-1
+  key_spec: AES_256
+  pending_window_days: 7      # KMS mandatory pending window
+
+key_aliases:
+  - alias/user/personal_data
+  - alias/user/pii_columns
+  - alias/user/ml_features
+
+deletion_policy:
+  on_gdpr_request:
+    - schedule_key_deletion
+    - wait_pending_window
+    - verify_ciphertext_unreadable
+    - log_certificate
+
+audit:
+  log_all_key_operations: true
+  hsm_signed_receipts: true

@@ -15,7 +15,8 @@ THE WINDOW SEMANTICS DECISION (ask the interviewer, then state your choice):
 
   FIXED-FROM-FIRST (implemented here, and correct for billing)
       Window opens at the first click and closes 60s later, regardless of what
-      happens in between. A bot clicking every 59s is billed once per minute.
+      happens in between. A bot clicking every 59s keeps getting billed -- once
+      per window it opens, so roughly every other click.
 
   SLIDING-FROM-LAST (the tempting bug)
       Every click extends the window. A bot clicking every 59s is deduped

@@ -1,0 +1,19 @@
+%% Routing Decision Matrix
+flowchart TD
+    In[Score Aggregator Output] --> S{Severity Class?}
+    S -- SEVERE --> SS{Confidence?}
+    SS -- High --> RM1[Auto-Remove<br/>+ NCMEC if CSAM]
+    SS -- Borderline --> RM2[Auto-Remove<br/>+ Spot-Check Flag]
+    SS -- Low --> H0[Human Review<br/>P0: 5 min SLA]
+
+    S -- HARMFUL --> HS{Confidence?}
+    HS -- High --> RM3[Auto-Remove]
+    HS -- Borderline --> H1[Human Review<br/>P1: 30 min SLA]
+    HS -- Low --> AP1[Auto-Approve]
+
+    S -- BORDERLINE --> BS{Confidence?}
+    BS -- High --> H2[Human Review<br/>P2: 4 hr SLA]
+    BS -- Borderline --> H2
+    BS -- Low --> AP2[Auto-Approve]
+
+    S -- SAFE --> AP3[Auto-Approve]

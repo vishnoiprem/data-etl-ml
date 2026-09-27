@@ -1,0 +1,15 @@
+%% Fatigue Detection Feedback Loop
+flowchart LR
+    User[User] --> SendSvc[Send Service]
+    SendSvc --> SendEvent[Send Event<br/>(channel, type, ts)]
+    SendEvent --> Counter[Per-User<br/>Rolling Counters<br/>(24h, 7d, 30d)]
+
+    Counter --> Features[Feature Vector<br/>+ open rate, dismiss rate]
+    Features --> ML[Fatigue ML Model<br/>(unsubscribe prob)]
+    ML --> Decision{prob > 0.5?}
+
+    Decision -- Yes --> Cap[Drop Marketing<br/>Keep Transactional]
+    Decision -- No --> Allow[Send]
+
+    User -. open / dismiss / unsubscribe .-> Counter
+    Cap -. reduced noise .-> User

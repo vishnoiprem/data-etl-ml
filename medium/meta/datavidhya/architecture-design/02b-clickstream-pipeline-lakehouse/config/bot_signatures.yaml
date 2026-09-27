@@ -1,0 +1,40 @@
+# Bot signature lists loaded by bot_filter.py
+# In prod, these are pulled from a config service with hot reload.
+
+user_agent_blocklist:
+  - 'headlesschrome'
+  - 'phantomjs'
+  - 'selenium'
+  - 'webdriver'
+  - 'scrapy'
+  - 'python-requests'
+  - 'curl/'
+  - 'wget/'
+  - 'bot'
+  - 'spider'
+  - 'crawler'
+  - 'facebookexternalhit'
+  - 'ahrefs'
+  - 'semrush'
+  - 'mj12'
+  - 'petalbot'
+  - 'applebot'
+  - 'bingpreview'
+
+ip_blocklist:
+  # Datacenter ranges (sampled)
+  - '34.'
+  - '35.'
+  # Internal CIDRs — never real users
+  - '10.'
+  - '172.16.'
+  - '192.168.'
+
+heuristic_thresholds:
+  max_events_per_5s: 50
+  headless_ua_indicators:
+    - 'headlesschrome'
+    - 'phantomjs'
+    - 'htmlunit'
+    - 'selenium'
+  suspicious_no_scroll_users: true   # users with > 50 events and 0 scroll events
