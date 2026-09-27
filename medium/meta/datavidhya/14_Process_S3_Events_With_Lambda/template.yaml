@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  14_Process_S3_Events_With_Lambda
+
+  Process S3 ObjectCreated events on the raw/ prefix of OrdersBucket.
+  For every new CSV the OrdersProcessorFunction validates each row,
+  enriches the good ones, and writes the split to processed/ and rejected/.
+  Event-driven ingestion: no scheduler, no polling.
+
+# Mirrors the user's app/template.yaml shape: AWSTemplateFormatVersion,
+# Transform, Globals.Function (Timeout + JSON CloudWatch logging), and the
+# same Outputs-style block. Lab-grade IAM -- production should scope to
+# the bucket ARN (see README "Going to production").
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: INFO
+
+Resources:
+
+  # Bucket name is unique (account+region suffix) -- lab provisions one per
+  # session. NOTIFICATION is NOT wired here; it goes on the Function's
+  # Events block below, which SAM translates into the right NotificationConfiguration.
+  OrdersBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub orders-lab-${AWS::AccountId}-${AWS::Region}
+
+  OrdersProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda_function/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Description: >
+        Reads CSV uploaded to s3://${OrdersBucket}/raw/, validates each row,
+        enriches good rows, and writes the split to processed/ and rejected/.
+      Environment:
+        Variables:
+          RAW_PREFIX: "raw/"
+          PROCESSED_PREFIX: "processed/"
+          REJECTED_PREFIX: "rejected/"
+      # Lab-grade: read on the bucket, write to processed/ + rejected/.
+      # Production: scope to the bucket ARN and prefix.
+      Policies:
+        - AmazonS3ReadOnlyAccess
+        - AmazonS3FullAccess
+      Events:
+        S3PutEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref OrdersBucket
+            Events: 's3:ObjectCreated:*'
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: raw/
+                  - Name: suffix
+                    Value: .csv
+
+Outputs:
+  OrdersBucket:
+    Description: 'Lab bucket -- drop CSV files into the raw/ prefix'
+    Value: !Ref OrdersBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-OrdersBucket"
+  OrdersProcessorFunction:
+    Description: 'Lambda ARN processing S3 events'
+    Value: !GetAtt OrdersProcessorFunction.Arn
+  OrdersProcessorFunctionIamRole:
+    Description: 'IAM Role ARN granted to the Lambda'
+    Value: !GetAtt OrdersProcessorFunctionRole.Arn
