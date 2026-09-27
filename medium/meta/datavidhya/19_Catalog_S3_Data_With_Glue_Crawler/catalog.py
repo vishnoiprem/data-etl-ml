@@ -235,7 +235,11 @@ class Catalog:
         if not rows:
             return []
         columns = list(rows[0].keys())
-        return [{"Name": c, "Type": _infer_type([r.get(c, "") for r in rows])}
+        # Glue sees JSON numbers as numeric and strings as string; we coerce
+        # to str so _infer_value gets a uniform string input.
+        sampled = [[str(r.get(c, "")) for c in columns] for r in rows]
+        sampled_rows = [dict(zip(columns, vals)) for vals in sampled]
+        return [{"Name": c, "Type": _infer_type([r[c] for r in sampled_rows])}
                 for c in columns]
 
     @staticmethod
