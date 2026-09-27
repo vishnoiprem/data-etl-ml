@@ -1,0 +1,93 @@
+%% A/B Testing & Experimentation Platform — Architecture
+flowchart LR
+    %% Clients
+    subgraph Clients[" "]
+        Web["Web SDK"]
+        Mobile["Mobile SDK<br/>(iOS / Android)"]
+        Server["Server SDK<br/>(back-end events)"]
+    end
+
+    %% Ingestion
+    subgraph Ingestion["Event Ingestion Layer"]
+        Collector["Event Collector API<br/>(Envoy + Lua / OTel)"]
+        Kafka[/"Kafka<br/>(partitioned by user_id)"/]
+    end
+
+    %% Processing
+    subgraph Processing["Stream Processing (Flink)"]
+        Enricher["Event Enricher<br/>(geo, device, user attrs)"]
+        Dedup["Deduplicator<br/>(event_id TTL 7d)"]
+        BotFilter["Bot Filter<br/>(signature + ML score)"]
+        Valid["Schema Validator<br/>(Avro / JSON Schema)"]
+    end
+
+    %% Storage - Lakehouse
+    subgraph Lakehouse["Lakehouse (Iceberg on S3)"]
+        Bronze["Bronze<br/>raw events<br/>(partitioned: date/hour)"]
+        Silver["Silver<br/>enriched + dedup + bot-filtered"]
+        Gold["Gold<br/>user_metric_daily<br/>(partitioned: date, z-order: user_id)"]
+    end
+
+    %% Experiment Assignment
+    subgraph Assignment["Assignment Service"]
+        Hash["Hash Function<br/>MD5(user_id+exp_id)%10000"]
+        Mutex["Mutex Groups"]
+        Holdout["Global Holdout (5%)"]
+    end
+
+    %% Metrics
+    subgraph Metrics["Metric Computation (Spark on Airflow)"]
+        Rollup["Hourly Rollup Job"]
+        DailyAgg["Daily Metric Aggregation"]
+        CUPED["CUPED Covariate Adjustment"]
+    end
+
+    %% Statistics
+    subgraph Stats["Statistical Engine"]
+        TTest["T-Test / Bayesian"]
+        Sequential["Sequential<br/>(mSPRT / Always-Valid CI)"]
+        Guardrails["Guardrail Monitor<br/">(latency, crash, revenue)"]
+        SRMCheck["Sample Ratio Mismatch<br/>(daily health check)"]
+    end
+
+    %% Serving
+    subgraph Serving["Serving Layer"]
+        DWH["Warehouse<br/>(Snowflake / Trino)"]
+        Dash["Dashboards<br/>(Superset / Looker)"]
+        ExpUI["Experimentation UI<br/">(PM-facing)"]
+        MLSets["ML Feature Store<br/>(Feast)"]
+        API["Results API<br/>(REST + GraphQL)"]
+    end
+
+    %% Connections
+    Web --> Collector
+    Mobile --> Collector
+    Server --> Collector
+    Collector --> Kafka
+    Kafka --> Valid
+    Valid --> BotFilter
+    BotFilter --> Dedup
+    Dedup --> Enricher
+    Enricher --> Bronze
+    Bronze --> Silver
+    Silver --> Gold
+
+    Holdout -.controls.-> Hash
+    Mutex -.controls.-> Hash
+    Hash -.assignment.-> Collector
+
+    Gold --> Rollup
+    Rollup --> DailyAgg
+    DailyAgg --> CUPED
+    CUPED --> TTest
+    CUPED --> Sequential
+    Silver --> Guardrails
+    Gold --> SRMCheck
+
+    Gold --> DWH
+    DWH --> Dash
+    DWH --> ExpUI
+    Gold --> MLSets
+    DailyAgg --> API
+    Sequential --> API
+    Guardrails -->|auto-stop webhook| Collector

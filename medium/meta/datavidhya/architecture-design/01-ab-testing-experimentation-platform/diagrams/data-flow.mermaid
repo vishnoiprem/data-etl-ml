@@ -1,0 +1,16 @@
+%% Data Lineage — Clickstream to Metrics
+flowchart TD
+    A[Raw Event<br/>SDK Payload] --> B{Schema Valid?}
+    B -- No --> DLQ[Dead Letter Queue]
+    B -- Yes --> C[Bot Score]
+    C --> D{Bot?}
+    D -- Yes --> E[Bot Sink<br/>(kept for analysis)]
+    D -- No --> F[Enrich<br/>user/geo/device]
+    F --> G[Iceberg Bronze<br/>raw layer]
+    G --> H[Iceberg Silver<br/>cleaned layer]
+    H --> I[Iceberg Gold<br/>user_metric_daily]
+    I --> J[Statistical Engine]
+    J --> K[Experiment Results Table]
+    K --> L[Dashboard / API]
+    H --> M[Guardrail Streaming Job]
+    M -->|breach| N[Auto-Stop Webhook]
