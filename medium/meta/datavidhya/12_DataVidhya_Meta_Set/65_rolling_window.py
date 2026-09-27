@@ -180,12 +180,26 @@ expect("Q65 ROWS ignores the calendar gap (3 trading rows averaged)", SQL, [
     (d(10), "MSFT", 300.00, 200.00, 300.00, 100.00),
 ])
 
+# Spark cannot put an INTERVAL range frame over a DATE ordering column --
+# a RANGE frame needs a NUMERIC order key, so convert the date to a day number.
+try:
+    spark.sql("""
+    SELECT AVG(close_price) OVER (PARTITION BY ticker ORDER BY trade_date
+           RANGE BETWEEN INTERVAL 2 DAYS PRECEDING AND CURRENT ROW) FROM daily_stock
+    """).collect()
+    raise AssertionError("expected an INTERVAL range frame over DATE to be rejected")
+except Exception as e:
+    assert "RANGE_FRAME_INVALID_TYPE" in str(e), str(e)[:200]
+    print("[PASS] Q65 an INTERVAL RANGE frame over a DATE column is rejected -- "
+          "RANGE needs a numeric order key")
+
 range_based = spark.sql("""
 SELECT trade_date, ROUND(AVG(close_price) OVER (
-           PARTITION BY ticker ORDER BY trade_date
-           RANGE BETWEEN INTERVAL 2 DAYS PRECEDING AND CURRENT ROW), 2) AS a
+           PARTITION BY ticker
+           ORDER BY DATEDIFF(trade_date, DATE'1970-01-01')
+           RANGE BETWEEN 2 PRECEDING AND CURRENT ROW), 2) AS a
 FROM daily_stock ORDER BY trade_date
 """).collect()
-assert [float(r[1]) for r in range_based] == [100.0, 150.0, 300.0], \
-    [float(r[1]) for r in range_based]
+got_range = [float(r[1]) for r in range_based]
+assert got_range == [100.0, 150.0, 300.0], got_range
 print("[PASS] Q65 a 2-day RANGE window gives Jan 10 = 300.0 (itself only), not 200.0")

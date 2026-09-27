@@ -52,15 +52,20 @@ number moves. Correct-and-silent loses to slightly-imperfect-and-narrated.
 | `09_Python_Idempotent_ETL/` | 3 | deterministic dedup, partition overwrite, backfill |
 | `10_Product_Sense_Frameworks/` | 3 | metric→grain→query chain, drop investigation |
 | `11_Pipeline_Orchestration/` | 3 | Airflow DAG shape, watermarks, retries + gates |
-| `12_DataVidhya_Meta_Set/` | 25 | 20 Meta-tagged SQL questions + **5 data-modeling questions** |
+| `12_DataVidhya_Meta_Set/` | 81 | **all 76 Meta-tagged DataVidhya problems** + 5 data-modeling questions |
 | `13_Ten_Methods/` | 1 | one problem solved 10 different ways, all verified |
 
-**Status:** 58 files, 93 assertions, all passing. The 11 pattern folders hold 3
-worked problems each (not the 10 per folder an earlier draft of this README
-promised), plus all 20 Meta-tagged SQL questions and all 5 Meta-tagged modeling
-questions in `12_`. Several patterns deliberately include the **wrong** answer
-asserted alongside the right one, so the failure mode is documented rather than
-discovered in production.
+**Status:** 113 files, 409 assertions, all passing (`./run_all.sh`).
+
+`12_DataVidhya_Meta_Set/` now covers **every problem behind DataVidhya's Meta
+company filter** — 76 problems, which is all 4 pages of that filter: 10 Easy,
+47 Medium, 19 Hard. Files `01`–`20` are the 20 originally worked; `26`–`81` are
+the remaining 56; `21`–`25` are data-modeling questions with no site equivalent.
+
+Files `26`–`81` were built against the **site's own published schema, sample
+rows, and expected output**, pulled from `datavidhya.com/api/v1/questions/<slug>/`
+rather than paraphrased — so a green run means the answer matches the grader's,
+not just my reading of the prose.
 
 `07_Star_Schema_Modeling/` files are DDL + reasoning only — they define schemas
 rather than run queries, so `run_all.sh` executes them as no-ops.
@@ -99,3 +104,62 @@ rather than run queries, so `run_all.sh` executes them as no-ops.
 `NN_<problem_slug>.py` — runnable, self-asserting, self-contained.
 Each file: docstring (problem + how to think + traps) -> inline sample data ->
 Spark SQL solution -> PySpark DataFrame API equivalent -> assertion.
+
+## Near-identical question pairs
+
+The Meta set contains several pairs that look alike and want **opposite**
+answers. These are the highest-value things in the folder, because pattern
+matching fails on exactly these:
+
+| Pair | Looks the same | Actually differs |
+|---|---|---|
+| `31` vs `36` | popularity % over a social graph | `31` is **undirected** (canonicalise pairs); `36` is **directed** (never mirror) |
+| `40` vs `58` | month-over-month user metric | `40` wants the previous **calendar** month (`add_months`); `58` wants the previous month **in the result** (`LAG`). They diverge on a data gap |
+| `33` vs `65` | rolling N-period window | `33` wants a 7-**day** range (`ROWS` is wrong); `65` wants 3 **rows** and says calendar gaps must not count |
+| `26` vs `34` | keyword scoring over review text | `26` **retains** punctuation in tokens (so `"Excellent,"` doesn't match); `34` doesn't say that, so split on non-word chars |
+| `30` vs `80` | "3rd highest distinct value" | `30` returns the **value** as a scalar and needs a NULL row when absent; `80` returns **every row** in that tier |
+| `56` vs `60` | latest/max row per group | `56` must return **all** ties (`RANK`); `60` must return **exactly one** (`ROW_NUMBER` + tiebreak) |
+| `42` vs `54` | interpolated percentiles | Both need exact `percentile()`, but `54` then applies **per-group** Tukey fences — pooling the groups hides the anomaly |
+
+## Traps the shipped sample data cannot catch
+
+Roughly a third of these questions ship sample data that gives the *right*
+answer to a *wrong* query. Those files assert the bug separately on constructed
+rows, so the failure mode is documented rather than discovered later:
+
+- `46` — ids are contiguous, so a `LAG`-based "consecutive" check passes; it breaks on an id gap.
+- `52` — every friendship is stored author-first, so a one-directional join coincidentally works.
+- `47` — a combined `COUNT(*) >= 8` threshold passes; an 8/0 year split slips through it.
+- `59`/`80` — counts/prices are consecutive, so `RANK` and `DENSE_RANK` agree until a gap or a top-tier tie appears.
+- `69` — the one other-domain login lands on a day the user was also active, so dropping the domain filter changes nothing.
+- `54` — both spikes are extreme enough that fleet-wide fences still catch them; a merely-anomalous reading is missed.
+- `61`/`64`/`73` — no boundary row, so `<` vs `<=` and `BETWEEN` vs half-open ranges look equivalent.
+- `35`/`49` — one promotion per product and matching card numbers, so fan-out and the wrong dedup key stay hidden.
+
+## Two defects in the source data
+
+Found while matching the site's published expected output; both are flagged in
+the relevant file's docstring:
+
+- **`47_consistent_monthly_shoppers`** — the published expected output lists
+  `Eve`, who has no row in `csf_users` and no transactions. The data supports
+  `Alice` only. The file asserts `Alice` and proves the per-year counts row by row.
+- **`75_email_validation_filter`** — the explanation says "the table contains 7
+  rows" but only 6 are published. The 6 published rows reproduce the published
+  expected output exactly; the 7th is unrecoverable.
+
+## A Spark-specific gotcha worth memorising
+
+Spark SQL string literals consume **one level of backslash escaping** before the
+regex engine sees the pattern. So `'\.'` in SQL text reaches the matcher as a
+bare `.` — which matches *any* character:
+
+```sql
+-- these two are NOT the same predicate
+email RLIKE '^[a-z]+@dataplatform\.com$'    -- backslash eaten: '.' matches anything
+email RLIKE '^[a-z]+@dataplatform\\.com$'   -- correct in SQL text
+```
+
+The DataFrame API takes the pattern verbatim, so `F.col("email").rlike(r"...\.com$")`
+needs only the single backslash. `26`, `34` and `75` all hit this; `75` asserts
+both behaviours side by side.

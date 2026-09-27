@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  15_Getting_Started_With_AWS_Lambda
+
+  First Lambda function. Built from the console in the AWS lab; mirrored
+  here so the local codebase has a deployable artefact with the same shape.
+  No event source -- invocation is purely manual via the Test button or
+  `sam local invoke`.
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 128
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: INFO
+
+Resources:
+
+  HelloLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambda_function/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Architectures:
+        - x86_64
+      Description: >
+        First Lambda. Six named test events under events/ exercise a
+        greet / factorial / echo / schedule / apigw / error dispatch.
+      Environment:
+        Variables:
+          LOG_PREFIX: "[HelloLab]"
+      # Minimal policy: only CloudWatch Logs write. Lab-grade.
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      # No Events block: the function is invocation-only (manual Test or
+      # sam local invoke). The lab walks the user through the console UI.
+
+Outputs:
+  HelloLambdaFunction:
+    Description: 'First Lambda ARN'
+    Value: !GetAtt HelloLambdaFunction.Arn
+  HelloLambdaFunctionIamRole:
+    Description: 'IAM Role ARN attached to the function (writes to CloudWatch)'
+    Value: !GetAtt HelloLambdaFunctionRole.Arn
