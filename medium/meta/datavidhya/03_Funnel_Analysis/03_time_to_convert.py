@@ -52,7 +52,10 @@ conv AS (
 )
 SELECT COUNT(*) AS converters,
        ROUND(AVG(mins), 2) AS avg_mins,
-       ROUND(PERCENTILE_APPROX(mins, 0.5), 2) AS median_mins
+       ROUND(PERCENTILE(mins, 0.5), 2) AS median_mins
 FROM conv
 """
-expect("conversion time distribution", AGG, [(2, 15.00, 10.00)])
+# PERCENTILE is exact and interpolates: median of {10, 20} = 15.0.
+# PERCENTILE_APPROX would return an actual data point (10.0) instead — fine at
+# scale, wrong when you are asserting an interpolated median on 2 rows.
+expect("conversion time distribution", AGG, [(2, 15.00, 15.00)])
