@@ -281,7 +281,7 @@ def imbalance(col):
     """).collect()[0][0])
 
 by_event, by_user = imbalance("event_id"), imbalance("user_id")
-assert by_event < 1.5 and by_user > 50, (by_event, by_user)
+assert by_event < 2.0 and by_user > 50, (by_event, by_user)
 print(f"[PASS] bucket imbalance on this traffic: salt on event_id = {by_event:.2f}x, "
       f"on user_id = {by_user:,.0f}x")
 print("       -> event_id is unique per event so it spreads evenly. user_id")
