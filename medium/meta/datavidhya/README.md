@@ -67,6 +67,9 @@ rows, and expected output**, pulled from `datavidhya.com/api/v1/questions/<slug>
 rather than paraphrased — so a green run means the answer matches the grader's,
 not just my reading of the prose.
 
+Per-problem index with titles, difficulty, topics and site slugs:
+[`12_DataVidhya_Meta_Set/INDEX.md`](12_DataVidhya_Meta_Set/INDEX.md).
+
 `07_Star_Schema_Modeling/` files are DDL + reasoning only — they define schemas
 rather than run queries, so `run_all.sh` executes them as no-ops.
 
