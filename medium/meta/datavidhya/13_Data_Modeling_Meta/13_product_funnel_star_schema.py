@@ -579,7 +579,7 @@ FROM fact_funnel_event f JOIN dim_stage d USING (stage_key)
 JOIN dim_user u ON u.user_sk = f.user_sk
 WHERE d.stage_name = 'view_product' GROUP BY d.stage_name
 """).collect()[0]
-assert (both[1], both[2]) == (4, 3), both
+assert (both[1], both[2]) == (5, 3), both   # S1 x2, S2, S3, S4 -> 3 people
 print(f"[PASS] view_product has {both[1]} events but {both[2]} distinct users "
       "-- counting events inflates the funnel")
 
