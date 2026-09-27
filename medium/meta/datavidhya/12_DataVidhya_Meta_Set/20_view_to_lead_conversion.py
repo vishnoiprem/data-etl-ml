@@ -21,7 +21,58 @@ Spark note:
   becomes a broadcast instead of a shuffle-hash join. This "aggregate then
   join" instinct is exactly what a Meta pipeline-design follow-up probes.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("20-view-to-lead-conversion")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "Bangkok"), (2, "Bangkok"), (3, "Bangkok"), (4, "Bangkok"),
+    (5, "Hanoi"), (6, "Hanoi"),
+    (7, "Manila"),
+],
+    ["view_id", "location"]
+).createOrReplaceTempView("listing_views")
+
+spark.createDataFrame(
+    [
+    (1, "Bangkok"), (2, "Bangkok"),   # 2/4 = 50.00
+    (5, "Hanoi"),                     # 1/2 = 50.00
+                                      # Manila 0/1 = 0.00
+],
+    ["lead_id", "location"]
+).createOrReplaceTempView("listing_leads")
+
 
 SQL = """
 WITH v AS (

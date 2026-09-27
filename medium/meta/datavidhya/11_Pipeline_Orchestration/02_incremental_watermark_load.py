@@ -23,9 +23,39 @@ How to Think:
 This file runs three loads and asserts: no duplicates, nothing skipped, and that
 a re-run with no new data is a no-op.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("02-incremental-watermark-load")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
 from pyspark.sql import functions as F
 
 # Source with an updated_at watermark column.

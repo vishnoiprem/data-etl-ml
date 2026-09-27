@@ -13,7 +13,49 @@ How to Think:
 Spark note:
 - Single shuffle aggregate; nothing clever required.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("11-campaign-success-by-language")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "en", 1), (2, "en", 1), (3, "en", 0), (4, "en", 0),   # 2/4 = 50.00
+    (5, "th", 1), (6, "th", 1), (7, "th", 1),                 # 3/3 = 100.00
+    (8, "ja", 0), (9, "ja", 0),                               # 0/2 = 0.00
+],
+    ["campaign_id", "language", "is_success"]
+).createOrReplaceTempView("campaigns")
+
 
 SQL = """
 SELECT language,

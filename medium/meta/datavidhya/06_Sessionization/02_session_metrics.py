@@ -18,9 +18,52 @@ How to Think:
 Spark note:
 - Reuses the window from problem 01, then one group-by. Two shuffles total.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("02-session-metrics")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "2026-01-01 10:00:00"), (1, "2026-01-01 10:10:00"), (1, "2026-01-01 10:25:00"),
+    (1, "2026-01-01 12:00:00"), (1, "2026-01-01 12:05:00"),
+    (2, "2026-01-01 08:00:00"), (2, "2026-01-01 08:20:00"),
+    (3, "2026-01-01 09:00:00"),
+    (3, "2026-01-01 11:00:00"),
+    (3, "2026-01-01 15:00:00"), (3, "2026-01-01 15:29:00"),
+],
+    ["user_id", "hit_ts"]
+).createOrReplaceTempView("raw_hits")
+
 
 SQL = """
 WITH flagged AS (

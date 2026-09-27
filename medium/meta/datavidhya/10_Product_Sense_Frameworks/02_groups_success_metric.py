@@ -25,9 +25,39 @@ Spark note:
 - Grain is (user, group, day); dedup to that grain before counting or an
   active-user count silently becomes an event count.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("02-groups-success-metric")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
 
 # One row per (user, group, day, action). g1 is healthy, g2 is a lurker-only
 # group with no contributors at all — exactly the "dead group" case the metric
@@ -67,3 +97,48 @@ FROM group_activity
 GROUP BY group_id
 ORDER BY group_id
 """, [("g1", 50.00), ("g2", 0.00)])
+
+
+# ===========================================================================
+# PySpark DataFrame API — same two questions, expressed with DataFrame ops.
+# Mirror of the SQL above; assert at the end of each block so SQL vs. DataFrame
+# cannot silently disagree.
+# ===========================================================================
+from pyspark.sql import functions as F
+
+act_df = spark.table("group_activity")
+
+# Helpers: action-class flags equivalent to the CASE WHEN IN (...) in SQL.
+# Use a single isin() predicate instead of chained .when() — cheaper to plan
+# and easier to read at scale.
+is_contrib = F.col("action").isin("post", "comment")
+is_view    = F.col("action") == "view"
+
+# PRIMARY: weekly active participants per group, split by action class.
+wa_df = (act_df
+         .groupBy("group_id")
+         .agg(F.countDistinct("user_id").alias("weekly_active_participants"),
+              F.countDistinct(F.when(is_contrib, F.col("user_id"))).alias("contributors"),
+              F.countDistinct(F.when(is_view,    F.col("user_id"))).alias("viewers"))
+         .orderBy("group_id"))
+assert [tuple(r) for r in wa_df.collect()] == [
+    ("g1", 4, 2, 2),
+    ("g2", 2, 0, 2),
+]
+print("[PASS] weekly active participants per group — DataFrame API matches SQL")
+
+# SECONDARY: contributor-to-participant ratio.
+# 100.0 * (count of distinct contributors) / (count of distinct participants).
+# If participants > 0, the division is safe; if it were 0 we'd hit a divide by
+# zero, which is the case g2 sits at the boundary of — handled correctly
+# because g2 has 2 participants, just 0 contributors.
+ratio_df = (act_df
+            .groupBy("group_id")
+            .agg(F.round(
+                100.0 * F.countDistinct(F.when(is_contrib, F.col("user_id")))
+                       / F.countDistinct("user_id"),
+                2
+            ).alias("contributor_pct"))
+            .orderBy("group_id"))
+assert [tuple(r) for r in ratio_df.collect()] == [("g1", 50.00), ("g2", 0.00)]
+print("[PASS] contributor-to-participant ratio — DataFrame API matches SQL")

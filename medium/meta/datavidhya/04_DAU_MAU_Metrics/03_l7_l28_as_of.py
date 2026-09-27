@@ -18,9 +18,54 @@ Spark note:
 - One scan of events, two conditional COUNT DISTINCTs. On a real table push the
   D-27 lower bound into the partition filter so you read 28 days, not all time.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("03-l7-l28-as-of")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "2026-01-01", "open"),  (1, "2026-01-02", "open"),  (1, "2026-01-08", "open"),
+    (2, "2026-01-01", "open"),
+    (3, "2026-01-01", "open"),  (3, "2026-01-02", "open"),
+    (4, "2026-01-02", "open"),  (4, "2026-01-03", "open"),  (4, "2026-01-09", "open"),
+    (5, "2026-01-02", "open"),
+    (6, "2026-01-02", "open"),  (6, "2026-01-03", "open"),  (6, "2026-01-30", "open"),
+    (7, "2026-01-08", "open"),
+    (8, "2026-01-08", "open"),  (8, "2026-01-09", "open"),
+],
+    ["user_id", "event_date", "event_name"]
+).createOrReplaceTempView("events")
+
 
 SQL = """
 WITH as_of AS (SELECT * FROM VALUES ('2026-01-08'), ('2026-01-30') AS t(d))

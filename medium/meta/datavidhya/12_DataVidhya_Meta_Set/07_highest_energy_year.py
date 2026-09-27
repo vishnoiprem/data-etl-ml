@@ -17,7 +17,55 @@ The trap:
 Spark note:
 - UNION ALL is a cheap, shuffle-free append. UNION adds a full distinct shuffle.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("07-highest-energy-year")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [(2024, 100.0), (2025, 150.0)],
+    ["year", "consumption"]
+).createOrReplaceTempView("energy_asia")
+
+spark.createDataFrame(
+    [(2024, 200.0), (2025, 120.0)],
+    ["year", "consumption"]
+).createOrReplaceTempView("energy_europe")
+
+spark.createDataFrame(
+    [(2024,  50.0), (2025,  80.0)],
+    ["year", "consumption"]
+).createOrReplaceTempView("energy_africa")
+
 
 SQL = """
 WITH all_regions AS (

@@ -19,7 +19,59 @@ Spark note:
 - One pass over activity + one broadcastable signups side = cheap.
   On real data, broadcast the small cohort table: /*+ BROADCAST(s) */
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("02-weekly-retention-cohort")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "2026-01-05"), (2, "2026-01-06"), (3, "2026-01-07"),
+    (4, "2026-01-12"), (5, "2026-01-13"),
+],
+    ["user_id", "signup_date"]
+).createOrReplaceTempView("signups")
+
+spark.createDataFrame(
+    [
+    (1, "2026-01-05"), (1, "2026-01-06"), (1, "2026-01-12"),   # D0,D1,D7
+    (2, "2026-01-06"), (2, "2026-01-07"),                      # D0,D1
+    (3, "2026-01-07"),                                         # D0 only
+    (4, "2026-01-12"), (4, "2026-01-13"), (4, "2026-01-19"),   # D0,D1,D7
+    (5, "2026-01-13"),                                         # D0 only
+],
+    ["user_id", "activity_date"]
+).createOrReplaceTempView("activity")
+
 from pyspark.sql import functions as F
 
 SQL = """

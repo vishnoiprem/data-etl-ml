@@ -22,7 +22,57 @@ The traps:
 Spark note:
 - Counting distinct users per step is one shuffle; window over 3 rows is free.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("03-funnel-dropoff")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "view", "2026-03-01 10:00:00"),
+    (1, "click", "2026-03-01 10:02:00"),
+    (1, "purchase", "2026-03-01 10:09:00"),
+    (2, "view", "2026-03-01 11:00:00"),
+    (2, "click", "2026-03-01 11:04:00"),
+    (3, "view", "2026-03-01 12:00:00"),
+    (4, "view", "2026-03-02 09:00:00"),
+    (4, "view", "2026-03-02 09:06:00"),          # duplicate step
+    (4, "click", "2026-03-02 09:11:00"),
+    (5, "view", "2026-03-02 14:00:00"),
+    (5, "purchase", "2026-03-02 14:20:00"),      # skipped 'click'
+],
+    ["user_id", "event_name", "event_ts"]
+).createOrReplaceTempView("funnel")
+
 
 SQL = """
 WITH step_order AS (

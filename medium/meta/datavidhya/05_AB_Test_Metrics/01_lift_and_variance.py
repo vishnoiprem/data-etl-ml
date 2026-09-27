@@ -17,9 +17,50 @@ How to Think:
 Spark note:
 - Single grouped aggregate. Nothing clever needed.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("01-lift-and-variance")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "control",   12.0), (2, "control",   9.0),  (3, "control",  11.0),
+    (4, "control",   10.0), (5, "control",    8.0),
+    (6, "treatment", 14.0), (7, "treatment", 13.0), (8, "treatment", 15.0),
+    (9, "treatment", 12.0), (10, "treatment", 16.0),
+],
+    ["user_id", "variant", "metric"]
+).createOrReplaceTempView("experiment")
+
 
 SQL = """
 SELECT variant,

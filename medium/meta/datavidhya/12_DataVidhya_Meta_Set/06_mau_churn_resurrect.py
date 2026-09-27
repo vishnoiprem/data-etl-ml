@@ -22,7 +22,50 @@ Spark note:
 - Build a small month spine and cross join it to distinct users. That is a
   broadcast on the spine, so it stays cheap even at billions of events.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("06-mau-churn-resurrect")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "2026-01-10"), (1, "2026-02-10"), (1, "2026-03-10"),
+    (2, "2026-01-15"),
+    (3, "2026-02-20"), (3, "2026-03-05"),
+    (4, "2026-01-05"), (4, "2026-03-25"),
+],
+    ["user_id", "event_date"]
+).createOrReplaceTempView("activity_log")
+
 
 SQL = """
 WITH um AS (            -- one row per user per active month

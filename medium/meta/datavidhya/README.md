@@ -9,9 +9,14 @@ actually right — not merely syntactically valid.
 cd 02_Retention_Cohorts && ../../../.env/bin/python 01_d1_retention.py
 ```
 
-Both seed modules build a local Spark session (`local[2]`) with every table
-registered as a temp view. Seed data is deliberately tiny and hand-checkable,
-and each table carries the trap the question is really testing.
+**Every file is fully self-contained.** It builds its own `SparkSession`, defines
+its own sample data inline with `spark.createDataFrame(...)`, and carries its own
+`expect()` assertion helper. There is no shared seed module to import — copy any
+single file anywhere and it runs. Sample data is deliberately tiny and
+hand-checkable, and each table carries the trap the question is really testing.
+
+Each file prints its intermediate result with `.show()` before asserting, so you
+can eyeball the per-row logic rather than trusting an aggregate.
 
 ## What the interview actually is
 
@@ -47,10 +52,12 @@ number moves. Correct-and-silent loses to slightly-imperfect-and-narrated.
 | `09_Python_Idempotent_ETL/` | 3 | deterministic dedup, partition overwrite, backfill |
 | `10_Product_Sense_Frameworks/` | 3 | metric→grain→query chain, drop investigation |
 | `11_Pipeline_Orchestration/` | 3 | Airflow DAG shape, watermarks, retries + gates |
-| `12_DataVidhya_Meta_Set/` | 20 | the 20 Meta-tagged SQL questions, solved |
+| `12_DataVidhya_Meta_Set/` | 25 | 20 Meta-tagged SQL questions + **5 data-modeling questions** |
+| `13_Ten_Methods/` | 1 | one problem solved 10 different ways, all verified |
 
-**Status:** the 11 pattern folders hold 3 worked problems each (not the 10 per
-folder an earlier draft of this README promised), plus all 20 Meta-tagged SQL
+**Status:** 58 files, 93 assertions, all passing. The 11 pattern folders hold 3
+worked problems each (not the 10 per folder an earlier draft of this README
+promised), plus all 20 Meta-tagged SQL questions and all 5 Meta-tagged modeling
 questions in `12_`. Several patterns deliberately include the **wrong** answer
 asserted alongside the right one, so the failure mode is documented rather than
 discovered in production.
@@ -89,5 +96,6 @@ rather than run queries, so `run_all.sh` executes them as no-ops.
 
 ## Naming convention
 
-`NN_<problem_slug>.py` — runnable, self-asserting, PySpark + Spark SQL.
-Shared seeds: `_common.py` (patterns) and `12_DataVidhya_Meta_Set/_seeds.py`.
+`NN_<problem_slug>.py` — runnable, self-asserting, self-contained.
+Each file: docstring (problem + how to think + traps) -> inline sample data ->
+Spark SQL solution -> PySpark DataFrame API equivalent -> assertion.

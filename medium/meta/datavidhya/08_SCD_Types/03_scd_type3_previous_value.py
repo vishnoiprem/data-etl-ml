@@ -24,9 +24,51 @@ The trap:
 Spark note:
 - LAG + ROW_NUMBER in one window pass per key.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("03-scd-type3-previous-value")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (501, "casual",   "Bangkok", "2026-01-01"),
+    (501, "power",    "Bangkok", "2026-01-05"),
+    (501, "power",    "Chiang Mai", "2026-01-20"),
+    (502, "business", "Singapore", "2026-01-01"),
+    (503, "casual",   "Hanoi",  "2026-01-03"),
+],
+    ["seller_id", "tier", "city", "changed_on"]
+).createOrReplaceTempView("seller_changes")
+
 
 SQL = """
 WITH stepped AS (

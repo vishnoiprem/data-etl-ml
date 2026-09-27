@@ -54,9 +54,57 @@ AI Use Cases
   dashboard.
 - Per-user latency feeds sessionization and dwell-time models downstream.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("03-time-to-convert")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "view",     "2026-01-01 10:00:00"),
+    (1, "message",  "2026-01-01 10:05:00"),
+    (1, "purchase", "2026-01-01 10:20:00"),
+    (2, "view",     "2026-01-01 11:00:00"),
+    (2, "message",  "2026-01-01 11:30:00"),
+    (3, "view",     "2026-01-01 12:00:00"),
+    (3, "purchase", "2026-01-01 12:10:00"),   # skipped 'message'
+    (4, "view",     "2026-01-02 09:00:00"),
+    (5, "view",     "2026-01-02 09:30:00"),
+    (5, "view",     "2026-01-02 09:40:00"),   # duplicate step
+    (5, "message",  "2026-01-02 09:50:00"),
+],
+    ["user_id", "step", "event_ts"]
+).createOrReplaceTempView("funnel_events")
+
 
 SQL = """
 WITH per_user AS (

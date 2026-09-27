@@ -21,7 +21,49 @@ The trap:
 Spark note:
 - One window shuffle partitioned by state. Skewed states would need salting.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("09-top-percentile-fraud")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "CA", 10.0), (2, "CA", 20.0), (3, "CA", 30.0), (4, "CA", 90.0),
+    (5, "NY", 40.0), (6, "NY", 95.0),
+    (7, "TX", 50.0),
+],
+    ["record_id", "state", "fraud_score"]
+).createOrReplaceTempView("fraud_scores")
+
 
 SQL = """
 WITH ranked AS (

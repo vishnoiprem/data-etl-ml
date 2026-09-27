@@ -18,7 +18,51 @@ The traps:
 Spark note:
 - LEFT JOIN on the pair then conditional count = one shuffle, one pass.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("10-friend-request-acceptance")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, 2, "sent",     "2026-01-05"), (1, 2, "accepted", "2026-01-06"),
+    (1, 3, "sent",     "2026-01-10"), (1, 3, "accepted", "2026-01-12"),
+    (2, 4, "sent",     "2026-01-20"),
+    (3, 5, "sent",     "2026-02-02"), (3, 5, "accepted", "2026-02-03"),
+    (4, 6, "sent",     "2026-02-14"),
+],
+    ["sender_id", "receiver_id", "action", "action_date"]
+).createOrReplaceTempView("friend_requests")
+
 
 SQL = """
 WITH sent AS (

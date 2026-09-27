@@ -20,7 +20,51 @@ Spark note:
   prunes partitions. `MONTH(order_date) = 3` forces a full scan — this is the
   "would this scan the whole table?" reasoning Meta rewards.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("08-march-revenue-per-customer")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, 10, "2026-03-02", 2, 25.00),
+    (2, 10, "2026-03-15", 1, 10.00),
+    (3, 11, "2026-03-20", 3, 30.00),
+    (4, 12, "2026-02-28", 5, 100.00),   # February - excluded
+    (5, 11, "2026-04-01", 1, 99.00),    # April - excluded
+],
+    ["order_id", "customer_id", "order_date", "quantity", "unit_cost"]
+).createOrReplaceTempView("cust_orders")
+
 
 SQL = """
 SELECT customer_id,

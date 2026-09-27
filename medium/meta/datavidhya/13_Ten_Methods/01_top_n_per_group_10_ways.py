@@ -23,9 +23,39 @@ Data:
   u2: p4=90  p5=70  p6=70   <- TIE   -> top2: p4(90), p5(70)  [p6 loses on id]
   u3: p7=20                          -> top2: p7(20)  (only has one)
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("01-top-n-per-group-10-ways")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
 from pyspark.sql import functions as F, Window
 from pyspark.sql.types import StructType, StructField, LongType
 

@@ -20,7 +20,51 @@ The traps:
 Spark note:
 - Single pass + HAVING. No self-join means no second shuffle of the big table.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("04-monthly-active-retention")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, "sign-in", "2022-06-10"), (1, "like",    "2022-07-11"),
+    (2, "comment", "2022-07-05"),
+    (3, "like",    "2022-06-20"),
+    (4, "sign-in", "2022-06-15"), (4, "logout",  "2022-07-15"),
+    (5, "sign-in", "2022-06-01"), (5, "comment", "2022-08-02"),
+],
+    ["user_id", "action", "action_date"]
+).createOrReplaceTempView("user_actions")
+
 
 SQL = """
 SELECT user_id

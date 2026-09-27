@@ -19,7 +19,50 @@ Spark note:
 - This is a plain shuffle aggregate. On a real events table you would filter
   the date partition FIRST so the shuffle carries less data.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("01-power-users")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (1, 1, 150, 50), (2, 1, 80, 20),
+    (3, 2, 250, 50), (4, 2, 150, 50), (5, 2, 70, 30),
+    (6, 3, 400, 100),
+    (7, 4, 60, 40), (8, 4, 70, 30),
+],
+    ["post_id", "user_id", "likes", "comments"]
+).createOrReplaceTempView("posts")
+
 from pyspark.sql import functions as F
 
 SQL = """

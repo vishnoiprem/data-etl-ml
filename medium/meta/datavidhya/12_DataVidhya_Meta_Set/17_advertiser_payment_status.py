@@ -24,7 +24,50 @@ The trap:
 Spark note:
 - Spine is tiny and broadcastable; one window per advertiser for the LAG.
 """
-from _seeds import spark, expect
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("17-advertiser-payment-status")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    ("a1", "2026-01-10"), ("a1", "2026-02-10"),
+    ("a2", "2026-02-05"),
+    ("a3", "2026-01-20"),
+    ("a4", "2026-01-15"), ("a4", "2026-03-15"),
+],
+    ["advertiser_id", "payment_date"]
+).createOrReplaceTempView("advertiser_pay")
+
 
 SQL = """
 WITH am AS (

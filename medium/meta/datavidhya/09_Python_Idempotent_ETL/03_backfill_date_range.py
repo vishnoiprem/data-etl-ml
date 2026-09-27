@@ -24,11 +24,32 @@ This file backfills each date independently, deliberately fails one partition to
 prove resumability, then re-runs and asserts the final state is complete and
 un-duplicated.
 """
+import os
 import shutil
-import sys, os
 import tempfile
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark
+
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("backfill-date-range")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+# ---------------------------------------------------------- sample data
+# orders(order_id, buyer_id, seller_id, order_date, gross_amount, status)
+spark.createDataFrame(
+    [
+        (9001, 1, 501, "2026-01-01", 25.00, "completed"),
+        (9002, 2, 502, "2026-01-01", 40.00, "completed"),
+        (9003, 3, 501, "2026-01-02", 15.00, "cancelled"),
+        (9004, 1, 503, "2026-01-03", 60.00, "completed"),
+        (9005, 4, 502, "2026-01-08", 10.00, "completed"),
+    ],
+    ["order_id", "buyer_id", "seller_id", "order_date", "gross_amount", "status"]
+).createOrReplaceTempView("orders")
 
 spark.conf.set("spark.sql.sources.partitionOverwriteMode", "dynamic")
 out = os.path.join(tempfile.mkdtemp(prefix="backfill_"), "orders")

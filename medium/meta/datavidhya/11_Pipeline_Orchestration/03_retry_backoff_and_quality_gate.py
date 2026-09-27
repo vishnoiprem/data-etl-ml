@@ -19,9 +19,51 @@ How to Think:
   half-written partition is worse than publishing nothing, because downstream
   consumers cannot tell it is wrong.
 """
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from _common import spark
+from pyspark.sql import SparkSession
+
+spark = (SparkSession.builder
+         .appName("03-retry-backoff-and-quality-gate")
+         .master("local[2]")
+         .config("spark.sql.shuffle.partitions", "2")
+         .config("spark.ui.showConsoleProgress", "false")
+         .getOrCreate())
+spark.sparkContext.setLogLevel("ERROR")
+
+
+def expect(title, sql, expected_rows):
+    """Run a query and assert its exact rows, in order. Decimal/float safe."""
+    import decimal
+
+    def norm(v):
+        if isinstance(v, decimal.Decimal):
+            return float(v)
+        if isinstance(v, float):
+            return round(v, 6)
+        return v
+
+    got = [tuple(norm(c) for c in r) for r in spark.sql(sql).collect()]
+    exp = [tuple(norm(c) for c in r) for r in expected_rows]
+    if got != exp:
+        print(f"[FAIL] {title}")
+        print(f"   expected: {exp}")
+        print(f"   got:      {got}")
+        raise AssertionError(title)
+    print(f"[PASS] {title}")
+    return got
+
+
+# ---------------------------------------------------------- sample data
+spark.createDataFrame(
+    [
+    (9001, 1, 501, "2026-01-01", 25.00, "completed"),
+    (9002, 2, 502, "2026-01-01", 40.00, "completed"),
+    (9003, 3, 501, "2026-01-02", 15.00, "cancelled"),
+    (9004, 1, 503, "2026-01-03", 60.00, "completed"),
+    (9005, 4, 502, "2026-01-08", 10.00, "completed"),
+],
+    ["order_id", "buyer_id", "seller_id", "order_date", "gross_amount", "status"]
+).createOrReplaceTempView("orders")
+
 
 
 class TransientError(Exception):
