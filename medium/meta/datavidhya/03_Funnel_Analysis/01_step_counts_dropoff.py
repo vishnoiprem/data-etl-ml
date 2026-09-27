@@ -4,18 +4,45 @@ Problem 01: Funnel step counts and drop-off (LOOSE definition).
 Meta flavor: "Marketplace funnel is view -> message -> purchase. Where do we
 leak the most users?"
 
-How to Think:
-- COUNT(DISTINCT user_id) per step. Events, not users, is the wrong grain —
-  user 5 viewed twice.
-- The event table has no inherent step order. Pin it with a VALUES spine so the
-  window functions have something to ORDER BY.
+Business Question
+-----------------
+For each step of the marketplace funnel (view -> message -> purchase), how
+many distinct users reached that step, and what fraction of the previous step
+made it here? The LOOSE definition counts each step independently: a user who
+skipped a middle step still gets credit for the step they did. This is the
+definition most growth dashboards show because it is the most forgiving signal
+of where the top of the funnel leaks.
+
+How to Think
+------------
+- COUNT(DISTINCT user_id) per step. Events, not users, is the wrong grain
+  — user 5 viewed twice, and counting rows would double-count them.
+- The `funnel_events` table has no inherent step order. Pin it with a VALUES
+  spine so the window functions have something stable to ORDER BY.
 - conv_from_prev = users / LAG(users); drop_off = 100 - that.
 - LOOSE means each step is counted independently. User 3 purchased without
   messaging and still counts in `purchase` here. Ask which definition the
   interviewer wants — see 02_strict_ordered_funnel.py for the other one.
+- Always include a step_num column in the spine so ORDER BY is over an int,
+  not a string (sorting by step alphabetically would put purchase before
+  view).
 
-Spark note:
-- One distinct-count shuffle; the 3-row window is free.
+How to Remember
+---------------
+"Loose = independent counts. Strict = monotonically increasing timestamps."
+
+Spark / Performance Note
+------------------------
+- One distinct-count shuffle is unavoidable; the 3-row window is free.
+- Prefer the SQL form in production — the DataFrame API shown below is a
+  useful parity check while writing the query, but it pays for two extra
+  shuffle stages (the join + the groupBy) that the SQL form folds into one.
+
+AI Use Cases
+------------
+- Drop-off at step N is the headline KPI for onboarding flow reviews.
+- conv_from_prev_pct is a feature in funnel-completion classifiers.
+- A/B test primary endpoint for any "increase X -> Y conversion" experiment.
 """
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
