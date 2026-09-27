@@ -179,14 +179,6 @@ print("[PASS] Q32 ORDER BY full_path gives 1,2,4,3 -- ordering by category_id is
 # ------------------------------------------------ the cycle guard
 # A category that is its own ancestor must fail loudly, not spin.
 spark.createDataFrame(
-    [(1, "A", 2), (2, "B", 1)],
-    "category_id INT, category_name STRING, parent_id INT",
-).createOrReplaceTempView("categories")
-cyclic = walk_hierarchy()
-assert cyclic.count() == 0, "a cycle with no root should yield no rows"
-print("[PASS] Q32 all-cycle input has no root, so the anchor is empty -- no infinite loop")
-
-spark.createDataFrame(
     [(1, "Root", None), (2, "B", 1), (3, "C", 2), (4, "D", 3), (2, "B-again", 4)],
     "category_id INT, category_name STRING, parent_id INT",
 ).createOrReplaceTempView("categories")

@@ -159,7 +159,7 @@ SELECT (SELECT COUNT(DISTINCT follower_id) FROM cup_user_percentage
        (SELECT COUNT(DISTINCT f) FROM (
             SELECT user_id AS u, follower_id AS f FROM cup_user_percentage
             UNION ALL
-            SELECT follower_id, user_id FROM cup_user_percentage
+            SELECT follower_id AS u, user_id AS f FROM cup_user_percentage
         ) WHERE u = 1) AS mirrored
 """).collect()[0]
 assert (directed, mirrored) == (2, 3), (directed, mirrored)

@@ -234,6 +234,23 @@ assert sigma_flags == 0, sigma_flags
 print("[PASS] Q54 mean +/- 3-sigma flags 0 -- the outlier inflates the sd that should catch it")
 
 # ------------------------------------------------ percentile_approx moves the fences
+# Restore the shipped rows -- the trap above replaced S001's spike.
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW sensor_readings AS
+SELECT * FROM VALUES
+    ( 1, 'S001', TIMESTAMP'2024-01-01 00:00:00', CAST( 30.24 AS DECIMAL(10,2))),
+    ( 2, 'S001', TIMESTAMP'2024-01-01 01:00:00', CAST( 36.94 AS DECIMAL(10,2))),
+    ( 3, 'S001', TIMESTAMP'2024-01-01 02:00:00', CAST( 34.05 AS DECIMAL(10,2))),
+    ( 4, 'S001', TIMESTAMP'2024-01-01 03:00:00', CAST(113.03 AS DECIMAL(10,2))),
+    ( 5, 'S001', TIMESTAMP'2024-01-01 04:00:00', CAST( 29.28 AS DECIMAL(10,2))),
+    (10, 'S002', TIMESTAMP'2024-01-01 00:00:00', CAST( 58.97 AS DECIMAL(10,2))),
+    (11, 'S002', TIMESTAMP'2024-01-01 01:00:00', CAST( 60.25 AS DECIMAL(10,2))),
+    (12, 'S002', TIMESTAMP'2024-01-01 02:00:00', CAST( 61.83 AS DECIMAL(10,2))),
+    (13, 'S002', TIMESTAMP'2024-01-01 03:00:00', CAST(147.20 AS DECIMAL(10,2))),
+    (14, 'S002', TIMESTAMP'2024-01-01 04:00:00', CAST( 55.69 AS DECIMAL(10,2)))
+AS t(reading_id, sensor_id, `timestamp`, value)
+""")
+
 approx = spark.sql("""
 SELECT sensor_id,
        PERCENTILE_APPROX(CAST(value AS DOUBLE), 0.25) AS q1_approx,
@@ -241,6 +258,29 @@ SELECT sensor_id,
 FROM sensor_readings GROUP BY sensor_id ORDER BY sensor_id
 """).collect()
 assert [(r[0], float(r[1]), float(r[2])) for r in approx] == [
-    ("S001", 29.28, 30.24), ("S002", 55.69, 58.97),
+    ("S001", 30.24, 30.24), ("S002", 58.97, 58.97),
 ], approx
-print("[PASS] Q54 percentile_approx returns a data point (29.28/55.69) not the ranked Q1")
+print("[PASS] Q54 at n=5, approx and exact agree -- Q1 position 0.25*(5-1) = 1 is an "
+      "integer, so no interpolation happens and the functions cannot diverge")
+
+# Add a 6th reading to S001: now Q1 position = 0.25*5 = 1.25 falls BETWEEN two
+# values, interpolation kicks in, and percentile_approx stops matching.
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW sensor_readings AS
+SELECT * FROM VALUES
+    ( 1, 'S001', TIMESTAMP'2024-01-01 00:00:00', CAST( 30.24 AS DECIMAL(10,2))),
+    ( 2, 'S001', TIMESTAMP'2024-01-01 01:00:00', CAST( 36.94 AS DECIMAL(10,2))),
+    ( 3, 'S001', TIMESTAMP'2024-01-01 02:00:00', CAST( 34.05 AS DECIMAL(10,2))),
+    ( 4, 'S001', TIMESTAMP'2024-01-01 03:00:00', CAST(113.03 AS DECIMAL(10,2))),
+    ( 5, 'S001', TIMESTAMP'2024-01-01 04:00:00', CAST( 29.28 AS DECIMAL(10,2))),
+    ( 6, 'S001', TIMESTAMP'2024-01-01 05:00:00', CAST( 32.00 AS DECIMAL(10,2)))
+AS t(reading_id, sensor_id, `timestamp`, value)
+""")
+n6 = spark.sql("""
+SELECT PERCENTILE_APPROX(CAST(value AS DOUBLE), 0.25) AS q1_approx,
+       PERCENTILE(CAST(value AS DOUBLE), 0.25)        AS q1_exact
+FROM sensor_readings WHERE sensor_id = 'S001'
+""").collect()[0]
+assert (float(n6[0]), float(n6[1])) == (30.24, 30.68), n6
+print("[PASS] Q54 at n=6 the position is fractional: approx gives 30.24, "
+      "exact interpolates to 30.68")
