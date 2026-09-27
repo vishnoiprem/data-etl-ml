@@ -1,0 +1,62 @@
+%% Lifecycle of ONE click — and why the dashboard number and the invoice
+%% number legitimately differ for a while.
+sequenceDiagram
+    autonumber
+    participant U as User / bot
+    participant C as Collector
+    participant K as Kafka
+    participant D as Dedup (Flink)
+    participant A as Aggregation (Flink)
+    participant O as Druid (speed)
+    participant L as Iceberg raw (log)
+    participant M as Fraud ML (tier 2)
+    participant B as Billing (Spark, batch)
+
+    U->>C: click(ad_id, user_id, ts)
+    Note over C: stamp event_id = UUIDv7<br/>event_ts (client) + ingest_ts (server)
+
+    rect rgb(218, 56, 50, 0.12)
+    C->>C: FRAUD TIER 1 (µs, deterministic)
+    alt datacenter IP / bot UA / rate-limited
+        C--xU: drop → rejected_events
+        Note over C: never counted, never billed
+    else passes
+        C->>K: produce (key = hash(user_id), idempotent)
+    end
+    end
+
+    K->>D: consume partition
+    rect rgb(48, 111, 199, 0.12)
+    D->>D: lookup state (user_id, ad_id)
+    alt seen within 60s of FIRST click
+        D--xD: duplicate → duplicate_events
+    else new or window expired
+        D->>D: write state, TTL 60s past watermark
+        D->>K: produce deduped_clicks<br/>⚠ RE-KEY to hash(campaign_id, salt)
+    end
+    end
+
+    par speed path — target < 10s
+        K->>A: consume
+        A->>A: tumbling windows 1m/5m/1h/1d<br/>salted 2-stage for hot campaigns
+        A->>O: idempotent upsert (window_start, ad_id, salt)
+        O-->>U: dashboard: "spend $1,240 (provisional)"
+        Note over O: t + ~5s ✅ freshness SLO met<br/>but tier-2 fraud NOT yet applied
+    and durable path — authority
+        K->>L: append to immutable log (1 yr)
+    end
+
+    Note over M: minutes to hours later
+    L->>M: batch scan, cross-event features
+    M->>M: detect click farm across 10k events
+    M->>B: fraud_verdicts (event_id → invalid, score, reason)
+
+    rect rgb(67, 147, 143, 0.12)
+    L->>B: raw events (T+1)
+    B->>B: billable = raw − tier1 − tier2_verdicts<br/>MERGE, idempotent — replay-safe
+    B->>B: billing_ledger (append-only, 7 yrs)
+    B-->>O: adjustment_record: −$180 (12% tier-2 fraud)
+    B-->>U: invoice: $1,060 ✅ authoritative
+    end
+
+    Note over O,B: The two numbers differing is CORRECT, not a bug.<br/>Dashboard = provisional + revisable.<br/>Invoice = exact, after fraud settles.<br/>History is never mutated — the delta is published.

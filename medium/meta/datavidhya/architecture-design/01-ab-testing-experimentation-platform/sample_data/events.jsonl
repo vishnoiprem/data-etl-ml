@@ -1,0 +1,10 @@
+{"event_id":"e_0001","user_id":"user_000001","event_ts":"2026-09-26T10:00:00Z","event_name":"page_view","properties":{"page":"/feed","is_returned_d7":"1"},"experiment_tags":["exp_feed_rank_2026q4"]}
+{"event_id":"e_0002","user_id":"user_000001","event_ts":"2026-09-26T10:01:23Z","event_name":"click","properties":{"target":"like_button"},"experiment_tags":["exp_feed_rank_2026q4"]}
+{"event_id":"e_0003","user_id":"user_000002","event_ts":"2026-09-26T10:02:01Z","event_name":"purchase","properties":{"revenue_usd":"29.99","item_id":"sku_7782"},"experiment_tags":["exp_home_redesign"]}
+{"event_id":"e_0004","user_id":"user_000003","event_ts":"2026-09-26T10:02:45Z","event_name":"session_start","properties":{"session_duration_s":"312","crash_count":"0","session_count":"1"},"experiment_tags":["exp_feed_rank_2026q4"]}
+{"event_id":"e_0005","user_id":"user_000004","event_ts":"2026-09-26T10:03:11Z","event_name":"form_submit","properties":{"form_name":"signup"},"experiment_tags":[]}
+{"event_id":"e_0006","user_id":"user_000005","event_ts":"2026-09-26T10:04:02Z","event_name":"page_view","properties":{"page":"/home","is_returned_d7":"0","latency_ms":"182"},"experiment_tags":["exp_home_redesign"]}
+{"event_id":"e_0007","user_id":"user_000006","event_ts":"2026-09-26T10:04:33Z","event_name":"scroll","properties":{"depth_pct":"75"},"experiment_tags":["exp_feed_rank_2026q4"]}
+{"event_id":"e_0008","user_id":"user_000007","event_ts":"2026-09-26T10:05:14Z","event_name":"session_start","properties":{"session_duration_s":"612","crash_count":"1","session_count":"1"},"experiment_tags":["exp_feed_rank_2026q4"]}
+{"event_id":"e_0009","user_id":"user_000008","event_ts":"2026-09-26T10:05:55Z","event_name":"click","properties":{"target":"nav_home"},"experiment_tags":["exp_home_redesign"]}
+{"event_id":"e_0010","user_id":"user_000009","event_ts":"2026-09-26T10:06:21Z","event_name":"page_view","properties":{"page":"/profile","is_returned_d7":"1"},"experiment_tags":["exp_feed_rank_2026q4","exp_home_redesign"]}

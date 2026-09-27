@@ -92,7 +92,14 @@ def is_in_global_holdout(user_id: str) -> bool:
 
 
 def assign(user_id: str, experiment: Experiment) -> Assignment:
-    """Return the user's variant for an experiment. None means not enrolled."""
+    """Return the user's variant for an experiment. None means not enrolled.
+
+    Users in the global holdout are excluded from EVERY experiment.
+    """
+
+    if is_in_global_holdout(user_id):
+        return Assignment(user_id, experiment.experiment_id, None,
+                          experiment.layer, -1)
 
     layer_salt = LAYER_SALTS.get(experiment.layer, f"custom-{experiment.layer}")
 
