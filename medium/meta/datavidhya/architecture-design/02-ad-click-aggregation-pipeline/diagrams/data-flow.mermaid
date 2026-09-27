@@ -15,7 +15,7 @@ sequenceDiagram
     U->>C: click(ad_id, user_id, ts)
     Note over C: stamp event_id = UUIDv7<br/>event_ts (client) + ingest_ts (server)
 
-    rect rgb(218, 56, 50, 0.12)
+    rect rgb(250, 228, 227)
     C->>C: FRAUD TIER 1 (µs, deterministic)
     alt datacenter IP / bot UA / rate-limited
         C--xU: drop → rejected_events
@@ -26,7 +26,7 @@ sequenceDiagram
     end
 
     K->>D: consume partition
-    rect rgb(48, 111, 199, 0.12)
+    rect rgb(226, 236, 249)
     D->>D: lookup state (user_id, ad_id)
     alt seen within 60s of FIRST click
         D--xD: duplicate → duplicate_events
@@ -51,7 +51,7 @@ sequenceDiagram
     M->>M: detect click farm across 10k events
     M->>B: fraud_verdicts (event_id → invalid, score, reason)
 
-    rect rgb(67, 147, 143, 0.12)
+    rect rgb(229, 241, 240)
     L->>B: raw events (T+1)
     B->>B: billable = raw − tier1 − tier2_verdicts<br/>MERGE, idempotent — replay-safe
     B->>B: billing_ledger (append-only, 7 yrs)

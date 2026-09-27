@@ -22,8 +22,11 @@ from typing import Any, Dict, List, NamedTuple, Tuple
 
 import boto3
 
-LOG = logging.getLogger()
-LOG.setLevel(logging.INFO)
+# Named logger so importing this module doesn't mutate the root logger (which
+# pytest and other libraries configure at import time).
+LOG = logging.getLogger(__name__)
+if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    LOG.setLevel(logging.INFO)
 
 RAW_PREFIX       = os.environ.get("RAW_PREFIX",       "raw/")
 PROCESSED_PREFIX = os.environ.get("PROCESSED_PREFIX", "processed/")
@@ -63,6 +66,11 @@ class _Valid(NamedTuple):
     already-parsed ``amount`` so the enricher doesn't reparse."""
     order_id: str
     amount:   float
+
+
+# Detail string used when an order_id has been seen earlier in this file.
+# Non-empty so the rejected CSV always carries a usable detail column.
+_DUPLICATE_DETAIL = "order_id_seen"
 
 
 def _reject(row: Dict[str, Any], rej: Reject) -> Dict[str, Any]:
@@ -150,7 +158,8 @@ def _split_rows(body: str) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
 
         oid = result.order_id
         if oid in seen:
-            rejected.append(_reject(row, Reject(Reason.DUPLICATE_ORDER_ID, "")))
+            rejected.append(_reject(row, Reject(Reason.DUPLICATE_ORDER_ID,
+                                                _DUPLICATE_DETAIL)))
             continue
         seen.add(oid)
 

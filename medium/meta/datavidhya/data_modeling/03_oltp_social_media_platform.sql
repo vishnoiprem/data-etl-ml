@@ -248,6 +248,10 @@ CREATE TABLE social_notifications (
 CREATE INDEX idx_social_notif_user_unread ON social_notifications(user_id)
     WHERE is_read = FALSE;
 
+-- Polymorphic target lookup: "show every notification referencing post 42".
+-- Same pattern as the rich notification system.
+CREATE INDEX idx_social_notif_target ON social_notifications(target_type, target_id);
+
 -- ---------------------------------------------------------------------
 -- 9) user_signals  (spam / fake-account / trust signals)
 -- ---------------------------------------------------------------------

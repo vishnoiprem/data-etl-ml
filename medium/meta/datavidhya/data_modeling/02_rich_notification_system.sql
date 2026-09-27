@@ -130,7 +130,7 @@ CREATE TABLE notification_templates (
     CONSTRAINT uq_template_event_locale_channel UNIQUE (event_type_code, locale, channel)
 );
 
-CREATE INDEX idx_templates_code ON notification_event_types(code) WHERE is_active;
+CREATE INDEX idx_templates_code ON notification_templates(event_type_code) WHERE is_active;
 
 INSERT INTO notification_templates (event_type_code, channel, locale, subject, body) VALUES
     ('comment.reply',  'in_app', 'en_GB', NULL,                                    '{{replier_name}} replied to your comment.'),
@@ -249,6 +249,12 @@ CREATE INDEX idx_notif_digest_root ON notifications(digest_root_id)
 -- The retention-cron sweep. Drives the 90-day delete.
 CREATE INDEX idx_notif_created_retention ON notifications(created_at);
 
+-- FK-side indexes. Joins notifications.template_id and event_type_code
+-- happen on every notification create + on the template-render path.
+-- Without these, joins are O(N) per row.
+CREATE INDEX idx_notif_template         ON notifications(template_id);
+CREATE INDEX idx_notif_event_type_code ON notifications(event_type_code);
+
 -- The denorm trigger: every unread change touches users.unread_count.
 -- See the explicit trigger at the bottom of this file.
 
@@ -288,6 +294,10 @@ CREATE TABLE campaign_sends (
 
 CREATE INDEX idx_campaign_sends_campaign ON campaign_sends(campaign_id);
 CREATE INDEX idx_campaign_sends_user     ON campaign_sends(user_id);
+-- Reverse FK from notification_deliveries.campaign_send_id lives on
+-- idx_deliveries_campaign. This one supports "find all sends for this
+-- notification" — the join direction of the campaign_reports view.
+CREATE INDEX idx_campaign_sends_notification ON campaign_sends(notification_id);
 
 -- ---------------------------------------------------------------------
 -- 7) notification_deliveries  (the per-channel attempts)
@@ -398,7 +408,11 @@ BEGIN
                 END IF;
             ELSE
                 IF OLD.is_read OR OLD.is_archived OR OLD.deleted_at IS NOT NULL THEN
-                    UPDATE users SET unread_count = unread_count + 1
+                    -- The CHECK constraint on users.unread_count is >= 0;
+                    -- GREATEST caps the value at +1 per row even if the
+                    -- counter was somehow stale. Keeps the trigger
+                    -- idempotent if retried.
+                    UPDATE users SET unread_count = LEAST(unread_count + 1, 9223372036854775807)
                         WHERE id = NEW.user_id;
                 END IF;
             END IF;

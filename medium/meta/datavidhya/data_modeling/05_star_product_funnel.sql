@@ -186,6 +186,7 @@ CREATE TABLE fact_user_events (
     day_key         INT NOT NULL REFERENCES dim_date(day_key),
     user_key        BIGINT NOT NULL REFERENCES dim_users(user_key),
     product_key     BIGINT REFERENCES dim_products(product_key),
+    -- FK to fact_sessions added after both tables exist (cross-table FK).
     session_id      BIGINT NOT NULL,
     variant_key     BIGINT REFERENCES dim_variants(variant_key),
     event_type      TEXT NOT NULL
@@ -235,6 +236,13 @@ CREATE TABLE fact_sessions (
 
 CREATE INDEX idx_fact_sessions_user_day ON fact_sessions(user_key, day_key);
 CREATE INDEX idx_fact_sessions_variant  ON fact_sessions(variant_key);
+
+-- Cross-table FK declared here (after fact_sessions exists) so the
+-- session-grain enforces referential integrity with the event-grain.
+-- fact_user_events.session_id MUST correspond to a real session row.
+ALTER TABLE fact_user_events
+    ADD CONSTRAINT fk_events_session
+    FOREIGN KEY (session_id) REFERENCES fact_sessions(session_id);
 
 -- =====================================================================
 -- Sample data

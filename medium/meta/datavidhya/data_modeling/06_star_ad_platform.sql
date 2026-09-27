@@ -207,6 +207,10 @@ CREATE TABLE fact_clicks (
 CREATE INDEX idx_fact_click_day_ad  ON fact_clicks(day_key, ad_key);
 CREATE INDEX idx_fact_click_day_camp ON fact_clicks(day_key, campaign_key);
 CREATE INDEX idx_fact_click_user    ON fact_clicks(user_id);
+-- Reverse FK from fact_clicks.impression_id; the conversion-to-impression
+-- trace follows clicks -> impressions. Without it, every impression lookup
+-- is a sequential scan on fact_clicks.
+CREATE INDEX idx_fact_click_impression ON fact_clicks(impression_id);
 
 -- ---------------------------------------------------------------------
 -- 10) fact_conversions  (grain = one conversion per row)
@@ -293,22 +297,20 @@ SELECT
     gs % 25 = 0                                            -- 4% clicked
 FROM generate_series(0, 4999) gs;
 
+-- Clicks reference real impressions via (impression_id). Since the
+-- synthetic seed marks every 25th impression as clicked, we look up
+-- the corresponding impression_id and pull its ad/placement/etc.
 INSERT INTO fact_clicks (event_ts, day_key, ad_key, impression_id, audience_key, placement_key, device_key, campaign_key, advertiser_key, cost_per_click_usd, user_id)
 SELECT
     TIMESTAMP'2026-01-15 10:01:00' + MAKE_INTERVAL(0,0,0,0,0,0, gs % 60000),
-    20260115,
-    ((gs % 4) + 1),
-    gs * 25 + 1,                                           -- approx the impression
-    ((gs % 3) + 1),
-    ((gs % 4) + 1),
-    ((gs % 5) + 1),
-    ((gs % 3) + 1),
-    ((gs % 3) + 1),
+    i.day_key, i.ad_key, i.impression_id, i.audience_key, i.placement_key,
+    i.device_key, i.campaign_key, i.advertiser_key,
     CASE WHEN gs % 3 = 0 THEN 1.20
          WHEN gs % 3 = 1 THEN 0.85
          ELSE 1.50 END,
-    1000 + gs                                              -- user_id
-FROM generate_series(0, 199) gs;
+    1000 + gs
+FROM generate_series(0, 199) gs
+JOIN fact_impressions i ON i.impression_id = (gs * 25 + 1);   -- the 200 clicked impressions
 
 -- 12 conversions, mostly on retargeting (ad_key 4, audience 3, campaign 3).
 INSERT INTO fact_conversions (event_ts, day_key, click_id, ad_key, audience_key, campaign_key, advertiser_key, user_id, revenue_usd, attribution_model, attribution_window_days, seconds_to_conversion)
@@ -337,31 +339,45 @@ COMMIT;
 
 \echo ''
 \echo '--- Q1: CTR per campaign (the correct way: sum-of-clicks / sum-of-impressions) ---'
-SELECT
-    c.name AS campaign,
-    COUNT(DISTINCT i.impression_id) AS impressions,
-    COUNT(DISTINCT cl.click_id)     AS clicks,
-    ROUND(100.0 * COUNT(DISTINCT cl.click_id) / COUNT(DISTINCT i.impression_id), 2) AS ctr_pct
-FROM fact_impressions i
-JOIN dim_campaign c ON i.campaign_key = c.campaign_key
-LEFT JOIN fact_clicks cl ON cl.day_key = i.day_key AND cl.ad_key = i.ad_key
-                        -- NOTE: in production this is a proper impression-to-click join;
-                        -- the synthetic seed doesn't carry user_id on impressions, so we
-                        -- approximate by counting clicks per ad.
-GROUP BY c.name
-ORDER BY ctr_pct DESC;
+-- CTR is non-additive: the right denominator is the same denominator as
+-- the numerator joins against. We pre-aggregate impressions and clicks
+-- per campaign in CTEs (no cross-join), then divide. This is the
+-- canonical interview answer.
+WITH imp_per_campaign AS (
+    SELECT campaign_key, COUNT(*) AS impressions
+    FROM fact_impressions GROUP BY campaign_key
+),
+clk_per_campaign AS (
+    SELECT campaign_key, COUNT(*) AS clicks
+    FROM fact_clicks GROUP BY campaign_key
+)
+SELECT c.name,
+       COALESCE(i.impressions, 0)  AS impressions,
+       COALESCE(cl.clicks, 0)     AS clicks,
+       ROUND(100.0 * COALESCE(cl.clicks, 0) / NULLIF(i.impressions, 0), 2) AS ctr_pct
+FROM dim_campaign c
+LEFT JOIN imp_per_campaign i   ON i.campaign_key = c.campaign_key
+LEFT JOIN clk_per_campaign cl ON cl.campaign_key = c.campaign_key
+ORDER BY ctr_pct DESC NULLS LAST;
 
 \echo ''
 \echo '--- Q2: CTR per placement (placement × surface) ---'
+WITH imp_per_placement AS (
+    SELECT placement_key, COUNT(*) AS impressions
+    FROM fact_impressions GROUP BY placement_key
+),
+clk_per_placement AS (
+    SELECT placement_key, COUNT(*) AS clicks
+    FROM fact_clicks GROUP BY placement_key
+)
 SELECT p.surface, p.placement_code,
-       COUNT(DISTINCT cl.click_id)     AS clicks,
-       COUNT(DISTINCT i.impression_id) AS impressions,
-       ROUND(100.0 * COUNT(DISTINCT cl.click_id) / COUNT(DISTINCT i.impression_id), 2) AS ctr_pct
-FROM fact_clicks cl
-JOIN dim_placement p ON cl.placement_key = p.placement_key
-JOIN fact_impressions i ON i.day_key = cl.day_key AND i.ad_key = cl.ad_key
-GROUP BY p.surface, p.placement_code
-ORDER BY ctr_pct DESC;
+       COALESCE(i.impressions, 0) AS impressions,
+       COALESCE(cl.clicks, 0)     AS clicks,
+       ROUND(100.0 * COALESCE(cl.clicks, 0) / NULLIF(i.impressions, 0), 2) AS ctr_pct
+FROM dim_placement p
+LEFT JOIN imp_per_placement i ON i.placement_key = p.placement_key
+LEFT JOIN clk_per_placement cl ON cl.placement_key = p.placement_key
+ORDER BY ctr_pct DESC NULLS LAST;
 
 \echo ''
 \echo '--- Q3: CPC vs CPM mix at the campaign level ---'
@@ -462,15 +478,25 @@ ORDER BY revenue_usd DESC;
 
 \echo ''
 \echo '--- Q8: device-level CTR (mobile vs desktop vs CTV) ---'
+-- Same pattern as Q1/Q2: pre-aggregate per device in CTEs, then divide.
+-- Avoids the Cartesian product of joining clicks to all impressions on
+-- (day_key, ad_key).
+WITH imp_per_device AS (
+    SELECT device_key, COUNT(*) AS impressions
+    FROM fact_impressions GROUP BY device_key
+),
+clk_per_device AS (
+    SELECT device_key, COUNT(*) AS clicks
+    FROM fact_clicks GROUP BY device_key
+)
 SELECT d.device_type,
-       COUNT(DISTINCT cl.click_id)     AS clicks,
-       COUNT(DISTINCT i.impression_id) AS impressions,
-       ROUND(100.0 * COUNT(DISTINCT cl.click_id) / COUNT(DISTINCT i.impression_id), 2) AS ctr_pct
+       COALESCE(i.impressions, 0) AS impressions,
+       COALESCE(cl.clicks, 0)     AS clicks,
+       ROUND(100.0 * COALESCE(cl.clicks, 0) / NULLIF(i.impressions, 0), 2) AS ctr_pct
 FROM dim_device d
-JOIN fact_clicks cl ON cl.device_key = d.device_key
-JOIN fact_impressions i ON i.day_key = cl.day_key AND i.ad_key = cl.ad_key
-GROUP BY d.device_type
-ORDER BY ctr_pct DESC;
+LEFT JOIN imp_per_device i ON i.device_key = d.device_key
+LEFT JOIN clk_per_device cl ON cl.device_key = d.device_key
+ORDER BY ctr_pct DESC NULLS LAST;
 
 \echo ''
 \echo '=== Done: OLAP ad platform star schema ==='

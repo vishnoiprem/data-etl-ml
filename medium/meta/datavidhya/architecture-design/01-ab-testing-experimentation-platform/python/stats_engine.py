@@ -138,21 +138,56 @@ def msprt_pvalue(
 
     Reference: Howard et al. (2021) "Time-uniform, nonparametric, nonasymptotic
     confidence sequences", Jennison & Turnbull.
+
+    The closed-form approximation (Eq. 6 in Howard et al.) for a normal-mixture
+    prior on the effect size with prior scale `tau`:
+
+      log_lambda = (1/2) * [ log(s2 / (s2 + tau^2))
+                            + (diff^2 / (s2 + tau^2))
+                            - (diff^2 / s2) ]
+
+      p ≈ Phi(-sgn * sqrt(2 log_lambda))
+          + exp(2 log_lambda) * Phi(-sgn * sqrt(2 log_lambda) - 2 sqrt(log_lambda))
+
+    where s2 = v_c/n_c + v_t/n_t, sgn = sign(diff), and Phi is the standard normal CDF.
     """
     n_c, n_t = len(control), len(treatment)
+    if n_c < 2 or n_t < 2:
+        return 1.0
     m_c, m_t = control.mean(), treatment.mean()
     v_c, v_t = control.var(ddof=1), treatment.var(ddof=1)
 
-    var_combined = v_c / n_c + v_t / n_t
+    s2 = v_c / n_c + v_t / n_t
     diff = m_t - m_c
+    if s2 <= 0:
+        return 1.0
 
-    # Log mixture likelihood ratio vs H0: delta = 0
-    # Reference: https://arxiv.org/abs/2010.02286
-    log_lambda = 0.5 * (np.log(var_combined / (var_combined + tau ** 2))
-                        + diff ** 2 / (var_combined + tau ** 2)
-                        - diff ** 2 / var_combined)
-    p_value = np.exp(-np.maximum(log_lambda, 0.0))
-    return float(np.clip(p_value, 0.0, 1.0))
+    # Howard et al. (2021) Eq. 6 — closed-form mSPRT.
+    # log Bayes factor under N(0, tau^2) prior on the effect size:
+    #   log BF = -1/2 * log(1 + tau^2/s^2) + Z^2 * tau^2 / (2*(s^2 + tau^2))
+    # where Z = diff / sqrt(s^2). Always-valid p is then derived from this BF.
+    z = diff / np.sqrt(s2)
+    log_lambda = (
+        -0.5 * np.log(1.0 + tau ** 2 / s2)
+        + (z ** 2) * (tau ** 2) / (2.0 * (s2 + tau ** 2))
+    )
+
+    # When diff == 0, log_lambda ~ -log(1+tau^2/s2)/2 < 0; p should be 1.0.
+    # When |diff| is large, log_lambda → +∞, p → 0 — short-circuit to avoid overflow.
+    if log_lambda <= 0:
+        return 1.0
+    if log_lambda > 50:   # Phi term is < 1e-50; safe to return 0
+        return 0.0
+
+    sgn = np.sign(diff)
+    if sgn == 0:
+        sgn = 1.0
+    sqrt_two_ll = np.sqrt(2.0 * log_lambda)
+    p = stats.norm.cdf(-sgn * sqrt_two_ll) \
+        + np.exp(2.0 * log_lambda) * stats.norm.cdf(
+            -sgn * sqrt_two_ll - 2.0 * np.sqrt(log_lambda)
+        )
+    return float(np.clip(p, 0.0, 1.0))
 
 
 # --------------------------------------------------------------------- #

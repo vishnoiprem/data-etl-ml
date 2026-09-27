@@ -1,4 +1,4 @@
-"""Offline S3 stub + tiny CSV helpers shared by the driver and pytest suite.
+"""Offline S3 stub + tiny CSV + event helpers shared by the driver and pytest suite.
 
 Packaged alongside the Lambda handler so it ships with the deployment.
 Tests import the classes/functions; the one-shot driver imports them
@@ -8,9 +8,32 @@ from __future__ import annotations
 
 import csv
 import io
+import os
 from typing import Any, Dict, Optional
 
 import boto3
+
+_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         "data")
+
+
+def put_event(bucket: str, key: str) -> Dict[str, Any]:
+    """Build the S3 ObjectCreated event payload the handler expects."""
+    return {"Records": [{
+        "eventVersion": "2.1",
+        "eventSource": "aws:s3",
+        "eventName":   "ObjectCreated:Put",
+        "s3": {
+            "bucket": {"name": bucket},
+            "object": {"key": key},
+        },
+    }]}
+
+
+def load_raw_csv(name: str = "orders_raw.csv") -> str:
+    """Read ``data/<name>`` as a string -- the driver's input fixture."""
+    with open(os.path.join(_DATA_DIR, name), encoding="utf-8") as fh:
+        return fh.read()
 
 
 class StubBucket:

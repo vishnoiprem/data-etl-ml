@@ -14,6 +14,19 @@ from typing import Dict, List, Optional
 
 
 @dataclass
+class NotificationRecord:
+    notification_id: str
+    notification_group_id: str
+    user_id: str
+    channel: str
+    sent_ts: float
+    delivered_ts: Optional[float] = None
+    opened_ts: Optional[float] = None
+    clicked_ts: Optional[float] = None
+    converted_ts: Optional[float] = None
+
+
+@dataclass
 class DedupedFact:
     notification_group_id: str
     user_id: str

@@ -30,17 +30,16 @@ AWS note:
 """
 from __future__ import annotations
 
-import csv
 import os
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List
 
-# Make `lambda_function` importable when run directly.
 _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "lambda_function"))
 
 import app                              # noqa: E402  -- import after sys.path
-from _stubs import StubBucket, install, load_csv, parse_csv  # noqa: E402
+from _stubs import StubBucket, install, load_csv,  \
+                   load_raw_csv, parse_csv, put_event  # noqa: E402
 
 PROCESSED_KEEP = ("order_id", "customer_id", "amount", "currency",
                   "order_date", "amount_usd")
@@ -74,21 +73,9 @@ def main() -> None:
     install(stub)
 
     raw_key = "raw/orders_2026-09-27.csv"
-    with open(os.path.join(_HERE, "data", "orders_raw.csv"),
-              encoding="utf-8") as fh:
-        stub.put(raw_key, fh.read())
-
-    event = {
-        "Records": [{
-            "eventVersion": "2.1",
-            "eventSource": "aws:s3",
-            "eventName":   "ObjectCreated:Put",
-            "s3": {
-                "bucket": {"name": "orders-lab-test-bucket"},
-                "object": {"key": raw_key},
-            },
-        }]
-    }
+    bucket = "orders-lab-test-bucket"
+    stub.put(raw_key, load_raw_csv())
+    event = put_event(bucket, raw_key)
 
     print("\n=== Q14 Process S3 Events with Lambda ===\n")
 
@@ -136,10 +123,7 @@ def main() -> None:
     print("[PASS] Q14 re-running the handler returns identical counts")
 
     # Stage 8: non-matching key skip -- a key under processed/ is ignored.
-    proc_event = {"Records": [{
-        "s3": {"bucket": {"name": "orders-lab-test-bucket"},
-               "object": {"key": proc_key}},
-    }]}
+    proc_event = put_event(bucket, proc_key)
     assert app.lambda_handler(proc_event, context=None) == {"accepted": 0, "rejected": 0}
     print("[PASS] Q14 handler ignores processed/ keys (no S3-event loop)")
 
