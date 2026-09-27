@@ -1,0 +1,5 @@
+{"notification_id":"n1","notification_group_id":"g1","user_id":"u1","channel":"push","notification_type":"marketing","template_id":"tpl_sale","campaign_id":"c_sale_q4","variant_id":"control","sent_ts":1758950400.0,"delivered_ts":1758950403.0}
+{"notification_id":"n2","notification_group_id":"g1","user_id":"u1","channel":"email","notification_type":"marketing","template_id":"tpl_sale","campaign_id":"c_sale_q4","variant_id":"control","sent_ts":1758950400.5,"delivered_ts":1758950406.0}
+{"notification_id":"n3","notification_group_id":"g2","user_id":"u2","channel":"sms","notification_type":"transactional","template_id":"tpl_otp","sent_ts":1758950500.0,"delivered_ts":1758950502.0}
+{"notification_id":"n4","notification_group_id":"g3","user_id":"u3","channel":"in_app","notification_type":"system","template_id":"tpl_welcome","sent_ts":1758950600.0}
+{"notification_id":"n5","notification_group_id":"g4","user_id":"u1","channel":"push","notification_type":"marketing","template_id":"tpl_reminder","campaign_id":"c_cart","variant_id":"v1","sent_ts":1758950700.0,"delivered_ts":1758950702.0}
