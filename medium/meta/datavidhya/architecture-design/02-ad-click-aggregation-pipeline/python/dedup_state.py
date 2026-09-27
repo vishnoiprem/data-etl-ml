@@ -139,14 +139,17 @@ if __name__ == "__main__":
     for e in patient_bot:
         sliding.process(e)
 
-    assert fixed.stats["emitted"] == 10, fixed.stats
+    assert fixed.stats["emitted"] == 5, fixed.stats
     assert sliding.stats["emitted"] == 1, sliding.stats
-    print(f"[PASS] patient bot, 10 clicks at 59s intervals:")
+    print(f"[PASS] patient bot, 10 clicks at 59s intervals over ~9 minutes:")
     print(f"         fixed-from-first  -> {fixed.stats['emitted']:>2} billed  (correct)")
     print(f"         sliding-from-last -> {sliding.stats['emitted']:>2} billed  "
           "(unlimited free clicks)")
-    print("       -> the sliding variant is the bug. Each click extends the window,")
-    print("          so the attacker is deduped forever.")
+    print("       -> fixed-from-first bills once per 60s window, so consecutive")
+    print("          59s-apart clicks ALTERNATE: the first opens a window, the")
+    print("          second falls inside it, the third opens the next one.")
+    print("       -> sliding-from-last is the bug: each click extends the window,")
+    print("          so the attacker is deduped forever and billed once, ever.")
 
     # -- a real human double-click IS caught by both ------------------------
     human = [ev("u9", "a9", 0), ev("u9", "a9", 180)]     # 180ms apart
