@@ -59,6 +59,20 @@ def welch_ttest(
 
     se = np.sqrt(v_c / n_c + v_t / n_t)
     diff = m_t - m_c
+
+    # Edge case: zero variance in both arms (constant metric) → no signal
+    if se == 0:
+        return TTestResult(
+            point_estimate=float(diff),
+            ci_low=float(diff),
+            ci_high=float(diff),
+            p_value=1.0,            # no evidence of difference
+            n_control=int(n_c),
+            n_treatment=int(n_t),
+            mean_control=float(m_c),
+            mean_treatment=float(m_t),
+        )
+
     t_stat = diff / se
 
     # Welch-Satterthwaite degrees of freedom
