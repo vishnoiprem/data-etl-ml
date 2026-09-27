@@ -699,11 +699,51 @@ Each file is self-contained and self-asserting — every claim above that's mark
 | `10_factless_coverage_fact.py` | 20, 35 | anti-join coverage, why GROUP BY can't answer it |
 | `11_mini_dimension.py` | 25 | 12 rows vs 156B, banding, stamp-at-event-time |
 | `12_data_vault_hub_link_sat.py` | 30, 31 | hub/link/sat, audit trail, 4 joins vs 1, key collision |
+| `13_product_funnel_star_schema.py` | 13, 14, 21, 49 | full star schema for the *Product Funnel & Conversion Analytics* design question |
 
 ```bash
 cd 13_Data_Modeling_Meta
 ../../../../.env/bin/python 01_grain_violation_detection.py
 ```
+
+## The end-to-end design question
+
+`13_product_funnel_star_schema.py` is the one full schema-design exercise:
+DataVidhya's **Product Funnel & Conversion Analytics**. It takes the 6 given
+OLTP tables (`User_Events`, `Purchases`, `Users`, `Products`, `AB_Tests`,
+`Sessions`) and builds the complete model — two facts plus four dimensions —
+then answers all six of the product team's questions and asserts every trap.
+
+**The answer to "why two fact tables":**
+
+| | grain | role |
+|---|---|---|
+| `fact_funnel_event` | one row per user per session per stage **occurrence** | source of truth; stages repeat, so it must be event-grain |
+| `fact_session_funnel` | one row per **session** | accumulating snapshot; one timestamp column per milestone |
+
+The accumulating snapshot is what makes the funnel cheap: *"how many reached
+checkout"* becomes `COUNT(checkout_ts IS NOT NULL)` and *"time from view to
+purchase"* becomes a subtraction, instead of a self-join per question. Naming
+that fact type is the signal — it's the one candidates forget exists.
+
+**What the file proves, beyond the happy path:**
+
+- **Loose vs strict funnels give different curves.** Loose counting produces
+  *negative* drop-off (a stage exceeding its predecessor); strict requires the
+  full ordered chain. One user purchases with no `add_to_cart` — counted under
+  loose, excluded under strict. Ask which the team means.
+- **The strict chain must be cumulative.** Checking only the immediate
+  predecessor lets that user rejoin the funnel at purchase, so the curve rises
+  again at the end. Both formulations are asserted side by side.
+- **Distinct users, not events.** `view_product` has 5 events from 3 people.
+- **SCD2 point-in-time vs `is_current`.** Joining on `is_current` relabels a
+  January purchase as `vip` and flatters the vip cohort — survivorship.
+- **`purchase_amount` is NULL for non-purchases**, so AOV is 299.00 over
+  purchasers but 119.60 spread over all sessions. State the denominator.
+- **The 24h session rule is validated, not assumed** — re-derived with
+  gap-and-island and reconciled against the source `session_id`.
+- **A/B assignment is per user, not per session.** Deriving it per session
+  would let one user see two variants and invalidate the test.
 
 ## Related folders
 

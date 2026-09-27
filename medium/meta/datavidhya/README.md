@@ -53,11 +53,12 @@ number moves. Correct-and-silent loses to slightly-imperfect-and-narrated.
 | `10_Product_Sense_Frameworks/` | 3 | metric→grain→query chain, drop investigation |
 | `11_Pipeline_Orchestration/` | 3 | Airflow DAG shape, watermarks, retries + gates |
 | `12_DataVidhya_Meta_Set/` | 81 | **all 76 Meta-tagged DataVidhya problems** + 5 data-modeling questions |
-| `13_Data_Modeling_Meta/` | 12 + guide | **all 50 data-modeling interview questions**, Meta-framed |
+| `13_Data_Modeling_Meta/` | 13 + guide | **all 50 data-modeling questions** + the Product Funnel schema-design exercise |
 | `13_Ten_Methods/` | 1 | one problem solved 10 different ways, all verified |
 
-**Status:** 126 files across `01_`–`13_`, 495 assertions, all passing
-(`./run_all.sh`). Folders `14_`–`18_` are separate AWS/Iceberg tracks.
+**Status:** 127 files across `01_`–`13_`, 513 assertions, all passing
+(`./run_all.sh` — last full run: 136 passed, 0 failed, including the `14_`–`18_`
+AWS/Iceberg tracks).
 
 `12_DataVidhya_Meta_Set/` now covers **every problem behind DataVidhya's Meta
 company filter** — 76 problems, which is all 4 pages of that filter: 10 Easy,
@@ -79,8 +80,11 @@ one sentence that earns the signal and the specific way it goes wrong — plus 1
 runnable files proving the ones that can be demonstrated in code (grain
 violations, the SCD2 MERGE, Type 6, bridge double-counting, junk and
 role-playing dimensions, late-arriving dimensions, NULL foreign keys,
-multi-currency, factless coverage, mini-dimensions, Data Vault). Those files
-assert the **failure modes** too, not just the correct answers.
+multi-currency, factless coverage, mini-dimensions, Data Vault) — plus a full
+star-schema build for the **Product Funnel & Conversion Analytics** design
+exercise, which takes the 6 given OLTP tables and delivers both fact tables,
+four dimensions, all six business questions, and every stated constraint.
+These files assert the **failure modes** too, not just the correct answers.
 
 `07_Star_Schema_Modeling/` files are DDL + reasoning only — they define schemas
 rather than run queries, so `run_all.sh` executes them as no-ops.
