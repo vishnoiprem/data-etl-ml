@@ -1,0 +1,76 @@
+%% Clickstream → Lakehouse — End-to-End Architecture
+flowchart LR
+    subgraph Sources[" "]
+        Web["Web SDK<br/>(JS)"]
+        iOS["iOS SDK"]
+        Android["Android SDK"]
+        Server["Server SDK"]
+    end
+
+    subgraph Edge["Edge Ingestion"]
+        CDN["CDN / Load Balancer"]
+        Collector["Event Collector API<br/>(Envoy + Lua)"]
+        Auth["Consent Service<br/>(GDPR / cookies)"]
+    end
+
+    subgraph Streaming["Streaming Pipeline (Flink)"]
+        Schema["Schema Validator"]
+        Sig["Signature Bot Filter<br/>(Bloom + UA blocklist)"]
+        Heur["Heuristic Filter<br/>(rate, no-scroll, IP)"]
+        ML["ML Scorer<br/>(GBM)"]
+        Dedup["Dedup<br/>(event_id TTL 24h)"]
+        Enrich["Enrich<br/>(geo, device, traits)"]
+    end
+
+    subgraph Kafka["Kafka (partitioned by user_id)"]
+        K1["events.raw"]
+        K2["events.cleaned"]
+        K3["events.quarantine"]
+    end
+
+    subgraph Lakehouse["Lakehouse (Iceberg on S3)"]
+        Bronze["Bronze<br/>raw + bot-tagged<br/>TTL: 7d"]
+        Silver["Silver<br/>cleaned, deduped<br/>Z-ORDER user_id<br/>TTL: 180d"]
+        Gold["Gold<br/>user_features<br/>session_metrics<br/>TTL: 3y"]
+    end
+
+    subgraph Batch["Batch (Spark on Airflow/K8s)"]
+        Comp["Compaction &<br/>Z-ORDER Job"]
+        Agg["Daily Aggregations"]
+        MLPrep["ML Feature Export<br/>(TFRecord/Petastorm)"]
+    end
+
+    subgraph Serving["Serving Layer"]
+        Trino["Trino / Presto<br/>(dashboards)"]
+        Exp["Experimentation<br/>(Spark)"]
+        Feast["Feature Store<br/>(Feast)"]
+        DWH["Warehouse<br/>(Snowflake)"]
+        Dashboard["Dashboards<br/>(Superset)"]
+    end
+
+    Web --> CDN
+    iOS --> CDN
+    Android --> CDN
+    Server --> Collector
+    CDN --> Collector
+    Collector --> Auth
+    Auth --> Schema
+    Schema --> Sig
+    Sig --> K1
+    Schema -.quarantine.-> K3
+    K1 --> Heur
+    Heur --> Dedup
+    Dedup --> Enrich
+    Enrich --> K2
+    K2 --> Bronze
+    K1 --> Bronze
+    Bronze --> Comp
+    Bronze --> Silver
+    Silver --> Agg
+    Silver --> MLPrep
+    Agg --> Gold
+    MLPrep --> Feast
+    Gold --> Trino
+    Silver --> DWH
+    Trino --> Dashboard
+    Gold --> Exp

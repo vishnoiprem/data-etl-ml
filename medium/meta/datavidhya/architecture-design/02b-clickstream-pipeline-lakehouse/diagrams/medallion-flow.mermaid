@@ -1,0 +1,13 @@
+%% Medallion (Bronze → Silver → Gold) Lineage
+flowchart TD
+    A[Kafka: events.raw<br/>Avro / JSON] --> B{Schema OK?}
+    B -- No --> Q[Quarantine Topic<br/>+ alerts]
+    B -- Yes --> C[Bronze<br/>raw, immutable<br/>partitioned by dt]
+    C --> D[Bot Tag<br/>+ heuristic score]
+    D --> E[Silver<br/>bot-filtered<br/>deduped by event_id<br/>Z-ORDER user_id]
+    E --> F[Sessionize<br/>30min inactivity]
+    E --> G[Daily User Rollup]
+    F --> H[Gold: session_metrics]
+    G --> I[Gold: user_features_daily]
+    H --> J[Dashboard / ML / Experiments]
+    I --> J

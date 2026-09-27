@@ -1,0 +1,13 @@
+%% Bot Filter Pipeline — Three-Stage Funnel
+flowchart TD
+    In[Event In] --> S1{Stage 1:<br/>Signature Match?<br/>(Bloom + UA blocklist)}
+    S1 -- Bot --> DropBot1[Bot Tier<br/>~70% of bots blocked here]
+    S1 -- Pass --> S2{Stage 2:<br/>Heuristic<br/>(rate > 50/s,<br/>no-scroll, headless,<br/>datacenter IP)}
+    S2 -- Bot --> DropBot2[Bot Tier<br/>~20% blocked]
+    S2 -- Pass --> S3{Stage 3:<br/>ML Scorer<br/>(50+ features)}
+    S3 -- score > 0.8 --> DropBot3[Bot Tier<br/>~10% blocked]
+    S3 -- score ≤ 0.8 --> Out[Human Events<br/>→ Silver]
+
+    DropBot1 --> BotAnalysis[Bot Analysis<br/>partition<br/>(kept 30d)]
+    DropBot2 --> BotAnalysis
+    DropBot3 --> BotAnalysis
