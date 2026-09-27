@@ -519,10 +519,11 @@ SELECT ROUND(AVG(seconds_view_to_purchase) / 60.0, 2) AS avg_minutes_view_to_pur
        COUNT(seconds_view_to_purchase)                AS sessions_measured
 FROM fact_session_funnel
 """
+# S1: 09:05 -> 09:40 = 35 min.  S4: 20:05 -> 20:30 = 25 min.  Mean = 30.
 expect("Q3 time view -> purchase (accumulating snapshot makes this trivial)",
-       Q3, [(30.42, 2)])
+       Q3, [(30.0, 2)])
 print("      denominator is 2 (sessions that reached BOTH milestones), not 5. "
-       "AVG over all sessions would be meaningless.")
+      "AVG over all sessions would be meaningless.")
 
 # Q4: Do mobile users convert differently than desktop?
 Q4 = """
