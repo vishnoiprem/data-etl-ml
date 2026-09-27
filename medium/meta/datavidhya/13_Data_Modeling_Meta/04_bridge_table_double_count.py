@@ -30,9 +30,11 @@ The trap:
 - COUNT(DISTINCT reel_id) is NOT a fix for a SUM. It fixes "how many Reels",
   but views are additive and still triple. Different metrics need different
   treatment -- additive measures need allocation, distinct counts need DISTINCT.
-- Weights must sum to exactly 1.0 per fact row. With 3 hashtags, 1/3 in
-  floating point sums to 0.9999999999999998, so a naive equality check on the
-  reconciliation fails. Round at the comparison, not in the weight.
+- Weights must sum to exactly 1.0 per fact row. In floating point that is not
+  guaranteed for every n -- 3 x (1/3) happens to be exact, while 49 x (1/49)
+  drifts off 1.0 -- so an equality check on the reconciliation can fail for
+  reasons that have nothing to do with the model. Keep weights DECIMAL, and
+  round at the comparison rather than in the weight.
 - A fact row with NO bridge entry (a Reel with no hashtags) is DROPPED by an
   inner join through the bridge, so the allocated total silently under-reports.
   Asserted below -- this is the mirror image of the double-count and is missed
@@ -171,16 +173,15 @@ ORDER BY reel_id
 assert [(r[0], float(r[1])) for r in per_reel] == [(1, 1.0), (2, 1.0), (3, 1.0)], per_reel
 print("[PASS] Q19 weights sum to 1.0 per reel -- the invariant that makes totals reconcile")
 
-# Spark's DECIMAL arithmetic keeps this exact; the same weights in a DOUBLE
-# pipeline do not sum to 1.0, which is why you round at the comparison.
-raw = float(spark.sql(
-    "SELECT SUM(weight) FROM bridge_weighted WHERE reel_id = 1").collect()[0][0])
-as_double = float(spark.sql(
-    "SELECT SUM(CAST(weight AS DOUBLE)) FROM bridge_weighted WHERE reel_id = 1"
-).collect()[0][0])
-assert raw == 1.0 and as_double != 1.0, (raw, as_double)
-print(f"[PASS] Q19 decimal weights sum to {raw}; as DOUBLE they give {as_double!r} "
-      "-- round at the comparison, never in the weight")
+# Float weights are not exact for every n. 1/3 happens to sum cleanly, but a
+# fact row split 49 ways does not -- so compare with a rounding tolerance.
+n3 = float(spark.sql(
+    "SELECT SUM(CAST(1.0 AS DOUBLE)/3) FROM VALUES (1),(2),(3) AS t(i)").collect()[0][0])
+n49 = float(spark.sql(
+    "SELECT SUM(CAST(1.0 AS DOUBLE)/49) FROM range(49)").collect()[0][0])
+assert n3 == 1.0 and n49 != 1.0, (n3, n49)
+print(f"[PASS] Q19 float weights: 3-way sums to {n3}, 49-way sums to {n49!r} "
+      "-- keep weights DECIMAL and round at the comparison")
 
 # ---------------------------------------------------------- fix 2: don't add
 # Per-hashtag impact is the un-weighted number; it just must not be totalled.
