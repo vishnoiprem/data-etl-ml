@@ -22,7 +22,7 @@ data-enginnering-cloudvala/
 │   └── python_top50.md                        ← Top 50 Python DE interview Q&A
 │
 └── course-curricula/                          ← Verbatim course outlines
-    ├── 01_de_foundations_track.md             ← DE Foundations (5 courses, 48 lessons)
+    ├── 01_de_foundations_track.md             ← DE Foundations (6 modules, 49 lessons)
     ├── 02_python_track.md                     ← Python for DE (5 modules, 54 lessons)
     ├── 03_snowflake_hands_on.md               ← Snowflake Hands-On (5 modules, 39 lessons)
     ├── 04_airflow_track.md                    ← Airflow Fundamentals + Intermediate (6 modules, 45 lessons)
@@ -30,7 +30,9 @@ data-enginnering-cloudvala/
     ├── 06_azure_de.md                         ← Azure DE Stack + Batch + Streaming + Production (4 modules, 22 lessons)
     ├── 07_kafka_fundamentals.md               ← Apache Kafka Fundamentals (4 modules, 32 lessons)
     ├── 08_dbt_course.md                       ← dbt (Data Build Tool) Course (5 modules, 37 lessons)
-    └── 09_aws_de.md                           ← AWS for Data Engineering (5 modules, 36 lessons)
+    ├── 09_aws_de.md                           ← AWS for Data Engineering (5 modules, 36 lessons)
+    ├── de_foundations_full_detail.md          ← DE Foundations with 4 verbatim deep-dive articles
+    └── aws_de_full_detail.md                  ← AWS for DE with 9 verbatim deep-dive articles
 ```
 
 ## Counts
@@ -38,8 +40,9 @@ data-enginnering-cloudvala/
 | Category | Articles / courses | Lessons / Q&As |
 |---|---:|---:|
 | Interview Q&A articles | 3 | 150 |
-| Course curricula | 9 | 411 |
-| **Total** | **12** | **561** |
+| Course curricula (outline-only) | 9 | 411 |
+| Full-detail courses (with verbatim article bodies) | 2 | 85 (49 DE Found. + 36 AWS DE) — 13 article bodies included |
+| **Total** | **14** | **561** |
 
 ## Use
 

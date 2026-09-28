@@ -11,14 +11,17 @@ study-path reference. Full-detail versions of the deep-dive articles are
 included where the full body was extractable from the public page.
 
 > **Note on coverage:** This file contains the complete 49-lesson curriculum
-> (titles, formats, descriptions) plus the full article bodies for the deep-dive
-> lessons that were extractable from the public pages (`What is DE (Deep Dive)`
-> and `Lake vs Warehouse (Deep Dive)`). The remaining deep-dive articles
-> (Lifecycle, Data Modeling, OLTP vs OLAP, Data Quality, Observability &
+> (titles, formats, descriptions) plus the full article bodies for the
+> deep-dive lessons that were extractable from the public pages:
+> *What is DE (Deep Dive)*, *Lake vs Warehouse (Deep Dive)*,
+> *Data Quality*, *Modern Data Stack (Deep Dive)*, and *The Data
+> Engineering Landscape in 2026 (Deep Dive)*. The remaining articles
+> (Lifecycle, Data Modeling, OLTP vs OLAP, ETL vs ELT, Observability &
 > Lineage, Governance & Compliance, Idempotency, Schema Evolution, File
-> Formats, Partitioning & Clustering, Modern Data Stack, Tools for DE, dbt,
-> Apache Airflow) are JS-rendered and require a logged-in browser session to
-> extract. Their descriptions are included below as abstracts.
+> Formats, Partitioning & Clustering, Tools for DE, dbt, Apache Airflow)
+> are JS-rendered on Data Vidhya and require a logged-in browser session
+> to extract the full prose. Their descriptions are included above as
+> abstracts.
 
 ---
 
