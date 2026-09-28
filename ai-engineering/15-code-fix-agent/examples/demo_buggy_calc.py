@@ -22,9 +22,13 @@ from agent.schemas import RunTestsArgs
 
 SETUP = {
     "calculator.py": '''\
-"""Simple calculator with a known bug: division by zero is unhandled."""
+"""Simple calculator with a known bug: divide returns inf for b == 0."""
+
 
 def divide(a: float, b: float) -> float:
+    if b == 0:
+        # BUG: should raise ZeroDivisionError but silently returns inf
+        return float("inf")
     return a / b
 
 
@@ -32,6 +36,7 @@ def add(a: float, b: float) -> float:
     return a + b
 ''',
     "tests/test_calculator.py": '''\
+import pytest
 from calculator import add, divide
 
 
@@ -44,8 +49,7 @@ def test_divide_normal():
 
 
 def test_divide_by_zero():
-    # This test should pass once the agent fixes the bug
-    import pytest
+    # This test will fail until divide() is fixed to raise.
     with pytest.raises(ZeroDivisionError):
         divide(10, 0)
 ''',
@@ -57,6 +61,8 @@ def main() -> None:
         root = Path(tmp) / "buggy_calc"
         root.mkdir()
         (root / "tests").mkdir()
+        # conftest.py makes 'calculator' importable from tests/
+        (root / "conftest.py").write_text("")
         for path, content in SETUP.items():
             (root / path).write_text(content)
 
@@ -77,13 +83,16 @@ def main() -> None:
                 path="calculator.py",
                 old_text=(
                     "def divide(a: float, b: float) -> float:\n"
+                    "    if b == 0:\n"
+                    '        # BUG: should raise ZeroDivisionError but silently returns inf\n'
+                    '        return float("inf")\n'
                     "    return a / b"
                 ),
                 new_text=(
                     "def divide(a: float, b: float) -> float:\n"
                     '    """Divide a by b. Raises ZeroDivisionError on b == 0."""\n'
                     "    if b == 0:\n"
-                    "        raise ZeroDivisionError(\"division by zero\")\n"
+                    '        raise ZeroDivisionError("division by zero")\n'
                     "    return a / b"
                 ),
                 rationale="handle b == 0 to satisfy test_divide_by_zero",
