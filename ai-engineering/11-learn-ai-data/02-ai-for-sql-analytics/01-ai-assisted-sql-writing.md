@@ -159,6 +159,167 @@ If the AI's explanation is hand-wavy where the logic is subtle, the SQL is too. 
 
 ---
 
+## Worked Example — the cohort-retention query, all 4 silent bugs in one
+
+> **Task:** *"Show me the top 3 products by revenue per category for users in the second-purchase cohort, last 90 days."*
+
+### Step 1 — The first-draft query (AI)
+
+```sql
+WITH cohort AS (
+  SELECT user_id, MIN(order_date) AS first_order_date
+  FROM orders
+  GROUP BY user_id
+),
+ranked AS (
+  SELECT
+    p.category,
+    p.product_id,
+    SUM(oi.revenue) AS revenue,
+    ROW_NUMBER() OVER (
+      PARTITION BY p.category
+      ORDER BY SUM(oi.revenue) DESC
+    ) AS rn
+  FROM order_items oi
+  JOIN orders o   ON o.order_id = oi.order_id
+  JOIN products p ON p.product_id = oi.product_id
+  JOIN cohort c   ON c.user_id = o.user_id
+  WHERE o.order_date >= CURRENT_DATE - INTERVAL '90 days'
+    AND o.order_date > c.first_order_date          -- "second purchase"
+  GROUP BY p.category, p.product_id
+)
+SELECT category, product_id, revenue
+FROM ranked
+WHERE rn <= 3
+ORDER BY category, rn;
+```
+
+### Step 2 — Read it line by line (5 minutes)
+
+You scan it. Looks plausible. **Now check the 4 silent bugs.**
+
+### Step 3 — Run the verification probes
+
+```sql
+-- Bug #1: silent fan-out?
+-- Is order_items 1:1 with orders? No — an order has many items.
+-- Did AI count an order's revenue N times if it had N items?
+-- Probe:
+SELECT 'orders_last_90d' AS what, COUNT(*) AS n FROM orders WHERE order_date >= CURRENT_DATE - 90
+UNION ALL
+SELECT 'order_items_last_90d', COUNT(*) FROM order_items oi JOIN orders o ON o.order_id = oi.order_id WHERE o.order_date >= CURRENT_DATE - 90;
+-- If order_items >> orders, you have a fan-out if you SUM without careful grouping.
+
+-- In our draft, we GROUP BY (category, product_id) and SUM revenue.
+-- SUM(oi.revenue) per (category, product_id) is correct because we're
+-- aggregating per item, not per order. OK. NO fan-out here.
+-- BUT — many-to-many between products and orders (via order_items).
+-- AI joined products to order_items. Cardinality: order_items 1:1 products.
+-- No fan-out.
+
+-- Bug #2: NULL exclusion
+-- 'region' wasn't in this query. Skip.
+
+-- Bug #3: window frame
+-- ROW_NUMBER() with PARTITION BY + ORDER BY — no LAST_VALUE(). OK.
+
+-- Bug #4: timezone drift
+-- CURRENT_DATE assumes server timezone. If your server is UTC, "last 90 days"
+-- is UTC. If it's EST, "last 90 days" is EST. The product owner said
+-- "last 90 days" without saying which. AI picked server default.
+-- FIX: explicit cast.
+WHERE o.order_date >= DATE_TRUNC('day', CURRENT_TIMESTAMP() AT TIME ZONE 'UTC') - INTERVAL '90 days'
+```
+
+### Step 4 — Run on sample data + check row counts
+
+```sql
+-- Sample
+SELECT * FROM (
+  SELECT category, product_id, revenue, rn
+  FROM ranked
+  WHERE rn <= 3
+)
+ORDER BY category, rn;
+-- Spot-check 5 rows. Compare to a hand-computed value for one user.
+
+-- Row count sanity check
+-- We expect ~3 rows per category that had orders in the window.
+SELECT COUNT(DISTINCT category) AS cats_with_orders
+FROM ranked;
+-- Compare to "total active categories in 90 days" — should be ≤ this.
+```
+
+### Step 5 — Senior "explain it back" probe
+
+You ask AI:
+
+> "In this query, if a user has 5 orders and 30 order-items in the last 90 days, what is their contribution to `ranked.revenue`?"
+
+The honest answer is: it depends on which items and which categories. `ranked.revenue` is per (category, product_id), summed across users, not per-user. So one user doesn't "contribute" a single value — they contribute rows to the aggregation.
+
+If AI replies *"the user's revenue is the sum of all their items"*, that's the **per-user view**, not the **per-product view**. **The query is per-product, not per-user.** Push back on the answer and you'll see whether the AI actually understands the grain.
+
+### Step 6 — The "right" version
+
+```sql
+WITH cohort AS (
+  SELECT user_id, MIN(order_date) AS first_order_date
+  FROM orders
+  GROUP BY user_id
+),
+second_purchase_orders AS (
+  SELECT o.*
+  FROM orders o
+  JOIN cohort c ON c.user_id = o.user_id
+  WHERE o.order_date > c.first_order_date                       -- exclude the first
+    AND o.order_date >= DATE_TRUNC('day', CURRENT_TIMESTAMP() AT TIME ZONE 'UTC') - INTERVAL '90 days'
+),
+scoped_items AS (
+  SELECT oi.product_id, oi.revenue
+  FROM order_items oi
+  WHERE oi.order_id IN (SELECT order_id FROM second_purchase_orders)
+),
+ranked AS (
+  SELECT
+    p.category,
+    si.product_id,
+    SUM(si.revenue) AS revenue,
+    ROW_NUMBER() OVER (
+      PARTITION BY p.category
+      ORDER BY SUM(si.revenue) DESC
+    ) AS rn
+  FROM scoped_items si
+  JOIN products p ON p.product_id = si.product_id
+  GROUP BY p.category, si.product_id
+)
+SELECT category, product_id, revenue
+FROM ranked
+WHERE rn <= 3
+ORDER BY category, rn;
+```
+
+**What changed:**
+- Made the second-purchase logic explicit in its own CTE (clearer).
+- Pinned the time window to UTC.
+- Made grain explicit at each step.
+- Same correctness, much easier to audit.
+
+### What this example shows
+
+| AI gave you | You added |
+|---|---|
+| Reasonable structure | Explicit grain at each CTE |
+| Correct `ROW_NUMBER()` usage | Timezone pinned |
+| Correct aggregations | Row count + sample verification |
+| Correct joins | "Explain it back" probe caught a framing error |
+| Plausible-looking SQL | Documented *why* each step exists |
+
+**The 5-step loop in action: SPEC → DRAFT → READ → VERIFY → SHIP.**
+Without steps 3–4, you ship a query that looks right, runs fast, and answers the wrong question in production for 6 months.
+
+---
+
 ## What Comes Next
 
 > Lesson 2 — **Text-to-SQL** — the real accuracy of AI on a 200-table warehouse, the failure modes that drive the gap, and when text-to-SQL is the right tool vs. the wrong one.

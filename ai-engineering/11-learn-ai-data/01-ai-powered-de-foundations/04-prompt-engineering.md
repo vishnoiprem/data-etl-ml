@@ -283,6 +283,208 @@ This is meta-prompting and it works shockingly well. Use it when you find yourse
 
 ---
 
+## Worked Example — generating a dbt staging model end-to-end
+
+> **Task:** Create `stg_stripe__payments` from a Stripe Payments v2 source in Snowflake. The source is 23 columns. The team uses dbt-snowflake 1.8, staging layer, snake_case, surrogate MD5 PKs, status filtering, explicit type casts. ACL: `analysts` role can read.
+
+### Step 1 — Draft the prompt
+
+```text
+ROLE: senior dbt engineer on the analytics team.
+
+CONTEXT — DBT:
+- dbt-snowflake 1.8, three layers (staging / intermediate / marts)
+- Staging: 1:1 with sources, materialized as views
+- All marts must have unique + not_null on PK + column descriptions in schema.yml
+- Snowflake; all timestamps in TIMESTAMP_NTZ unless UTC is required
+- snake_case throughout
+
+TASK:
+Generate the dbt model stg_stripe__payments.
+
+SOURCE: raw.stripe.payments_v2 (Stripe Payments object, v2 API)
+
+COLUMNS (23 total, abbreviated):
+- id (string) — Stripe payment ID
+- customer (string) — Stripe customer ID (FK → customers.id)
+- amount (int) — in cents
+- currency (string, ISO-4217)
+- status (string) — one of: succeeded, pending, failed, canceled, refunded
+- created (int, unix epoch seconds)
+- captured (int, unix epoch seconds, nullable)
+- payment_method (string) — card / sepa_debit / ideal / ...
+- metadata (variant) — JSON blob from Stripe
+- last4 (string, nullable) — last 4 of card
+- ...
+
+CONSTRAINTS:
+- rename: id → payment_id, customer → customer_id,
+  amount → amount_cents, payment_method → payment_method_type
+- cast: created, captured → TIMESTAMP_NTZ (convert from unix epoch)
+- filter: status NOT IN ('failed', 'pending') — we only model terminal-success paths
+- add surrogate PK: payment_pk = MD5(payment_id)
+- grain: 1 row per payment_id
+- DO NOT generate happy-path-only code. If metadata is malformed, log it
+  to a dbt warning, do not silently drop.
+- include a brief description in the model header
+
+FORMAT:
+1. models/staging/stripe/stg_stripe__payments.sql — full SQL
+2. models/staging/stripe/_sources.yml — source definition + freshness check
+3. models/staging/stripe/stg_stripe__payments.yml — schema block with
+   description, tests (not_null + unique on payment_pk, accepted_values
+   on status, relationships on customer_id → stg_customers.customer_id)
+4. tests/generic/test_stripe_metadata_well_formed.sql — singular test that
+   fails if > 1% of rows have invalid JSON in metadata
+
+VERIFICATION (you, the engineer, must do):
+- dbt parse → no errors
+- dbt build --select stg_stripe__payments → all tests pass
+- row count(stg) == row count(raw) WHERE status IN ('succeeded', 'canceled', 'refunded')
+- a downstream model can JOIN on payment_pk without ambiguity
+```
+
+### Step 2 — What you get back (cleaned up)
+
+```sql
+-- models/staging/stripe/stg_stripe__payments.sql
+-- Staging model for Stripe Payments v2. One row per payment.
+-- Filters out pending and failed; these are tracked in a separate quarantine model.
+
+with source as (
+
+    select * from {{ source('stripe', 'payments_v2') }}
+
+),
+
+renamed as (
+
+    select
+        id                                    as payment_id,
+        customer                              as customer_id,
+        amount                                as amount_cents,
+        currency                              as currency_code,
+        status,
+        payment_method                        as payment_method_type,
+        last4                                 as card_last4,
+        metadata                              as metadata_json,
+        to_timestamp_ntz(created)             as created_at,
+        to_timestamp_ntz(captured)            as captured_at,
+        current_timestamp()                   as _loaded_at
+    from source
+    where status not in ('failed', 'pending')
+
+),
+
+final as (
+
+    select
+        md5(payment_id)                       as payment_pk,
+        payment_id,
+        customer_id,
+        amount_cents,
+        currency_code,
+        status,
+        payment_method_type,
+        card_last4,
+        metadata_json,
+        created_at,
+        captured_at,
+        _loaded_at
+    from renamed
+
+)
+
+select * from final
+```
+
+```yaml
+# models/staging/stripe/_sources.yml
+version: 2
+
+sources:
+  - name: stripe
+    database: raw
+    schema: stripe
+    description: "Raw Stripe data (loaded via Fivetran / Stitch)."
+    loaded_at_field: _loaded_at
+    freshness:
+      warn_after: { count: 6, period: hour }
+      error_after: { count: 24, period: hour }
+    tables:
+      - name: payments_v2
+        description: "Stripe Payment Intents, v2 schema (since 2024-04)."
+```
+
+```yaml
+# models/staging/stripe/stg_stripe__payments.yml
+version: 2
+
+models:
+  - name: stg_stripe__payments
+    description: >
+      One row per Stripe payment, terminal-status only (succeeded, canceled,
+      refunded). Pending and failed payments are excluded here and tracked in
+      stg_stripe__payments_quarantine.
+    columns:
+      - name: payment_pk
+        description: Surrogate PK, MD5 of payment_id.
+        tests: [not_null, unique]
+      - name: payment_id
+        description: Stripe's payment ID (e.g., pi_3NXYZ...).
+      - name: customer_id
+        description: FK → stg_customers.customer_id.
+        tests:
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: status
+        description: Terminal payment status.
+        tests:
+          - accepted_values:
+              values: ['succeeded', 'canceled', 'refunded']
+      - name: amount_cents
+        description: Payment value in the smallest unit of the currency (cents for USD).
+      - name: created_at
+        description: UTC timestamp when payment was created.
+      - name: captured_at
+        description: UTC timestamp when payment was captured (null if uncaptured).
+```
+
+### Step 3 — Verification you actually do
+
+```bash
+dbt parse
+dbt build --select stg_stripe__payments --fail-fast
+
+# Confirm row counts
+snowsql -q "SELECT COUNT(*) FROM raw.stripe.payments_v2 WHERE status IN ('succeeded','canceled','refunded')"
+snowsql -q "SELECT COUNT(*) FROM analytics.staging.stg_stripe__payments"
+# These must match.
+
+# Confirm surrogate uniqueness
+snowsql -q "SELECT payment_pk, COUNT(*) c FROM analytics.staging.stg_stripe__payments GROUP BY 1 HAVING c > 1"
+# Should be empty.
+```
+
+### What the prompt got right vs what to push back on
+
+**Got right (because the prompt was specific):**
+- surrogate MD5 PK (the team's convention)
+- status filter (the team's policy)
+- schema.yml with column-level descriptions
+- _sources.yml with freshness check
+- TIMESTAMP_NTZ cast (the dialect detail)
+
+**Push back / refine:**
+- AI may have used `payment_method_type` directly without normalising to the team's controlled vocabulary → add `LOWER(TRIM(...))` and a mapping.
+- AI may have missed the `metadata` JSON validation → add the singular test from the FORMAT spec.
+- AI may have used `current_timestamp()` instead of the dbt `dbt.current_timestamp()` macro → fix.
+
+This is the **60/40 split** in action. AI produced ~85% of the model in 12 seconds. You spent ~15 minutes reviewing, normalising two columns, adding the malformed-metadata test, and swapping to dbt macros. The model is in prod by ~20 minutes total. **Manual baseline: ~90 minutes.**
+
+---
+
 ## What Comes Next
 
 > Lesson 5 — **Trust vs Verify** — the verification rituals that turn the prompts above into trustworthy output. AI-assisted doesn't mean AI-accepted. The habits that catch the silent bugs.
