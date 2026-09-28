@@ -26,7 +26,7 @@ rouge==1.0.1
 
 # Big Data
 pyarrow==14.0.2
-dask==2024.5.1
+dask==2026.8.0
 distributed==2024.5.1
 
 # Vector Databases
