@@ -38,6 +38,7 @@ data-enginnering-cloudvala/
     ├── de_system_design_cto_learning_plan.md  ← CTO/Principal plan for all 65 DE System Design lessons
     ├── kafka_stream_processing_cto_learning_plan.md  ← CTO/Principal plan for all 16 Kafka Stream Processing lessons
     ├── kafka_python_pipelines_cto_learning_plan.md   ← CTO/Principal plan for all 20 Building Data Pipelines with Kafka lessons
+    ├── advanced_pyspark_cto_learning_plan.md  ← CTO/Principal plan for all 19 Advanced PySpark lessons
     └── snowflake_full_detail.md               ← Snowflake Hands-On with verbatim Stages/Performance/Types/Streams deep-dives
 ```
 
@@ -48,8 +49,8 @@ data-enginnering-cloudvala/
 | Interview Q&A articles | 3 | 150 |
 | Course curricula (outline-only) | 9 | 411 |
 | Full-detail courses (with verbatim article bodies) | 3 | 124 (49 DE Found. + 36 AWS DE + 39 Snowflake) — 15 article bodies included |
-| CTO/Principal learning plans | 5 | 159 (36 AWS DE + 22 Azure DE + 65 DE System Design + 16 Kafka Stream Processing + 20 Kafka Python Pipelines lessons) |
-| **Total** | **20** | **720** |
+| CTO/Principal learning plans | 6 | 178 (36 AWS DE + 22 Azure DE + 65 DE System Design + 16 Kafka Stream Processing + 20 Kafka Python Pipelines + 19 Advanced PySpark lessons) |
+| **Total** | **21** | **739** |
 
 ## Use
 
