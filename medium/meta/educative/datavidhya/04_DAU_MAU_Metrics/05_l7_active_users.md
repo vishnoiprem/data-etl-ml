@@ -64,12 +64,12 @@ ORDER BY a.d;
 ### Expected output
 ```
    as_of_date   l7_users   l28_users
-   2026-01-08   6          8
+   2026-01-08   7          8
    2026-01-30   1          5
 ```
 Walk-through:
-- `2026-01-08`, L7 window = `2026-01-02..2026-01-08`: users 1,3,4,5,7,8 = 6 distinct.
-- `2026-01-08`, L28 window = `2025-12-12..2026-01-08`: every user has at least one event in this window = 8 distinct.
+- `2026-01-08`, L7 window = `2026-01-02..2026-01-08` (DATEDIFF in [0,6]): users 1,3,4,5,6,7,8 = 7 distinct.
+- `2026-01-08`, L28 window = `2025-12-12..2026-01-08` (DATEDIFF in [0,27]): every user has at least one event in this window = 8 distinct.
 - `2026-01-30`, L7 window = `2026-01-24..2026-01-30`: only user 6 = 1 distinct.
 - `2026-01-30`, L28 window = `2026-01-03..2026-01-30`: users 1 (Jan 8), 4 (Jan 9), 6 (Jan 30), 7 (Jan 8), 8 (Jan 9) = 5 distinct.
 
