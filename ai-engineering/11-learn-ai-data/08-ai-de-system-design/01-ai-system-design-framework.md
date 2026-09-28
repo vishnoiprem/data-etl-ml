@@ -254,6 +254,201 @@ Practise 3–5 designs with this template. You'll internalise the structure.
 
 ---
 
+## Worked Example — "real-time ad CTR prediction" through the full framework
+
+> **Interview question:** *"Design a real-time ad click-through-rate prediction system. 100B events/day, p99 < 50ms, 100M ads. Predict probability of click given user, ad, context."*
+
+### Step 1 — CLARIFY (5 min)
+
+```
+   users:        200M DAU
+   ads:          100M, refresh 1M/day
+   events:       100B/day (impressions + clicks), peak 1.5M QPS
+   traffic:      100B events → request-time scoring at ~30K QPS average, peak ~80K QPS
+   freshness:    user features:        < 5 min
+                 ad features:          < 5 min
+                 context features:     < 1 min (e.g., time of day, device class)
+                 model weight:         retrain hourly
+   latency:      p99 < 50ms end-to-end (request → response)
+   precision:    AUC > 0.85 on the eval set
+   ACL:          per-advertiser, ad visibility, brand-safety filters
+   cost:         < $500k/mo for serving + features + training
+   failure mode: silent accuracy drop (more impressions, fewer clicks, revenue falls)
+```
+
+The clarifying questions you ask:
+
+1. "Is this a per-impression auction, or a feed ranker?" (Affects whether you need a heavy model in the path.)
+2. "Are we optimising CTR or conversion?" (Conversion delays 30 days; CTR is same-session.)
+3. "What's the freshness budget on user features — minutes, hours?"
+4. "Are there brand-safety / advertiser filters (e.g., never show alcohol to minors)?"
+5. "Multi-region, or single?"
+
+### Step 2 — SKETCH (10 min)
+
+15 boxes, each with a one-line role:
+
+```
+   USER REQUEST
+        │
+        ▼
+   [CDN / Edge]   geo-routing, basic cache for repeat requests
+        │
+        ▼
+   [Auction Service]   selects ad candidate from inventory, runs bid logic
+        │
+        ▼
+   [Ad Candidate Gen]   top-100 ads given user (from retrieval index)
+        │
+        ▼
+   [Feature Fetch]   online store, < 5ms
+        │              fetches user features + ad features + context features
+        ▼
+   [Light Ranker]   GBDT, top-100 → top-20
+        │
+        ▼
+   [Heavy Ranker (DNN)]   GPU-served, top-20 → top-5
+        │
+        ▼
+   [Bid / Price]   second-price auction, reserve price
+        │
+        ▼
+   [Response]   bid + ad creative + click URL
+        │
+        ▼
+   [Impression Logged]   Kafka, downstream
+
+   ──── offline paths ────
+   [Click Stream Kafka] → [Flink Streaming Features]
+                                      │
+                                      ├──► [Online Store (Redis)]
+                                      └──► [Offline Store (Iceberg)]
+
+   [Hourly Trainer]   Spark + PyTorch
+        │
+        ▼
+   [Model Registry]   MLflow
+        │
+        ▼
+   [Online Ranker Service]
+```
+
+**Total: 15 boxes. Each has a role. Numbers next to each latency budget.**
+
+### Step 3 — DEEP-DIVE (15 min)
+
+Pick the 3 boxes that decide the outcome.
+
+#### Box A: Heavy Ranker (DNN)
+
+```
+   Latency budget: 20ms (5 candidates × 1 forward pass each, batched)
+
+   Model: DNN on user embedding × ad embedding → P(click)
+     user_tower: user_id → history features → DNN → 256-d
+     ad_tower:   ad_id → content features → DNN → 256-d
+     context:    time, device, location → DNN → 64-d
+     concat → MLP → 256 → 128 → 1 → sigmoid
+
+   Served on GPU (A10G, 4× GPUs):
+     - Batched inference: collect 20ms of requests, batch them
+     - Effective throughput: 50K QPS / 4 GPUs ≈ 12K QPS per GPU
+     - p99 batch latency: 15-20ms
+
+   Fallback: if GPU unavailable, CPU GBDT (slightly worse quality)
+```
+
+#### Box B: Feature fetch (online)
+
+```
+   Latency budget: 5-15ms
+
+   Per request, fetch:
+     - 50 user features (clicks_30d, last_5_categories, etc.)
+     - 20 ad features (ctr_7d, ctr_30d, advertiser_id, etc.)
+     - 10 context features (time_of_day, device, geo, page_category)
+     = ~80 features total
+
+   Storage: Redis cluster, key = entity_id
+     mget 80 keys per request → ~5-10ms
+
+   Hot key handling: if user_id is a top-1% high-traffic user, the
+     Redis shard for that user becomes hot. Use read-replicas + jitter.
+
+   Single-tenant vs multi-tenant: per-tenant key prefixes for ACL.
+```
+
+#### Box C: Ad candidate generation (the funnel)
+
+```
+   Latency budget: 15ms
+
+   Three sources:
+     1. ANN search:    user_embedding × ad_embedding via two-tower
+                       top-500 candidates, p95 < 20ms (Faiss / ScaNN)
+     2. Co-occurrence: "users like you also saw"
+                       top-200 from precomputed matrix
+     3. Trending:      top-100 trending ads by region
+
+   Combined: 800 candidates, ACL-filtered (skip restricted categories
+              for this user), deduped → 100 → light ranker
+```
+
+### Step 4 — TRADEOFFS (5 min)
+
+| Choice | Alt | Why this | Revisit if |
+|---|---|---|---|
+| **GPU DNN serving (heavy ranker)** | CPU-only ranker (e.g., single XGBoost) | Latency at p99 < 50ms requires GPU | GPU util < 30%, cost > $200k/mo |
+| **Two-tower ANN candidate gen** | Co-occurrence only | Catches novel ads; co-occurrence alone is stale | ANN recall < 80% on offline eval |
+| **Redis online store** | DynamoDB | Redis is faster; latency budget is tight | ops complexity > benefit |
+| **Hourly model retrain** | Daily | CTR shifts within hours (news, sports, daypart) | drift > 1 day detectable vs hourly |
+| **Edge-cache top results** | Always compute | Common ad/user pairs avoid 50ms entirely | cache freshness < 5 min acceptable |
+| **Single global model** | Per-region models | Geo-compliance not required here | cross-region privacy law appears |
+
+### Step 5 — SUMMARY (3 min)
+
+```
+   Decision:
+   - Two-tower ANN candidate gen (top-500) + co-occurrence (top-200) +
+     trending (top-100), deduped + ACL-filtered, → 100 candidates
+   - Light GBDT ranker on CPU: 100 → 20
+   - Heavy DNN ranker on GPU (batched): 20 → 5
+   - Bid computation: second-price auction
+   - Online features from Redis (mget 80 keys, 5-10ms)
+   - Streaming feature update (Flink → Redis) every 5 min
+   - Hourly retrain on PyTorch + Spark
+   - Eval-driven deployment (shadow → canary → 100%)
+
+   Cost (rough):
+   - GPU serving (4× A10G, ~50K QPS batched):  ~$80k/mo
+   - Redis cluster (100M user keys + 100M ad keys): ~$15k/mo
+   - ANN index (Pinecone / ScaNN, 100M ads):     ~$10k/mo
+   - Kafka + Flink (100B events/day streaming):   ~$60k/mo
+   - Offline training (hourly, GPU spot):         ~$40k/mo
+   - Eval + monitoring:                           ~$5k/mo
+   - ──────────────────────────────────────────
+   - Total:                                       ~$210k/mo
+
+   Revisit if:
+   - p99 > 50ms              → reduce candidates, smaller model, more batching
+   - AUC < 0.85              → bigger embedding, more features, longer training
+   - Cost > $500k/mo         → smaller DNN, fewer GPUs, cache more
+   - Brand-safety breach      → tighter filter, audit creative uploads
+   - Drift detected in hours → more frequent retrain
+```
+
+### The five things that distinguish a senior answer from a junior answer
+
+1. **You wrote numbers everywhere.** "200M users, 100M ads, 50K QPS, p99 < 50ms." Not "lots of users, many ads, fast."
+2. **You spent time on the boxes that decide the outcome** (heavy ranker, feature fetch, candidate gen) and **drew-but-didn't-over-explain** the boxes that don't (CDN, bidding).
+3. **You stated alternatives** for every major choice. "GPU over CPU because..." not "we use GPU."
+4. **You addressed monitoring and failure modes** explicitly (drift, brand-safety, hot keys).
+5. **You committed to a decision** and said what would change your mind.
+
+The 38-minute version of this answer is the difference between a hire at L5 and a hire at L6 (staff/principal). The framework is the structure that lets you allocate the time correctly.
+
+---
+
 ## What Comes Next
 
 > Lesson 2 — **Recommendation Pipeline** — full worked design at billion-scale. Follow the framework end-to-end.

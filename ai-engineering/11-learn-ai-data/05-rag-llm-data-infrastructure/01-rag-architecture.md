@@ -229,6 +229,165 @@ The DE work is **the boring 80%** that makes the AI 20% reliable.
 
 ---
 
+## Worked Example — a 5-design-question design brief, end-to-end
+
+> **Brief:** *"Design a RAG bot over our 50,000 Notion pages. Internal employees only. Refresh: every 6 hours. ACL: only show pages the user is permitted to see."*
+
+This is the kind of brief a senior DE receives in a 1:1 or a kickoff doc. Walk it through the 5 design questions from the lesson.
+
+### Q1 — Chunking strategy
+
+```
+   Decision: recursive structure-aware chunking, 400 tokens with 80-token overlap
+
+   Reasoning:
+   - Notion content is a mix of prose, headings, tables, code blocks.
+   - Fixed-size chunking breaks paragraphs mid-sentence.
+   - Sentence chunking explodes the count for long pages.
+   - Recursive with structure-awareness: respect headings, code blocks, lists.
+   - 400 tokens = ~1 paragraph in technical docs. Sweet spot for embedding
+     granularity (covered in Lesson 2).
+   - 80-token overlap = 20%, prevents losing cross-paragraph context.
+
+   Metadata per chunk:
+   - page_id (Notion)
+   - parent_page_id (for tree traversal)
+   - workspace_id (for ACL)
+   - user_permissions[] (Notion's permission list)
+   - last_edited_time (for freshness SLO)
+   - heading_path[] (e.g., ["Refund", "> Eligibility"])
+   - chunk_index_in_page (ordinal)
+   - content_type ("prose", "table", "code", "list")
+```
+
+### Q2 — Retrieval approach
+
+```
+   Decision: hybrid (BM25 + vector) with cross-encoder rerank
+
+   Reasoning:
+   - Notion queries mix exact-term ("policy-D-12") and semantic
+     ("what's our cancellation policy").
+   - Pure vector misses exact IDs; pure BM25 misses paraphrases.
+   - RRF fusion over BM25-top-50 + vector-top-50 → top-100 union.
+   - Cross-encoder rerank (Cohere Rerank 3) on top-100 → final top-10.
+   - Adds ~50ms but recovers 5-10% recall. (Lesson 3 of this module.)
+
+   Where to filter ACL:
+   - At the vector DB query: WHERE workspace_id IN :user_workspaces
+     AND (visibility='public' OR user_id IN :page_editors).
+   - NOT in the LLM prompt. LLM can be prompt-injected.
+```
+
+### Q3 — Freshness SLO
+
+```
+   Decision: 6-hour freshness (matches the brief)
+
+   Mechanism:
+   - Notion API → webhook on page change → Kafka event.
+   - Consumer picks up page_id, fetches new content, re-chunks,
+     re-embeds, upserts into vector DB.
+   - Pages edited > 6h ago are stale (alert if lag exceeds SLA).
+   - Full re-ingest of all 50K pages nightly to catch missed webhooks.
+
+   Cost check:
+   - 50K pages × ~600 tokens = 30M tokens to embed at full re-ingest.
+   - At $0.02/1M (Cohere embed-v3 / OpenAI small) = $0.60/night.
+   - Trivial. The infra to wire webhooks is the bigger cost.
+```
+
+### Q4 — Eval set
+
+```
+   Decision: 200-query eval set, hand-curated over 2 days
+
+   Composition:
+   - 120 "production-realistic" queries (mix of factual, multi-hop)
+   - 30 "hard" queries (multi-step, edge cases)
+   - 30 "guardrail" queries (PII, off-topic, prompt injection)
+   - 20 "freshness" queries (recently edited pages)
+
+   Per query, capture:
+   - query text
+   - expected_doc_ids (3-5 ground-truth Notion pages)
+   - expected_answer (1-2 sentences, hand-written)
+   - difficulty (easy / medium / hard)
+   - user_context (which workspaces this user can access)
+
+   Refresh: quarterly + every time Notion adds a major feature.
+
+   Run nightly at 01:00 against prod pipeline. Track:
+   - recall@10 (was the right page in the top-10?)
+   - MRR (how high was the first hit?)
+   - faithfulness (LLM-as-judge, 1-5)
+   - citation_accuracy (LLM-as-judge, 1-5)
+   - p95 latency
+   - cost per query
+   - guardrail pass rate (must not regress)
+```
+
+### Q5 — ACL model
+
+```
+   Decision: filter at the vector DB query; Notion permissions drive metadata
+
+   Reasoning:
+   - Notion has its own permission model: workspace, page-level user lists,
+     public-to-workspace, restricted-to-team.
+   - At ingest, attach every chunk with the page's effective permissions.
+   - At query, join against the requesting user's permissions.
+   - Fail-closed: if permission metadata is missing, refuse to show.
+
+   Metadata schema per chunk:
+   {
+     "page_id": "...",
+     "workspace_id": "...",
+     "parent_page_id": "...",
+     "user_emails_with_access": ["alice@co.com", "bob@co.com"],
+     "team_ids_with_access": ["team-eng", "team-data"],
+     "visibility": "workspace" | "team" | "restricted" | "public",
+     "last_edited_time": "..."
+   }
+
+   Query filter:
+   WHERE
+     workspace_id = :user_workspace
+     AND (
+       visibility = 'workspace'
+       OR :user_email IN user_emails_with_access
+       OR :user_team IN team_ids_with_access
+     )
+     AND NOT archived
+```
+
+### Putting it together — the cost roll-up
+
+```
+   Embeddings (50K pages × 600 tok × nightly re-ingest × $0.02/1M) = $0.60/day
+   Vector DB (managed Pinecone, 100K chunks @ 1536d)              = $70/mo
+   BM25 (OpenSearch S2 tier)                                      = $150/mo
+   Cohere Rerank (5K queries/day × ~$0.001/query)                  = $150/mo
+   LLM serving (Claude Haiku for routing, Sonnet for answers,
+                5K queries × ~$0.005/query)                        = $750/mo
+   Eval + monitoring                                              = $50/mo
+   ────────────────────────────────────────────────────────────
+   Total: ~$1,200/mo, ~$0.008/query
+```
+
+That's a real number you can put in a budget doc. $1,200/mo for an internal tool that handles 5K queries/day across 200 employees.
+
+### What this example demonstrates
+
+- All 5 design questions answered with **specifics** (numbers, schema, threshold).
+- The interplay: ACL metadata drives the chunk schema, which drives the vector DB query, which drives the LLM context, which drives what the user can see. **The DE owns the chain.**
+- A real cost roll-up that survives scrutiny in a budget review.
+- The 80/20: you answered 5 design questions in maybe 90 minutes of focused work. That becomes the kickoff doc. Without these answers, the project is "we're building a RAG" — and it never ships.
+
+This is the kind of design brief that should exist for every RAG project before a single line of code is written. If you can't fill it in, the project isn't ready.
+
+---
+
 ## What Comes Next
 
 > Lesson 2 — **Ingestion & Chunking** — the most-debated stage. Chunk size, overlap, hierarchical strategies, metadata preservation, and the tradeoffs.

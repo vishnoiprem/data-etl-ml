@@ -275,6 +275,279 @@ For prototype-to-prod on AWS, this is the fastest path. For fine-grained control
 
 ---
 
+## Worked Example — Bedrock + OpenSearch RAG over S3-stored PDFs
+
+> **Goal:** Build a RAG system over 1M internal PDFs (compliance docs, contracts, runbooks). Stack: AWS-only. Use Bedrock for LLMs, OpenSearch for vectors, Textract for parsing, SageMaker Pipelines for ingest orchestration. Multi-tenant via AWS IAM.
+
+### Architecture
+
+```
+   ┌──────────────────┐
+   │  S3 bucket       │  s3://company-docs/  (1M PDFs, versioned)
+   │  (raw PDFs)      │
+   └────────┬─────────┘
+            │  (event: PutObject)
+            ▼
+   ┌──────────────────┐
+   │  EventBridge     │  routes to Step Functions
+   │  + SQS           │
+   └────────┬─────────┘
+            │
+            ▼
+   ┌──────────────────────────────────────────────────┐
+   │  Step Functions state machine                    │
+   │                                                  │
+   │  [Textract OCR + tables]                         │
+   │        │                                         │
+   │        ▼                                         │
+   │  [Chunk (400 tok, recursive)]                    │
+   │        │                                         │
+   │        ▼                                         │
+   │  [Bedrock Titan Embeddings]                      │
+   │        │                                         │
+   │        ▼                                         │
+   │  [OpenSearch k-NN upsert + BM25]                 │
+   └────────┬─────────────────────────────────────────┘
+            │
+            ▼
+   ┌──────────────────────────────────────────────────┐
+   │  QUERY TIME                                      │
+   │                                                  │
+   │  [API Gateway + Lambda]                          │
+   │        │                                         │
+   │        ▼                                         │
+   │  [Embed via Bedrock Titan]                       │
+   │        │                                         │
+   │        ▼                                         │
+   │  [OpenSearch hybrid search (BM25 + k-NN)]        │
+   │        │                                         │
+   │        ▼                                         │
+   │  [Cohere Rerank on Bedrock] (optional)           │
+   │        │                                         │
+   │        ▼                                         │
+   │  [Bedrock Claude Sonnet (answer + citations)]    │
+   └──────────────────────────────────────────────────┘
+```
+
+### Step 1 — Ingest: Textract + chunk + embed
+
+```python
+# ingest/handler.py — invoked by Step Functions
+import json
+import boto3
+from typing import Iterator
+
+textract = boto3.client("textract")
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+s3 = boto3.client("s3")
+opensearch = boto3.client("opensearch")
+
+
+def handler(event, context):
+    bucket = event["bucket"]
+    key = event["key"]
+
+    # 1. Textract
+    response = textract.start_document_text_detection(
+        DocumentLocation={"S3Object": {"Bucket": bucket, "Name": key}},
+        FeatureTypes=["TABLES", "FORMS"],
+    )
+    job_id = response["JobId"]
+    # poll until done (or use async pagination)
+    text = wait_for_textract(job_id)
+    tables = wait_for_textract_tables(job_id)
+
+    # 2. Chunk (recursive, structure-aware)
+    chunks = recursive_chunk(text, max_tokens=400, overlap=80)
+
+    # 3. Embed (Bedrock Titan)
+    embeddings = []
+    for batch in batched(chunks, batch_size=20):
+        body = json.dumps({"inputText": [c.text for c in batch]})
+        resp = bedrock.invoke_model(
+            modelId="amazon.titan-embed-text-v2:0",
+            contentType="application/json",
+            accept="application/json",
+            body=body,
+        )
+        embeddings.extend(json.loads(resp["body"].read())["embedding"])
+
+    # 4. Upsert to OpenSearch
+    for chunk, emb in zip(chunks, embeddings):
+        opensearch.index(
+            index="company-docs",
+            body={
+                "doc_id": chunk.doc_id,
+                "tenant_id": chunk.tenant_id,
+                "chunk_index": chunk.index,
+                "text": chunk.text,
+                "embedding": emb,
+                "source_url": f"s3://{bucket}/{key}",
+                "page_number": chunk.page_number,
+                "heading_path": chunk.heading_path,
+                "last_modified": chunk.last_modified,
+            },
+        )
+```
+
+### Step 2 — Query: Bedrock + OpenSearch hybrid
+
+```python
+# query/handler.py — Lambda behind API Gateway
+import json
+import boto3
+from opensearchpy import OpenSearch
+
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+client = OpenSearch(
+    hosts=[{"host": "search-xxx.us-east-1.es.amazonaws.com", "port": 443}],
+    http_auth=(("user", "pass")),  # from Secrets Manager
+    use_ssl=True,
+)
+
+
+def handler(event, context):
+    user_query = event["query"]
+    user_tenant = event["tenant_id"]      # from JWT claim
+    user_roles = event["roles"]            # from JWT claim
+
+    # 1. Embed query
+    resp = bedrock.invoke_model(
+        modelId="amazon.titan-embed-text-v2:0",
+        contentType="application/json",
+        accept="application/json",
+        body=json.dumps({"inputText": user_query}),
+    )
+    query_emb = json.loads(resp["body"].read())["embedding"]
+
+    # 2. Hybrid search with ACL filter (key part!)
+    body = {
+        "size": 10,
+        "query": {
+            "bool": {
+                "must": {
+                    "hybrid": {
+                        "queries": [
+                            {"match": {"text": user_query}},
+                            {"knn": {
+                                "embedding": {
+                                    "vector": query_emb,
+                                    "k": 50,
+                                }
+                            }},
+                        ]
+                    }
+                },
+                # ACL FILTER AT QUERY TIME — not in the LLM prompt
+                "filter": [
+                    {"term": {"tenant_id": user_tenant}},
+                    {"bool": {"should": [
+                        {"term": {"visibility": "public"}},
+                        {"terms": {"allowed_roles": user_roles}},
+                    ]}},
+                ],
+            }
+        },
+    }
+    results = client.search(index="company-docs", body=body)
+
+    chunks = [hit["_source"] for hit in results["hits"]["hits"]]
+
+    # 3. Generate answer with citations (Bedrock Claude Sonnet)
+    context = "\n\n".join(
+        f"[Source {i+1}: {c['source_url']}, page {c.get('page_number', '?')}]\n{c['text']}"
+        for i, c in enumerate(chunks)
+    )
+    prompt = f"""Answer using ONLY the sources below. Cite each claim with [Source N].
+If the sources don't contain the answer, say "I don't know" — do not make up information.
+
+SOURCES:
+{context}
+
+QUESTION: {user_query}
+
+ANSWER:"""
+
+    resp = bedrock.invoke_model(
+        modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
+        contentType="application/json",
+        accept="application/json",
+        body=json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [{"role": "user", "content": prompt}],
+        }),
+    )
+    answer = json.loads(resp["body"].read())["content"][0]["text"]
+
+    # 4. Return with citations
+    return {
+        "answer": answer,
+        "citations": [{"doc_id": c["doc_id"], "page": c["page_number"]} for c in chunks],
+    }
+```
+
+### Step 3 — IAM policies (the AWS-native ACL pattern)
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {"AWS": "arn:aws:iam::123456789012:role/data-platform"},
+      "Action": "es:ESHttp*",
+      "Resource": "arn:aws:es:us-east-1:123456789012:domain/company-docs/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/tenant_id": "${aws:PrincipalTag/tenant_id}"
+        }
+      }
+    }
+  ]
+}
+```
+
+The IAM role has a `tenant_id` tag. OpenSearch evaluates the resource policy and only returns documents matching the user's tenant. **ACL at the infra layer, not in code.**
+
+### Cost roll-up (1M PDFs, 5K queries/day, single tenant for simplicity)
+
+```
+   ONE-TIME INGEST
+   ────────────────
+   Textract (1M pages × $1.50/1000):               $1,500  (one-shot)
+   Bedrock Titan Embed (1M pages × 600 tok × 1M):
+       = 600M tokens × $0.10/M                      $60     (one-shot)
+
+   RECURRING (per month)
+   ──────────────────────
+   OpenSearch (managed t3.small.search × 3 AZ):     $200/mo
+   Bedrock Titan Embed (5K queries × 200 tok):      $0.10/mo
+   Bedrock Claude Sonnet (5K × 1.5K tok × $3/M):
+       = 22.5M tokens × $3                          $68/mo
+   Bedrock Claude Sonnet output (5K × 200 tok × $15/M):
+       = 3M tokens × $15                            $45/mo
+   S3 storage (1M PDFs, 50GB total):                $1.15/mo
+   Lambda invocations:                               $0.20/mo
+   ──────────────────────────────────────────────
+   Total recurring:                                 ~$315/mo
+   + one-shot ingest:                               $1,560
+```
+
+That's **less than $0.003 per query** for the entire pipeline. Affordable for internal use.
+
+### What this example demonstrates
+
+- The components actually touch (Textract → chunk → Bedrock → OpenSearch → Bedrock).
+- The ACL pattern at **two layers**: OpenSearch query filter (semantic) + IAM policy (infra).
+- The cost is **real** and **defensible** in a budget review.
+- The architecture is **AWS-native** — minimal glue code. The trade-off is vendor lock-in (Lesson 2 covers alternatives).
+- The IAM policy tag-based ACL is a pattern unique to AWS — if you're on AWS, this is the cheapest way to do per-tenant isolation.
+
+This is the kind of architecture diagram you'd put in a kickoff doc and a cost doc on the same day.
+
+---
+
 ## What Comes Next
 
 > Lesson 2 — **GCP AI for Data Engineers** — Vertex AI, BigQuery, Vector Search, and the GCP-native data + AI stack.

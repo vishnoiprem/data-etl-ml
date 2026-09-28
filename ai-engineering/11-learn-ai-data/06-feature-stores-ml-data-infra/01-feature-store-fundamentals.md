@@ -201,6 +201,276 @@ If the data scientist writes the SQL and the platform team wires the infra, you 
 
 ---
 
+## Worked Example — a fraud-detection feature store, end-to-end
+
+> **Goal:** Build a feature store for a real-time fraud-detection model. Three features, two freshness tiers, online + offline parity. Single definition used at both training and serving.
+
+### The three features
+
+```
+   user_velocity_5m          sub-second freshness, used at serving
+   user_amount_sum_1h        sub-second freshness, used at serving
+   user_chargeback_rate_90d  daily freshness, used at training (not serving)
+```
+
+The first two need **online** because the model runs in <50ms at request time. The third is **offline-only** because it's a slowly-changing attribute that doesn't need live recompute.
+
+### Step 1 — Define the features (one source of truth)
+
+```python
+# features/repo.py — the registry
+
+from feast import (
+    Entity, FeatureView, Field, FileSource, RedisSource,
+    PushSource,
+)
+from feast.types import Float32, Int64
+from datetime import timedelta
+
+user_entity = Entity(
+    name="user_id",
+    description="Unique user identifier from the auth system",
+)
+
+
+# Feature 1: streaming, online + offline
+user_velocity_5m_source = FileSource(
+    path="s3://lake/fraud/events/",
+    timestamp_field="event_ts",
+    created_timestamp_column="ingest_ts",
+)
+
+user_velocity_5m = FeatureView(
+    name="user_velocity_5m",
+    entities=[user_entity],
+    ttl=timedelta(minutes=15),
+    schema=[
+        Field(name="txn_count_5m", dtype=Int64),
+        Field(name="txn_sum_amount_5m", dtype=Float32),
+    ],
+    source=user_velocity_5m_source,
+    online=True,
+    owner="fraud-platform",
+    freshness_sla="5s",
+    description="Count and total $ of transactions per user in last 5 min",
+)
+
+
+# Feature 2: nightly batch, offline only
+user_chargeback_rate_90d_source = FileSource(
+    path="s3://lake/fraud/chargebacks/",
+    timestamp_field="as_of_ts",
+)
+
+user_chargeback_rate_90d = FeatureView(
+    name="user_chargeback_rate_90d",
+    entities=[user_entity],
+    ttl=timedelta(days=120),
+    schema=[Field(name="chargeback_rate_90d", dtype=Float32)],
+    source=user_chargeback_rate_90d_source,
+    online=False,             # offline-only
+    owner="fraud-platform",
+    freshness_sla="24h",
+    description="Fraction of user's transactions over the last 90 days that resulted in a chargeback",
+)
+```
+
+### Step 2 — Streaming transform (Flink)
+
+```java
+// flink-job/src/main/java/fraud/UserVelocityTransform.java
+// Sub-second feature engineering. Reads from Kafka, writes to
+// Parquet (offline) AND Redis (online). Idempotent by (user_id, event_ts).
+
+public class UserVelocityTransform extends KeyedProcessFunction<String, Event, FeatureUpdate> {
+
+    private transient ValueState<VelocityState> state;
+
+    @Override
+    public void open(Configuration parameters) {
+        ValueStateDescriptor<VelocityState> descriptor =
+            new ValueStateDescriptor<>("velocity", TypeInformation.of(VelocityState.class));
+        state = getRuntimeContext().getState(descriptor);
+    }
+
+    @Override
+    public void processElement(Event event, Context ctx, Collector<FeatureUpdate> out) throws Exception {
+        VelocityState s = state.value();
+        if (s == null) s = new VelocityState();
+
+        long now = ctx.timestamp();
+        s.addEvent(event, now);            // updates count and sum, evicts events > 5 min old
+
+        state.update(s);
+
+        // Emit to both stores
+        FeatureUpdate update = new FeatureUpdate(
+            event.userId,
+            now,
+            s.count,
+            s.sumAmount
+        );
+        out.collect(update);
+    }
+}
+```
+
+The transform runs 24/7, processing every transaction event. Writes idempotently keyed on `(user_id, event_ts)`.
+
+### Step 3 — Online/offline sync
+
+```
+   ┌──────────────┐         ┌─────────────────┐
+   │  Flink job   │────────►│  S3 (Parquet)   │  offline, source of truth
+   │  (streaming) │         └─────────────────┘
+   │              │
+   │              │         ┌─────────────────┐
+   │              │────────►│  Redis (online) │  < 10ms reads
+   └──────────────┘         └─────────────────┘
+                                    ▲
+                                    │  CDC sync catches any misses
+                                    │  (every 1 min, idempotent)
+                                    │
+                             ┌─────────────────┐
+                             │  Debezium CDC   │
+                             └─────────────────┘
+```
+
+If Redis goes down or a write fails, the CDC consumer reads from the offline Parquet and rebuilds Redis. **Offline is the source of truth; online is always a cache of recent values.**
+
+### Step 4 — Training data generation (point-in-time correct)
+
+```python
+# training/generate_training_set.py
+# Joins labels (chargebacks confirmed T+45d) with features as-of the original txn time.
+
+from feast import FeatureStore
+
+store = FeatureStore(repo_path="features/")
+
+training_df = store.get_historical_features(
+    entity_df=f"""
+        SELECT
+          user_id,
+          original_txn_ts AS event_ts,        -- the timestamp we want features as-of
+          label_fraud AS label
+        FROM fraud.labels
+        WHERE original_txn_ts BETWEEN '2025-01-01' AND '2025-12-31'
+    """,
+    features=[
+        "user_velocity_5m:txn_count_5m",
+        "user_velocity_5m:txn_sum_amount_5m",
+        "user_chargeback_rate_90d:chargeback_rate_90d",
+    ],
+).to_df()
+
+# The ASOF JOIN happens inside Feast. Each row's features are joined
+# as-of the row's event_ts. NO future leakage.
+print(training_df.head())
+#        user_id   event_ts   label  txn_count_5m  txn_sum_amount_5m  chargeback_rate_90d
+# 0      u_42      2025-03-15 10:23  1        3              142.50               0.012
+# 1      u_42      2025-03-15 10:31  0        2               87.00               0.012
+# 2      u_43      2025-03-15 11:02  1        8              950.25               0.087
+# 3      u_43      2025-03-15 11:15  0        5              410.00               0.087
+```
+
+The critical property: **`chargeback_rate_90d` is the rate as-of the txn time, not as-of today.** Without point-in-time correctness, your training data has look-ahead bias and the model fails in production.
+
+### Step 5 — Online serving
+
+```python
+# serving/fraud_inference.py
+# Latency budget: p99 < 100ms total.
+
+from feast import FeatureStore
+
+store = FeatureStore(repo_path="features/")
+
+def score_transaction(txn):
+    # 1. Fetch online features (target: 5-15ms)
+    features = store.get_online_features(
+        features=[
+            "user_velocity_5m:txn_count_5m",
+            "user_velocity_5m:txn_sum_amount_5m",
+        ],
+        entity_rows=[{"user_id": txn.user_id}],
+    ).to_dict()
+
+    # 2. Model inference (target: 20-30ms)
+    feature_vector = [
+        features["txn_count_5m"][0],
+        features["txn_sum_amount_5m"][0],
+    ]
+    prob_fraud = model.predict_proba([feature_vector])[0]
+
+    # 3. Decision
+    if prob_fraud >= 0.95:
+        return "DECLINE"
+    elif prob_fraud >= 0.50:
+        return "REVIEW"
+    else:
+        return "APPROVE"
+```
+
+Note: `chargeback_rate_90d` is NOT in the online feature fetch. It's offline-only because it doesn't change in real-time. The model that trains on it can include it; the model that serves doesn't need it.
+
+### Step 6 — Drift monitoring
+
+```python
+# monitoring/feature_drift.py
+# Run hourly. Alert if PSI > 0.25 for any feature.
+
+import pandas as pd
+from scipy.stats import ks_2samp
+
+def psi(expected, actual, bins=10):
+    """Population Stability Index. PSI > 0.25 = significant drift."""
+    expected_percents = np.histogram(expected, bins=bins)[0] / len(expected)
+    actual_percents = np.histogram(actual, bins=bins)[0] / len(actual)
+    return np.sum(
+        (actual_percents - expected_percents) * np.log(actual_percents / expected_percents)
+    )
+
+# Get baseline (training distribution) and current (last 24h)
+baseline = store.get_historical_features(...).to_df()
+current = get_last_24h_from_redis(...)
+
+for feature in ["txn_count_5m", "txn_sum_amount_5m", "chargeback_rate_90d"]:
+    psi_val = psi(baseline[feature], current[feature])
+    if psi_val > 0.25:
+        alert(f"Feature {feature} PSI = {psi_val:.3f}, drift detected")
+        page_oncall("data-platform")
+```
+
+### Cost roll-up (production scale, 50M users, 100M txns/day)
+
+```
+   Redis (online, 50M user keys × 5 features × ~200 bytes):    ~$15k/mo
+   S3 + Iceberg (offline, 100M events/day × 90d retention):     ~$10k/mo
+   Flink cluster (streaming transform, 24/7):                   ~$30k/mo
+   Feast control plane (self-hosted) OR Tecton licence:         ~$20k/mo (Feast)
+                                                                  or $20k+/mo (Tecton)
+   Monitoring + dashboards:                                      ~$3k/mo
+   ────────────────────────────────────────────────────────
+   Total: ~$78k/mo for 3 features, 1 model, 100M txns/day
+
+   Per-query online inference cost: < 10ms Redis read = < $0.00001
+   Per-training-set generation: ~$5 (one-time, 12mo of data)
+```
+
+### What this example demonstrates
+
+- **One definition, two stores.** The FeatureView is the contract.
+- **Streaming transform** for sub-second freshness; **batch transform** for daily.
+- **Point-in-time joins** prevent look-ahead bias in training data.
+- **Online inference is read-only** — no compute at request time, just a Redis fetch.
+- **Drift monitoring** catches upstream pipeline changes before they silently degrade the model.
+- **Cost roll-up** is real, defensible, and shows the dominant cost drivers (Redis + Flink).
+
+This is the pattern every production ML team eventually lands on. **The feature store is the moat, not the model.** Three different teams could share this `user_velocity_5m` definition; the same definition, the same numbers, the same freshness SLA.
+
+---
+
 ## What Comes Next
 
 > Lesson 2 — **Feature Store Comparison** — Feast, Tecton, Featureform, AWS / GCP / Databricks / Snowflake built-ins. The decision framework.
