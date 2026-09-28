@@ -30,7 +30,7 @@ dask==2024.5.1
 distributed==2024.5.1
 
 # Vector Databases
-pinecone-client==3.2.0
+pinecone-client==6.0.0
 chromadb==0.4.22
 faiss-cpu==1.8.0
 
