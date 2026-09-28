@@ -250,11 +250,11 @@ INSERT INTO notification_events (notification_id, delivery_id, event_type, occur
     (1, 1, 'delivered',   DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY) + INTERVAL 30 SECOND),
     (1, 1, 'opened',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 DAY)),
     (3, 5, 'failed',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 3 DAY) + INTERVAL 2 SECOND),
-    (4, 5, 'sent',        DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR)),
-    (4, 5, 'opened',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 11 HOUR)),
+    (4, 6, 'sent',        DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR)),
+    (4, 6, 'opened',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 11 HOUR)),
     (6, 9, 'failed',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)),
     (6, 9, 'rate_limited',DATE_SUB(UTC_TIMESTAMP(), INTERVAL 50 MINUTE)),
-    (10,15,'queued',      DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 DAY));
+    (10,13,'queued',      DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 DAY));
 
 -- =====================================================================
 -- Example queries

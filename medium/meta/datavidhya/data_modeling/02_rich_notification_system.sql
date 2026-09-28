@@ -614,9 +614,9 @@ INSERT INTO notification_events_audit (notification_id, delivery_id, event_type,
     (1, 1, 'delivered',DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY) + INTERVAL 2 SECOND),
     (1, 1, 'opened',   DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 DAY)),
     (2, 3, 'read',     DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)),
-    (4, 4, 'failed',   DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE)),
-    (4, 4, 'retried',  DATE_SUB(UTC_TIMESTAMP(), INTERVAL 25 MINUTE)),
-    (5, 5, 'archived', DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE)),
+    (3, 4, 'failed',   DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE)),
+    (3, 4, 'retried',  DATE_SUB(UTC_TIMESTAMP(), INTERVAL 25 MINUTE)),
+    (4, 5, 'archived', DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE)),
     (12, NULL, 'created', DATE_SUB(UTC_TIMESTAMP(), INTERVAL 5 MINUTE));
 
 -- =====================================================================
