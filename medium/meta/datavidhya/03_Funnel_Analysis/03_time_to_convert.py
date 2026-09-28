@@ -142,3 +142,78 @@ FROM conv
 # PERCENTILE_APPROX would return an actual data point (10.0) instead — fine at
 # scale, wrong when you are asserting an interpolated median on 2 rows.
 expect("conversion time distribution", AGG, [(2, 15.00, 15.00)])
+
+
+# ============================================================================
+# MySQL equivalent (MySQL 8.0+) -- paste the un-commented block into a
+# `mysql` client to reproduce the same results outside of PySpark.
+# ============================================================================
+# CREATE DATABASE IF NOT EXISTS funnel_demo;
+# USE funnel_demo;
+#
+# CREATE TABLE funnel_events (
+#     user_id  INT          NOT NULL,
+#     step     VARCHAR(20)  NOT NULL,
+#     event_ts DATETIME     NOT NULL
+# );
+#
+# INSERT INTO funnel_events (user_id, step, event_ts) VALUES
+#     (1, 'view',     '2026-01-01 10:00:00'),
+#     (1, 'message',  '2026-01-01 10:05:00'),
+#     (1, 'purchase', '2026-01-01 10:20:00'),
+#     (2, 'view',     '2026-01-01 11:00:00'),
+#     (2, 'message',  '2026-01-01 11:30:00'),
+#     (3, 'view',     '2026-01-01 12:00:00'),
+#     (3, 'purchase', '2026-01-01 12:10:00'),   -- skipped 'message'
+#     (4, 'view',     '2026-01-02 09:00:00'),
+#     (5, 'view',     '2026-01-02 09:30:00'),
+#     (5, 'view',     '2026-01-02 09:40:00'),   -- duplicate step
+#     (5, 'message',  '2026-01-02 09:50:00');
+#
+# -- Per-user latency (same as PySpark):
+# WITH per_user AS (
+#     SELECT user_id,
+#            MIN(CASE WHEN step = 'view'     THEN event_ts END) AS view_ts,
+#            MIN(CASE WHEN step = 'purchase' THEN event_ts END) AS buy_ts
+#     FROM funnel_events
+#     GROUP BY user_id
+# )
+# SELECT user_id,
+#        ROUND((UNIX_TIMESTAMP(buy_ts) - UNIX_TIMESTAMP(view_ts)) / 60.0, 2) AS minutes_to_buy
+# FROM per_user
+# WHERE buy_ts IS NOT NULL AND view_ts IS NOT NULL
+# ORDER BY user_id;
+#
+# -- Per-user expected output: (1, 20.00), (3, 10.00)
+#
+# -- Distribution roll-up. MySQL 8.0 has no exact PERCENTILE() function;
+# -- the canonical median-via-Windows form is below. For 2 rows, it
+# -- correctly returns the interpolated 15.00 (avg of 10.00 and 20.00).
+# WITH per_user AS (
+#     SELECT user_id,
+#            MIN(CASE WHEN step = 'view'     THEN event_ts END) AS view_ts,
+#            MIN(CASE WHEN step = 'purchase' THEN event_ts END) AS buy_ts
+#     FROM funnel_events GROUP BY user_id
+# ),
+# conv AS (
+#     SELECT (UNIX_TIMESTAMP(buy_ts) - UNIX_TIMESTAMP(view_ts)) / 60.0 AS mins
+#     FROM per_user WHERE buy_ts IS NOT NULL AND view_ts IS NOT NULL
+# ),
+# ranked AS (
+#     SELECT mins,
+#            ROW_NUMBER() OVER (ORDER BY mins) AS rn,
+#            COUNT(*)     OVER ()              AS n
+#     FROM conv
+# )
+# SELECT (SELECT COUNT(*) FROM conv) AS converters,
+#        ROUND((SELECT AVG(mins) FROM conv), 2) AS avg_mins,
+#        ROUND(AVG(CASE WHEN rn IN (FLOOR((n + 1) / 2), CEIL((n + 1) / 2))
+#                       THEN mins END), 2) AS median_mins
+# FROM ranked;
+#
+# -- Expected output (same as the PySpark assertion above):
+# -- +-----------+----------+------------+
+# -- | converters| avg_mins | median_mins|
+# -- +-----------+----------+------------+
+# -- |         2 |    15.00 |      15.00 |
+# -- +-----------+----------+------------+

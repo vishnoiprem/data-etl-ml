@@ -135,3 +135,60 @@ out = (per_step
 assert [tuple(r) for r in out.collect()] == [
     ("view", 5, None, None), ("message", 3, 60.00, 40.00), ("purchase", 2, 66.67, 33.33)]
 print("[PASS] loose funnel — DataFrame API matches SQL")
+
+
+# ============================================================================
+# MySQL equivalent (MySQL 8.0+) -- paste the un-commented block into a
+# `mysql` client to reproduce the same results outside of PySpark.
+# ============================================================================
+# CREATE DATABASE IF NOT EXISTS funnel_demo;
+# USE funnel_demo;
+#
+# CREATE TABLE funnel_events (
+#     user_id  INT          NOT NULL,
+#     step     VARCHAR(20)  NOT NULL,
+#     event_ts DATETIME     NOT NULL
+# );
+#
+# INSERT INTO funnel_events (user_id, step, event_ts) VALUES
+#     (1, 'view',     '2026-01-01 10:00:00'),
+#     (1, 'message',  '2026-01-01 10:05:00'),
+#     (1, 'purchase', '2026-01-01 10:20:00'),
+#     (2, 'view',     '2026-01-01 11:00:00'),
+#     (2, 'message',  '2026-01-01 11:30:00'),
+#     (3, 'view',     '2026-01-01 12:00:00'),
+#     (3, 'purchase', '2026-01-01 12:10:00'),   -- skipped 'message'
+#     (4, 'view',     '2026-01-02 09:00:00'),
+#     (5, 'view',     '2026-01-02 09:30:00'),
+#     (5, 'view',     '2026-01-02 09:40:00'),   -- duplicate step
+#     (5, 'message',  '2026-01-02 09:50:00');
+#
+# -- MySQL has the same LAG() OVER (ORDER BY step_num) as Spark 3.x for
+# -- MySQL 8.0+. The spine is a UNION ALL constant SELECT (the VALUES
+# -- table-value constructor is also fine in 8.0.19+; kept inline here so
+# -- the query is copy-paste-portable to any 8.0+ server).
+# WITH RECURSIVE spine AS (
+#     SELECT 'view'     AS step, 1 AS step_num
+#     UNION ALL SELECT 'message',  2
+#     UNION ALL SELECT 'purchase', 3
+# ),
+# per_step AS (
+#     SELECT s.step, s.step_num, COUNT(DISTINCT f.user_id) AS users
+#     FROM spine s
+#     LEFT JOIN funnel_events f ON f.step = s.step
+#     GROUP BY s.step, s.step_num
+# )
+# SELECT step, users,
+#        ROUND(100.0 * users / LAG(users) OVER (ORDER BY step_num), 2) AS conv_from_prev_pct,
+#        ROUND(100.0 - 100.0 * users / LAG(users) OVER (ORDER BY step_num), 2) AS drop_off_pct
+# FROM per_step
+# ORDER BY step_num;
+#
+# -- Expected output (same as the PySpark assertion above):
+# -- +----------+-------+-------------------+--------------+
+# -- | step     | users | conv_from_prev_pct| drop_off_pct |
+# -- +----------+-------+-------------------+--------------+
+# -- | view     |     5 |              NULL |         NULL |
+# -- | message  |     3 |             60.00 |        40.00 |
+# -- | purchase |     2 |             66.67 |        33.33 |
+# -- +----------+-------+-------------------+--------------+
