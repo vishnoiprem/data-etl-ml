@@ -1605,6 +1605,9 @@ vs Redshift** narrative.
 
 ## Lesson 6 — Delta Lake
 
+> Full deep-dive article body: [`delta_lake_full_detail.md`](./delta_lake_full_detail.md)
+> (verbatim reproduction of Darshil Parmar's article; stub pending source paste).
+
 ### Theory
 
 Delta = open table format with ACID. Mental model:
