@@ -47,7 +47,7 @@ protobuf==3.20.3
 # Visualization
 matplotlib==3.8.0
 seaborn==0.13.0
-plotly==5.15.0
+plotly==7.1.0
 
 # Development
 jupyterlab==4.0.0
