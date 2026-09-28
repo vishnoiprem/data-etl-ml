@@ -297,3 +297,128 @@ naive_versions = comparison.filter(F.col("s_id").isNotNull()).count()
 guarded_versions = changed.count() + brand_new.count()
 assert (naive_versions, guarded_versions) == (4, 2), (naive_versions, guarded_versions)
 print("[PASS] Q23 no-hash MERGE would write 4 new versions/day; the guard writes 2")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE dim_advertiser (
+#       advertiser_sk   INT             NOT NULL,
+#       advertiser_id   INT             NOT NULL,
+#       country         VARCHAR(8)      NOT NULL,
+#       tier            VARCHAR(16)     NOT NULL,
+#       last_login_at   DATETIME        NULL,
+#       effective_from  DATE            NOT NULL,
+#       effective_to    DATE            NOT NULL,
+#       is_current      TINYINT(1)      NOT NULL,
+#       PRIMARY KEY (advertiser_sk),
+#       KEY idx_dim_adv_id (advertiser_id),
+#       KEY idx_dim_adv_pit (advertiser_id, effective_from, effective_to),
+#       KEY idx_dim_adv_current (advertiser_id, is_current)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_advertiser
+#       (advertiser_sk, advertiser_id, country, tier, last_login_at,
+#        effective_from, effective_to, is_current) VALUES
+#       (1, 501, 'US', 'gold',   '2026-02-01 00:00:00', '2026-01-01', '9999-12-31', 1),
+#       (2, 502, 'IN', 'silver', '2026-02-10 00:00:00', '2026-01-01', '9999-12-31', 1),
+#       (3, 503, 'BR', 'bronze', '2026-02-11 00:00:00', '2026-01-01', '9999-12-31', 1);
+#
+#   CREATE TABLE staging_advertiser (
+#       advertiser_id   INT         NOT NULL,
+#       country         VARCHAR(8)  NOT NULL,
+#       tier            VARCHAR(16) NOT NULL,
+#       last_login_at   DATETIME    NULL,
+#       KEY idx_stg_adv_id (advertiser_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO staging_advertiser
+#       (advertiser_id, country, tier, last_login_at) VALUES
+#       (501, 'US', 'platinum', '2026-03-01 00:00:00'),
+#       (502, 'IN', 'silver',   '2026-03-01 09:30:00'),
+#       (503, 'BR', 'bronze',   '2026-02-11 00:00:00'),
+#       (504, 'DE', 'gold',     '2026-03-01 10:00:00');
+#
+#   CREATE TABLE fact_spend (
+#       advertiser_id   INT             NOT NULL,
+#       event_date      DATE            NOT NULL,
+#       spend           DECIMAL(12,2)   NOT NULL,
+#       KEY idx_fact_spend_date (event_date),
+#       KEY idx_fact_spend_adv_date (advertiser_id, event_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_spend (advertiser_id, event_date, spend) VALUES
+#       (501, '2026-03-01', 1000.00),
+#       (501, '2026-01-15',  400.00),
+#       (501, '2026-03-05',  600.00);
+#
+#   -- Q23 SCD2 upsert end state (expect block).
+#   -- Build a "comparison" view that mirrors the Spark SHA2 hash on tracked cols:
+#   CREATE OR REPLACE VIEW v_dim_after AS
+#   WITH cmp AS (
+#       SELECT d.advertiser_sk AS existing_sk, d.advertiser_id AS d_id,
+#              s.advertiser_id AS s_id, s.country AS s_country, s.tier AS s_tier,
+#              s.last_login_at AS s_login,
+#              d.country AS d_country, d.tier AS d_tier, d.effective_from AS d_from,
+#              SHA2(CONCAT_WS('||', d.country, d.tier), 256) AS d_hash,
+#              SHA2(CONCAT_WS('||', s.country, s.tier), 256) AS s_hash
+#       FROM dim_advertiser d
+#       LEFT JOIN staging_advertiser s ON s.advertiser_id = d.advertiser_id
+#       WHERE d.is_current = 1
+#   ),
+#   changed AS (SELECT * FROM cmp WHERE d_id IS NOT NULL AND s_id IS NOT NULL
+#                                  AND d_hash <> s_hash),
+#   brand_new AS (SELECT * FROM cmp WHERE d_id IS NULL),
+#   expired AS (
+#       UPDATE dim_advertiser d
+#       JOIN changed c ON d.advertiser_sk = c.existing_sk
+#       SET d.effective_to = '2026-03-01', d.is_current = 0
+#   ),
+#   -- Type 1 overwrite on untracked column for matched keys
+#   typed AS (
+#       UPDATE dim_advertiser d
+#       JOIN staging_advertiser s ON s.advertiser_id = d.advertiser_id
+#       SET d.last_login_at = s.last_login_at
+#       WHERE d.is_current = 1
+#   )
+#   SELECT advertiser_sk, advertiser_id, country, tier, last_login_at,
+#          effective_from, effective_to, is_current
+#   FROM dim_advertiser
+#   UNION ALL
+#   SELECT (SELECT MAX(advertiser_sk) FROM dim_advertiser) + ROW_NUMBER() OVER (ORDER BY s_id) AS advertiser_sk,
+#          s_id AS advertiser_id, s_country AS country, s_tier AS tier, s_login AS last_login_at,
+#          DATE'2026-03-01' AS effective_from, DATE'9999-12-31' AS effective_to, 1 AS is_current
+#   FROM (
+#       SELECT s_id, s_country, s_tier, s_login FROM changed
+#       UNION ALL
+#       SELECT s_id, s_country, s_tier, s_login FROM brand_new
+#   ) ins;
+#
+#   SELECT advertiser_id, country, tier, effective_from, effective_to, is_current
+#   FROM dim_advertiser ORDER BY advertiser_id, effective_from;
+#
+#   -- Q23 half-open join on the boundary date matches 1 version -> 1000.00 (expect block)
+#   SELECT COUNT(*) AS matched, ROUND(SUM(f.spend), 2) AS attributed
+#   FROM fact_spend f
+#   JOIN dim_advertiser d
+#     ON d.advertiser_id = f.advertiser_id
+#    AND f.event_date >= d.effective_from
+#    AND f.event_date <  d.effective_to;        -- EXCLUSIVE end
+#
+#   -- Q23 inclusive BETWEEN matches 2 versions -> 2000.00, double-counted (expect block)
+#   SELECT COUNT(*) AS matched, ROUND(SUM(f.spend), 2) AS attributed
+#   FROM fact_spend f
+#   JOIN dim_advertiser d
+#     ON d.advertiser_id = f.advertiser_id
+#    AND f.event_date BETWEEN d.effective_from AND d.effective_to;
+#
+#   -- Q23 point-in-time attribution uses the tier held at the time (expect block)
+#   SELECT f.event_date, d.tier, ROUND(f.spend, 2) AS spend
+#   FROM fact_spend f
+#   JOIN dim_advertiser d
+#     ON d.advertiser_id = f.advertiser_id
+#    AND f.event_date >= d.effective_from AND f.event_date < d.effective_to
+#   ORDER BY f.event_date;
+#
+# MySQL 8.0+ notes: the production path is a single transaction with an UPDATE
+# for EXPIRE and an INSERT ... SELECT from (changed UNION ALL brand_new) for
+# the new versions; wrap both in START TRANSACTION ... COMMIT. SHA2() replaces
+# F.sha2() for the tracked-column hash. The half-open / inclusive BETWEEN trap
+# is identical -- at Meta volume that 2x attribution error is the one that ships
+# if the join uses BETWEEN against a closed-on-both-sides interval. The PIT
+# covering index (idx_dim_adv_pit) makes the join a range scan, not a table scan.

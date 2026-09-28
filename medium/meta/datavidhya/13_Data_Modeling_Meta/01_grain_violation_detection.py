@@ -203,3 +203,76 @@ JOIN (SELECT 'feed' AS placement UNION ALL SELECT 'reels') d
 assert dropped == 1, dropped
 print("[PASS] Q45 ...yet the NULL row is silently dropped by the dimension join "
       "(1 of 2 survives) -- grain columns must be NOT NULL")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE fact_ad_performance (
+#       ad_id          INT             NOT NULL,
+#       campaign_id    INT             NOT NULL,
+#       placement      VARCHAR(32)     NOT NULL,
+#       event_date     DATE            NOT NULL,
+#       spend          DECIMAL(12,2)   NOT NULL,
+#       impressions    INT             NOT NULL,
+#       KEY idx_fact_ad_perf_ad (ad_id),
+#       KEY idx_fact_ad_perf_date (event_date),
+#       KEY idx_fact_ad_perf_grain (ad_id, campaign_id, placement, event_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_ad_performance
+#       (ad_id, campaign_id, placement, event_date, spend, impressions) VALUES
+#       (100, 10, 'feed',        '2026-03-01',  500.00, 1200),
+#       (200, 10, 'feed',        '2026-03-01',  750.00, 1800),
+#       (300, 11, 'reels',       '2026-03-01',  900.00, 2200),
+#       (300, 11, 'reels',       '2026-03-01',  900.00, 2200),
+#       (400, 12, 'stories',     '2026-03-01',  300.00,  700),
+#       (400, 12, 'stories',     '2026-03-01',  450.00,  900),
+#       (500, 12, 'marketplace', '2026-03-02', 1000.00, 2500);
+#
+#   -- Q45 grain check finds both violating keys (expect block)
+#   SELECT ad_id, campaign_id, placement, event_date, COUNT(*) AS row_count
+#   FROM fact_ad_performance
+#   GROUP BY ad_id, campaign_id, placement, event_date
+#   HAVING COUNT(*) > 1
+#   ORDER BY row_count DESC, ad_id;
+#
+#   -- Q45 the two duplicate kinds are distinguishable (expect block)
+#   SELECT ad_id, campaign_id, placement, event_date,
+#          COUNT(*)                  AS row_count,
+#          COUNT(DISTINCT spend)     AS distinct_spend,
+#          CASE WHEN COUNT(DISTINCT spend) = 1
+#               THEN 'identical -> dedup'
+#               ELSE 'differing -> join fan-out'
+#          END AS diagnosis
+#   FROM fact_ad_performance
+#   GROUP BY ad_id, campaign_id, placement, event_date
+#   HAVING COUNT(*) > 1
+#   ORDER BY ad_id;
+#
+#   -- Q45 blast radius is quantified, not just counted (expect block)
+#   WITH dupes AS (
+#       SELECT ad_id, campaign_id, placement, event_date,
+#              COUNT(*) AS n, SUM(spend) AS dup_spend, MIN(spend) AS keep_spend
+#       FROM fact_ad_performance
+#       GROUP BY ad_id, campaign_id, placement, event_date
+#       HAVING COUNT(*) > 1
+#   )
+#   SELECT COUNT(*)                              AS violating_keys,
+#          SUM(n) - COUNT(*)                     AS excess_rows,
+#          ROUND(SUM(dup_spend - keep_spend), 2) AS overstated_spend
+#   FROM dupes;
+#
+#   -- Q45 a table at its stated grain returns no rows (cleaned table expect block)
+#   DELETE FROM fact_ad_performance WHERE ad_id IN (300, 400, 500);
+#   -- then re-run the grain check; result is empty.
+#
+#   -- Q45 a NULL grain column still passes the duplicate check (expect block):
+#   INSERT INTO fact_ad_performance
+#       (ad_id, campaign_id, placement, event_date, spend, impressions) VALUES
+#       (100, 10, 'feed',   '2026-03-01', 500.00, 1200),
+#       (200, 10, NULL,     '2026-03-01', 750.00, 1800);
+#   -- grain check returns 0 rows; the NULL still fails the dimension join.
+#
+# MySQL 8.0+ notes: GROUP BY/HAVING behaves the same; COUNT(DISTINCT spend) works
+# identically. The NULL grain trap is identical -- GROUP BY groups NULLs together
+# but the dimension join still drops the row. A covering index on the grain
+# columns (idx_fact_ad_perf_grain) keeps the check cheap at Meta volume so the
+# pipeline does not disable it when someone is in a hurry.

@@ -250,3 +250,125 @@ WHICH ONE TO USE
   per-group logic    -> #10 applyInPandas
   never in prod      -> #9 RDD groupByKey
 """)
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE posts (
+#       post_id     INT PRIMARY KEY,
+#       user_id     INT NOT NULL,
+#       engagement  INT NOT NULL,
+#       KEY idx_posts_user_eng (user_id, engagement DESC)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO posts (post_id, user_id, engagement) VALUES
+#       (1, 1, 50), (2, 1, 80), (3, 1, 30),
+#       (4, 2, 90), (5, 2, 70), (6, 2, 70),
+#       (7, 3, 20);
+#
+# -- 1. ROW_NUMBER + filter  -> CANON (exactly 5 rows)
+# SELECT user_id, post_id, engagement
+# FROM (
+#   SELECT user_id, post_id, engagement,
+#          ROW_NUMBER() OVER (PARTITION BY user_id
+#                             ORDER BY engagement DESC, post_id ASC) AS rn
+#   FROM posts
+# ) t
+# WHERE rn <= 2
+# ORDER BY user_id, engagement DESC, post_id;
+#
+# -- 2. RANK + filter (with ties)  -> WITH_TIES (6 rows, both 70s kept)
+# SELECT user_id, post_id, engagement
+# FROM (
+#   SELECT user_id, post_id, engagement,
+#          RANK() OVER (PARTITION BY user_id ORDER BY engagement DESC) AS rk
+#   FROM posts
+# ) t
+# WHERE rk <= 2
+# ORDER BY user_id, engagement DESC, post_id;
+#
+# -- 3. DENSE_RANK + filter (with ties)  -> WITH_TIES (same as RANK at N=2)
+# SELECT user_id, post_id, engagement
+# FROM (
+#   SELECT user_id, post_id, engagement,
+#          DENSE_RANK() OVER (PARTITION BY user_id ORDER BY engagement DESC) AS dr
+#   FROM posts
+# ) t
+# WHERE dr <= 2
+# ORDER BY user_id, engagement DESC, post_id;
+#
+# -- 4. Correlated subquery COUNT  -> CANON (pre-window classic, O(n^2))
+# SELECT p.user_id, p.post_id, p.engagement
+# FROM posts p
+# WHERE (SELECT COUNT(*) FROM posts q
+#        WHERE q.user_id = p.user_id
+#          AND (q.engagement > p.engagement
+#               OR (q.engagement = p.engagement AND q.post_id < p.post_id))) < 2
+# ORDER BY p.user_id, p.engagement DESC, p.post_id;
+#
+# -- 5. Self-join + HAVING COUNT  -> CANON (join form of #4)
+# SELECT p.user_id, p.post_id, p.engagement
+# FROM posts p
+# JOIN posts q
+#   ON q.user_id = p.user_id
+#  AND (q.engagement > p.engagement
+#       OR (q.engagement = p.engagement AND q.post_id <= p.post_id))
+# GROUP BY p.user_id, p.post_id, p.engagement
+# HAVING COUNT(*) <= 2
+# ORDER BY p.user_id, p.engagement DESC, p.post_id;
+#
+# -- 6. LEFT SEMI JOIN on ranked keys  -> CANON
+# -- MySQL has no LEFT SEMI JOIN. Two portable substitutes:
+# --   (a) INNER JOIN + DISTINCT
+# --   (b) WHERE EXISTS ( ... )   <-- usually preferred by the optimizer
+# WITH ranked AS (
+#   SELECT post_id FROM (
+#     SELECT post_id, user_id,
+#            ROW_NUMBER() OVER (PARTITION BY user_id
+#                               ORDER BY engagement DESC, post_id ASC) AS rn
+#     FROM posts
+#   ) t
+#   WHERE rn <= 2
+# )
+# SELECT DISTINCT p.user_id, p.post_id, p.engagement
+# FROM posts p
+# INNER JOIN ranked r ON r.post_id = p.post_id
+# ORDER BY p.user_id, p.engagement DESC, p.post_id;
+# -- Equivalent WHERE EXISTS form:
+# -- SELECT p.user_id, p.post_id, p.engagement
+# -- FROM posts p
+# -- WHERE EXISTS (SELECT 1 FROM ranked r WHERE r.post_id = p.post_id)
+# -- ORDER BY p.user_id, p.engagement DESC, p.post_id;
+#
+# -- 7. collect_list + array_sort + slice + LATERAL VIEW EXPLODE
+# -- NOT portable. MySQL 8.0 has no COLLECT_LIST / ARRAY_SORT / EXPLODE.
+# -- MySQL has JSON_ARRAYAGG + JSON_TABLE as the closest analogue, but the
+# -- idiomatic answer is: just use method #1 (ROW_NUMBER). It's simpler, the
+# -- optimizer handles it well, and you avoid per-group array materialisation.
+# -- Skipped on purpose — see note below.
+#
+# -- 8. PySpark DataFrame API window
+# -- Spark-specific. Same physical plan as #1. Not applicable to MySQL.
+#
+# -- 9. RDD groupByKey + sorted
+# -- Spark-specific. Not applicable to MySQL.
+#
+# -- 10. applyInPandas (Pandas per group)
+# -- Spark-specific. Not applicable to MySQL. In MySQL you'd express any
+# -- genuinely custom per-group logic in a stored procedure or app code.
+#
+# Notes:
+# - Methods 1-5 translate cleanly: window functions (ROW_NUMBER / RANK /
+#   DENSE_RANK) and correlated subqueries are all in MySQL 8.0+. CANON and
+#   WITH_TIES row sets come out identical to the Spark results.
+# - Method 6's LEFT SEMI JOIN has no direct MySQL spelling; use INNER JOIN +
+#   DISTINCT or WHERE EXISTS against the ranked CTE. Both let MySQL stop at
+#   the first match per outer row, which is the semi-join semantics we want.
+# - Method 7 (collect_list + array_sort + EXPLODE) is Spark-only; the
+#   portable replacement in MySQL is the ROW_NUMBER pattern from #1 — same
+#   answer, no array materialisation, no LATERAL VIEW trick.
+# - Methods 8-10 are Spark abstractions (DataFrame API, RDDs, applyInPandas)
+#   with no MySQL counterpart; they exist in the original file to show
+#   Spark-internal alternatives, not SQL alternatives.
+# - At Meta volume the B-tree index on (user_id, engagement) lets MySQL stream
+#   each user's rows already in DESC-by-engagement order (descending indexes
+#   are supported since 8.0), so the ROW_NUMBER window is cheap. The fully-
+# -sorted tie-break on (engagement DESC, post_id ASC) is portable everywhere.

@@ -252,3 +252,99 @@ WHERE d.is_current                      -- pretending only open rows carry it
 """).collect()[0][0]
 assert stale == 4000, stale
 print("[PASS] Q28 stamping current_tier only on the open row would report 4000, not 7000")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE creator_changes (
+#       creator_id   INT         NOT NULL,
+#       tier         VARCHAR(16) NOT NULL,
+#       changed_on   DATE        NOT NULL,
+#       KEY idx_creator_changes (creator_id, changed_on)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO creator_changes (creator_id, tier, changed_on) VALUES
+#       (901, 'bronze', '2026-01-01'),
+#       (901, 'silver', '2026-02-01'),
+#       (901, 'gold',   '2026-03-01'),
+#       (902, 'silver', '2026-01-15');
+#
+#   CREATE TABLE dim_creator (
+#       creator_id      INT         NOT NULL,
+#       tier            VARCHAR(16) NOT NULL,
+#       previous_tier   VARCHAR(16) NULL,
+#       current_tier    VARCHAR(16) NOT NULL,
+#       effective_from  DATE        NOT NULL,
+#       effective_to    DATE        NOT NULL,
+#       is_current      TINYINT(1)  NOT NULL,
+#       KEY idx_dim_creator_pit (creator_id, effective_from, effective_to),
+#       KEY idx_dim_creator_current (creator_id, is_current)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_creator
+#       (creator_id, tier, previous_tier, current_tier,
+#        effective_from, effective_to, is_current) VALUES
+#       (901, 'bronze', NULL,     'gold',   '2026-01-01', '2026-02-01', 0),
+#       (901, 'silver', 'bronze', 'gold',   '2026-02-01', '2026-03-01', 0),
+#       (901, 'gold',   'silver', 'gold',   '2026-03-01', '9999-12-31', 1),
+#       (902, 'silver', NULL,     'silver', '2026-01-15', '9999-12-31', 1);
+#
+#   CREATE TABLE fact_video_views (
+#       creator_id   INT  NOT NULL,
+#       view_date    DATE NOT NULL,
+#       views        INT  NOT NULL,
+#       KEY idx_fact_views_date (view_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_video_views (creator_id, view_date, views) VALUES
+#       (901, '2026-01-10', 1000),
+#       (901, '2026-02-14', 2000),
+#       (901, '2026-03-20', 4000),
+#       (902, '2026-02-01',  500);
+#
+#   -- Q28 Type 6 dimension: 2 + 1 + 3 in one table (expect block).
+#   -- MySQL build using window functions (same LEAD / LAG / FIRST_VALUE idiom):
+#   INSERT INTO dim_creator (creator_id, tier, previous_tier, current_tier,
+#                            effective_from, effective_to, is_current)
+#   SELECT creator_id,
+#          tier,
+#          LAG(tier) OVER w                                          AS previous_tier,
+#          FIRST_VALUE(tier) OVER (
+#              PARTITION BY creator_id ORDER BY changed_on
+#              ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+#          )                                                         AS current_tier,
+#          changed_on                                                AS effective_from,
+#          COALESCE(LEAD(changed_on) OVER w, DATE'9999-12-31')       AS effective_to,
+#          CASE WHEN LEAD(changed_on) OVER w IS NULL THEN 1 ELSE 0 END AS is_current
+#   FROM creator_changes
+#   WINDOW w AS (PARTITION BY creator_id ORDER BY changed_on);
+#
+#   SELECT creator_id, tier, previous_tier, current_tier,
+#          effective_from, effective_to, is_current
+#   FROM dim_creator ORDER BY creator_id, effective_from;
+#
+#   -- Q28 as-was: views grouped by the tier held at the time (expect block)
+#   SELECT d.tier AS tier_at_the_time, SUM(f.views) AS views
+#   FROM fact_video_views f
+#   JOIN dim_creator d
+#     ON d.creator_id = f.creator_id
+#    AND f.view_date >= d.effective_from AND f.view_date < d.effective_to
+#   GROUP BY d.tier ORDER BY views DESC;
+#
+#   -- Q28 as-is: same join, reading current_tier (expect block)
+#   SELECT d.current_tier AS tier_today, SUM(f.views) AS views
+#   FROM fact_video_views f
+#   JOIN dim_creator d
+#     ON d.creator_id = f.creator_id
+#    AND f.view_date >= d.effective_from AND f.view_date < d.effective_to
+#   GROUP BY d.current_tier ORDER BY views DESC;
+#
+#   -- Q28 Type 3 column gives tier transitions with no self-join (expect block)
+#   SELECT creator_id, previous_tier, tier AS new_tier, effective_from
+#   FROM dim_creator
+#   WHERE previous_tier IS NOT NULL AND previous_tier <> tier
+#   ORDER BY creator_id, effective_from;
+#
+# MySQL 8.0+ notes: FIRST_VALUE(... ROWS BETWEEN UNBOUNDED PRECEDING AND
+# UNBOUNDED FOLLOWING) is the FIRST_VALUE idiom that gives LAST_VALUE-over-the-
+# full-partition semantics; Spark's LAST_VALUE is a syntactic shortcut but
+# MySQL has no LAST_VALUE, so FIRST_VALUE is the portable equivalent. Type 1
+# stamping on EVERY row of the key is non-negotiable; the (idx_dim_creator_pit)
+# covering index keeps the as-was join cheap while still allowing the as-is
+# read off the same row.
