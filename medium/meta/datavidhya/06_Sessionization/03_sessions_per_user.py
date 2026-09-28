@@ -99,3 +99,53 @@ FROM (SELECT user_id, session_num FROM sessions GROUP BY user_id, session_num) t
 expect("total sessions — WRONG (global distinct session_num)", BASE + """
 SELECT COUNT(DISTINCT session_num) AS looks_like_total FROM sessions
 """, [(3,)])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data (same as problems 01/02):
+#   CREATE TABLE raw_hits (
+#       user_id INT NOT NULL,
+#       hit_ts  DATETIME NOT NULL
+#   );
+#   INSERT INTO raw_hits (user_id, hit_ts) VALUES
+#       (1, '2026-01-01 10:00:00'), (1, '2026-01-01 10:10:00'),
+#       (1, '2026-01-01 10:25:00'), (1, '2026-01-01 12:00:00'),
+#       (1, '2026-01-01 12:05:00'),
+#       (2, '2026-01-01 08:00:00'), (2, '2026-01-01 08:20:00'),
+#       (3, '2026-01-01 09:00:00'), (3, '2026-01-01 11:00:00'),
+#       (3, '2026-01-01 15:00:00'), (3, '2026-01-01 15:29:00');
+#
+# Sessionize (same LAG + flag + cumulative SUM):
+#   WITH flagged AS (
+#       SELECT user_id, hit_ts,
+#              CASE
+#                WHEN LAG(hit_ts) OVER (PARTITION BY user_id ORDER BY hit_ts) IS NULL
+#                  THEN 1
+#                WHEN TIMESTAMPDIFF(SECOND,
+#                       LAG(hit_ts) OVER (PARTITION BY user_id ORDER BY hit_ts),
+#                       hit_ts) > 30 * 60
+#                  THEN 1
+#                ELSE 0
+#              END AS is_new_session
+#       FROM raw_hits
+#   ),
+#   sessions AS (
+#       SELECT user_id, hit_ts,
+#              SUM(is_new_session) OVER (PARTITION BY user_id ORDER BY hit_ts
+#                  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_num
+#       FROM flagged
+#   )
+#   SELECT user_id, MAX(session_num) AS sessions
+#   FROM sessions GROUP BY user_id ORDER BY user_id;
+#
+# Total sessions (correct — group by user+session first):
+#   SELECT COUNT(*) AS total_sessions
+#   FROM (
+#       SELECT user_id, session_num
+#       FROM sessions
+#       GROUP BY user_id, session_num
+#   ) t;
+#
+# WRONG version (session_num is only unique WITHIN a user):
+#   SELECT COUNT(DISTINCT session_num) AS looks_like_total FROM sessions;
+# Production tip: emit a globally unique session_key = hash(user_id, session_start)
+# so downstream joins cannot accidentally fall into this trap.

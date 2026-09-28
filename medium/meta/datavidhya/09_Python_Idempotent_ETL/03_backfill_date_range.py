@@ -102,4 +102,57 @@ for d in DATES:
 assert spark.read.parquet(out).count() == expected.count()
 print("[PASS] full re-run is a no-op — backfill is idempotent end to end")
 
+# ---- MySQL way ----------------------------------------------------------
+# Backfill a date range safely — same four bullets apply:
+#   1. PARTITION-AT-A-TIME (per-date)
+#   2. Each per-date write IDEMPOTENT (DELETE + INSERT in one TX)
+#   3. BOUND THE CONCURRENCY (run at lower priority than the daily job)
+#   4. RESUMABLE (track completed dates in a ledger table)
+#
+# CREATE TABLE + sample data (orders; mirror of Spark section):
+#   CREATE TABLE orders (
+#       order_id     INT PRIMARY KEY,
+#       buyer_id     INT,
+#       seller_id    INT,
+#       order_date   DATE NOT NULL,
+#       gross_amount DECIMAL(10,2),
+#       status       VARCHAR(20),
+#       KEY idx_orders_date (order_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO orders VALUES
+#       (9001, 1, 501, '2026-01-01', 25.00, 'completed'),
+#       (9002, 2, 502, '2026-01-01', 40.00, 'completed'),
+#       (9003, 3, 501, '2026-01-02', 15.00, 'cancelled'),
+#       (9004, 1, 503, '2026-01-03', 60.00, 'completed'),
+#       (9005, 4, 502, '2026-01-08', 10.00, 'completed');
+#
+# Ledger table tracking which dates have been backfilled:
+#   CREATE TABLE backfill_ledger (
+#       run_id      VARCHAR(40),
+#       metric      VARCHAR(60),
+#       backfill_dt DATE,
+#       status      VARCHAR(20),    -- pending / done / failed
+#       PRIMARY KEY (run_id, metric, backfill_dt)
+#   ) ENGINE=InnoDB;
+#
+# Single-date idempotent swap (the unit of work):
+#   START TRANSACTION;
+#   DELETE FROM orders WHERE order_date = '2026-01-03';
+#   INSERT INTO orders (order_id, buyer_id, seller_id, order_date, gross_amount, status)
+#   SELECT order_id, buyer_id, seller_id, order_date, gross_amount, status
+#   FROM orders_stage
+#   WHERE order_date = '2026-01-03';
+#   INSERT INTO backfill_ledger (run_id, metric, backfill_dt, status)
+#   VALUES ('backfill-2026-Q1', 'orders', '2026-01-03', 'done')
+#   ON DUPLICATE KEY UPDATE status = 'done';
+#   COMMIT;
+#
+# Resume loop (cursor over only the missing dates):
+#   SELECT backfill_dt FROM backfill_ledger
+#   WHERE run_id = 'backfill-2026-Q1' AND metric = 'orders' AND status = 'pending';
+#
+# Stakeholder note: backfilling a metric DEFINITION change means the restated
+# history will not match previously published numbers — that is a stakeholder
+# conversation, not just a pipeline run.
+
 shutil.rmtree(os.path.dirname(out), ignore_errors=True)

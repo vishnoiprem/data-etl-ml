@@ -94,3 +94,37 @@ FROM seller_changes GROUP BY seller_id ORDER BY seller_id
     (502, "business", "Singapore"),
     (503, "casual",   "Hanoi"),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE seller_changes (
+#       seller_id  INT NOT NULL,
+#       tier       VARCHAR(16) NOT NULL,
+#       city       VARCHAR(60) NOT NULL,
+#       changed_on DATE NOT NULL,
+#       KEY idx_seller_changed (seller_id, changed_on)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO seller_changes (seller_id, tier, city, changed_on) VALUES
+#       (501, 'casual',   'Bangkok',    '2026-01-01'),
+#       (501, 'power',    'Bangkok',    '2026-01-05'),
+#       (501, 'power',    'Chiang Mai', '2026-01-20'),
+#       (502, 'business', 'Singapore',  '2026-01-01'),
+#       (503, 'casual',   'Hanoi',      '2026-01-03');
+#
+# SCD1 current row per seller (MySQL 8.0+ windows):
+#   WITH ranked AS (
+#       SELECT seller_id, tier, city, changed_on,
+#              ROW_NUMBER() OVER (PARTITION BY seller_id
+#                                 ORDER BY changed_on DESC, tier DESC) AS rn
+#       FROM seller_changes
+#   )
+#   SELECT seller_id, tier, city, changed_on
+#   FROM ranked WHERE rn = 1
+#   ORDER BY seller_id;
+#
+# WRONG (independent MAX() splices versions):
+#   SELECT seller_id, MAX(tier) AS tier, MAX(city) AS city
+#   FROM seller_changes GROUP BY seller_id ORDER BY seller_id;
+# Trap: MAX(tier) is lexicographic ('power' > 'casual'), unrelated to recency.
+# On real data where the spliced values come from DIFFERENT versions, you
+# invent a row that never existed. Always use ROW_NUMBER(), never MAX().

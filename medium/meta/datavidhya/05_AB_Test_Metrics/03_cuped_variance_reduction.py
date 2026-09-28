@@ -117,3 +117,48 @@ FROM adj GROUP BY variant ORDER BY variant
     ("control",   10.0, 0.0),
     ("treatment", 14.0, 0.0),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data (X = pre-period metric, Y = post-period metric):
+#   CREATE TABLE cuped_exp (
+#       user_id     INT PRIMARY KEY,
+#       variant     VARCHAR(16) NOT NULL,
+#       pre_metric  DECIMAL(6,2) NOT NULL,
+#       post_metric DECIMAL(6,2) NOT NULL
+#   );
+#   INSERT INTO cuped_exp (user_id, variant, pre_metric, post_metric) VALUES
+#       (1,  'control',   11.00, 12.00), (2, 'control',    8.00,  9.00),
+#       (3,  'control',   10.00, 11.00), (4, 'control',    9.00, 10.00),
+#       (5,  'control',    7.00,  8.00),
+#       (6,  'treatment', 10.00, 15.00), (7, 'treatment',  9.00, 14.00),
+#       (8,  'treatment', 11.00, 16.00), (9, 'treatment',  7.00, 12.00),
+#       (10, 'treatment',  8.00, 13.00);
+#
+# Pre-period balance + raw effect:
+#   SELECT variant, COUNT(*) AS n,
+#          ROUND(AVG(pre_metric), 2)         AS mean_pre,
+#          ROUND(AVG(post_metric), 2)        AS mean_post,
+#          ROUND(VAR_SAMP(post_metric), 4)   AS raw_var
+#   FROM cuped_exp GROUP BY variant ORDER BY variant;
+#
+# theta from POOLED data (NEVER per-arm — that leaks the treatment effect):
+#   SELECT ROUND(COVAR_SAMP(post_metric, pre_metric) / VAR_SAMP(pre_metric), 4) AS theta
+#   FROM cuped_exp;
+#
+# CUPED-adjusted: theta computed on POOLED rows, then Y_adj per row.
+#   WITH pooled AS (
+#       SELECT AVG(pre_metric) AS x_bar,
+#              COVAR_SAMP(post_metric, pre_metric) / VAR_SAMP(pre_metric) AS theta
+#       FROM cuped_exp
+#   ),
+#   adj AS (
+#       SELECT e.variant,
+#              e.post_metric - p.theta * (e.pre_metric - p.x_bar) AS y_adj
+#       FROM cuped_exp e CROSS JOIN pooled p
+#   )
+#   SELECT variant,
+#          ROUND(AVG(y_adj), 4)      AS mean_adj,
+#          ROUND(VAR_SAMP(y_adj), 4) AS var_adj
+#   FROM adj GROUP BY variant ORDER BY variant;
+# Caveat: never use an in-experiment covariate. X must be measured BEFORE
+# assignment, otherwise treatment can move X and the adjustment becomes biased.

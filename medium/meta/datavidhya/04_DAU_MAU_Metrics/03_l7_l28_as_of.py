@@ -85,12 +85,32 @@ expect("L7 / L28 as of date", SQL, [
 ])
 
 # ---- MySQL way ----------------------------------------------------------
-# MySQL 8.0 supports CTEs and the same VALUES-derived anchor table. One pass,
-# two conditional DISTINCT counts — push DATEDIFF lower bound into a WHERE
-# filter (or partition pruning on a real table) so you only scan 28 days.
+# CREATE TABLE + sample data:
+#   CREATE TABLE events (
+#       user_id    INT NOT NULL,
+#       event_date DATE NOT NULL,
+#       event_name VARCHAR(32) NOT NULL,
+#       KEY idx_events_date (event_date),
+#       KEY idx_events_user_date (user_id, event_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO events (user_id, event_date, event_name) VALUES
+#       (1, '2026-01-01', 'open'), (1, '2026-01-02', 'open'), (1, '2026-01-08', 'open'),
+#       (2, '2026-01-01', 'open'),
+#       (3, '2026-01-01', 'open'), (3, '2026-01-02', 'open'),
+#       (4, '2026-01-02', 'open'), (4, '2026-01-03', 'open'), (4, '2026-01-09', 'open'),
+#       (5, '2026-01-02', 'open'),
+#       (6, '2026-01-02', 'open'), (6, '2026-01-03', 'open'), (6, '2026-01-30', 'open'),
+#       (7, '2026-01-08', 'open'),
+#       (8, '2026-01-08', 'open'), (8, '2026-01-09', 'open');
 #
+# L7 / L28 conditional distinct counts in one pass. MySQL 8.0 has no VALUES
+# clause, so use UNION ALL of constants (works on 5.7 / MariaDB too):
+#   WITH RECURSIVE as_of(d) AS (
+#       SELECT '2026-01-08' UNION ALL SELECT '2026-01-30'
+#   )
+#   -- simpler and portable form:
 #   WITH as_of AS (
-#       SELECT * FROM (VALUES ROW('2026-01-08'), ROW('2026-01-30')) AS t(d)
+#       SELECT '2026-01-08' AS d UNION ALL SELECT '2026-01-30'
 #   )
 #   SELECT a.d AS as_of_date,
 #          COUNT(DISTINCT CASE WHEN DATEDIFF(a.d, e.event_date) BETWEEN 0 AND 6
@@ -99,12 +119,15 @@ expect("L7 / L28 as of date", SQL, [
 #                              THEN e.user_id END) AS l28_users
 #   FROM as_of a
 #   CROSS JOIN events e
+#   WHERE e.event_date >= DATE_SUB(a.d, INTERVAL 27 DAY)   -- prune scan
 #   GROUP BY a.d
 #   ORDER BY a.d;
 #
 # Notes:
-# - DATEDIFF(a, b) returns a - b in days in MySQL, matching Spark's usage here.
-# - To restrict the scan, add WHERE e.event_date >= a.d - INTERVAL 27 DAY
-#   (planner-aware: anchor the lower bound from the smallest as_of date).
-# - If running on MySQL 5.7 or MariaDB without VALUES-as-table, use a UNION ALL
-#   of SELECT ... constants instead.
+# - DATEDIFF(a, b) returns a - b in days in MySQL, matching Spark usage.
+# - Trailing window is [D-6, D] for L7, inclusive of the as-of date. Confirm
+#   "L7" means "active at least once in the trailing 7 days" — some teams use
+#   the stricter "active on 7 of the last 7" sense. The confirmation is the
+#   signal at Meta.
+# - Push DATE_SUB(a.d, INTERVAL 27 DAY) into a WHERE so you scan 28 days, not
+#   the whole history.

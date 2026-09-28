@@ -29,6 +29,8 @@ def read_file(root: Path, args: ReadFileArgs, max_lines: int = 400) -> str:
     if path.stat().st_size > 200_000:
         raise FileContextError(f"file too large (>200KB): {args.path}")
     text = path.read_text(encoding="utf-8", errors="replace")
+    if len(text) > 200_000:
+        return text[:200_000] + "\n\n[... truncated at 200K of characters ...]"
     lines = text.splitlines()
     if len(lines) > max_lines:
         return "\n".join(lines[:max_lines]) + f"\n\n[... truncated at {max_lines} of {len(lines)} lines ...]"
@@ -72,17 +74,15 @@ def list_dir(root: Path, args: ListDirArgs) -> str:
         raise FileContextError(f"not a directory: {args.path}")
 
     lines = []
-    base_depth = len(path.parts)
-    for p in sorted(path.glob("*" if depth_unlimited(args.depth) else "*/" * args.depth + "*")):
+    for p in sorted(path.iterdir()):
         try:
             rel = p.relative_to(root)
         except ValueError:
             continue
-        depth = len(rel.parts) - 1
-        if depth > args.depth:
+        if len(rel.parts) > args.depth + 1:
             continue
         marker = "/" if p.is_dir() else ""
-        lines.append(f"{'  ' * depth}{p.name}{marker}")
+        lines.append(f"{p.name}{marker}")
     return "\n".join(lines[:300]) or "(empty)"
 
 

@@ -99,3 +99,50 @@ expect("per-session metrics", SQL, [
     (3, 2, 1, "2026-01-01 11:00:00", "2026-01-01 11:00:00", 0),
     (3, 3, 2, "2026-01-01 15:00:00", "2026-01-01 15:29:00", 29),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data (same as problem 01):
+#   CREATE TABLE raw_hits (
+#       user_id INT NOT NULL,
+#       hit_ts  DATETIME NOT NULL
+#   );
+#   INSERT INTO raw_hits (user_id, hit_ts) VALUES
+#       (1, '2026-01-01 10:00:00'), (1, '2026-01-01 10:10:00'),
+#       (1, '2026-01-01 10:25:00'), (1, '2026-01-01 12:00:00'),
+#       (1, '2026-01-01 12:05:00'),
+#       (2, '2026-01-01 08:00:00'), (2, '2026-01-01 08:20:00'),
+#       (3, '2026-01-01 09:00:00'), (3, '2026-01-01 11:00:00'),
+#       (3, '2026-01-01 15:00:00'), (3, '2026-01-01 15:29:00');
+#
+# Per-session metrics (roll up sessionized rows):
+#   WITH flagged AS (
+#       SELECT user_id, hit_ts,
+#              CASE
+#                WHEN LAG(hit_ts) OVER (PARTITION BY user_id ORDER BY hit_ts) IS NULL
+#                  THEN 1
+#                WHEN TIMESTAMPDIFF(SECOND,
+#                       LAG(hit_ts) OVER (PARTITION BY user_id ORDER BY hit_ts),
+#                       hit_ts) > 30 * 60
+#                  THEN 1
+#                ELSE 0
+#              END AS is_new_session
+#       FROM raw_hits
+#   ),
+#   sessions AS (
+#       SELECT user_id, hit_ts,
+#              SUM(is_new_session) OVER (PARTITION BY user_id ORDER BY hit_ts
+#                  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_num
+#       FROM flagged
+#   )
+#   SELECT user_id, session_num,
+#          COUNT(*) AS hits,
+#          MIN(hit_ts) AS session_start,
+#          MAX(hit_ts) AS session_end,
+#          CAST(TIMESTAMPDIFF(SECOND, MIN(hit_ts), MAX(hit_ts)) / 60 AS SIGNED) AS duration_min
+#   FROM sessions
+#   GROUP BY user_id, session_num
+#   ORDER BY user_id, session_num;
+# Caveat: duration = last_hit - first_hit. It does NOT capture the time the
+# user spent on the FINAL hit before leaving. A single-hit session gets 0
+# (correct for "span of activity", wrong for "time spent"). Real impls add
+# an assumed dwell for the last hit or use an explicit session_end event.

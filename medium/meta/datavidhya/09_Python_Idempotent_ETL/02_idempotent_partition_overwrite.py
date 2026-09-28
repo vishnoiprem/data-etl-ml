@@ -91,4 +91,51 @@ dates = sorted(str(r["order_date"]) for r in both.select("order_date").distinct(
 assert dates == ["2026-01-01", "2026-01-03"], f"partition clobbered: {dates}"
 print(f"[PASS] dynamic mode preserved the untouched partition — {dates}")
 
+# ---- MySQL way ----------------------------------------------------------
+# "APPEND on a retry is the most common production data bug." MySQL has no
+# Spark-style dynamic partition overwrite; equivalent patterns:
+#
+# CREATE TABLE + sample data:
+#   CREATE TABLE orders (
+#       order_id     INT PRIMARY KEY,
+#       buyer_id     INT,
+#       seller_id    INT,
+#       order_date   DATE NOT NULL,
+#       gross_amount DECIMAL(10,2),
+#       status       VARCHAR(20),
+#       KEY idx_orders_date (order_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO orders VALUES
+#       (9001, 1, 501, '2026-01-01', 25.00, 'completed'),
+#       (9002, 2, 502, '2026-01-01', 40.00, 'completed'),
+#       (9003, 3, 501, '2026-01-02', 15.00, 'cancelled'),
+#       (9004, 1, 503, '2026-01-03', 60.00, 'completed'),
+#       (9005, 4, 502, '2026-01-08', 10.00, 'completed');
+#
+# Idempotent partition-equivalent: replace the day's rows only, in a single
+# transaction. RUN THIS WRAPPED IN A TX so a mid-run failure rolls back.
+#   START TRANSACTION;
+#   DELETE FROM orders WHERE order_date = '2026-01-01';
+#   INSERT INTO orders (order_id, buyer_id, seller_id, order_date, gross_amount, status)
+#   SELECT order_id, buyer_id, seller_id, order_date, gross_amount, status
+#   FROM orders_stage
+#   WHERE order_date = '2026-01-01';
+#   COMMIT;
+# Re-runnable. Retries with identical source data leave row count unchanged.
+#
+# Per-day idempotent upsert for full late-arriving updates to old partitions
+# (the equivalent of Delta/Iceberg MERGE, MySQL 8.0+):
+#   INSERT INTO orders (order_id, buyer_id, seller_id, order_date, gross_amount, status)
+#   SELECT order_id, buyer_id, seller_id, order_date, gross_amount, status
+#   FROM orders_stage
+#   ON DUPLICATE KEY UPDATE
+#       buyer_id     = VALUES(buyer_id),
+#       seller_id    = VALUES(seller_id),
+#       gross_amount = VALUES(gross_amount),
+#       status       = VALUES(status);
+# Choose option 1 (DELETE+INSERT in a TX) for whole-day refresh; option 2
+# (ON DUPLICATE KEY UPDATE) when old partitions can change row-by-row.
+# Note: without a TX wrapper around DELETE+INSERT, a crash mid-load leaves
+# a hole — always wrap the swap.
+
 shutil.rmtree(os.path.dirname(out), ignore_errors=True)

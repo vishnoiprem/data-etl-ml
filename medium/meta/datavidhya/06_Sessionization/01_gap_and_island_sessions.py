@@ -120,3 +120,42 @@ assert [tuple(r) for r in df.collect()] == [
     (3, "2026-01-01 11:00:00", 2), (3, "2026-01-01 15:00:00", 3),
     (3, "2026-01-01 15:29:00", 3)]
 print("[PASS] sessionization — DataFrame API matches SQL")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE raw_hits (
+#       user_id INT NOT NULL,
+#       hit_ts  DATETIME NOT NULL
+#   );
+#   INSERT INTO raw_hits (user_id, hit_ts) VALUES
+#       (1, '2026-01-01 10:00:00'), (1, '2026-01-01 10:10:00'),
+#       (1, '2026-01-01 10:25:00'), (1, '2026-01-01 12:00:00'),
+#       (1, '2026-01-01 12:05:00'),
+#       (2, '2026-01-01 08:00:00'), (2, '2026-01-01 08:20:00'),
+#       (3, '2026-01-01 09:00:00'), (3, '2026-01-01 11:00:00'),
+#       (3, '2026-01-01 15:00:00'), (3, '2026-01-01 15:29:00');
+#
+# Gap-and-island sessionization (MySQL 8.0+, 30-min rule, strictly > 30):
+#   WITH flagged AS (
+#       SELECT user_id, hit_ts,
+#              CASE
+#                WHEN LAG(hit_ts) OVER (PARTITION BY user_id ORDER BY hit_ts) IS NULL
+#                  THEN 1
+#                WHEN TIMESTAMPDIFF(SECOND,
+#                       LAG(hit_ts) OVER (PARTITION BY user_id ORDER BY hit_ts),
+#                       hit_ts) > 30 * 60
+#                  THEN 1
+#                ELSE 0
+#              END AS is_new_session
+#       FROM raw_hits
+#   )
+#   SELECT user_id, hit_ts,
+#          SUM(is_new_session) OVER (PARTITION BY user_id ORDER BY hit_ts
+#              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS session_num
+#   FROM flagged
+#   ORDER BY user_id, hit_ts;
+# Notes:
+# - MySQL uses TIMESTAMPDIFF(SECOND, a, b) instead of UNIX_TIMESTAMP arithmetic.
+# - Boundary choice: strictly > 30 minutes keeps the same session; user 3's
+#   29-minute gap (15:00 -> 15:29) tests that near-boundary case.
+# - Watch skew: a bot user with millions of hits lands in one partition.

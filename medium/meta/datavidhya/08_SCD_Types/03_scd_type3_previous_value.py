@@ -90,3 +90,40 @@ expect("SCD3 current + previous city", SQL, [
     (502, "Singapore",  None,      False),
     (503, "Hanoi",      None,      False),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE seller_changes (
+#       seller_id  INT, tier VARCHAR(16), city VARCHAR(60), changed_on DATE,
+#       KEY idx_seller_changed (seller_id, changed_on)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO seller_changes VALUES
+#       (501, 'casual',   'Bangkok',    '2026-01-01'),
+#       (501, 'power',    'Bangkok',    '2026-01-05'),
+#       (501, 'power',    'Chiang Mai', '2026-01-20'),
+#       (502, 'business', 'Singapore',  '2026-01-01'),
+#       (503, 'casual',   'Hanoi',      '2026-01-03');
+#
+# SCD3 — current + previous value in the same row (LAG + ROW_NUMBER):
+#   WITH stepped AS (
+#       SELECT seller_id, city, tier, changed_on,
+#              LAG(city) OVER (PARTITION BY seller_id ORDER BY changed_on) AS prev_city,
+#              ROW_NUMBER() OVER (PARTITION BY seller_id ORDER BY changed_on DESC) AS rn
+#       FROM seller_changes
+#   )
+#   SELECT seller_id,
+#          city AS current_city,
+#          prev_city AS previous_city,
+#          CASE WHEN prev_city IS NOT NULL AND prev_city <> city THEN 1 ELSE 0 END AS moved
+#   FROM stepped
+#   WHERE rn = 1
+#   ORDER BY seller_id;
+#
+# Notes:
+# - Type 3 adds COLUMNS, not rows: one row per key, plus a previous_*. It is
+#   the right answer only when the business question is literally "what changed
+#   most recently". The moment someone asks for a value 3 changes ago, switch
+#   to Type 2.
+# - Sellers who never changed must appear with previous_city NULL, not filtered
+#   out, and not defaulted to the current value. Both mistakes destroy the
+#   "did they move?" signal this table exists to answer.

@@ -110,3 +110,58 @@ df = (spark.table("cdc_raw").withColumn("rn", F.row_number().over(w))
       .filter("rn = 1").drop("rn").orderBy("seller_id"))
 assert [tuple(r) for r in df.collect()] == r1
 print("[PASS] dedup — DataFrame API matches SQL")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE seller_changes (
+#       seller_id  INT NOT NULL,
+#       tier       VARCHAR(16) NOT NULL,
+#       city       VARCHAR(60) NOT NULL,
+#       changed_on DATE NOT NULL,
+#       KEY idx_seller_changed (seller_id, changed_on)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO seller_changes (seller_id, tier, city, changed_on) VALUES
+#       (501, 'casual',   'Bangkok',    '2026-01-01'),
+#       (501, 'power',    'Bangkok',    '2026-01-05'),
+#       (501, 'power',    'Chiang Mai', '2026-01-20'),
+#       (502, 'business', 'Singapore',  '2026-01-01'),
+#       (503, 'casual',   'Hanoi',      '2026-01-03');
+#
+# Simulate a replayed feed (every row twice + a same-timestamp collision):
+#   CREATE TABLE cdc_raw AS
+#   SELECT * FROM seller_changes
+#   UNION ALL SELECT * FROM seller_changes
+#   UNION ALL SELECT 501, 'business', 'Chiang Mai', '2026-01-20';
+#
+# Deterministic dedup (ROW_NUMBER + tie-breaker):
+#   WITH ranked AS (
+#       SELECT seller_id, tier, city, changed_on,
+#              ROW_NUMBER() OVER (PARTITION BY seller_id
+#                                 ORDER BY changed_on DESC, tier ASC) AS rn
+#       FROM cdc_raw
+#   )
+#   SELECT seller_id, tier, city, changed_on FROM ranked WHERE rn = 1
+#   ORDER BY seller_id;
+# Tie on 2026-01-20 between 'power' / 'business' resolves to 'business'
+# reproducibly thanks to `tier ASC`.
+#
+# Materialise the deduped set idempotently (safe to re-run):
+#   CREATE TABLE dim_seller_current AS
+#   WITH ranked AS (
+#       SELECT seller_id, tier, city, changed_on,
+#              ROW_NUMBER() OVER (PARTITION BY seller_id
+#                                 ORDER BY changed_on DESC, tier ASC) AS rn
+#       FROM cdc_raw
+#   )
+#   SELECT seller_id, tier, city, changed_on FROM ranked WHERE rn = 1;
+# For recurring loads on an already-populated table, use:
+#   TRUNCATE TABLE dim_seller_current;
+#   INSERT INTO dim_seller_current SELECT ...;            -- whole-table rewrite
+# Or per-key upsert with ON DUPLICATE KEY UPDATE for incremental CDC:
+#   INSERT INTO dim_seller_current (seller_id, tier, city, changed_on)
+#   SELECT seller_id, tier, city, changed_on FROM ranked WHERE rn = 1
+#   ON DUPLICATE KEY UPDATE tier = VALUES(tier),
+#                           city = VALUES(city),
+#                           changed_on = VALUES(changed_on);
+# Note: dropDuplicates(["key"]) in Spark keeps an arbitrary row — re-runs can
+# flip. The MySQL ROW_NUMBER pattern is fully deterministic.

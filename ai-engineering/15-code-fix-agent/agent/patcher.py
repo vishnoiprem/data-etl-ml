@@ -16,40 +16,48 @@ class EditError(Exception):
 def apply_edits(root: Path, args: ApplyEditsArgs, dry_run: bool = False) -> str:
     """Apply all edits atomically. Either every edit succeeds or none do.
 
-    Returns a unified diff for the user to review.
+    When multiple edits target the same file, they are applied in order on
+    the in-memory copy, so each subsequent old_text check operates on the
+    state after prior edits (matching how an LLM would plan them).
     """
-    # Pre-flight: every old_text must be unique in its file
+    # Pre-flight: every old_text must be unique in its file (vs original)
     snapshots: dict[Path, str] = {}
     for edit in args.edits:
         path = _resolve(root, edit.path)
         if not path.exists():
             raise EditError(f"file not found: {edit.path}")
-        original = path.read_text(encoding="utf-8")
-        if edit.old_text not in original:
+        if path not in snapshots:
+            snapshots[path] = path.read_text(encoding="utf-8")
+        current = snapshots[path]
+        if edit.old_text not in current:
             raise EditError(
                 f"old_text not found verbatim in {edit.path}.\n"
                 f"--- looking for ---\n{edit.old_text}\n--- end ---\n"
                 f"Hint: make sure whitespace and indentation match exactly."
             )
-        count = original.count(edit.old_text)
+        count = current.count(edit.old_text)
         if count > 1:
             raise EditError(
                 f"old_text is ambiguous ({count} matches) in {edit.path}. "
                 f"Include more surrounding context to make it unique."
             )
-        snapshots[path] = original
 
-    # All pre-flight passed — apply in memory
-    new_contents: dict[Path, str] = {}
+    # All pre-flight passed — apply in order on in-memory copies
+    new_contents: dict[Path, str] = dict(snapshots)
     for edit in args.edits:
         path = _resolve(root, edit.path)
-        new_contents[path] = snapshots[path].replace(edit.old_text, edit.new_text, 1)
+        new_contents[path] = new_contents[path].replace(edit.old_text, edit.new_text, 1)
 
     # Diff for review
     diffs = []
+    root_resolved = root.resolve()
     for path, new in new_contents.items():
         old = snapshots[path]
-        rel = path.relative_to(root)
+        try:
+            rel = path.relative_to(root_resolved)
+        except ValueError:
+            # Fallback if paths diverge due to symlinks (macOS /tmp -> /private/tmp)
+            rel = Path(path.name)
         diff = "".join(
             difflib.unified_diff(
                 old.splitlines(keepends=True),

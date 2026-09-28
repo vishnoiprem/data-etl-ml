@@ -31,9 +31,14 @@ class TestResult:
 def run_tests(root: Path, args: RunTestsArgs) -> TestResult:  # type: ignore[name-defined]
     """Run pytest in the given repo root. Capture output and parse failures."""
     import time
-    cmd = ["pytest", args.target, "-x", "--tb=short", "--no-header", "-q"]
-    if not args.target:
-        cmd = ["pytest", "-x", "--tb=short", "--no-header", "-q"]
+    # Always pass the root explicitly via a cd target. Pytest treats positional
+    # args as paths to test files/roots.
+    cmd = ["pytest"]
+    if args.target:
+        cmd.append(args.target)
+    else:
+        cmd.append(str(root))
+    cmd += ["-x", "--tb=short", "--no-header", "-q"]
 
     t0 = time.perf_counter()
     try:

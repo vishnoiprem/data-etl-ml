@@ -89,3 +89,39 @@ SELECT ROUND(mt - mc, 2) AS absolute_lift,
 FROM s
 """
 expect("absolute vs relative lift", LIFT, [(4.00, 40.00)])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE experiment (
+#       user_id   INT PRIMARY KEY,
+#       variant   VARCHAR(16) NOT NULL,
+#       metric    DECIMAL(6,2) NOT NULL
+#   );
+#   INSERT INTO experiment (user_id, variant, metric) VALUES
+#       (1,  'control',   12.00), (2,  'control',    9.00), (3,  'control',   11.00),
+#       (4,  'control',   10.00), (5,  'control',    8.00),
+#       (6,  'treatment', 14.00), (7,  'treatment', 13.00), (8,  'treatment', 15.00),
+#       (9,  'treatment', 12.00), (10, 'treatment', 16.00);
+#
+# Per-variant mean/variance (MySQL 8.0+ supports VAR_SAMP / STDDEV_SAMP):
+#   SELECT variant,
+#          COUNT(*) AS n,
+#          ROUND(AVG(metric), 2)        AS mean_metric,
+#          ROUND(VAR_SAMP(metric), 2)    AS var_samp,
+#          ROUND(STDDEV_SAMP(metric), 4) AS sd_samp
+#   FROM experiment
+#   GROUP BY variant
+#   ORDER BY variant;
+#
+# Absolute vs relative lift:
+#   WITH s AS (
+#       SELECT
+#         AVG(CASE WHEN variant = 'control'   THEN metric END) AS mc,
+#         AVG(CASE WHEN variant = 'treatment' THEN metric END) AS mt
+#       FROM experiment
+#   )
+#   SELECT ROUND(mt - mc, 2)                  AS absolute_lift,
+#          ROUND(100.0 * (mt - mc) / mc, 2)   AS relative_lift_pct
+#   FROM s;
+# Caveat: on MySQL < 8.0 use VAR_SAMPLE / STDDEV_SAMPLE (older alias) or
+# compute variance as SUM(metric^2)/n - AVG(metric)^2 manually.

@@ -111,11 +111,26 @@ expect("rolling 7-day unique (HLL approx, exact at this size)", APPROX, [
 ])
 
 # ---- MySQL way ----------------------------------------------------------
-# Same self-join range trick works in MySQL 8.0+ (CTEs + window-style syntax).
-# Counting DISTINCT inside a window function is still not allowed, so the
-# range-join pattern is the portable answer across engines.
+# CREATE TABLE + sample data:
+#   CREATE TABLE events (
+#       user_id    INT NOT NULL,
+#       event_date DATE NOT NULL,
+#       event_name VARCHAR(32) NOT NULL,
+#       KEY idx_events_date (event_date),
+#       KEY idx_events_user_date (user_id, event_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO events (user_id, event_date, event_name) VALUES
+#       (1, '2026-01-01', 'open'), (1, '2026-01-02', 'open'), (1, '2026-01-08', 'open'),
+#       (2, '2026-01-01', 'open'),
+#       (3, '2026-01-01', 'open'), (3, '2026-01-02', 'open'),
+#       (4, '2026-01-02', 'open'), (4, '2026-01-03', 'open'), (4, '2026-01-09', 'open'),
+#       (5, '2026-01-02', 'open'),
+#       (6, '2026-01-02', 'open'), (6, '2026-01-03', 'open'), (6, '2026-01-30', 'open'),
+#       (7, '2026-01-08', 'open'),
+#       (8, '2026-01-08', 'open'), (8, '2026-01-09', 'open');
 #
-# Exact rolling 7-day unique users:
+# Rolling 7-day unique users (range-join; COUNT(DISTINCT) inside a window is
+# still not allowed in MySQL 8, so the range-join is the portable answer):
 #   WITH days AS (SELECT DISTINCT event_date FROM events)
 #   SELECT d.event_date,
 #          COUNT(DISTINCT e.user_id) AS rolling_7d_unique
@@ -125,16 +140,7 @@ expect("rolling 7-day unique (HLL approx, exact at this size)", APPROX, [
 #   GROUP BY d.event_date
 #   ORDER BY d.event_date;
 #
-# Sketch (approx) — MySQL has no HLL built in, but you can swap in an
-# approximation via sampling if exactness is not required:
-#   WITH days AS (SELECT DISTINCT event_date FROM events)
-#   SELECT d.event_date,
-#          COUNT(DISTINCT e.user_id) AS approx_7d_unique
-#   FROM days d
-#   JOIN events e
-#     ON DATEDIFF(d.event_date, e.event_date) BETWEEN 0 AND 6
-#   GROUP BY d.event_date
-#   ORDER BY d.event_date;
-# Caveat unchanged: this is a range join and does not scale. The portable
-# production answer is a daily first-seen/last-seen table, or an external
-# HLL sketch (e.g. java-udaf) that can be merged across days.
+# HLL approx — MySQL has no built-in HLL, so on MySQL you stay exact here.
+# Production answer at scale remains a daily first-seen/last-seen table or
+# an external sketch (java-udaf, Redis HLL) that can be merged across days.
+# The range join still does not scale; same caveat as in Spark.

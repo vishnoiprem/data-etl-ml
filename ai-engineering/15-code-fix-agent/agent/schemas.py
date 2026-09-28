@@ -15,13 +15,6 @@ from pydantic import BaseModel, Field, field_validator
 class ReadFileArgs(BaseModel):
     path: str = Field(description="Repo-relative path of the file to read")
 
-    @field_validator("path")
-    @classmethod
-    def no_traversal(cls, v: str) -> str:
-        if v.startswith("/") or ".." in v.split("/"):
-            raise ValueError(f"path must be repo-relative and contain no '..': {v!r}")
-        return v
-
 
 # ── grep ────────────────────────────────────────────────────────────────
 class GrepArgs(BaseModel):
@@ -55,7 +48,7 @@ class RunTestsArgs(BaseModel):
         default="",
         description="Pytest target, e.g. 'tests/test_foo.py::test_bar'. Empty = run all.",
     )
-    timeout_s: int = Field(default=120, ge=5, le=600)
+    timeout_s: int = Field(default=120, ge=2, le=600)
 
 
 # ── git_commit ──────────────────────────────────────────────────────────

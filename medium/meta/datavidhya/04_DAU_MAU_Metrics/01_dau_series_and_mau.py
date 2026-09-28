@@ -102,14 +102,31 @@ ORDER BY m.ym
 expect("MAU + stickiness (avg over active days)", STICKY, [("2026-01", 8, 2.67, 33.33)])
 
 # ---- MySQL way ----------------------------------------------------------
-# Same logic, MySQL 8.0+. Use DATE_FORMAT to bucket by month.
-# DAU series:
+# CREATE TABLE + sample data:
+#   CREATE TABLE events (
+#       user_id    INT NOT NULL,
+#       event_date DATE NOT NULL,
+#       event_name VARCHAR(32) NOT NULL,
+#       KEY idx_events_date (event_date),
+#       KEY idx_events_user_date (user_id, event_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO events (user_id, event_date, event_name) VALUES
+#       (1, '2026-01-01', 'open'), (1, '2026-01-02', 'open'), (1, '2026-01-08', 'open'),
+#       (2, '2026-01-01', 'open'),
+#       (3, '2026-01-01', 'open'), (3, '2026-01-02', 'open'),
+#       (4, '2026-01-02', 'open'), (4, '2026-01-03', 'open'), (4, '2026-01-09', 'open'),
+#       (5, '2026-01-02', 'open'),
+#       (6, '2026-01-02', 'open'), (6, '2026-01-03', 'open'), (6, '2026-01-30', 'open'),
+#       (7, '2026-01-08', 'open'),
+#       (8, '2026-01-08', 'open'), (8, '2026-01-09', 'open');
+#
+# DAU series (MySQL 8.0+):
 #   SELECT event_date, COUNT(DISTINCT user_id) AS dau
 #   FROM events
 #   GROUP BY event_date
 #   ORDER BY event_date;
 #
-# MAU + stickiness (avg over active days):
+# MAU + stickiness (avg over active days; DATE_FORMAT bucket = '%Y-%m'):
 #   WITH dau AS (
 #       SELECT event_date, COUNT(DISTINCT user_id) AS dau
 #       FROM events GROUP BY event_date
@@ -120,14 +137,15 @@ expect("MAU + stickiness (avg over active days)", STICKY, [("2026-01", 8, 2.67, 
 #       FROM events GROUP BY DATE_FORMAT(event_date, '%Y-%m')
 #   )
 #   SELECT m.ym, m.mau,
-#          ROUND(AVG(d.dau), 2) AS avg_dau,
+#          ROUND(AVG(d.dau), 2)               AS avg_dau,
 #          ROUND(100.0 * AVG(d.dau) / m.mau, 2) AS stickiness_pct
 #   FROM mau m
 #   JOIN dau d ON DATE_FORMAT(d.event_date, '%Y-%m') = m.ym
 #   GROUP BY m.ym, m.mau
 #   ORDER BY m.ym;
-# Note: MySQL's DATEDIFF behaves the same (DATEDIFF(d, e) BETWEEN 0 AND 6).
-# Stickiness definition is unchanged: DAU/MAU, capped at 1.
+# Note: stickiness definition is unchanged — DAU/MAU, capped at 1. Stickiness
+# uses days-with-activity in the numerator (NOT all calendar days of the month);
+# this differs whenever the product has dead days.
 
 # ---- PySpark DataFrame API ------------------------------------------------
 dau_df = (spark.table("events").groupBy("event_date")

@@ -125,3 +125,61 @@ ORDER BY o.order_id
     (9004, 503, "2026-01-03", "casual"),
     (9005, 502, "2026-01-08", "business"),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data (orders + seller_changes):
+#   CREATE TABLE orders (
+#       order_id     INT PRIMARY KEY,
+#       buyer_id     INT,
+#       seller_id    INT,
+#       order_date   DATE,
+#       gross_amount DECIMAL(10,2),
+#       status       VARCHAR(20),
+#       KEY idx_orders_seller_date (seller_id, order_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO orders (order_id, buyer_id, seller_id, order_date, gross_amount, status) VALUES
+#       (9001, 1, 501, '2026-01-01', 25.00, 'completed'),
+#       (9002, 2, 502, '2026-01-01', 40.00, 'completed'),
+#       (9003, 3, 501, '2026-01-02', 15.00, 'cancelled'),
+#       (9004, 1, 503, '2026-01-03', 60.00, 'completed'),
+#       (9005, 4, 502, '2026-01-08', 10.00, 'completed');
+#
+#   CREATE TABLE seller_changes (
+#       seller_id  INT, tier VARCHAR(16), city VARCHAR(60), changed_on DATE,
+#       KEY idx_seller_changed (seller_id, changed_on)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO seller_changes VALUES
+#       (501, 'casual',   'Bangkok',    '2026-01-01'),
+#       (501, 'power',    'Bangkok',    '2026-01-05'),
+#       (501, 'power',    'Chiang Mai', '2026-01-20'),
+#       (502, 'business', 'Singapore',  '2026-01-01'),
+#       (503, 'casual',   'Hanoi',      '2026-01-03');
+#
+# SCD2 versioned history (LEAD gives you the end of the interval):
+#   SELECT seller_id, tier, city,
+#          changed_on AS effective_from,
+#          LEAD(changed_on) OVER (PARTITION BY seller_id ORDER BY changed_on) AS effective_to,
+#          LEAD(changed_on) OVER (PARTITION BY seller_id ORDER BY changed_on) IS NULL AS is_current
+#   FROM seller_changes
+#   ORDER BY seller_id, effective_from;
+#
+# Point-in-time tier attribution (interval is [effective_from, effective_to),
+# inclusive start, EXCLUSIVE end):
+#   WITH scd AS (
+#       SELECT seller_id, tier,
+#              changed_on AS eff_from,
+#              LEAD(changed_on) OVER (PARTITION BY seller_id ORDER BY changed_on) AS eff_to
+#       FROM seller_changes
+#   )
+#   SELECT o.order_id, o.seller_id, o.order_date, s.tier
+#   FROM orders o
+#   JOIN scd s
+#     ON s.seller_id = o.seller_id
+#    AND o.order_date >= s.eff_from
+#    AND (o.order_date < s.eff_to OR s.eff_to IS NULL)
+#   ORDER BY o.order_id;
+# Critical: an inclusive end matches TWO versions on the boundary date and
+# silently doubles revenue. State the convention out loud.
+# MERGE in MySQL 8.0+:
+#   To merge new CDC rows: CLOSE the open row (set effective_to = new changed_on)
+#   then INSERT the new version, both in one transaction.

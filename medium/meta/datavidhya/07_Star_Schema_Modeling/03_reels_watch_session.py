@@ -78,3 +78,53 @@ CREATE TABLE dim_device ( device_key INT, device_type VARCHAR(20), os VARCHAR(20
 CREATE TABLE dim_entry_source ( source_key INT, source_name VARCHAR(40) );
 CREATE TABLE dim_date ( date_key INT PRIMARY KEY, full_date DATE, day_of_week VARCHAR(10), month INT, quarter INT, year INT );
 """
+
+# ---- MySQL way ----------------------------------------------------------
+# DDL is portable to MySQL 8.0 (InnoDB + utf8mb4). Just swap BOOLEAN -> TINYINT(1).
+#
+# Example for fact_reels_session:
+#   CREATE TABLE fact_reels_session (
+#     session_key        BIGINT PRIMARY KEY,
+#     user_key           BIGINT,
+#     session_date_key   INT,
+#     device_key         INT,
+#     entry_source_key   INT,
+#     videos_watched     INT,
+#     total_duration_ms  BIGINT,
+#     likes_in_session   INT,
+#     shares_in_session  INT,
+#     saves_in_session   INT,
+#     is_loop_heavy      TINYINT(1),
+#     exit_reason        VARCHAR(20)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# Sample dimension + fact loads:
+#   INSERT INTO dim_user (user_key, user_id, age_bucket, country, locale,
+#       tenure_days, effective_from, effective_to, is_current)
+#   VALUES (1, 'u-001', '25-34', 'US', 'en_US', 365, '2026-01-01', '9999-12-31', 1);
+#
+#   INSERT INTO dim_reel (reel_key, reel_id, author_user_key, sound_key,
+#       duration_ms, hashtags, effective_from, effective_to, is_current)
+#   VALUES (10, 'r-001', 100, 5, 15000, 'fyp', '2026-01-01', '9999-12-31', 1);
+#
+#   INSERT INTO fact_reels_session (session_key, user_key, session_date_key,
+#       device_key, entry_source_key, videos_watched, total_duration_ms,
+#       likes_in_session, shares_in_session, saves_in_session,
+#       is_loop_heavy, exit_reason)
+#   VALUES (1, 1, 20260101, 1, 1, 8, 92000, 4, 1, 0, 1, 'timeout');
+#
+# Session-level engagement rollup with conformed dims:
+#   SELECT u.user_id,
+#          COUNT(*)                   AS sessions,
+#          AVG(s.videos_watched)      AS avg_videos,
+#          AVG(s.total_duration_ms)/1000.0 AS avg_duration_sec,
+#          AVG(s.likes_in_session)    AS avg_likes
+#   FROM fact_reels_session s
+#   JOIN dim_user u ON s.user_key = u.user_key AND u.is_current = 1
+#   WHERE s.session_date_key BETWEEN 20260101 AND 20260107
+#   GROUP BY u.user_id
+#   ORDER BY sessions DESC;
+# Modelling note: session grain = 1 row per (user, open -> exit) episode. A
+# separate fact_reel_view carries video-level events; do NOT conflate the two
+# grains or you double-count videos. Lifecycle (open -> first_video -> nth
+# video -> exit) maps to an accumulating snapshot, not a transactional fact.
