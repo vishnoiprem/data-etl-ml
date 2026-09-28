@@ -1,5 +1,5 @@
 # Core Data Science
-pandas==2.2.1
+pandas==2.3.3
 numpy==1.26.4
 scikit-learn==1.4.1.post1
 
