@@ -203,3 +203,43 @@ FROM daily_stock ORDER BY trade_date
 got_range = [float(r[1]) for r in range_based]
 assert got_range == [100.0, 150.0, 300.0], got_range
 print("[PASS] Q65 a 2-day RANGE window gives Jan 10 = 300.0 (itself only), not 200.0")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 window functions support the same ROWS BETWEEN N PRECEDING AND
+# CURRENT ROW frame, and ROUND/AVG/MAX/MIN are identical. Note that MySQL
+# also rejects RANGE frames over DATE ordering keys (range frames need a
+# numeric order key in both engines).
+#
+# CREATE TABLE daily_stock (
+#     trade_date  DATE         NOT NULL,
+#     ticker      VARCHAR(8)   NOT NULL,
+#     close_price DECIMAL(10,2) NOT NULL,
+#     volume      BIGINT       NOT NULL,
+#     PRIMARY KEY (ticker, trade_date),
+#     KEY ix_ds_date (trade_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO daily_stock (trade_date, ticker, close_price, volume) VALUES
+#     ('2024-01-01', 'AAPL', 106.71, 3361366),
+#     ('2024-01-02', 'AAPL', 126.55, 1307277),
+#     ('2024-01-03', 'AAPL', 128.06, 3121834),
+#     ('2024-01-04', 'AAPL', 118.67, 4914373),
+#     ('2024-01-05', 'AAPL', 112.63, 1288531);
+#
+# SELECT trade_date,
+#        ticker,
+#        close_price,
+#        ROUND(AVG(close_price) OVER w, 2) AS rolling_3day_avg,
+#        MAX(close_price) OVER w           AS rolling_3day_max,
+#        MIN(close_price) OVER w           AS rolling_3day_min
+# FROM daily_stock
+# WINDOW w AS (PARTITION BY ticker ORDER BY trade_date
+#              ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)
+# ORDER BY ticker, trade_date;
+#
+# -- Expected:
+# -- 2024-01-01 AAPL 106.71 106.71 106.71 106.71
+# -- 2024-01-02 AAPL 126.55 116.63 126.55 106.71
+# -- 2024-01-03 AAPL 128.06 120.44 128.06 106.71
+# -- 2024-01-04 AAPL 118.67 124.43 128.06 118.67
+# -- 2024-01-05 AAPL 112.63 119.79 128.06 112.63

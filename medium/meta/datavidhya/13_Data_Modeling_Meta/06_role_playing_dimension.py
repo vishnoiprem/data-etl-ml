@@ -234,3 +234,117 @@ expect("Q34 derived attributes are available in every role", WEEKEND, [
     (4, "Friday",    False, None),
 ])
 print("[PASS] Q18 no query reimplements weekend or fiscal-quarter logic")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE dim_date (
+#       date_key        INT         NOT NULL,
+#       full_date       DATE        NOT NULL,
+#       year            INT         NOT NULL,
+#       quarter         INT         NOT NULL,
+#       month           INT         NOT NULL,
+#       day_name        VARCHAR(16) NOT NULL,
+#       is_weekend      TINYINT(1)  NOT NULL,
+#       fiscal_quarter  VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (date_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- 14-day range, 2025-12-28 .. 2026-01-10
+#   INSERT INTO dim_date
+#       (date_key, full_date, year, quarter, month, day_name, is_weekend, fiscal_quarter) VALUES
+#       (20251228, '2025-12-28', 2025, 4, 12, 'Sunday',   1, 'FY2025-Q4'),
+#       (20251229, '2025-12-29', 2025, 4, 12, 'Monday',   0, 'FY2025-Q4'),
+#       (20251230, '2025-12-30', 2025, 4, 12, 'Tuesday',  0, 'FY2025-Q4'),
+#       (20251231, '2025-12-31', 2025, 4, 12, 'Wednesday',0, 'FY2025-Q4'),
+#       (20260101, '2026-01-01', 2026, 1,  1, 'Thursday', 0, 'FY2026-Q1'),
+#       (20260102, '2026-01-02', 2026, 1,  1, 'Friday',   0, 'FY2026-Q1'),
+#       (20260103, '2026-01-03', 2026, 1,  1, 'Saturday', 1, 'FY2026-Q1'),
+#       (20260104, '2026-01-04', 2026, 1,  1, 'Sunday',   1, 'FY2026-Q1'),
+#       (20260105, '2026-01-05', 2026, 1,  1, 'Monday',   0, 'FY2026-Q1'),
+#       (20260106, '2026-01-06', 2026, 1,  1, 'Tuesday',  0, 'FY2026-Q1'),
+#       (20260107, '2026-01-07', 2026, 1,  1, 'Wednesday',0, 'FY2026-Q1'),
+#       (20260108, '2026-01-08', 2026, 1,  1, 'Thursday', 0, 'FY2026-Q1'),
+#       (20260109, '2026-01-09', 2026, 1,  1, 'Friday',   0, 'FY2026-Q1'),
+#       (20260110, '2026-01-10', 2026, 1,  1, 'Saturday', 1, 'FY2026-Q1');
+#
+#   CREATE TABLE fact_marketplace_order (
+#       order_id          INT           NOT NULL,
+#       order_date_key    INT           NOT NULL,
+#       ship_date_key     INT               NULL,
+#       delivery_date_key INT               NULL,
+#       amount            DECIMAL(12,2) NOT NULL,
+#       PRIMARY KEY (order_id),
+#       KEY idx_fact_order_date (order_date_key),
+#       KEY idx_fact_ship_date  (ship_date_key),
+#       KEY idx_fact_delivery_date (delivery_date_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_marketplace_order
+#       (order_id, order_date_key, ship_date_key, delivery_date_key, amount) VALUES
+#       (1, 20251230, 20251231, 20260102, 120.00),
+#       (2, 20251231, 20260102, 20260105,  80.00),
+#       (3, 20260101, 20260103, 20260106, 200.00),
+#       (4, 20260102,      NULL,      NULL,  50.00);
+#
+#   -- Role views: alias every dim_date column with a role prefix.
+#   CREATE OR REPLACE VIEW vw_order_date AS
+#   SELECT date_key       AS order_date_key,
+#          full_date      AS order_date,
+#          year           AS order_year,
+#          quarter        AS order_quarter,
+#          day_name       AS order_day_name,
+#          is_weekend     AS order_is_weekend,
+#          fiscal_quarter AS order_fiscal_quarter
+#   FROM dim_date;
+#   CREATE OR REPLACE VIEW vw_ship_date AS
+#   SELECT date_key       AS ship_date_key,
+#          full_date      AS ship_date,
+#          year           AS ship_year,
+#          quarter        AS ship_quarter,
+#          day_name       AS ship_day_name,
+#          is_weekend     AS ship_is_weekend,
+#          fiscal_quarter AS ship_fiscal_quarter
+#   FROM dim_date;
+#   CREATE OR REPLACE VIEW vw_delivery_date AS
+#   SELECT date_key       AS delivery_date_key,
+#          full_date      AS delivery_date,
+#          year           AS delivery_year,
+#          quarter        AS delivery_quarter,
+#          day_name       AS delivery_day_name,
+#          is_weekend     AS delivery_is_weekend,
+#          fiscal_quarter AS delivery_fiscal_quarter
+#   FROM dim_date;
+#
+#   -- Q34 three roles, no name collisions, unshipped order preserved (expect block)
+#   SELECT f.order_id,
+#          o.order_year,
+#          o.order_fiscal_quarter,
+#          s.ship_year,
+#          d.delivery_year,
+#          DATEDIFF(d.delivery_date, o.order_date) AS days_to_deliver
+#   FROM fact_marketplace_order f
+#   JOIN      vw_order_date    o ON o.order_date_key    = f.order_date_key
+#   LEFT JOIN vw_ship_date     s ON s.ship_date_key     = f.ship_date_key
+#   LEFT JOIN vw_delivery_date d ON d.delivery_date_key = f.delivery_date_key
+#   ORDER BY f.order_id;
+#
+#   -- Q34 INNER JOIN trap: count comparison. INNER drops order 4; LEFT keeps it.
+#   SELECT o.year AS order_year, COUNT(*) AS orders, ROUND(SUM(f.amount), 2) AS revenue
+#   FROM fact_marketplace_order f
+#   JOIN dim_date o ON o.date_key = f.order_date_key
+#   JOIN dim_date s ON s.date_key = f.ship_date_key      -- INNER on optional role
+#   GROUP BY o.year ORDER BY o.year;
+#
+#   -- Q34 derived attributes are available in every role (expect block)
+#   SELECT f.order_id, o.order_day_name, o.order_is_weekend, d.delivery_is_weekend
+#   FROM fact_marketplace_order f
+#   JOIN vw_order_date o ON o.order_date_key = f.order_date_key
+#   LEFT JOIN vw_delivery_date d ON d.delivery_date_key = f.delivery_date_key
+#   ORDER BY f.order_id;
+#
+# MySQL 8.0+ notes: Spark's `date_format(d, 'yyyy-MM-dd')` -> MySQL's
+# DATE_FORMAT(d, '%Y%m%d'); Spark's `EXPLODE(SEQUENCE(start, end, INTERVAL))`
+# for generating the date spine -> use a recursive CTE or a one-shot
+# INSERT ... SELECT from a numbers table. DAYOFWEEK(d) IN (1, 7) is identical
+# in MySQL. dim_date is intentionally tiny (~14 rows here, 7300 in production);
+# every role view is a zero-storage alias, so the fiscal-calendar logic lives
+# in exactly one place and the Q34 "report labelled orders by year that is
+# actually delivery year" bug is closed by the column rename, not by hope.

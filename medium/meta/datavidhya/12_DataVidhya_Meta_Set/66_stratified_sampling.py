@@ -155,3 +155,42 @@ expect("Q66 strata with fewer than 2 members return all they have", SQL, [
     ( 2, "18-25", "M", "North", "Medium", 2),
     (99, "26-35", "F", "South", "High",   1),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...) and
+# the same composite-key partitioning. TABLESAMPLE does not exist in
+# MySQL -- "stratified sampling" here is deterministic, not random.
+#
+# CREATE TABLE population (
+#     person_id  INT          NOT NULL,
+#     age_group  VARCHAR(8)   NOT NULL,
+#     gender     CHAR(1)      NOT NULL,
+#     region     VARCHAR(16)  NOT NULL,
+#     income     VARCHAR(16)  NOT NULL,
+#     PRIMARY KEY (person_id),
+#     KEY ix_pop_stratum (age_group, gender, person_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO population (person_id, age_group, gender, region, income) VALUES
+#     ( 1, '18-25', 'M', 'North', 'Low'),
+#     ( 2, '18-25', 'M', 'North', 'Medium'),
+#     ( 3, '18-25', 'M', 'North', 'High'),
+#     (13, '18-25', 'F', 'North', 'Low'),
+#     (14, '18-25', 'F', 'North', 'Medium'),
+#     (15, '18-25', 'F', 'North', 'High');
+#
+# SELECT person_id, age_group, gender, region, income, stratum_rank
+# FROM (
+#     SELECT person_id, age_group, gender, region, income,
+#            ROW_NUMBER() OVER (PARTITION BY age_group, gender
+#                               ORDER BY person_id) AS stratum_rank
+#     FROM population
+# ) t
+# WHERE stratum_rank <= 2
+# ORDER BY age_group, gender, person_id;
+#
+# -- Expected:
+# -- (13, '18-25', 'F', 'North', 'Low',    1)
+# -- (14, '18-25', 'F', 'North', 'Medium', 2)
+# -- ( 1, '18-25', 'M', 'North', 'Low',    1)
+# -- ( 2, '18-25', 'M', 'North', 'Medium', 2)

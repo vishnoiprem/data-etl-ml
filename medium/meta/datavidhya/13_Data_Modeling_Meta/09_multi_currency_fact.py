@@ -290,3 +290,93 @@ JOIN fact_ad_revenue f
 """).collect()[0]
 print(f"[PASS] Q47 round-then-sum {per_row[0]} vs sum-then-round {per_row[1]} "
       "-- convert at full precision, round once at presentation")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE dim_exchange_rate (
+#       currency_code  CHAR(3)        NOT NULL,
+#       rate_date      DATE           NOT NULL,
+#       rate_to_usd    DECIMAL(18,6)  NOT NULL,
+#       PRIMARY KEY (currency_code, rate_date),
+#       KEY idx_rate_date (rate_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_exchange_rate (currency_code, rate_date, rate_to_usd) VALUES
+#       ('USD', '2026-03-01', 1.000000),
+#       ('EUR', '2026-03-01', 1.080000),
+#       ('INR', '2026-03-01', 0.012000),
+#       ('USD', '2026-03-02', 1.000000),
+#       ('EUR', '2026-03-02', 1.090000),
+#       ('INR', '2026-03-02', 0.011900),
+#       -- June snapshot moves EUR; March rows must be UNTOUCHED.
+#       ('USD', '2026-06-01', 1.000000),
+#       ('EUR', '2026-06-01', 1.200000),
+#       ('INR', '2026-06-01', 0.010000);
+#
+#   CREATE TABLE fact_ad_revenue (
+#       revenue_id    INT             NOT NULL,
+#       currency_code CHAR(3)         NOT NULL,
+#       revenue_date  DATE            NOT NULL,
+#       local_amount  DECIMAL(18,2)   NOT NULL,
+#       PRIMARY KEY (revenue_id),
+#       KEY idx_fact_rev_ccy_date (currency_code, revenue_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_ad_revenue (revenue_id, currency_code, revenue_date, local_amount) VALUES
+#       (1, 'USD', '2026-03-01', 1000.00),
+#       (2, 'EUR', '2026-03-01',  500.00),
+#       (3, 'INR', '2026-03-01', 90000.00),
+#       (4, 'EUR', '2026-03-02',  500.00),
+#       (5, 'EUR', '2026-03-07',  800.00);  -- missing rate for Mar 7
+#
+#   -- Q47 conversion uses the rate on the transaction date (expect block).
+#   SELECT f.revenue_id,
+#          f.currency_code,
+#          f.revenue_date,
+#          f.local_amount,
+#          ROUND(f.local_amount * er.rate_to_usd, 2) AS usd_amount
+#   FROM fact_ad_revenue f
+#   JOIN dim_exchange_rate er
+#     ON er.currency_code = f.currency_code
+#    AND er.rate_date     = f.revenue_date
+#   ORDER BY f.revenue_id;
+#
+#   -- Q47 daily USD totals (expect block)
+#   SELECT revenue_date, ROUND(SUM(local_amount * er.rate_to_usd), 2) AS usd_revenue
+#   FROM fact_ad_revenue f
+#   JOIN dim_exchange_rate er
+#     ON er.currency_code = f.currency_code AND er.rate_date = f.revenue_date
+#   GROUP BY revenue_date ORDER BY revenue_date;
+#
+#   -- Q47 forward-filling the rate dimension recovers the full USD total.
+#   -- MySQL has no IGNORE NULLS for window functions, so use a correlated
+#   -- subquery to pick the most recent rate on or before the transaction date:
+#   CREATE OR REPLACE VIEW dim_rate_filled AS
+#   WITH RECURSIVE cal(d) AS (
+#       SELECT DATE'2026-03-01'
+#       UNION ALL
+#       SELECT d + INTERVAL 1 DAY FROM cal WHERE d < DATE'2026-03-10'
+#   ),
+#   cur AS (SELECT DISTINCT currency_code FROM dim_exchange_rate),
+#   scaffold AS (
+#       SELECT c.currency_code, cal.d AS rate_date
+#       FROM cur c CROSS JOIN cal
+#   )
+#   SELECT s.currency_code, s.rate_date,
+#          (SELECT er.rate_to_usd
+#             FROM dim_exchange_rate er
+#            WHERE er.currency_code = s.currency_code
+#              AND er.rate_date     <= s.rate_date
+#          ORDER BY er.rate_date DESC LIMIT 1) AS rate_to_usd
+#   FROM scaffold s;
+#
+#   SELECT ROUND(SUM(f.local_amount * er.rate_to_usd), 2) AS usd
+#   FROM fact_ad_revenue f
+#   JOIN dim_rate_filled er
+#     ON er.currency_code = f.currency_code AND er.rate_date = f.revenue_date;
+#
+# MySQL 8.0+ notes: the PRIMARY KEY on (currency_code, rate_date) makes the
+# snapshot lookup an equality probe; joining on currency alone fans out (Q47
+# fan-out trap -- 3x inflation, still looks like money). USD must be in the
+# rate dimension at 1.0 -- omitting it drops your largest market silently.
+# LAST_VALUE(IGNORE NULLS) is Spark-only; the correlated subquery is the
+# portable forward-fill idiom and is the one to commit at Meta volume where
+# the forward-fill scaffolding runs every night.

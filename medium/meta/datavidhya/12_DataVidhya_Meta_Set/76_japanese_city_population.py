@@ -129,3 +129,35 @@ SELECT * FROM VALUES
 AS t(Id, Name, COUNTRYCODE, DISTRICT, POPULATION)
 """)
 expect("Q76 no JPN cities -> one row of NULL, not zero rows and not 0", SQL, [(None,)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 SUM() over an empty set also returns one row of NULL (same
+# semantics as Spark). The alias needs backticks because it contains a
+# space; in MySQL you can alternatively use double quotes (sql_mode
+# permitting) or rename to avoid the space.
+#
+# CREATE TABLE jcp_city_pop (
+#     Id          INT          NOT NULL,
+#     Name        VARCHAR(64)  NOT NULL,
+#     COUNTRYCODE VARCHAR(3)   NOT NULL,
+#     DISTRICT    VARCHAR(64)  NOT NULL,
+#     POPULATION  BIGINT       NOT NULL,
+#     PRIMARY KEY (Id),
+#     KEY ix_jcp_country (COUNTRYCODE, POPULATION)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO jcp_city_pop (Id, Name, COUNTRYCODE, DISTRICT, POPULATION) VALUES
+#     (1, 'Tokyo', 'JPN', 'Kanto',         13929286),
+#     (2, 'Osaka', 'JPN', 'Kansai',         2691167),
+#     (3, 'Seoul', 'KOR', 'Seoul',          9776000),
+#     (4, 'Kyoto', 'JPN', 'Kansai',         1474570),
+#     (5, 'Paris', 'FRA', 'Ile-de-France',  2138551);
+#
+# -- Single scalar SUM, same as Spark. The composite index on
+# -- (COUNTRYCODE, POPULATION) lets the engine seek + range-aggregate
+# -- the three JPN rows without scanning Seoul/Paris.
+# SELECT SUM(POPULATION) AS `Total Population`
+# FROM jcp_city_pop
+# WHERE COUNTRYCODE = 'JPN';
+#
+# -- Expected: 18095023.

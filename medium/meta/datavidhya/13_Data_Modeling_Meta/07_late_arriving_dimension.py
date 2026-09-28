@@ -254,3 +254,100 @@ FROM fact_with_unknown GROUP BY advertiser_sk
 assert (collapsed[0], collapsed[1]) == (-1, 2), collapsed
 print("[PASS] Q27 a shared Unknown key collapses 2 distinct advertisers into one "
       "bucket -- unresolvable; an inferred member keeps them separate")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE dim_advertiser (
+#       advertiser_sk   INT             NOT NULL,
+#       advertiser_id   INT             NOT NULL,
+#       name            VARCHAR(64)     NOT NULL,
+#       country         VARCHAR(8)      NOT NULL,
+#       tier            VARCHAR(16)     NOT NULL,
+#       is_inferred     TINYINT(1)      NOT NULL,
+#       effective_from  DATE            NOT NULL,
+#       effective_to    DATE            NOT NULL,
+#       is_current      TINYINT(1)      NOT NULL,
+#       PRIMARY KEY (advertiser_sk),
+#       KEY idx_dim_adv_id (advertiser_id),
+#       KEY idx_dim_adv_pit (advertiser_id, effective_from, effective_to),
+#       KEY idx_dim_adv_inferred (is_inferred)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_advertiser
+#       (advertiser_sk, advertiser_id, name, country, tier, is_inferred,
+#        effective_from, effective_to, is_current) VALUES
+#       (1, 601, 'Acme Corp',  'US', 'gold',   0, '2026-01-01', '9999-12-31', 1);
+#
+#   CREATE TABLE fact_impression (
+#       impression_id  INT             NOT NULL,
+#       advertiser_id  INT             NOT NULL,
+#       event_date     DATE            NOT NULL,
+#       spend          DECIMAL(12,2)   NOT NULL,
+#       PRIMARY KEY (impression_id),
+#       KEY idx_fact_imp_adv_date (advertiser_id, event_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_impression (impression_id, advertiser_id, event_date, spend) VALUES
+#       (1, 601, '2026-03-01', 100.00),
+#       (2, 602, '2026-03-01', 250.00),
+#       (3, 602, '2026-03-01', 150.00);
+#
+#   -- Q27 inferred member inserted, keyed on the real natural key (expect block).
+#   -- Step 1: detect orphans
+#   SELECT DISTINCT f.advertiser_id
+#   FROM fact_impression f
+#   WHERE NOT EXISTS (SELECT 1 FROM dim_advertiser d WHERE d.advertiser_id = f.advertiser_id);
+#
+#   -- Step 2: insert one inferred row PER unseen natural key, effective_from = fact date.
+#   INSERT INTO dim_advertiser
+#       (advertiser_sk, advertiser_id, name, country, tier, is_inferred,
+#        effective_from, effective_to, is_current)
+#   SELECT (SELECT COALESCE(MAX(advertiser_sk), 0) FROM dim_advertiser) +
+#              ROW_NUMBER() OVER (ORDER BY f.advertiser_id) AS advertiser_sk,
+#          f.advertiser_id,
+#          '(inferred)', '(unknown)', '(unknown)', 1,
+#          '2026-03-01', '9999-12-31', 1
+#   FROM fact_impression f
+#   LEFT JOIN dim_advertiser d ON d.advertiser_id = f.advertiser_id
+#   WHERE d.advertiser_id IS NULL;
+#
+#   SELECT advertiser_sk, advertiser_id, name, tier, is_inferred,
+#          effective_from, effective_to, is_current
+#   FROM dim_advertiser ORDER BY advertiser_sk;
+#
+#   -- Q27 day-1 impressions retroactively pick up the real attributes (expect block)
+#   CREATE TABLE staging_advertiser (
+#       advertiser_id  INT         NOT NULL,
+#       name           VARCHAR(64) NOT NULL,
+#       country        VARCHAR(8)  NOT NULL,
+#       tier           VARCHAR(16) NOT NULL
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO staging_advertiser (advertiser_id, name, country, tier) VALUES
+#       (602, 'Globex Ltd', 'DE', 'silver');
+#
+#   -- Resolution: UPDATE the placeholder IN PLACE, effective_from UNCHANGED.
+#   UPDATE dim_advertiser d
+#   JOIN staging_advertiser s ON s.advertiser_id = d.advertiser_id
+#   SET d.name        = s.name,
+#       d.country     = s.country,
+#       d.tier        = s.tier,
+#       d.is_inferred = 0
+#   WHERE d.is_inferred = 1;
+#
+#   SELECT f.impression_id, d.name, d.tier, ROUND(f.spend, 2) AS spend
+#   FROM fact_impression f
+#   JOIN dim_advertiser d ON d.advertiser_id = f.advertiser_id
+#    AND f.event_date >= d.effective_from AND f.event_date < d.effective_to
+#   ORDER BY f.impression_id;
+#
+#   -- THE BACKDATING TRAP: resolving with effective_from = today leaves a gap.
+#   INSERT INTO dim_advertiser
+#       (advertiser_sk, advertiser_id, name, tier, effective_from, effective_to) VALUES
+#       (3, 602, 'Globex Ltd', 'silver', '2026-03-02', '9999-12-31');
+#   -- The day-1 spend falls into a coverage gap.
+#
+# MySQL 8.0+ notes: NOT EXISTS / LEFT JOIN ... IS NULL is the MySQL-idiomatic
+# anti-join. Resolution is a single UPDATE ... JOIN that mutates the inferred
+# row in place -- inserting a second row leaves historical facts pointing at
+# the placeholder forever. The is_inferred TINYINT(1) flag is what makes the
+# dimension-feed gap MONITORABLE; without it the backdating trap is invisible
+# until the next reconciliation fails. The (idx_dim_adv_pit) covering index
+# keeps the half-open point-in-time join a single range scan at Meta volume.

@@ -223,3 +223,46 @@ SELECT * FROM VALUES
 AS t(user_id, event_type, event_date, event_time)
 """)
 expect("Q72 a lone load and a lone exit produce no rows at all", SQL, [])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports window frames including ROWS BETWEEN ... FOLLOWING
+# and UNIX_TIMESTAMP, so the same window pattern works verbatim. The
+# partition must still include event_date or sessions will cross midnight.
+#
+# CREATE TABLE web_log (
+#     user_id    INT       NOT NULL,
+#     event_type ENUM('page_load','page_exit') NOT NULL,
+#     event_date DATE      NOT NULL,
+#     event_time TIMESTAMP NOT NULL,
+#     KEY ix_wl_user_day (user_id, event_date, event_time)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO web_log (user_id, event_type, event_date, event_time) VALUES
+#     (1, 'page_load', '2024-01-01', '2024-01-01 10:00:00'),
+#     (1, 'page_exit', '2024-01-01', '2024-01-01 10:15:00'),
+#     (1, 'page_load', '2024-01-01', '2024-01-01 10:20:00'),
+#     (1, 'page_exit', '2024-01-01', '2024-01-01 10:35:00'),
+#     (1, 'page_load', '2024-01-02', '2024-01-02 09:00:00'),
+#     (1, 'page_exit', '2024-01-02', '2024-01-02 09:20:00');
+#
+# WITH paired AS (
+#     SELECT user_id, event_type, event_time,
+#            MIN(CASE WHEN event_type = 'page_exit' THEN event_time END) OVER (
+#                PARTITION BY user_id, event_date
+#                ORDER BY event_time
+#                ROWS BETWEEN 1 FOLLOWING AND UNBOUNDED FOLLOWING
+#            ) AS next_exit
+#     FROM web_log
+# ),
+# sessions AS (
+#     SELECT user_id,
+#            (UNIX_TIMESTAMP(next_exit) - UNIX_TIMESTAMP(event_time)) / 60.0 AS minutes
+#     FROM paired
+#     WHERE event_type = 'page_load' AND next_exit IS NOT NULL
+# )
+# SELECT user_id, ROUND(AVG(minutes), 2) AS avg_session_minutes
+# FROM sessions
+# GROUP BY user_id
+# ORDER BY user_id;
+#
+# -- Expected: (1, 16.67).

@@ -238,3 +238,120 @@ SELECT COUNT(*) FROM (SELECT DISTINCT engagement_band, follower_count FROM user_
 assert (banded_combos, raw_combos) == (12, 1000), (banded_combos, raw_combos)
 print(f"[PASS] Q25 banding gives {banded_combos} combinations from 1000 users; "
       f"raw follower_count gives {raw_combos} -- as large as the dimension itself")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE dim_user_profile (
+#       profile_key     INT         NOT NULL,
+#       engagement_band VARCHAR(16) NOT NULL,
+#       follower_band   VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (profile_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_user_profile (profile_key, engagement_band, follower_band) VALUES
+#       ( 1, 'low',    '0-1k'),     ( 2, 'low',    '1k-10k'),
+#       ( 3, 'low',    '10k-100k'), ( 4, 'low',    '100k+'),
+#       ( 5, 'medium', '0-1k'),     ( 6, 'medium', '1k-10k'),
+#       ( 7, 'medium', '10k-100k'), ( 8, 'medium', '100k+'),
+#       ( 9, 'high',   '0-1k'),     (10, 'high',   '1k-10k'),
+#       (11, 'high',   '10k-100k'), (12, 'high',   '100k+');
+#
+#   CREATE TABLE dim_user (
+#       user_sk      INT          NOT NULL,
+#       user_id      BIGINT       NOT NULL,
+#       country      VARCHAR(8)   NOT NULL,
+#       signup_date  DATE         NOT NULL,
+#       PRIMARY KEY (user_sk),
+#       KEY idx_dim_user_id (user_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_user (user_sk, user_id, country, signup_date) VALUES
+#       (1, 7001, 'US', '2024-05-01'),
+#       (2, 7002, 'IN', '2024-06-15'),
+#       (3, 7003, 'BR', '2025-01-20');
+#
+#   CREATE TABLE fact_reel_post (
+#       post_id      INT   NOT NULL,
+#       user_sk      INT   NOT NULL,
+#       profile_key  INT   NOT NULL,
+#       post_date    DATE  NOT NULL,
+#       views        INT   NOT NULL,
+#       PRIMARY KEY (post_id),
+#       KEY idx_fact_post_user (user_sk),
+#       KEY idx_fact_post_profile (profile_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- profile_key stamped AT EVENT TIME -- this is what preserves history
+#   -- without versioning either dimension.
+#   INSERT INTO fact_reel_post (post_id, user_sk, profile_key, post_date, views) VALUES
+#       (1, 1, 10, '2026-01-10',  500),
+#       (2, 1, 10, '2026-01-24',  700),
+#       (3, 1,  6, '2026-03-14', 9000),
+#       (4, 2, 11, '2026-01-11',  300),
+#       (5, 3, 10, '2026-03-02',  150);
+#
+#   -- Q25 two keys, one query, bands as of the post date (expect block)
+#   SELECT p.engagement_band,
+#          p.follower_band,
+#          u.country,
+#          COUNT(*)     AS posts,
+#          SUM(f.views) AS views
+#   FROM fact_reel_post f
+#   JOIN dim_user         u ON u.user_sk     = f.user_sk
+#   JOIN dim_user_profile p ON p.profile_key = f.profile_key
+#   GROUP BY p.engagement_band, p.follower_band, u.country
+#   ORDER BY views DESC, p.engagement_band, u.country;
+#
+#   -- History without versioning -- point-in-time via the stamped profile_key.
+#   SELECT f.post_date, p.engagement_band, p.follower_band
+#   FROM fact_reel_post f JOIN dim_user_profile p ON p.profile_key = f.profile_key
+#   WHERE f.user_sk = 1 ORDER BY f.post_date;
+#
+#   -- The resolve-at-query trap: today's profile key relabels January as 'medium'.
+#   CREATE OR REPLACE VIEW current_user_profile AS
+#   SELECT user_sk, profile_key
+#   FROM (
+#       SELECT user_sk, profile_key,
+#              ROW_NUMBER() OVER (PARTITION BY user_sk ORDER BY post_date DESC) AS rn
+#       FROM fact_reel_post
+#   ) t WHERE rn = 1;
+#
+#   SELECT f.post_date, p.engagement_band
+#   FROM fact_reel_post f
+#   JOIN current_user_profile c ON c.user_sk = f.user_sk
+#   JOIN dim_user_profile     p ON p.profile_key = c.profile_key
+#   WHERE f.user_sk = 1 ORDER BY f.post_date;
+#
+#   -- Q25 banding gives 12 combinations from 1000 users; raw follower_count
+#   -- gives 1000 -- as large as the dimension itself (assertion).
+#   CREATE TABLE user_metrics (
+#       user_id          INT         NOT NULL,
+#       engagement_band  VARCHAR(16) NOT NULL,
+#       follower_count   INT         NOT NULL,
+#       PRIMARY KEY (user_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- Spark's range(1,1001) -> MySQL recursive CTE:
+#   INSERT INTO user_metrics (user_id, engagement_band, follower_count)
+#   WITH RECURSIVE seq(n) AS (
+#       SELECT 1 UNION ALL SELECT n+1 FROM seq WHERE n < 1000
+#   )
+#   SELECT n AS user_id,
+#          CASE WHEN n % 3 = 0 THEN 'low' WHEN n % 3 = 1 THEN 'medium' ELSE 'high' END,
+#          CAST(n * 137 AS UNSIGNED)
+#   FROM seq;
+#
+#   SELECT COUNT(*) FROM (
+#       SELECT DISTINCT engagement_band,
+#              CASE WHEN follower_count <   1000 THEN '0-1k'
+#                   WHEN follower_count <  10000 THEN '1k-10k'
+#                   WHEN follower_count < 100000 THEN '10k-100k'
+#                   ELSE '100k+' END AS follower_band
+#       FROM user_metrics
+#   ) banded;
+#
+#   SELECT COUNT(*) FROM (SELECT DISTINCT engagement_band, follower_count FROM user_metrics) raw;
+#
+# MySQL 8.0+ notes: the mini-dimension's PRIMARY KEY on profile_key makes the
+# fact-side lookup a single-row probe -- at Meta volume with 3B users, the
+# profile_key must be stamped on the fact AT WRITE TIME, not resolved against
+# "today's" band at read time. The CTE form of `range(1, 1001)` keeps the
+# banding assertion reproducible without a numbers table. Banding is the
+# precondition: drop the buckets and the mini-dimension collapses back to
+# dimension scale and stops being a "mini".

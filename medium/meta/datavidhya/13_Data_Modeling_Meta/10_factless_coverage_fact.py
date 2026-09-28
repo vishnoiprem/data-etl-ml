@@ -227,3 +227,89 @@ LEFT ANTI JOIN factless_promo_eligibility e
 assert [(r[0], r[1]) for r in invented] == [("bronze", "JP")], invented
 print(f"[PASS] Q35 a Cartesian grid has {cartesian} cells vs {eligible} truly eligible "
       "-- it would report bronze/JP as a failure though it was never in the promo")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE factless_promo_eligibility (
+#       promo_id     VARCHAR(16) NOT NULL,
+#       creator_tier VARCHAR(16) NOT NULL,
+#       market       VARCHAR(8)  NOT NULL,
+#       PRIMARY KEY (promo_id, creator_tier, market),
+#       KEY idx_cov_tier (creator_tier),
+#       KEY idx_cov_market (market)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO factless_promo_eligibility (promo_id, creator_tier, market) VALUES
+#       ('P1', 'gold',   'US'), ('P1', 'gold',   'IN'), ('P1', 'gold',   'BR'),
+#       ('P1', 'gold',   'JP'), ('P1', 'silver', 'US'), ('P1', 'silver', 'IN'),
+#       ('P1', 'silver', 'BR'), ('P1', 'silver', 'JP'), ('P1', 'bronze', 'US'),
+#       ('P1', 'bronze', 'IN'), ('P1', 'bronze', 'BR');
+#
+#   CREATE TABLE factless_promoted_view (
+#       promo_id     VARCHAR(16) NOT NULL,
+#       creator_tier VARCHAR(16) NOT NULL,
+#       market       VARCHAR(8)  NOT NULL,
+#       viewer_id    INT         NOT NULL,
+#       PRIMARY KEY (viewer_id),
+#       KEY idx_event_tier_market (creator_tier, market)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO factless_promoted_view (promo_id, creator_tier, market, viewer_id) VALUES
+#       ('P1', 'gold',   'US', 9001), ('P1', 'gold',   'US', 9002),
+#       ('P1', 'gold',   'IN', 9003), ('P1', 'silver', 'US', 9004),
+#       ('P1', 'silver', 'US', 9005), ('P1', 'silver', 'US', 9006);
+#
+#   -- Q20 event-tracking factless fact: the measure is COUNT(*) (expect block)
+#   SELECT creator_tier, market, COUNT(*) AS promoted_views
+#   FROM factless_promoted_view
+#   GROUP BY creator_tier, market
+#   ORDER BY promoted_views DESC, creator_tier, market;
+#
+#   -- Q35 coverage anti-join finds the 8 combinations with zero views (expect block).
+#   -- The LEFT JOIN + IS NULL is the portable form; MySQL 8 has no LATERAL but
+#   -- does NOT support the anti-join syntax directly in standard SQL.
+#   SELECT e.creator_tier, e.market
+#   FROM factless_promo_eligibility e
+#   LEFT JOIN factless_promoted_view v
+#          ON v.promo_id     = e.promo_id
+#         AND v.creator_tier = e.creator_tier
+#         AND v.market       = e.market
+#   WHERE v.promo_id IS NULL
+#   ORDER BY e.creator_tier, e.market;
+#
+#   -- Full coverage report (combines activity count with eligibility):
+#   SELECT e.creator_tier,
+#          e.market,
+#          COUNT(v.viewer_id) AS promoted_views,
+#          CASE WHEN COUNT(v.viewer_id) = 0 THEN 'no activity' ELSE 'active' END AS status
+#   FROM factless_promo_eligibility e
+#   LEFT JOIN factless_promoted_view v
+#          ON v.promo_id = e.promo_id AND v.creator_tier = e.creator_tier
+#         AND v.market = e.market
+#   GROUP BY e.creator_tier, e.market
+#   ORDER BY promoted_views DESC, e.creator_tier, e.market;
+#
+#   -- COUNT(*) vs COUNT(key): the trap (expectation).
+#   SELECT e.creator_tier, e.market, COUNT(*) AS star, COUNT(v.viewer_id) AS keyed
+#   FROM factless_promo_eligibility e
+#   LEFT JOIN factless_promoted_view v
+#          ON v.promo_id = e.promo_id AND v.creator_tier = e.creator_tier
+#         AND v.market = e.market
+#   WHERE e.creator_tier = 'bronze' AND e.market = 'US'
+#   GROUP BY e.creator_tier, e.market;
+#
+#   -- Q35 a Cartesian grid would invent bronze/JP as a failure:
+#   WITH tiers AS (SELECT DISTINCT creator_tier FROM factless_promo_eligibility),
+#        mkts  AS (SELECT DISTINCT market       FROM factless_promo_eligibility),
+#        grid  AS (SELECT t.creator_tier, m.market FROM tiers t CROSS JOIN mkts m)
+#   SELECT g.creator_tier, g.market FROM grid g
+#   LEFT JOIN factless_promo_eligibility e
+#          ON e.creator_tier = g.creator_tier AND e.market = g.market
+#   WHERE e.promo_id IS NULL;
+#
+# MySQL 8.0+ notes: a factless fact is FK-only and has no numeric measure; the
+# "no rows for absent combinations" problem is unfixable from the events table
+# alone -- coverage is the universe table that makes the anti-join possible.
+# The PRIMARY KEY on the grain columns (promo_id, creator_tier, market) makes
+# the coverage lookup a 3-column probe; an unindexed CROSS JOIN grid at Meta
+# volume would consume the buffer pool. COUNT(*) vs COUNT(key) is the same
+# defect as Q81 in the SQL set: COUNT ignores NULLs from the manufactured
+# outer-join row.

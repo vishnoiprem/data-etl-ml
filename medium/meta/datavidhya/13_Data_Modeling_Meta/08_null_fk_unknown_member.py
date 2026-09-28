@@ -256,3 +256,87 @@ WHERE d.country <> 'US'
 """).collect()[0][0]
 assert fixed == 1, fixed
 print("[PASS] Q44 defaulting the attribute restores the expected filter result (1)")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE dim_user (
+#       user_key   INT          NOT NULL,
+#       country    VARCHAR(32)  NOT NULL,
+#       platform   VARCHAR(32)  NOT NULL,
+#       PRIMARY KEY (user_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- Always ship explicit Unknown (-1) and Not Applicable (-2) members; real
+#   -- keys are generated positive so negatives cannot collide.
+#   INSERT INTO dim_user (user_key, country, platform) VALUES
+#       (-1, '(unknown)',        '(unknown)'),
+#       (-2, '(not applicable)', '(not applicable)'),
+#       (101, 'US', 'ios'),
+#       (102, 'IN', 'android'),
+#       (103, 'US', 'web');
+#
+#   CREATE TABLE fact_impression (
+#       impression_id  INT NOT NULL,
+#       user_key       INT NOT NULL,
+#       PRIMARY KEY (impression_id),
+#       KEY idx_fact_imp_user (user_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- COALESCE the FK on LOAD, not at query time.
+#   INSERT INTO fact_impression (impression_id, user_key)
+#   SELECT impression_id,
+#          CASE WHEN impression_id = 8 THEN -2 ELSE COALESCE(user_key, -1) END AS user_key
+#   FROM (VALUES ROW(1, 101), ROW(2, 101), ROW(3, 102), ROW(4, 103), ROW(5, 103),
+#                ROW(6, NULL), ROW(7, NULL), ROW(8, NULL)) AS t(impression_id, user_key);
+#
+#   -- Q44 every row joins; Unknown is an explicit category (expect block)
+#   SELECT d.country, COUNT(*) AS impressions
+#   FROM fact_impression f
+#   JOIN dim_user d ON d.user_key = f.user_key
+#   GROUP BY d.country
+#   ORDER BY impressions DESC, d.country;
+#
+#   -- Q44 LEFT JOIN keeps all 8 rows but only 5 have a country (the trap).
+#   SELECT COUNT(*) AS rows_kept,
+#          COUNT(d.country) AS rows_with_country
+#   FROM (VALUES ROW(1,101),ROW(2,101),ROW(3,102),ROW(4,103),ROW(5,103),
+#                ROW(6,NULL),ROW(7,NULL),ROW(8,NULL)) AS f(impression_id, user_key)
+#   LEFT JOIN dim_user_raw d ON d.user_key = f.user_key;
+#
+#   -- Q44 `WHERE country <> 'US'` returns 1, not 4 -- NULL <> 'US' is NULL.
+#   SELECT COUNT(*)
+#   FROM (VALUES ROW(1,101),ROW(2,101),ROW(3,102),ROW(4,103),ROW(5,103),
+#                ROW(6,NULL),ROW(7,NULL),ROW(8,NULL)) AS f(impression_id, user_key)
+#   LEFT JOIN dim_user_raw d ON d.user_key = f.user_key
+#   WHERE d.country <> 'US';
+#
+#   -- Q44 -1 and -2 keep 'no key' and 'key is meaningless' distinguishable
+#   SELECT d.country, COUNT(*) AS n
+#   FROM fact_impression f JOIN dim_user d ON d.user_key = f.user_key
+#   WHERE f.user_key < 0
+#   GROUP BY d.country ORDER BY d.country;
+#
+#   -- Q44 NULL attribute on a real dimension row re-creates the bug --
+#   -- a LEFT JOIN keeps the row but the filter loses it.
+#   INSERT INTO dim_user (user_key, country, platform) VALUES
+#       (104, NULL, 'web');
+#   INSERT INTO fact_impression (impression_id, user_key) VALUES (1, 101), (2, 104);
+#   SELECT COUNT(*) FROM fact_impression f
+#   JOIN dim_user d ON d.user_key = f.user_key
+#   WHERE d.country <> 'US';     -- returns 0, not 1
+#
+#   -- Defaulting the attribute restores the expected filter result:
+#   CREATE OR REPLACE VIEW dim_user_clean AS
+#   SELECT user_key,
+#          COALESCE(country, '(unknown)')  AS country,
+#          COALESCE(platform, '(unknown)') AS platform
+#   FROM dim_user;
+#   SELECT COUNT(*) FROM fact_impression f
+#   JOIN dim_user_clean d ON d.user_key = f.user_key
+#   WHERE d.country <> 'US';     -- returns 1
+#
+# MySQL 8.0+ notes: TINYINT(1) is the explicit BOOLEAN. ROW(... ) VALUES is
+# MySQL 8.0.19+ portable table-constructor syntax (replaces Spark's
+# SELECT * FROM VALUES ROW(...) AS t(...)). The three-valued-logic bite
+# (NULL <> 'US' is NULL, so the LEFT-joined rows vanish at the filter) is
+# the silent-failure mode that makes a dashboard 12% low at Meta volume --
+# shipping explicit Unknown / Not Applicable members turns absence into a
+# filterable category and stops the gap from being invisible.

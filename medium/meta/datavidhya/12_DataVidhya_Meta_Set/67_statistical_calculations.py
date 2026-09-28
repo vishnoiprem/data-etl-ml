@@ -163,3 +163,58 @@ print("[PASS] Q67 with a repeat test-taker: 9 rows but student_count stays 8")
 # ------------------------------------------------ min/max keep their own scale
 assert float(got[3]) == 51.5 and float(got[4]) == 77.2
 print("[PASS] Q67 min/max are unrounded data points (51.5 / 77.2)")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has STDDEV_SAMP, STDDEV_POP, MIN, MAX, AVG, COUNT(DISTINCT).
+# It does NOT have an exact interpolating PERCENTILE aggregate (the
+# built-in PERCENTILE_CONT was added in MySQL 8.0.2 as a window function
+# only, not as a GROUP BY aggregate). The portable workaround for an
+# exact median per group is a self-join with row positions, or a stored
+# function. The window-function form PERCENT_RANK + a sort is shown here
+# for completeness; on small per-group data the self-join is simpler.
+#
+# CREATE TABLE test_results (
+#     test_id    INT          NOT NULL,
+#     student_id INT          NOT NULL,
+#     subject    VARCHAR(16)  NOT NULL,
+#     score      DECIMAL(10,2) NOT NULL,
+#     test_date  DATE         NOT NULL,
+#     PRIMARY KEY (test_id),
+#     KEY ix_tr_subject (subject, score)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO test_results (test_id, student_id, subject, score, test_date) VALUES
+#     (1, 1040, 'Math', 55.6, '2024-02-17'),
+#     (2, 1017, 'Math', 62.2, '2024-01-09'),
+#     (3, 1047, 'Math', 55.1, '2024-02-17'),
+#     (4, 1034, 'Math', 54.3, '2024-01-28'),
+#     (5, 1002, 'Math', 51.5, '2024-01-14'),
+#     (6, 1014, 'Math', 75.3, '2024-01-02'),
+#     (7, 1035, 'Math', 59.9, '2024-02-11'),
+#     (8, 1044, 'Math', 77.2, '2024-01-15');
+#
+# SELECT subject,
+#        COUNT(DISTINCT student_id)             AS student_count,
+#        ROUND(AVG(score), 2)                   AS avg_score,
+#        MIN(score)                             AS min_score,
+#        MAX(score)                             AS max_score,
+#        ROUND(STDDEV_SAMP(score), 2)           AS std_dev
+# FROM test_results
+# GROUP BY subject
+# ORDER BY subject;
+#
+# -- Per-group median via self-join on row positions (exact, interpolating).
+# -- For n=8, the median is AVG of the 4th and 5th sorted values:
+# SELECT t.subject,
+#        ( (SELECT s.score
+#            FROM test_results s
+#            WHERE s.subject = t.subject
+#            ORDER BY s.score
+#            LIMIT 1 OFFSET 3)            -- 4th value (0-indexed offset 3)
+#        + (SELECT s.score
+#            FROM test_results s
+#            WHERE s.subject = t.subject
+#            ORDER BY s.score
+#            LIMIT 1 OFFSET 4) ) / 2      -- 5th value
+#        AS median_score
+# FROM (SELECT DISTINCT subject FROM test_results) t;

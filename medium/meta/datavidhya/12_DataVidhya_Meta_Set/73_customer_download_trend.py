@@ -167,3 +167,37 @@ HAVING SUM(CASE WHEN user_type='free' THEN downloads END)
 """).collect()
 assert no_else == [], no_else
 print("[PASS] Q73 omitting ELSE 0 makes the premium total NULL and the date disappears")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same SUM(CASE WHEN ... THEN ... ELSE 0 END) pattern.
+# The ELSE 0 is critical because SUM over an all-NULL set returns NULL,
+# and `5 > NULL` evaluates to NULL (filtered out by HAVING).
+#
+# CREATE TABLE adtc_customer (
+#     user_id    VARCHAR(16) NOT NULL,
+#     user_type  ENUM('free','premium') NOT NULL,
+#     downloads  INT         NOT NULL,
+#     cdate      DATE        NOT NULL,
+#     PRIMARY KEY (user_id, cdate),
+#     KEY ix_adtc_date_type (cdate, user_type)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO adtc_customer (user_id, user_type, downloads, cdate) VALUES
+#     ('u1', 'free',    5, '2024-01-01'),
+#     ('u2', 'premium', 3, '2024-01-01'),
+#     ('u3', 'free',    2, '2024-01-01'),
+#     ('u4', 'premium', 6, '2024-01-02'),
+#     ('u5', 'free',    4, '2024-01-02'),
+#     ('u6', 'premium', 2, '2024-01-03'),
+#     ('u7', 'free',    5, '2024-01-03');
+#
+# SELECT cdate,
+#        SUM(CASE WHEN user_type = 'free'    THEN downloads ELSE 0 END) AS non_paying_downloads,
+#        SUM(CASE WHEN user_type = 'premium' THEN downloads ELSE 0 END) AS paying_downloads
+# FROM adtc_customer
+# GROUP BY cdate
+# HAVING SUM(CASE WHEN user_type = 'free'    THEN downloads ELSE 0 END)
+#      > SUM(CASE WHEN user_type = 'premium' THEN downloads ELSE 0 END)
+# ORDER BY cdate;
+#
+# -- Expected: ('2024-01-01', 7, 3), ('2024-01-03', 5, 2).

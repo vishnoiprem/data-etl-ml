@@ -151,3 +151,35 @@ SELECT CAST(user_id AS INT) AS user_id FROM VALUES ('2'), ('10') AS t(user_id) O
 """).collect()]
 assert text_sorted == ["10", "2"] and int_sorted == [2, 10]
 print("[PASS] Q78 as text, '10' sorts before '2'; cast to INT it does not")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has SUBSTRING_INDEX, CONCAT, RIGHT and CAST AS SIGNED, all
+# identical to Spark. The sort on anon_phone remains a STRING sort -- the
+# comment about user_id being text is preserved here, but the production
+# DDL stores user_id as INT so the cast is essentially a no-op.
+#
+# CREATE TABLE social_media_pii_input (
+#     user_id  INT          NOT NULL,
+#     email    VARCHAR(255) NOT NULL,
+#     phone    CHAR(10)     NOT NULL,    -- 10-digit US-style format
+#     PRIMARY KEY (user_id),
+#     KEY ix_pii_email (email)           -- useful if you ever rejoin by email
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO social_media_pii_input (user_id, email, phone) VALUES
+#     (1, 'alice@example.com',  '5551234567'),
+#     (2, 'bob@domain.net',     '5559876543'),
+#     (3, 'carol@email.org',    '5551239876'),
+#     (4, 'dave@site.com',      '5554567890'),
+#     (5, 'eve@platform.io',    '5559871234');
+#
+# -- Redaction projection: domain (substring_index with -1) + masked phone
+# -- (six asterisks plus the last four digits) + int user_id. The output
+# -- must NEVER carry the original phone or the email local part.
+# SELECT CONCAT('******', RIGHT(phone, 4))        AS anon_phone,
+#        SUBSTRING_INDEX(email, '@', -1)          AS email_domain,
+#        CAST(user_id AS SIGNED)                  AS user_id
+# FROM social_media_pii_input
+# ORDER BY anon_phone;
+#
+# -- Expected order by anon_phone: 5, 1, 2, 4, 3 (string sort, not user_id).

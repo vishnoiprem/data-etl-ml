@@ -179,3 +179,39 @@ SELECT COUNT(*) FROM (
 assert distinct_dates == 0
 print("[PASS] Q70 COUNT(DISTINCT post_date) >= 2 would exclude them -- "
       "spec says POSTS, so COUNT(*) is right")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports DATEDIFF(end, start) with the same argument order
+# (end first), so the same query works verbatim. MIN/MAX/COUNT are
+# identical to Spark. Note that MySQL's DATEDIFF returns an INTEGER day
+# count, which is fine for this query -- no float division needed.
+#
+# CREATE TABLE posts (
+#     post_id    INT          NOT NULL,
+#     user_id    INT          NOT NULL,
+#     post_date  DATE         NOT NULL,
+#     content    VARCHAR(256) NOT NULL,
+#     PRIMARY KEY (post_id),
+#     KEY ix_posts_user (user_id, post_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO posts (post_id, user_id, post_date, content) VALUES
+#     (1, 1, '2024-01-01', 'Hello world'),
+#     (2, 1, '2024-01-15', 'Second post'),
+#     (3, 1, '2024-02-10', 'Third post'),
+#     (4, 2, '2024-01-05', 'My first post'),
+#     (5, 2, '2024-01-10', 'Update');
+#
+# SELECT user_id,
+#        MIN(post_date)                           AS first_post,
+#        MAX(post_date)                           AS last_post,
+#        DATEDIFF(MAX(post_date), MIN(post_date)) AS days_between,
+#        COUNT(*)                                 AS post_count
+# FROM posts
+# GROUP BY user_id
+# HAVING COUNT(*) >= 2
+# ORDER BY days_between DESC, user_id;
+#
+# -- Expected:
+# -- (1, '2024-01-01', '2024-02-10', 40, 3)
+# -- (2, '2024-01-05', '2024-01-10',  5, 2)

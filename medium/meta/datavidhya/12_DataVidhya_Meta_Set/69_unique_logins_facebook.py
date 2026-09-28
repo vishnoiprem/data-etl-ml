@@ -148,3 +148,35 @@ FROM login_events GROUP BY user_id ORDER BY user_id
 """).collect()
 assert [(r[0], r[1]) for r in leaky] == [(1, 2), (4, 1)], leaky
 print("[PASS] Q69 without the filter, user 1 inflates to 2 days and user 4 appears")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports COUNT(DISTINCT DATE(login_datetime)) with the same
+# semantics: cast to DATE first, then dedupe. DATE() on a TIMESTAMP/DATETIME
+# returns the calendar-date portion.
+#
+# CREATE TABLE login_events (
+#     user_id         INT       NOT NULL,
+#     login_datetime  TIMESTAMP NOT NULL,
+#     domain          VARCHAR(64) NOT NULL,
+#     KEY ix_le_user_day (user_id, login_datetime),
+#     KEY ix_le_domain   (domain)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO login_events (user_id, login_datetime, domain) VALUES
+#     (1, '2021-01-01 08:00:00', 'facebook.com'),
+#     (1, '2021-01-01 10:30:00', 'linkedin.com'),
+#     (1, '2021-01-02 08:00:00', 'facebook.com'),
+#     (1, '2021-01-03 09:15:00', 'facebook.com'),
+#     (2, '2021-01-01 07:00:00', 'facebook.com'),
+#     (2, '2021-01-01 08:00:00', 'facebook.com'),
+#     (2, '2021-01-02 07:30:00', 'facebook.com'),
+#     (3, '2021-01-01 09:00:00', 'facebook.com');
+#
+# SELECT user_id,
+#        COUNT(DISTINCT DATE(login_datetime)) AS unique_login_days
+# FROM login_events
+# WHERE domain = 'facebook.com'
+# GROUP BY user_id
+# ORDER BY user_id;
+#
+# -- Expected: (1, 3), (2, 2), (3, 1).

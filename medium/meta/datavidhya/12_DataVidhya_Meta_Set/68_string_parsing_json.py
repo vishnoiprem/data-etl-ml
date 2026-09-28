@@ -181,3 +181,53 @@ expect("Q68 map lookup is order-independent; a missing color is ''", SQL, [
     (1, "Reordered", "teal", "xxl", 1.25, dt.date(2024, 2, 1)),
     (2, "NoColor",   "",     "s",    0.2, dt.date(2024, 2, 2)),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has no str_to_map. The portable translation is JSON_TABLE with
+# JSON_OBJECT('a', 'a\\|b', 'b', 'b\\|c'), but for the simpler pipe-delimited
+# format here, a recursive CTE or SUBSTRING_INDEX chain works cleanly.
+# The cleanest approach is to convert the metadata to JSON once and then
+# use JSON_EXTRACT / JSON_UNQUOTE.
+#
+# CREATE TABLE product_listings (
+#     listing_id   INT          NOT NULL,
+#     product_name VARCHAR(128) NOT NULL,
+#     metadata     TEXT         NOT NULL,    -- 'color=blue|size=medium|weight=0.3kg'
+#     list_date    DATE         NOT NULL,
+#     PRIMARY KEY (listing_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO product_listings (listing_id, product_name, metadata, list_date) VALUES
+#     (1, 'Blue T-Shirt', 'color=blue|size=medium|weight=0.3kg',   '2024-01-10'),
+#     (2, 'Red Dress',    'color=red|size=large|weight=0.5kg',     '2024-01-12'),
+#     (3, 'Jeans',        'color=blue|weight=0.6kg',               '2024-01-15'),
+#     (4, 'Winter Coat',  'color=black|size=xl|weight=2.5kg',      '2024-01-18'),
+#     (5, 'Sneakers',     'color=white|size=10|weight=0.4kg',      '2024-01-20'),
+#     (6, 'Shorts',       'color=green|size=small',                '2024-01-22'),
+#     (7, 'Sweater',      'color=gray|size=medium|weight=0.7kg',   '2024-01-25'),
+#     (8, 'Socks',        'color=black|size=one size|weight=0.1kg','2024-01-28');
+#
+# -- Strategy: rebuild the blob as JSON {"k":"v", ...}, then JSON_UNQUOTE
+# -- the keys. The two different missing-value conventions are kept:
+# --     COALESCE for the text keys (missing -> '')
+# --     CAST(NULLIF(REGEXP_SUBSTR(...), '')) for weight (missing -> NULL)
+# WITH parsed AS (
+#     SELECT listing_id,
+#            product_name,
+#            list_date,
+#            CONCAT('{"',
+#                   REPLACE(metadata, '|', '","'),
+#                   '"}') AS jstr
+#     FROM product_listings
+# )
+# SELECT listing_id,
+#        product_name,
+#        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(jstr, '$.color')), '')        AS color,
+#        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(jstr, '$.size')),  '')        AS size,
+#        CAST(NULLIF(REGEXP_SUBSTR(
+#                   COALESCE(JSON_UNQUOTE(JSON_EXTRACT(jstr, '$.weight')), ''),
+#                   '^[0-9.]+'), '')
+#             AS DECIMAL(10,2))                                          AS weight_value,
+#        list_date
+# FROM parsed
+# ORDER BY listing_id;

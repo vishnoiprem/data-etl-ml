@@ -170,3 +170,49 @@ print("[PASS] Q71 Spark's / promotes to double; Presto/Hive would truncate to 0"
 r, t = spark.sql("SELECT ROUND(2.0/3, 2) AS r, FLOOR(2.0/3 * 100)/100 AS t").collect()[0]
 assert (float(r), float(t)) == (0.67, 0.66), (r, t)
 print("[PASS] Q71 ROUND gives 0.67; truncation would give 0.66")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports EXISTS subqueries in the SELECT list, but it does NOT
+# support COUNT(*) over an inner SELECT as a scalar the way Presto/Spark do.
+# The portable pattern is:
+#   1. count the confirmed set in a subquery,
+#   2. count the total in another subquery,
+#   3. divide and round.
+# The 'multiply by 1.0' guard is critical in MySQL too: 2/3 evaluates to 0.
+#
+# CREATE TABLE arate_emails (
+#     email_id    INT       NOT NULL,
+#     user_id     INT       NOT NULL,
+#     signup_date TIMESTAMP NOT NULL,
+#     PRIMARY KEY (email_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE arate_texts (
+#     text_id       INT          NOT NULL,
+#     email_id      INT          NOT NULL,
+#     signup_action VARCHAR(32)  NOT NULL,
+#     PRIMARY KEY (text_id),
+#     KEY ix_ate_email_action (email_id, signup_action),
+#     CONSTRAINT fk_ate_email FOREIGN KEY (email_id)
+#         REFERENCES arate_emails(email_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO arate_emails (email_id, user_id, signup_date) VALUES
+#     (125, 7771, '2022-06-14 00:00:00'),
+#     (236, 6950, '2022-07-01 00:00:00'),
+#     (433, 1052, '2022-07-09 00:00:00');
+#
+# INSERT INTO arate_texts (text_id, email_id, signup_action) VALUES
+#     (6878, 125, 'Confirmed'),
+#     (6920, 236, 'Not Confirmed'),
+#     (6994, 236, 'Confirmed');
+#
+# -- numerator = DISTINCT email_ids that have at least one Confirmed text
+# -- denominator = COUNT(*) of arate_emails (email 433 stays in)
+# SELECT ROUND(
+#            (SELECT COUNT(DISTINCT email_id)
+#               FROM arate_texts WHERE signup_action = 'Confirmed') * 1.0
+#          / (SELECT COUNT(*) FROM arate_emails),
+#        2) AS confirm_rate;
+#
+# -- Expected: 0.67.

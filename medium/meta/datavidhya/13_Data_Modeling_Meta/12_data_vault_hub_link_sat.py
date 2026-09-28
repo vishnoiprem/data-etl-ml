@@ -286,3 +286,128 @@ FROM VALUES (1, 'platform_a'), (1, 'platform_b') AS t(src_id, source)
 assert (collide[0], collide[1]) == (1, 2), collide
 print("[PASS] Q31 two sources both using id=1 collapse to 1 hub key unless the "
       "source is part of the business key (then 2)")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE hub_advertiser (
+#       advertiser_hk  CHAR(32)    NOT NULL,
+#       advertiser_bk  VARCHAR(32) NOT NULL,
+#       load_date      DATE        NOT NULL,
+#       record_source  VARCHAR(32) NOT NULL,
+#       PRIMARY KEY (advertiser_hk),
+#       KEY idx_hub_adv_bk (advertiser_bk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO hub_advertiser (advertiser_hk, advertiser_bk, load_date, record_source) VALUES
+#       (MD5('ADV-501'), 'ADV-501', '2026-01-01', 'platform_a'),
+#       (MD5('ADV-502'), 'ADV-502', '2026-01-01', 'platform_b'),
+#       (MD5('ADV-503'), 'ADV-503', '2026-02-01', 'platform_c');
+#
+#   CREATE TABLE hub_campaign (
+#       campaign_hk  CHAR(32)    NOT NULL,
+#       campaign_bk  VARCHAR(32) NOT NULL,
+#       load_date    DATE        NOT NULL,
+#       record_source VARCHAR(32) NOT NULL,
+#       PRIMARY KEY (campaign_hk),
+#       KEY idx_hub_cmp_bk (campaign_bk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO hub_campaign (campaign_hk, campaign_bk, load_date, record_source) VALUES
+#       (MD5('CMP-9001'), 'CMP-9001', '2026-01-05', 'platform_a'),
+#       (MD5('CMP-9002'), 'CMP-9002', '2026-01-05', 'platform_a'),
+#       (MD5('CMP-9003'), 'CMP-9003', '2026-02-02', 'platform_c');
+#
+#   CREATE TABLE link_advertiser_campaign (
+#       link_hk        CHAR(32)    NOT NULL,
+#       advertiser_hk  CHAR(32)    NOT NULL,
+#       campaign_hk    CHAR(32)    NOT NULL,
+#       load_date      DATE        NOT NULL,
+#       record_source  VARCHAR(32) NOT NULL,
+#       PRIMARY KEY (link_hk),
+#       KEY idx_link_adv (advertiser_hk),
+#       KEY idx_link_cmp (campaign_hk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO link_advertiser_campaign
+#       (link_hk, advertiser_hk, campaign_hk, load_date, record_source) VALUES
+#       (MD5(CONCAT_WS('||', 'ADV-501', 'CMP-9001')), MD5('ADV-501'), MD5('CMP-9001'),
+#        '2026-01-05', 'platform_a'),
+#       (MD5(CONCAT_WS('||', 'ADV-501', 'CMP-9002')), MD5('ADV-501'), MD5('CMP-9002'),
+#        '2026-01-05', 'platform_a'),
+#       (MD5(CONCAT_WS('||', 'ADV-503', 'CMP-9003')), MD5('ADV-503'), MD5('CMP-9003'),
+#        '2026-02-02', 'platform_c');
+#
+#   CREATE TABLE sat_advertiser_platform_a (
+#       advertiser_hk   CHAR(32)    NOT NULL,
+#       load_date       DATE        NOT NULL,
+#       record_source   VARCHAR(32) NOT NULL,
+#       name            VARCHAR(64) NOT NULL,
+#       tier            VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (advertiser_hk, load_date, record_source),
+#       KEY idx_sat_a_adv (advertiser_hk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO sat_advertiser_platform_a
+#       (advertiser_hk, load_date, record_source, name, tier) VALUES
+#       (MD5('ADV-501'), '2026-01-01', 'platform_a', 'Acme Corp',  'gold'),
+#       (MD5('ADV-501'), '2026-03-01', 'platform_a', 'Acme Corp',  'platinum'),
+#       (MD5('ADV-502'), '2026-01-01', 'platform_b', 'Globex Ltd', 'silver');
+#
+#   CREATE TABLE sat_advertiser_platform_c (
+#       advertiser_hk   CHAR(32)    NOT NULL,
+#       load_date       DATE        NOT NULL,
+#       record_source   VARCHAR(32) NOT NULL,
+#       name            VARCHAR(64) NOT NULL,
+#       tier            VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (advertiser_hk, load_date, record_source)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO sat_advertiser_platform_c
+#       (advertiser_hk, load_date, record_source, name, tier) VALUES
+#       (MD5('ADV-503'), '2026-02-01', 'platform_c', 'Initech', 'bronze');
+#
+#   -- Q30 every attribute row records WHO said it and WHEN (expect block).
+#   CREATE OR REPLACE VIEW all_sats AS
+#   SELECT * FROM sat_advertiser_platform_a
+#   UNION ALL
+#   SELECT * FROM sat_advertiser_platform_c;
+#
+#   SELECT h.advertiser_bk, s.record_source, s.load_date, s.tier
+#   FROM hub_advertiser h
+#   JOIN all_sats s ON s.advertiser_hk = h.advertiser_hk
+#   ORDER BY h.advertiser_bk, s.load_date;
+#
+#   -- Q30 star projected from the vault (expect block).
+#   CREATE OR REPLACE VIEW dim_advertiser AS
+#   WITH current_sat AS (
+#       SELECT advertiser_hk, name, tier, record_source,
+#              ROW_NUMBER() OVER (PARTITION BY advertiser_hk ORDER BY load_date DESC) AS rn
+#       FROM all_sats
+#   )
+#   SELECT h.advertiser_bk AS advertiser_id, s.name, s.tier, s.record_source
+#   FROM hub_advertiser h
+#   JOIN current_sat s ON s.advertiser_hk = h.advertiser_hk AND s.rn = 1;
+#
+#   SELECT advertiser_id, name, tier FROM dim_advertiser ORDER BY advertiser_id;
+#
+#   -- Q30 the same answer from the raw vault (expect block).
+#   SELECT ha.advertiser_bk, hc.campaign_bk, s.tier
+#   FROM hub_campaign hc
+#   JOIN link_advertiser_campaign l ON l.campaign_hk = hc.campaign_hk
+#   JOIN hub_advertiser ha ON ha.advertiser_hk = l.advertiser_hk
+#   JOIN (
+#       SELECT advertiser_hk, tier,
+#              ROW_NUMBER() OVER (PARTITION BY advertiser_hk ORDER BY load_date DESC) AS rn
+#       FROM all_sats
+#   ) s ON s.advertiser_hk = ha.advertiser_hk AND s.rn = 1
+#   ORDER BY hc.campaign_bk;
+#
+#   -- Q31 two sources both using id=1 collapse to 1 hub key unless the source
+#   -- is part of the business key.
+#   SELECT COUNT(DISTINCT MD5(CAST(src_id AS CHAR)))                       AS naive_keys,
+#          COUNT(DISTINCT MD5(CONCAT_WS('||', source, CAST(src_id AS CHAR)))) AS scoped_keys
+#   FROM (SELECT 1 AS src_id, 'platform_a' AS source
+#         UNION ALL SELECT 1, 'platform_b') t;
+#
+# MySQL 8.0+ notes: Data Vault loads are pure INSERT-only -- no UPDATE on hubs,
+# links, or satellites. The PRIMARY KEY on (advertiser_hk, load_date,
+# record_source) makes the satellite idempotent under replay. MD5 hash keys
+# let every table derive its surrogate independently, which is what enables
+# parallel loads. The "fan-out without picking the current row" trap is the
+# same defect as an SCD2 boundary bug -- the projected dim_advertiser view
+# exists precisely so analysts do not have to write the window themselves.

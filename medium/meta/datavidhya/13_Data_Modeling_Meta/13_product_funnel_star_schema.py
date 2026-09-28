@@ -316,7 +316,7 @@ SELECT e.event_id                                  AS funnel_event_sk,
 FROM User_Events e
 JOIN dim_stage ds ON ds.stage_name = e.event_type
 JOIN Sessions  s  ON s.session_id  = e.session_id
--- POINT-IN-TIME SCD2 join: the segment held when the event happened
+#   POINT-IN-TIME SCD2 join: the segment held when the event happened
 JOIN dim_user du ON du.user_id = e.user_id
                 AND CAST(e.event_timestamp AS DATE) >= du.effective_from
                 AND CAST(e.event_timestamp AS DATE) <  du.effective_to
@@ -680,3 +680,344 @@ print("[PASS] both facts reconcile: 5 distinct sessions in the event fact = "
 
 print("\n[PASS] all 7 requirements satisfied: per-stage rows, degenerate session_id, "
       "SCD2 segments, A/B variant, distinct-user drop-off, stored durations, two facts")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE Users (
+#       user_id      INT          NOT NULL,
+#       signup_date  DATE         NOT NULL,
+#       segment      VARCHAR(16)  NOT NULL,
+#       country      VARCHAR(8)   NOT NULL,
+#       PRIMARY KEY (user_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO Users (user_id, signup_date, segment, country) VALUES
+#       (1, '2025-11-01', 'vip',       'US'),
+#       (2, '2026-01-05', 'returning', 'IN'),
+#       (3, '2026-02-20', 'new',       'BR');
+#
+#   CREATE TABLE Products (
+#       product_id   INT             NOT NULL,
+#       product_name VARCHAR(64)     NOT NULL,
+#       category     VARCHAR(16)     NOT NULL,
+#       price        DECIMAL(10,2)   NOT NULL,
+#       is_active    TINYINT(1)      NOT NULL,
+#       PRIMARY KEY (product_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO Products (product_id, product_name, category, price, is_active) VALUES
+#       (900, 'Noise Cancelling Headphones', 'audio', 299.00, 1),
+#       (901, 'Laptop Stand',                'desk',   49.00, 1),
+#       (902, 'Mechanical Keyboard',         'desk',  129.00, 1);
+#
+#   CREATE TABLE AB_Tests (
+#       test_id        VARCHAR(16) NOT NULL,
+#       user_id        INT         NOT NULL,
+#       test_name      VARCHAR(32) NOT NULL,
+#       variant        VARCHAR(16) NOT NULL,
+#       assigned_date  DATE        NOT NULL,
+#       PRIMARY KEY (test_id, user_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO AB_Tests (test_id, user_id, test_name, variant, assigned_date) VALUES
+#       ('T1', 1, 'checkout_redesign', 'treatment', '2026-01-01'),
+#       ('T1', 2, 'checkout_redesign', 'control',   '2026-01-01'),
+#       ('T1', 3, 'checkout_redesign', 'treatment', '2026-02-20');
+#
+#   CREATE TABLE Sessions (
+#       session_id         VARCHAR(8)  NOT NULL,
+#       user_id            INT         NOT NULL,
+#       session_start      DATETIME    NOT NULL,
+#       session_end        DATETIME    NOT NULL,
+#       device_type        VARCHAR(16) NOT NULL,
+#       marketing_channel  VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (session_id),
+#       KEY idx_sess_user (user_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO Sessions VALUES
+#       ('S1', 1, '2026-01-10 09:00:00', '2026-01-10 09:40:00', 'mobile',  'paid_search'),
+#       ('S2', 1, '2026-03-02 14:00:00', '2026-03-02 14:25:00', 'desktop', 'organic'),
+#       ('S3', 2, '2026-03-03 11:00:00', '2026-03-03 11:12:00', 'mobile',  'email'),
+#       ('S4', 3, '2026-03-04 20:00:00', '2026-03-04 20:30:00', 'desktop', 'paid_social'),
+#       ('S5', 2, '2026-03-05 08:00:00', '2026-03-05 08:05:00', 'mobile',  'organic');
+#
+#   CREATE TABLE User_Events (
+#       event_id        INT           NOT NULL,
+#       user_id         INT           NOT NULL,
+#       session_id      VARCHAR(8)    NOT NULL,
+#       event_type      VARCHAR(16)   NOT NULL,
+#       product_id      INT               NULL,
+#       event_timestamp DATETIME      NOT NULL,
+#       device_type     VARCHAR(16)   NOT NULL,
+#       page_url        VARCHAR(64)   NOT NULL,
+#       PRIMARY KEY (event_id),
+#       KEY idx_ue_session (session_id),
+#       KEY idx_ue_user_ts (user_id, event_timestamp)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO User_Events VALUES
+#       (1,  1, 'S1', 'browse',       NULL, '2026-01-10 09:00:00', 'mobile',  '/home'),
+#       (2,  1, 'S1', 'search',       NULL, '2026-01-10 09:03:00', 'mobile',  '/search'),
+#       (3,  1, 'S1', 'view_product', 900,  '2026-01-10 09:05:00', 'mobile',  '/p/900'),
+#       (4,  1, 'S1', 'view_product', 900,  '2026-01-10 09:20:00', 'mobile',  '/p/900'),
+#       (5,  1, 'S1', 'add_to_cart',  900,  '2026-01-10 09:25:00', 'mobile',  '/cart'),
+#       (6,  1, 'S1', 'checkout',     900,  '2026-01-10 09:35:00', 'mobile',  '/checkout'),
+#       (7,  1, 'S1', 'purchase',     900,  '2026-01-10 09:40:00', 'mobile',  '/confirm'),
+#       (8,  1, 'S2', 'browse',       NULL, '2026-03-02 14:00:00', 'desktop', '/home'),
+#       (9,  1, 'S2', 'view_product', 901,  '2026-03-02 14:10:00', 'desktop', '/p/901'),
+#       (10, 1, 'S2', 'add_to_cart',  901,  '2026-03-02 14:20:00', 'desktop', '/cart'),
+#       (11, 2, 'S3', 'browse',       NULL, '2026-03-03 11:00:00', 'mobile',  '/home'),
+#       (12, 2, 'S3', 'search',       NULL, '2026-03-03 11:04:00', 'mobile',  '/search'),
+#       (13, 2, 'S3', 'view_product', 902,  '2026-03-03 11:08:00', 'mobile',  '/p/902'),
+#       (14, 3, 'S4', 'browse',       NULL, '2026-03-04 20:00:00', 'desktop', '/home'),
+#       (15, 3, 'S4', 'view_product', 900,  '2026-03-04 20:05:00', 'desktop', '/p/900'),
+#       (16, 3, 'S4', 'checkout',     900,  '2026-03-04 20:25:00', 'desktop', '/checkout'),
+#       (17, 3, 'S4', 'purchase',     900,  '2026-03-04 20:30:00', 'desktop', '/confirm'),
+#       (18, 2, 'S5', 'browse',       NULL, '2026-03-05 08:00:00', 'mobile',  '/home');
+#
+#   CREATE TABLE Purchases (
+#       purchase_id       INT           NOT NULL,
+#       user_id           INT           NOT NULL,
+#       session_id        VARCHAR(8)    NOT NULL,
+#       product_id        INT           NOT NULL,
+#       purchase_timestamp DATETIME     NOT NULL,
+#       amount            DECIMAL(10,2) NOT NULL,
+#       PRIMARY KEY (purchase_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO Purchases VALUES
+#       (5001, 1, 'S1', 900, '2026-01-10 09:40:00', 299.00),
+#       (5002, 3, 'S4', 900, '2026-03-04 20:30:00', 299.00);
+#
+#   CREATE TABLE dim_stage (
+#       stage_key  INT         NOT NULL,
+#       stage_name VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (stage_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_stage VALUES
+#       (1, 'browse'),       (2, 'search'),   (3, 'view_product'),
+#       (4, 'add_to_cart'),  (5, 'checkout'), (6, 'purchase');
+#
+#   CREATE TABLE dim_user (
+#       user_sk         INT          NOT NULL,
+#       user_id         INT          NOT NULL,
+#       country         VARCHAR(8)   NOT NULL,
+#       signup_date     DATE         NOT NULL,
+#       segment         VARCHAR(16)  NOT NULL,
+#       effective_from  DATE         NOT NULL,
+#       effective_to    DATE         NOT NULL,
+#       is_current      TINYINT(1)   NOT NULL,
+#       PRIMARY KEY (user_sk),
+#       KEY idx_dim_user_pit (user_id, effective_from, effective_to)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_user
+#       (user_sk, user_id, country, signup_date, segment, effective_from, effective_to, is_current)
+#   WITH changes AS (
+#       SELECT 1 AS user_id, 'new'       AS segment, DATE'2025-11-01' AS changed_on UNION ALL
+#       SELECT 1,            'returning',            DATE'2026-02-01'             UNION ALL
+#       SELECT 1,            'vip',                  DATE'2026-03-01'             UNION ALL
+#       SELECT 2,            'new',                  DATE'2026-01-05'             UNION ALL
+#       SELECT 2,            'returning',            DATE'2026-02-15'             UNION ALL
+#       SELECT 3,            'new',                  DATE'2026-02-20'
+#   )
+#   SELECT ROW_NUMBER() OVER (ORDER BY c.user_id, c.changed_on) AS user_sk,
+#          c.user_id, u.country, u.signup_date, c.segment,
+#          c.changed_on AS effective_from,
+#          COALESCE(LEAD(c.changed_on) OVER (PARTITION BY c.user_id ORDER BY c.changed_on),
+#                   DATE'9999-12-31') AS effective_to,
+#          CASE WHEN LEAD(c.changed_on) OVER (PARTITION BY c.user_id ORDER BY c.changed_on) IS NULL
+#               THEN 1 ELSE 0 END AS is_current
+#   FROM changes c JOIN Users u ON u.user_id = c.user_id;
+#
+#   CREATE TABLE dim_product (
+#       product_sk   INT             NOT NULL,
+#       product_id   INT                 NULL,
+#       product_name VARCHAR(64)         NULL,
+#       category     VARCHAR(16)         NULL,
+#       price        DECIMAL(10,2)       NULL,
+#       PRIMARY KEY (product_sk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_product VALUES
+#       (900, 900, 'Noise Cancelling Headphones', 'audio', 299.00),
+#       (901, 901, 'Laptop Stand',                'desk',   49.00),
+#       (902, 902, 'Mechanical Keyboard',         'desk',  129.00),
+#       ( -1, NULL, '(not applicable)',           '(not applicable)', NULL);
+#
+#   CREATE TABLE dim_ab_variant (
+#       ab_variant_sk INT         NOT NULL,
+#       test_id       VARCHAR(16) NOT NULL,
+#       user_id       INT         NOT NULL,
+#       test_name     VARCHAR(32) NOT NULL,
+#       variant       VARCHAR(16) NOT NULL,
+#       assigned_date DATE        NOT NULL,
+#       PRIMARY KEY (ab_variant_sk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_ab_variant
+#       SELECT ROW_NUMBER() OVER (ORDER BY test_id, user_id), test_id, user_id, test_name, variant, assigned_date
+#       FROM AB_Tests;
+#
+#   CREATE TABLE fact_funnel_event (
+#       funnel_event_sk          INT          NOT NULL,
+#       session_id               VARCHAR(8)   NOT NULL,    -- DEGENERATE dimension
+#       user_sk                  INT          NOT NULL,
+#       product_sk               INT          NOT NULL,
+#       stage_key                INT          NOT NULL,
+#       ab_variant_sk            INT              NULL,
+#       device_type              VARCHAR(16)  NOT NULL,
+#       marketing_channel        VARCHAR(16)  NOT NULL,
+#       event_timestamp          DATETIME     NOT NULL,
+#       event_date               DATE         NOT NULL,
+#       seconds_since_prev_stage INT              NULL,
+#       PRIMARY KEY (funnel_event_sk),
+#       KEY idx_ffe_session_ts (session_id, event_timestamp),
+#       KEY idx_ffe_user (user_sk)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_funnel_event
+#   SELECT e.event_id,
+#          e.session_id, du.user_sk, COALESCE(e.product_id, -1), ds.stage_key,
+#          ab.ab_variant_sk, s.device_type, s.marketing_channel,
+#          e.event_timestamp, CAST(e.event_timestamp AS DATE),
+#          CAST(TIMESTAMPDIFF(SECOND,
+#               LAG(e.event_timestamp) OVER (PARTITION BY e.session_id ORDER BY e.event_timestamp, e.event_id),
+#               e.event_timestamp) AS SIGNED)
+#   FROM User_Events e
+#   JOIN dim_stage     ds ON ds.stage_name = e.event_type
+#   JOIN Sessions      s  ON s.session_id  = e.session_id
+#   JOIN dim_user      du ON du.user_id    = e.user_id
+#                         AND CAST(e.event_timestamp AS DATE) >= du.effective_from
+#                         AND CAST(e.event_timestamp AS DATE) <  du.effective_to
+#   LEFT JOIN dim_ab_variant ab ON ab.user_id = e.user_id AND ab.test_id = 'T1';
+#
+#   CREATE TABLE fact_session_funnel (
+#       session_id               VARCHAR(8)   NOT NULL,
+#       user_sk                  INT          NOT NULL,
+#       ab_variant_sk            INT              NULL,
+#       device_type              VARCHAR(16)  NOT NULL,
+#       marketing_channel        VARCHAR(16)  NOT NULL,
+#       session_date             DATE         NOT NULL,
+#       browse_ts                DATETIME         NULL,
+#       search_ts                DATETIME         NULL,
+#       view_ts                  DATETIME         NULL,
+#       cart_ts                  DATETIME         NULL,
+#       checkout_ts              DATETIME         NULL,
+#       purchase_ts              DATETIME         NULL,
+#       purchase_amount          DECIMAL(10,2)    NULL,
+#       seconds_view_to_purchase INT              NULL,
+#       seconds_view_to_cart     INT              NULL,
+#       max_stage_key            INT          NOT NULL,
+#       PRIMARY KEY (session_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_session_funnel
+#   WITH milestones AS (
+#       SELECT f.session_id, MIN(f.user_sk) AS user_sk, MIN(f.ab_variant_sk) AS ab_variant_sk,
+#              MIN(f.device_type) AS device_type, MIN(f.marketing_channel) AS marketing_channel,
+#              CAST(MIN(f.event_timestamp) AS DATE) AS session_date,
+#              MIN(CASE WHEN d.stage_name = 'browse'       THEN f.event_timestamp END) AS browse_ts,
+#              MIN(CASE WHEN d.stage_name = 'search'       THEN f.event_timestamp END) AS search_ts,
+#              MIN(CASE WHEN d.stage_name = 'view_product' THEN f.event_timestamp END) AS view_ts,
+#              MIN(CASE WHEN d.stage_name = 'add_to_cart'  THEN f.event_timestamp END) AS cart_ts,
+#              MIN(CASE WHEN d.stage_name = 'checkout'     THEN f.event_timestamp END) AS checkout_ts,
+#              MIN(CASE WHEN d.stage_name = 'purchase'     THEN f.event_timestamp END) AS purchase_ts
+#       FROM fact_funnel_event f JOIN dim_stage d USING (stage_key)
+#       GROUP BY f.session_id
+#   )
+#   SELECT m.session_id, m.user_sk, m.ab_variant_sk, m.device_type, m.marketing_channel,
+#          m.session_date, m.browse_ts, m.search_ts, m.view_ts, m.cart_ts,
+#          m.checkout_ts, m.purchase_ts,
+#          p.amount AS purchase_amount,
+#          CAST(TIMESTAMPDIFF(SECOND, m.view_ts, m.purchase_ts) AS SIGNED) AS seconds_view_to_purchase,
+#          CAST(TIMESTAMPDIFF(SECOND, m.view_ts, m.cart_ts)     AS SIGNED) AS seconds_view_to_cart,
+#          CASE WHEN m.purchase_ts IS NOT NULL THEN 6
+#               WHEN m.checkout_ts IS NOT NULL THEN 5
+#               WHEN m.cart_ts     IS NOT NULL THEN 4
+#               WHEN m.view_ts     IS NOT NULL THEN 3
+#               WHEN m.search_ts   IS NOT NULL THEN 2
+#               ELSE 1 END AS max_stage_key
+#   FROM milestones m LEFT JOIN Purchases p ON p.session_id = m.session_id;
+#
+#   -- Q1 view -> purchase conversion (distinct users) (expect block)
+#   SELECT COUNT(DISTINCT CASE WHEN view_ts     IS NOT NULL THEN user_sk END) AS viewers,
+#          COUNT(DISTINCT CASE WHEN purchase_ts IS NOT NULL THEN user_sk END) AS buyers,
+#          ROUND(100.0 * COUNT(DISTINCT CASE WHEN purchase_ts IS NOT NULL THEN user_sk END)
+#                      / COUNT(DISTINCT CASE WHEN view_ts IS NOT NULL THEN user_sk END), 2) AS view_to_purchase_pct
+#   FROM fact_session_funnel;
+#
+#   -- Q1b same question at person grain (expect block)
+#   SELECT COUNT(DISTINCT CASE WHEN f.view_ts IS NOT NULL THEN u.user_id END)     AS viewers,
+#          COUNT(DISTINCT CASE WHEN f.purchase_ts IS NOT NULL THEN u.user_id END) AS buyers
+#   FROM fact_session_funnel f JOIN dim_user u ON u.user_sk = f.user_sk;
+#
+#   -- Q2 drop-off by stage, LOOSE definition (expect block)
+#   WITH reached AS (
+#       SELECT d.stage_key, d.stage_name, COUNT(DISTINCT u.user_id) AS users
+#       FROM fact_funnel_event f
+#       JOIN dim_stage d USING (stage_key)
+#       JOIN dim_user  u ON u.user_sk = f.user_sk
+#       GROUP BY d.stage_key, d.stage_name
+#   )
+#   SELECT stage_name, users,
+#          LAG(users) OVER (ORDER BY stage_key) AS prev_users,
+#          ROUND(100.0 * (LAG(users) OVER (ORDER BY stage_key) - users)
+#                      / LAG(users) OVER (ORDER BY stage_key), 2) AS drop_off_pct
+#   FROM reached ORDER BY stage_key;
+#
+#   -- Q2-strict: the cumulative-chain check (expect block).
+#   WITH per_session AS (
+#       SELECT f.user_sk,
+#              f.view_ts IS NOT NULL                                              AS r_view,
+#              f.view_ts IS NOT NULL AND f.cart_ts     >= f.view_ts               AS r_cart,
+#              f.view_ts IS NOT NULL AND f.cart_ts     >= f.view_ts
+#                                       AND f.checkout_ts >= f.cart_ts           AS r_checkout,
+#              f.view_ts IS NOT NULL AND f.cart_ts     >= f.view_ts
+#                                       AND f.checkout_ts >= f.cart_ts
+#                                       AND f.purchase_ts >= f.checkout_ts       AS r_purchase
+#       FROM fact_session_funnel f
+#   ),
+#   reached AS (
+#       SELECT u.user_id,
+#              MAX(CASE WHEN p.r_view     THEN 1 ELSE 0 END) AS s_view,
+#              MAX(CASE WHEN p.r_cart     THEN 1 ELSE 0 END) AS s_cart,
+#              MAX(CASE WHEN p.r_checkout THEN 1 ELSE 0 END) AS s_checkout,
+#              MAX(CASE WHEN p.r_purchase THEN 1 ELSE 0 END) AS s_purchase
+#       FROM per_session p JOIN dim_user u ON u.user_sk = p.user_sk
+#       GROUP BY u.user_id
+#   )
+#   SELECT 'view_product' AS stage_name, SUM(s_view)     AS users FROM reached UNION ALL
+#   SELECT 'add_to_cart',                 SUM(s_cart)     FROM reached UNION ALL
+#   SELECT 'checkout',                    SUM(s_checkout) FROM reached UNION ALL
+#   SELECT 'purchase',                    SUM(s_purchase) FROM reached;
+#
+#   -- Q3 time view -> purchase (accumulating snapshot) (expect block)
+#   SELECT ROUND(AVG(seconds_view_to_purchase) / 60.0, 2) AS avg_minutes_view_to_purchase,
+#          COUNT(seconds_view_to_purchase)                AS sessions_measured
+#   FROM fact_session_funnel;
+#
+#   -- Q4 conversion by device (expect block)
+#   SELECT device_type,
+#          COUNT(*) AS sessions,
+#          COUNT(purchase_ts) AS purchases,
+#          ROUND(100.0 * COUNT(purchase_ts) / COUNT(*), 2) AS session_cvr_pct
+#   FROM fact_session_funnel
+#   GROUP BY device_type ORDER BY session_cvr_pct DESC, device_type;
+#
+#   -- Q5 conversion by A/B variant (expect block)
+#   SELECT ab.variant,
+#          COUNT(*) AS sessions,
+#          COUNT(f.purchase_ts) AS purchases,
+#          ROUND(100.0 * COUNT(f.purchase_ts) / COUNT(*), 2) AS cvr_pct
+#   FROM fact_session_funnel f
+#   JOIN dim_ab_variant ab ON ab.ab_variant_sk = f.ab_variant_sk
+#   GROUP BY ab.variant ORDER BY cvr_pct DESC, ab.variant;
+#
+#   -- Q6 purchase attribution by channel (expect block)
+#   SELECT marketing_channel,
+#          COUNT(*)                       AS purchase_sessions,
+#          ROUND(SUM(purchase_amount), 2) AS revenue
+#   FROM fact_session_funnel
+#   WHERE purchase_ts IS NOT NULL
+#   GROUP BY marketing_channel ORDER BY revenue DESC, marketing_channel;
+#
+# MySQL 8.0+ notes: TIMESTAMPDIFF(SECOND, a, b) replaces UNIX_TIMESTAMP(...)
+# arithmetic -- it is portable and ignores DST. Spark's explode(sequence(...))
+# for the session-id `range` becomes a recursive CTE or a numbers table at
+# write time. dim_user is built ONCE from a change log via LEAD for the SCD2
+# intervals -- the point-in-time join (idx_dim_user_pit) is what stops
+# January sessions from relabelling as 'vip' (the survivorship bug). The
+# fact_session_funnel "max_stage_key" column stores the deepest stage reached
+# so an abandonment report is a single GROUP BY rather than a multi-stage
+# CASE per stage. Two facts, two grain statements -- never collapse.

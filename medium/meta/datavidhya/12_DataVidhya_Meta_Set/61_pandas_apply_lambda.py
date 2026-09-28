@@ -168,3 +168,47 @@ SELECT SUBSTRING_INDEX('McDonald O''Brien', ' ', 1) AS first_name
 """).collect()[0][0]
 assert cased == "McDonald", cased
 print("[PASS] Q61 'McDonald' keeps its internal capital -- no lower()/initcap()")
+
+# ---- MySQL way ----------------------------------------------------------
+# The Spark DataFrame API example here uses NATIVE column expressions
+# (substring_index, datediff, when/otherwise). All three translate to MySQL
+# verbatim:
+#   substring_index(str, ' ', 1) -> SUBSTRING_INDEX(str, ' ', 1)
+#   datediff(end, start)         -> DATEDIFF(end, start)
+#   case when salary < X ...     -> CASE WHEN salary < X ...
+#
+# The pandas_udf / pandas-apply-with-lambda framing in the question title is
+# Spark-specific -- there is no equivalent on the MySQL side. A MySQL-native
+# implementation is just the SQL CASE chain.
+#
+# CREATE TABLE employees (
+#     emp_id      INT          NOT NULL,
+#     full_name   VARCHAR(128) NOT NULL,
+#     email       VARCHAR(255) NOT NULL,
+#     hire_date   DATE         NOT NULL,
+#     salary      INT          NOT NULL,
+#     department  VARCHAR(64)  NOT NULL,
+#     PRIMARY KEY (emp_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO employees (emp_id, full_name, email, hire_date, salary, department) VALUES
+#     (1, 'John Smith',   'john.smith@company.com',  '2018-03-15',  85000, 'Engineering'),
+#     (4, 'Emma Davis',   'emma.davis@company.com',  '2020-06-01',  58000, 'Sales'),
+#     (7, 'James Wilson', 'james.w@company.com',     '2016-09-20', 110000, 'Engineering');
+#
+# SELECT emp_id,
+#        SUBSTRING_INDEX(full_name, ' ', 1)                                AS first_name,
+#        department,
+#        ROUND(DATEDIFF('2024-01-01', hire_date) / 365.25, 2)               AS years_employed,
+#        salary,
+#        CASE WHEN salary <  60000 THEN 'junior'
+#             WHEN salary < 100000 THEN 'mid'
+#             ELSE 'senior'
+#        END                                                               AS salary_band
+# FROM employees
+# ORDER BY emp_id;
+#
+# -- Expected:
+# -- (1, 'John',  'Engineering', 5.80,  85000, 'mid')
+# -- (4, 'Emma',  'Sales',       3.58,  58000, 'junior')
+# -- (7, 'James', 'Engineering', 7.28, 110000, 'senior')

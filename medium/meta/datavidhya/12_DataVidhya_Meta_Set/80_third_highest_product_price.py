@@ -165,3 +165,37 @@ SELECT product_name FROM (
 assert [r[0] for r in rank_gap] == ["Monitor"], rank_gap
 print("[PASS] Q80 with a top-tier tie, RANK's rank 3 is Monitor (800) -- "
       "DENSE_RANK correctly gives Desk (500)")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 window functions support both DENSE_RANK() and RANK() OVER
+# (ORDER BY ...). The DENSE_RANK form is correct because the question is
+# about the third-highest distinct price tier, and we want every product
+# at that tier returned.
+#
+# CREATE TABLE products (
+#     product_id   INT             NOT NULL,
+#     product_name VARCHAR(64)     NOT NULL,
+#     price        DECIMAL(10, 2)  NOT NULL,
+#     PRIMARY KEY (product_id),
+#     KEY ix_products_price (price)         -- the OVER (ORDER BY price DESC) sort
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO products (product_id, product_name, price) VALUES
+#     (1, 'Laptop',  1000.00),
+#     (2, 'Monitor',  800.00),
+#     (3, 'Desk',     500.00),
+#     (4, 'Chair',    500.00),
+#     (5, 'Mouse',     50.00);
+#
+# -- DENSE_RANK with no PARTITION BY (single global ranking over distinct prices).
+# -- Tier 1 = 1000, Tier 2 = 800, Tier 3 = 500 (Chair AND Desk), Tier 4 = 50.
+# SELECT product_id, product_name, price
+# FROM (
+#     SELECT product_id, product_name, price,
+#            DENSE_RANK() OVER (ORDER BY price DESC) AS price_tier
+#     FROM products
+# ) t
+# WHERE price_tier = 3
+# ORDER BY product_name;
+#
+# -- Expected: (4, 'Chair', 500.00), (3, 'Desk', 500.00).

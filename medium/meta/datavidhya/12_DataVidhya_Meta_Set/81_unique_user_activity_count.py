@@ -165,3 +165,49 @@ AS t(user_id, activity_type, activity_timestamp)
 """)
 expect("Q81 unregistered user 99 is excluded", SQL, [(1, 1), (2, 0), (3, 0), (4, 0)])
 print("[PASS] Q81 driving from cuat_user_information keeps user 99 out")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same LEFT JOIN + COUNT(DISTINCT) pattern. NULL
+# rows from the unmatched side are ignored by COUNT(DISTINCT), so users
+# with no activity automatically report 0 -- no COALESCE needed.
+#
+# CREATE TABLE cuat_user_information (
+#     user_id      INT          NOT NULL,
+#     name         VARCHAR(64)  NOT NULL,
+#     email        VARCHAR(255) NOT NULL,
+#     signup_date  DATE         NOT NULL,
+#     PRIMARY KEY (user_id),
+#     UNIQUE KEY uk_cuat_email (email)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE cuat_user_activity (
+#     user_id            INT         NOT NULL,
+#     activity_type      VARCHAR(32) NOT NULL,
+#     activity_timestamp DATE        NOT NULL,
+#     KEY ix_cuat_user_ts (user_id, activity_timestamp),
+#     CONSTRAINT fk_cuat_activity_user
+#         FOREIGN KEY (user_id) REFERENCES cuat_user_information(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO cuat_user_information (user_id, name, email, signup_date) VALUES
+#     (1, 'Alice',   'alice@example.com',   '2024-06-26'),
+#     (2, 'Bob',     'bob@example.com',     '2023-07-29'),
+#     (3, 'Charlie', 'charlie@example.com', '2022-05-30'),
+#     (4, 'David',   'david@example.com',   '2024-01-10');
+#
+# INSERT INTO cuat_user_activity (user_id, activity_type, activity_timestamp) VALUES
+#     (1, 'like',     '2024-09-22'),
+#     (1, 'comment',  '2024-07-27'),
+#     (2, 'purchase', '2024-07-16'),
+#     (2, 'comment',  '2024-07-24');
+#
+# -- information drives the LEFT JOIN; activity is optional.
+# -- COUNT(DISTINCT activity_type) ignores the manufactured NULL row.
+# SELECT i.user_id,
+#        COUNT(DISTINCT a.activity_type) AS unique_activity_count
+# FROM cuat_user_information i
+# LEFT JOIN cuat_user_activity a ON a.user_id = i.user_id
+# GROUP BY i.user_id
+# ORDER BY i.user_id;
+#
+# -- Expected: (1, 2), (2, 2), (3, 0), (4, 0).

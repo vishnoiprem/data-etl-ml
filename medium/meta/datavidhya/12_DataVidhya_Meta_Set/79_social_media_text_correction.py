@@ -169,3 +169,43 @@ AS t(id, text, `date`, likes, comments, shares, platform)
 expect("Q79 all occurrences in a row are replaced", SQL, [
     (1, d(1), 1, 1, "Twitter", 1, "PySpark, PySpark, and more PySpark"),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL's REPLACE(str, from, to) is a global literal substitution and is
+# case-sensitive, just like Spark's. The `date` column needs backticks
+# because it collides with a reserved word.
+#
+# CREATE TABLE correct_social_media_post (
+#     id        INT          NOT NULL,
+#     text      TEXT         NOT NULL,
+#     date      DATE         NOT NULL,
+#     likes     INT          NOT NULL,
+#     comments  INT          NOT NULL,
+#     shares    INT          NOT NULL,
+#     platform  VARCHAR(16)  NOT NULL,
+#     PRIMARY KEY (id),
+#     KEY ix_csmp_comments (comments)        -- the spec's sort key
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO correct_social_media_post
+#     (id, text, `date`, likes, comments, shares, platform) VALUES
+#     (1, 'This is a Python post.',                     '2022-03-01', 10, 3, 2, 'Twitter'),
+#     (2, 'Another post about Python.',                 '2022-03-02', 20, 5, 3, 'Instagram'),
+#     (3, 'Python is great for data analysis.',         '2022-03-03', 30, 2, 4, 'Facebook'),
+#     (4, 'I am learning Python for machine learning.', '2022-03-04', 40, 7, 5, 'Twitter'),
+#     (5, 'Python vs. R for data science.',             '2022-03-05', 50, 9, 6, 'Instagram'),
+#     (6, 'Python web development is awesome.',         '2022-03-06', 60, 1, 1, 'Facebook'),
+#     (7, 'Python for finance.',                        '2022-03-07', 70, 4, 3, 'Twitter'),
+#     (8, 'Python libraries for data visualization.',   '2022-03-08', 80, 6, 2, 'Instagram');
+#
+# -- Case-sensitive global replace, then alphabetical column order,
+# -- then ORDER BY comments -- all identical to Spark.
+# SELECT comments,
+#        `date`,
+#        id,
+#        likes,
+#        platform,
+#        shares,
+#        REPLACE(text, 'Python', 'PySpark') AS text
+# FROM correct_social_media_post
+# ORDER BY comments;

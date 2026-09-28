@@ -169,3 +169,40 @@ SELECT COUNT(DISTINCT company_id) AS c FROM (
 """).collect()[0][0]
 assert with_descn == 0, with_descn
 print("[PASS] Q74 including description in the GROUP BY finds no duplicates (0, not 1)")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same nested-GROUP BY pattern. COUNT(*) > 1
+# inside the subquery, COUNT(DISTINCT company_id) outside. The DISTINCT
+# in the outer count prevents a single company that duplicates two
+# different titles from being counted twice.
+#
+# CREATE TABLE job_listings (
+#     job_id       INT          NOT NULL,
+#     company_id   INT          NOT NULL,
+#     title        VARCHAR(128) NOT NULL,
+#     description  TEXT,
+#     PRIMARY KEY (job_id),
+#     KEY ix_jl_company_title (company_id, title)   -- drives the inner GROUP BY
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO job_listings (job_id, company_id, title, description) VALUES
+#     (1, 1, 'Software Engineer', 'Build scalable systems'),
+#     (2, 1, 'Software Engineer', 'Build scalable systems'),
+#     (3, 1, 'Data Analyst',      'Analyze trends'),
+#     (4, 2, 'Software Engineer', 'Build scalable systems'),
+#     (5, 2, 'Product Manager',   'Manage products'),
+#     (6, 3, 'Sales Manager',     'Lead sales team'),
+#     (7, 3, 'Sales Manager',     'Lead sales team'),
+#     (8, 4, 'DevOps Engineer',   'Deploy systems');
+#
+# -- Inner: one row per (company_id, title) that appears more than once.
+# -- Outer: distinct count of those companies.
+# SELECT COUNT(DISTINCT company_id) AS duplicate_company_count
+# FROM (
+#     SELECT company_id, title
+#     FROM job_listings
+#     GROUP BY company_id, title
+#     HAVING COUNT(*) > 1
+# ) t;
+#
+# -- Expected: 2 (companies 1 and 3).

@@ -185,3 +185,53 @@ SELECT * FROM VALUES
 AS t(date, consumption)
 """)
 expect("Q62 tie resolves to the earliest date", SQL, [(dt.date(2020, 1, 3), 1200)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same UNION ALL + GROUP BY + ORDER BY ... LIMIT 1
+# pattern verbatim. UNION (without ALL) would dedupe Asia's and EU's
+# identical (2020-01-01, 400) row -- the test below shows it losing 400.
+#
+# CREATE TABLE pec_asia_energy (
+#     date         DATE NOT NULL,
+#     consumption  INT  NOT NULL,
+#     PRIMARY KEY (date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE pec_eu_energy (
+#     date         DATE NOT NULL,
+#     consumption  INT  NOT NULL,
+#     PRIMARY KEY (date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE pec_na_energy (
+#     date         DATE NOT NULL,
+#     consumption  INT  NOT NULL,
+#     PRIMARY KEY (date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO pec_asia_energy (date, consumption) VALUES
+#     ('2020-01-01',  400), ('2020-01-02',  400),
+#     ('2020-01-04',  675), ('2020-01-05', 1200);
+#
+# INSERT INTO pec_eu_energy (date, consumption) VALUES
+#     ('2020-01-01', 400), ('2020-01-02', 350),
+#     ('2020-01-03', 500), ('2020-01-04', 500);
+#
+# INSERT INTO pec_na_energy (date, consumption) VALUES
+#     ('2020-01-01', 250), ('2020-01-02', 375),
+#     ('2020-01-03', 600), ('2020-01-06', 500);
+#
+# WITH all_regions AS (
+#     SELECT date, consumption FROM pec_asia_energy
+#     UNION ALL
+#     SELECT date, consumption FROM pec_eu_energy
+#     UNION ALL
+#     SELECT date, consumption FROM pec_na_energy
+# )
+# SELECT date, SUM(consumption) AS total_consumption
+# FROM all_regions
+# GROUP BY date
+# ORDER BY total_consumption DESC, date
+# LIMIT 1;
+#
+# -- Expected: ('2020-01-05', 1200).

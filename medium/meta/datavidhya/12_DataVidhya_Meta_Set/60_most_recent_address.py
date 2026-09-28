@@ -171,3 +171,43 @@ SELECT COUNT(*) FROM (
 """).collect()[0][0]
 assert tied_rank == 2, tied_rank
 print("[PASS] Q60 RANK returns 2 rows for user 9 -- violates 'exactly one row per user'")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...) and
+# RANK() with the same semantics as Spark. The two-column ORDER BY (date
+# DESC, id DESC) makes ties deterministic.
+#
+# CREATE TABLE user_addresses (
+#     address_id  INT          NOT NULL,
+#     user_id     INT          NOT NULL,
+#     street      VARCHAR(128) NOT NULL,
+#     city        VARCHAR(64)  NOT NULL,
+#     state       CHAR(2)      NOT NULL,
+#     updated_at  DATE         NOT NULL,
+#     PRIMARY KEY (address_id),
+#     KEY ix_ua_user_date (user_id, updated_at DESC, address_id DESC)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO user_addresses (address_id, user_id, street, city, state, updated_at) VALUES
+#     ( 1, 1, '123 Main St',   'New York', 'NY', '2024-01-15'),
+#     ( 2, 1, '456 Oak Ave',   'Boston',   'MA', '2024-03-20'),
+#     ( 5, 3, '654 Maple Dr',  'Denver',   'CO', '2024-02-28'),
+#     ( 6, 3, '987 Cedar Ln',  'Austin',   'TX', '2024-04-01'),
+#     ( 7, 3, '111 Birch Way', 'Portland', 'OR', '2024-03-15'),
+#     (13, 7, '777 Elm Ave',   'Dallas',   'TX', '2024-01-30'),
+#     (14, 7, '888 Pine St',   'Houston',  'TX', '2024-03-05');
+#
+# SELECT user_id, street, city, state, updated_at
+# FROM (
+#     SELECT user_id, street, city, state, updated_at,
+#            ROW_NUMBER() OVER (PARTITION BY user_id
+#                               ORDER BY updated_at DESC, address_id DESC) AS rn
+#     FROM user_addresses
+# ) t
+# WHERE rn = 1
+# ORDER BY user_id;
+#
+# -- Expected:
+# -- (1, '456 Oak Ave',  'Boston',  'MA', '2024-03-20')
+# -- (3, '987 Cedar Ln', 'Austin',  'TX', '2024-04-01')
+# -- (7, '888 Pine St',  'Houston', 'TX', '2024-03-05')

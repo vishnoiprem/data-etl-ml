@@ -137,3 +137,35 @@ ORDER BY product_id
 assert [r[0] for r in normalised] == [1, 2, 4], normalised
 print("[PASS] Q77 normalising with UPPER/TRIM would admit 1,2,4 -- "
       "worth asking which the business means")
+
+# ---- MySQL way ----------------------------------------------------------
+# Two exact-equality predicates; MySQL handles VARCHAR='literal' the same
+# way as Spark, including trailing-space padding rules under the default
+# sql_mode. An index on (fat_content, is_recyclable) makes this a covering
+# seek on the typical small catalogue.
+#
+# CREATE TABLE products (
+#     product_id     INT          NOT NULL,
+#     product_name   VARCHAR(128) NOT NULL,
+#     fat_content    VARCHAR(16)  NOT NULL,
+#     is_recyclable  CHAR(1)      NOT NULL,
+#     PRIMARY KEY (product_id),
+#     KEY ix_products_fat_rec (fat_content, is_recyclable)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO products (product_id, product_name, fat_content, is_recyclable) VALUES
+#     (1, 'Organic Cereal', 'Low Fat', 'Y'),
+#     (2, 'Whole Milk',     'Regular', 'Y'),
+#     (3, 'Greek Yogurt',   'Low Fat', 'Y'),
+#     (4, 'Butter',         'Regular', 'N'),
+#     (5, 'Almond Milk',    'Low Fat', 'N'),
+#     (7, 'Skim Yogurt',    'Low Fat', 'Y');
+#
+# SELECT product_id, product_name
+# FROM products
+# WHERE fat_content = 'Low Fat'
+#   AND is_recyclable = 'Y'
+# ORDER BY product_id;
+#
+# -- Expected rows: (1, 'Organic Cereal'), (3, 'Greek Yogurt'),
+# --                (7, 'Skim Yogurt').

@@ -195,3 +195,37 @@ api_result = (spark.createDataFrame([("sneak@dataplatformXcom",)], "email STRING
               .filter(F.col("email").rlike(PATTERN)).count())
 assert api_result == 0, api_result
 print("[PASS] Q75 the DataFrame API needs no doubling -- single backslash rejects it")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0+ uses REGEXP_LIKE (or REGEXP / RLIKE) against POSIX/Java regex.
+# Anchors (^, $) are required for an exact match, and the literal dot in
+# '.com' is NOT a metacharacter in MySQL's REGEXP engine the way it is in
+# Spark/Java -- but escaping it is still safer and identical-looking.
+#
+# CREATE TABLE fve_sample (
+#     customer_id  INT          NOT NULL,
+#     full_name    VARCHAR(64)  NOT NULL,
+#     email        VARCHAR(255) NOT NULL,
+#     PRIMARY KEY (customer_id),
+#     KEY ix_fve_email (email)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO fve_sample (customer_id, full_name, email) VALUES
+#     (1, 'Alice',   'alice@dataplatform.com'),
+#     (2, 'Bob',     'bob_the_great'),
+#     (3, 'Charlie', 'charlie-@dataplatform.com'),
+#     (4, 'Daniel',  'daniel.data@dataplatform.com'),
+#     (5, 'Eve',     'eve#2022@dataplatform.com'),
+#     (6, 'Frank',   'frank77@gmail.com');
+#
+# -- Equivalent of the main Spark RLIKE filter.
+# -- MySQL string literals do NOT consume backslashes, so a SINGLE '\\.' is
+# -- passed through to the regex engine as the two-character escape sequence
+# -- '\.' (matches a literal dot). Spark's SQL text needed '\\\\' for the
+# -- same result; here a single backslash is enough.
+# SELECT customer_id, full_name, email
+# FROM fve_sample
+# WHERE email REGEXP '^[A-Za-z][A-Za-z0-9_.-]*@dataplatform\\.com$'
+# ORDER BY customer_id;
+#
+# -- Expected: rows for customer_id 1, 3, 4 (the trailing hyphen is valid).
