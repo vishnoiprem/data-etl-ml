@@ -148,3 +148,73 @@ try:
     raise AssertionError("gate should have failed")
 except ValueError as e:
     print(f"[PASS] quality gate blocked an empty partition: {e}")
+
+# ---- MySQL way ----------------------------------------------------------
+# Same rules. In MySQL you get exponential backoff and quality gates through
+# either the application layer (Python + connector) or a stored-procedure loop.
+#
+# CREATE TABLE + sample data:
+#   CREATE TABLE orders (
+#       order_id     INT PRIMARY KEY,
+#       buyer_id     INT, seller_id INT,
+#       order_date   DATE NOT NULL,
+#       gross_amount DECIMAL(10,2),
+#       status       VARCHAR(20),
+#       KEY idx_orders_date (order_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO orders VALUES
+#       (9001, 1, 501, '2026-01-01', 25.00, 'completed'),
+#       (9002, 2, 502, '2026-01-01', 40.00, 'completed'),
+#       (9003, 3, 501, '2026-01-02', 15.00, 'cancelled'),
+#       (9004, 1, 503, '2026-01-03', 60.00, 'completed'),
+#       (9005, 4, 502, '2026-01-08', 10.00, 'completed');
+#
+# Quality gate stored procedure — fails the run (SIGNAL SQLSTATE) rather than
+# publishing an empty partition:
+#   DELIMITER $$
+#   CREATE PROCEDURE assert_not_empty(IN p_ds DATE)
+#   BEGIN
+#       DECLARE n INT;
+#       SELECT COUNT(*) INTO n FROM orders WHERE order_date = p_ds;
+#       IF n = 0 THEN
+#           SIGNAL SQLSTATE '45000'
+#             SET MESSAGE_TEXT = 'partition is empty — refusing to publish';
+#       END IF;
+#   END$$
+#   DELIMITER ;
+#
+# In Python (e.g. an Airflow PythonOperator using mysql-connector-python or
+# PyMySQL), classify errors and retry only the transient class:
+#   import time, random
+#   import pymysql
+#
+#   class TransientError(Exception): pass    # 1213 deadlock, 1205 lock wait, timeouts
+#   class PermanentError(Exception): pass    # 1064 syntax, 1146 table missing, 1045 auth
+#
+#   TRANSIENT_MYSQL_CODES = {1213, 1205, 2006, 2013, 1040, 1226}
+#
+#   def call_with_retry(sql, params=(), max_attempts=4, base_delay=1.0):
+#       for attempt in range(1, max_attempts + 1):
+#           try:
+#               conn = pymysql.connect(host="warehouse", user="etl", password="...")
+#               with conn.cursor() as cur:
+#                   cur.execute(sql, params)
+#                   conn.commit()
+#               conn.close()
+#               return cur.rowcount
+#           except pymysql.err.OperationalError as e:
+#               code = e.args[0]
+#               if code not in TRANSIENT_MYSQL_CODES:
+#                   raise PermanentError(code) from e
+#               if attempt == max_attempts:
+#                   raise TransientError(code) from e
+#               time.sleep(base_delay * (2 ** (attempt - 1)) + random.uniform(0, 0.5))
+#       raise TransientError("exhausted retries")
+#
+# Rules:
+#   1. CLASSIFY FIRST — 5xx / 1213 / timeout -> transient (retry); 1064 /
+#      1146 / 1045 / schema mismatch -> permanent (fail fast).
+#   2. EXPONENTIAL BACKOFF + jitter — fixed retries against an overloaded MySQL
+#      make the outage worse.
+#   3. CAP attempts, then FAIL. Infinite retries silently stall the pipeline.
+#   4. Quality gate stored proc SIGNALs an error; the caller fails the DAG.

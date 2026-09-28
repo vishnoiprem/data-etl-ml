@@ -159,3 +159,48 @@ gmv_per_buyer_df = (orders_df
                          ).alias("gmv_per_buyer")))
 assert [tuple(r) for r in gmv_per_buyer_df.collect()] == [(3, 135.00, 45.00)]
 print("[PASS] primary: GMV per active buyer — DataFrame API matches SQL")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE orders (
+#       order_id     INT PRIMARY KEY,
+#       buyer_id     INT,
+#       seller_id    INT,
+#       order_date   DATE NOT NULL,
+#       gross_amount DECIMAL(10,2),
+#       status       VARCHAR(20),
+#       KEY idx_orders_date_status (order_date, status)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO orders VALUES
+#       (9001, 1, 501, '2026-01-01', 25.00, 'completed'),
+#       (9002, 2, 502, '2026-01-01', 40.00, 'completed'),
+#       (9003, 3, 501, '2026-01-02', 15.00, 'cancelled'),
+#       (9004, 1, 503, '2026-01-03', 60.00, 'completed'),
+#       (9005, 4, 502, '2026-01-08', 10.00, 'completed');
+#
+# Primary: daily completed GMV (filter BEFORE aggregating; cancellations must
+# never reach the GMV sum):
+#   SELECT order_date,
+#          COUNT(*) AS completed_orders,
+#          ROUND(SUM(gross_amount), 2) AS gmv
+#   FROM orders
+#   WHERE status = 'completed'
+#   GROUP BY order_date
+#   ORDER BY order_date;
+#
+# Guardrail: cancellation rate over ALL orders (denominator choice is the
+# whole point — completed-only would always give 0%):
+#   SELECT COUNT(*) AS all_orders,
+#          SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled,
+#          ROUND(100.0 * AVG(CASE WHEN status = 'cancelled' THEN 1.0 ELSE 0.0 END), 2)
+#              AS cancel_rate_pct
+#   FROM orders;
+#
+# Primary: GMV per active buyer (denominator = buyers with >=1 completed order):
+#   SELECT COUNT(DISTINCT buyer_id) AS active_buyers,
+#          ROUND(SUM(gross_amount), 2) AS gmv,
+#          ROUND(SUM(gross_amount) / COUNT(DISTINCT buyer_id), 2) AS gmv_per_buyer
+#   FROM orders WHERE status = 'completed';
+# Why a guardrail: GMV alone is gameable. A spike in orders that all cancel is
+# a worse product and a better GMV number. Naming the guardrail unprompted is
+# the strongest single product signal here.

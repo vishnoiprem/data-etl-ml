@@ -197,3 +197,53 @@ mix_adj_df = joined.agg(
 )
 assert [tuple(r) for r in mix_adj_df.collect()] == [(9.25,)]
 print("[PASS] mix-adjusted w2 conversion (w1 weights) — DataFrame API matches SQL")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE conv (
+#       week      VARCHAR(10),
+#       platform  VARCHAR(16),
+#       views     INT,
+#       leads     INT,
+#       PRIMARY KEY (week, platform)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO conv VALUES
+#       ('w1', 'ios',     1000, 100),
+#       ('w1', 'android',  200,  10),
+#       ('w2', 'ios',      600,  60),
+#       ('w2', 'android',  800,  44);
+#
+# Headline conversion by week (pre-aggregate to (week), THEN divide):
+#   SELECT week, SUM(views) AS views, SUM(leads) AS leads,
+#          ROUND(100.0 * SUM(leads) / SUM(views), 2) AS conv_pct
+#   FROM conv GROUP BY week ORDER BY week;
+#
+# Per-platform rate (grain is already (week, platform) — divide in place):
+#   SELECT platform, week,
+#          ROUND(100.0 * leads / views, 2) AS conv_pct
+#   FROM conv ORDER BY platform, week;
+#
+# Traffic mix shift (Simpson's paradox evidence):
+#   SELECT week, platform,
+#          ROUND(100.0 * views / SUM(views) OVER (PARTITION BY week), 2)
+#              AS share_of_views_pct
+#   FROM conv ORDER BY week, platform;
+#
+# Mix-adjusted w2 — re-score w2 with w1 weights (counterfactual):
+#   WITH r AS (
+#       SELECT platform,
+#              MAX(CASE WHEN week = 'w1' THEN views END) AS w1_views,
+#              MAX(CASE WHEN week = 'w2' THEN 1.0 * leads / views END) AS w2_rate
+#       FROM conv GROUP BY platform
+#   )
+#   SELECT ROUND(100.0 * SUM(w1_views * w2_rate) / SUM(w1_views), 2)
+#          AS mix_adjusted_pct
+#   FROM r;
+# Investigate in this order — cheapest and most likely first:
+#   1. IS IT REAL? Check pipeline before product. Late partition, dropped
+#      upstream partition, schema change explains more 5% drops than user
+#      behaviour.
+#   2. IS IT EVERYWHERE OR SOMEWHERE? Cut by dimension.
+#   3. NUMERATOR OR DENOMINATOR? A "rate" can fall because N fell OR D grew.
+#   4. SEASONALITY / MIX. Compare week-over-week AND year-over-year.
+#   5. Only then product hypotheses, each with a query that could falsify it.

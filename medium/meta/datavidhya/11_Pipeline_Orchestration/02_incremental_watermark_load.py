@@ -136,3 +136,78 @@ target = sorted(by_key.values())
 assert len(target) == 5 and (5, "late") in target, target
 print(f"[PASS] {LOOKBACK_HOURS}h lookback + merge recovered the late row "
       f"-> {len(target)} rows, no duplicates")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE src (
+#       id         INT PRIMARY KEY,
+#       val        VARCHAR(20),
+#       updated_at DATETIME NOT NULL
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO src VALUES
+#       (1, 'a', '2026-01-01 10:00:00'),
+#       (2, 'b', '2026-01-01 11:00:00'),
+#       (3, 'c', '2026-01-02 09:00:00');
+#
+#   CREATE TABLE target (
+#       id  INT PRIMARY KEY,
+#       val VARCHAR(20)
+#   ) ENGINE=InnoDB;
+#
+#   CREATE TABLE watermark_kv (
+#       wm_name VARCHAR(40) PRIMARY KEY,
+#       wm_ts   DATETIME NOT NULL
+#   ) ENGINE=InnoDB;
+#   INSERT INTO watermark_kv (wm_name, wm_ts) VALUES ('src_to_target', '1970-01-01 00:00:00');
+#
+# Per-run procedure: read strictly ABOVE watermark, MERGE into target, then
+# advance watermark from the DATA (not wall-clock):
+#   DELIMITER $$
+#   CREATE PROCEDURE incremental_load()
+#   BEGIN
+#       START TRANSACTION;
+#
+#       SELECT wm_ts INTO @wm FROM watermark_kv WHERE wm_name = 'src_to_target'
+#           FOR UPDATE;
+#
+#       -- 1) read strictly above the watermark
+#       CREATE TEMPORARY TABLE _batch AS
+#       SELECT id, val, updated_at
+#       FROM src
+#       WHERE updated_at > @wm;
+#
+#       -- 2) MERGE into target (upsert, MERGE semantics)
+#       INSERT INTO target (id, val)
+#       SELECT id, val FROM _batch
+#       ON DUPLICATE KEY UPDATE val = VALUES(val);
+#
+#       -- 3) advance the watermark from the DATA, not wall-clock
+#       UPDATE watermark_kv SET wm_ts = (SELECT MAX(updated_at) FROM _batch)
+#       WHERE wm_name = 'src_to_target';
+#
+#       DROP TEMPORARY TABLE _batch;
+#       COMMIT;
+#   END$$
+#   DELIMITER ;
+#
+# Late-arriving-data mitigation: lookback + MERGE. Re-read the last N hours
+# and let ON DUPLICATE KEY UPDATE collapse updates:
+#   DELIMITER $$
+#   CREATE PROCEDURE merge_lookback(IN p_lookback_hours INT)
+#   BEGIN
+#       SELECT wm_ts INTO @wm FROM watermark_kv WHERE wm_name = 'src_to_target';
+#       SET @cutoff = DATE_SUB(@wm, INTERVAL p_lookback_hours HOUR);
+#
+#       INSERT INTO target (id, val)
+#       SELECT id, val FROM src
+#       WHERE updated_at > @cutoff
+#       ON DUPLICATE KEY UPDATE val = VALUES(val);
+#   END$$
+#   DELIMITER ;
+#
+# Critical invariants:
+#   - Boundary is strict `>` (not `>=`) — re-running with no new data is a no-op.
+#   - Advance the watermark from the DATA (`MAX(updated_at)` of what you read),
+#     NEVER wall-clock time — a crash between "read" and "commit watermark"
+#     would otherwise lose rows silently.
+#   - For late-arriving data: lookback + MERGE, not append-only.

@@ -142,3 +142,44 @@ ratio_df = (act_df
             .orderBy("group_id"))
 assert [tuple(r) for r in ratio_df.collect()] == [("g1", 50.00), ("g2", 0.00)]
 print("[PASS] contributor-to-participant ratio — DataFrame API matches SQL")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE group_activity (
+#       group_id      VARCHAR(20) NOT NULL,
+#       user_id       INT NOT NULL,
+#       activity_date DATE NOT NULL,
+#       action        VARCHAR(16) NOT NULL,    -- post | comment | view
+#       KEY idx_group_date (group_id, activity_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO group_activity VALUES
+#       ('g1', 1, '2026-01-05', 'post'),
+#       ('g1', 2, '2026-01-05', 'comment'),
+#       ('g1', 3, '2026-01-06', 'view'),
+#       ('g1', 1, '2026-01-07', 'comment'),
+#       ('g1', 4, '2026-01-07', 'view'),
+#       ('g2', 5, '2026-01-05', 'view'),
+#       ('g2', 6, '2026-01-06', 'view');
+#
+# Weekly active participants per group (split by action class):
+#   SELECT group_id,
+#          COUNT(DISTINCT user_id) AS weekly_active_participants,
+#          COUNT(DISTINCT CASE WHEN action IN ('post','comment') THEN user_id END)
+#              AS contributors,
+#          COUNT(DISTINCT CASE WHEN action = 'view' THEN user_id END) AS viewers
+#   FROM group_activity
+#   GROUP BY group_id
+#   ORDER BY group_id;
+#
+# Contributor-to-participant ratio (g2 -> 0.0 = pure lurkers, dead group):
+#   SELECT group_id,
+#          ROUND(100.0 * COUNT(DISTINCT CASE WHEN action IN ('post','comment')
+#                                            THEN user_id END)
+#                      / COUNT(DISTINCT user_id), 2) AS contributor_pct
+#   FROM group_activity
+#   GROUP BY group_id
+#   ORDER BY group_id;
+#
+# Why "participants" not "members": membership is monotonic and only ever
+# grows, so it CANNOT detect decline. Any metric that cannot go down is not a
+# health metric.

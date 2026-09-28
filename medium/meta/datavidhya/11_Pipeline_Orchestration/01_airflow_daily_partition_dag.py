@@ -114,3 +114,68 @@ if __name__ == "__main__":
     else:
         print("[SKIP] Airflow not installed — DAG not instantiated. "
               "Install with: pip install apache-airflow")
+
+# ---- MySQL way ----------------------------------------------------------
+# Same five rules apply; the per-partition unit of work for a MySQL target is
+# DELETE + INSERT in a single transaction (the MySQL equivalent of Spark's
+# dynamic partition overwrite).
+#
+# CREATE TABLE + sample data:
+#   CREATE TABLE raw_orders (
+#       order_id     INT PRIMARY KEY,
+#       buyer_id     INT, seller_id INT,
+#       order_date   DATE NOT NULL,
+#       gross_amount DECIMAL(10,2),
+#       status       VARCHAR(20),
+#       KEY idx_orders_date (order_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- (sample inserts omitted for brevity; same shape as 09/02 example)
+#
+# Idempotent per-date transform (the unit of work):
+#   DELIMITER $$
+#   CREATE PROCEDURE build_fact_order_for_date(IN p_ds DATE)
+#   BEGIN
+#       START TRANSACTION;
+#       DELETE FROM fact_order WHERE order_date = p_ds;
+#       INSERT INTO fact_order (order_id, buyer_id, seller_id, order_date,
+#                               gross_amount, status)
+#       SELECT order_id, buyer_id, seller_id, order_date, gross_amount, status
+#       FROM raw_orders WHERE order_date = p_ds;
+#       COMMIT;
+#   END$$
+#   DELIMITER ;
+#
+# Quality gate stored procedure (FAIL the run, not silent zero):
+#   DELIMITER $$
+#   CREATE PROCEDURE assert_not_empty(IN p_ds DATE)
+#   BEGIN
+#       DECLARE n INT;
+#       SELECT COUNT(*) INTO n FROM fact_order WHERE order_date = p_ds;
+#       IF n = 0 THEN
+#           SIGNAL SQLSTATE '45000'
+#             SET MESSAGE_TEXT = 'fact_order partition is empty';
+#       END IF;
+#   END$$
+#   DELIMITER ;
+#
+# Airflow orchestration (same shape, MySQL calls instead of Spark):
+#   from airflow.operators.mysql import MySqlOperator
+#
+#   build = MySqlOperator(
+#       task_id="build_fact_order",
+#       sql="CALL build_fact_order_for_date('{{ ds }}')",
+#       mysql_conn_id="warehouse",
+#   )
+#   check = MySqlOperator(
+#       task_id="quality_gate",
+#       sql="CALL assert_not_empty('{{ ds }}')",
+#       mysql_conn_id="warehouse",
+#   )
+#   wait_upstream >> build >> check
+#
+# Same five rules:
+#   1. IDEMPOTENT — proc overwrites exactly the {{ ds }} partition.
+#   2. NO WORK IN THE DAG FILE — connections / procs live in the DB.
+#   3. SENSORS over guessing — ExternalTaskSensor on upstream.
+#   4. RETRIES WITH BACKOFF + SLA.
+#   5. DATA QUALITY AS A TASK that can FAIL the DAG.
