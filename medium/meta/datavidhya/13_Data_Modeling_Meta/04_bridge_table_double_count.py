@@ -253,3 +253,79 @@ fixed_total = spark.sql(f"SELECT ROUND(SUM(allocated_views), 2) FROM ({ALLOCATED
     .collect()[0][0]
 assert float(fixed_total) == 6500.0, fixed_total
 print(f"[PASS] Q19 allocation now reconciles to {fixed_total} = the true total")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE fact_reel_views (
+#       reel_id    INT   NOT NULL,
+#       view_date  DATE  NOT NULL,
+#       views      INT   NOT NULL,
+#       KEY idx_fact_reel_views_date (view_date)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_reel_views (reel_id, view_date, views) VALUES
+#       (1, '2026-03-01', 3000),
+#       (2, '2026-03-01', 2000),
+#       (3, '2026-03-01', 1000),
+#       (4, '2026-03-01',  500);
+#
+#   CREATE TABLE bridge_reel_hashtag (
+#       reel_id  INT         NOT NULL,
+#       hashtag  VARCHAR(32) NOT NULL,
+#       KEY idx_bridge_reel (reel_id),
+#       KEY idx_bridge_hashtag (hashtag)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO bridge_reel_hashtag (reel_id, hashtag) VALUES
+#       (1, 'cooking'), (1, 'recipe'), (1, 'food'),
+#       (2, 'cooking'), (2, 'vegan'),
+#       (3, 'cooking');
+#
+#   -- Q19 un-weighted SUM through the bridge (expect block)
+#   SELECT b.hashtag, SUM(f.views) AS views
+#   FROM fact_reel_views f
+#   JOIN bridge_reel_hashtag b ON b.reel_id = f.reel_id
+#   GROUP BY b.hashtag
+#   ORDER BY views DESC, b.hashtag;
+#
+#   -- Fix 1: allocate. weight stamped ON the bridge once at load time.
+#   CREATE OR REPLACE VIEW bridge_weighted AS
+#   SELECT reel_id, hashtag,
+#          1.0 / COUNT(*) OVER (PARTITION BY reel_id) AS weight
+#   FROM bridge_reel_hashtag;
+#
+#   -- Q19 weighted allocation reconciles to the true total (expect block)
+#   SELECT b.hashtag, ROUND(SUM(f.views * b.weight), 2) AS allocated_views
+#   FROM fact_reel_views f
+#   JOIN bridge_weighted b ON b.reel_id = f.reel_id
+#   GROUP BY b.hashtag
+#   ORDER BY allocated_views DESC, b.hashtag;
+#
+#   -- Q19 impact framing: correct per row, explicitly NOT summable (expect block)
+#   SELECT b.hashtag,
+#          SUM(f.views)                  AS views_on_reels_with_tag,
+#          COUNT(DISTINCT f.reel_id)     AS reels
+#   FROM fact_reel_views f
+#   JOIN bridge_reel_hashtag b ON b.reel_id = f.reel_id
+#   GROUP BY b.hashtag
+#   ORDER BY views_on_reels_with_tag DESC, b.hashtag;
+#
+#   -- Q19 an '(unassigned)' member keeps the allocation complete (expect block).
+#   -- AFTER adding reel 4 (no hashtag), rebuild bridge_weighted with the orphan:
+#   CREATE OR REPLACE VIEW bridge_weighted AS
+#   WITH covered AS (
+#       SELECT reel_id, hashtag FROM bridge_reel_hashtag
+#       UNION ALL
+#       SELECT f.reel_id, '(unassigned)' AS hashtag
+#       FROM fact_reel_views f
+#       LEFT JOIN bridge_reel_hashtag b ON b.reel_id = f.reel_id
+#       WHERE b.reel_id IS NULL
+#   )
+#   SELECT reel_id, hashtag,
+#          1.0 / COUNT(*) OVER (PARTITION BY reel_id) AS weight
+#   FROM covered;
+#
+# MySQL 8.0+ notes: COUNT(*) OVER (PARTITION BY reel_id) replaces the Spark
+# window directly. The 1/n allocation is computed once on write and stored as
+# DECIMAL(18,9) so the float-drift trap (49 x 1/49 != 1.0) does not corrupt the
+# reconciliation at Meta volume. The '(unassigned)' bridge member is added via
+# LEFT JOIN ... WHERE b.reel_id IS NULL (the MySQL-idiomatic form of NOT EXISTS)
+# so every fact row has a home and the inner-join-through-bridge drop is closed.

@@ -234,3 +234,79 @@ SELECT flag_key FROM dim_stable_subset WHERE placement_type = 'feed' AND is_vide
 assert key_full == key_subset, (key_full, key_subset)
 print(f"[PASS] Q33 a hash key survives the rebuild unchanged ({key_full[:12]}...) "
       "-- deterministic, order-independent, safe to recompute")
+
+# ---- MySQL way ----------------------------------------------------------
+# CREATE TABLE + sample data:
+#   CREATE TABLE raw_impressions (
+#       impression_id  INT         NOT NULL,
+#       ad_id          INT         NOT NULL,
+#       is_video       TINYINT(1)  NOT NULL,
+#       is_autoplay    TINYINT(1)  NOT NULL,
+#       is_sponsored   TINYINT(1)  NOT NULL,
+#       placement_type VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (impression_id),
+#       KEY idx_raw_impressions_ad (ad_id)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO raw_impressions
+#       (impression_id, ad_id, is_video, is_autoplay, is_sponsored, placement_type) VALUES
+#       (1, 501, 1, 1, 1, 'feed'),
+#       (2, 501, 1, 1, 1, 'feed'),
+#       (3, 502, 0, 0, 1, 'feed'),
+#       (4, 502, 1, 0, 0, 'reels'),
+#       (5, 503, 1, 1, 1, 'reels'),
+#       (6, 503, 0, 0, 0, 'stories'),
+#       (7, 504, 1, 1, 1, 'feed'),
+#       (8, 504, 1, 0, 0, 'reels');
+#
+#   CREATE TABLE dim_impression_flags (
+#       flag_key        CHAR(32)    NOT NULL,
+#       is_video        TINYINT(1)  NOT NULL,
+#       is_autoplay     TINYINT(1)  NOT NULL,
+#       is_sponsored    TINYINT(1)  NOT NULL,
+#       placement_type  VARCHAR(16) NOT NULL,
+#       PRIMARY KEY (flag_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO dim_impression_flags
+#       (flag_key, is_video, is_autoplay, is_sponsored, placement_type) VALUES
+#       (MD5(CONCAT_WS('|', '0', '0', '0', 'stories')), 0, 0, 0, 'stories'),
+#       (MD5(CONCAT_WS('|', '0', '0', '1', 'feed')),    0, 0, 1, 'feed'),
+#       (MD5(CONCAT_WS('|', '1', '0', '0', 'reels')),   1, 0, 0, 'reels'),
+#       (MD5(CONCAT_WS('|', '1', '1', '1', 'feed')),    1, 1, 1, 'feed'),
+#       (MD5(CONCAT_WS('|', '1', '1', '1', 'reels')),   1, 1, 1, 'reels');
+#
+#   CREATE TABLE fact_ad_impression (
+#       impression_id  INT      NOT NULL,
+#       ad_id          INT      NOT NULL,
+#       flag_key       CHAR(32) NOT NULL,
+#       PRIMARY KEY (impression_id),
+#       KEY idx_fact_impression_flag (flag_key)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO fact_ad_impression (impression_id, ad_id, flag_key) VALUES
+#       (1, 501, MD5(CONCAT_WS('|', '1', '1', '1', 'feed'))),
+#       (2, 501, MD5(CONCAT_WS('|', '1', '1', '1', 'feed'))),
+#       (3, 502, MD5(CONCAT_WS('|', '0', '0', '1', 'feed'))),
+#       (4, 502, MD5(CONCAT_WS('|', '1', '0', '0', 'reels'))),
+#       (5, 503, MD5(CONCAT_WS('|', '1', '1', '1', 'reels'))),
+#       (6, 503, MD5(CONCAT_WS('|', '0', '0', '0', 'stories'))),
+#       (7, 504, MD5(CONCAT_WS('|', '1', '1', '1', 'feed'))),
+#       (8, 504, MD5(CONCAT_WS('|', '1', '0', '0', 'reels')));
+#
+#   -- Q33 junk dimension holds only the OBSERVED combinations (expect block).
+#   -- Use MD5(CONCAT_WS(...)) as a STABLE key -- ROW_NUMBER() renumbers on
+#   -- rebuild, which silently mislabels every historical fact row.
+#   SELECT flag_key, is_video, is_autoplay, is_sponsored, placement_type
+#   FROM dim_impression_flags ORDER BY flag_key;
+#
+#   -- Q33 grouping through the dimension matches the raw table (expect block)
+#   SELECT d.placement_type, d.is_video, COUNT(*) AS impressions
+#   FROM fact_ad_impression f
+#   JOIN dim_impression_flags d ON d.flag_key = f.flag_key
+#   GROUP BY d.placement_type, d.is_video
+#   ORDER BY impressions DESC, d.placement_type;
+#
+# MySQL 8.0+ notes: a CHAR(32) MD5 hash key is the stable alternative to
+# ROW_NUMBER() -- the Spark renumbering trap (rebuild flips flag_key=1 from
+# 'stories' to 'feed') is identical in MySQL but a hash key is order-
+# independent and safe to recompute. TINYINT(1) replaces BOOLEAN. INDEX on
+# flag_key keeps the fact-side lookup a single-row probe; with 40B impressions
+# a day that broadcast-on-write pattern is the one that scales.
