@@ -193,7 +193,7 @@ INSERT INTO notification_templates (code, channel, locale, subject, body, versio
     ('weekly.digest',  'email',  'en_GB', 'Your weekly digest',                    'Here are the top {{count}} stories for you, {{name}}.', 1),
     ('new_follower',   'push',   'en_GB', NULL,                                    '{{follower_name}} started following you', 1),
     ('security.alert', 'email',  'en_GB', 'Security alert: new sign-in',           'We detected a new sign-in from {{location}}.', 1),
-    ('security.alert', 'sms',    'en_GB', NULL,                                    'Security alert: new sign-in from {{location}}. Reply NO if this wasnt you.', 1),
+    ('security.alert', 'sms',    'en_GB', NULL,                                    'Security alert: new sign-in from {{location}}. Reply NO if this was not you.', 1),
     ('cart.reminder',  'email',  'en_GB', 'You left items in your cart',           '{{name}}, you have {{item_count}} items waiting.', 1),
     ('comment.reply',  'in_app', 'en_GB', NULL,                                    '{{replier_name}} replied to your comment.', 1),
     ('comment.reply',  'push',   'en_GB', NULL,                                    '{{replier_name}} replied: "{{snippet}}"', 1),
@@ -241,8 +241,6 @@ INSERT INTO notification_deliveries (notification_id, channel, status, provider,
     (7,  'in_app','opened',   NULL,       0, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE), NULL, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE), DATE_SUB(UTC_TIMESTAMP(), INTERVAL 25 MINUTE)),
     (7,  'push',  'delivered','apns',     1, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE), DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE) + INTERVAL 3 SECOND, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 30 MINUTE) + INTERVAL 12 SECOND, NULL),
     (8,  'push',  'opened',   'fcm',      1, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE), DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE) + INTERVAL 2 SECOND, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 15 MINUTE) + INTERVAL 7 SECOND,  DATE_SUB(UTC_TIMESTAMP(), INTERVAL 10 MINUTE)),
-    (9,  'email', 'opened',   'sendgrid', 1, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR), DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR) + INTERVAL 3 SECOND, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR) + INTERVAL 18 SECOND, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 11 HOUR)),
-    (9,  'sms',   'delivered','twilio',   1, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR), DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR) + INTERVAL 5 SECOND, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR) + INTERVAL 13 SECOND, NULL),
     (10, 'email', 'queued',   'sendgrid', 0, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 5 DAY),  NULL, NULL, NULL);
 
 INSERT INTO notification_events (notification_id, delivery_id, event_type, occurred_at) VALUES
@@ -251,7 +249,7 @@ INSERT INTO notification_events (notification_id, delivery_id, event_type, occur
     (1, 1, 'sent',        DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY) + INTERVAL 5 SECOND),
     (1, 1, 'delivered',   DATE_SUB(UTC_TIMESTAMP(), INTERVAL 2 DAY) + INTERVAL 30 SECOND),
     (1, 1, 'opened',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 DAY)),
-    (3, 3, 'failed',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 3 DAY) + INTERVAL 2 SECOND),
+    (3, 5, 'failed',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 3 DAY) + INTERVAL 2 SECOND),
     (4, 5, 'sent',        DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 HOUR)),
     (4, 5, 'opened',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 11 HOUR)),
     (6, 9, 'failed',      DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR)),
