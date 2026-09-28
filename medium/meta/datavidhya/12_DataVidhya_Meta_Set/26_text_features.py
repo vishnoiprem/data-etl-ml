@@ -147,3 +147,73 @@ SELECT size(filter(split('Excellent, best product I have', '\\s+'),
 """).collect()[0][0]
 assert trap == 1, f"punctuation trap changed: expected 1 keyword hit, got {trap}"
 print("[PASS] Q26 punctuation retained in tokens -> 'Excellent,' does not match 'excellent'")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has no array types, no higher-order filter, and no LATERAL VIEW
+# EXPLODE. The portable workaround is JSON_TABLE: split the text into JSON
+# tokens, expand to one row per token, then count membership in the
+# positive/negative keyword sets. This loses the single-pass elegance of
+# Spark's array filter but produces the same counts.
+#
+# CREATE TABLE reviews (
+#     review_id   INT         NOT NULL,
+#     product_id  VARCHAR(8)  NOT NULL,
+#     review_text TEXT        NOT NULL,
+#     review_date DATE        NOT NULL,
+#     PRIMARY KEY (review_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO reviews (review_id, product_id, review_text, review_date) VALUES
+#     (1, 'P002', 'This product is great and amazing',         '2024-01-02'),
+#     (2, 'P003', 'Terrible quality, very bad experience',     '2024-01-03'),
+#     (5, 'P001', 'Excellent, best product I have',            '2024-01-06');
+#
+# -- Build a per-review word list, then count hits per review.
+# WITH tokenized AS (
+#     SELECT r.review_id, r.product_id, r.review_text,
+#            JSON_LENGTH(j.tokens)                            AS word_count,
+#            CHAR_LENGTH(r.review_text)                        AS char_count,
+#            JSON_LENGTH(j.tokens)                             AS _n
+#     FROM reviews r
+#     JOIN JSON_TABLE(
+#              CONCAT('["', REPLACE(r.review_text, ' ', '","'), '"]'),
+#              '$[*]' COLUMNS (tokens JSON PATH '$')
+#          ) j
+# ),
+# -- Per-token classification: lower the token, look it up in keyword sets.
+# classified AS (
+#     SELECT r.review_id, r.product_id, r.review_text, t.word_count, r.char_count,
+#            LOWER(j.word) AS word
+#     FROM reviews r
+#     JOIN tokenized t   ON t.review_id = r.review_id
+#     JOIN JSON_TABLE(
+#              CONCAT('["', REPLACE(r.review_text, ' ', '","'), '"]'),
+#              '$[*]' COLUMNS (word VARCHAR(64) PATH '$')
+#          ) j
+# ),
+# hits AS (
+#     SELECT review_id, product_id, word_count, char_count,
+#            SUM(CASE WHEN LOWER(word) IN ('great','good','excellent','amazing','love','best')
+#                     THEN 1 ELSE 0 END) AS pos_hits,
+#            SUM(CASE WHEN LOWER(word) IN ('bad','terrible','awful','worst','poor','hate')
+#                     THEN 1 ELSE 0 END) AS neg_hits
+#     FROM classified
+#     GROUP BY review_id, product_id, word_count, char_count
+# )
+# SELECT review_id,
+#        product_id,
+#        word_count,
+#        char_count,
+#        ROUND(char_count / word_count, 2)        AS avg_word_length,
+#        CASE WHEN neg_hits > 0 THEN 1 ELSE 0 END AS contains_negative,
+#        pos_hits - neg_hits                      AS sentiment_score
+# FROM hits
+# ORDER BY review_id;
+#
+# -- Note: this preserves the punctuation trap -- 'Excellent,' is not the
+# -- token 'excellent' -- because the JSON_TABLE split keeps punctuation
+# -- attached to each word exactly as Spark's split does.
+# -- Expected:
+# -- 1  P002  6  33  5.5  0   2
+# -- 2  P003  5  37  7.4  1  -2
+# -- 5  P001  5  30  6.0  0   1

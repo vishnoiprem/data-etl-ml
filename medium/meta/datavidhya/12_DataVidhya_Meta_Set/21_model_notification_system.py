@@ -244,3 +244,97 @@ GROUP BY notification_id, channel_id
 HAVING COUNT(*) > 1
 ORDER BY notification_id, channel_id
 """, [(101, 2, 2), (103, 1, 2)])
+
+# ---- MySQL way ----------------------------------------------------------
+# This is a DDL-only file -- a relational OLTP schema, not a SQL exercise.
+# The MySQL translation enforces the constraints Spark cannot, and uses
+# BOOLEAN -> TINYINT(1) (MySQL's native boolean). Add explicit FKs and a
+# CHECK on the (trigger_kind, scheduled_for/source_event_id) mutual
+# exclusivity that the Spark DDL could only comment. STRING -> JSON, and
+# include a couple of example dimension inserts.
+#
+# CREATE TABLE users (
+#     user_id    BIGINT       NOT NULL AUTO_INCREMENT,
+#     handle     VARCHAR(40)  NOT NULL,
+#     timezone   VARCHAR(40)  NOT NULL,
+#     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (user_id),
+#     UNIQUE KEY uq_users_handle (handle)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE notification_type (
+#     type_id     INT          NOT NULL AUTO_INCREMENT,
+#     code        VARCHAR(40)  NOT NULL,
+#     category    VARCHAR(20)  NOT NULL,
+#     is_critical TINYINT(1)   NOT NULL DEFAULT 0,
+#     PRIMARY KEY (type_id),
+#     UNIQUE KEY uq_nt_code (code)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE channel (
+#     channel_id INT         NOT NULL AUTO_INCREMENT,
+#     name       VARCHAR(20) NOT NULL,
+#     PRIMARY KEY (channel_id),
+#     UNIQUE KEY uq_channel_name (name)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE user_notification_preference (
+#     user_id    BIGINT     NOT NULL,
+#     type_id    INT        NOT NULL,
+#     channel_id INT        NOT NULL,
+#     is_enabled TINYINT(1) NOT NULL DEFAULT 1,
+#     quiet_from TIME       NULL,
+#     quiet_to   TIME       NULL,
+#     PRIMARY KEY (user_id, type_id, channel_id),
+#     CONSTRAINT fk_unp_user    FOREIGN KEY (user_id)    REFERENCES users(user_id),
+#     CONSTRAINT fk_unp_type    FOREIGN KEY (type_id)    REFERENCES notification_type(type_id),
+#     CONSTRAINT fk_unp_channel FOREIGN KEY (channel_id) REFERENCES channel(channel_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE notification (
+#     notification_id BIGINT       NOT NULL AUTO_INCREMENT,
+#     user_id         BIGINT       NOT NULL,
+#     type_id         INT          NOT NULL,
+#     trigger_kind    VARCHAR(10)  NOT NULL,
+#     source_event_id BIGINT       NULL,
+#     scheduled_for   TIMESTAMP    NULL,
+#     payload         JSON         NULL,
+#     created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (notification_id),
+#     KEY ix_notif_user (user_id),
+#     CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+#     CONSTRAINT fk_notif_type FOREIGN KEY (type_id) REFERENCES notification_type(type_id),
+#     CONSTRAINT chk_notif_trigger CHECK (
+#         (trigger_kind = 'scheduled' AND scheduled_for IS NOT NULL)
+#      OR (trigger_kind = 'event'     AND source_event_id IS NOT NULL)
+#     )
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE notification_delivery (
+#     delivery_id     BIGINT       NOT NULL AUTO_INCREMENT,
+#     notification_id BIGINT       NOT NULL,
+#     channel_id      INT          NOT NULL,
+#     attempt_no      INT          NOT NULL,
+#     status          VARCHAR(20)  NOT NULL,
+#     failure_reason  VARCHAR(100) NULL,
+#     attempted_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (delivery_id),
+#     UNIQUE KEY uq_nd_attempt (notification_id, channel_id, attempt_no),
+#     CONSTRAINT fk_nd_notif   FOREIGN KEY (notification_id) REFERENCES notification(notification_id),
+#     CONSTRAINT fk_nd_channel FOREIGN KEY (channel_id)      REFERENCES channel(channel_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE notification_read (
+#     notification_id BIGINT    NOT NULL,
+#     read_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (notification_id),
+#     CONSTRAINT fk_nr_notif FOREIGN KEY (notification_id) REFERENCES notification(notification_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# -- Two example dimension rows. The seed data in the Spark script maps 1:1
+# -- once you add the analogous rows to users and notification_type.
+# INSERT INTO channel (channel_id, name) VALUES (1, 'push'), (2, 'email'), (3, 'sms');
+# INSERT INTO notification_type (type_id, code, category, is_critical) VALUES
+#     (1, 'friend_request', 'social',    0),
+#     (2, 'comment_reply',  'social',    0),
+#     (3, 'security_alert', 'system',    1);

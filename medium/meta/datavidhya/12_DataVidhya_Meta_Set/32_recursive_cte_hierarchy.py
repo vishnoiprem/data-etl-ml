@@ -188,3 +188,62 @@ try:
 except RuntimeError as e:
     assert "cycle in categories" in str(e), e
     print("[PASS] Q32 depth guard trips on a cyclic branch instead of looping forever")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports WITH RECURSIVE natively. The two halves are the anchor
+# (roots, parent_id IS NULL) and the recursive step (children of whatever
+# the previous iteration produced), glued by UNION ALL. The path is built
+# during the recursion, not computed afterwards, so an N-level tree needs
+# only one query instead of N self-joins. Order by full_path, not by id, so
+# siblings sort alphabetically under their parent.
+#
+# CREATE TABLE categories (
+#     category_id   INT         NOT NULL,
+#     category_name VARCHAR(64) NOT NULL,
+#     parent_id     INT         NULL,
+#     PRIMARY KEY (category_id),
+#     KEY ix_cat_parent (parent_id),
+#     CONSTRAINT fk_cat_parent FOREIGN KEY (parent_id) REFERENCES categories(category_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO categories (category_id, category_name, parent_id) VALUES
+#     (1, 'Electronics', NULL),
+#     (2, 'Computers',  1),
+#     (3, 'Laptops',    2),
+#     (4, 'Desktops',   2);
+#
+# WITH RECURSIVE tree AS (
+#     -- anchor: roots
+#     SELECT category_id,
+#            category_name,
+#            parent_id,
+#            1 AS depth,
+#            category_name AS full_path
+#     FROM categories
+#     WHERE parent_id IS NULL
+#
+#     UNION ALL
+#
+#     -- recursive: children of whatever the previous iteration produced
+#     SELECT c.category_id,
+#            c.category_name,
+#            c.parent_id,
+#            t.depth + 1                                  AS depth,
+#            CONCAT(t.full_path, ' > ', c.category_name)  AS full_path
+#     FROM categories c
+#     JOIN tree t ON c.parent_id = t.category_id
+# )
+# SELECT category_id, category_name, parent_id, depth, full_path
+# FROM tree
+# ORDER BY full_path;
+#
+# -- Expected:
+# -- 1  Electronics   NULL  1  Electronics
+# -- 2  Computers     1     2  Electronics > Computers
+# -- 4  Desktops      2     3  Electronics > Computers > Desktops
+# -- 3  Laptops       2     3  Electronics > Computers > Laptops
+#
+# -- MySQL's CTE supports a recursion cap via cte_max_recursion_depth (default
+# -- 1000) so a cycle in the data raises ER_CTE_MAX_RECURSION_DEPTH instead of
+# -- spinning forever. That is the MySQL analogue of the depth guard used in
+# -- the Spark 3.x iterative version.

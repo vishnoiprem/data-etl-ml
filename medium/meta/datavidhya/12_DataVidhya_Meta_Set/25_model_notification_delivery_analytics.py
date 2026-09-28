@@ -211,3 +211,69 @@ FROM pit GROUP BY segment ORDER BY segment
     ("engaged", 3, 2, 66.67),
     ("new",     1, 0, 0.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# DDL-only. The same notification domain as Q21, modeled dimensionally here:
+# fact_notification has one row per logical notification; a per-channel
+# delivery sub-fact is a separate table for retry history; dim_channel and
+# dim_user provide context. Booleans -> TINYINT(1). Two example dimension
+# inserts:
+#
+# CREATE TABLE dim_user (
+#     user_key  BIGINT      NOT NULL AUTO_INCREMENT,
+#     user_id   BIGINT      NOT NULL,
+#     country   VARCHAR(8)  NOT NULL,
+#     PRIMARY KEY (user_key),
+#     UNIQUE KEY uq_dim_user_nk (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE dim_channel (
+#     channel_key INT         NOT NULL AUTO_INCREMENT,
+#     name        VARCHAR(16) NOT NULL,
+#     PRIMARY KEY (channel_key),
+#     UNIQUE KEY uq_dim_channel_name (name)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE dim_notification_type (
+#     type_key      INT         NOT NULL AUTO_INCREMENT,
+#     code          VARCHAR(32) NOT NULL,
+#     category      VARCHAR(16) NOT NULL,
+#     is_critical   TINYINT(1)  NOT NULL DEFAULT 0,
+#     PRIMARY KEY (type_key),
+#     UNIQUE KEY uq_dim_nt_code (code)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE fact_notification (
+#     notification_key BIGINT    NOT NULL AUTO_INCREMENT,
+#     user_key         BIGINT    NOT NULL,
+#     type_key         INT       NOT NULL,
+#     trigger_kind     VARCHAR(10) NOT NULL,
+#     created_at       TIMESTAMP NOT NULL,
+#     read_at          TIMESTAMP NULL,
+#     is_read          TINYINT(1) NOT NULL DEFAULT 0,
+#     PRIMARY KEY (notification_key),
+#     KEY ix_fn_user (user_key, created_at),
+#     KEY ix_fn_type (type_key, created_at),
+#     CONSTRAINT fk_fn_user FOREIGN KEY (user_key) REFERENCES dim_user(user_key),
+#     CONSTRAINT fk_fn_type FOREIGN KEY (type_key) REFERENCES dim_notification_type(type_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE fact_notification_delivery (
+#     delivery_key     BIGINT    NOT NULL AUTO_INCREMENT,
+#     notification_key BIGINT    NOT NULL,
+#     channel_key      INT       NOT NULL,
+#     attempt_no       INT       NOT NULL,
+#     status           VARCHAR(16) NOT NULL,
+#     attempted_at     TIMESTAMP NOT NULL,
+#     PRIMARY KEY (delivery_key),
+#     UNIQUE KEY uq_fnd_attempt (notification_key, channel_key, attempt_no),
+#     KEY ix_fnd_channel_status (channel_key, status),
+#     CONSTRAINT fk_fnd_notif   FOREIGN KEY (notification_key) REFERENCES fact_notification(notification_key),
+#     CONSTRAINT fk_fnd_channel FOREIGN KEY (channel_key)      REFERENCES dim_channel(channel_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO dim_channel (name) VALUES ('push'), ('email'), ('sms');
+# INSERT INTO dim_notification_type (code, category, is_critical) VALUES
+#     ('friend_request', 'social', 0),
+#     ('comment_reply',  'social', 0),
+#     ('security_alert', 'system', 1);

@@ -190,3 +190,52 @@ SELECT session_key FROM fact_session_funnel
 WHERE checkout_ts IS NOT NULL AND purchase_ts IS NULL
 ORDER BY session_key
 """, [(4,)])
+
+# ---- MySQL way ----------------------------------------------------------
+# DDL-only star-schema translation. MySQL supports surrogate keys, FKs, and
+# CHECK constraints. Booleans are TINYINT(1). The funnel fact's four
+# timestamps are kept as separate columns -- one wide fact row per session --
+# and the session_id is the natural key plus the dedup key. Two example
+# dimension inserts:
+#
+# CREATE TABLE dim_user (
+#     user_key  BIGINT      NOT NULL AUTO_INCREMENT,
+#     user_id   BIGINT      NOT NULL,
+#     country   VARCHAR(8)  NOT NULL,
+#     signup_at TIMESTAMP   NOT NULL,
+#     PRIMARY KEY (user_key),
+#     UNIQUE KEY uq_dim_user_nk (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE dim_device (
+#     device_key BIGINT      NOT NULL AUTO_INCREMENT,
+#     device_id  VARCHAR(64) NOT NULL,
+#     kind       VARCHAR(16) NOT NULL,
+#     os         VARCHAR(32) NOT NULL,
+#     PRIMARY KEY (device_key),
+#     UNIQUE KEY uq_dim_device_nk (device_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE fact_session (
+#     session_key  BIGINT    NOT NULL AUTO_INCREMENT,
+#     user_key     BIGINT    NOT NULL,
+#     device_key   BIGINT    NOT NULL,
+#     session_id   VARCHAR(64) NOT NULL,
+#     visit_ts     TIMESTAMP NOT NULL,
+#     signin_ts    TIMESTAMP NULL,
+#     checkout_ts  TIMESTAMP NULL,
+#     purchase_ts  TIMESTAMP NULL,
+#     PRIMARY KEY (session_key),
+#     UNIQUE KEY uq_fact_session_id (session_id),
+#     KEY ix_fact_session_user    (user_key, visit_ts),
+#     KEY ix_fact_session_checkout (checkout_ts),
+#     CONSTRAINT fk_fs_user   FOREIGN KEY (user_key)   REFERENCES dim_user(user_key),
+#     CONSTRAINT fk_fs_device FOREIGN KEY (device_key) REFERENCES dim_device(device_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO dim_user (user_id, country, signup_at) VALUES
+#     (1, 'TH', '2026-01-01 09:00:00'),
+#     (2, 'TH', '2026-01-02 09:00:00');
+# INSERT INTO dim_device (device_id, kind, os) VALUES
+#     ('iphone-12', 'mobile', 'iOS'),
+#     ('pixel-7',   'mobile', 'Android');

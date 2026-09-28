@@ -157,3 +157,60 @@ expect("Q27 pre-login events belong to session 0", SQL, [
     (9, dt.date(2024, 3, 2), "login",    0.0,  1, 0.0),
     (9, dt.date(2024, 3, 2), "purchase", 40.0, 1, 40.0),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports both windows and the two-stage session-runnning-total
+# pattern. The ORDER BY must include the tiebreak on event_id -- three events
+# share 2024-01-01 in the shipped sample, and an ORDER BY date alone is
+# non-deterministic. ROWS (not RANGE) is explicit so the running sum is by
+# row position, not by peer-group with the same date.
+#
+# CREATE TABLE user_sessions (
+#     event_id   INT            NOT NULL,
+#     user_id    INT            NOT NULL,
+#     event_date DATE           NOT NULL,
+#     event_type VARCHAR(16)    NOT NULL,
+#     amount     DECIMAL(10, 2) NOT NULL,
+#     PRIMARY KEY (event_id),
+#     KEY ix_us_user_date (user_id, event_date, event_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO user_sessions (event_id, user_id, event_date, event_type, amount) VALUES
+#     (1, 1, '2024-01-01', 'login',     0.00),
+#     (2, 1, '2024-01-01', 'purchase', 50.00),
+#     (3, 1, '2024-01-01', 'purchase', 30.00),
+#     (4, 1, '2024-01-02', 'login',     0.00),
+#     (5, 1, '2024-01-02', 'purchase', 75.00);
+#
+# WITH sessioned AS (
+#     SELECT event_id,
+#            user_id,
+#            event_date,
+#            event_type,
+#            amount,
+#            SUM(CASE WHEN event_type = 'login' THEN 1 ELSE 0 END) OVER (
+#                PARTITION BY user_id
+#                ORDER BY event_date, event_id
+#                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+#            ) AS session_id
+#     FROM user_sessions
+# )
+# SELECT user_id,
+#        event_date,
+#        event_type,
+#        amount,
+#        session_id,
+#        SUM(amount) OVER (
+#            PARTITION BY user_id, session_id
+#            ORDER BY event_date, event_id
+#            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+#        ) AS session_running_total
+# FROM sessioned
+# ORDER BY user_id, event_date, event_id;
+#
+# -- Expected:
+# -- 1  2024-01-01  login      0.00  1   0.00
+# -- 1  2024-01-01  purchase  50.00  1  50.00
+# -- 1  2024-01-01  purchase  30.00  1  80.00
+# -- 1  2024-01-02  login      0.00  2   0.00
+# -- 1  2024-01-02  purchase  75.00  2  75.00

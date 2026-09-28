@@ -180,3 +180,65 @@ SELECT size(split(CAST(NULL AS STRING), ',')) AS from_null,
 """).collect()[0]
 assert (sizes[0], sizes[1]) == (-1, 1), f"unexpected split sizes: {sizes}"
 print("[PASS] Q29 empty string yields a phantom token -- must be filtered, not just NULL-checked")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has no LATERAL VIEW EXPLODE. The portable substitute is a JSON
+# table: rebuild the comma-separated list as a JSON array, then use
+# JSON_TABLE to expand one row per (query, column, usage_type). The CASE
+# ordering for usage_type must remain explicit -- alphabetical would give
+# join/order/where, but the spec is order/where/join.
+#
+# CREATE TABLE slow_queries (
+#     query_id         INT         NOT NULL,
+#     table_name       VARCHAR(32) NOT NULL,
+#     where_columns    VARCHAR(64) NULL,
+#     join_columns     VARCHAR(64) NULL,
+#     order_columns    VARCHAR(64) NULL,
+#     execution_time_ms INT        NOT NULL,
+#     row_count        INT         NOT NULL,
+#     PRIMARY KEY (query_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO slow_queries (query_id, table_name, where_columns, join_columns, order_columns, execution_time_ms, row_count) VALUES
+#     (100001, 'orders',    'status,amount', NULL,    NULL, 11476, 335277),
+#     (100002, 'products',  'date',          'product_id', NULL, 4602, 933882);
+#
+# WITH unpivoted AS (
+#     SELECT query_id, table_name, execution_time_ms, 'where' AS usage_type, where_columns AS cols
+#     FROM slow_queries
+#     UNION ALL
+#     SELECT query_id, table_name, execution_time_ms, 'join'  AS usage_type, join_columns  AS cols
+#     FROM slow_queries
+#     UNION ALL
+#     SELECT query_id, table_name, execution_time_ms, 'order' AS usage_type, order_columns AS cols
+#     FROM slow_queries
+# ),
+# tokens AS (
+#     SELECT u.query_id, u.table_name, u.execution_time_ms, u.usage_type,
+#            TRIM(j.col) AS column_name
+#     FROM unpivoted u
+#     JOIN JSON_TABLE(
+#              CONCAT('["', REPLACE(IFNULL(u.cols, ''), ',', '","'), '"]'),
+#              '$[*]' COLUMNS (col VARCHAR(64) PATH '$')
+#          ) j
+#     WHERE u.cols IS NOT NULL
+#       AND TRIM(u.cols) <> ''
+# )
+# SELECT table_name,
+#        column_name,
+#        usage_type,
+#        COUNT(*)                                              AS frequency,
+#        ROUND(AVG(execution_time_ms), 2)                      AS avg_execution_time,
+#        ROUND(COUNT(*) * AVG(execution_time_ms) / 1000, 2)    AS priority_score
+# FROM tokens
+# WHERE column_name <> ''
+# GROUP BY table_name, column_name, usage_type
+# ORDER BY priority_score DESC,
+#          CASE usage_type WHEN 'order' THEN 0 WHEN 'where' THEN 1 WHEN 'join' THEN 2 END,
+#          column_name;
+#
+# -- Expected:
+# -- orders    amount       where  1  11476.00  11.48
+# -- orders    status       where  1  11476.00  11.48
+# -- products  date         where  1   4602.00   4.60
+# -- products  product_id   join   1   4602.00   4.60

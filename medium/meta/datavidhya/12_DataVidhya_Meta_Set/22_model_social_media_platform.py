@@ -186,3 +186,70 @@ LEFT JOIN post c     ON c.parent_post_id = p.post_id
 GROUP BY p.post_id
 ORDER BY p.post_id
 """, [(1, 3, 1), (2, 0, 0), (3, 1, 0), (4, 0, 0)])
+
+# ---- MySQL way ----------------------------------------------------------
+# DDL-only. Translate the three many-to-many relationships explicitly:
+# follows is DIRECTED (composite PK), friendship is UNDIRECTED with a
+# canonical-order CHECK (user_a_id < user_b_id), reactions are user x post.
+# Spark's STRING -> JSON; BOOLEAN -> TINYINT(1). Add real FK constraints and
+# useful indexes (follower_id and followee_id get separate indexes because
+# fan-out reads hit both directions). Two example dimension inserts:
+#
+# CREATE TABLE users (
+#     user_id    BIGINT       NOT NULL AUTO_INCREMENT,
+#     handle     VARCHAR(40)  NOT NULL,
+#     created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (user_id),
+#     UNIQUE KEY uq_users_handle (handle)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE posts (
+#     post_id      BIGINT      NOT NULL AUTO_INCREMENT,
+#     author_id    BIGINT      NOT NULL,
+#     parent_post_id BIGINT    NULL,        -- self-referencing for comment threads
+#     body         TEXT        NOT NULL,
+#     created_at   TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (post_id),
+#     KEY ix_posts_author      (author_id, created_at DESC),
+#     KEY ix_posts_parent      (parent_post_id),
+#     CONSTRAINT fk_posts_author FOREIGN KEY (author_id)      REFERENCES users(user_id),
+#     CONSTRAINT fk_posts_parent FOREIGN KEY (parent_post_id) REFERENCES posts(post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE follows (
+#     follower_id BIGINT NOT NULL,
+#     followee_id BIGINT NOT NULL,
+#     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (follower_id, followee_id),
+#     KEY ix_follows_followee (followee_id),
+#     CONSTRAINT chk_follows_not_self CHECK (follower_id <> followee_id),
+#     CONSTRAINT fk_follows_follower FOREIGN KEY (follower_id) REFERENCES users(user_id),
+#     CONSTRAINT fk_follows_followee FOREIGN KEY (followee_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE friendship (
+#     user_a_id BIGINT NOT NULL,
+#     user_b_id BIGINT NOT NULL,
+#     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (user_a_id, user_b_id),
+#     KEY ix_friend_b (user_b_id),
+#     CONSTRAINT chk_friend_canonical CHECK (user_a_id < user_b_id),
+#     CONSTRAINT fk_friend_a FOREIGN KEY (user_a_id) REFERENCES users(user_id),
+#     CONSTRAINT fk_friend_b FOREIGN KEY (user_b_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE reaction (
+#     user_id    BIGINT    NOT NULL,
+#     post_id    BIGINT    NOT NULL,
+#     kind       VARCHAR(16) NOT NULL DEFAULT 'like',
+#     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+#     PRIMARY KEY (user_id, post_id),
+#     KEY ix_reaction_post (post_id),
+#     CONSTRAINT fk_reaction_user FOREIGN KEY (user_id) REFERENCES users(user_id),
+#     CONSTRAINT fk_reaction_post FOREIGN KEY (post_id) REFERENCES posts(post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# -- Example dimension rows. Real users/posts/etc. would be inserted by the
+# -- application; the schema itself only needs the seed.
+# INSERT INTO users (user_id, handle) VALUES (1, 'alice'), (2, 'bob'), (3, 'carol');
+# INSERT INTO follows (follower_id, followee_id) VALUES (1, 2), (1, 3), (2, 3);

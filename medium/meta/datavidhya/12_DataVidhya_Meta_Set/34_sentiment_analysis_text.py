@@ -166,3 +166,68 @@ SELECT array_contains(split(lower('lovely day'), '\\W+'), 'love') AS m
 """).collect()[0][0]
 assert substring_hit is True and token_hit is False
 print("[PASS] Q34 'lovely' matches LIKE '%love%' but is not the token 'love'")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has no array types or higher-order filter. The portable substitute
+# is JSON_TABLE: rebuild the review text as a JSON array of word tokens and
+# join row-per-token, then count positive/negative hits. The score is
+# occurrences, not presence -- a review saying "great great" scores 2.
+# Splits on non-word characters (NOT whitespace only, the way Q26 keeps
+# punctuation attached) -- that is the opposite rule and the question
+# states it explicitly.
+#
+# CREATE TABLE product_reviews (
+#     review_id   INT         NOT NULL,
+#     product_id  INT         NOT NULL,
+#     review_text TEXT        NOT NULL,
+#     review_date DATE        NOT NULL,
+#     PRIMARY KEY (review_id),
+#     KEY ix_pr_product (product_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO product_reviews (review_id, product_id, review_text, review_date) VALUES
+#     (1, 101, 'This product is great and amazing',                 '2024-01-15'),
+#     (2, 101, 'Terrible quality worst experience ever',            '2024-01-16'),
+#     (3, 101, 'Love it fantastic product',                         '2024-01-17'),
+#     (4, 101, 'It arrived on Tuesday in a box',                    '2024-01-18'),
+#     (5, 101, 'great but terrible',                                '2024-01-19');
+#
+# -- Tokenise via JSON_TABLE over the regex-split text. MySQL 8 has no native
+# -- regex split, so substitute: replace each non-word run with a unique
+# -- separator (here ' '), then split on space. Keep occurrences, not
+# -- presence, so "great great" gives two rows.
+# WITH tokens AS (
+#     SELECT r.review_id, r.product_id, LOWER(j.word) AS word
+#     FROM product_reviews r
+#     JOIN JSON_TABLE(
+#              CONCAT('["',
+#                     REPLACE(
+#                        REGEXP_REPLACE(r.review_text, '[^a-zA-Z]+', ' '),
+#                        ' ', '","'),
+#                     '"]'),
+#              '$[*]' COLUMNS (word VARCHAR(64) PATH '$')
+#          ) j
+#     WHERE LENGTH(j.word) > 0
+# ),
+-- (continuation)
+# scored AS (
+#     SELECT review_id, product_id,
+#            SUM(CASE WHEN word IN ('great','good','excellent','amazing',
+#                                   'love','best','fantastic','wonderful')
+#                     THEN 1 ELSE 0 END)
+#          - SUM(CASE WHEN word IN ('bad','terrible','awful','worst',
+#                                   'poor','hate','horrible','disappointing')
+#                     THEN 1 ELSE 0 END) AS sentiment_score
+#     FROM tokens
+#     GROUP BY review_id, product_id
+# )
+# SELECT product_id,
+#        COUNT(*)                                               AS total_reviews,
+#        ROUND(AVG(sentiment_score), 2)                          AS avg_sentiment_score,
+#        SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END)   AS positive_review_count,
+#        SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END)   AS negative_review_count
+# FROM scored
+# GROUP BY product_id
+# ORDER BY product_id;
+#
+# -- Expected: (101, 5, 0.4, 2, 1) -- neutral reviews count in total only.

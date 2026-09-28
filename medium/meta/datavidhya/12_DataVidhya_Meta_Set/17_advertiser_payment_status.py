@@ -112,3 +112,65 @@ expect("Q17 advertiser payment status", SQL, [
     ("a4", "2026-02", "Churn"),
     ("a4", "2026-03", "Resurrected"),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs, CROSS JOIN to a month spine, and LAG. The status
+# definitions map directly to the CASE arms: New = active AND first_paying
+# month; Existing = active AND prior month active; Resurrected = active AND
+# prior month inactive AND month > first; Churn = inactive AND prior month
+# active. Rows that are neither (before first payment, or long after churn)
+# are dropped by the final WHERE.
+#
+# CREATE TABLE advertiser_pay (
+#     advertiser_id VARCHAR(8)  NOT NULL,
+#     payment_date  DATE        NOT NULL,
+#     PRIMARY KEY (advertiser_id, payment_date),
+#     KEY ix_ap_date (payment_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO advertiser_pay (advertiser_id, payment_date) VALUES
+#     ('a1', '2026-01-10'), ('a1', '2026-02-10'),
+#     ('a2', '2026-02-05'),
+#     ('a3', '2026-01-20'),
+#     ('a4', '2026-01-15'), ('a4', '2026-03-15');
+#
+# WITH am AS (
+#     SELECT DISTINCT advertiser_id, DATE_FORMAT(payment_date, '%Y-%m') AS ym
+#     FROM advertiser_pay
+# ),
+# first_pay AS (SELECT advertiser_id, MIN(ym) AS first_ym FROM am GROUP BY advertiser_id),
+# months AS (SELECT DISTINCT ym FROM am),
+# grid AS (
+#     SELECT m.ym, a.advertiser_id, f.first_ym,
+#            CASE WHEN p.advertiser_id IS NOT NULL THEN 1 ELSE 0 END AS active
+#     FROM months m
+#     CROSS JOIN (SELECT DISTINCT advertiser_id FROM am) a
+#     JOIN first_pay f ON f.advertiser_id = a.advertiser_id
+#     LEFT JOIN am p ON p.advertiser_id = a.advertiser_id AND p.ym = m.ym
+# ),
+# flagged AS (
+#     SELECT ym, advertiser_id, first_ym, active,
+#            LAG(active) OVER (PARTITION BY advertiser_id ORDER BY ym) AS prev_active
+#     FROM grid
+# )
+# SELECT advertiser_id, ym,
+#        CASE WHEN active = 1 AND ym = first_ym                          THEN 'New'
+#             WHEN active = 1 AND prev_active = 1                        THEN 'Existing'
+#             WHEN active = 1 AND prev_active = 0 AND ym > first_ym      THEN 'Resurrected'
+#             WHEN active = 0 AND prev_active = 1                        THEN 'Churn'
+#        END AS status
+# FROM flagged
+# WHERE (active = 1) OR (active = 0 AND prev_active = 1)
+# ORDER BY advertiser_id, ym;
+#
+# -- Expected:
+# -- a1  2026-01  New
+# -- a1  2026-02  Existing
+# -- a1  2026-03  Churn
+# -- a2  2026-02  New
+# -- a2  2026-03  Churn
+# -- a3  2026-01  New
+# -- a3  2026-02  Churn
+# -- a4  2026-01  New
+# -- a4  2026-02  Churn
+# -- a4  2026-03  Resurrected

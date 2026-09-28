@@ -224,3 +224,79 @@ JOIN fact_click cl      ON cl.click_key = v.click_key
 JOIN fact_impression i  ON i.impression_key = cl.impression_key
 ORDER BY v.conversion_key
 """, [(5001, 901, 1, "c1")])
+
+# ---- MySQL way ----------------------------------------------------------
+# DDL-only. Translate the multi-fact star schema: three fact tables
+# (impression, click, conversion) all reference dim_advertiser and dim_campaign
+# via surrogate keys. MySQL supports FKs, so wire them up -- Spark can only
+# comment them. Booleans -> TINYINT(1). Two example dimension inserts:
+#
+# CREATE TABLE dim_advertiser (
+#     advertiser_key BIGINT      NOT NULL AUTO_INCREMENT,
+#     advertiser_id  BIGINT      NOT NULL,
+#     name           VARCHAR(64) NOT NULL,
+#     industry       VARCHAR(32) NOT NULL,
+#     PRIMARY KEY (advertiser_key),
+#     UNIQUE KEY uq_dim_advertiser_nk (advertiser_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE dim_campaign (
+#     campaign_key BIGINT      NOT NULL AUTO_INCREMENT,
+#     campaign_id  BIGINT      NOT NULL,
+#     advertiser_key BIGINT    NOT NULL,
+#     name         VARCHAR(64) NOT NULL,
+#     is_active    TINYINT(1)  NOT NULL DEFAULT 1,
+#     PRIMARY KEY (campaign_key),
+#     UNIQUE KEY uq_dim_campaign_nk (campaign_id),
+#     KEY ix_dim_campaign_advertiser (advertiser_key),
+#     CONSTRAINT fk_dc_advertiser FOREIGN KEY (advertiser_key)
+#         REFERENCES dim_advertiser(advertiser_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE fact_impression (
+#     impression_key BIGINT    NOT NULL AUTO_INCREMENT,
+#     advertiser_key BIGINT    NOT NULL,
+#     campaign_key   BIGINT    NOT NULL,
+#     impression_id  BIGINT    NOT NULL,
+#     occurred_at    TIMESTAMP NOT NULL,
+#     PRIMARY KEY (impression_key),
+#     UNIQUE KEY uq_fi_impression_id (impression_id),
+#     KEY ix_fi_campaign_time (campaign_key, occurred_at),
+#     CONSTRAINT fk_fi_advertiser FOREIGN KEY (advertiser_key)
+#         REFERENCES dim_advertiser(advertiser_key),
+#     CONSTRAINT fk_fi_campaign   FOREIGN KEY (campaign_key)
+#         REFERENCES dim_campaign(campaign_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE fact_click (
+#     click_key      BIGINT    NOT NULL AUTO_INCREMENT,
+#     impression_key BIGINT    NOT NULL,
+#     click_id       BIGINT    NOT NULL,
+#     occurred_at    TIMESTAMP NOT NULL,
+#     PRIMARY KEY (click_key),
+#     UNIQUE KEY uq_fc_click_id (click_id),
+#     KEY ix_fc_impression (impression_key),
+#     CONSTRAINT fk_fc_impression FOREIGN KEY (impression_key)
+#         REFERENCES fact_impression(impression_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE fact_conversion (
+#     conversion_key BIGINT      NOT NULL AUTO_INCREMENT,
+#     impression_key BIGINT      NOT NULL,
+#     conversion_id  BIGINT      NOT NULL,
+#     revenue        DECIMAL(10, 2) NOT NULL,
+#     currency       CHAR(3)     NOT NULL,
+#     occurred_at    TIMESTAMP   NOT NULL,
+#     PRIMARY KEY (conversion_key),
+#     UNIQUE KEY uq_fv_conversion_id (conversion_id),
+#     KEY ix_fv_impression (impression_key),
+#     CONSTRAINT fk_fv_impression FOREIGN KEY (impression_key)
+#         REFERENCES fact_impression(impression_key)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO dim_advertiser (advertiser_id, name, industry) VALUES
+#     (900, 'Acme Corp', 'retail'),
+#     (901, 'Globex',   'finance');
+# INSERT INTO dim_campaign (campaign_id, advertiser_key, name, is_active) VALUES
+#     (1, 900, 'Acme Q1 Brand', 1),
+#     (2, 901, 'Globex CTR Push', 1);

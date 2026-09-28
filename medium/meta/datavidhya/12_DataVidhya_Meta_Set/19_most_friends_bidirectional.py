@@ -91,3 +91,45 @@ SELECT user_id, friend_count FROM ranked WHERE rnk = 1 ORDER BY user_id
 """
 
 expect("Q19 most friends bidirectional", SQL, [(3, 3)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs and RANK() identically. The mirror trick
+# (UNION ALL with the pair flipped) is what turns an ordered-pair table into
+# an undirected graph. Filter status = 'accepted' before the union so a
+# 'pending' edge never becomes a friendship. RANK() = 1 returns ties; LIMIT 1
+# would hide a genuine tie at the top.
+#
+# CREATE TABLE friendships (
+#     user1_id INT         NOT NULL,
+#     user2_id INT         NOT NULL,
+#     status   VARCHAR(16) NOT NULL,
+#     PRIMARY KEY (user1_id, user2_id),
+#     KEY ix_fr_status (status, user1_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO friendships (user1_id, user2_id, status) VALUES
+#     (1, 2, 'accepted'), (1, 3, 'accepted'),
+#     (2, 3, 'accepted'), (3, 4, 'accepted'),
+#     (1, 5, 'pending');
+#
+# WITH accepted AS (
+#     SELECT user1_id, user2_id FROM friendships WHERE status = 'accepted'
+# ),
+# both_ways AS (
+#     SELECT user1_id AS user_id, user2_id AS friend_id FROM accepted
+#     UNION ALL
+#     SELECT user2_id AS user_id, user1_id AS friend_id FROM accepted
+# ),
+# counts AS (
+#     SELECT user_id, COUNT(DISTINCT friend_id) AS friend_count
+#     FROM both_ways
+#     GROUP BY user_id
+# ),
+# ranked AS (
+#     SELECT user_id, friend_count,
+#            RANK() OVER (ORDER BY friend_count DESC) AS rnk
+#     FROM counts
+# )
+# SELECT user_id, friend_count FROM ranked WHERE rnk = 1 ORDER BY user_id;
+#
+# -- Expected: (3, 3).

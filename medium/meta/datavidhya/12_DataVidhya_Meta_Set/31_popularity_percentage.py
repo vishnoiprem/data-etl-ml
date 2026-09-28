@@ -169,3 +169,52 @@ SELECT COUNT(*) FROM (
 """).collect()[0][0]
 assert (raw_dupes, canon_dupes) == (2, 1), (raw_dupes, canon_dupes)
 print("[PASS] Q31 mirroring raw rows duplicates the (1,2) edge; canonicalising first does not")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports LEAST, GREATEST, CTEs, and UNION ALL identically. The
+# dedupe-then-mirror order is what keeps an undirected pair from inflating a
+# friend's count. The denominator must count distinct ids across BOTH
+# columns, not just user1_id. Multiplying by 100.0 forces DECIMAL so integer
+# division cannot truncate to 0.
+#
+# CREATE TABLE friendships (
+#     user1_id INT NOT NULL,
+#     user2_id INT NOT NULL,
+#     PRIMARY KEY (user1_id, user2_id),
+#     KEY ix_friends_user2 (user2_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO friendships (user1_id, user2_id) VALUES
+#     (1, 2), (1, 3), (2, 1), (2, 4), (3, 5);
+#
+# WITH canonical AS (
+#     SELECT DISTINCT LEAST(user1_id, user2_id)    AS lo,
+#                     GREATEST(user1_id, user2_id) AS hi
+#     FROM friendships
+# ),
+# edges AS (
+#     SELECT lo AS user_id, hi AS friend_id FROM canonical
+#     UNION ALL
+#     SELECT hi AS user_id, lo AS friend_id FROM canonical
+# ),
+# totals AS (
+#     SELECT COUNT(DISTINCT user_id) AS total_users
+#     FROM (
+#         SELECT user1_id AS user_id FROM friendships
+#         UNION ALL
+#         SELECT user2_id AS user_id FROM friendships
+#     ) both
+# )
+# SELECT e.user_id,
+#        ROUND(100.0 * COUNT(DISTINCT e.friend_id) / t.total_users, 2) AS popularity_percentage
+# FROM edges e
+# CROSS JOIN totals t
+# GROUP BY e.user_id, t.total_users
+# ORDER BY e.user_id;
+#
+# -- Expected:
+# -- 1  40.00
+# -- 2  40.00
+# -- 3  40.00
+# -- 4  20.00
+# -- 5  20.00

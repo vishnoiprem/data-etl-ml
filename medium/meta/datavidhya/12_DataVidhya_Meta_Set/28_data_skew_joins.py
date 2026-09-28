@@ -169,3 +169,78 @@ expect("Q28 pre-aggregated variant agrees", SQL_PREAGG, [
     ("Basic", 2, 1, 2.00),
     ("Standard", 1, 1, 1.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the inner join + GROUP BY pattern. The query itself is
+# not Spark-specific; what is Spark-specific is the skew mitigation. MySQL's
+# optimiser cannot broadcast a small dimension automatically (no broadcast
+# hint equivalent), but pre-aggregating the fact side is portable and shrinks
+# the join cardinality the same way. INNER JOIN drops event 11 (user 99 has
+# no row in `users`); LEFT JOIN would keep it with a NULL account_type.
+#
+# CREATE TABLE events (
+#     event_id   INT         NOT NULL,
+#     user_id    INT         NOT NULL,
+#     event_type VARCHAR(16) NOT NULL,
+#     event_date DATE        NOT NULL,
+#     PRIMARY KEY (event_id),
+#     KEY ix_events_user (user_id),
+#     CONSTRAINT fk_events_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE users (
+#     user_id      INT         NOT NULL,
+#     user_name    VARCHAR(32) NOT NULL,
+#     account_type VARCHAR(16) NOT NULL,
+#     PRIMARY KEY (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO users (user_id, user_name, account_type) VALUES
+#     (1, 'User_1', 'Premium'),
+#     (2, 'User_2', 'Basic'),
+#     (3, 'User_3', 'Standard'),
+#     (4, 'User_4', 'Premium'),
+#     (7, 'User_7', 'Premium');
+#
+# INSERT INTO events (event_id, user_id, event_type, event_date) VALUES
+#     (1,  1, 'purchase', '2024-01-05'),
+#     (2,  1, 'view',     '2024-01-06'),
+#     (3,  1, 'click',    '2024-01-09'),
+#     (4,  4, 'view',     '2024-01-11'),
+#     (5,  4, 'share',    '2024-01-12'),
+#     (6,  7, 'purchase', '2024-01-14'),
+#     (7,  7, 'view',     '2024-01-18'),
+#     (8,  2, 'click',    '2024-01-08'),
+#     (9,  2, 'purchase', '2024-01-15'),
+#     (10, 3, 'view',     '2024-01-20'),
+#     (11, 99, 'click',    '2024-01-22');
+#
+# -- Straightforward inner join + group by:
+# SELECT u.account_type,
+#        COUNT(*)                  AS total_events,
+#        COUNT(DISTINCT e.user_id) AS unique_users,
+#        ROUND(COUNT(*) * 1.0 / COUNT(DISTINCT e.user_id), 2) AS events_per_user
+# FROM events e
+# JOIN users u ON e.user_id = u.user_id
+# GROUP BY u.account_type
+# ORDER BY total_events DESC;
+#
+# -- Pre-aggregate variant (same answer, smaller join):
+# WITH per_user AS (
+#     SELECT user_id, COUNT(*) AS events
+#     FROM events
+#     GROUP BY user_id
+# )
+# SELECT u.account_type,
+#        SUM(p.events)                 AS total_events,
+#        COUNT(*)                      AS unique_users,
+#        ROUND(SUM(p.events) * 1.0 / COUNT(*), 2) AS events_per_user
+# FROM per_user p
+# JOIN users u ON p.user_id = u.user_id
+# GROUP BY u.account_type
+# ORDER BY total_events DESC;
+#
+# -- Expected:
+# -- Premium   7  3  2.33
+# -- Basic     2  1  2.00
+# -- Standard  1  1  1.00

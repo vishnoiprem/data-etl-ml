@@ -93,3 +93,50 @@ expect("Q16 spam post % by day", SQL, [
     ("2026-01-01", 4, 2, 50.00),
     ("2026-01-02", 2, 0, 0.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports LOWER + LIKE identically. LIKE is case-INSENSITIVE by
+# default in MySQL (collation-dependent); for a portable case-insensitive
+# match LOWER() the column and use LIKE '%spam%'. Note this is substring
+# matching -- 'anti-spamming tools review' would match too, by design. A
+# word-boundary alternative is REGEXP_LIKE(content, '[[:<:]]spam[[:>:]]')
+# in MySQL's POSIX extension.
+#
+# CREATE TABLE posts_content (
+#     post_id INT         NOT NULL,
+#     content VARCHAR(64) NOT NULL,
+#     PRIMARY KEY (post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE post_views (
+#     post_id   INT  NOT NULL,
+#     view_date DATE NOT NULL,
+#     KEY ix_pv_post_date (post_id, view_date),
+#     KEY ix_pv_date      (view_date),
+#     CONSTRAINT fk_pv_post FOREIGN KEY (post_id) REFERENCES posts_content(post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO posts_content (post_id, content) VALUES
+#     (1, 'buy cheap spam now'),
+#     (2, 'normal holiday photo'),
+#     (3, 'SPAM offer inside'),
+#     (4, 'anti-spamming tools review'),
+#     (5, 'just a regular post');
+#
+# INSERT INTO post_views (post_id, view_date) VALUES
+#     (1, '2026-01-01'), (2, '2026-01-01'), (3, '2026-01-01'), (5, '2026-01-01'),
+#     (2, '2026-01-02'), (5, '2026-01-02');
+#
+# SELECT v.view_date,
+#        COUNT(*) AS posts_viewed,
+#        SUM(CASE WHEN LOWER(c.content) LIKE '%spam%' THEN 1 ELSE 0 END) AS spam_viewed,
+#        ROUND(100.0 * SUM(CASE WHEN LOWER(c.content) LIKE '%spam%' THEN 1 ELSE 0 END)
+#                    / COUNT(*), 2) AS spam_pct
+# FROM post_views v
+# JOIN posts_content c ON c.post_id = v.post_id
+# GROUP BY v.view_date
+# ORDER BY v.view_date;
+#
+# -- Expected:
+# -- 2026-01-01  4  2  50.00
+# -- 2026-01-02  2  0   0.00

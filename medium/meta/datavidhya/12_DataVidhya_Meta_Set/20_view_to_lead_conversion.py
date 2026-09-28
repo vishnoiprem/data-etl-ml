@@ -95,3 +95,52 @@ expect("Q20 view-to-lead conversion by location", SQL, [
     ("Hanoi", 2, 1, 50.00),
     ("Manila", 1, 0, 0.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same "aggregate first, then join" pattern. Pre-
+# aggregating both fact tables shrinks them to one row per location, so the
+# join becomes a small lookup rather than a row-fanning Cartesian product.
+# LEFT JOIN keeps Manila in the result with 0 leads and 0.00% conversion;
+# INNER JOIN would silently drop it.
+#
+# CREATE TABLE listing_views (
+#     view_id  INT         NOT NULL,
+#     location VARCHAR(32) NOT NULL,
+#     PRIMARY KEY (view_id),
+#     KEY ix_lv_location (location)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE listing_leads (
+#     lead_id  INT         NOT NULL,
+#     location VARCHAR(32) NOT NULL,
+#     PRIMARY KEY (lead_id),
+#     KEY ix_ll_location (location)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO listing_views (view_id, location) VALUES
+#     (1, 'Bangkok'), (2, 'Bangkok'), (3, 'Bangkok'), (4, 'Bangkok'),
+#     (5, 'Hanoi'),   (6, 'Hanoi'),
+#     (7, 'Manila');
+#
+# INSERT INTO listing_leads (lead_id, location) VALUES
+#     (1, 'Bangkok'), (2, 'Bangkok'),
+#     (5, 'Hanoi');
+#
+# WITH v AS (
+#     SELECT location, COUNT(*) AS views FROM listing_views GROUP BY location
+# ),
+# l AS (
+#     SELECT location, COUNT(*) AS leads FROM listing_leads GROUP BY location
+# )
+# SELECT v.location,
+#        v.views,
+#        COALESCE(l.leads, 0) AS leads,
+#        ROUND(100.0 * COALESCE(l.leads, 0) / v.views, 2) AS conversion_pct
+# FROM v
+# LEFT JOIN l ON l.location = v.location
+# ORDER BY v.location;
+#
+# -- Expected:
+# -- Bangkok  4  2  50.00
+# -- Hanoi    2  1  50.00
+# -- Manila   1  0   0.00

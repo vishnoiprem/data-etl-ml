@@ -187,3 +187,54 @@ SELECT window_start FROM (
 """).collect()[0][0]
 assert frame_start == d(4), frame_start
 print(f"[PASS] Q33 ROWS frame starts {frame_start} (5 days), spec needs {d(2)} -- ROWS is not DAYS")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 cannot use COUNT(DISTINCT) inside a window either -- the same
+# restriction that drove Spark to a range self-join. The range self-join is
+# fully portable: collapse to (date, user) pairs, then range-join against
+# the anchor dates. The window is INCLUSIVE at both ends, so it spans
+# 7 days: date-6 .. date. `date - 7` would be an off-by-one.
+#
+# CREATE TABLE user_actions (
+#     action_id   INT         NOT NULL,
+#     user_id     INT         NOT NULL,
+#     action_date DATE        NOT NULL,
+#     action_type VARCHAR(16) NOT NULL,
+#     PRIMARY KEY (action_id),
+#     KEY ix_ua_user_date (user_id, action_date),
+#     KEY ix_ua_date      (action_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO user_actions (action_id, user_id, action_date, action_type) VALUES
+#     (1, 1, '2024-01-01', 'click'),
+#     (2, 2, '2024-01-02', 'view'),
+#     (3, 3, '2024-01-03', 'like'),
+#     (4, 4, '2024-01-04', 'share'),
+#     (5, 5, '2024-01-05', 'click'),
+#     (6, 6, '2024-01-06', 'view'),
+#     (7, 7, '2024-01-07', 'like'),
+#     (8, 8, '2024-01-08', 'share');
+#
+# WITH anchors AS (
+#     SELECT DISTINCT action_date FROM user_actions
+# ),
+# user_days AS (
+#     SELECT DISTINCT action_date, user_id FROM user_actions
+# )
+# SELECT a.action_date,
+#        COUNT(DISTINCT ud.user_id) AS rolling_7day_active_users
+# FROM anchors a
+# JOIN user_days ud
+#   ON ud.action_date BETWEEN DATE_SUB(a.action_date, INTERVAL 6 DAY) AND a.action_date
+# GROUP BY a.action_date
+# ORDER BY a.action_date;
+#
+# -- Expected:
+# -- 2024-01-01  1
+# -- 2024-01-02  2
+# -- 2024-01-03  3
+# -- 2024-01-04  4
+# -- 2024-01-05  5
+# -- 2024-01-06  6
+# -- 2024-01-07  7
+# -- 2024-01-08  7

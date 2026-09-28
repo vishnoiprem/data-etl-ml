@@ -129,3 +129,37 @@ ORDER BY salary DESC LIMIT 1 OFFSET 2
 """).collect()
 assert empty == [], empty
 print("[PASS] Q30 LIMIT/OFFSET returns 0 rows instead of NULL -- MAX() wrapper is required")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports DENSE_RANK() identically. The key trick is the
+# outer MAX() with no GROUP BY: an aggregate over an empty input returns
+# ONE row of NULL, which is the contract the question requires. A bare
+# `SELECT salary WHERE rnk = N` returns an empty result set instead, and
+# LIMIT 1 OFFSET N-1 has the same defect. DENSE_RANK over DISTINCT salaries
+# collapses duplicates, so two employees on 90000 occupy a single rank.
+#
+# CREATE TABLE employees (
+#     emp_id   INT         NOT NULL,
+#     emp_name VARCHAR(32) NOT NULL,
+#     salary   INT         NOT NULL,
+#     PRIMARY KEY (emp_id),
+#     KEY ix_emp_salary (salary)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO employees (emp_id, emp_name, salary) VALUES
+#     (1, 'Employee_1', 90000),
+#     (2, 'Employee_2', 90000),
+#     (3, 'Employee_3', 70000),
+#     (4, 'Employee_4', 50000),
+#     (5, 'Employee_5', 30000);
+#
+# -- N is a SQL parameter; the literal 3 below matches the Spark script.
+# SELECT MAX(salary) AS nth_highest_salary
+# FROM (
+#     SELECT salary,
+#            DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk
+#     FROM (SELECT DISTINCT salary FROM employees) d
+# ) ranked
+# WHERE rnk = 3;
+#
+# -- Expected: (50000,).
