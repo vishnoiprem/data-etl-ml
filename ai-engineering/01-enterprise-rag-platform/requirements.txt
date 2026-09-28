@@ -8,7 +8,7 @@ rank-bm25>=0.2.2
 # Document processing
 pypdf>=4.2.0
 markdown>=3.6
-beautifulsoup4>=4.12.0
+beautifulsoup4>=4.15.0
 
 # API
 fastapi>=0.110.0
