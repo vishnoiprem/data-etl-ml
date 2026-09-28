@@ -404,8 +404,8 @@ BEGIN
     -- The transition check uses explicit AND/OR (MySQL has no
     -- IS DISTINCT FROM; NULL-safe equal `<=>` works for scalars but
     -- we need IS-NULL semantics too, so we spell it out).
-    DECLARE was_visible BOOLEAN;
-    DECLARE is_visible  BOOLEAN;
+    DECLARE was_visible TINYINT;
+    DECLARE is_visible  TINYINT;
 
     SET was_visible = (OLD.is_read = 0 AND OLD.is_archived = 0 AND OLD.deleted_at IS NULL);
     SET is_visible  = (NEW.is_read = 0 AND NEW.is_archived = 0 AND NEW.deleted_at IS NULL);
