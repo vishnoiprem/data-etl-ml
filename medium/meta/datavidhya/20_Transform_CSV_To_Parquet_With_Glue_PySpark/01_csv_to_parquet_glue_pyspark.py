@@ -241,3 +241,71 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# ---- MySQL way ----------------------------------------------------------
+# The same `csv -> parquet` job lands in MySQL by ingesting through `LOAD DATA
+# INFILE` (or a staging table via PyMySQL) and then running the analytical
+# queries that the Spark script runs against the Parquet output.
+#
+# CREATE TABLE + sample data (curated_sales = the post-ETL shape; status
+# column is dropped because all surviving rows are 'completed'):
+#   CREATE TABLE curated_sales (
+#       transaction_id VARCHAR(20) PRIMARY KEY,
+#       customer_id    VARCHAR(20) NOT NULL,
+#       product_id     VARCHAR(20) NOT NULL,
+#       quantity       INT         NOT NULL,
+#       unit_price     DECIMAL(10,2) NOT NULL,
+#       total_amount   DECIMAL(12,2) NOT NULL,   -- generated: quantity*unit_price
+#       order_date     DATE        NOT NULL
+#       -- status dropped: filter completes before load
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   -- partition-equivalent: index on order_date for partition-pruning-style
+#   -- reads; in production this becomes a real RANGE-partitioned table or a
+#   -- sharded table partitioned by order_date.
+#   ALTER TABLE curated_sales ADD KEY idx_curated_date (order_date),
+#                              ADD KEY idx_curated_cust (customer_id);
+#
+#   INSERT INTO curated_sales (transaction_id, customer_id, product_id,
+#                              quantity, unit_price, total_amount, order_date)
+#   SELECT transaction_id, customer_id, product_id,
+#          CAST(quantity  AS SIGNED),
+#          CAST(unit_price AS DECIMAL(10,2)),
+#          CAST(quantity AS SIGNED) * CAST(unit_price AS DECIMAL(10,2)),
+#          STR_TO_DATE(order_date, '%Y-%m-%d')
+#   FROM raw_sales_transactions
+#   WHERE status = 'completed';
+#
+# Top customer by total spend (matches Spark stage 5):
+#   SELECT customer_id, SUM(total_amount) AS total_spend
+#   FROM curated_sales
+#   GROUP BY customer_id
+#   ORDER BY total_spend DESC
+#   LIMIT 1;
+#
+# Per-product units sold:
+#   SELECT product_id, SUM(quantity) AS units_sold
+#   FROM curated_sales
+#   GROUP BY product_id
+#   ORDER BY units_sold DESC;
+#
+# Per-day revenue (partition-pruning-equivalent: WHERE on the date column
+# is the cheap read; the (order_date) index makes it index range-scan cheap):
+#   SELECT order_date, SUM(total_amount) AS daily_total
+#   FROM curated_sales
+#   WHERE order_date BETWEEN '2026-09-20' AND '2026-09-22'
+#   GROUP BY order_date
+#   ORDER BY order_date;
+#
+# Notes:
+# - Glue auto-infers every CSV column as string. The PySpark job casts them;
+#   the MySQL equivalent does the cast in the INSERT ... SELECT.
+# - status column is dropped from `curated_sales` because the filter
+#   `WHERE status = 'completed'` has been applied at load time.
+# - Idempotent re-runs are handled by `TRUNCATE curated_sales; INSERT ... SELECT ...`
+#   inside a transaction (the MySQL equivalent of Spark's mode='overwrite').
+# - In production the table is usually RANGE-partitioned by order_date
+#   (PARTITION BY RANGE (YEAR(order_date) * 100 + MONTH(order_date))) so the
+#   engine can prune the same way Parquet + Athena would.
+# - On very large fact tables, a covering secondary index on (order_date)
+#   plus hashing / sharding by customer_id buys you the partition-pruning
+#   speed the lab demonstrates against Parquet.

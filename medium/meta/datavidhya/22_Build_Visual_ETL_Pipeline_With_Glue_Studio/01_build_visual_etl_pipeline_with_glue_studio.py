@@ -257,3 +257,56 @@ def run() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(run())
+
+# ---- MySQL way ----------------------------------------------------------
+# The Glue Studio visual ETL produces a `curated_customers` table. In MySQL the
+# equivalent is a single LOAD DATA INFILE + a typed `curated_customers` table,
+# with the same Athena-style SQL run against it.
+#
+# CREATE TABLE + sample data:
+#   CREATE TABLE curated_customers (
+#       customer_id VARCHAR(20) PRIMARY KEY,
+#       name        VARCHAR(120) NOT NULL,
+#       email       VARCHAR(200) NOT NULL,
+#       country     VARCHAR(60),
+#       created_at  DATETIME NOT NULL,
+#       KEY idx_curated_created (created_at)
+#   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#   INSERT INTO curated_customers (customer_id, name, email, country, created_at) VALUES
+#       ('C001', 'Alice',  '[email protected]',   'US', '2026-09-20 10:15:00'),
+#       ('C002', 'Bob',    '[email protected]',     'US', '2026-09-21 08:42:00'),
+#       ('C003', 'Cara',   '[email protected]',  'GB', '2026-09-22 14:30:00'),
+#       ('C004', 'Drew',   '[email protected]', 'CA', '2026-09-23 11:00:00'),
+#       ('C005', 'Eli',    '[email protected]',   'AU', '2026-09-24 09:00:00'),
+#       ('C006', 'Fay',    '[email protected]',   'US', '2026-09-25 13:20:00'),
+#       ('C007', 'Gus',    '[email protected]',   'NZ', '2026-09-25 19:45:00'),
+#       ('C008', 'Hana',   '[email protected]', 'JP', '2026-09-26 03:10:00'),
+#       ('C009', 'Ivan',   '[email protected]',   'DE', '2026-09-26 17:55:00'),
+#       ('C010', 'Jane',   '[email protected]',   'US', '2026-09-27 02:00:00'),
+#       ('C011', 'Kim',    '[email protected]',   'KR', '2026-09-27 06:30:00'),
+#       ('C012', 'Leo',    '[email protected]',   'US', '2026-09-27 19:10:00');
+#
+# COUNT(*) over curated_customers:
+#   SELECT COUNT(*) AS n FROM curated_customers;
+#
+# Top 3 newest by created_at DESC (mirrors the Athena-style Spark SQL):
+#   SELECT name, created_at
+#   FROM curated_customers
+#   ORDER BY created_at DESC LIMIT 3;
+#
+# Per-day customer count (DATE(created_at) -> DATE():
+#   SELECT DATE(created_at) AS day, COUNT(*) AS n
+#   FROM curated_customers
+#   GROUP BY DATE(created_at)
+#   ORDER BY day;
+#
+# Notes:
+# - Glue Studio's visual job emits a script that calls
+#   `write_dynamic_frame.from_options(format="glueparquet")`. The MySQL
+#   equivalent is one `LOAD DATA INFILE ... INTO TABLE curated_customers`
+#   wrapped in a transaction (idempotent: TRUNCATE + LOAD).
+# - created_at is loaded as DATETIME; `DATE(created_at)` is the MySQL equivalent
+#   of Spark's `DATE(created_at)` (both yield a calendar day, time stripped).
+# - The `KEY idx_curated_created (created_at)` index makes ORDER BY created_at
+#   DESC LIMIT 3 a backward-index scan (cheap), matching what Athena does
+#   against the Parquet metadata.
