@@ -74,13 +74,13 @@ _DUPLICATE_DETAIL = "order_id_seen"
 
 
 def _reject(row: Dict[str, Any], rej: Reject) -> Dict[str, Any]:
-    """Annotate a rejected row with the ``_rejected_reason`` / ``_rejected_detail``
+    """Annotate a rejected row with the ``rejected_reason`` / ``rejected_detail``
     columns. Centralising this keeps the two rejection paths (validator and
     duplicate-order_id) in lockstep.
     """
     return {**row,
-            "_rejected_reason": rej.reason,
-            "_rejected_detail": rej.detail}
+            "rejected_reason": rej.reason,
+            "rejected_detail": rej.detail}
 
 
 # ----------------------------------------------------------------------- main

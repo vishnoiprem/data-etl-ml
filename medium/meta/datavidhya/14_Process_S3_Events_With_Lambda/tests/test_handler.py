@@ -57,7 +57,7 @@ def test_duplicate_order_id_goes_to_rejected(patched_s3: StubBucket) -> None:
 
     assert result == {"accepted": 1, "rejected": 1}, result
     rej = parse_csv(patched_s3.get("rejected/dup.csv"))
-    assert rej[0]["_rejected_reason"] == app.Reason.DUPLICATE_ORDER_ID
+    assert rej[0]["rejected_reason"] == app.Reason.DUPLICATE_ORDER_ID
 
 
 def test_rejection_reasons_are_stable(patched_s3: StubBucket) -> None:
@@ -75,7 +75,7 @@ def test_rejection_reasons_are_stable(patched_s3: StubBucket) -> None:
 
     app.lambda_handler(put_event("orders-lab-test-bucket", key), context=None)
     rej = parse_csv(patched_s3.get("rejected/traps.csv"))
-    reasons = {r["_rejected_reason"] for r in rej}
+    reasons = {r["rejected_reason"] for r in rej}
 
     expected = {app.Reason.MISSING_FIELD, app.Reason.BAD_AMOUNT,
                 app.Reason.BAD_CURRENCY, app.Reason.BAD_DATE}

@@ -74,18 +74,14 @@ def make_client(stub: StubBucket) -> _StubS3Client:
     return _StubS3Client(stub)
 
 
-def install(stub: StubBucket, monkeypatch: Optional[Any] = None) -> None:
-    """Replace ``boto3.client('s3')`` with a stub.
+def install(stub: StubBucket, monkeypatch: Any) -> None:
+    """Replace ``boto3.client('s3')`` with a stub for the duration of the
+    test (auto-reverted by ``monkeypatch``).
 
-    When called from pytest, pass the ``monkeypatch`` fixture so the original
-    is restored after the test. The one-shot driver omits it because the
-    process exits shortly after.
+    Callers MUST pass the pytest ``monkeypatch`` fixture; the one-shot driver
+    installs via its own minimal fixture so the patch is reverted on exit.
     """
-    replacement = lambda *a, **kw: make_client(stub)
-    if monkeypatch is not None:
-        monkeypatch.setattr(boto3, "client", replacement)
-    else:
-        boto3.client = replacement
+    monkeypatch.setattr(boto3, "client", lambda *a, **kw: make_client(stub))
 
 
 def load_csv(path: str):

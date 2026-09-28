@@ -38,13 +38,14 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_HERE, "lambda_function"))
 
 import app                              # noqa: E402  -- import after sys.path
-from _stubs import StubBucket, install, load_csv,  \
+import boto3                            # noqa: E402
+from _stubs import StubBucket, make_client, load_csv, \
                    load_raw_csv, parse_csv, put_event  # noqa: E402
 
 PROCESSED_KEEP = ("order_id", "customer_id", "amount", "currency",
                   "order_date", "amount_usd")
 REJECTED_KEEP  = ("order_id", "customer_id", "amount", "currency",
-                  "order_date", "_rejected_reason", "_rejected_detail")
+                  "order_date", "rejected_reason", "rejected_detail")
 
 
 def expect_csv(title: str, got: List[Dict[str, str]],
@@ -70,64 +71,76 @@ def _norm_rejected(rows):
 
 def main() -> None:
     stub = StubBucket()
-    install(stub)
+    # Driver-side monkey-patch with explicit restore. `_stubs.install` is
+    # pytest-only (requires the monkeypatch fixture); here we patch the
+    # attribute directly and revert it on exit so a follow-up interpreter
+    # command or sibling import isn't broken.
+    _original_client = boto3.client
+    boto3.client = lambda *a, **kw: make_client(stub)
+    try:
+        raw_key = "raw/orders_2026-09-27.csv"
+        bucket = "orders-lab-test-bucket"
+        stub.put(raw_key, load_raw_csv())
+        event = put_event(bucket, raw_key)
 
-    raw_key = "raw/orders_2026-09-27.csv"
-    bucket = "orders-lab-test-bucket"
-    stub.put(raw_key, load_raw_csv())
-    event = put_event(bucket, raw_key)
+        print("\n=== Q14 Process S3 Events with Lambda ===\n")
 
-    print("\n=== Q14 Process S3 Events with Lambda ===\n")
+        # Stage 1: handler returns accepted/rejected counts.
+        result = app.lambda_handler(event, context=None)
+        assert result == {"accepted": 7, "rejected": 5}, result
+        print(f"[PASS] Q14 handler returned {result}")
 
-    # Stage 1: handler returns accepted/rejected counts.
-    result = app.lambda_handler(event, context=None)
-    assert result == {"accepted": 7, "rejected": 5}, result
-    print(f"[PASS] Q14 handler returned {result}")
+        # Stage 2: stub received BOTH processed/ and rejected/ writes.
+        proc_key = "processed/orders_2026-09-27.csv"
+        rej_key  = "rejected/orders_2026-09-27.csv"
+        assert stub.has(proc_key) and stub.has(rej_key), list(stub.objects)
+        print("[PASS] Q14 stub bucket has processed/ AND rejected/ keys")
 
-    # Stage 2: stub received BOTH processed/ and rejected/ writes.
-    proc_key = "processed/orders_2026-09-27.csv"
-    rej_key  = "rejected/orders_2026-09-27.csv"
-    assert stub.has(proc_key) and stub.has(rej_key), list(stub.objects)
-    print("[PASS] Q14 stub bucket has processed/ AND rejected/ keys")
+        # Stage 3: processed CSV row-by-row matches expected.
+        got_proc_rows = parse_csv(stub.get(proc_key))
+        expect_csv("Q14 processed CSV matches expected",
+                   got_proc_rows,
+                   load_csv(os.path.join(_HERE, "data", "orders_processed_expected.csv")),
+                   _norm_processed)
 
-    # Stage 3: processed CSV row-by-row matches expected.
-    got_proc_rows = parse_csv(stub.get(proc_key))
-    expect_csv("Q14 processed CSV matches expected",
-               got_proc_rows,
-               load_csv(os.path.join(_HERE, "data", "orders_processed_expected.csv")),
-               _norm_processed)
+        # Stage 4: rejected CSV row-by-row matches expected.
+        got_rej_rows = parse_csv(stub.get(rej_key))
+        expect_csv("Q14 rejected CSV matches expected",
+                   got_rej_rows,
+                   load_csv(os.path.join(_HERE, "data", "orders_rejected_expected.csv")),
+                   _norm_rejected)
 
-    # Stage 4: rejected CSV row-by-row matches expected.
-    got_rej_rows = parse_csv(stub.get(rej_key))
-    expect_csv("Q14 rejected CSV matches expected",
-               got_rej_rows,
-               load_csv(os.path.join(_HERE, "data", "orders_rejected_expected.csv")),
-               _norm_rejected)
+        # Stage 5: per-row breakdown -- the lab's named trap rows.
+        # Built from app.Reason.* so a rename of the constant fails the
+        # driver too, not just the tests.
+        expected_reasons = sorted([
+            app.Reason.BAD_AMOUNT, app.Reason.BAD_CURRENCY, app.Reason.BAD_DATE,
+            app.Reason.DUPLICATE_ORDER_ID, app.Reason.MISSING_FIELD,
+        ])
+        reasons = sorted({r["rejected_reason"] for r in got_rej_rows})
+        assert reasons == expected_reasons, reasons
+        print(f"[PASS] Q14 rejection reasons covered: {reasons}")
 
-    # Stage 5: per-row breakdown -- the lab's named trap rows.
-    reasons = sorted({r["_rejected_reason"] for r in got_rej_rows})
-    assert reasons == ["bad_amount", "bad_currency", "bad_date",
-                       "duplicate_order_id", "missing_field"], reasons
-    print(f"[PASS] Q14 rejection reasons covered: {reasons}")
+        # Stage 6: enrichment -- every accepted row has the three derived fields.
+        for row in got_proc_rows:
+            assert row["amount_usd"] and row["processed_at"] \
+                   and len(row["row_hash"]) == 16, row
+        print("[PASS] Q14 every accepted row has amount_usd, processed_at, row_hash")
 
-    # Stage 6: enrichment -- every accepted row has the three derived fields.
-    for row in got_proc_rows:
-        assert row["amount_usd"] and row["processed_at"] \
-               and len(row["row_hash"]) == 16, row
-    print(f"[PASS] Q14 every accepted row has amount_usd, processed_at, row_hash")
+        # Stage 7: idempotency NOTE -- counts are stable, but processed_at is
+        # wall-clock so the second run's CSV differs byte-for-byte. Counts match.
+        result2 = app.lambda_handler(event, context=None)
+        assert result2 == result, f"non-idempotent counts: {result} vs {result2}"
+        print("[PASS] Q14 re-running the handler returns identical counts")
 
-    # Stage 7: idempotency NOTE -- counts are stable, but processed_at is
-    # wall-clock so the second run's CSV differs byte-for-byte. Counts match.
-    result2 = app.lambda_handler(event, context=None)
-    assert result2 == result, f"non-idempotent counts: {result} vs {result2}"
-    print("[PASS] Q14 re-running the handler returns identical counts")
+        # Stage 8: non-matching key skip -- a key under processed/ is ignored.
+        proc_event = put_event(bucket, proc_key)
+        assert app.lambda_handler(proc_event, context=None) == {"accepted": 0, "rejected": 0}
+        print("[PASS] Q14 handler ignores processed/ keys (no S3-event loop)")
 
-    # Stage 8: non-matching key skip -- a key under processed/ is ignored.
-    proc_event = put_event(bucket, proc_key)
-    assert app.lambda_handler(proc_event, context=None) == {"accepted": 0, "rejected": 0}
-    print("[PASS] Q14 handler ignores processed/ keys (no S3-event loop)")
-
-    print("\n=== All Q14 stages pass ===\n")
+        print("\n=== All Q14 stages pass ===\n")
+    finally:
+        boto3.client = _original_client
 
 
 if __name__ == "__main__":

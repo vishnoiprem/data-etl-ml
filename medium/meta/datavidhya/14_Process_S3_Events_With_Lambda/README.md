@@ -39,16 +39,33 @@ polling.
 
 ## The 8 lab stages — mapped to artifacts
 
-| Stage | Lab step                                          | Artifact / behavior                                       |
+The AWS Skill Builder lab walks you through 8 steps; `01_process_csv_upload.py`
+exercises an independent set of 8 offline assertions against the same
+artifacts. The tables below are kept separate on purpose — the lab step
+number is what you do in the console, the assertion number is what the
+driver verifies.
+
+| Stage | Lab step (AWS console)                            | Artifact / behavior                                       |
 |-------|---------------------------------------------------|-----------------------------------------------------------|
-| 1     | Inspect provisioned bucket + Lambda                | `template.yaml` → `Outputs.OrdersBucket` / `…Function`   |
-| 2     | Upload `orders_…csv` to `raw/`                    | `data/orders_raw.csv` (12 rows)                            |
-| 3     | Function auto-fires, read the object              | `lambda_function/app.py` → `lambda_handler` + `_read_object` |
-| 4     | Validate records (drop the bad ones)              | `_validate()` returns a reason code per row                |
-| 5     | Enrich good rows (`amount_usd` etc.)              | `_enrich()` adds 3 derived columns                         |
-| 6     | Write results to `processed/`                     | `_write_objects()` + `put_object`                          |
-| 7     | Inspect CloudWatch Logs                           | `LOG.info()` calls → `sam logs -n OrdersProcessorFunction --tail` |
-| 8     | Find rejection reason, fix, reprocess             | Re-run `python 01_process_csv_upload.py` after editing the CSV |
+| L1    | Inspect provisioned bucket + Lambda                | `template.yaml` → `Outputs.OrdersBucket` / `…Function`   |
+| L2    | Upload `orders_…csv` to `raw/`                    | `data/orders_raw.csv` (12 rows)                            |
+| L3    | Function auto-fires, read the object              | `lambda_function/app.py` → `lambda_handler` + `_read_object` |
+| L4    | Validate records (drop the bad ones)              | `_validate()` returns a reason code per row                |
+| L5    | Enrich good rows (`amount_usd` etc.)              | `_enrich()` adds 3 derived columns                         |
+| L6    | Write results to `processed/`                     | `_write_objects()` + `put_object`                          |
+| L7    | Inspect CloudWatch Logs                           | `LOG.info()` calls → `sam logs -n OrdersProcessorFunction --tail` |
+| L8    | Find rejection reason, fix, reprocess             | Re-run `python 01_process_csv_upload.py` after editing the CSV |
+
+| Stage | Driver assertion                                  | What it checks                                            |
+|-------|---------------------------------------------------|-----------------------------------------------------------|
+| A1    | handler returns `{accepted: 7, rejected: 5}`      | The 12-row fixture splits 7/5.                            |
+| A2    | stub bucket has BOTH `processed/` and `rejected/` | The split write path is exercised, not just `processed/`. |
+| A3    | processed CSV matches expected                    | Row-by-row equality on the 7 accepted rows.               |
+| A4    | rejected CSV matches expected                     | Row-by-row equality on the 5 rejected rows.                |
+| A5    | rejection reasons covered                         | All five named reasons appear at least once.              |
+| A6    | every accepted row has the 3 derived columns      | `amount_usd`, `processed_at`, `row_hash` populated.       |
+| A7    | re-running returns identical counts               | Idempotency at the count level (the wall-clock field drifts byte-for-byte). |
+| A8    | non-matching key (under `processed/`) is ignored  | The S3-event loop is broken.                              |
 
 ## Run it offline (no AWS credentials, no SAM CLI)
 
@@ -74,6 +91,12 @@ sam deploy --guided                                      # provisions bucket + f
 aws s3 cp data/orders_raw.csv \
     s3://orders-lab-<account>-<region>/raw/orders_2026-09-27.csv
 sam logs -n OrdersProcessorFunction --tail               # watch CloudWatch
+
+# Local invoke against the bundled event fixture (no AWS account required)
+sam local invoke -e events/s3-put-event.json
+#   (uses events/s3-put-event.json's payload shape; raw/orders_2026-09-27.csv
+#    still has to exist locally for the handler to read -- `sam local start-api`
+#    + curl/POST is the alternative when the bucket doesn't exist yet)
 ```
 
 The first `sam deploy --guided` will prompt for a stack name and region. After
