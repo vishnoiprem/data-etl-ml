@@ -83,3 +83,28 @@ expect("L7 / L28 as of date", SQL, [
     ("2026-01-08", 7, 8),
     ("2026-01-30", 1, 5),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs and the same VALUES-derived anchor table. One pass,
+# two conditional DISTINCT counts — push DATEDIFF lower bound into a WHERE
+# filter (or partition pruning on a real table) so you only scan 28 days.
+#
+#   WITH as_of AS (
+#       SELECT * FROM (VALUES ROW('2026-01-08'), ROW('2026-01-30')) AS t(d)
+#   )
+#   SELECT a.d AS as_of_date,
+#          COUNT(DISTINCT CASE WHEN DATEDIFF(a.d, e.event_date) BETWEEN 0 AND 6
+#                              THEN e.user_id END) AS l7_users,
+#          COUNT(DISTINCT CASE WHEN DATEDIFF(a.d, e.event_date) BETWEEN 0 AND 27
+#                              THEN e.user_id END) AS l28_users
+#   FROM as_of a
+#   CROSS JOIN events e
+#   GROUP BY a.d
+#   ORDER BY a.d;
+#
+# Notes:
+# - DATEDIFF(a, b) returns a - b in days in MySQL, matching Spark's usage here.
+# - To restrict the scan, add WHERE e.event_date >= a.d - INTERVAL 27 DAY
+#   (planner-aware: anchor the lower bound from the smallest as_of date).
+# - If running on MySQL 5.7 or MariaDB without VALUES-as-table, use a UNION ALL
+#   of SELECT ... constants instead.

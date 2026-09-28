@@ -1,0 +1,6 @@
+# Code-fix agent
+openai>=1.0.0
+pydantic>=2.5.0
+GitPython>=3.1.40
+pytest>=8.0.0
+rich>=13.0.0
