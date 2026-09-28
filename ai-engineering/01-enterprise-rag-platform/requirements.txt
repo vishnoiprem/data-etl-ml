@@ -15,7 +15,7 @@ fastapi>=0.110.0
 uvicorn>=0.29.0
 
 # Tokenization (for token counting + chunking)
-tiktoken>=0.6.0
+tiktoken>=0.14.0
 
 # Eval
 numpy>=1.26.0
