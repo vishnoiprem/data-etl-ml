@@ -10,7 +10,6 @@ import pytest
 from verification import verify_and_certify
 from delete_coordinator import Receipt
 from crypto_shred import CryptoKeyRegistry
-from multi_channel_dedup import NotificationRecord, dedup  # for assert
 
 
 # --------------------------------------------------------------------- #
@@ -71,13 +70,5 @@ def test_crypto_shred_cancel_during_pending():
 
 
 # --------------------------------------------------------------------- #
-# Dedup multi-user guard
+# Dedup multi-user guard — covered by Problem 5's test_dedup.py.
 # --------------------------------------------------------------------- #
-
-def test_dedup_raises_on_cross_user_group():
-    """If a group_id accidentally spans two users, fail loudly."""
-    with pytest.raises(ValueError, match="spans multiple users"):
-        dedup([
-            NotificationRecord("n1", "g1", "u1", "push", 100.0),
-            NotificationRecord("n2", "g1", "u2", "email", 100.5),
-        ])
