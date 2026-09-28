@@ -32,7 +32,9 @@ data-enginnering-cloudvala/
     ├── 08_dbt_course.md                       ← dbt (Data Build Tool) Course (5 modules, 37 lessons)
     ├── 09_aws_de.md                           ← AWS for Data Engineering (5 modules, 36 lessons)
     ├── de_foundations_full_detail.md          ← DE Foundations with 4 verbatim deep-dive articles
-    └── aws_de_full_detail.md                  ← AWS for DE with 9 verbatim deep-dive articles
+    ├── aws_de_full_detail.md                  ← AWS for DE with 9 verbatim deep-dive articles
+    ├── aws_de_cto_learning_plan.md            ← CTO/Principal plan: theory + example + AI + motivation for all 36 lessons
+    └── snowflake_full_detail.md               ← Snowflake Hands-On with verbatim Stages/Performance deep-dives
 ```
 
 ## Counts
@@ -41,8 +43,9 @@ data-enginnering-cloudvala/
 |---|---:|---:|
 | Interview Q&A articles | 3 | 150 |
 | Course curricula (outline-only) | 9 | 411 |
-| Full-detail courses (with verbatim article bodies) | 2 | 85 (49 DE Found. + 36 AWS DE) — 13 article bodies included |
-| **Total** | **14** | **561** |
+| Full-detail courses (with verbatim article bodies) | 3 | 124 (49 DE Found. + 36 AWS DE + 39 Snowflake) — 15 article bodies included |
+| CTO/Principal learning plans | 1 | 36 (all AWS DE lessons with theory + AI + motivation) |
+| **Total** | **16** | **597** |
 
 ## Use
 

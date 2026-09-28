@@ -13,8 +13,9 @@ are included where the full body was extractable from the public page.
 > **Note on coverage:** This file contains the complete 39-lesson
 > curriculum plus the full article bodies for the lessons that were
 > extractable from the public pages (Stages & Data Loading, Performance
-> Optimization). The remaining articles are JS-rendered and require a
-> logged-in browser session to extract.
+> Optimization, Types of Tables, Streams & Tasks). The remaining
+> articles are JS-rendered and require a logged-in browser session to
+> extract.
 
 ---
 
@@ -445,3 +446,306 @@ DROP ROLE DBA;
 DROP WAREHOUSE DS_WH;
 DROP WAREHOUSE DBA_WH;
 ```
+
+---
+
+## Module 4 · Lesson 2: Types of Tables — Permanent, Transient, Temporary
+
+*Written by Darshil Parmar, Founder & Lead Instructor, Data Vidhya.
+Published Mar 23, 2026.
+Course URL: https://datavidhya.com/learn/snowflake/tables-time-travel-sharing/types-of-tables/*
+
+Snowflake has three types of tables, each with different persistence,
+Time Travel, and Fail-safe behavior. Choosing the right type affects both
+cost and data protection.
+
+### Comparison
+
+| Feature | Permanent | Transient | Temporary |
+|---|---|---|---|
+| **Persistence** | Until explicitly dropped | Until explicitly dropped | Deleted when session ends |
+| **Time Travel** | Up to 90 days (Enterprise) | 0 or 1 day only | 0 or 1 day only |
+| **Fail-safe** | 7 days | No | No |
+| **Visible to other sessions** | Yes | Yes | No |
+| **Storage cost** | Highest | Medium | Lowest |
+
+### Permanent Tables
+
+Permanent tables are the default. They persist until explicitly dropped
+and have full Time Travel (up to 90 days) and Fail-safe (7 days of
+recovery by Snowflake support).
+
+```sql
+CREATE OR REPLACE DATABASE PDB;
+
+CREATE OR REPLACE TABLE PDB.public.customers (
+    id INT,
+    first_name STRING,
+    last_name STRING,
+    email STRING,
+    gender STRING,
+    Job STRING,
+    Phone STRING
+);
+```
+
+Load data and verify:
+
+```sql
+CREATE OR REPLACE FILE FORMAT MANAGE_DB.file_formats.csv_file
+    TYPE = CSV
+    FIELD_DELIMITER = ','
+    SKIP_HEADER = 1;
+
+CREATE OR REPLACE STAGE MANAGE_DB.external_stages.time_travel_stage
+    URL = 's3://data-snowflake-fundamentals/time-travel/'
+    file_format = MANAGE_DB.file_formats.csv_file;
+
+COPY INTO PDB.public.customers
+FROM @MANAGE_DB.external_stages.time_travel_stage
+files = ('customers.csv');
+
+SELECT * FROM PDB.public.customers;
+
+-- SHOW TABLES confirms it's a permanent table
+SHOW TABLES;
+```
+
+**Use when:** Data is frequently accessed, modified, and queried. You
+need full Time Travel and Fail-safe protection.
+
+### Transient Tables
+
+Transient tables persist until dropped (like permanent tables) but have
+**no Fail-safe** and **limited Time Travel** (0 or 1 day max). This saves
+storage costs for data that doesn't need long-term protection.
+
+```sql
+CREATE OR REPLACE DATABASE TDB;
+
+CREATE OR REPLACE TRANSIENT TABLE TDB.public.customers_transient (
+    id INT,
+    first_name STRING,
+    last_name STRING,
+    email STRING,
+    gender STRING,
+    Job STRING,
+    Phone STRING
+);
+
+INSERT INTO TDB.public.customers_transient
+SELECT t1.* FROM OUR_FIRST_DB.public.customers t1
+CROSS JOIN (SELECT * FROM OUR_FIRST_DB.public.customers) t2;
+
+SHOW TABLES;
+```
+
+#### Time Travel on Transient Tables
+
+You can set retention to 0 or 1 day only:
+
+```sql
+ALTER TABLE TDB.public.customers_transient
+SET DATA_RETENTION_TIME_IN_DAYS = 0;
+```
+
+With retention set to 0, UNDROP will not work:
+
+```sql
+DROP TABLE TDB.public.customers_transient;
+
+-- This will FAIL: no Time Travel history
+UNDROP TABLE TDB.public.customers_transient;
+```
+
+#### Transient Schemas
+
+You can also create transient schemas; any table created inside a
+transient schema is automatically transient:
+
+```sql
+CREATE OR REPLACE TRANSIENT SCHEMA TDB.TRANSIENT_SCHEMA;
+
+SHOW SCHEMAS;
+
+-- This table is automatically transient (inherits from schema)
+CREATE OR REPLACE TABLE TDB.TRANSIENT_SCHEMA.new_table (
+    id INT,
+    first_name STRING,
+    last_name STRING,
+    email STRING,
+    gender STRING,
+    Job STRING,
+    Phone STRING
+);
+
+-- Can set up to 1 day retention (not more)
+ALTER TABLE TDB.TRANSIENT_SCHEMA.new_table
+SET DATA_RETENTION_TIME_IN_DAYS = 2;
+-- This will fail: transient tables can only have 0 or 1 day retention
+
+SHOW TABLES;
+```
+
+**Use when:** Staging tables, intermediate ETL results, large datasets
+that can be easily recreated from source.
+
+### Temporary Tables
+
+Temporary tables exist only for the **duration of the session**. They
+are not visible to other sessions or users. When you disconnect, the
+table is automatically deleted.
+
+```sql
+-- Create a permanent table first
+CREATE OR REPLACE TABLE PDB.public.customers (
+    id INT,
+    first_name STRING,
+    last_name STRING,
+    email STRING,
+    gender STRING,
+    Job STRING,
+    Phone STRING
+);
+
+INSERT INTO PDB.public.customers
+SELECT t1.* FROM OUR_FIRST_DB.public.customers t1;
+
+-- Create a temporary table
+CREATE OR REPLACE TEMPORARY TABLE PDB.public.temp_table (
+    id INT,
+    first_name STRING,
+    last_name STRING,
+    email STRING,
+    gender STRING,
+    Job STRING,
+    Phone STRING
+);
+
+INSERT INTO PDB.public.temp_table
+SELECT * FROM PDB.public.customers;
+
+SELECT * FROM PDB.public.temp_table;
+
+SHOW TABLES;
+```
+
+**Use when:** Intermediate results for complex queries, working datasets
+within a session, ad-hoc analysis that doesn't need to persist.
+
+---
+
+### Choosing the Right Table Type
+
+- **Permanent**: Default choice. Use for anything important: fact tables,
+  dimension tables, reference data.
+- **Transient**: Use for staging/landing tables, ETL intermediates. Saves
+  ~30-50% on storage vs permanent tables.
+- **Temporary**: Use for session-scoped work: ad-hoc analysis, intermediate
+  query results, scratch tables.
+
+### Transient Databases
+
+You can also create transient databases with `CREATE TRANSIENT DATABASE`.
+Every schema and table created inside will inherit the transient property.
+
+---
+
+## Module 5 · Lesson 1: Streams & Tasks — Native CDC and Scheduling
+
+*Written by Darshil Parmar, Founder & Lead Instructor, Data Vidhya.
+Published Mar 23, 2026.
+Course URL: https://datavidhya.com/learn/snowflake/automation/streams-and-tasks/*
+
+Most warehouses need outside help for two jobs: noticing what changed
+(Debezium, Kafka) and running things on a schedule (Airflow, cron).
+Snowflake ships both as SQL objects. **Streams** are change data capture
+built into the table; **Tasks** are a scheduler built into the warehouse.
+
+### Streams: a change log you can SELECT
+
+Creating one takes a single statement:
+
+```sql
+CREATE OR REPLACE STREAM customer_changes ON TABLE customer;
+```
+
+From that moment, every insert, update, and delete on `customer` is
+visible in the stream:
+
+```sql
+INSERT INTO customer VALUES (101, 'Anna', 'Engineer');
+UPDATE customer SET job = 'Manager' WHERE id = 42;
+DELETE FROM customer WHERE id = 7;
+
+SELECT * FROM customer_changes;
+```
+
+The result contains the changed rows plus metadata columns that say what
+happened to each. One logical UPDATE arrives as **two rows**, the DELETE
+of the old image and the INSERT of the new one, both flagged
+`METADATA$ISUPDATE = TRUE`.
+
+#### The rule that surprises everyone
+
+A stream is not a growing log you clean up. It is an **offset** that
+advances when consumed:
+
+- A plain `SELECT * FROM customer_changes` **peeks**: the stream still
+  holds everything.
+- Using the stream inside a DML statement (`MERGE ... USING customer_changes`,
+  `INSERT ... SELECT FROM customer_changes`) **consumes**: the offset
+  advances, and the stream shows empty until new changes arrive.
+
+### Tasks: cron that lives in the warehouse
+
+A stream captures changes; something still has to process them regularly:
+
+```sql
+CREATE OR REPLACE TASK process_customer_changes
+    WAREHOUSE = COMPUTE_WH
+    SCHEDULE = '1 minute'
+    WHEN SYSTEM$STREAM_HAS_DATA('customer_changes')
+AS
+    MERGE INTO customer_current c
+    USING customer_changes s ON c.id = s.id
+    WHEN MATCHED AND s.METADATA$ACTION = 'DELETE' AND s.METADATA$ISUPDATE = 'FALSE'
+        THEN DELETE
+    WHEN MATCHED AND s.METADATA$ACTION = 'INSERT'
+        THEN UPDATE SET c.name = s.name, c.job = s.job
+    WHEN NOT MATCHED AND s.METADATA$ACTION = 'INSERT'
+        THEN INSERT (id, name, job) VALUES (s.id, s.name, s.job);
+
+ALTER TASK process_customer_changes RESUME;
+```
+
+Key operational details:
+
+- **Tasks are born suspended.** Nothing runs until `ALTER TASK ... RESUME`.
+- **`WHEN SYSTEM$STREAM_HAS_DATA(...)`** makes the schedule cheap: the
+  task skips without spinning up the warehouse.
+- **Tasks chain.** `CREATE TASK child ... AFTER parent` builds small
+  DAGs entirely inside Snowflake.
+
+```sql
+SELECT name, state, scheduled_time
+FROM TABLE(INFORMATION_SCHEMA.TASK_HISTORY())
+ORDER BY scheduled_time DESC;
+```
+
+### The trio, assembled
+
+Snowpipe loads files into staging; a Stream captures changes; a Task
+running every minute MERGEs them onward; the history table stays fresh.
+Ingestion, CDC, and scheduling without a single external tool.
+
+### Common mistakes
+
+- **SELECTing a stream and wondering why it never empties.** Only DML
+  consumes.
+- **Forgetting RESUME.** Tasks are created suspended.
+- **Skipping `WHEN SYSTEM$STREAM_HAS_DATA`.**
+- **Letting a stream go stale.** If a stream is never consumed within
+  the table's Time Travel retention, it goes stale.
+- **Treating update pairs as two changes.** DELETE + INSERT with
+  `ISUPDATE = TRUE` is one logical update.
