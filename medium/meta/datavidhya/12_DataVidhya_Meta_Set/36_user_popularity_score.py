@@ -164,3 +164,58 @@ SELECT (SELECT COUNT(DISTINCT follower_id) FROM cup_user_percentage
 """).collect()[0]
 assert (directed, mirrored) == (2, 3), (directed, mirrored)
 print("[PASS] Q36 mirroring inflates user 1 from 2 followers to 3 -- follows are directed")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs (including the UNION ALL + CROSS JOIN pattern) and
+# UNION ALL inside a CTE. The denominator is the count of distinct ids across
+# BOTH columns -- a plain SELECT user_id loses the pure followers (3, 4, 7, 8,
+# 10) and inflates every percentage. The numerator is per followed user only.
+# Both tables are tiny in the shipped sample, but real follows tables hit
+# hundreds of millions; the (user_id, follower_id) PK is the workhorse index.
+#
+# CREATE TABLE cup_user_percentage (
+#     user_id     INT NOT NULL,
+#     follower_id INT NOT NULL,
+#     PRIMARY KEY (user_id, follower_id),
+#     KEY ix_cup_follower (follower_id, user_id),
+#     CONSTRAINT fk_cup_user     FOREIGN KEY (user_id)     REFERENCES users(user_id),
+#     CONSTRAINT fk_cup_follower FOREIGN KEY (follower_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# -- Assume an existing users table that holds every id anywhere in
+# -- cup_user_percentage; otherwise the FKs are dropped.
+#
+# INSERT INTO cup_user_percentage (user_id, follower_id) VALUES
+#     (1, 2), (1, 3), (2, 4), (5, 1), (5, 3), (11, 7), (12, 8),
+#     (13, 5), (13, 10), (14, 12), (14, 3), (15, 14), (15, 13);
+#
+# WITH all_users AS (
+#     -- the denominator's grain: every id anywhere in the table
+#     SELECT user_id     AS id FROM cup_user_percentage
+#     UNION ALL
+#     SELECT follower_id AS id FROM cup_user_percentage
+# ),
+# platform AS (
+#     SELECT COUNT(DISTINCT id) AS total_users FROM all_users
+# ),
+# followers AS (
+#     -- the numerator's grain: one row per followed user
+#     SELECT user_id, COUNT(DISTINCT follower_id) AS follower_count
+#     FROM cup_user_percentage
+#     GROUP BY user_id
+# )
+# SELECT f.user_id,
+#        ROUND(f.follower_count * 100.0 / p.total_users, 2) AS famous_percentage
+# FROM followers f
+# CROSS JOIN platform p
+# ORDER BY f.user_id;
+#
+# -- Expected:
+# -- 1   15.38
+# -- 2    7.69
+# -- 5   15.38
+# -- 11   7.69
+# -- 12   7.69
+# -- 13  15.38
+# -- 14  15.38
+# -- 15  15.38

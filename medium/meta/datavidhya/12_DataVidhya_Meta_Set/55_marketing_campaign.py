@@ -214,3 +214,81 @@ WHERE i.campaign_id = 'C004'
 """).collect()[0][1]
 assert float(coalesced) == 0.0
 print("[PASS] Q55 a blanket COALESCE turns C004's NULL rate into 0.00 -- wrong")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same three-CTE pre-aggregation + LEFT JOIN shape.
+# The conversion_rate formula is deliberately NOT coalesced to 0: x/0 is
+# NULL in MySQL too, and the spec asks for NULL there.
+#
+# CREATE TABLE impressions (
+#     campaign_id     VARCHAR(8) NOT NULL,
+#     user_id         INT        NOT NULL,
+#     impression_date DATE       NOT NULL,
+#     PRIMARY KEY (campaign_id, user_id, impression_date),
+#     KEY ix_imp_campaign (campaign_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE clicks (
+#     campaign_id VARCHAR(8) NOT NULL,
+#     user_id     INT        NOT NULL,
+#     click_date  DATE       NOT NULL,
+#     PRIMARY KEY (campaign_id, user_id, click_date),
+#     KEY ix_clk_campaign (campaign_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE conversions (
+#     campaign_id    VARCHAR(8)    NOT NULL,
+#     user_id        INT           NOT NULL,
+#     conversion_date DATE         NOT NULL,
+#     revenue        DECIMAL(12,2) NOT NULL,
+#     PRIMARY KEY (campaign_id, user_id, conversion_date),
+#     KEY ix_conv_campaign (campaign_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO impressions (campaign_id, user_id, impression_date) VALUES
+#     ('C001','U001','2024-01-01'),('C001','U001','2024-01-02'),
+#     ('C001','U002','2024-01-01'),('C001','U003','2024-01-05'),
+#     ('C002','U002','2024-01-01'),('C002','U004','2024-01-02'),
+#     ('C002','U004','2024-01-03'),('C002','U005','2024-01-05'),
+#     ('C003','U001','2024-01-10'),('C003','U002','2024-01-10'),
+#     ('C003','U003','2024-01-12'),('C004','U006','2024-01-06'),
+#     ('C004','U007','2024-01-07');
+#
+# INSERT INTO clicks (campaign_id, user_id, click_date) VALUES
+#     ('C001','U001','2024-01-02'),('C001','U002','2024-01-01'),
+#     ('C002','U004','2024-01-02'),('C002','U005','2024-01-05'),
+#     ('C003','U002','2024-01-10'),('C001','U001','2024-01-03');
+#
+# INSERT INTO conversions (campaign_id, user_id, conversion_date, revenue) VALUES
+#     ('C001','U001','2024-01-03', 150.00),
+#     ('C001','U002','2024-01-02', 200.00),
+#     ('C002','U004','2024-01-05', 300.00),
+#     ('C003','U002','2024-01-12', 250.00);
+#
+# WITH imp AS (
+#     SELECT campaign_id, COUNT(*) AS impressions FROM impressions GROUP BY campaign_id
+# ),
+# clk AS (
+#     SELECT campaign_id, COUNT(DISTINCT user_id) AS clicks FROM clicks GROUP BY campaign_id
+# ),
+# conv AS (
+#     SELECT campaign_id, COUNT(*) AS conversions, SUM(revenue) AS total_revenue
+#     FROM conversions GROUP BY campaign_id
+# )
+# SELECT i.campaign_id,
+#        i.impressions,
+#        COALESCE(c.clicks, 0)        AS clicks,
+#        COALESCE(v.conversions, 0)   AS conversions,
+#        COALESCE(v.total_revenue, 0) AS total_revenue,
+#        ROUND(COALESCE(c.clicks, 0) * 100.0 / i.impressions, 2) AS ctr,
+#        ROUND(COALESCE(v.conversions, 0) * 100.0 / c.clicks, 2) AS conversion_rate
+# FROM imp i
+# LEFT JOIN clk  c ON c.campaign_id = i.campaign_id
+# LEFT JOIN conv v ON v.campaign_id = i.campaign_id
+# ORDER BY i.campaign_id;
+#
+# -- Expected:
+# -- C001 4 2 2 350.00  50.00 100.00
+# -- C002 4 2 1 300.00  50.00  50.00
+# -- C003 3 1 1 250.00  33.33 100.00
+# -- C004 2 0 0   0.00   0.00   NULL

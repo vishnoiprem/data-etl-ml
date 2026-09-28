@@ -173,3 +173,58 @@ SELECT DATE_FORMAT(TIMESTAMP'2023-01-01 13:05:09', 'yyyy-MM-dd HH:mm:ss') AS s
 """).collect()[0][0]
 assert good == "2023-01-01 13:05:09", good
 print("[PASS] Q44 Java pattern 'yyyy-MM-dd HH:mm:ss' produces the required text")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same GROUP BY with conditional / count-distinct
+# aggregates. The DATE_FORMAT pattern MUST use MySQL's %Y/%m/%d/%H/%i/%s
+# format codes -- the Java 'yyyy-MM-dd HH:mm:ss' used by Spark is not
+# accepted and would render as literal characters.
+#
+# CREATE TABLE conversations (
+#     conversation_id   INT  NOT NULL,
+#     created_at        DATE NOT NULL,
+#     participant_count INT  NOT NULL,
+#     PRIMARY KEY (conversation_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE messages (
+#     message_id      INT       NOT NULL,
+#     conversation_id INT       NOT NULL,
+#     sender_id       INT       NOT NULL,
+#     message_text    TEXT      NOT NULL,
+#     sent_at         TIMESTAMP NOT NULL,
+#     PRIMARY KEY (message_id),
+#     KEY ix_m_conv_ts (conversation_id, sent_at),
+#     CONSTRAINT fk_m_conv FOREIGN KEY (conversation_id)
+#         REFERENCES conversations(conversation_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO conversations (conversation_id, created_at, participant_count) VALUES
+#     (1, '2023-01-01', 4),
+#     (2, '2023-01-02', 3),
+#     (3, '2023-01-03', 5);
+#
+# INSERT INTO messages (message_id, conversation_id, sender_id, message_text, sent_at) VALUES
+#     (1, 1, 108, 'msg', '2023-01-01 00:00:00'),
+#     (2, 1, 104, 'msg', '2023-01-01 00:30:00'),
+#     (3, 1, 108, 'msg', '2023-01-01 01:00:00'),
+#     (6, 2, 107, 'msg', '2023-01-01 05:00:00'),
+#     (7, 2, 106, 'msg', '2023-01-01 06:00:00');
+#
+# -- HOUR-truncation in MySQL: DATE_FORMAT(sent_at, '%Y-%m-%d %H:00:00') gives a
+# -- text hour-bucket; for the COUNT(DISTINCT ...) we want one bucket per hour
+# -- and DATE_FORMAT's text output is fine because we only need equality on it.
+# SELECT conversation_id,
+#        COUNT(*)                                              AS message_count,
+#        COUNT(DISTINCT sender_id)                             AS unique_senders,
+#        DATE_FORMAT(MIN(sent_at), '%Y-%m-%d %H:%i:%s')        AS first_message,
+#        DATE_FORMAT(MAX(sent_at), '%Y-%m-%d %H:%i:%s')        AS last_message,
+#        ROUND(COUNT(*) / COUNT(DISTINCT DATE_FORMAT(sent_at, '%Y-%m-%d %H:00:00')), 1)
+#                                                                AS avg_messages_per_day
+# FROM messages
+# GROUP BY conversation_id
+# ORDER BY conversation_id;
+#
+# -- Expected:
+# -- 1 3 2 '2023-01-01 00:00:00' '2023-01-01 01:00:00' 1.5
+# -- 2 2 2 '2023-01-01 05:00:00' '2023-01-01 06:00:00' 1.0

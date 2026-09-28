@@ -100,3 +100,54 @@ expect("Q03 funnel drop-off", SQL, [
     ("click", 3, 60.00, 40.00),
     ("purchase", 2, 66.67, 33.33),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports window functions and the LAG form. There is no native
+# VALUES table in MySQL 8 (rows constructors work but the CTE form is cleaner
+# using a subquery with UNION ALL). Counting distinct users per step gives a
+# "loose" funnel where user 5 -- who purchased without clicking -- still
+# counts as a purchase. The first step has no prior step, so LAG returns NULL.
+#
+# CREATE TABLE funnel (
+#     user_id    INT          NOT NULL,
+#     event_name VARCHAR(16)  NOT NULL,
+#     event_ts   TIMESTAMP    NOT NULL,
+#     KEY ix_funnel_event (event_name, user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO funnel (user_id, event_name, event_ts) VALUES
+#     (1, 'view',     '2026-03-01 10:00:00'),
+#     (1, 'click',    '2026-03-01 10:02:00'),
+#     (1, 'purchase', '2026-03-01 10:09:00'),
+#     (2, 'view',     '2026-03-01 11:00:00'),
+#     (2, 'click',    '2026-03-01 11:04:00'),
+#     (3, 'view',     '2026-03-01 12:00:00'),
+#     (4, 'view',     '2026-03-02 09:00:00'),
+#     (4, 'view',     '2026-03-02 09:06:00'),
+#     (4, 'click',    '2026-03-02 09:11:00'),
+#     (5, 'view',     '2026-03-02 14:00:00'),
+#     (5, 'purchase', '2026-03-02 14:20:00');
+#
+# WITH RECURSIVE step_order AS (
+#     SELECT 1 AS step_num, 'view' AS step
+#     UNION ALL SELECT 2, 'click' UNION ALL SELECT 3, 'purchase'
+# ),
+# per_step AS (
+#     SELECT s.step,
+#            s.step_num,
+#            COUNT(DISTINCT f.user_id) AS users
+#     FROM step_order s
+#     LEFT JOIN funnel f ON f.event_name = s.step
+#     GROUP BY s.step, s.step_num
+# )
+# SELECT step,
+#        users,
+#        ROUND(100.0 * users / LAG(users) OVER (ORDER BY step_num), 2) AS conv_from_prev_pct,
+#        ROUND(100.0 - 100.0 * users / LAG(users) OVER (ORDER BY step_num), 2) AS drop_off_pct
+# FROM per_step
+# ORDER BY step_num;
+#
+# -- Expected:
+# -- view      5  NULL  NULL
+# -- click     3  60.00  40.00
+# -- purchase  2  66.67  33.33

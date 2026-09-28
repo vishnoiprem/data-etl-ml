@@ -149,3 +149,35 @@ WHERE f1.user_id = 1 AND f2.user_id = 2
 """).count()
 assert no_distinct == 4, no_distinct   # 3: 2x1 rows, 5: 1x2 rows
 print("[PASS] Q50 the self-join without DISTINCT fans out to 4 rows")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports INTERSECT (dedupes set members). The self-join
+# formulation generalises to per-pair mutual friends and needs DISTINCT
+# when the source has duplicates.
+#
+# CREATE TABLE friendships (
+#     user_id    INT NOT NULL,
+#     friend_id  INT NOT NULL,
+#     PRIMARY KEY (user_id, friend_id),
+#     KEY ix_f_user (user_id),
+#     KEY ix_f_friend (friend_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO friendships (user_id, friend_id) VALUES
+#     (1, 2), (1, 3), (1, 4), (1, 5),
+#     (2, 1), (2, 3), (2, 5), (2, 6);
+#
+# -- INTERSECT form (dedupes):
+# SELECT friend_id AS mutual_friend_id FROM friendships WHERE user_id = 1
+# INTERSECT
+# SELECT friend_id AS mutual_friend_id FROM friendships WHERE user_id = 2
+# ORDER BY mutual_friend_id;
+#
+# -- Self-join form (generalises; needs DISTINCT):
+# SELECT DISTINCT f1.friend_id AS mutual_friend_id
+# FROM friendships f1
+# JOIN friendships f2 ON f2.friend_id = f1.friend_id
+# WHERE f1.user_id = 1 AND f2.user_id = 2
+# ORDER BY mutual_friend_id;
+#
+# -- Both forms return: (3,), (5,).

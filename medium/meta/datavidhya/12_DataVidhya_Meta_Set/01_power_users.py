@@ -87,3 +87,38 @@ df = (spark.table("posts")
       .orderBy(F.col("avg_reactions").desc(), "user_id"))
 assert [tuple(r) for r in df.collect()] == [(2, 3, 200.0), (1, 2, 150.0)]
 print("[PASS] Q01 DataFrame API matches SQL")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same GROUP BY + HAVING pattern. The two filters are
+# on aggregates (post count and average reactions per post), so they must live
+# in HAVING. The AVG is over (likes + comments) per row -- the equivalent of
+# Spark's AVG(likes + comments). MySQL's COUNT(*) returns BIGINT but the value
+# here fits in INT.
+#
+# CREATE TABLE posts (
+#     post_id  INT NOT NULL,
+#     user_id  INT NOT NULL,
+#     likes    INT NOT NULL,
+#     comments INT NOT NULL,
+#     PRIMARY KEY (post_id),
+#     KEY ix_posts_user (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO posts (post_id, user_id, likes, comments) VALUES
+#     (1, 1, 150, 50), (2, 1,  80, 20),
+#     (3, 2, 250, 50), (4, 2, 150, 50), (5, 2,  70, 30),
+#     (6, 3, 400, 100),
+#     (7, 4,  60, 40), (8, 4,  70, 30);
+#
+# SELECT user_id,
+#        COUNT(*) AS post_count,
+#        ROUND(AVG(likes + comments), 2) AS avg_reactions
+# FROM posts
+# GROUP BY user_id
+# HAVING COUNT(*) >= 2
+#    AND AVG(likes + comments) >= 150
+# ORDER BY avg_reactions DESC, user_id;
+#
+# -- Expected:
+# -- 2  3  200.00
+# -- 1  2  150.00

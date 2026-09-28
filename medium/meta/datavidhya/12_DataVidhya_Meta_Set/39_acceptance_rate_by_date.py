@@ -196,3 +196,56 @@ print("[PASS] Q39 joining on date drops the late acceptance (01-03 becomes 0.00,
 dates = [r[0] for r in spark.sql(SQL).collect()]
 assert d(4) not in dates and len(dates) == 3, dates
 print("[PASS] Q39 2026-01-04 is accept-only -- no output row for it")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs and the LEFT JOIN + reversed-key pattern. The
+# distinctness on `acc` matters: two accepted rows for the same pair would fan
+# out a send and could push a rate above 100%. The 18->19 acceptance on
+# 2026-01-04 belongs to the 2026-01-03 send, so the join must NOT filter on
+# the accept date -- drop `request_date` from the acc projection.
+#
+# CREATE TABLE friend_requests (
+#     request_date DATE        NOT NULL,
+#     sender_id    INT         NOT NULL,
+#     receiver_id  INT         NOT NULL,
+#     action       VARCHAR(16) NOT NULL,
+#     PRIMARY KEY (request_date, sender_id, receiver_id, action),
+#     KEY ix_fr_action (action, sender_id, receiver_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO friend_requests (request_date, sender_id, receiver_id, action) VALUES
+#     ('2026-01-01',  1,  2, 'sent'),
+#     ('2026-01-01',  3,  4, 'sent'),
+#     ('2026-01-01',  2,  1, 'accepted'),
+#     ('2026-01-02', 10, 11, 'sent'),
+#     ('2026-01-02', 12, 13, 'sent'),
+#     ('2026-01-03', 18, 19, 'sent'),
+#     ('2026-01-03', 20, 21, 'sent'),
+#     ('2026-01-03', 22, 23, 'sent'),
+#     ('2026-01-04', 19, 18, 'accepted');
+#
+# WITH sent AS (
+#     SELECT request_date, sender_id, receiver_id
+#     FROM friend_requests
+#     WHERE action = 'sent'
+# ),
+# acc AS (
+#     -- DISTINCT so a repeated acceptance cannot fan out a send
+#     SELECT DISTINCT sender_id, receiver_id
+#     FROM friend_requests
+#     WHERE action = 'accepted'
+# )
+# SELECT s.request_date AS date,
+#        ROUND(100.0 * SUM(CASE WHEN a.sender_id IS NOT NULL THEN 1 ELSE 0 END)
+#                    / COUNT(*), 2) AS percentage_acceptance
+# FROM sent s
+# LEFT JOIN acc a
+#        ON a.sender_id   = s.receiver_id
+#       AND a.receiver_id = s.sender_id
+# GROUP BY s.request_date
+# ORDER BY s.request_date;
+#
+# -- Expected:
+# -- 2026-01-01  50.00
+# -- 2026-01-02   0.00
+# -- 2026-01-03  33.33

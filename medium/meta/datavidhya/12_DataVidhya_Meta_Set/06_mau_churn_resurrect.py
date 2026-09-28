@@ -107,3 +107,60 @@ expect("Q06 mau/new/churned/resurrected", SQL, [
     ("2026-02", 2, 1, 2, 0),
     ("2026-03", 3, 0, 0, 1),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs, LAG, and the user x month grid via CROSS JOIN.
+# The month grain is DATE_FORMAT(event_date, '%Y-%m') (MySQL's pattern codes,
+# not Spark's Java-style 'yyyy-MM'). The "resurrected" definition is what
+# separates a strong answer from an average one -- it requires an earlier
+# activity month, not just a gap from the previous month.
+#
+# CREATE TABLE activity_log (
+#     user_id    INT  NOT NULL,
+#     event_date DATE NOT NULL,
+#     KEY ix_al_user_date (user_id, event_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO activity_log (user_id, event_date) VALUES
+#     (1, '2026-01-10'), (1, '2026-02-10'), (1, '2026-03-10'),
+#     (2, '2026-01-15'),
+#     (3, '2026-02-20'), (3, '2026-03-05'),
+#     (4, '2026-01-05'), (4, '2026-03-25');
+#
+# WITH um AS (            -- one row per user per active month
+#     SELECT DISTINCT user_id, DATE_FORMAT(event_date, '%Y-%m') AS ym
+#     FROM activity_log
+# ),
+# first_seen AS (
+#     SELECT user_id, MIN(ym) AS first_ym FROM um GROUP BY user_id
+# ),
+# months AS (SELECT DISTINCT ym FROM um),
+# grid AS (               -- every user x every month, with activity flags
+#     SELECT m.ym,
+#            u.user_id,
+#            CASE WHEN a.user_id IS NOT NULL THEN 1 ELSE 0 END AS active,
+#            f.first_ym
+#     FROM months m
+#     CROSS JOIN (SELECT DISTINCT user_id FROM um) u
+#     LEFT JOIN um a ON a.user_id = u.user_id AND a.ym = m.ym
+#     JOIN first_seen f ON f.user_id = u.user_id
+# ),
+# flagged AS (
+#     SELECT ym, user_id, active, first_ym,
+#            LAG(active) OVER (PARTITION BY user_id ORDER BY ym) AS prev_active
+#     FROM grid
+# )
+# SELECT ym,
+#        SUM(active) AS mau,
+#        SUM(CASE WHEN active = 1 AND ym = first_ym THEN 1 ELSE 0 END) AS new_users,
+#        SUM(CASE WHEN active = 0 AND prev_active = 1 THEN 1 ELSE 0 END) AS churned,
+#        SUM(CASE WHEN active = 1 AND prev_active = 0 AND ym > first_ym
+#                 THEN 1 ELSE 0 END) AS resurrected
+# FROM flagged
+# GROUP BY ym
+# ORDER BY ym;
+#
+# -- Expected:
+# -- 2026-01  3  3  0  0
+# -- 2026-02  2  1  2  0
+# -- 2026-03  3  0  0  1

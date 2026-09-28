@@ -73,3 +73,31 @@ expect("Q13 popularity % by domain", SQL, [
     ("whatsapp.com", 150, 15.00),
     ("threads.net", 50, 5.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports SUM(...) OVER () with empty PARTITION BY identically.
+# OVER () collects every row into one partition to compute the grand total,
+# which is the entire trick of the question. Multiplying by 100.0 forces
+# DECIMAL arithmetic so integer division cannot truncate. Shares sum to 100.
+#
+# CREATE TABLE domain_views (
+#     domain VARCHAR(64) NOT NULL,
+#     views  INT         NOT NULL,
+#     PRIMARY KEY (domain)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO domain_views (domain, views) VALUES
+#     ('facebook.com', 500), ('instagram.com', 300),
+#     ('whatsapp.com', 150), ('threads.net',   50);
+#
+# SELECT domain,
+#        views,
+#        ROUND(100.0 * views / SUM(views) OVER (), 2) AS pct_of_total
+# FROM domain_views
+# ORDER BY pct_of_total DESC, domain;
+#
+# -- Expected:
+# -- facebook.com   500  50.00
+# -- instagram.com  300  30.00
+# -- whatsapp.com   150  15.00
+# -- threads.net     50   5.00

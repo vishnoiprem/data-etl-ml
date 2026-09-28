@@ -215,3 +215,79 @@ SELECT COUNT(*) AS all_rows, COUNT(rating) AS non_null FROM reviews WHERE user_i
 """).collect()[0]
 assert (count_rating[0], count_rating[1]) == (3, 2), count_rating
 print("[PASS] Q57 COUNT(*) = 3 but COUNT(rating) = 2 -- review_count must use COUNT(*)")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same two-CTE pre-aggregation + LEFT JOIN shape.
+# The same AVG/COUNT semantics apply: AVG skips NULL ratings, COUNT(*)
+# counts every row.
+#
+# CREATE TABLE users (
+#     user_id    INT          NOT NULL,
+#     name       VARCHAR(64)  NOT NULL,
+#     join_date  DATE         NOT NULL,
+#     PRIMARY KEY (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE orders (
+#     order_id   INT            NOT NULL,
+#     user_id    INT            NOT NULL,
+#     amount     DECIMAL(12,2)  NOT NULL,
+#     order_date DATE           NOT NULL,
+#     PRIMARY KEY (order_id),
+#     KEY ix_orders_user (user_id),
+#     CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE reviews (
+#     review_id   INT          NOT NULL,
+#     user_id     INT          NOT NULL,
+#     rating      TINYINT      NULL,             -- ratings are 1..5
+#     review_date DATE         NOT NULL,
+#     PRIMARY KEY (review_id),
+#     KEY ix_reviews_user (user_id),
+#     CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO users (user_id, name, join_date) VALUES
+#     (1,'User_1','2023-01-31'),(2,'User_2','2023-02-28'),
+#     (3,'User_3','2023-03-31'),(4,'User_4','2023-04-30'),
+#     (5,'User_5','2023-05-31');
+#
+# INSERT INTO orders (order_id, user_id, amount, order_date) VALUES
+#     (1,1,  66.38,'2024-01-01'),(4,1,127.89,'2024-01-04'),
+#     (2,2,308.44,'2024-01-02'),(3,3, 75.36,'2024-01-03'),
+#     (6,5,430.98,'2024-01-06');
+#
+# INSERT INTO reviews (review_id, user_id, rating, review_date) VALUES
+#     (1,1,5,'2024-01-10'),(3,1,4,'2024-01-12'),
+#     (2,2,4,'2024-01-11'),(4,4,3,'2024-01-14');
+#
+# WITH order_summary AS (
+#     SELECT user_id,
+#            COUNT(*)    AS total_orders,
+#            SUM(amount) AS total_amount
+#     FROM orders GROUP BY user_id
+# ),
+# review_summary AS (
+#     SELECT user_id,
+#            AVG(rating) AS avg_rating,
+#            COUNT(*)    AS review_count
+#     FROM reviews GROUP BY user_id
+# )
+# SELECT u.user_id,
+#        u.name,
+#        COALESCE(o.total_orders, 0)           AS total_orders,
+#        COALESCE(ROUND(o.total_amount, 2), 0) AS total_amount,
+#        COALESCE(ROUND(r.avg_rating, 2), 0)   AS avg_rating,
+#        COALESCE(r.review_count, 0)           AS review_count
+# FROM users u
+# LEFT JOIN order_summary  o ON o.user_id = u.user_id
+# LEFT JOIN review_summary r ON r.user_id = u.user_id
+# ORDER BY u.user_id;
+#
+# -- Expected:
+# -- (1,'User_1', 2, 194.27, 4.50, 2)
+# -- (2,'User_2', 1, 308.44, 4.00, 1)
+# -- (3,'User_3', 1,  75.36, 0.00, 0)
+# -- (4,'User_4', 0,   0.00, 3.00, 1)
+# -- (5,'User_5', 1, 430.98, 0.00, 0)

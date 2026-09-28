@@ -185,3 +185,57 @@ SELECT COUNT(*) FROM reactions WHERE reaction_type LIKE '%heart%'
 """).collect()[0][0]
 assert like_count == 3, like_count
 print("[PASS] Q51 LIKE '%heart%' matches 3 rows including 'broken_heart' and 'hearted'")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same INNER JOIN + WHERE filter pattern verbatim.
+# The ON-vs-WHERE trap with LEFT JOIN translates identically: filter on the
+# heart type in WHERE for inner semantics, in ON for outer.
+#
+# CREATE TABLE posts (
+#     post_id    INT          NOT NULL,
+#     poster_id  INT          NOT NULL,
+#     post_date  DATE         NOT NULL,
+#     post_text  VARCHAR(256) NOT NULL,
+#     PRIMARY KEY (post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE reactions (
+#     reaction_id   INT         NOT NULL,
+#     post_id       INT         NOT NULL,
+#     user_id       INT         NOT NULL,
+#     reaction_type VARCHAR(16) NOT NULL,
+#     PRIMARY KEY (reaction_id),
+#     KEY ix_r_post_type (post_id, reaction_type),
+#     CONSTRAINT fk_r_post FOREIGN KEY (post_id) REFERENCES posts(post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO posts (post_id, poster_id, post_date, post_text) VALUES
+#     (1, 101, '2023-01-15', 'Great day at the beach'),
+#     (2, 102, '2023-01-20', 'Just finished a great book'),
+#     (3, 101, '2023-02-10', 'Excited about the new project'),
+#     (4, 103, '2023-02-22', 'Coffee and coding'),
+#     (8, 101, '2023-04-25', 'Happy Friday everyone'),
+#     (9, 106, '2023-05-08', 'Loving this weather');
+#
+# INSERT INTO reactions (reaction_id, post_id, user_id, reaction_type) VALUES
+#     ( 1, 1, 201, 'heart'),   ( 2, 1, 202, 'like'),
+#     ( 3, 1, 203, 'heart'),   ( 4, 2, 204, 'like'),
+#     ( 5, 2, 205, 'heart'),   ( 6, 3, 206, 'heart'),
+#     ( 7, 3, 207, 'heart'),   ( 8, 3, 208, 'heart'),
+#     (18, 8, 218, 'heart'),   (19, 8, 219, 'heart'),
+#     (20, 8, 220, 'heart'),   (21, 9, 221, 'like');
+#
+# SELECT p.post_id,
+#        p.post_text,
+#        COUNT(*) AS heart_count
+# FROM posts p
+# JOIN reactions r ON r.post_id = p.post_id
+# WHERE r.reaction_type = 'heart'
+# GROUP BY p.post_id, p.post_text
+# ORDER BY heart_count DESC, p.post_id;
+#
+# -- Expected:
+# -- (3, 'Excited about the new project', 3)
+# -- (8, 'Happy Friday everyone', 3)
+# -- (1, 'Great day at the beach', 2)
+# -- (2, 'Just finished a great book', 1)

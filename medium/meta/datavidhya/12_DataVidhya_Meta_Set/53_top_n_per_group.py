@@ -183,3 +183,52 @@ print("[PASS] Q53 ranking raw sales splits Laptop into 1000@1 and 500@3 -- never
 north_rows = [r for r in spark.sql(SQL).collect() if r[0] == "North"]
 assert len(north_rows) == 4, north_rows
 print("[PASS] Q53 North returns 4 rows for 3 ranks -- 'top 3' means ranks, not rows")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same aggregate-first / DENSE_RANK second pattern.
+# DENSE_RANK keeps ties and leaves no gap, so rank 3 still exists when
+# rank 2 is shared between Monitor and Tablet.
+#
+# CREATE TABLE sales (
+#     sale_id      INT       NOT NULL,
+#     region       VARCHAR(16) NOT NULL,
+#     product_name VARCHAR(64) NOT NULL,
+#     sale_date    DATE      NOT NULL,
+#     revenue      INT       NOT NULL,
+#     PRIMARY KEY (sale_id),
+#     KEY ix_sales_region_product (region, product_name)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO sales (sale_id, region, product_name, sale_date, revenue) VALUES
+#     (1, 'North', 'Laptop',  '2024-01-01', 1000),
+#     (2, 'North', 'Laptop',  '2024-01-02',  500),
+#     (3, 'North', 'Monitor', '2024-01-01',  800),
+#     (4, 'North', 'Tablet',  '2024-01-01',  800),
+#     (5, 'North', 'Mouse',   '2024-01-01',  200),
+#     (6, 'South', 'Phone',   '2024-01-01',  900),
+#     (7, 'South', 'Tablet',  '2024-01-01',  700),
+#     (8, 'South', 'Watch',   '2024-01-01',  600);
+#
+# WITH totals AS (
+#     SELECT region, product_name, SUM(revenue) AS total_revenue
+#     FROM sales GROUP BY region, product_name
+# ),
+# ranked AS (
+#     SELECT region, product_name, total_revenue,
+#            DENSE_RANK() OVER (PARTITION BY region
+#                               ORDER BY total_revenue DESC) AS region_rank
+#     FROM totals
+# )
+# SELECT region, product_name, total_revenue, region_rank
+# FROM ranked
+# WHERE region_rank <= 3
+# ORDER BY region, region_rank, product_name;
+#
+# -- Expected:
+# -- North Laptop  1500 1
+# -- North Monitor  800 2
+# -- North Tablet   800 2
+# -- North Mouse    200 3
+# -- South Phone    900 1
+# -- South Tablet   700 2
+# -- South Watch    600 3

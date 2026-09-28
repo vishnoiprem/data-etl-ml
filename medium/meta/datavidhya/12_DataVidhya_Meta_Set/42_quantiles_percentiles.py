@@ -140,3 +140,61 @@ SELECT PERCENTILE(salary, 0.25) FROM employee_salaries WHERE department = 'Sales
 """).collect()[0][0]
 assert manual == float(engine) == 47250.0, (manual, engine)
 print(f"[PASS] Q42 hand-computed p25 = {manual} matches PERCENTILE()")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 does NOT have an exact interpolating PERCENTILE aggregate.
+# PERCENT_RANK() exists as a window function only, not as a GROUP BY
+# aggregate. The portable workaround for an exact p25/p50/p75 per group is
+# the row-position self-join used in Q54 and Q67: compute the fractional
+# position, pick the surrounding values, then blend.
+#
+# CREATE TABLE employee_salaries (
+#     emp_id     INT       NOT NULL,
+#     department VARCHAR(16) NOT NULL,
+#     salary     INT       NOT NULL,
+#     PRIMARY KEY (emp_id),
+#     KEY ix_es_dept_salary (department, salary)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO employee_salaries (emp_id, department, salary) VALUES
+#     (101, 'Sales',       45000),
+#     (102, 'Sales',       48000),
+#     (103, 'Sales',       52000),
+#     (104, 'Sales',       55000),
+#     (201, 'Engineering', 75000),
+#     (202, 'Engineering', 78000),
+#     (203, 'Engineering', 82000),
+#     (204, 'Engineering', 85000);
+#
+# -- For each percentile p, the position is p * (n - 1). With n = 4 and p =
+# -- 0.25 the position is 0.75 -> lower = 1st value (offset 0), upper = 2nd
+# -- value (offset 1), fraction = 0.75. Generalise:
+# --     value = value_at_offset(FLOOR(pos)) + frac * (value_at_offset(CEIL(pos)) - ...)
+# WITH sorted AS (
+#     SELECT department, salary,
+#            ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary) - 1 AS pos0,
+#            COUNT(*)     OVER (PARTITION BY department)                     AS n
+#     FROM employee_salaries
+# ),
+# p AS (
+#     SELECT department,
+#            MAX(CASE WHEN pos0 = FLOOR(0.25 * (n-1)) THEN salary END) AS p25_lo,
+#            MAX(CASE WHEN pos0 = CEIL (0.25 * (n-1)) THEN salary END) AS p25_hi,
+#            MAX(CASE WHEN pos0 = FLOOR(0.50 * (n-1)) THEN salary END) AS p50_lo,
+#            MAX(CASE WHEN pos0 = CEIL (0.50 * (n-1)) THEN salary END) AS p50_hi,
+#            MAX(CASE WHEN pos0 = FLOOR(0.75 * (n-1)) THEN salary END) AS p75_lo,
+#            MAX(CASE WHEN pos0 = CEIL (0.75 * (n-1)) THEN salary END) AS p75_hi
+#     FROM sorted GROUP BY department
+# )
+# SELECT department,
+#        ROUND(p25_lo + (0.25*(n-1) - FLOOR(0.25*(n-1))) * (p25_hi - p25_lo), 2) AS p25,
+#        ROUND(p50_lo + (0.50*(n-1) - FLOOR(0.50*(n-1))) * (p50_hi - p50_lo), 2) AS p50,
+#        ROUND(p75_lo + (0.75*(n-1) - FLOOR(0.75*(n-1))) * (p75_hi - p75_lo), 2) AS p75,
+#        ROUND((p75_lo + (0.75*(n-1) - FLOOR(0.75*(n-1))) * (p75_hi - p75_lo))
+#            - (p25_lo + (0.25*(n-1) - FLOOR(0.25*(n-1))) * (p25_hi - p25_lo)), 2) AS iqr
+# FROM p
+# ORDER BY department;
+#
+# -- Expected:
+# -- Engineering 77250.00 80000.00 82750.00 5500.00
+# -- Sales       47250.00 50000.00 52750.00 5500.00

@@ -209,3 +209,61 @@ FROM csf_transactions
 """).collect()[0]
 assert (bad, good) == (8, 4), (bad, good)
 print("[PASS] Q47 COUNT(cond) returns 8 (false is not NULL); COUNT(CASE...) returns 4")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports YEAR() on TIMESTAMP/DATETIME and the same HAVING clause
+# with two conditional counts. The same COUNT(CASE WHEN ... THEN 1 END)
+# form is needed; COUNT(boolean) would count every row.
+#
+# CREATE TABLE csf_users (
+#     id   INT         NOT NULL,
+#     name VARCHAR(64) NOT NULL,
+#     PRIMARY KEY (id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE csf_transactions (
+#     id          INT       NOT NULL,
+#     user_id     INT       NOT NULL,
+#     created_at  TIMESTAMP NOT NULL,
+#     product_id  INT       NOT NULL,
+#     quantity    INT       NOT NULL,
+#     PRIMARY KEY (id),
+#     KEY ix_csf_user_date (user_id, created_at),
+#     CONSTRAINT fk_csf_user FOREIGN KEY (user_id) REFERENCES csf_users(id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO csf_users (id, name) VALUES
+#     (101, 'Alice'), (102, 'Bob'), (103, 'Charlie'), (104, 'David');
+#
+# INSERT INTO csf_transactions (id, user_id, created_at, product_id, quantity) VALUES
+#     ( 1, 101, '2019-01-10 10:00:00', 501, 1),
+#     ( 2, 101, '2019-03-15 12:00:00', 502, 1),
+#     ( 3, 101, '2019-05-20 09:30:00', 503, 1),
+#     ( 4, 101, '2019-09-10 14:45:00', 504, 1),
+#     ( 5, 101, '2020-01-05 10:00:00', 505, 1),
+#     ( 6, 101, '2020-04-10 11:30:00', 506, 1),
+#     ( 7, 101, '2020-07-20 15:00:00', 507, 1),
+#     ( 8, 101, '2020-11-25 16:20:00', 508, 1),
+#     ( 9, 102, '2019-02-15 10:00:00', 509, 1),
+#     (10, 102, '2020-02-15 10:00:00', 510, 1),
+#     (11, 103, '2020-03-01 11:00:00', 511, 2),
+#     (12, 103, '2020-05-01 14:00:00', 512, 1),
+#     (13, 103, '2020-07-01 16:00:00', 513, 2),
+#     (14, 103, '2020-08-01 18:00:00', 514, 1),
+#     (15, 104, '2019-06-15 10:00:00', 515, 1),
+#     (16, 104, '2019-07-15 10:00:00', 516, 1),
+#     (17, 104, '2019-08-15 10:00:00', 517, 1),
+#     (18, 104, '2020-06-15 10:00:00', 518, 1),
+#     (19, 104, '2020-07-15 10:00:00', 519, 1),
+#     (20, 104, '2020-08-15 10:00:00', 520, 1);
+#
+# SELECT u.name AS customer_name
+# FROM csf_transactions t
+# JOIN csf_users u ON u.id = t.user_id
+# GROUP BY u.name
+# HAVING COUNT(CASE WHEN YEAR(t.created_at) = 2019 THEN 1 END) >= 4
+#    AND COUNT(CASE WHEN YEAR(t.created_at) = 2020 THEN 1 END) >= 4
+# ORDER BY customer_name;
+#
+# -- Expected: ('Alice',).
+# -- The site's published 'Eve' is a source-data defect: csf_users has no Eve.

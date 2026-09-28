@@ -185,3 +185,39 @@ expect("Q63 three-way tie: RANK skips to 4, DENSE_RANK goes to 2", SQL, [
     ("C", dt.date(2024, 2, 3), 90.0, 1, 1),
     ("C", dt.date(2024, 2, 4), 70.0, 4, 2),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports RANK() and DENSE_RANK() with the same semantics as
+# Spark: RANK() leaves a gap after ties, DENSE_RANK() does not. The same
+# window spec drives both columns.
+#
+# CREATE TABLE store_sales (
+#     sale_id   INT            NOT NULL,
+#     store_id  VARCHAR(8)     NOT NULL,
+#     sale_date DATE           NOT NULL,
+#     amount    DECIMAL(10, 2) NOT NULL,
+#     PRIMARY KEY (sale_id),
+#     KEY ix_ss_store_amount (store_id, amount DESC)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO store_sales (sale_id, store_id, sale_date, amount) VALUES
+#     (1, 'A', '2024-01-01', 100.00),
+#     (2, 'A', '2024-01-02', 100.00),
+#     (3, 'A', '2024-01-03',  80.00),
+#     (4, 'A', '2024-01-04',  60.00),
+#     (5, 'B', '2024-01-01',  50.00);
+#
+# SELECT store_id,
+#        sale_date,
+#        amount,
+#        RANK()       OVER (PARTITION BY store_id ORDER BY amount DESC) AS sale_rank,
+#        DENSE_RANK() OVER (PARTITION BY store_id ORDER BY amount DESC) AS sale_dense_rank
+# FROM store_sales
+# ORDER BY store_id, amount DESC, sale_date;
+#
+# -- Expected:
+# -- A 2024-01-01 100.00 1 1
+# -- A 2024-01-02 100.00 1 1
+# -- A 2024-01-03  80.00 3 2
+# -- A 2024-01-04  60.00 4 3
+# -- B 2024-01-01  50.00 1 1

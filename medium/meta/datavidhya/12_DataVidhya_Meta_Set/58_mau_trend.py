@@ -188,3 +188,47 @@ may = [r for r in calendar if r[0] == dt.date(2024, 5, 1)][0]
 assert may[2] is None, may
 print("[PASS] Q58 add_months (Q40's rule) gives May a NULL predecessor; LAG gives 4 -- "
       "the wording decides")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has LAG() and the same first-then-LAG over observed months
+# pattern. The TRUNC-to-month is `DATE_FORMAT(event_date, '%Y-%m-01')` in
+# MySQL -- that is the equivalent of Spark's TRUNC(d, 'MM'). DO NOT use
+# DATE_FORMAT with the Java-style 'yyyy-MM' here, because the result would
+# be a STRING, not a DATE -- sorting still works, but date arithmetic on
+# it does not.
+#
+# CREATE TABLE events (
+#     user_id    INT          NOT NULL,
+#     event_date DATE         NOT NULL,
+#     event_type VARCHAR(16)  NOT NULL,
+#     KEY ix_events_user_date (user_id, event_date),
+#     KEY ix_events_date      (event_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO events (user_id, event_date, event_type) VALUES
+#     (1, '2024-01-05', 'login'),    (1, '2024-01-15', 'login'),
+#     (2, '2024-01-08', 'purchase'), (1, '2024-02-03', 'login'),
+#     (2, '2024-02-07', 'purchase'), (3, '2024-02-10', 'login'),
+#     (4, '2024-02-14', 'view'),     (1, '2024-03-05', 'login'),
+#     (2, '2024-03-10', 'purchase');
+#
+# WITH monthly AS (
+#     SELECT DATE_FORMAT(event_date, '%Y-%m-01') AS month,
+#            COUNT(DISTINCT user_id) AS mau
+#     FROM events
+#     GROUP BY DATE_FORMAT(event_date, '%Y-%m-01')
+# ),
+# trended AS (
+#     SELECT month, mau,
+#            LAG(mau) OVER (ORDER BY month) AS prev_mau
+#     FROM monthly
+# )
+# SELECT month, mau, prev_mau,
+#        ROUND((mau - prev_mau) * 100.0 / prev_mau, 2) AS growth_rate
+# FROM trended
+# ORDER BY month;
+#
+# -- Expected:
+# -- 2024-01-01 2 NULL  NULL
+# -- 2024-02-01 4 2      100.00
+# -- 2024-03-01 2 4      -50.00

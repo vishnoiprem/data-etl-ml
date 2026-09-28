@@ -173,3 +173,44 @@ expect("Q49 lowest txn_id is kept regardless of input order", SQL, [
     ("T007", "C101", "Starbucks", 5.50, D15, 1),
     ("T009", "C101", "Starbucks", 5.50, D15, 1),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same ROW_NUMBER() OVER (PARTITION BY ... ORDER BY
+# ...) flag pattern. The four-column business key excludes card_last4.
+#
+# CREATE TABLE transactions (
+#     txn_id      VARCHAR(8)    NOT NULL,
+#     customer_id VARCHAR(8)    NOT NULL,
+#     merchant    VARCHAR(32)   NOT NULL,
+#     amount      DECIMAL(10,2) NOT NULL,
+#     txn_date    DATE          NOT NULL,
+#     card_last4  INT           NOT NULL,
+#     PRIMARY KEY (txn_id),
+#     KEY ix_txn_business_key (customer_id, merchant, amount, txn_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO transactions (txn_id, customer_id, merchant, amount, txn_date, card_last4) VALUES
+#     ('T001', 'C101', 'Starbucks',  5.50, '2024-01-15', 4242),
+#     ('T002', 'C101', 'Starbucks',  5.50, '2024-01-15', 4242),
+#     ('T003', 'C102', 'Amazon',    99.99, '2024-01-15', 5555),
+#     ('T004', 'C101', 'Walmart',   25.00, '2024-01-16', 4242),
+#     ('T005', 'C103', 'Shell Gas', 45.00, '2024-01-15', 6666);
+#
+# SELECT txn_id, customer_id, merchant, amount, txn_date,
+#        CASE WHEN rn = 1 THEN 0 ELSE 1 END AS is_duplicate
+# FROM (
+#     SELECT txn_id, customer_id, merchant, amount, txn_date,
+#            ROW_NUMBER() OVER (
+#                PARTITION BY customer_id, merchant, amount, txn_date
+#                ORDER BY txn_id
+#            ) AS rn
+#     FROM transactions
+# ) t
+# ORDER BY txn_id;
+#
+# -- Expected:
+# -- T001 C101 Starbucks  5.50 2024-01-15 0
+# -- T002 C101 Starbucks  5.50 2024-01-15 1
+# -- T003 C102 Amazon    99.99 2024-01-15 0
+# -- T004 C101 Walmart   25.00 2024-01-16 0
+# -- T005 C103 Shell Gas 45.00 2024-01-15 0

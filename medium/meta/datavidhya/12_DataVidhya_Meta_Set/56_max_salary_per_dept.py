@@ -184,3 +184,67 @@ AS t(department_id, department_name)
 """)
 expect("Q56 Legal has no employees, so INNER JOIN omits it", SQL, EXPECTED)
 print("[PASS] Q56 an employee-less department is absent -- ask whether it should appear")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports RANK() OVER (PARTITION BY ... ORDER BY ...) identically
+# to Spark. The GROUP BY + self-join formulation is also portable and
+# keeps ties.
+#
+# CREATE TABLE departments (
+#     department_id   INT          NOT NULL,
+#     department_name VARCHAR(64)  NOT NULL,
+#     PRIMARY KEY (department_id),
+#     UNIQUE KEY uk_dept_name (department_name)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE employees (
+#     employee_id    INT          NOT NULL,
+#     name           VARCHAR(64)  NOT NULL,
+#     salary         INT          NOT NULL,
+#     department_id  INT          NOT NULL,
+#     PRIMARY KEY (employee_id),
+#     KEY ix_emp_dept_salary (department_id, salary DESC),
+#     CONSTRAINT fk_emp_dept FOREIGN KEY (department_id)
+#         REFERENCES departments(department_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO departments (department_id, department_name) VALUES
+#     (1, 'Engineering'), (2, 'Sales'), (3, 'HR');
+#
+# INSERT INTO employees (employee_id, name, salary, department_id) VALUES
+#     ( 1, 'Employee_1',  125520, 1),
+#     ( 2, 'Employee_2',   84530, 1),
+#     ( 4, 'Employee_4',   90301, 2),
+#     ( 5, 'Employee_5',  111905, 2),
+#     ( 7, 'Employee_7',  111905, 2),
+#     ( 9, 'Employee_9',  145536, 3),
+#     (10, 'Employee_10',  72721, 3);
+#
+# -- RANK form (keeps ties):
+# SELECT department_name, employee_name, max_salary
+# FROM (
+#     SELECT d.department_name, e.name AS employee_name, e.salary AS max_salary,
+#            RANK() OVER (PARTITION BY d.department_name
+#                         ORDER BY e.salary DESC) AS rnk
+#     FROM employees e
+#     JOIN departments d ON d.department_id = e.department_id
+# ) t
+# WHERE rnk = 1
+# ORDER BY department_name, employee_name;
+#
+# -- Alternative MAX+JOIN form, also keeps ties:
+# WITH dept_max AS (
+#     SELECT department_id, MAX(salary) AS max_salary
+#     FROM employees GROUP BY department_id
+# )
+# SELECT d.department_name, e.name AS employee_name, e.salary AS max_salary
+# FROM employees e
+# JOIN dept_max m ON m.department_id = e.department_id AND e.salary = m.max_salary
+# JOIN departments d ON d.department_id = e.department_id
+# ORDER BY d.department_name, e.name;
+#
+# -- Both forms return:
+# -- Engineering Employee_1 125520
+# -- HR          Employee_9 145536
+# -- Sales       Employee_5 111905
+# -- Sales       Employee_7 111905

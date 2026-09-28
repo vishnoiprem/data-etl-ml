@@ -89,3 +89,50 @@ expect("Q10 friend request acceptance rate", SQL, [
     ("2026-01", 3, 2, 66.67),
     ("2026-02", 2, 1, 50.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs and the LEFT JOIN + COUNT pattern. The denominator
+# is the count of SENT rows; the numerator is the count of those for which
+# a matching ACCEPTED row exists. Group by the SENT month -- never the
+# accepted month, or a late acceptance inflates a different month's numerator.
+# DATE_FORMAT uses MySQL's %Y-%m codes; Spark's 'yyyy-MM' is Java and does
+# NOT work in MySQL.
+#
+# CREATE TABLE friend_requests (
+#     sender_id   INT         NOT NULL,
+#     receiver_id INT         NOT NULL,
+#     action      VARCHAR(16) NOT NULL,
+#     action_date DATE        NOT NULL,
+#     PRIMARY KEY (sender_id, receiver_id, action),
+#     KEY ix_fr_action_date (action, action_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO friend_requests (sender_id, receiver_id, action, action_date) VALUES
+#     (1, 2, 'sent',     '2026-01-05'), (1, 2, 'accepted', '2026-01-06'),
+#     (1, 3, 'sent',     '2026-01-10'), (1, 3, 'accepted', '2026-01-12'),
+#     (2, 4, 'sent',     '2026-01-20'),
+#     (3, 5, 'sent',     '2026-02-02'), (3, 5, 'accepted', '2026-02-03'),
+#     (4, 6, 'sent',     '2026-02-14');
+#
+# WITH sent AS (
+#     SELECT sender_id, receiver_id, action_date AS sent_date
+#     FROM friend_requests WHERE action = 'sent'
+# ),
+# accepted AS (
+#     SELECT sender_id, receiver_id
+#     FROM friend_requests WHERE action = 'accepted'
+# )
+# SELECT DATE_FORMAT(s.sent_date, '%Y-%m') AS request_month,
+#        COUNT(*) AS requests_sent,
+#        COUNT(a.sender_id) AS requests_accepted,
+#        ROUND(100.0 * COUNT(a.sender_id) / COUNT(*), 2) AS acceptance_rate_pct
+# FROM sent s
+# LEFT JOIN accepted a
+#        ON a.sender_id = s.sender_id
+#       AND a.receiver_id = s.receiver_id
+# GROUP BY DATE_FORMAT(s.sent_date, '%Y-%m')
+# ORDER BY request_month;
+#
+# -- Expected:
+# -- 2026-01  3  2  66.67
+# -- 2026-02  2  1  50.00

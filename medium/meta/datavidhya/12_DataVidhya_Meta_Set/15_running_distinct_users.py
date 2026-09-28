@@ -95,3 +95,46 @@ expect("Q15 running distinct users", SQL, [
     ("2026-01-02", 1, 3),
     ("2026-01-03", 0, 3),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs and windowed SUM with ROWS BETWEEN UNBOUNDED
+# PRECEDING AND CURRENT ROW. The trick of the question is that COUNT(DISTINCT)
+# is NOT a valid window aggregate in any major engine -- not MySQL, not Spark,
+# not Postgres. The first-seen reduction is the correct reframe: count
+# first-appearances per date, then take a plain cumulative SUM. ROWS (not
+# RANGE) is the explicit frame so duplicate dates do not collapse.
+#
+# CREATE TABLE daily_users (
+#     user_id        INT  NOT NULL,
+#     activity_date  DATE NOT NULL,
+#     KEY ix_du_user_date (user_id, activity_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO daily_users (user_id, activity_date) VALUES
+#     (1, '2026-01-01'), (2, '2026-01-01'),
+#     (2, '2026-01-02'), (3, '2026-01-02'),
+#     (1, '2026-01-03');
+#
+# WITH first_seen AS (
+#     SELECT user_id, MIN(activity_date) AS first_date
+#     FROM daily_users
+#     GROUP BY user_id
+# ),
+# new_per_day AS (
+#     SELECT first_date AS activity_date, COUNT(*) AS new_users
+#     FROM first_seen
+#     GROUP BY first_date
+# ),
+# all_days AS (SELECT DISTINCT activity_date FROM daily_users)
+# SELECT d.activity_date,
+#        COALESCE(n.new_users, 0) AS new_users,
+#        SUM(COALESCE(n.new_users, 0)) OVER (ORDER BY d.activity_date
+#            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_distinct_users
+# FROM all_days d
+# LEFT JOIN new_per_day n ON n.activity_date = d.activity_date
+# ORDER BY d.activity_date;
+#
+# -- Expected:
+# -- 2026-01-01  2  2
+# -- 2026-01-02  1  3
+# -- 2026-01-03  0  3

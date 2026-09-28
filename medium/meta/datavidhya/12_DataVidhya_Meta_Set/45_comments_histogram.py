@@ -158,3 +158,53 @@ FROM per_user GROUP BY comment_count ORDER BY comment_count
 """).collect()
 assert [(r[0], r[1]) for r in zero_bucket] == [(0, 1), (1, 2), (2, 2)], zero_bucket
 print("[PASS] Q45 starting from `users` invents a comment_count = 0 bucket")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same two-stage aggregate-of-aggregate pattern. The
+# DATE '2020-01-01' literals become '2020-01-01', and the half-open month
+# filter is best written as a range on DATE columns.
+#
+# CREATE TABLE comments (
+#     comment_id   INT          NOT NULL,
+#     user_id      INT          NOT NULL,
+#     comment_date DATE         NOT NULL,
+#     comment_text VARCHAR(256) NOT NULL,
+#     likes        INT          NOT NULL,
+#     PRIMARY KEY (comment_id),
+#     KEY ix_comments_user_date (user_id, comment_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE users (
+#     user_id   INT         NOT NULL,
+#     name      VARCHAR(64) NOT NULL,
+#     join_date DATE        NOT NULL,
+#     PRIMARY KEY (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO comments (comment_id, user_id, comment_date, comment_text, likes) VALUES
+#     (1, 1, '2020-01-05', 'Comment text', 16),
+#     (2, 1, '2020-01-22', 'Comment text',  2),
+#     (3, 2, '2020-01-09', 'Comment text', 15),
+#     (4, 2, '2020-01-16', 'Comment text', 44),
+#     (5, 3, '2020-01-31', 'Comment text',  8),
+#     (6, 4, '2020-02-03', 'Comment text', 30),
+#     (7, 5, '2020-01-11', 'Comment text',  7);
+#
+# INSERT INTO users (user_id, name, join_date) VALUES
+#     (1, 'User_1', '2019-12-01'), (2, 'User_2', '2019-12-01'),
+#     (3, 'User_3', '2019-12-01'), (4, 'User_4', '2019-12-01'),
+#     (5, 'User_5', '2019-12-01');
+#
+# WITH per_user AS (
+#     SELECT user_id, COUNT(*) AS comment_count
+#     FROM comments
+#     WHERE comment_date >= '2020-01-01'
+#       AND comment_date <  '2020-02-01'
+#     GROUP BY user_id
+# )
+# SELECT comment_count, COUNT(*) AS user_count
+# FROM per_user
+# GROUP BY comment_count
+# ORDER BY comment_count;
+#
+# -- Expected: (1, 2), (2, 2).

@@ -80,3 +80,37 @@ ORDER BY days_between DESC, user_id
 expect("Q14 days first-to-last post 2024", SQL, [
     (2, 3, 365), (1, 2, 30), (4, 2, 10),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports DATEDIFF(max, min) identically. The 2024 filter must
+# happen BEFORE the HAVING count, otherwise user 4's lifetime span (2023-12
+# to 2024-03-11) gets reported as ~100 days. A user with exactly one 2024
+# post is excluded by HAVING COUNT(*) >= 2. DATEDIFF returns the number of
+# day boundaries between two dates -- inclusive count vs difference.
+#
+# CREATE TABLE user_posts (
+#     user_id   INT  NOT NULL,
+#     post_date DATE NOT NULL,
+#     KEY ix_up_user_date (user_id, post_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO user_posts (user_id, post_date) VALUES
+#     (1, '2024-01-01'), (1, '2024-01-31'),
+#     (2, '2024-01-01'), (2, '2024-06-15'), (2, '2024-12-31'),
+#     (3, '2024-05-05'),
+#     (4, '2023-12-01'), (4, '2024-03-01'), (4, '2024-03-11');
+#
+# SELECT user_id,
+#        COUNT(*) AS posts_2024,
+#        DATEDIFF(MAX(post_date), MIN(post_date)) AS days_between
+# FROM user_posts
+# WHERE post_date >= '2024-01-01'
+#   AND post_date <  '2025-01-01'
+# GROUP BY user_id
+# HAVING COUNT(*) >= 2
+# ORDER BY days_between DESC, user_id;
+#
+# -- Expected:
+# -- 2  3  365
+# -- 1  2   30
+# -- 4  2   10

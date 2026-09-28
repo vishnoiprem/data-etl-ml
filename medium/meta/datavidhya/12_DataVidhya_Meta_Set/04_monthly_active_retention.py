@@ -79,3 +79,36 @@ ORDER BY user_id
 """
 
 expect("Q04 monthly active retention", SQL, [(1,)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the conditional-flag aggregate with HAVING. The action
+# filter must apply to BOTH months -- a user whose only July row is 'logout'
+# (not in the qualifying action set) must be excluded. Month boundaries use
+# half-open ranges so a 2022-07-31 23:59:59 timestamp still falls in July.
+#
+# CREATE TABLE user_actions (
+#     user_id     INT         NOT NULL,
+#     action      VARCHAR(16) NOT NULL,
+#     action_date DATE        NOT NULL,
+#     KEY ix_ua_user_date (user_id, action_date),
+#     KEY ix_ua_action    (action)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO user_actions (user_id, action, action_date) VALUES
+#     (1, 'sign-in', '2022-06-10'), (1, 'like',    '2022-07-11'),
+#     (2, 'comment', '2022-07-05'),
+#     (3, 'like',    '2022-06-20'),
+#     (4, 'sign-in', '2022-06-15'), (4, 'logout',  '2022-07-15'),
+#     (5, 'sign-in', '2022-06-01'), (5, 'comment', '2022-08-02');
+#
+# SELECT user_id
+# FROM user_actions
+# WHERE action IN ('sign-in', 'like', 'comment')
+# GROUP BY user_id
+# HAVING MAX(CASE WHEN action_date >= '2022-07-01'
+#                 AND action_date <  '2022-08-01' THEN 1 ELSE 0 END) = 1
+#    AND MAX(CASE WHEN action_date >= '2022-06-01'
+#                AND action_date <  '2022-07-01' THEN 1 ELSE 0 END) = 1
+# ORDER BY user_id;
+#
+# -- Expected: (1,).

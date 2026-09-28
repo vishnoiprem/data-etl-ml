@@ -213,3 +213,64 @@ expect("Q52 reversed storage does not change the bidirectional answer", SQL,
 one_way_reversed = [(r[0], r[1]) for r in spark.sql(ONE_WAY_SQL).collect()]
 assert one_way_reversed == [(101, 1), (102, 1)], one_way_reversed
 print("[PASS] Q52 with the edge stored (102,101), the one-way join drops 101 to 1")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports UNION ALL into a symmetric edges CTE, DAYOFWEEK()
+# (1 = Sunday, 6 = Friday in MySQL too), and the same inner-join chain.
+#
+# CREATE TABLE friendships (
+#     user_id_1  INT NOT NULL,
+#     user_id_2  INT NOT NULL,
+#     PRIMARY KEY (user_id_1, user_id_2)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE posts (
+#     post_id   INT  NOT NULL,
+#     user_id   INT  NOT NULL,
+#     post_date DATE NOT NULL,
+#     PRIMARY KEY (post_id),
+#     KEY ix_posts_date (post_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE likes (
+#     like_id        INT  NOT NULL,
+#     post_id        INT  NOT NULL,
+#     liker_user_id  INT  NOT NULL,
+#     like_date      DATE NOT NULL,
+#     PRIMARY KEY (like_id),
+#     KEY ix_l_post (post_id),
+#     CONSTRAINT fk_l_post FOREIGN KEY (post_id) REFERENCES posts(post_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO friendships (user_id_1, user_id_2) VALUES
+#     (101, 102), (101, 103), (102, 104), (103, 104);
+#
+# INSERT INTO posts (post_id, user_id, post_date) VALUES
+#     (1, 101, '2024-01-05'),
+#     (2, 101, '2024-01-12'),
+#     (3, 102, '2024-01-12'),
+#     (4, 103, '2024-01-12');
+#
+# INSERT INTO likes (like_id, post_id, liker_user_id, like_date) VALUES
+#     (1, 1, 102, '2024-01-05'),
+#     (2, 1, 103, '2024-01-05'),
+#     (3, 2, 101, '2024-01-12'),
+#     (4, 3, 104, '2024-01-12'),
+#     (5, 4, 102, '2024-01-12');
+#
+# WITH edges AS (
+#     SELECT user_id_1 AS a, user_id_2 AS b FROM friendships
+#     UNION ALL
+#     SELECT user_id_2 AS a, user_id_1 AS b FROM friendships
+# ),
+# friday_posts AS (
+#     SELECT post_id, user_id FROM posts WHERE DAYOFWEEK(post_date) = 6
+# )
+# SELECT p.user_id, COUNT(*) AS friday_friend_likes
+# FROM friday_posts p
+# JOIN likes  l ON l.post_id = p.post_id
+# JOIN edges  e ON e.a = p.user_id AND e.b = l.liker_user_id
+# GROUP BY p.user_id
+# ORDER BY friday_friend_likes DESC, p.user_id;
+#
+# -- Expected: (101, 2), (102, 1).

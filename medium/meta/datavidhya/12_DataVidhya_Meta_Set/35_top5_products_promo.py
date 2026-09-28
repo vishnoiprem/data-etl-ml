@@ -201,3 +201,75 @@ AS t(sale_id, product_id, quantity, sale_date, revenue)
 """)
 expect("Q35 orphan sale (product 99) excluded entirely", SQL,
        [("Product A", 750.0, 500.0, 250.0)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTE + EXISTS semi-join identically. The EXISTS keeps a
+# sale inside two overlapping promotions as a single row; an INNER JOIN to
+# `promotions` would fan out and double-count. ROUND(..., 1) is enough since
+# revenue is INT in this table.
+#
+# CREATE TABLE products (
+#     product_id   INT         NOT NULL,
+#     product_name VARCHAR(64) NOT NULL,
+#     category     VARCHAR(32) NOT NULL,
+#     PRIMARY KEY (product_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE promotions (
+#     promo_id     INT  NOT NULL,
+#     product_id   INT  NOT NULL,
+#     start_date   DATE NOT NULL,
+#     end_date     DATE NOT NULL,
+#     discount_pct INT  NOT NULL,
+#     PRIMARY KEY (promo_id),
+#     KEY ix_promo_prod_date (product_id, start_date, end_date),
+#     CONSTRAINT fk_promo_product FOREIGN KEY (product_id)
+#         REFERENCES products(product_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE sales (
+#     sale_id    INT  NOT NULL,
+#     product_id INT  NOT NULL,
+#     quantity   INT  NOT NULL,
+#     sale_date  DATE NOT NULL,
+#     revenue    INT  NOT NULL,
+#     PRIMARY KEY (sale_id),
+#     KEY ix_sales_prod_date (product_id, sale_date),
+#     CONSTRAINT fk_sales_product FOREIGN KEY (product_id)
+#         REFERENCES products(product_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO products (product_id, product_name, category) VALUES
+#     (1, 'Product A', 'Electronics');
+#
+# INSERT INTO promotions (promo_id, product_id, start_date, end_date, discount_pct) VALUES
+#     (1, 1, '2024-01-01', '2024-01-05', 10);
+#
+# INSERT INTO sales (sale_id, product_id, quantity, sale_date, revenue) VALUES
+#     (1, 1, 10, '2024-01-01', 500),
+#     (2, 1,  5, '2024-01-10', 250);
+#
+# -- EXISTS is the semi-join: a sale inside multiple overlapping promotions
+# -- is matched once, so revenue is summed once. An INNER JOIN to promotions
+# -- would fan the row out and double-count.
+# WITH tagged AS (
+#     SELECT p.product_name,
+#            s.revenue,
+#            CASE WHEN EXISTS (
+#                     SELECT 1 FROM promotions pr
+#                     WHERE pr.product_id = s.product_id
+#                       AND s.sale_date BETWEEN pr.start_date AND pr.end_date
+#                 ) THEN 1 ELSE 0 END AS is_promo
+#     FROM sales s
+#     JOIN products p ON s.product_id = p.product_id
+# )
+# SELECT product_name,
+#        ROUND(SUM(revenue), 1)                                       AS total_revenue,
+#        ROUND(SUM(CASE WHEN is_promo = 1 THEN revenue ELSE 0 END), 1) AS promo_revenue,
+#        ROUND(SUM(CASE WHEN is_promo = 0 THEN revenue ELSE 0 END), 1) AS non_promo_revenue
+# FROM tagged
+# GROUP BY product_name
+# ORDER BY total_revenue DESC, product_name
+# LIMIT 5;
+#
+# -- Expected: ('Product A', 750.0, 500.0, 250.0).

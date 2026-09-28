@@ -187,3 +187,64 @@ FROM exp e FULL OUTER JOIN act a ON a.category = e.category
 """).collect()})
 assert full_outer == ["A", "B", "C", "Z"], full_outer
 print("[PASS] Q48 FULL OUTER JOIN would admit the unexpected category Z")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same two-CTE pre-aggregation + LEFT JOIN shape.
+# The COALESCE on the LEFT-JOINed actual_count is what saves category C
+# from NULL propagation. Note that MySQL 8.0 has no FULL OUTER JOIN -- use
+# UNION for the unexpected-category scan.
+#
+# CREATE TABLE actual_records (
+#     record_id    INT             NOT NULL,
+#     category     VARCHAR(8)      NOT NULL,
+#     actual_date  DATE            NOT NULL,
+#     value        DECIMAL(10, 2)  NOT NULL,
+#     PRIMARY KEY (record_id),
+#     KEY ix_ar_category (category)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE expected_records (
+#     record_id    INT     NOT NULL,
+#     category     VARCHAR(8) NOT NULL,
+#     expected_date DATE   NOT NULL,
+#     PRIMARY KEY (record_id),
+#     KEY ix_er_category (category)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO actual_records (record_id, category, actual_date, value) VALUES
+#     (70001, 'A', '2024-06-04', 4606.98),
+#     (70002, 'A', '2024-03-19', 1680.69),
+#     (70003, 'A', '2024-05-07', 2394.83),
+#     (70014, 'B', '2024-04-20', 2609.24),
+#     (70015, 'B', '2024-07-28', 3677.63),
+#     (70016, 'B', '2024-03-27', 4546.52),
+#     (70099, 'Z', '2024-08-01',  999.99);
+#
+# INSERT INTO expected_records (record_id, category, expected_date) VALUES
+#     (70001, 'A', '2024-02-02'), (70002, 'A', '2024-04-05'),
+#     (70003, 'A', '2024-08-01'), (70004, 'A', '2024-06-12'),
+#     (70014, 'B', '2024-01-25'), (70015, 'B', '2024-09-25'),
+#     (70016, 'B', '2024-01-18'), (70029, 'C', '2024-01-07'),
+#     (70030, 'C', '2024-12-30');
+#
+# WITH exp AS (
+#     SELECT category, COUNT(*) AS expected_count
+#     FROM expected_records GROUP BY category
+# ),
+# act AS (
+#     SELECT category, COUNT(*) AS actual_count
+#     FROM actual_records GROUP BY category
+# )
+# SELECT e.category,
+#        e.expected_count,
+#        COALESCE(a.actual_count, 0)                     AS actual_count,
+#        e.expected_count - COALESCE(a.actual_count, 0)  AS missing_count,
+#        ROUND(COALESCE(a.actual_count, 0) * 100.0 / e.expected_count, 2) AS coverage_pct
+# FROM exp e
+# LEFT JOIN act a ON a.category = e.category
+# ORDER BY e.category;
+#
+# -- Expected:
+# -- A 4 3 1  75.00
+# -- B 3 3 0 100.00
+# -- C 2 0 2   0.00

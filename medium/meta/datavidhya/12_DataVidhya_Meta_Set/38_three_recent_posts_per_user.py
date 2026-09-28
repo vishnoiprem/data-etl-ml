@@ -154,3 +154,46 @@ SELECT post_id, post_rank FROM (
 """).collect()
 assert [(r.post_id, r.post_rank) for r in deterministic] == [(2, 1), (1, 2), (3, 3)], deterministic
 print("[PASS] Q38 same-date posts need post_id as a tiebreak to be reproducible")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports window functions identically to Spark. The subquery is
+# structural: a window function cannot appear in WHERE, so the rank column
+# must be materialised in an inner SELECT before filtering. ROW_NUMBER is the
+# right rank choice here because the spec guarantees at most one post per
+# user per day; for ambiguous dates add post_id as a tiebreak.
+#
+# CREATE TABLE posts (
+#     post_id    INT         NOT NULL,
+#     user_id    INT         NOT NULL,
+#     content    VARCHAR(64) NOT NULL,
+#     created_at DATE        NOT NULL,
+#     likes      INT         NOT NULL,
+#     PRIMARY KEY (post_id),
+#     KEY ix_posts_user_date (user_id, created_at DESC),
+#     CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO posts (post_id, user_id, content, created_at, likes) VALUES
+#     (1, 10, 'Old',       '2024-01-01', 1),
+#     (2, 10, 'Middle',    '2024-01-02', 2),
+#     (3, 10, 'Recent',    '2024-01-03', 3),
+#     (4, 10, 'Newest',    '2024-01-04', 4),
+#     (5, 20, 'Only post', '2024-02-01', 5);
+#
+# SELECT user_id, post_id, content, created_at, post_rank
+# FROM (
+#     SELECT user_id,
+#            post_id,
+#            content,
+#            created_at,
+#            ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC) AS post_rank
+#     FROM posts
+# ) ranked
+# WHERE post_rank <= 3
+# ORDER BY user_id, post_rank;
+#
+# -- Expected:
+# -- 10  4  'Newest'    2024-01-04  1
+# -- 10  3  'Recent'    2024-01-03  2
+# -- 10  2  'Middle'    2024-01-02  3
+# -- 20  5  'Only post' 2024-02-01  1

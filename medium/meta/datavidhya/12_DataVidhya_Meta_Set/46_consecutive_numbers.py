@@ -155,3 +155,35 @@ SELECT * FROM VALUES
 AS t(id, num)
 """)
 expect("Q46 two separate runs of 5 yield one row", SQL, [(5,)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same `id - ROW_NUMBER() OVER (PARTITION BY num
+# ORDER BY id)` gap-and-island pattern verbatim.
+#
+# CREATE TABLE logs (
+#     id  INT NOT NULL,
+#     num INT NOT NULL,
+#     PRIMARY KEY (id),
+#     KEY ix_logs_num (num, id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO logs (id, num) VALUES
+#     (1, 1), (2, 1), (3, 1),
+#     (4, 2), (5, 2),
+#     (6, 3), (7, 3), (8, 3);
+#
+# WITH islands AS (
+#     SELECT num,
+#            id - ROW_NUMBER() OVER (PARTITION BY num ORDER BY id) AS island
+#     FROM logs
+# ),
+# runs AS (
+#     SELECT num, island, COUNT(*) AS run_length
+#     FROM islands GROUP BY num, island
+# )
+# SELECT DISTINCT num AS consecutive_num
+# FROM runs
+# WHERE run_length >= 3
+# ORDER BY consecutive_num;
+#
+# -- Expected: (1,), (3,).

@@ -205,3 +205,60 @@ SELECT running_total FROM (
 """).collect()[0][0]
 assert by_amount == 1350, by_amount
 print("[PASS] Q37 ordering running_total by amount gives E001 = 1350, not 100")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports RANK, DENSE_RANK, and windowed SUM with ROWS BETWEEN
+# UNBOUNDED PRECEDING AND CURRENT ROW. RANK skips after ties (1,1,3) while
+# DENSE_RANK does not (1,1,2); the category `electronics` has two events at
+# 250 that must share a rank and let the next value take rank 4, not 5. ROWS
+# (not RANGE) is the explicit frame so duplicate dates cannot collapse peer
+# rows into one step.
+#
+# CREATE TABLE events (
+#     event_id   VARCHAR(8)   NOT NULL,
+#     user_id    VARCHAR(8)   NOT NULL,
+#     event_date DATE         NOT NULL,
+#     amount     INT          NOT NULL,
+#     category   VARCHAR(32)  NOT NULL,
+#     PRIMARY KEY (event_id),
+#     KEY ix_events_user_date (user_id, event_date),
+#     KEY ix_events_cat_amt   (category, amount DESC)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO events (event_id, user_id, event_date, amount, category) VALUES
+#     ('E001', 'U001', '2024-01-05', 100, 'electronics'),
+#     ('E002', 'U001', '2024-01-10', 250, 'electronics'),
+#     ('E003', 'U001', '2024-01-15', 150, 'clothing'),
+#     ('E004', 'U002', '2024-01-08', 200, 'clothing'),
+#     ('E005', 'U002', '2024-01-12',  80, 'electronics'),
+#     ('E006', 'U002', '2024-01-20', 300, 'home'),
+#     ('E007', 'U003', '2024-01-05', 120, 'home'),
+#     ('E008', 'U003', '2024-01-10',  90, 'clothing'),
+#     ('E009', 'U003', '2024-01-18', 180, 'electronics'),
+#     ('E010', 'U001', '2024-02-05', 220, 'home'),
+#     ('E011', 'U002', '2024-02-08', 110, 'clothing'),
+#     ('E012', 'U003', '2024-02-15', 250, 'electronics'),
+#     ('E013', 'U001', '2024-02-20', 160, 'clothing'),
+#     ('E014', 'U002', '2024-02-25', 270, 'electronics'),
+#     ('E015', 'U003', '2024-02-28', 140, 'home'),
+#     ('E016', 'U001', '2024-03-10', 300, 'electronics'),
+#     ('E017', 'U002', '2024-03-12', 190, 'home'),
+#     ('E018', 'U003', '2024-03-15', 100, 'clothing'),
+#     ('E019', 'U001', '2024-03-20', 170, 'home'),
+#     ('E020', 'U002', '2024-03-25', 240, 'clothing');
+#
+# SELECT event_id,
+#        user_id,
+#        category,
+#        amount,
+#        event_date,
+#        RANK()       OVER (PARTITION BY user_id  ORDER BY amount DESC) AS user_rank,
+#        DENSE_RANK() OVER (PARTITION BY category ORDER BY amount DESC) AS category_rank,
+#        SUM(amount)  OVER (PARTITION BY user_id  ORDER BY event_date
+#                           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+# FROM events
+# ORDER BY event_id;
+#
+# -- The 20 output rows match the Spark expected block. The (E002, E012) pair
+# -- at 250 in `electronics` is the test of RANK vs DENSE_RANK; with RANK the
+# -- next value (180, E009) would be rank 5.

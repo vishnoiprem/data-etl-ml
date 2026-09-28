@@ -193,3 +193,47 @@ JOIN amazon_transactions b ON b.user_id = a.user_id AND b.created_at > a.created
 """).count()
 assert without_distinct == 3, without_distinct
 print("[PASS] Q64 without DISTINCT the user appears 3 times (one row per qualifying pair)")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same self-join + DATEDIFF + DISTINCT pattern. The
+# one-directional `b.created_at > a.created_at` predicate simultaneously
+# halves the join output and excludes same-date pairs. MySQL also has a
+# window-function LAG form, identical to Spark.
+#
+# CREATE TABLE amazon_transactions (
+#     id          INT          NOT NULL,
+#     user_id     INT          NOT NULL,
+#     item        VARCHAR(64)  NOT NULL,
+#     created_at  DATE         NOT NULL,
+#     revenue     INT          NOT NULL,
+#     PRIMARY KEY (id),
+#     KEY ix_at_user_date (user_id, created_at)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO amazon_transactions (id, user_id, item, created_at, revenue) VALUES
+#     (1, 10, 'Book', '2024-01-01', 20),
+#     (2, 10, 'Pen',  '2024-01-06',  5),
+#     (3, 20, 'Game', '2024-02-01', 40),
+#     (4, 20, 'Toy',  '2024-02-12', 30),
+#     (5, 30, 'Lamp', '2024-03-01', 25);
+#
+# SELECT DISTINCT a.user_id
+# FROM amazon_transactions a
+# JOIN amazon_transactions b
+#   ON b.user_id    = a.user_id
+#  AND b.created_at > a.created_at
+#  AND DATEDIFF(b.created_at, a.created_at) <= 7
+# ORDER BY a.user_id;
+#
+# -- LAG form, identical semantics, single window instead of a self-join:
+# SELECT DISTINCT user_id
+# FROM (
+#     SELECT user_id,
+#            DATEDIFF(created_at,
+#                     LAG(created_at) OVER (PARTITION BY user_id ORDER BY created_at)) AS gap
+#     FROM (SELECT DISTINCT user_id, created_at FROM amazon_transactions) t
+# ) g
+# WHERE gap BETWEEN 1 AND 7
+# ORDER BY user_id;
+#
+# -- Both forms return: (10,).

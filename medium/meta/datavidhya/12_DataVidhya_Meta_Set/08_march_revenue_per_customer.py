@@ -77,3 +77,39 @@ ORDER BY revenue DESC, customer_id
 """
 
 expect("Q08 March revenue per customer", SQL, [(11, 90.0), (10, 60.0)])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same GROUP BY + SUM(quantity * unit_cost) pattern.
+# Revenue is computed per row first, then summed -- SUM(quantity) * SUM(unit_cost)
+# would be wrong (cross-product). The date range is half-open so the partition
+# stays prunable on a date-partitioned table, and the year is implicit (no
+# EXTRACT(MONTH ...) = 3 that would also match March of other years).
+#
+# CREATE TABLE cust_orders (
+#     order_id    INT            NOT NULL,
+#     customer_id INT            NOT NULL,
+#     order_date  DATE           NOT NULL,
+#     quantity    INT            NOT NULL,
+#     unit_cost   DECIMAL(10, 2) NOT NULL,
+#     PRIMARY KEY (order_id),
+#     KEY ix_co_customer_date (customer_id, order_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO cust_orders (order_id, customer_id, order_date, quantity, unit_cost) VALUES
+#     (1, 10, '2026-03-02', 2, 25.00),
+#     (2, 10, '2026-03-15', 1, 10.00),
+#     (3, 11, '2026-03-20', 3, 30.00),
+#     (4, 12, '2026-02-28', 5, 100.00),
+#     (5, 11, '2026-04-01', 1, 99.00);
+#
+# SELECT customer_id,
+#        ROUND(SUM(quantity * unit_cost), 2) AS revenue
+# FROM cust_orders
+# WHERE order_date >= '2026-03-01'
+#   AND order_date <  '2026-04-01'
+# GROUP BY customer_id
+# ORDER BY revenue DESC, customer_id;
+#
+# -- Expected:
+# -- 11  90.00
+# -- 10  60.00

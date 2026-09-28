@@ -192,3 +192,55 @@ assert [(r[0], r[1], r[2], r[3]) for r in gapped] == [
     (1, 3, 1, 1), (2, 3, 1, 1), (3, 1, 3, 2), (4, 1, 3, 2),
 ], gapped
 print("[PASS] Q59 with a count gap, RANK gives 1,1,3,3 and DENSE_RANK gives 1,1,2,2")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same UNION ALL into a participant stream and
+# RANK() OVER (ORDER BY ...). The OR-join workaround is portable too but
+# the optimizer cannot use a hash join on an OR predicate.
+#
+# CREATE TABLE users (
+#     user_id  INT         NOT NULL,
+#     username VARCHAR(32) NOT NULL,
+#     PRIMARY KEY (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE messages (
+#     message_id   INT       NOT NULL,
+#     sender_id    INT       NOT NULL,
+#     receiver_id  INT       NOT NULL,
+#     message_date DATE      NOT NULL,
+#     PRIMARY KEY (message_id),
+#     KEY ix_msg_sender   (sender_id),
+#     KEY ix_msg_receiver (receiver_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO users (user_id, username) VALUES
+#     (1, 'alice'), (2, 'bob'), (3, 'charlie'), (4, 'david');
+#
+# INSERT INTO messages (message_id, sender_id, receiver_id, message_date) VALUES
+#     (1, 1, 2, '2023-01-15'),
+#     (2, 1, 3, '2023-01-20'),
+#     (3, 2, 1, '2023-02-10'),
+#     (4, 1, 4, '2023-02-22');
+#
+# WITH participants AS (
+#     SELECT sender_id   AS user_id FROM messages
+#     UNION ALL
+#     SELECT receiver_id AS user_id FROM messages
+# ),
+# counted AS (
+#     SELECT user_id, COUNT(*) AS message_count
+#     FROM participants
+#     GROUP BY user_id
+# )
+# SELECT c.user_id, u.username, c.message_count,
+#        RANK() OVER (ORDER BY c.message_count DESC) AS activity_rank
+# FROM counted c
+# JOIN users u ON u.user_id = c.user_id
+# ORDER BY activity_rank, c.user_id;
+#
+# -- Expected:
+# -- (1, 'alice',   4, 1)
+# -- (2, 'bob',     2, 2)
+# -- (3, 'charlie', 1, 3)
+# -- (4, 'david',   1, 3)

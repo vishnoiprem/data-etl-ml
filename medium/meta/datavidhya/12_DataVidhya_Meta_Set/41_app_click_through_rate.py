@@ -152,3 +152,41 @@ FROM events WHERE app_id = 101
 """).collect()[0]
 assert (bad_count, good_count) == (4, 1), (bad_count, good_count)
 print("[PASS] Q41 COUNT(cond) returns 4 (false is not NULL); COUNT(CASE...) returns 1")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports the same SUM(CASE WHEN ... THEN 1 ELSE 0 END) pattern
+# in the WHERE/GROUP BY/HAVING flow. The HAVING impressions > 0 filter is
+# what keeps app 105 out of the result; without it, MySQL returns NULL
+# silently.
+#
+# CREATE TABLE events (
+#     event_id   INT         NOT NULL,
+#     app_id     INT         NOT NULL,
+#     event_type VARCHAR(16) NOT NULL,
+#     event_date DATE        NOT NULL,
+#     PRIMARY KEY (event_id),
+#     KEY ix_events_app_date (app_id, event_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO events (event_id, app_id, event_type, event_date) VALUES
+#     (1, 101, 'impression', '2022-01-05'),
+#     (2, 101, 'impression', '2022-01-06'),
+#     (3, 101, 'click',      '2022-01-07'),
+#     (4, 101, 'impression', '2021-12-31'),
+#     (5, 102, 'impression', '2022-01-10'),
+#     (6, 102, 'impression', '2022-01-11'),
+#     (7, 102, 'impression', '2022-01-12'),
+#     (8, 102, 'click',      '2022-01-13'),
+#     (9, 105, 'click',      '2022-03-10');
+#
+# SELECT app_id,
+#        ROUND(100.0 * SUM(CASE WHEN event_type = 'click'      THEN 1 ELSE 0 END)
+#                    / SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END), 2) AS ctr
+# FROM events
+# WHERE event_date >= '2022-01-01'
+#   AND event_date <  '2023-01-01'
+# GROUP BY app_id
+# HAVING SUM(CASE WHEN event_type = 'impression' THEN 1 ELSE 0 END) > 0
+# ORDER BY app_id;
+#
+# -- Expected: (101, 50.00), (102, 33.33).

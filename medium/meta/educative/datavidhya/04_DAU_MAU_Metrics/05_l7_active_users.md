@@ -64,10 +64,14 @@ ORDER BY a.d;
 ### Expected output
 ```
    as_of_date   l7_users   l28_users
-   2026-01-08   5          6
-   2026-01-30   1          1
+   2026-01-08   6          8
+   2026-01-30   1          5
 ```
-Why: on `2026-01-08`, the L7 window covers `2026-01-02..2026-01-08`, which has 5 distinct users (1,3,4,7,8). The L28 window covers `2026-01-09 - 27 days` through `2026-01-08` = the full dataset except user 6 on `2026-01-30`, so 6 distinct users (1,2,3,4,5,7,8 minus the 2026-01-30 row = 1,2,3,4,5,7,8 = 7 actually; recount below).
+Walk-through:
+- `2026-01-08`, L7 window = `2026-01-02..2026-01-08`: users 1,3,4,5,7,8 = 6 distinct.
+- `2026-01-08`, L28 window = `2025-12-12..2026-01-08`: every user has at least one event in this window = 8 distinct.
+- `2026-01-30`, L7 window = `2026-01-24..2026-01-30`: only user 6 = 1 distinct.
+- `2026-01-30`, L28 window = `2026-01-03..2026-01-30`: users 1 (Jan 8), 4 (Jan 9), 6 (Jan 30), 7 (Jan 8), 8 (Jan 9) = 5 distinct.
 
 ## Common Mistakes
 - Off-by-one: L7 should be 7 days, including today — that's `D-6 .. D` (6 preceding + 1 current).

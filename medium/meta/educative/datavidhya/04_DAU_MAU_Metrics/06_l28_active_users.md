@@ -64,8 +64,8 @@ ORDER BY a.d;
 ### Expected output
 ```
    as_of_date   l7_users   l28_users
-   2026-01-08   5          6
-   2026-01-30   1          1
+   2026-01-08   6          8
+   2026-01-30   1          5
 ```
 
 ## Common Mistakes

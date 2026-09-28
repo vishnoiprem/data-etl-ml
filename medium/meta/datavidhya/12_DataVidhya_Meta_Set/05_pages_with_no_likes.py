@@ -85,3 +85,47 @@ anti = (spark.table("pages").join(spark.table("page_likes"), "page_id", "left_an
         .orderBy("page_id").select("page_id", "page_name"))
 assert [tuple(r) for r in anti.collect()] == [(103, "Empty Page"), (104, "Also Empty")]
 print("[PASS] Q05 LEFT ANTI join matches")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports LEFT JOIN ... IS NULL and NOT EXISTS for anti-joins.
+# NOT IN is portable but breaks if the subquery can return NULL -- the result
+# collapses to an empty set silently. NOT EXISTS and LEFT JOIN ... IS NULL are
+# both NULL-safe. MySQL has no native LEFT ANTI join keyword, so use one of
+# these two forms.
+#
+# CREATE TABLE pages (
+#     page_id   INT         NOT NULL,
+#     page_name VARCHAR(64) NOT NULL,
+#     PRIMARY KEY (page_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE page_likes (
+#     page_id INT NOT NULL,
+#     user_id INT NOT NULL,
+#     PRIMARY KEY (page_id, user_id),
+#     KEY ix_pl_user (user_id),
+#     CONSTRAINT fk_pl_page FOREIGN KEY (page_id) REFERENCES pages(page_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO pages (page_id, page_name) VALUES
+#     (101, 'Cooking Daily'), (102, 'Tech Weekly'),
+#     (103, 'Empty Page'),    (104, 'Also Empty');
+#
+# INSERT INTO page_likes (page_id, user_id) VALUES
+#     (101, 1), (101, 2), (102, 1);
+#
+# SELECT p.page_id, p.page_name
+# FROM pages p
+# LEFT JOIN page_likes l ON l.page_id = p.page_id
+# WHERE l.page_id IS NULL
+# ORDER BY p.page_id;
+#
+# -- Equivalent NOT EXISTS form (often optimiser-preferred):
+# SELECT p.page_id, p.page_name
+# FROM pages p
+# WHERE NOT EXISTS (SELECT 1 FROM page_likes l WHERE l.page_id = p.page_id)
+# ORDER BY p.page_id;
+#
+# -- Expected:
+# -- 103  'Empty Page'
+# -- 104  'Also Empty'

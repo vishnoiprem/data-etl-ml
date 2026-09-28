@@ -159,3 +159,54 @@ ORDER BY ABS(diff) DESC
 """).collect()]
 assert by_abs == ["HR", "Engineering", "Sales"], by_abs
 print("[PASS] Q43 ordering by ABS(diff) gives HR/Engineering/Sales -- diff is signed")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports both the window form (OVER () with empty PARTITION BY
+# for the company average) and the GROUP BY + CROSS JOIN form. The CROSS
+# JOIN to a single-row aggregate is portable and tends to be cheaper than
+# the empty-OVER form on real data.
+#
+# CREATE TABLE employees (
+#     employee_id INT            NOT NULL,
+#     name        VARCHAR(64)    NOT NULL,
+#     salary      DECIMAL(12, 2) NOT NULL,
+#     department  VARCHAR(32)    NOT NULL,
+#     PRIMARY KEY (employee_id),
+#     KEY ix_emp_dept (department)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO employees (employee_id, name, salary, department) VALUES
+#     (1, 'Alice',   80000.00, 'Sales'),
+#     (2, 'Bob',     75000.00, 'Sales'),
+#     (3, 'Charlie', 90000.00, 'Engineering'),
+#     (4, 'David',   95000.00, 'Engineering'),
+#     (5, 'Eve',     70000.00, 'HR');
+#
+# -- Window form (OVER () = whole-table grain):
+# SELECT DISTINCT
+#        department,
+#        ROUND(AVG(salary) OVER (PARTITION BY department), 2) AS dept_avg,
+#        ROUND(AVG(salary) OVER (), 2)                        AS company_avg,
+#        ROUND(AVG(salary) OVER (PARTITION BY department)
+#              - AVG(salary) OVER (), 2)                      AS diff
+# FROM employees
+# ORDER BY diff DESC;
+#
+# -- GROUP BY + CROSS JOIN form (often cheaper):
+# WITH dept AS (
+#     SELECT department, AVG(salary) AS dept_avg FROM employees GROUP BY department
+# ),
+# company AS (
+#     SELECT AVG(salary) AS company_avg FROM employees
+# )
+# SELECT d.department,
+#        ROUND(d.dept_avg, 2)                 AS dept_avg,
+#        ROUND(c.company_avg, 2)              AS company_avg,
+#        ROUND(d.dept_avg - c.company_avg, 2) AS diff
+# FROM dept d CROSS JOIN company c
+# ORDER BY diff DESC;
+#
+# -- Both forms return:
+# -- Engineering 92500.00 82000.00  10500.00
+# -- Sales       77500.00 82000.00  -4500.00
+# -- HR          70000.00 82000.00 -12000.00

@@ -80,3 +80,35 @@ ORDER BY state, fraud_score DESC
 expect("Q09 top 5th percentile fraud per state", SQL, [
     (4, "CA", 90.0), (6, "NY", 95.0), (7, "TX", 50.0),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports PERCENT_RANK as a window function. PERCENT_RANK() = 0
+# for the first row of every partition by construction, so a `< 0.05` filter
+# returns the single top row per state -- including single-row states (Texas).
+# NTILE(20) would be wrong on small partitions: with 4 rows, NTILE puts one
+# row in each of buckets 1-4 and "top 5%" becomes the top 25%.
+#
+# CREATE TABLE fraud_scores (
+#     record_id   INT         NOT NULL,
+#     state       VARCHAR(8)  NOT NULL,
+#     fraud_score DECIMAL(6,2) NOT NULL,
+#     PRIMARY KEY (record_id),
+#     KEY ix_fs_state_score (state, fraud_score DESC)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO fraud_scores (record_id, state, fraud_score) VALUES
+#     (1, 'CA', 10.0), (2, 'CA', 20.0), (3, 'CA', 30.0), (4, 'CA', 90.0),
+#     (5, 'NY', 40.0), (6, 'NY', 95.0),
+#     (7, 'TX', 50.0);
+#
+# WITH ranked AS (
+#     SELECT record_id, state, fraud_score,
+#            PERCENT_RANK() OVER (PARTITION BY state ORDER BY fraud_score DESC) AS pr
+#     FROM fraud_scores
+# )
+# SELECT record_id, state, fraud_score
+# FROM ranked
+# WHERE pr < 0.05
+# ORDER BY state, fraud_score DESC;
+#
+# -- Expected: (4, 'CA', 90.0), (6, 'NY', 95.0), (7, 'TX', 50.0).

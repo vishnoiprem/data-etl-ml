@@ -284,3 +284,66 @@ FROM sensor_readings WHERE sensor_id = 'S001'
 assert (float(n6[0]), float(n6[1])) == (30.24, 30.68), n6
 print("[PASS] Q54 at n=6 the position is fractional: approx gives 30.24, "
       "exact interpolates to 30.68")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 does NOT have a built-in PERCENTILE aggregate that interpolates
+# between values. The portable workaround for an exact per-group Q1/Q3 is a
+# self-join with row positions (same approach as Q67). The CTE structure
+# stays the same: aggregate per sensor, then join fences back to readings.
+# The DATE_FORMAT pattern must use MySQL's %Y/%m/%d, NOT Spark's Java
+# 'yyyy-MM-dd HH:mm:ss'.
+#
+# CREATE TABLE sensor_readings (
+#     reading_id  INT             NOT NULL,
+#     sensor_id   VARCHAR(8)      NOT NULL,
+#     timestamp   TIMESTAMP       NOT NULL,
+#     value       DECIMAL(10, 2)  NOT NULL,
+#     PRIMARY KEY (reading_id),
+#     KEY ix_sr_sensor (sensor_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO sensor_readings (reading_id, sensor_id, `timestamp`, value) VALUES
+#     ( 1, 'S001', '2024-01-01 00:00:00',  30.24),
+#     ( 2, 'S001', '2024-01-01 01:00:00',  36.94),
+#     ( 3, 'S001', '2024-01-01 02:00:00',  34.05),
+#     ( 4, 'S001', '2024-01-01 03:00:00', 113.03),
+#     ( 5, 'S001', '2024-01-01 04:00:00',  29.28),
+#     (10, 'S002', '2024-01-01 00:00:00',  58.97),
+#     (11, 'S002', '2024-01-01 01:00:00',  60.25),
+#     (12, 'S002', '2024-01-01 02:00:00',  61.83),
+#     (13, 'S002', '2024-01-01 03:00:00', 147.20),
+#     (14, 'S002', '2024-01-01 04:00:00',  55.69);
+#
+# -- Per-sensor fences via row-position self-joins. For n=5, Q1 = 2nd smallest
+# -- (offset 1) and Q3 = 4th smallest (offset 3). The CAST(... AS DOUBLE)
+# -- keeps the arithmetic in floating-point; otherwise MySQL's integer
+# -- division on DECIMAL can mis-place the interpolation.
+# WITH sorted AS (
+#     SELECT sensor_id, value,
+#            ROW_NUMBER() OVER (PARTITION BY sensor_id ORDER BY value) AS pos,
+#            COUNT(*)     OVER (PARTITION BY sensor_id)              AS n
+#     FROM sensor_readings
+# ),
+# q_pos AS (
+#     SELECT sensor_id,
+#            MAX(CASE WHEN pos = FLOOR(0.25*(n-1))+1 THEN value END) AS q1,
+#            MAX(CASE WHEN pos = FLOOR(0.75*(n-1))+1 THEN value END) AS q3
+#     FROM sorted GROUP BY sensor_id
+# ),
+# fences AS (
+#     SELECT sensor_id,
+#            ROUND(q1 - 1.5 * (q3 - q1), 2) AS lower_bound,
+#            ROUND(q3 + 1.5 * (q3 - q1), 2) AS upper_bound
+#     FROM q_pos
+# )
+# SELECT r.reading_id,
+#        r.sensor_id,
+#        DATE_FORMAT(r.`timestamp`, '%Y-%m-%d %H:%i:%s') AS `timestamp`,
+#        r.value,
+#        CASE WHEN r.value < f.lower_bound OR r.value > f.upper_bound
+#             THEN 1 ELSE 0 END AS is_outlier,
+#        f.lower_bound,
+#        f.upper_bound
+# FROM sensor_readings r
+# JOIN fences f ON f.sensor_id = r.sensor_id
+# ORDER BY r.reading_id;

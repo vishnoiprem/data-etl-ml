@@ -104,3 +104,63 @@ expect("Q02 weekly D1/D7 retention", SQL, [
     (_dt.date(2026, 1, 5), 3, 2, 1, 66.67, 33.33),
     (_dt.date(2026, 1, 12), 2, 1, 1, 50.00, 50.00),
 ])
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 supports CTEs and DATE_ADD. The conditional-aggregate form scans
+# `activity` once and uses COUNT(DISTINCT CASE WHEN ... THEN user_id END) to
+# count cohort members who returned on day 1 / day 7. The cohort grain is
+# fixed at signup -- never re-cohort by activity_date. The week boundary is
+# Spark's Monday start; MySQL has no exact equivalent of DATE_TRUNC('WEEK'),
+# so use DATE_SUB(d, INTERVAL WEEKDAY(d) DAY) to snap to Monday.
+#
+# CREATE TABLE signups (
+#     user_id     INT  NOT NULL,
+#     signup_date DATE NOT NULL,
+#     PRIMARY KEY (user_id),
+#     KEY ix_signups_date (signup_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# CREATE TABLE activity (
+#     user_id       INT  NOT NULL,
+#     activity_date DATE NOT NULL,
+#     PRIMARY KEY (user_id, activity_date),
+#     KEY ix_activity_date (activity_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO signups (user_id, signup_date) VALUES
+#     (1, '2026-01-05'), (2, '2026-01-06'), (3, '2026-01-07'),
+#     (4, '2026-01-12'), (5, '2026-01-13');
+#
+# INSERT INTO activity (user_id, activity_date) VALUES
+#     (1, '2026-01-05'), (1, '2026-01-06'), (1, '2026-01-12'),
+#     (2, '2026-01-06'), (2, '2026-01-07'),
+#     (3, '2026-01-07'),
+#     (4, '2026-01-12'), (4, '2026-01-13'), (4, '2026-01-19'),
+#     (5, '2026-01-13');
+#
+# WITH cohorts AS (
+#     SELECT user_id,
+#            signup_date,
+#            DATE_SUB(signup_date, INTERVAL WEEKDAY(signup_date) DAY) AS cohort_week
+#     FROM signups
+# )
+# SELECT c.cohort_week,
+#        COUNT(DISTINCT c.user_id) AS cohort_size,
+#        COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 1)
+#                            THEN a.user_id END) AS d1_users,
+#        COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 7)
+#                            THEN a.user_id END) AS d7_users,
+#        ROUND(100.0 * COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 1)
+#                                          THEN a.user_id END)
+#                    / COUNT(DISTINCT c.user_id), 2) AS d1_pct,
+#        ROUND(100.0 * COUNT(DISTINCT CASE WHEN a.activity_date = DATE_ADD(c.signup_date, 7)
+#                                          THEN a.user_id END)
+#                    / COUNT(DISTINCT c.user_id), 2) AS d7_pct
+# FROM cohorts c
+# LEFT JOIN activity a ON a.user_id = c.user_id
+# GROUP BY c.cohort_week
+# ORDER BY c.cohort_week;
+#
+# -- Expected:
+# -- 2026-01-05  3  2  1  66.67  33.33
+# -- 2026-01-12  2  1  1  50.00  50.00

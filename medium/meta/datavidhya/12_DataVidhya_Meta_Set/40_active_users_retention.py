@@ -181,3 +181,52 @@ assert [(r[0], r[1]) for r in lag_based] == [
     (dt.date(2024, 2, 1), 1), (dt.date(2024, 4, 1), 1),
 ], lag_based
 print("[PASS] Q40 LAG over observed months wrongly retains April across the March gap")
+
+# ---- MySQL way ----------------------------------------------------------
+# MySQL 8.0 has window functions but lacks ADD_MONTHS. The portable
+# substitute is DATE_SUB(c.month, INTERVAL 1 MONTH) for "preceding calendar
+# month". The same self-join on user_id + shifted month gives the retained
+# set. TRUNC(date, 'MM') in Spark is DATE_FORMAT(event_date, '%Y-%m-01') in
+# MySQL -- both return the first day of the month as a DATE.
+#
+# CREATE TABLE events (
+#     user_id    INT         NOT NULL,
+#     event_date DATE        NOT NULL,
+#     event_type VARCHAR(16) NOT NULL,
+#     KEY ix_events_user_date (user_id, event_date)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+#
+# INSERT INTO events (user_id, event_date, event_type) VALUES
+#     (1, '2024-01-01', 'login'),
+#     (1, '2024-02-01', 'login'),
+#     (2, '2024-01-02', 'login'),
+#     (4, '2024-02-01', 'login');
+#
+# WITH user_months AS (
+#     SELECT DISTINCT user_id,
+#            DATE_FORMAT(event_date, '%Y-%m-01') AS month
+#     FROM events
+# ),
+# monthly AS (
+#     SELECT month, COUNT(*) AS active_users
+#     FROM user_months GROUP BY month
+# ),
+# retained AS (
+#     SELECT c.month, COUNT(*) AS retained_users
+#     FROM user_months c
+#     JOIN user_months p
+#       ON p.user_id = c.user_id
+#      AND p.month   = DATE_SUB(c.month, INTERVAL 1 MONTH)
+#     GROUP BY c.month
+# )
+# SELECT m.month,
+#        m.active_users,
+#        COALESCE(r.retained_users, 0) AS retained_users,
+#        ROUND(COALESCE(r.retained_users, 0) / m.active_users, 2) AS retention_rate
+# FROM monthly m
+# LEFT JOIN retained r ON r.month = m.month
+# ORDER BY m.month;
+#
+# -- Expected:
+# -- 2024-01-01 2 0 0.00
+# -- 2024-02-01 2 1 0.50
