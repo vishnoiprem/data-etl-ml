@@ -2088,3 +2088,495 @@ after six weeks" into "Slack pinged us on day three."
 
 Sixty percent off, no pipeline deleted, no SLA missed. Find the waste
 before you touch anything that works.
+
+---
+
+## Module 1 · Lesson 1: AWS vs GCP vs Azure
+
+*Written by Darshil Parmar, Founder & Lead Instructor, Data Vidhya.
+Published Mar 16, 2026.
+Course URL: https://datavidhya.com/learn/aws-data-engineering/cloud-fundamentals/aws-vs-gcp-vs-azure/*
+
+You've decided to learn cloud. You open three browser tabs — AWS, GCP,
+Azure — and within five minutes you're drowning. AWS has 200+ services.
+GCP has BigQuery, which everyone raves about. Azure has... Microsoft
+enterprise contracts. You close all three tabs and go back to watching
+YouTube tutorials about pandas.
+
+This is the wrong approach. Cloud platform selection for data
+engineering is not a research project — it's a career decision that you
+can make in about ten minutes with the right framework. Let me give you
+that framework.
+
+### The Cloud Market in 2025
+
+Before we talk about data engineering specifically, here's where the
+market stands:
+
+| Provider | Global Market Share | DE Job Listings (approx.) | Strongest Signal |
+|----------|---------------------|---------------------------|------------------|
+| AWS | ~32% | ~60% of cloud DE roles | Default for startups and most tech companies |
+| Azure | ~23% | ~25% of cloud DE roles | Dominant in enterprise, Fortune 500, healthcare |
+| GCP | ~12% | ~15% of cloud DE roles | Strongest DE/ML tooling, BigQuery is best-in-class |
+
+These numbers matter because your goal isn't to pick the "best" cloud —
+it's to pick the cloud that maximizes your career options. And right
+now, that's AWS by a wide margin in terms of raw job availability.
+
+> **The 60% Rule** — Roughly 60% of data engineering job listings
+> mention AWS. That doesn't mean AWS is technically superior — it means
+> more companies use it, so more companies hire for it.
+
+### Head-to-Head: Data Engineering Service Comparison
+
+Here's where it gets interesting. The three clouds have roughly
+equivalent services for everything, but the quality and developer
+experience vary enormously for DE-specific workloads.
+
+| Capability | AWS | GCP | Azure |
+|------------|-----|-----|-------|
+| Object Storage | S3 (gold standard) | GCS (excellent) | ADLS Gen2 (good) |
+| Data Warehouse | Redshift | BigQuery (best-in-class) | Synapse Analytics |
+| Serverless ETL | Glue | Dataflow (Beam) | Data Factory |
+| Managed Spark | EMR | Dataproc | HDInsight / Databricks |
+| Streaming | Kinesis / MSK | Pub/Sub + Dataflow | Event Hubs |
+| Orchestration | Step Functions / MWAA | Cloud Composer | Data Factory pipelines |
+| Data Catalog | Glue Data Catalog | Data Catalog | Purview |
+| Serverless Compute | Lambda | Cloud Functions | Azure Functions |
+| ML Platform | SageMaker | Vertex AI | Azure ML |
+
+#### Where Each Cloud Wins for DEs
+
+**AWS wins on breadth and ecosystem.** S3 is the de facto standard for
+data lakes. Every open-source tool integrates with AWS first. Glue is
+serviceable but clunky. EMR is powerful but requires cluster management
+expertise.
+
+**GCP wins on data engineering experience.** BigQuery is genuinely the
+best serverless data warehouse — no cluster management, no tuning, just
+SQL that scales to petabytes. Dataflow (Apache Beam) provides true
+unified batch and streaming. Pub/Sub is simpler than Kafka for most use
+cases.
+
+**Azure wins on enterprise integration.** If your company runs on
+Microsoft (Active Directory, Office 365, Power BI), Azure is the
+natural choice. Azure Databricks is arguably the best Databricks
+experience.
+
+> **The BigQuery Exception** — Even if you learn AWS as your primary
+> cloud, learn BigQuery from GCP. It's that good. Many companies use a
+> multi-cloud approach specifically to leverage BigQuery for analytics
+> while running infrastructure on AWS.
+
+### The Decision Framework
+
+Stop overthinking this. Here's the decision tree:
+
+- **Are you learning cloud for the first time?** Learn AWS.
+- **Are you already employed?** Learn whatever your company uses.
+- **Are you focused on analytics engineering (dbt, SQL-heavy)?** Learn
+  GCP/BigQuery.
+- **Are you in enterprise / Fortune 500 / healthcare?** Learn Azure.
+- **Are you targeting ML engineering + DE?** GCP's Vertex AI + BigQuery
+  ML is the most cohesive ML platform.
+
+#### The Opinionated Default for 80% of Aspiring DEs
+
+Learn AWS first. Get comfortable with S3, IAM, Glue, Redshift, and
+Lambda. Then learn BigQuery from GCP — it takes a weekend, and it will
+come up in interviews constantly.
+
+### The Multi-Cloud Reality
+
+Most companies above 500 employees use more than one cloud:
+
+- **Acquisitions**: Company A runs on AWS, acquires Company B which
+  runs on GCP.
+- **Best-of-breed**: Run infrastructure on AWS, analytics on BigQuery,
+  ML on Vertex AI.
+- **Vendor leverage**: Using two clouds gives you negotiating power on
+  pricing.
+- **Compliance**: Some regulated industries require data residency in
+  specific regions.
+
+The implication: learning one cloud deeply and a second cloud at a
+surface level is more valuable than learning one cloud exhaustively.
+
+### Cost Comparison: 100GB/Day Pipeline
+
+| Component | AWS | GCP | Azure |
+|-----------|-----|-----|-------|
+| Object Storage (3TB stored) | S3: $69/mo | GCS: $60/mo | ADLS: $62/mo |
+| ETL Processing (serverless) | Glue: $220/mo | Dataflow: $180/mo | Data Factory: $200/mo |
+| Data Warehouse (3TB, moderate queries) | Redshift Serverless: $450/mo | BigQuery on-demand: $300/mo | Synapse Serverless: $400/mo |
+| Orchestration | MWAA: $350/mo | Composer: $400/mo | Data Factory: included |
+| Monitoring | CloudWatch: $30/mo | Cloud Monitoring: $25/mo | Monitor: $30/mo |
+| **Total** | **~$1,120/mo** | **~$965/mo** | **~$692/mo** |
+
+The real cost difference isn't in list prices — it's in operational
+overhead. BigQuery requires zero cluster management. Factor in
+engineering time and GCP often wins on total cost of ownership for
+analytics workloads.
+
+### Common Mistakes
+
+**Mistake 1: Spending months "researching" before starting.** Pick one
+and start building.
+
+**Mistake 2: Learning all three clouds at surface level.** Depth beats
+breadth.
+
+**Mistake 3: Ignoring the free tier.**
+- AWS: 12-month free tier with 5GB S3, 750 hours EC2 t2.micro
+- GCP: $300 credit for 90 days + always-free tier (1TB BigQuery
+  queries/month)
+- Azure: $200 credit for 30 days + 12-month free services
+
+**Mistake 4: Thinking certification equals competence.** Get the cert
+after you've built something.
+
+**Mistake 5: Dismissing a cloud because of online opinions.** All three
+clouds are reliable.
+
+### In an Interview
+
+**Junior / Mid-Level**: Name the primary DE services on at least one
+cloud. Know the rough equivalents across clouds.
+
+**Senior**: Discuss tradeoffs between clouds for specific use cases.
+Know cost implications.
+
+**Staff+**: Make multi-cloud architecture decisions. Handle data
+gravity. Address cross-cloud IAM strategy.
+
+The most common trap: saying "it depends" without following up with
+specific criteria.
+
+---
+
+## Module 1 · Lesson 2: Cloud Storage for Data Engineers (S3, GCS, ADLS)
+
+*Written by Darshil Parmar, Founder & Lead Instructor, Data Vidhya.
+Published Mar 16, 2026.
+Course URL: https://datavidhya.com/learn/aws-data-engineering/cloud-fundamentals/cloud-storage/*
+
+Every data pipeline starts and ends with storage. Your Spark job reads
+from storage. Your dbt models materialize to storage. Your ML models
+train on data sitting in storage. If compute is the brain of your
+pipeline, storage is the bloodstream — everything flows through it.
+
+And yet, most data engineers treat object storage as a solved problem.
+"Just throw it in S3" is the default answer. That attitude works until
+you get a $14,000 monthly bill because nobody configured lifecycle
+policies, or your pipeline takes 45 minutes because you're reading
+50,000 tiny JSON files instead of 500 Parquet files.
+
+Object storage is the most important primitive in cloud data
+engineering. Let's learn it properly.
+
+### Object Storage: The Foundational Primitive
+
+Object storage is fundamentally different from the file systems you're
+used to. There are no directories — just keys and values. When you see
+`s3://my-bucket/data/2025/01/events.parquet`, that entire path including
+"directories" is one flat key. The "folders" are an illusion that the UI
+creates for you.
+
+This matters because:
+
+- **Listing operations are expensive.** `ls` on a "directory" with
+  100,000 objects can take seconds and cost money (S3 charges $0.005
+  per 1,000 LIST requests).
+- **There's no rename operation.** "Renaming" a file is a copy +
+  delete. Renaming a "directory" means copying every object
+  individually.
+- **Consistency is eventual (mostly).** S3 now offers strong
+  read-after-write consistency, but GCS and ADLS have had this for
+  longer. Know your cloud's consistency model.
+
+> "Think of object storage as a giant hash map: the key is the full
+> path, the value is the file contents plus metadata."
+
+### S3 for Data Engineers
+
+Amazon S3 is the gold standard. It was launched in 2006 and basically
+invented cloud object storage. Every tool in the data ecosystem supports
+S3, often before other storage systems.
+
+#### What DEs Need to Know About S3
+
+**Storage Classes** — S3 offers multiple storage tiers, and choosing
+the right one is free money:
+
+| Storage Class | Cost (per GB/mo) | Use Case |
+| --- | --- | --- |
+| S3 Standard | $0.023 | Hot data, frequent access |
+| S3 Infrequent Access (IA) | $0.0125 | Data accessed monthly or less |
+| S3 Glacier Instant Retrieval | $0.004 | Archival with rare but immediate needs |
+| S3 Glacier Deep Archive | $0.00099 | Long-term compliance, accessed yearly |
+
+**The math is simple**: if you have 10TB of data older than 90 days
+that's rarely accessed, moving it from Standard to IA saves $105/month.
+Moving it to Glacier Deep Archive saves $220/month. For 100TB, that's
+$2,200/month — $26,400 per year — just from a lifecycle policy.
+
+**Partitioning Strategy** — How you organize data in S3 determines
+your query performance:
+
+```
+# Good: Hive-style partitioning for time-series data
+s3://data-lake/events/year=2025/month=01/day=15/events.parquet
+
+# Bad: Flat dump
+s3://data-lake/events/events_20250115.parquet
+
+# Worse: One giant file
+s3://data-lake/events/all_events.parquet
+```
+
+Hive-style partitioning lets query engines (Athena, Spark, Presto) skip
+entire partitions — a query for January data never touches February's
+files.
+
+**File Sizing** — This is where most teams get burned. S3 performs
+best with files between 128MB and 1GB. Too many small files (the
+"small files problem") destroys performance because each file requires
+a separate HTTP request to open, read headers, and process.
+
+### GCS for Data Engineers
+
+Google Cloud Storage is functionally equivalent to S3 with a few
+DE-relevant differences:
+
+- **Stronger consistency**: GCS has offered strong consistency since
+  launch. No worrying about read-after-write delays.
+- **Simpler storage classes**: Standard, Nearline (30-day minimum),
+  Coldline (90-day minimum), Archive (365-day minimum).
+- **Native BigQuery integration**: Loading data from GCS to BigQuery is
+  seamless and free (you pay for storage, not the load operation).
+- **gsutil is excellent**: Google's CLI tool for GCS is arguably better
+  than the AWS CLI for bulk operations.
+
+The pricing is competitive with S3:
+
+| Storage Class | Cost (per GB/mo) |
+| --- | --- |
+| Standard | $0.020 |
+| Nearline | $0.010 |
+| Coldline | $0.004 |
+| Archive | $0.0012 |
+
+> "Loading data from GCS into BigQuery is free — you only pay for the
+> GCS storage and the BigQuery storage after loading."
+
+### ADLS Gen2 for Data Engineers
+
+Azure Data Lake Storage Gen2 is Azure's answer to S3/GCS, built on top
+of Azure Blob Storage with a hierarchical namespace — meaning it
+actually has real directories, unlike S3 and GCS.
+
+Key differences for DEs:
+
+- **Hierarchical namespace**: Real directories mean rename operations
+  are atomic and fast. This matters for Spark, which writes to
+  temporary directories and renames them on completion.
+- **Azure AD integration**: Permissions use the same Azure Active
+  Directory as everything else in a Microsoft shop.
+- **Databricks optimized**: ADLS Gen2 + Azure Databricks is one of the
+  tightest storage-compute integrations available.
+- **Pricing**: $0.021/GB/month for hot tier, competitive with S3/GCS.
+
+The tradeoff: ADLS Gen2 is excellent within the Azure ecosystem but
+has weaker support from open-source tools compared to S3.
+
+### File Formats: The Decision That Matters Most
+
+Choosing the right file format has a bigger impact on pipeline
+performance than almost any other storage decision. Here's the honest
+breakdown:
+
+| Format | Type | Compression | Schema | Best For |
+| --- | --- | --- | --- | --- |
+| **Parquet** | Columnar | Excellent (Snappy/Zstd) | Embedded | Analytics, warehousing — **default choice** |
+| **Avro** | Row-based | Good (Deflate/Snappy) | Embedded | Streaming, write-heavy, schema evolution |
+| **ORC** | Columnar | Excellent (Zlib/Snappy) | Embedded | Hive ecosystem specifically |
+| **JSON** | Row-based | Poor | None | APIs, human-readable interchange |
+| **CSV** | Row-based | None | None | Legacy systems, spreadsheet people |
+| **Delta Lake** | Columnar (Parquet + log) | Excellent | Embedded + evolution | ACID on data lakes, time travel |
+| **Apache Iceberg** | Columnar (Parquet + metadata) | Excellent | Embedded + evolution | Open table format, multi-engine |
+
+#### The Opinionated Guide
+
+**Use Parquet for 90% of your work.** It's the industry standard for
+analytics. Columnar layout means queries that touch 5 out of 50 columns
+only read 10% of the data. Snappy compression typically reduces file
+size by 60-80% compared to raw CSV.
+
+**Use Avro for streaming ingestion.** When you're writing lots of small
+records quickly (Kafka consumers, CDC streams), Avro's row-based format
+and schema registry integration make it the better choice. Convert to
+Parquet in your batch layer.
+
+**Use Delta Lake or Iceberg for your lakehouse layer.** These add ACID
+transactions, time travel, and schema evolution on top of Parquet. If
+you're building a data lakehouse, you need one of these. Iceberg is
+gaining momentum as the vendor-neutral choice, but Delta Lake has a
+head start in Databricks shops.
+
+**Stop using CSV in pipelines.** Seriously. Switching from CSV to
+Parquet typically drops storage by 70% and query time by 90%. CSV has
+no schema, no compression, no column pruning. The only acceptable use
+of CSV is as an input format from external systems you don't control.
+
+> "A team storing 1TB of CSV in S3 Standard pays $23/month in storage.
+> The same data in Parquet with Snappy compression: roughly 300GB,
+> costing $6.90/month."
+
+### Storage Cost Deep Dive
+
+Storage costs seem cheap until they're not. Here's how costs accumulate
+for a typical data pipeline:
+
+#### The Hidden Costs
+
+**Egress charges** are the silent killer. Downloading data from S3 to
+the internet costs $0.09/GB. Moving 10TB out of AWS per month: $900.
+Moving data between AWS regions: $0.02/GB. These costs are invisible
+until the bill arrives.
+
+**API request costs** add up with small files. S3 charges $0.005 per
+1,000 GET requests. If your pipeline reads 1 million small files per
+day, that's $5/day just in GET requests — $150/month — for a cost you
+could eliminate by compacting files.
+
+**Versioning without lifecycle policies** is a storage bomb. S3
+versioning keeps every version of every object. Without a policy to
+expire old versions, your storage grows silently. I've seen teams
+paying for 5x their actual data volume because of unmanaged versions.
+
+#### Lifecycle Policies Are Free Money
+
+Every cloud offers lifecycle policies that automatically transition
+data between storage tiers. Set them up on day one:
+
+```
+# Example S3 lifecycle policy logic:
+# - After 30 days: move to Infrequent Access
+# - After 90 days: move to Glacier Instant Retrieval
+# - After 365 days: move to Glacier Deep Archive
+# - After 7 years: delete (if compliance allows)
+```
+
+This single configuration can reduce storage costs by 60-80% for
+historical data with zero impact on your pipeline, because your
+pipeline only processes recent data.
+
+### Common Mistakes
+
+**Mistake 1: Ignoring the small files problem.** Ingesting one file
+per Kafka message creates millions of tiny files. Compact them. Use a
+scheduled job that merges small files into 128MB-1GB Parquet files.
+This alone can make your queries 10-50x faster.
+
+**Mistake 2: Not setting lifecycle policies.** Every bucket should
+have a lifecycle policy from day one. Even a simple "move to IA after
+90 days" saves meaningful money at scale.
+
+**Mistake 3: Using the wrong storage class.** Putting archival data
+in S3 Standard because "it's easier" wastes money linearly with data
+volume. At 100TB, the difference between Standard and Glacier Deep
+Archive is $2,200/month.
+
+**Mistake 4: Not partitioning data.** A flat bucket of Parquet files
+forces full scans. Partitioning by date (and optionally by a
+high-cardinality dimension) is almost always the right starting point.
+
+**Mistake 5: Treating object storage like a file system.** Don't build
+pipelines that depend on listing directories, renaming files, or
+checking file existence in tight loops. These operations are slow and
+expensive on object storage. Use manifest files or metadata catalogs
+instead.
+
+### In an Interview
+
+Storage questions reveal whether a candidate has actually built
+pipelines or just read about them.
+
+**Junior / Mid-Level**: You should know what S3/GCS is and how to
+read/write data from it. Explain the difference between Parquet and CSV
+and why Parquet is preferred. Know that partitioning exists and why it
+helps. Understand at a high level what storage classes are and that
+lifecycle policies save money.
+
+**Senior**: You should be able to design a storage layer for a
+pipeline. What partitioning scheme? What file format and compression?
+What file sizes? How do you handle the small files problem? What
+lifecycle policies? What's your cost estimate for 1TB/day ingestion?
+Be able to calculate rough storage costs and explain the tradeoffs
+between storage tiers.
+
+**Staff+**: You should be able to discuss storage strategy at the
+organizational level. How do you enforce partitioning standards across
+teams? How do you handle cross-account or cross-region data access?
+What's your table format strategy (Delta vs Iceberg)? How do you
+manage data lake governance — who can write to which paths, how do you
+prevent schema drift in storage? What's your approach to data
+compaction at petabyte scale?
+
+A great answer to "How would you set up storage for a new data
+pipeline?" covers: bucket structure, partitioning scheme, file format
+(Parquet), target file size (128MB-1GB), lifecycle policy, and access
+controls — all in under two minutes.
+
+---
+
+## Module 2 · Lesson 2: AWS Fundamentals
+
+*Written by Darshil Parmar, Founder & Lead Instructor, Data Vidhya.
+Published Jun 19, 2026.
+Course URL: https://datavidhya.com/learn/aws-data-engineering/aws-data-stack/aws-fundamentals/*
+
+AWS has a service for almost everything in a data pipeline — which is
+exactly what makes it overwhelming when you start. This lesson gives
+you the mental map: the core AWS data services, what each one is for,
+and how they connect from raw data to a query-ready warehouse.
+
+### The AWS data stack at a glance
+
+Every data pipeline does four things — ingest, store, process, and
+serve. Here's where the main AWS services land:
+
+- **Storage (the foundation):** Amazon S3 — your data lake. Almost
+  every AWS pipeline reads from and writes to S3.
+- **Ingestion & streaming:** Kinesis / MSK for real-time event streams,
+  Lambda for lightweight event-driven ingestion.
+- **Processing & transformation:** AWS Glue (serverless Spark + Data
+  Catalog) and Amazon EMR (managed Spark/Hadoop clusters) for heavier
+  workloads.
+- **Warehouse & serving:** Amazon Redshift for fast analytical
+  queries; query S3 directly with Athena.
+- **Orchestration:** Step Functions (and MWAA/Airflow) to wire the steps
+  together with retries and error handling.
+
+### How the pieces fit together
+
+A typical batch pipeline on AWS looks like this:
+
+1. Raw data lands in **S3** (from an app, an API, or a database
+   export).
+2. **Glue** or **EMR** reads it, cleans and transforms it, and writes
+   curated tables back to **S3**.
+3. **Redshift** (or **Athena** over S3) serves those tables to
+   dashboards and analysts.
+4. **Step Functions** orchestrates the whole flow; **Lambda** handles
+   the small event-driven glue in between.
+
+The rest of this module goes service by service. The goal isn't to
+memorize every option — it's to know which tool to reach for at each
+stage, and the cost and scaling trade-offs that come with it.
+
+### What comes next
+
+Start with S3 for Data Engineers — it's the foundation everything else
+builds on — then work through Glue, Redshift, EMR, and the rest in
+order.
