@@ -1,0 +1,157 @@
+# Dependabot configuration
+# - Weekly scans on Monday 09:00 IST
+# - Auto-PRs for security updates (patch + minor)
+# - Limits open PRs to 10 to avoid noise
+# - Grouped PRs by ecosystem + scope to keep reviews manageable
+
+version: 2
+
+# --- Python: pip ecosystem ---
+updates:
+  # Root + ai-engineering manifests (active project work)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns:
+          - "jinja2"
+          - "cryptography"
+          - "urllib3"
+          - "requests"
+          - "pillow"
+          - "fastapi"
+          - "starlette"
+          - "aiohttp"
+          - "pyjwt"
+          - "setuptools"
+      python-minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+        patterns: ["*"]
+
+  - package-ecosystem: "pip"
+    directory: "/ai-engineering"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "ai-engineering"
+    commit-message:
+      prefix: "chore(ai-eng)"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns:
+          - "jinja2"
+          - "cryptography"
+          - "urllib3"
+          - "requests"
+          - "pillow"
+          - "fastapi"
+          - "starlette"
+          - "aiohttp"
+          - "pyjwt"
+          - "setuptools"
+      python-minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+        patterns: ["*"]
+
+  # npm ecosystem (TypeScript starters)
+  - package-ecosystem: "npm"
+    directory: "/agentic-ai/7_Bedrock_course/recap/ts-strarter"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "npm"
+    commit-message:
+      prefix: "chore(ts)"
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/agentic-ai/7_Bedrock_course/ts"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "npm"
+    commit-message:
+      prefix: "chore(ts)"
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/aws/ecs-data-ingestion"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "npm"
+    commit-message:
+      prefix: "chore(ts)"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    groups:
+      github-actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+# Disable version updates for non-active areas (legacy course code) —
+# they generate noise without adding value. Security-only updates still run.
+# To enable weekly version bumps on those, add more `updates` blocks below.
