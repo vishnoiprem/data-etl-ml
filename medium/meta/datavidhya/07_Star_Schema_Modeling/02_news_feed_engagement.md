@@ -208,6 +208,333 @@ share-of-reaction by post_type:
   photo  ~21%
   text   ~18%
   link   ~12%
+  
+  
+  
 ```
 
 Full row-by-row SQL is in `02_news_feed_engagement.py` (`DIM_DATE_30D_FEED`, `DIM_POST_30D`, `DIM_USER_30D`, `FACT_POST_IMPRESSION_30D`, `FACT_POST_REACTION_30D`, `FACT_POST_SHARE_30D`).
+
+
+```
+-- =========================================================
+-- 1. TOTAL IMPRESSIONS
+-- =========================================================
+
+SELECT COUNT(*) AS total_impressions
+FROM fact_post_impression;
+
+
+-- =========================================================
+-- 2. TOTAL REACTIONS
+-- =========================================================
+
+SELECT COUNT(*) AS total_reactions
+FROM fact_post_reaction;
+
+
+-- =========================================================
+-- 3. TOTAL SHARES
+-- =========================================================
+
+SELECT COUNT(*) AS total_shares
+FROM fact_post_share;
+
+
+-- =========================================================
+-- 4. TOP POSTS BY IMPRESSIONS
+-- =========================================================
+
+SELECT
+    p.post_id,
+    COUNT(*) AS impressions
+FROM fact_post_impression i
+JOIN dim_post p
+    ON i.post_key = p.post_key
+GROUP BY p.post_id
+ORDER BY impressions DESC;
+
+
+-- =========================================================
+-- 5. TOP POSTS BY REACTIONS
+-- =========================================================
+
+SELECT
+    p.post_id,
+    COUNT(*) AS reactions
+FROM fact_post_reaction r
+JOIN dim_post p
+    ON r.post_key = p.post_key
+GROUP BY p.post_id
+ORDER BY reactions DESC;
+
+
+-- =========================================================
+-- 6. TOP POSTS BY SHARES
+-- =========================================================
+
+SELECT
+    p.post_id,
+    COUNT(*) AS shares
+FROM fact_post_share s
+JOIN dim_post p
+    ON s.post_key = p.post_key
+GROUP BY p.post_id
+ORDER BY shares DESC;
+
+
+-- =========================================================
+-- 7. REACTION RATE
+-- =========================================================
+
+SELECT
+    p.post_id,
+    COUNT(DISTINCT i.impression_key) AS impressions,
+    COUNT(DISTINCT r.reaction_key) AS reactions,
+    ROUND(
+        100.0 *
+        COUNT(DISTINCT r.reaction_key)
+        / NULLIF(COUNT(DISTINCT i.impression_key),0),
+        2
+    ) AS reaction_rate_pct
+FROM dim_post p
+LEFT JOIN fact_post_impression i
+    ON p.post_key=i.post_key
+LEFT JOIN fact_post_reaction r
+    ON p.post_key=r.post_key
+GROUP BY p.post_id
+ORDER BY reaction_rate_pct DESC;
+
+
+-- =========================================================
+-- 8. SHARE RATE
+-- =========================================================
+
+SELECT
+    p.post_id,
+    COUNT(DISTINCT r.reaction_key) AS reactions,
+    COUNT(DISTINCT s.share_key) AS shares,
+    ROUND(
+        100.0 *
+        COUNT(DISTINCT s.share_key)
+        / NULLIF(COUNT(DISTINCT r.reaction_key),0),
+        2
+    ) AS share_rate_pct
+FROM dim_post p
+LEFT JOIN fact_post_reaction r
+    ON p.post_key=r.post_key
+LEFT JOIN fact_post_share s
+    ON p.post_key=s.post_key
+GROUP BY p.post_id
+ORDER BY share_rate_pct DESC;
+
+
+-- =========================================================
+-- 9. VIRALITY SCORE
+-- =========================================================
+
+SELECT
+    p.post_id,
+    COUNT(DISTINCT s.share_key) AS shares,
+    COUNT(DISTINCT i.impression_key) AS impressions,
+    ROUND(
+        COUNT(DISTINCT s.share_key)*100.0
+        / NULLIF(COUNT(DISTINCT i.impression_key),0),
+        2
+    ) AS virality_score
+FROM dim_post p
+LEFT JOIN fact_post_impression i
+    ON p.post_key=i.post_key
+LEFT JOIN fact_post_share s
+    ON p.post_key=s.post_key
+GROUP BY p.post_id
+ORDER BY virality_score DESC;
+
+
+-- =========================================================
+-- 10. CONTENT TYPE PERFORMANCE
+-- =========================================================
+
+SELECT
+    p.post_type,
+    COUNT(DISTINCT i.impression_key) AS impressions,
+    COUNT(DISTINCT r.reaction_key) AS reactions,
+    ROUND(
+        COUNT(DISTINCT r.reaction_key)*100.0
+        / NULLIF(COUNT(DISTINCT i.impression_key),0),
+        2
+    ) AS engagement_rate
+FROM dim_post p
+LEFT JOIN fact_post_impression i
+    ON p.post_key=i.post_key
+LEFT JOIN fact_post_reaction r
+    ON p.post_key=r.post_key
+GROUP BY p.post_type
+ORDER BY engagement_rate DESC;
+
+
+-- =========================================================
+-- 11. REACTION BREAKDOWN
+-- =========================================================
+
+SELECT
+    rt.reaction_name,
+    COUNT(*) AS reactions
+FROM fact_post_reaction r
+JOIN dim_reaction_type rt
+    ON r.reaction_type_key=rt.reaction_type_key
+GROUP BY rt.reaction_name
+ORDER BY reactions DESC;
+
+
+-- =========================================================
+-- 12. POSITIVE VS NEGATIVE REACTIONS
+-- =========================================================
+
+SELECT
+    rt.is_positive,
+    COUNT(*) AS reactions
+FROM fact_post_reaction r
+JOIN dim_reaction_type rt
+ON r.reaction_type_key=rt.reaction_type_key
+GROUP BY rt.is_positive;
+
+
+-- =========================================================
+-- 13. AVG DWELL TIME
+-- =========================================================
+
+SELECT
+    ROUND(AVG(dwell_ms),0) AS avg_dwell_ms
+FROM fact_post_impression;
+
+
+-- =========================================================
+-- 14. DWELL TIME BY POST TYPE
+-- =========================================================
+
+SELECT
+    p.post_type,
+    ROUND(AVG(i.dwell_ms),0) AS avg_dwell_ms
+FROM fact_post_impression i
+JOIN dim_post p
+    ON i.post_key=p.post_key
+GROUP BY p.post_type
+ORDER BY avg_dwell_ms DESC;
+
+
+-- =========================================================
+-- 15. PLACEMENT ANALYSIS
+-- =========================================================
+
+SELECT
+    placement_key,
+    COUNT(*) AS impressions,
+    ROUND(AVG(dwell_ms),0) AS avg_dwell
+FROM fact_post_impression
+GROUP BY placement_key;
+
+
+-- =========================================================
+-- 16. DEVICE ANALYSIS
+-- =========================================================
+
+SELECT
+    d.device_type,
+    COUNT(*) AS impressions
+FROM fact_post_impression i
+JOIN dim_device d
+    ON i.device_key=d.device_key
+GROUP BY d.device_type;
+
+
+-- =========================================================
+-- 17. MOBILE VS DESKTOP REACTIONS
+-- =========================================================
+
+SELECT
+    d.device_type,
+    COUNT(*) AS reactions
+FROM fact_post_reaction r
+JOIN dim_device d
+    ON r.device_key=d.device_key
+GROUP BY d.device_type;
+
+
+-- =========================================================
+-- 18. DAILY IMPRESSION TREND
+-- =========================================================
+
+SELECT
+    date_key,
+    COUNT(*) AS impressions
+FROM fact_post_impression
+GROUP BY date_key
+ORDER BY date_key;
+
+
+-- =========================================================
+-- 19. DAILY REACTION TREND
+-- =========================================================
+
+SELECT
+    reaction_date_key,
+    COUNT(*) AS reactions
+FROM fact_post_reaction
+GROUP BY reaction_date_key
+ORDER BY reaction_date_key;
+
+
+-- =========================================================
+-- 20. DAILY SHARE TREND
+-- =========================================================
+
+SELECT
+    share_date_key,
+    COUNT(*) AS shares
+FROM fact_post_share
+GROUP BY share_date_key
+ORDER BY share_date_key;
+
+
+-- =========================================================
+-- 21. HOUR OF DAY ANALYSIS
+-- =========================================================
+
+SELECT
+    FLOOR(time_key/100) AS hour,
+    COUNT(*) AS impressions,
+    ROUND(AVG(dwell_ms),0) AS avg_dwell
+FROM fact_post_impression
+GROUP BY FLOOR(time_key/100)
+ORDER BY hour;
+
+
+-- =========================================================
+-- 22. TOP AUTHORS BY REACTIONS
+-- =========================================================
+
+SELECT
+    author_user_key,
+    COUNT(*) AS reactions
+FROM fact_post_reaction
+GROUP BY author_user_key
+ORDER BY reactions DESC;
+
+
+-- =========================================================
+-- 23. TOP AUTHORS BY SHARES
+-- =========================================================
+
+SELECT
+    author_user_key,
+    COUNT(*) AS shares
+FROM fact_post_share
+GROUP BY author_user_key
+ORDER BY shares DESC;
+
+
+-- =========================================================
+-- 24. SHARE DESTINATION ANALYSIS
+-- =======================
+```
