@@ -76,3 +76,47 @@ CREATE TABLE dim_date ( date_key INT PRIMARY KEY, full_date DATE, day_of_week VA
 - Predict post virality from early impression-to-share slope.
 - Detect engagement-bait (high share, low dwell, low positive reaction).
 - Recommend pages based on reaction co-occurrence vectors.
+
+## Interview Questions (natural flow)
+
+These escalate from scope to production reality. Ask in order; each answer unlocks the next.
+
+### 1. Scope
+> "Walk me through what News Feed analytics is supposed to answer. What's the daily question an ML engineer or ranking PM is asking?"
+
+*Why it's natural:* anchors the model in a real consumer of the data, not the abstract idea of "engagement."
+
+### 2. The split
+> "You have three facts: impression, reaction, share. Why three instead of one `fact_engagement` wide table?"
+
+*Why it's natural:* tests grain awareness. The cardinal-vice is mixing reactions with impressions and computing "engagement rate" — a non-additive ratio over a non-uniform denominator.
+
+### 3. The metric trap
+> "A junior analyst writes `AVG(reaction_count / impression_count)` to compute 'engagement rate.' What's wrong, and how would it show up in the dashboard?"
+
+*Why it's natural:* classic interview answer. AVG-of-ratios is biased by post-level impression volume. The right metric is `SUM(reactions) / SUM(impressions)`.
+
+### 4. Reaction ≠ impression
+> "A user likes a post they've never seen in their feed (e.g. via a profile visit). Does that row land in `fact_post_impression`, `fact_post_reaction`, or both? Why?"
+
+*Why it's natural:* tests understanding that impressions and reactions are different business events with different grains — the schema must allow them to exist independently.
+
+### 5. The placement dimension
+> "You have `placement_key`. PM asks why dwell time differs between 'Top of feed' and 'inline.' Walk me through the analysis."
+
+*Why it's natural:* placement is the strongest confounder. Tests whether the candidate knows to *slice* a non-additive metric by placement before drawing conclusions.
+
+### 6. SCD2 on dim_post
+> "A post changes from 'photo' to 'video' (because the user swapped the media). For events from January, does it show up as photo or video in last-quarter's engagement analysis?"
+
+*Why it's natural:* SCD2 application. Tests if the candidate understands that `effective_from/effective_to` on dim_post must align with the event timestamp.
+
+### 7. Scale
+> "10B impressions per day. What's the first thing to break, and what's the cheapest fix you'd ship?"
+
+*Why it's natural:* signals production reality. Hot partitions on (post_key, date_key) are the usual answer; the fix is composite partitioning or pre-aggregation.
+
+### 8. Edge case
+> "A user reports 'I never saw this post in my feed, but I got 50 reactions on it.' Walk me through what the data model says vs what the UI says."
+
+*Why it's natural:* tests whether the candidate can map between data semantics and user-facing reality. The data model may be right while the UI is broken — and vice versa.

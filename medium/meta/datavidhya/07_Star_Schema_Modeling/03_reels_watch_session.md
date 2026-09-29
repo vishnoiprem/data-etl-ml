@@ -74,3 +74,47 @@ CREATE TABLE dim_date ( date_key INT PRIMARY KEY, full_date DATE, day_of_week VA
 - Predict session length from the first 3 reels' completion %.
 - Cluster sessions into "binge", "casual", "bounce" for product analytics.
 - Next-reel recommendation conditioned on session position.
+
+## Interview Questions (natural flow)
+
+These escalate from scope to production reality. Ask in order; each answer unlocks the next.
+
+### 1. Scope
+> "Walk me through what this session model is supposed to answer. Why is 'session' the right unit and not 'reel'?"
+
+*Why it's natural:* tests the candidate's understanding that the *question* determines the grain, not the other way around. Reel-grain loses session metrics; user-grain loses per-content signals.
+
+### 2. The split
+> "You split session and view into two facts. Why? What happens to session-level metrics if I collapse them into one view-grain fact?"
+
+*Why it's natural:* forces grain defense. The right answer: session-level SUMs require pre-aggregation; collapsing to view grain forces DISTINCT session_id everywhere.
+
+### 3. Session definition
+> "How do you define 'session boundary'? 30 minutes of inactivity? App backgrounding? A pull-to-refresh? Where in the schema does that decision live?"
+
+*Why it's natural:* tests understanding that sessionization is a *policy*, not a schema column. The right answer involves a sessionizer job upstream, not a flag on the table.
+
+### 4. Position matters
+> "You have `position_in_session`. PM asks: 'At what position do users typically exit?' Walk me through the analysis and one pitfall."
+
+*Why it's natural:* tests understanding that position is a *per-session* number, not a per-reel property. Same reel at position 3 vs position 30 has different exit probability — and that's a feature, not a bug.
+
+### 5. SCD2 on dim_reel
+> "A reel's hashtags change from #funny to #comedy. For sessions in January, which hashtag shows up in the 'top exit-reason reels' report?"
+
+*Why it's natural:* SCD2 application. Tests if the candidate aligns dim_reel version with the session timestamp, not the reel's current state.
+
+### 6. Metric trap
+> "A junior computes 'avg completion per reel' as `AVG(completion_pct)`. Why is this biased, and what's the right metric?"
+
+*Why it's natural:* avg-of-ratios is biased by reel duration. The right metric is `SUM(watch_duration_ms) / SUM(video_duration_ms)`.
+
+### 7. Scale
+> "500M sessions per day, 5B views. What breaks first, and what's the cheapest fix?"
+
+*Why it's natural:* signals production reality. Position-in-session queries are the killer — `position` isn't a great partition key. The fix is bucketing or pre-aggregated drop-off curves.
+
+### 8. Edge case
+> "A user opens Reels, watches 1 reel, kills the app, reopens 2 hours later, watches 4 more. Is that 1 session or 2? What does your data say?"
+
+*Why it's natural:* tests whether the candidate can reason about ambiguity in the session boundary policy. The data model must allow either answer to be reconstructed from raw events.
