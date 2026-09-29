@@ -316,14 +316,14 @@ INSERT INTO fact_sessions (session_id, user_key, day_key, variant_key, device_ty
     -- Alice: session 1001, browsed but didn't buy on day 20260115.
     (1001, 1, 20260115, 1, 'desktop', 'US', '2026-01-15 14:00', '2026-01-15 14:23', 1380, 5,
      'view_product', NULL, 0),
-    -- Alice: session 1002, converted on day 20260215 (after she became 'returning').
-    (1002, 2, 20260215, 2, 'mobile',  'GB', '2026-02-15 09:30', '2026-02-15 09:48', 1080, 7,
+    -- Bob: session 1002, converted on Feb 15 (his segment was 'vip' by then).
+    (1002, 3, 20260215, 2, 'mobile',  'GB', '2026-02-15 09:30', '2026-02-15 09:48', 1080, 7,
      'purchase',     278.00, 1),
-    -- Bob: converted on 20260115 (variant treatment_a).
-    (1003, 3, 20260115, 1, 'desktop', 'IT', '2026-01-15 11:00', '2026-01-15 11:25', 1500, 6,
+    -- Alice: converted on 20260115 (variant control; her ab assignment is control).
+    (1003, 2, 20260115, 1, 'desktop', 'US', '2026-01-15 11:00', '2026-01-15 11:25', 1500, 6,
      'purchase',     49.00, 1),
-    -- Bob: abandoned cart on 20260115 (variant control).
-    (1004, 3, 20260115, 1, 'desktop', 'IT', '2026-01-15 16:00', '2026-01-15 16:18', 1080, 5,
+    -- Alice: abandoned cart on 20260115 (variant control).
+    (1004, 2, 20260115, 1, 'desktop', 'US', '2026-01-15 16:00', '2026-01-15 16:18', 1080, 5,
      'add_to_cart',  NULL, 0),
     -- Carla: visited only, no conversion.
     (1005, 5, 20260201, NULL, 'mobile', 'RU', '2026-02-01 10:00', '2026-02-01 10:08', 480, 3,
@@ -350,12 +350,12 @@ INSERT INTO fact_user_events (event_ts, day_key, user_key, product_key, session_
     ('2026-02-15 09:45:00', 20260215, 3, NULL,   1002, 2, 'checkout',       'mobile',  'GB', 900),
     ('2026-02-15 09:48:00', 20260215, 3, NULL,   1002, 2, 'purchase',       'mobile',  'GB', 1080),
 
-    -- Bob session 1003: converted on Jan 15 (segment was 'returning' then).
-    ('2026-01-15 11:00:00', 20260115, 2, NULL,   1003, 1, 'browse',         'desktop', 'IT', 0),
-    ('2026-01-15 11:02:00', 20260115, 2, 4,      1003, 1, 'view_product',   'desktop', 'IT', 120),
-    ('2026-01-15 11:08:00', 20260115, 2, 4,      1003, 1, 'add_to_cart',    'desktop', 'IT', 480),
-    ('2026-01-15 11:18:00', 20260115, 2, NULL,   1003, 1, 'checkout',       'desktop', 'IT', 1080),
-    ('2026-01-15 11:25:00', 20260115, 2, NULL,   1003, 1, 'purchase',       'desktop', 'IT', 1500);
+    -- Alice session 1003: converted on Jan 15 (variant control).
+    ('2026-01-15 11:00:00', 20260115, 2, NULL,   1003, 1, 'browse',         'desktop', 'US', 0),
+    ('2026-01-15 11:02:00', 20260115, 2, 4,      1003, 1, 'view_product',   'desktop', 'US', 120),
+    ('2026-01-15 11:08:00', 20260115, 2, 4,      1003, 1, 'add_to_cart',    'desktop', 'US', 480),
+    ('2026-01-15 11:18:00', 20260115, 2, NULL,   1003, 1, 'checkout',       'desktop', 'US', 1080),
+    ('2026-01-15 11:25:00', 20260115, 2, NULL,   1003, 1, 'purchase',       'desktop', 'US', 1500);
 
 -- =====================================================================
 -- Self-verifying queries
