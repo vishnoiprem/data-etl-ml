@@ -126,3 +126,59 @@ These escalate from scope to production reality. Ask in order; each answer unloc
 > "PM wants a 'live auctions' channel tomorrow. How many files do you touch, and which one is risky?"
 
 *Why it's natural:* simulates real work. Right answer is small (a new fact + dim), but the *risky* part is the seller_daily snapshot logic.
+
+## 30-Day Sample Data (January 2026)
+
+Volume budget for a small Marketplace:
+
+| Table | Rows |
+|-------|------|
+| `dim_date` | 31 (one per day, Jan 1 – Jan 31) |
+| `dim_seller` | 9 (8 sellers, 1 SCD2 split for Carla on Jan 16) |
+| `dim_category` | 12 |
+| `dim_location` | 8 cities |
+| `fact_listing` | 120 |
+| `fact_order` | 60 |
+| `fact_seller_daily` | 248 (8 × 31) |
+
+### SCD2 highlight
+
+Carla (seller_key=3) upgrades from 'casual' to 'power' on **2026-01-16**. Two rows in `dim_seller` with `effective_from`/`effective_to` boundary. The `fact_seller_daily` rows from Jan 1–15 report her `avg_response_min` ~12-15 (casual tier); from Jan 16 onward it drops to ~5-7 (power tier with priority inbox).
+
+### Sample queries that work against the 30-day load
+
+```sql
+-- GMV by seller for January
+SELECT s.seller_id, s.seller_name, s.tier,
+       SUM(f.gross_sales)   AS gmv_jan,
+       SUM(f.listings_sold) AS units_jan
+FROM fact_seller_daily f
+JOIN dim_seller s ON s.seller_key = f.seller_key AND s.is_current = 1
+WHERE f.date_key BETWEEN 20260101 AND 20260131
+GROUP BY s.seller_id, s.seller_name, s.tier
+ORDER BY gmv_jan DESC;
+
+-- Order funnel by category (using the order-grain fact)
+SELECT c.category_name,
+       COUNT(*)            AS orders,
+       SUM(o.gross_amount) AS gmv
+FROM fact_order o
+JOIN dim_category c ON c.category_key = o.category_key
+WHERE o.order_date_key BETWEEN 20260101 AND 20260131
+GROUP BY c.category_name
+ORDER BY gmv DESC;
+
+-- Sell-through rate per seller
+SELECT l.seller_key, s.seller_name,
+       COUNT(*)                                            AS total_listings,
+       SUM(CASE WHEN l.status_key = 3 THEN 1 ELSE 0 END)   AS sold,
+       ROUND(100.0 * SUM(CASE WHEN l.status_key = 3 THEN 1 ELSE 0 END)
+                  / COUNT(*), 1)                           AS sell_through_pct
+FROM fact_listing l
+JOIN dim_seller s ON s.seller_key = l.seller_key AND s.is_current = 1
+WHERE l.listing_date_key BETWEEN 20260101 AND 20260131
+GROUP BY l.seller_key, s.seller_name
+ORDER BY sell_through_pct DESC;
+```
+
+Full row-by-row SQL is in `01_marketplace_seller_dashboard.py` (`DIM_DATE_30D`, `DIM_SELLER_30D`, `FACT_LISTING_30D`, `FACT_ORDER_30D`, `FACT_SELLER_DAILY_30D`).
