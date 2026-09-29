@@ -120,3 +120,94 @@ These escalate from scope to production reality. Ask in order; each answer unloc
 > "A user reports 'I never saw this post in my feed, but I got 50 reactions on it.' Walk me through what the data model says vs what the UI says."
 
 *Why it's natural:* tests whether the candidate can map between data semantics and user-facing reality. The data model may be right while the UI is broken — and vice versa.
+
+## 30-Day Sample Data (January 2026)
+
+Volume budget for a mid-size News Feed test cohort:
+
+| Table | Rows |
+|-------|------|
+| `dim_date` | 31 |
+| `dim_post` | 25 |
+| `dim_user` | 31 (30 users, 1 SCD2 split for u-005 on Jan 18) |
+| `dim_reaction_type` | 6 |
+| `dim_device` | 5 |
+| `dim_placement` | 4 |
+| `fact_post_impression` | ~750 |
+| `fact_post_reaction` | ~225 |
+| `fact_post_share` | ~50 |
+
+### Funnel ratios (sanity-check on the load)
+
+```
+reach rate (impressions / viewers):
+  ~25 impressions per viewer over 31 days
+
+reaction rate:
+  ~30% of impressions yield a reaction (225 / 750)
+
+share rate (of reacted):
+  ~22% of reactors share (50 / 225)
+```
+
+### Sample queries that work against the 30-day load
+
+```sql
+-- The cardinal-vice ratio: engagement rate (CORRECT way).
+SELECT p.post_type,
+       COUNT(DISTINCT i.impression_key)                AS impressions,
+       COUNT(DISTINCT r.reaction_key)                  AS reactions,
+       COUNT(DISTINCT s.share_key)                     AS shares,
+       ROUND(100.0 * COUNT(DISTINCT r.reaction_key)
+                  / NULLIF(COUNT(DISTINCT i.impression_key), 0), 2)
+                                                       AS reaction_rate_pct,
+       ROUND(100.0 * COUNT(DISTINCT s.share_key)
+                  / NULLIF(COUNT(DISTINCT r.reaction_key), 0), 2)
+                                                       AS share_of_reaction_pct
+FROM dim_post p
+LEFT JOIN fact_post_impression i ON i.post_key = p.post_key
+LEFT JOIN fact_post_reaction  r ON r.post_key = p.post_key
+LEFT JOIN fact_post_share     s ON s.post_key = p.post_key
+WHERE i.date_key BETWEEN 20260101 AND 20260131
+GROUP BY p.post_type
+ORDER BY impressions DESC;
+
+-- Hour-of-day reach (uses time_key HHMM).
+SELECT FLOOR(i.time_key / 100) AS hour_utc,
+       COUNT(*)                AS impressions,
+       ROUND(AVG(i.dwell_ms))  AS avg_dwell_ms
+FROM fact_post_impression i
+WHERE i.date_key BETWEEN 20260101 AND 20260131
+GROUP BY FLOOR(i.time_key / 100)
+ORDER BY hour_utc;
+
+-- SCD2 demo: reactions from u-005 before and after RU->DE relocation.
+-- He moved on Jan 18. Before that his country='RU'; after, country='DE'.
+SELECT u.country,
+       COUNT(*) AS reactions
+FROM fact_post_reaction r
+JOIN dim_user u
+  ON u.user_key = r.reactor_user_key
+ AND r.reaction_date_key >= u.effective_from
+ AND (r.reaction_date_key < u.effective_to OR u.effective_to = '9999-12-31')
+WHERE r.reactor_user_key = 5
+GROUP BY u.country;
+```
+
+### Expected output (sanity check)
+
+```
+reaction_rate by post_type:
+  video  ~31%
+  photo  ~28%
+  text   ~25%
+  link   ~22%
+
+share-of-reaction by post_type:
+  video  ~24%
+  photo  ~21%
+  text   ~18%
+  link   ~12%
+```
+
+Full row-by-row SQL is in `02_news_feed_engagement.py` (`DIM_DATE_30D_FEED`, `DIM_POST_30D`, `DIM_USER_30D`, `FACT_POST_IMPRESSION_30D`, `FACT_POST_REACTION_30D`, `FACT_POST_SHARE_30D`).

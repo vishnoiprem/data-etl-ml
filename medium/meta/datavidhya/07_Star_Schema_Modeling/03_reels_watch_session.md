@@ -118,3 +118,121 @@ These escalate from scope to production reality. Ask in order; each answer unloc
 > "A user opens Reels, watches 1 reel, kills the app, reopens 2 hours later, watches 4 more. Is that 1 session or 2? What does your data say?"
 
 *Why it's natural:* tests whether the candidate can reason about ambiguity in the session boundary policy. The data model must allow either answer to be reconstructed from raw events.
+
+## 30-Day Sample Data (January 2026)
+
+Volume budget for a small Reels test cohort:
+
+| Table | Rows |
+|-------|------|
+| `dim_date` | 31 |
+| `dim_user` | 25 (24 users, 1 SCD2 split for u-005 on Jan 10) |
+| `dim_sound` | 8 |
+| `dim_reel` | 30 |
+| `dim_device` | 4 |
+| `dim_entry_source` | 4 |
+| `fact_reels_session` | ~110 (week 1-2 fully expanded; weeks 3-4 follow the same pattern) |
+| `fact_reel_view` | ~1,500 (~6 views per session on average) |
+
+### Drop-off curve (the model in action)
+
+The defining feature of `fact_reel_view` is `position_in_session`. Within a session,
+`completion_pct` typically decreases as position rises — early reels get full watch,
+late reels show mid-roll exits. Session 1 (8 videos, user 1) shows this clearly:
+
+```
+position 1  -> 100.00%   (full watch)
+position 2  ->  81.82%
+position 3  ->  66.67%
+position 4  ->  75.00%
+position 5  ->  52.00%   (mid-roll drop)
+position 6  ->  62.50%
+position 7  ->  57.89%
+position 8  ->  36.36%   (last reel, often truncated)
+```
+
+Session 2 (user 2, 14 videos, all 100% through position 8) and session 7 (user 8,
+18 videos, full completion through position 16) are **outliers** — binge sessions
+where the algorithm matched intent. Session 7 is also flagged `is_loop_heavy=1`
+in `fact_reels_session`.
+
+### SCD2 highlight
+
+User u-005 (user_key=5) flips `locale` from `en_GB` to `en_US` on **2026-01-10**.
+Two rows in `dim_user` with `effective_from`/`effective_to` boundary. Sessions
+from Jan 1–9 report her English-UK feed-mix; sessions from Jan 10 onward report
+US feed-mix.
+
+### Sample queries that work against the 30-day load
+
+```sql
+-- Drop-off curve: avg completion_pct by position_in_session (view grain).
+SELECT v.position_in_session,
+       COUNT(*)                    AS views,
+       ROUND(AVG(v.completion_pct), 1) AS avg_completion_pct
+FROM fact_reel_view v
+WHERE v.view_date_key BETWEEN 20260101 AND 20260114
+GROUP BY v.position_in_session
+ORDER BY v.position_in_session;
+
+-- Session length distribution by entry source (session grain).
+SELECT e.source_name,
+       COUNT(*)                   AS sessions,
+       ROUND(AVG(s.videos_watched), 1) AS avg_videos,
+       ROUND(AVG(s.total_duration_ms) / 1000.0, 1) AS avg_duration_sec
+FROM fact_reels_session s
+JOIN dim_entry_source e ON e.source_key = s.entry_source_key
+WHERE s.session_date_key BETWEEN 20260101 AND 20260114
+GROUP BY e.source_name
+ORDER BY avg_duration_sec DESC;
+
+-- Loop-heavy sessions: how do they differ?
+SELECT is_loop_heavy,
+       COUNT(*)                   AS sessions,
+       ROUND(AVG(videos_watched), 1) AS avg_videos,
+       ROUND(AVG(likes_in_session), 1) AS avg_likes
+FROM fact_reels_session
+WHERE session_date_key BETWEEN 20260101 AND 20260114
+GROUP BY is_loop_heavy;
+
+-- SCD2 demo: sessions for u-005 before and after the en_GB->en_US locale flip.
+-- He moved on Jan 10. Before that his locale='en_GB'; after, locale='en_US'.
+SELECT u.locale,
+       COUNT(*) AS sessions,
+       ROUND(AVG(s.videos_watched), 1) AS avg_videos
+FROM fact_reels_session s
+JOIN dim_user u
+  ON u.user_key = s.user_key
+ AND s.session_date_key >= u.effective_from
+ AND (s.session_date_key <  u.effective_to OR u.effective_to = '9999-12-31')
+WHERE s.user_key = 5
+GROUP BY u.locale;
+```
+
+### Expected output (sanity check)
+
+```
+drop-off by position (avg completion_pct):
+  pos 1  ~ 95-100%
+  pos 2  ~ 85-90%
+  pos 3  ~ 75-80%
+  pos 4  ~ 70-75%
+  pos 5  ~ 55-65%
+  pos 6  ~ 50-60%
+  pos 7  ~ 45-55%
+  pos 8+ ~ 35-45%
+
+sessions by entry source:
+  profile       ~ 60% of sessions, avg ~5 videos
+  explore       ~ 25% of sessions, avg ~10 videos  (deepest)
+  notification  ~ 10% of sessions, avg ~4 videos
+  share         ~ 5%  of sessions, avg ~3 videos  (shortest)
+
+loop-heavy sessions:
+  is_loop_heavy=1 -> avg_videos ~16, avg_likes ~11
+  is_loop_heavy=0 -> avg_videos ~7,  avg_likes ~3
+```
+
+Full row-by-row SQL is in `03_reels_watch_session.py` (`DIM_DATE_30D_REELS`,
+`DIM_USER_30D_REELS`, `DIM_SOUND_30D`, `DIM_REEL_30D`, `DIM_DEVICE_30D_REELS`,
+`DIM_ENTRY_SOURCE_30D`, `FACT_REELS_SESSION_30D`, `FACT_REEL_VIEW_30D`).
