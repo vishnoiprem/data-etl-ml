@@ -381,8 +381,8 @@ The most common interview trap in this domain, and a real production failure mod
 User posts ──► for each follower: write post into their timeline
 ```
 
-- ✅ Reads are dirt cheap (one MGET).
-- ❌ Writes cost O(followers).
+- Reads are dirt cheap (one MGET).
+- Writes cost O(followers).
 
 ### 9.2 Fan-out on read (pull)
 
@@ -390,8 +390,8 @@ User posts ──► for each follower: write post into their timeline
 User reads ──► fetch posts from everyone they follow, merge, rank
 ```
 
-- ✅ Writes are cheap.
-- ❌ Reads are expensive (back to the naive design).
+- Writes are cheap.
+- Reads are expensive (back to the naive design).
 
 ### 9.3 The celebrity problem
 
@@ -614,16 +614,16 @@ The key insight: **this is per-user, not global**. You do not pay the consistenc
 
 ### Use it when
 
-- ✅ **Read:write ratio is ≥ 10:1.** Feeds, catalogs, content sites, dashboards.
-- ✅ **The same result is requested by many users.** One computed answer serves many readers.
-- ✅ **Latency budgets are tight and the query is expensive.** Precompute it.
-- ✅ **Traffic is spiky.** A cache absorbs peaks that would otherwise reach the database.
+- **Read:write ratio is ≥ 10:1.** Feeds, catalogs, content sites, dashboards.
+- **The same result is requested by many users.** One computed answer serves many readers.
+- **Latency budgets are tight and the query is expensive.** Precompute it.
+- **Traffic is spiky.** A cache absorbs peaks that would otherwise reach the database.
 
 ### Do not use it when
 
-- ❌  **The workload is write-heavy or balanced.** Precomputing read models for data written constantly and read rarely is wasted work.
-- ❌ **You need strong consistency.** Payments, account balances, inventory at checkout, anything financial — do not cache. Read the primary. Period.
-- ❌ **The system isn’t under pressure yet.** Caching adds an invalidation surface, a new failure mode, and ongoing maintenance cost. It needs to earn its place.
+- **The workload is write-heavy or balanced.** Precomputing read models for data written constantly and read rarely is wasted work.
+- **You need strong consistency.** Payments, account balances, inventory at checkout, anything financial — do not cache. Read the primary. Period.
+- **The system isn’t under pressure yet.** Caching adds an invalidation surface, a new failure mode, and ongoing maintenance cost. It needs to earn its place.
 
 ---
 
