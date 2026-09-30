@@ -146,3 +146,29 @@ expect("per-session metrics", SQL, [
 # user spent on the FINAL hit before leaving. A single-hit session gets 0
 # (correct for "span of activity", wrong for "time spent"). Real impls add
 # an assumed dwell for the last hit or use an explicit session_end event.
+
+
+#
+# with raw_hits_vw as (
+# select user_id, hit_ts
+# ,lag(hit_ts) over ( partition by user_id order by hit_ts  ) pre_hit_ts
+# from raw_hits
+# ),
+# lead_raw_hits_vw as (select user_id
+#    , hit_ts
+#    , TIMESTAMPDIFF(SECOND
+#    , pre_hit_ts
+#    , hit_ts)/60 time_diff_min  from raw_hits_vw
+#     ),
+#  lead_raw_hits_vw_time as  (
+# select  user_id ,hit_ts,
+#         case when   time_diff_min>=30  then 1 when time_diff_min IS null then 1 else 0 end as is_new_session  FROM lead_raw_hits_vw)
+# ,
+# user_sesson_vw as (select user_id,
+#                           hit_ts,
+#                           sum(is_new_session)
+#                               over (partition by user_id order by hit_ts rows between UNBOUNDED PRECEDING and current row ) session_id
+#                    from lead_raw_hits_vw_time lead_raw_hits_vw)
+#
+# select user_id, session_id, COUNT(*) as hits ,max(hit_ts),min(hit_ts) FROM user_sesson_vw
+# GROUP BY user_id,session_id

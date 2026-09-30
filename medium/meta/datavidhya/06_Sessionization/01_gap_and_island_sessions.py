@@ -159,3 +159,22 @@ print("[PASS] sessionization — DataFrame API matches SQL")
 # - Boundary choice: strictly > 30 minutes keeps the same session; user 3's
 #   29-minute gap (15:00 -> 15:29) tests that near-boundary case.
 # - Watch skew: a bot user with millions of hits lands in one partition.
+
+#
+#
+# with raw_hits_vw as (
+# select user_id, hit_ts
+# ,lag(hit_ts) over ( partition by user_id order by hit_ts  ) pre_hit_ts
+# from raw_hits
+# ),
+# lead_raw_hits_vw as (select user_id
+#    , hit_ts
+#    , TIMESTAMPDIFF(SECOND
+#    , pre_hit_ts
+#    , hit_ts)/60 time_diff_min  from raw_hits_vw
+#     ),
+#  lead_raw_hits_vw_time as  (
+# select  user_id ,hit_ts,
+#         case when   time_diff_min>=30  then 1 when time_diff_min IS null then 1 else 0 end as is_new_session  FROM lead_raw_hits_vw)
+# select *, sum(is_new_session) over (partition by  user_id order by  hit_ts rows between UNBOUNDED  PRECEDING and current row ) from lead_raw_hits_vw_time
+#                                                                                    lead_raw_hits_vw
