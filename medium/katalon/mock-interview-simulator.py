@@ -475,16 +475,17 @@ def run_demo() -> List[Score]:
 
     # Synthetic answers — alternating strong/weak so the scorecard is illustrative
     demo_answers = {
-        "Q1": (  # Vu Bui — strong
-            "Three planes: business BI for executives, product data plane for "
-            "test executions (20M result-rows/day, ~46k events/sec peak), and "
-            "an AI plane for retrieval and eval. Tenant ID everywhere. Hot "
-            "serving in DynamoDB for live run status, durable lakehouse on S3 "
-            "+ Iceberg for 3-year history, certified warehouse + semantic layer "
-            "for executive KPIs. AI plane consumes governed products, never "
-            "scrapes arbitrary stores. Eval first, retrieval second, model "
-            "third. SLOs on data products, not just infra. Reconciliation "
-            "between producer, accepted, silver, and served counts."),
+        "Q1": (  # Vu Bui — strong (ordered: tenant → mechanism → SLO → AI)
+            "Tenant isolation is the spine, not an afterthought — tenant_id in "
+            "every key, partition, index, audit row. At 30k tenants and "
+            "~46k events/sec peak I would use Kafka for ingestion with "
+            "idempotent producers, durable lakehouse on S3 + Iceberg for 3-"
+            "year history, DynamoDB for hot run status, and a certified "
+            "warehouse + semantic layer for executive KPIs. SLOs sit on "
+            "data products, not on infra — a dashboard SLO is owned by the "
+            "domain. The AI plane consumes governed products, never scrapes "
+            "arbitrary stores. Eval first, retrieval second, model third — "
+            "the retrieval harness is a deployment gate, not an experiment."),
         "Q2": (  # Vu Bui — weak (no triggers, no specific non-builds)
             "I would not build things that are not core to the role."),
         "Q5": (  # Que Tran — strong
