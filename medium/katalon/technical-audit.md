@@ -403,7 +403,13 @@ def evaluate(retriever, eval_set, k=10):
     }
 ```
 
----
+### What changes in production
+
+The eval harness is the prototype most likely to be **adopted uncritically**. Three production realities change this:
+
+1. **Offline recall@k tells you nothing about answer quality.** A retriever with `recall@10 = 0.9` can still surface irrelevant docs in the top-3, and the LLM uses them. The harness needs end-task metrics: was the answer grounded in retrieved evidence? Did the citation resolve to a real artifact? Was the action the agent took reversible? These metrics come from a separate eval set, ideally human-labeled, and the offline recall is a *necessary but not sufficient* filter.
+2. **Ground truth constructed from the same index is circular.** If your `relevant_doc_ids` were sourced by running lexical retrieval and annotating the top hits, you have a retriever that scores perfectly against itself. The fix is to source ground truth from a different signal — customer support tickets linking to the right artifact, or expert adjudication. Otherwise the eval numbers are meaningless and you ship a regression.
+3. **Cross-tenant leakage in eval must hit zero, but a non-zero hit rate in staging is a launch blocker, not a warning.** The audit's leakage detector is correct in spirit but undersized for production — it checks `result.tenant_id != query.tenant_id`, which catches direct leaks but misses gradient leakage (an embedding that *resembles* another tenant's content) and indirect leakage (a doc authored in one tenant's workspace that references another tenant's identifier). Both require additional checks: embedding-space similarity audits, and post-retrieval policy filters that re-check the doc's tenant against the query's tenant at the storage layer, not the index layer.
 
 ## Prototype E — Idempotent Outbox for Agent Tool Calls
 
