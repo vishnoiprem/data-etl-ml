@@ -550,7 +550,9 @@ def run_demo() -> List[Score]:
             scores.append(s)
             print(f"  {q.qid}  panelist={q.panelist:<22}  "
                   f"score={s.raw}/4   coverage={s.coverage}   "
-                  f"keywords={s.keyword_density}")
+                  f"keywords={s.keyword_density}   "
+                  f"sequence={s.sequence_score}   "
+                  f"trap={s.trap_handling}")
             if s.feedback:
                 for f in s.feedback:
                     print(f"        - {f}")
