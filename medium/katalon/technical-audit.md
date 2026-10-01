@@ -4,6 +4,18 @@
 **Subject:** 5 code prototypes (A–E) for Head of Data interview prep
 **Verdict:** Conceptually correct. Need hardening on partition pruning, type safety, tenant binding, hash selection, and outbox atomicity before any survive a 30k-tenant production load.
 
+## How to read this
+
+The audit splits findings into three severities because they require different responses:
+
+- **BUG** is a correctness failure — the code does not do what the docstring claims, or returns a wrong answer in some input. These must be fixed before the demo runs in front of the panel; the panel will catch them.
+- **RISK** is something the code gets away with at demo scale (12 rows, 1 tenant, `local[2]`) but breaks at 30k-tenant production scale. These don't change the demo, but if you don't acknowledge them out loud, the panel will assume you don't see them.
+- **FIX** is the corrected code. Read the FIX section before re-running the prototype.
+
+The prototypes are *interview demos*, not production code. The point of the audit isn't to ship them — it's to make sure you can stand behind them under cross-examination. Saying "this is a demo; in production I'd swap parquet for Delta with merge, partition by tenant, and use a content hash for idempotency" is stronger than showing a demo that *happens* to use parquet. The first demonstrates judgment. The second demonstrates unfamiliarity with Delta.
+
+The single most important sentence in this audit: **the demo runs on `local[2]` with 12 rows. The interview is about what you'd build for 30k tenants. The audit is the bridge between the two.**
+
 ---
 
 ## Prototype A — CDC Dedup to Silver (Idempotent Merge)
