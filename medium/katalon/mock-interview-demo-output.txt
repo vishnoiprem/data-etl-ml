@@ -1,36 +1,39 @@
 
 === DEMO RUN — sample candidate answers ===
 
-  Q1  panelist=Vu Bui                  score=2.27/4   coverage=0.92   keywords=0.4
-  Q2  panelist=Vu Bui                  score=0.6/4   coverage=0.33   keywords=0.1
+  Q1  panelist=Vu Bui                  score=2.08/4   coverage=0.67   keywords=0.6   sequence=1.0   trap=0.0
+  Q2  panelist=Vu Bui                  score=0.48/4   coverage=0.33   keywords=0.1   sequence=0.0   trap=0.0
         - answer too short — under 40 words
         - only 1/10 expected terms present — likely missing the technical core
         - rubric coverage low — likely missing required depth
-  Q5  panelist=Que Tran                score=2.4/4   coverage=1.0   keywords=0.9
-  Q9  panelist=Son Dao                 score=2.89/4   coverage=1.0   keywords=0.89
-  Q12  panelist=Son Dao                 score=0.0/4   coverage=0.0   keywords=0.0
+        - answer sequence is disordered — concept ordering matters (constraint → mechanism → failure → trade-off)
+  Q5  panelist=Que Tran                score=2.19/4   coverage=1.0   keywords=0.9   sequence=0.67   trap=0.0
+  Q9  panelist=Son Dao                 score=2.71/4   coverage=1.0   keywords=0.89   sequence=1.0   trap=0.0
+  Q12  panelist=Son Dao                 score=0.0/4   coverage=0.0   keywords=0.0   sequence=0.0   trap=0.0
         - answer too short — under 40 words
         - only 0/11 expected terms present — likely missing the technical core
         - rubric coverage low — likely missing required depth
-  Q15  panelist=Duke Nguyen             score=1.5/4   coverage=0.5   keywords=0.75
+        - answer sequence is disordered — concept ordering matters (constraint → mechanism → failure → trade-off)
+  Q15  panelist=Duke Nguyen             score=2.7/4   coverage=0.83   keywords=0.75   sequence=1.0   trap=0.3
         - trap correctly rejected — good
-  Q20  panelist=Rajesh Krishnan         score=1.65/4   coverage=0.5   keywords=0.4
-  Q23  panelist=Rajesh Krishnan         score=1.48/4   coverage=0.7   keywords=0.43
+  Q20  panelist=Rajesh Krishnan         score=1.9/4   coverage=0.58   keywords=0.5   sequence=1.0   trap=0.0
+  Q23  panelist=Rajesh Krishnan         score=1.18/4   coverage=0.7   keywords=0.43   sequence=0.0   trap=0.0
         - answer too short — under 40 words
+        - answer sequence is disordered — concept ordering matters (constraint → mechanism → failure → trade-off)
 
 ==============================================================================
   PER-PANELIST SCORECARD
 ==============================================================================
-  Vu Bui                  avg=1.44/4  (2 qs)  ███████████
-  Que Tran                avg=2.40/4  (1 qs)  ███████████████████
-  Son Dao                 avg=1.45/4  (2 qs)  ████████████
-  Duke Nguyen             avg=1.50/4  (1 qs)  ████████████
-  Rajesh Krishnan         avg=1.56/4  (2 qs)  █████████████
+  Vu Bui                  avg=1.28/4  (2 qs)  ██████████
+  Que Tran                avg=2.19/4  (1 qs)  ██████████████████
+  Son Dao                 avg=1.35/4  (2 qs)  ███████████
+  Duke Nguyen             avg=2.70/4  (1 qs)  ██████████████████████
+  Rajesh Krishnan         avg=1.54/4  (2 qs)  ████████████
 
-  OVERALL: 1.60/4
+  OVERALL: 1.66/4
   Verdict: Weak — re-run pack from scratch, focus on rubric criteria.
 
   Drill these next:
     • Q12 (Son Dao) — 0.0/4
-    • Q2 (Vu Bui) — 0.6/4
-    • Q23 (Rajesh Krishnan) — 1.48/4
+    • Q2 (Vu Bui) — 0.48/4
+    • Q23 (Rajesh Krishnan) — 1.18/4

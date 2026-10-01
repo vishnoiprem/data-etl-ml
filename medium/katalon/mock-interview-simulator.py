@@ -617,6 +617,15 @@ def main() -> None:
     print("Type your answer for each; finish with a line containing only 'END'.")
     print("(Tip: run with --demo first to see what a scorecard looks like.)\n")
 
+    # Header: explain scoring dimensions before they hit the screen
+    print("Each answer is scored on four dimensions plus a trap-handling credit:")
+    print("  • keywords  — fraction of expected technical terms present")
+    print("  • coverage  — fraction of rubric criteria addressed")
+    print("  • sequence  — 0..1; do concepts follow the right conceptual order")
+    print("  • trap      — penalty for falling into a known weak pattern,")
+    print("                credit (+0.3) for naming and rejecting it")
+    print("  • raw       — final 0..4 score per the README §20 rubric\n")
+
     scores = run_interactive()
     print_scorecard(scores)
 
