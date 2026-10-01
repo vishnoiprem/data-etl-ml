@@ -94,6 +94,16 @@ checksum = hashlib.sha256(
 # Run pipeline twice, compare checksums — true idempotency
 ```
 
+### What changes in production
+
+The demo's row-count check is the single weakest invariant. Row count is monotonically correlated with idempotency only because the demo has no late-arriving or out-of-order events. In production, the invariant you actually need is: **the silver table is a function of the input stream up to a watermark**. The content-hash check captures that — re-running with the same input produces the same hash, regardless of which rows are present.
+
+Three other shifts happen the moment you cross from `local[2]` to a 30k-tenant cluster:
+
+1. **Partition pruning becomes a cost lever, not a nicety.** Without `partitionBy("tenant_id", "dt")`, every silver read scans the entire table. With 30k tenants × 730 days, that's millions of partitions and a multi-TB scan per query. The audit's `partitionBy("tenant_id")` fix is the minimum; production needs `dt` as a coarser partition and ZORDER on `(execution_id, test_case_id)` inside each tenant/day partition.
+2. **The merge becomes the bottleneck, not the dedup.** At 30k tenants, MERGE-on-business-key with 20M daily rows triggers shuffle-heavy file rewrites. Pre-aggregate by date, use Delta's `optimizedWrite` + `autoCompact`, and consider bucketing by `tenant_id` to keep hot-key partitions manageable.
+3. **Schema evolution becomes a deployment.** The demo never adds a column. Production does, on a quarterly cadence. Without `delta.columnMapping.mode = 'name'` and a contract-tested producer CI, adding a column silently breaks consumers. This is a *catalog* problem, not a *code* problem — the fix is governance, not Spark config.
+
 ---
 
 ## Prototype B — Flakiness SQL Runner
