@@ -209,7 +209,13 @@ WHERE s.run_count >= 5
 ORDER BY s.transition_rate DESC NULLS LAST, s.run_count DESC
 ```
 
----
+### What changes in production
+
+This prototype is the one the panel will scrutinize hardest, because flakiness is a metric a smart lazy engineer can game. Three production realities change the picture:
+
+1. **The `run_count >= 5` floor is too low for flakiness decisions.** Five executions is noise. The production floor is closer to 30, and even then a Bayesian shrinkage prior toward 0.5 is required for tests that haven't yet accumulated evidence — otherwise a test that's run twice (P, F) shows `transition_rate = 1.0` and triggers an alert. That's the kind of false positive that erodes trust in the metric and gets the whole feature turned off.
+2. **Window functions over `attempt_rank = 1` only work if `attempt_id` is the source of truth, not the platform's rendering.** A test framework that retries internally and emits one event with the final status hides flakiness upstream. The metric sees a stable test; the customer sees flakes. The fix is at the source: require producers to emit a stream of attempt events, not a single rolled-up status. That's a contract, not a query.
+3. **`environment_hash` is both the right call and the wrong default.** It correctly buckets across environments, but at 30k tenants × 5 environments × 1000s of tests, the GROUP BY cardinality explodes. Production keeps `environment_hash` as the key but pre-aggregates to `(tenant_id, project_id, test_case_id, environment_hash, dt)` and computes flakiness metrics off the pre-aggregate. The query becomes cheap enough to run hourly; the metric becomes visible to product managers without an analytics request.
 
 ## Prototype C — Reconciliation (Producer vs Accepted vs Silver vs Served)
 
