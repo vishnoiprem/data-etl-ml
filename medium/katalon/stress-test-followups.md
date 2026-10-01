@@ -4,6 +4,20 @@ For every question, this pack provides: (1) **Harder follow-ups** a senior inter
 
 The interviewer's posture throughout: every answer you give, expect a follow-up that assumes your proposal was the *generous* version. Size to 10x, plan for 3am, name the failure mode you skipped.
 
+## How to actually use it
+
+Read the strong/weak patterns together, not separately. The contrast is the lesson — most weak patterns fail at exactly the spot a strong pattern succeeds. If you can't articulate *why* a strong answer is stronger than a weak one in one sentence, you haven't internalized it yet; you'll replay the weak version under pressure.
+
+The follow-ups cluster into five recurring pushback moves. Recognizing them mid-conversation lets you preempt rather than react:
+
+1. **Size to 10×.** "Walk me through what this looks like at 10× the volume." Forces you off the comfortable sizing.
+2. **Plan for 3 a.m.** "Who pages whom when this breaks at 3 a.m., what's the runbook?" Forces you off the happy path.
+3. **Name the failure mode.** "What's the failure mode of this design we haven't discussed?" Forces you to admit a trade-off.
+4. **What would falsify this.** "What's the smallest experiment that would prove this wrong?" Forces you to put skin in the game.
+5. **Gaming the metric.** "How would a smart, lazy engineer game this metric?" Forces you to add a counter-metric.
+
+When you hear any of these phrasings, your next sentence should explicitly name a trade-off, a number, or a failure mode — not another benefit.
+
 ---
 
 ## ROUND 1 — Technical Panel (Vu Bui, Que Tran, Son Dao)
