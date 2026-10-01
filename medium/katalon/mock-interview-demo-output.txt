@@ -1,0 +1,37 @@
+
+=== DEMO RUN — sample candidate answers ===
+
+  Q1  panelist=Vu Bui                  score=2.27/4   coverage=0.92   keywords=0.4
+  Q2  panelist=Vu Bui                  score=0.6/4   coverage=0.33   keywords=0.1
+        - answer too short — under 40 words
+        - only 1/10 expected terms present — likely missing the technical core
+        - rubric coverage low — likely missing required depth
+  Q5  panelist=Que Tran                score=2.4/4   coverage=1.0   keywords=0.9
+  Q9  panelist=Son Dao                 score=2.39/4   coverage=1.0   keywords=0.89
+        - TRAP-LIKE: answer matches a known weak pattern — see rubric above
+  Q12  panelist=Son Dao                 score=0.0/4   coverage=0.0   keywords=0.0
+        - answer too short — under 40 words
+        - only 0/11 expected terms present — likely missing the technical core
+        - rubric coverage low — likely missing required depth
+  Q15  panelist=Duke Nguyen             score=1.0/4   coverage=0.5   keywords=0.75
+        - TRAP-LIKE: answer matches a known weak pattern — see rubric above
+  Q20  panelist=Rajesh Krishnan         score=1.65/4   coverage=0.5   keywords=0.4
+  Q23  panelist=Rajesh Krishnan         score=1.48/4   coverage=0.7   keywords=0.43
+        - answer too short — under 40 words
+
+==============================================================================
+  PER-PANELIST SCORECARD
+==============================================================================
+  Vu Bui                  avg=1.44/4  (2 qs)  ███████████
+  Que Tran                avg=2.40/4  (1 qs)  ███████████████████
+  Son Dao                 avg=1.20/4  (2 qs)  ██████████
+  Duke Nguyen             avg=1.00/4  (1 qs)  ████████
+  Rajesh Krishnan         avg=1.56/4  (2 qs)  █████████████
+
+  OVERALL: 1.47/4
+  Verdict: Weak — re-run pack from scratch, focus on rubric criteria.
+
+  Drill these next:
+    • Q12 (Son Dao) — 0.0/4
+    • Q2 (Vu Bui) — 0.6/4
+    • Q15 (Duke Nguyen) — 1.0/4
