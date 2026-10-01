@@ -277,14 +277,67 @@ QUESTION_BANK: List[Question] = [
 # Scoring — keyword density + rubric criterion coverage
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Question metadata — sequence of expected concepts (in order)
+# ---------------------------------------------------------------------------
+
+# Each entry: ordered list of concept groups. Score is high when the answer
+# mentions them in roughly this order, low when the order is reversed or
+# concepts are missing. Groups are pipe-separated substrings (case-insensitive).
+EXPECTED_SEQUENCE = {
+    "Q1":  ["tenant_id", "kafka|lakehouse|ingestion", "slo", "ai"],
+    "Q5":  ["idempot", "partition", "merge|dedup", "reconciliation"],
+    "Q6":  ["isolation|partition|quota", "burst", "cost"],
+    "Q9":  ["row_number|first_attempt", "lag", "nullif", "left join"],
+    "Q11": ["skew|partition", "sink|backpressure", "gc", "rebalance"],
+    "Q12": ["allow-list|allowlist|allowed", "tenant", "idempot", "audit",
+            "abstain|confirmation"],
+    "Q13": ["katalon|test execution|30k", "ai|data foundation", "now|inflection"],
+    "Q15": ["federated", "domain|owner", "central|platform"],
+    "Q19": ["decision latency", "trust|incident", "coverage|adoption"],
+    "Q20": ["outcome", "headcount", "risk", "not invest|off-ramp"],
+    "Q21": ["decision impact|customer", "ack|status|postmortem",
+            "prevention|control"],
+    "Q23": ["listen|diagnose", "floor|non-negotiable", "preserve trust"],
+    "Q2":  ["not build|defer|trigger"],
+}
+
+
+def score_sequence(q: Question, a: str) -> float:
+    """Did the candidate lay out concepts in a sensible order?
+
+    For technical answers the right sequence is usually:
+    constraint → mechanism → failure mode → trade-off.
+    For strategy: stake → decision → criteria → risk.
+    Returns 0..1 — fraction of present concepts that are in correct relative order.
+    """
+    seq = EXPECTED_SEQUENCE.get(q.qid, [])
+    if not seq:
+        return 1.0  # no sequence defined — neutral
+    positions = []
+    for group in seq:
+        earliest = None
+        for alt in group.split("|"):
+            idx = a.find(alt)
+            if idx >= 0 and (earliest is None or idx < earliest):
+                earliest = idx
+        positions.append(earliest)
+    present = [p for p in positions if p is not None]
+    if len(present) < max(2, len(seq) // 2):
+        return 0.0
+    in_order = sum(1 for a_, b in zip(present, present[1:]) if a_ < b)
+    return in_order / max(1, len(present) - 1)
+
+
 @dataclass
 class Score:
     qid: str
     panelist: str
-    coverage: float            # 0..1 — fraction of rubric criteria that appear to be addressed
+    coverage: float            # 0..1 — fraction of rubric criteria that appear addressed
     keyword_density: float     # 0..1 — fraction of expected keywords present
     length_score: int          # 0 / 1 — penalize too-short
-    penalty: float             # 0..0.5 — for hitting the 'trap' pattern
+    sequence_score: float      # 0..1 — does the answer follow the conceptual order?
+    trap_handling: float       # -0.5..+0.3 — penalty for falling in, credit for rejecting
     raw: float                 # 0..4 final
     feedback: List[str] = field(default_factory=list)
 
@@ -320,31 +373,39 @@ def score_answer(q: Question, answer: str) -> Score:
     if coverage < 0.4:
         feedback.append("rubric coverage low — likely missing required depth")
 
-    # Trap penalty: only flag when the trap pattern dominates the answer,
-    # i.e. the candidate uses trap words as their CONCLUSION rather than as
-    # things they are REJECTING. We require >=4 trap hits AND no negation
-    # markers near the trap phrases.
-    penalty = 0.0
+    # Sequence: does the answer follow the conceptual order?
+    sequence_score = score_sequence(q, a)
+    if sequence_score < 0.5 and EXPECTED_SEQUENCE.get(q.qid):
+        feedback.append("answer sequence is disordered — concept ordering matters "
+                       "(constraint → mechanism → failure → trade-off)")
+
+    # Trap handling — three outcomes:
+    #   (1) candidate doesn't engage with the trap pattern → no signal
+    #   (2) candidate uses trap phrases AND rejects them → credit
+    #   (3) candidate uses trap phrases AND concludes with them → penalty
+    trap_handling = 0.0
     trap_words = re.findall(r"[a-z]{4,}", q.trap.lower())
     trap_hits = sum(1 for w in trap_words if w in a)
     negation_markers = ("not ", "don't ", "avoid ", "reject ", "wouldn't ",
                         "won't ", "never ", "fails ", "breaks ", "drifts in ",
-                        "creates a bottleneck", "disagree ")
+                        "creates a bottleneck", "disagree ", "would not ",
+                        "doesn't ")
     has_negation = any(m in a for m in negation_markers)
-    if trap_hits >= 4 and not has_negation:
-        penalty = 0.5
+    if trap_hits >= 4 and has_negation:
+        trap_handling = 0.3
+        feedback.append("trap correctly rejected — good")
+    elif trap_hits >= 4 and not has_negation:
+        trap_handling = -0.5
         feedback.append("TRAP-LIKE: answer matches a known weak pattern — "
                        "see rubric above")
-    elif trap_hits >= 4 and has_negation:
-        # Candidate is naming the trap AND rejecting it — credit, not penalty
-        feedback.append("trap correctly rejected — good")
 
     # Final raw score 0..4 (rubric from README §20)
     raw = 0.0
-    raw += 1.0 * keyword_density        # technical core present
-    raw += 1.5 * coverage               # rubric satisfied
-    raw += 0.5 * length_score            # reasonable depth
-    raw -= penalty
+    raw += 0.8 * keyword_density        # technical core present
+    raw += 1.2 * coverage               # rubric satisfied
+    raw += 0.4 * length_score            # reasonable depth
+    raw += 0.4 * sequence_score          # ordered reasoning
+    raw += trap_handling                 # penalty or credit
     raw = max(0.0, min(4.0, raw))
 
     return Score(
@@ -353,7 +414,8 @@ def score_answer(q: Question, answer: str) -> Score:
         coverage=round(coverage, 2),
         keyword_density=round(keyword_density, 2),
         length_score=length_score,
-        penalty=penalty,
+        sequence_score=round(sequence_score, 2),
+        trap_handling=trap_handling,
         raw=round(raw, 2),
         feedback=feedback,
     )
