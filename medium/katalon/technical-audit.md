@@ -505,7 +505,13 @@ def mark_failed(conn, outbox_id, error, retry_count):
     """, (new_state, error, retry_count, int(time.time()), outbox_id))
 ```
 
----
+### What changes in production
+
+The outbox is the prototype the panel will push hardest on, because **the bug it produces is the most damaging** — a side effect that fires twice because two retries collided on the same idempotency key. Three production realities change this:
+
+1. **The outbox is a state machine, not a row.** Production needs `pending → applied → completed` with explicit transitions, timeouts on each state, and a drainer process that picks up rows stuck in `pending` past the SLA. The demo collapses the state to "row exists" which works at one agent's pace but fails at 10k agents per minute because there's no recovery for in-flight rows that crash mid-tool-execution.
+2. **The audit log is a regulatory artifact, not a debugging convenience.** The demo's audit table is a SQLite row, which the panel will accept for the demo but not for production. SOC 2 / GDPR require the audit log to be append-only, signed (HMAC or signed event), and replicated to a separate storage tier with retention tied to legal hold. The same content; a different trust model.
+3. **`tenant_id` from the request is a privilege escalation waiting to happen.** The demo accepts `tenant_id` as a parameter. Production binds `tenant_id` to the authenticated principal — the OAuth token, the mTLS identity, the workload identity — and refuses any tool call whose declared `tenant_id` doesn't match. This is the single change that turns the outbox from "demo" to "production-safe," and it's the one most likely to be skipped by someone reading the demo quickly.
 
 ## Cross-Cutting Findings
 
