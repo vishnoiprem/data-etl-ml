@@ -507,26 +507,31 @@ def run_demo() -> List[Score]:
         "Q12": (  # Son Dao — weak
             "I would put safety controls around the agent and let it edit "
             "tests carefully."),
-        "Q15": (  # Duke Nguyen — strong
-            "Federated ownership with a central platform team. Domains own "
-            "metric definitions and source contracts; central team owns "
-            "ingestion, catalog, policy, observability, paved road. Centralized "
-            "creates a bottleneck; embedded drifts in standards. Federated "
-            "fails if central team doesn't provide a paved road — that's the "
-            "first thing to build."),
-        "Q20": (  # Rajesh Krishnan — strong
-            "12-month outcomes: certified metrics for top 5 executive "
-            "decisions with zero silent material errors, ingestion + "
-            "lakehouse with SLOs covering ≥80% of accepted events, one AI "
-            "lighthouse with held-out eval harness and production canary, "
-            "governed AI context plane. Headcount: 1 senior platform lead, "
-            "2 platform engineers, 1 analytics engineer, 1 applied ML/eval "
-            "engineer, 0.5 governance engineer paired with security. Risks: "
-            "hiring slips (staged org), AI eval can't reach bar (ship eval + "
-            "deterministic baseline first), governance slows Engineering "
-            "(measure lead time, walk back any that hurts it). NOT investing: "
-            "real-time OLAP until latency tests prove needed, data mesh, "
-            "top-down BI consolidation."),
+        "Q15": (  # Duke Nguyen — strong (ordered: federated → domain → central)
+            "Federated ownership is the model — domains own metric definitions "
+            "and source contracts; the central platform team owns ingestion, "
+            "catalog, policy enforcement, observability, and the paved road "
+            "for serving. Federated fails first when the central team doesn't "
+            "ship a paved road, so that's the first investment. Centralized "
+            "creates a bottleneck and disconnects decision-makers from the "
+            "data; embedded drifts in standards without central governance. "
+            "The success metric is faster trusted decisions and fewer "
+            "incidents, not the number of data products."),
+        "Q20": (  # Rajesh Krishnan — strong (ordered: outcome → headcount → risk → not invest)
+            "12-month outcomes I would commit to: certified metrics for the "
+            "top 5 executive decisions with zero silent material errors; "
+            "ingestion + lakehouse path with SLOs covering ≥80% of accepted "
+            "events; one AI lighthouse use case with a held-out eval harness "
+            "and a production canary; a governed AI context plane with tenant "
+            "isolation enforced. Headcount: 1 senior platform lead, 2 platform "
+            "engineers, 1 analytics engineer, 1 applied ML/eval engineer, 0.5 "
+            "governance engineer paired with security. Risks with mitigation: "
+            "hiring slips (staged org, start with platform lead); AI eval "
+            "can't reach bar (ship eval + deterministic baseline first, then "
+            "decide on model); governance slows Engineering (measure lead "
+            "time, walk back any paved road that hurts it). Off-ramps: real-"
+            "time OLAP only when latency tests prove needed; data mesh only "
+            "when ownership is real; top-down BI consolidation never."),
         "Q23": (  # Rajesh Krishnan — partial (good direction, weak on listening)
             "I'd preserve the standard but coach the leader. Most resistance "
             "is signal about policy theater, but the floor is non-negotiable. "
