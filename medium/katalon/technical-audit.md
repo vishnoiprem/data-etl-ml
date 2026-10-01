@@ -515,24 +515,24 @@ The outbox is the prototype the panel will push hardest on, because **the bug it
 
 ## Cross-Cutting Findings
 
-| Concern | Severity | Notes |
-|---|---|---|
-| **`tenant_id` as `STRING` everywhere** | High | 30k tenants × string keys bloats shuffle. Consider `BIGINT` with a tenant dimension table. JOINs also break on case (`T_001` vs `t_001`). |
-| **No `dt` / `event_date` partition** | High | All five prototypes scan all-time data. Production needs daily partitioning + ZORDER on `tenant_id, execution_id`. |
-| **No observability / SLO** | High | None emit metrics. A pipeline that ships without `latency_p95`, `freshness_lag`, `error_rate` gets deleted in 6 months. |
-| **Demo fixtures don't reflect prod cardinality** | High | 12 rows, 1 tenant, 1 environment. Synthetic data should match tenant size distribution (power-law: few mega, many tiny). |
-| **No schema contract / Delta schema enforcement** | Medium | Use `delta.columnMapping.mode = 'name'` and `delta.enableChangeDataFeed`. |
-| **No unit tests for edge cases** | Medium | Single-row tables, NULL tenant_id, empty partitions, all-FAILED tests, retries with same attempt_id. |
-| **`random.seed` set but not all RNG sources seeded** | Medium | Python `random`, `numpy`, `torch`, `hash` — each needs seeding for reproducibility. |
-| **No row-level filters in asserts** | Medium | Count checks should also validate `WHERE tenant_id = :tenant` row counts, not just totals. |
-| **Security: `tenant_id` from request, not from session** | Critical (D) | Any path where `tenant_id` is a function arg rather than derived from authenticated session is a privilege escalation vector. |
+Most of these findings apply to all five prototypes in roughly the same shape. They cluster into four categories: tenant model, time model, observability, and security. Read the rows together — fixing one without the others just shifts the failure.
+
+**Tenant model.** `tenant_id` is the spine of every data product. Two findings hit this directly. First, `tenant_id` as `STRING` bloats shuffle and breaks JOINs on case (`T_001` vs `t_001`); promote it to `BIGINT` with a tenant dimension table that controls the canonical form. Second, `tenant_id` should be derived from the authenticated session, not accepted as a request parameter — every prototype that takes it as an argument has a privilege escalation vector. The audit's "Critical (D)" rating is correct: this is the difference between a demo and a multi-tenant data product.
+
+**Time model.** None of the prototypes include `dt` or `event_date` partitioning. At 30k tenants, a full-scan reconciliation or flakiness query is multi-TB and won't finish within SLO. The fix is `partitionBy("dt", "tenant_id")` plus ZORDER on `(execution_id, test_case_id)` inside each partition. Without partitioning, the demo can't be benchmarked honestly; with it, the benchmark becomes the production cost model.
+
+**Observability.** None of the prototypes emit metrics, log lines, or SLOs. A pipeline that ships without `latency_p95`, `freshness_lag`, and `error_rate` is invisible to whoever's on call. The on-call experience is downstream of the observability decisions you make before the first event lands. At Head of Data depth, the question isn't "do you have Grafana" — it's "what's your SLO budget for the silver pipeline, and what behavior changes when it's exhausted?"
+
+**Fixtures.** Synthetic data with 12 rows, 1 tenant, and 1 environment doesn't represent Katalon's distribution. Production tenant sizes follow a power law: a few enterprise tenants generate 40% of volume, a long tail of small tenants generates the rest. Synthetic data generators should match this — even a quick generator with `tenant_count = 30000, size_distribution = lognormal` is enough to expose the skew-handling bugs that 12-row demos hide.
 
 ---
 
 ## Top 5 Issues, Ranked by Production Severity
 
-1. **Prototype E outbox race condition** (concurrent submits with same key → double side effect).
-2. **Prototype B `IFF()` portability** (will break on any non-DBR compute).
-3. **Prototype A `monotonically_increasing_id()` as tiebreaker** (silent ordering corruption).
-4. **Prototype D empty ground-truth + hash collision** (eval harness lies to you).
-5. **Prototype C no partition pruning** (reconciliation job times out on month 1).
+These are the issues most likely to bite the demo in front of a panel that knows where to look. Ranked by blast radius, not by frequency.
+
+1. **Prototype E outbox race condition** — concurrent submits with the same key produce a double side effect. The audit's race-condition description is exact; the panel will look for whether you understand the failure mode (lost `INSERT OR IGNORE` race) and have a mitigation (atomic CAS or `MERGE` with a version column).
+2. **Prototype B `IFF()` portability** — Databricks-only function. Will break on every non-DBR compute (Presto, Trino, vanilla Spark, EMR). The fix is `CASE WHEN`, which the audit's rewrite applies consistently.
+3. **Prototype A `monotonically_increasing_id()` as tiebreaker** — silent ordering corruption. Two replays with the same `(aggregate_version, ingested_at)` can choose different winners across runs. The audit replaces MII with a content hash, which is deterministic and survives replays.
+4. **Prototype D empty ground-truth + hash collision** — the eval harness can quietly report `recall@10 = 0` for queries that have no relevant docs in the index. Without `coverage` reported alongside recall, the harness lies. Plus, hashing `doc_id` alone (not `tenant_id + doc_id`) lets cross-tenant content share buckets.
+5. **Prototype C no partition pruning** — the reconciliation job times out in month one when it tries to compare all-time counts across all four layers. Add `WHERE dt BETWEEN ...` and a tiered cadence (hourly for tier-1, daily for tier-2, weekly for tier-3) and the recon stays within SLO.
