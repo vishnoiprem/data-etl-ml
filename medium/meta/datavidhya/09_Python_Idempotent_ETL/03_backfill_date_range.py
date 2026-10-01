@@ -156,3 +156,15 @@ print("[PASS] full re-run is a no-op — backfill is idempotent end to end")
 # conversation, not just a pipeline run.
 
 shutil.rmtree(os.path.dirname(out), ignore_errors=True)
+
+
+# Main rule to remember
+# Per partition, idempotent, bounded, resumable.
+# - Per partition: Process one date at a time.
+# - Idempotent: Retrying must not create duplicates. Use partition overwrite, MERGE, or transactional delete-and-insert.
+# - Bounded: Limit parallel jobs so the backfill does not affect production.
+# - Resumable: Store each date’s status in a persistent ledger: pending → running → done/failed.
+# - Validate: Check row counts, duplicates, nulls, totals, and partition completeness before marking a date complete.
+# - Coordinate: Avoid conflicts with daily pipelines and notify stakeholders if historical metrics change.
+# Interview sentence:
+# “I would process the backfill per partition, make every write idempotent, limit concurrency, track progress in a persistent ledger, and validate each partition before marking it complete.”
