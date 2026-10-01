@@ -309,7 +309,13 @@ GROUP BY 1,2
 HAVING COUNT(*) > 0
 ```
 
----
+### What changes in production
+
+Recon is the prototype most likely to **silently fail open** — produce a green result while a real leak is happening. Three production realities change this:
+
+1. **Recon must run per tenant tier, not globally.** A 30k-tenant recon over all-time data exceeds daily SLO within the first quarter. Split: tier-1 enterprises get hourly recon against a 24h window; tier-2 gets daily against a 7d window; tier-3 gets weekly. Each tier has its own alert threshold calibrated to its volume.
+2. **Recon catches drift but not intent.** A row in `silver` with `tenant_id='t_001'` that came from a producer event with `tenant_id='t_002'` reconciles green because the row count is identical at the tenant level. The cross-tenant leak query is the only place intent is checked, and it must run on every commit, not as a sample. Otherwise the next leak looks like a clean recon.
+3. **Recon status must surface in the product, not just the data team's dashboard.** A recon job that fires an alert to the data team but shows green in the customer-facing dashboard is a worse failure than no recon at all — it gives the customer false confidence. The recon status is itself a data product with its own SLO and owner.
 
 ## Prototype D — Retrieval Eval Harness
 
