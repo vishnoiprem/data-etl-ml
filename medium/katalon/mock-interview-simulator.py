@@ -320,15 +320,24 @@ def score_answer(q: Question, answer: str) -> Score:
     if coverage < 0.4:
         feedback.append("rubric coverage low — likely missing required depth")
 
-    # Trap penalty: if the candidate's answer matches the trap pattern
-    # keywords heavily, apply a penalty.
+    # Trap penalty: only flag when the trap pattern dominates the answer,
+    # i.e. the candidate uses trap words as their CONCLUSION rather than as
+    # things they are REJECTING. We require >=4 trap hits AND no negation
+    # markers near the trap phrases.
     penalty = 0.0
     trap_words = re.findall(r"[a-z]{4,}", q.trap.lower())
     trap_hits = sum(1 for w in trap_words if w in a)
-    if trap_hits >= 3:
+    negation_markers = ("not ", "don't ", "avoid ", "reject ", "wouldn't ",
+                        "won't ", "never ", "fails ", "breaks ", "drifts in ",
+                        "creates a bottleneck", "disagree ")
+    has_negation = any(m in a for m in negation_markers)
+    if trap_hits >= 4 and not has_negation:
         penalty = 0.5
         feedback.append("TRAP-LIKE: answer matches a known weak pattern — "
                        "see rubric above")
+    elif trap_hits >= 4 and has_negation:
+        # Candidate is naming the trap AND rejecting it — credit, not penalty
+        feedback.append("trap correctly rejected — good")
 
     # Final raw score 0..4 (rubric from README §20)
     raw = 0.0
