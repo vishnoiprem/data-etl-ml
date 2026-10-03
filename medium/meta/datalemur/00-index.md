@@ -29,7 +29,7 @@ These DataLemur problems are the **easier end** of the Meta DE interview — the
 |---|---|---|---|
 | 1 | [page-with-no-likes.md](./sql/page-with-no-likes.md) | Easy | LEFT JOIN / NOT IN anti-join |
 | 2 | [average-post-hiatus.md](./sql/average-post-hiatus.md) | Easy | LAG window function |
-| 3 | [app-clickthrough-rate.md](./sql/app-clickthrough-rate.md) | Easy | Conditional aggregation |
+| 3 | [app-click-through-rate.md](./sql/app-click-through-rate.md) | Easy | Conditional aggregation |
 | 4 | [active-user-retention.md](./sql/active-user-retention.md) | Hard | D7 retention — self-join on dates |
 | 5 | [advertiser-status.md](./sql/advertiser-status.md) | Hard | Day-over-day classification with LAG |
 | 6 | [reactivated-users.md](./sql/reactivated-users.md) | Hard | 30-day inactivity gap, gaps-and-islands |
