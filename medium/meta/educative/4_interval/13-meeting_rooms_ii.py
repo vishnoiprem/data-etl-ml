@@ -369,3 +369,34 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
+
+import heapq
+
+def find_sets(intervals):
+    """
+    Calculates the minimum number of conference rooms required.
+
+    Time Complexity:  O(N log N) due to sorting and min-heap operations.
+    Space Complexity: O(N) to maintain the min-heap of meeting end times.
+    """
+    if not intervals:
+        return 0
+
+    # Step 1: Sort intervals by start time
+    intervals.sort(key=lambda x: x[0])
+
+    # Step 2: Min-heap to store end times of currently active rooms
+    min_heap = []
+
+    # Step 3: Process each meeting
+    for start, end in intervals:
+        # If the earliest ending meeting finishes before or at current start time, reuse the room
+        if min_heap and min_heap[0] <= start:
+            heapq.heappop(min_heap)
+
+        # Allocate room (or updated reused room) with the new end time
+        heapq.heappush(min_heap, end)
+
+    # The size of the heap represents the total rooms needed
+    return len(min_heap)
