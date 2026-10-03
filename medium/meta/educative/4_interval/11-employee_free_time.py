@@ -406,3 +406,67 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
+
+def least_interval(tasks, n):
+    frequencies = [0] * 26
+
+    for task in tasks:
+        frequencies[ord(task) - ord('A')] += 1
+
+    frequencies.sort(reverse=True)
+
+    max_gaps = frequencies[0] - 1
+
+    idle_slots = max_gaps * n
+
+    for i in range(1, 26):
+        idle_slots -= min(max_gaps, frequencies[i])
+
+    idle_slots = max(0, idle_slots)
+
+    return len(tasks) + idle_slots
+
+
+# driver code
+def main():
+    all_tasks = [['A', 'A', 'B', 'B'],
+                 ['A', 'A', 'A', 'B', 'B', 'C', 'C'],
+                 ['S', 'I', 'V', 'U', 'W', 'D', 'U', 'X'],
+                 ['M', 'A', 'B', 'M', 'A', 'A', 'Y', 'B', 'M'],
+                 ['A', 'K', 'X', 'M', 'W', 'D', 'X', 'B', 'D', 'C', 'O', 'Z', 'D', 'E', 'Q']]
+    all_ns = [2, 1, 0, 3, 3]
+
+    for i in range(len(all_tasks)):
+        print(i + 1, '.', '\tTasks: ', all_tasks[i], sep='')
+        print('\tn: ', all_ns[i], sep='')
+        min_time = least_interval(all_tasks[i], all_ns[i])
+        print('\tMinimum CPUs required to execute the tasks: ', min_time)
+        print('-' * 100)
+
+
+if __name__ == '__main__':
+    main()
+
+from collections import Counter
+
+
+def least_interval(tasks: list[str], n: int) -> int:
+    """
+    Calculates the minimum CPU intervals required to complete all tasks.
+
+    Time Complexity:  O(N) where N is the number of tasks (O(26) to scan frequencies).
+    Space Complexity: O(1) since there are at most 26 uppercase English letters.
+    """
+    # Step 1: Count frequency of each task
+    counts = Counter(tasks)
+
+    # Step 2: Find max frequency and how many tasks have that max frequency
+    f_max = max(counts.values())
+    count_max = sum(1 for f in counts.values() if f == f_max)
+
+    # Step 3: Compute minimum intervals using the bottleneck formula
+    frame_time = (f_max - 1) * (n + 1) + count_max
+
+    # Step 4: The answer is the larger of the calculated frame time or actual task count
+    return max(len(tasks), frame_time)

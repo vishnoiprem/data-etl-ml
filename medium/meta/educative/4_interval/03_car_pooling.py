@@ -334,3 +334,46 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
+
+def carPooling(trips: list[list[int]], capacity: int) -> bool:
+    """
+    Time Complexity:  O(N log N)
+    Space Complexity: O(N)
+    """
+    events = []
+    for passengers, start, end in trips:
+        events.append((start, passengers))   # Pickup event
+        events.append((end, -passengers))   # Drop-off event
+
+    # Tuple sorting automatically processes drop-offs (-p) before pickups (+p) at same location
+    events.sort()
+
+    current_passengers = 0
+    for _, delta in events:
+        current_passengers += delta
+        if current_passengers > capacity:
+            return False
+
+    return True
+
+
+def carPoolingDiffArray(trips: list[list[int]], capacity: int) -> bool:
+    """
+    Time Complexity:  O(N + M) where M is max stop location (<= 1000)
+    Space Complexity: O(M)
+    """
+    # Max location constraint per problem statement is 1000
+    diff = [0] * 1002
+
+    for passengers, start, end in trips:
+        diff[start] += passengers
+        diff[end] -= passengers
+
+    current_passengers = 0
+    for delta in diff:
+        current_passengers += delta
+        if current_passengers > capacity:
+            return False
+
+    return True

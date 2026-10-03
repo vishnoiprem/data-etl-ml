@@ -289,3 +289,52 @@ if __name__ == "__main__":
             print(f"  OK {name}: PASS")
     print()
     print("ALL PASS" if all_pass else "SOME FAILURES")
+
+
+
+def numSubarraysWithSum(nums, goal):
+    start = 0
+    prefixZeros = 0
+    currentSum = 0
+    totalCount = 0
+
+    for end, num in enumerate(nums):
+        currentSum += num
+
+        while start <= end and currentSum > goal:
+            currentSum -= nums[start]
+            start += 1
+            prefixZeros = 0
+
+        while start < end and nums[start] == 0 and currentSum == goal:
+            prefixZeros += 1
+            currentSum -= nums[start]
+            start += 1
+
+        if start <= end and currentSum == goal:
+            totalCount += 1 + prefixZeros
+
+    return totalCount
+
+
+def main():
+    testCases = [
+        ([1, 0, 1, 0, 1], 2),
+        ([0, 0, 0, 0, 0], 0),
+        ([1, 1, 1], 2),
+        ([0, 1, 0, 1, 0, 1], 2),
+        ([1], 1)
+    ]
+
+    for idx, (nums, goal) in enumerate(testCases, start=1):
+        result = numSubarraysWithSum(nums, goal)
+
+        print(f"{idx}.\tnums: [ {', '.join(str(n) for n in nums)} ]")
+        print(f"\tgoal: {goal}")
+        print(f"\tNumber of subarrays with sum = {goal} are {result}.")
+        print("-" * 100)
+
+
+if __name__ == "__main__":
+    main()
+  

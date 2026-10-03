@@ -499,3 +499,103 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
+
+def countDaysWithoutMeetings(days: int, meetings: list[list[int]]) -> int:
+    """
+    Time Complexity:  O(N log N) due to sorting.
+    Space Complexity: O(N) to store merged intervals.
+    """
+    if not meetings:
+        return days
+
+    # Step 1: Sort meetings by start day
+    meetings.sort(key=lambda x: x[0])
+
+    # Step 2: Merge overlapping and contiguous intervals
+    merged = [meetings[0][:]]
+    for cur_start, cur_end in meetings[1:]:
+        # If current meeting overlaps or directly touches the previous meeting
+        if cur_start <= merged[-1][1] + 1:
+            merged[-1][1] = max(merged[-1][1], cur_end)
+        else:
+            merged.append([cur_start, cur_end])
+
+    # Step 3: Compute total meeting days and subtract from total days
+    total_meeting_days = sum(end - start + 1 for start, end in merged)
+
+    return max(0, days - total_meeting_days)
+
+
+def countDaysWithoutMeetingsSweepLine(days: int, meetings: list[list[int]]) -> int:
+    """
+    Time Complexity:  O(N log N)
+    Space Complexity: O(N)
+    """
+    events = []
+    for start, end in meetings:
+        events.append((start, 1))  # Meeting starts
+        events.append((end + 1, -1))  # Meeting ends (day after end becomes free)
+
+    events.sort()
+
+    total_busy_days = 0
+    active_meetings = 0
+    prev_day = None
+
+    for pos, delta in events:
+        if active_meetings > 0 and prev_day is not None:
+            # Accumulate days covered by at least one active meeting
+            total_busy_days += min(pos, days + 1) - prev_day
+
+        active_meetings += delta
+        prev_day = pos if active_meetings > 0 else None
+
+    return max(0, days - total_busy_days)
+
+
+from bisect import bisect_right, insort
+
+
+class SummaryRanges:
+    def __init__(self):
+        """Initializes the SummaryRanges object with an empty list of intervals."""
+        self.intervals = []  # List of [start, end] pairs, maintained in sorted order
+
+    def addNum(self, value: int) -> None:
+        """
+        Adds an integer value to the stream and updates disjoint intervals.
+
+        Time Complexity: O(N) worst-case due to element shifting/deletion in a Python list.
+        Space Complexity: O(N) to store up to N disjoint intervals.
+        """
+        # Find insertion position where an interval starting at `value` would be inserted
+        idx = bisect_right(self.intervals, [value, float('inf')])
+
+        # 1. Check if value is already inside an existing interval
+        if idx > 0 and self.intervals[idx - 1][1] >= value:
+            return
+
+        merge_prev = idx > 0 and self.intervals[idx - 1][1] + 1 == value
+        merge_next = idx < len(self.intervals) and self.intervals[idx][0] == value + 1
+
+        # 2. Bridge merge: connects both previous and next intervals
+        if merge_prev and merge_next:
+            self.intervals[idx - 1][1] = self.intervals[idx][1]
+            del self.intervals[idx]
+
+        # 3. Extend previous interval right
+        elif merge_prev:
+            self.intervals[idx - 1][1] = value
+
+        # 4. Extend next interval left
+        elif merge_next:
+            self.intervals[idx][0] = value
+
+        # 5. Insert new disjoint range [value, value]
+        else:
+            insort(self.intervals, [value, value])
+
+    def getIntervals(self) -> list[list[int]]:
+        """Returns the current summary of disjoint intervals."""
+        return [iv[:] for iv in self.intervals]

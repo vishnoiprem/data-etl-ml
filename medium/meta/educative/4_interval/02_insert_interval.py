@@ -416,3 +416,27 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
+
+def insert(intervals: list[list[int]], newInterval: list[int]) -> list[list[int]]:
+    out = []
+    i, n = 0, len(intervals)
+
+    # 1. Add all intervals ending before newInterval starts
+    while i < n and intervals[i][1] < newInterval[0]:
+        out.append(intervals[i])
+        i += 1
+
+    # 2. Merge all overlapping intervals
+    while i < n and intervals[i][0] <= newInterval[1]:
+        newInterval[0] = min(newInterval[0], intervals[i][0])
+        newInterval[1] = max(newInterval[1], intervals[i][1])
+        i += 1
+    out.append(newInterval)
+
+    # 3. Add all remaining intervals
+    while i < n:
+        out.append(intervals[i])
+        i += 1
+
+    return out

@@ -403,3 +403,38 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+
+
+
+
+
+
+
+def intervals_intersection(
+    first_list: list[list[int]], second_list: list[list[int]]
+) -> list[list[int]]:
+    """
+    Finds the intersection of two lists of disjoint, sorted intervals.
+
+    Time Complexity:  O(M + N) where M and N are lengths of first_list and second_list.
+    Space Complexity: O(1) auxiliary space (excluding the output array).
+    """
+    intersections = []
+    i = j = 0
+
+    while i < len(first_list) and j < len(second_list):
+        # Determine the start and end of the potential intersection
+        start = max(first_list[i][0], second_list[j][0])
+        end = min(first_list[i][1], second_list[j][1])
+
+        # If start <= end, a valid overlap exists
+        if start <= end:
+            intersections.append([start, end])
+
+        # Always advance the pointer pointing to the interval that ends earlier
+        if first_list[i][1] < second_list[j][1]:
+            i += 1
+        else:
+            j += 1
+
+    return intersections
