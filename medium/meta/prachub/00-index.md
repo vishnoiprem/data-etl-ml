@@ -132,10 +132,10 @@ Product-sense / experimentation rounds. Often a 30-45 min case-style round.
 ## Study plan
 
 ### Week 1 — Foundations
-- Day 1-2: SQL warm-up — `#18`, `#17`, `#14`, `#16` (easy → medium)
-- Day 3-4: SQL core — `#8` (DAU/retention), `#19` (multi-join), `#3` (windows)
-- Day 5: SQL intervals — `#6` or `#13` (pick one; same pattern)
-- Day 6-7: Python graphs & top-k — `#9`, `#12`, `#5`
+- Day 1-2: SQL warm-up — `01-sql-coding/09-library-analytics-sql.md`, `08-count-renewal-pct-unreturned-good.md`, `06-reservation-diff-largest-member.md`, `16-...-top-3-books` (easy → medium)
+- Day 3-4: SQL core — `02-python-coding/04-sql-python-data-prep.md` (DAU/retention), `01-sql-coding/10-car-rental-utilization-by-city.md` (multi-join), `02-aggregate-netflix-metrics.md` (windows)
+- Day 5: SQL intervals — `01-sql-coding/03-validate-carpool-capacity.md` or `02-python-coding/check-carpool-trip-feasibility.md` (pick one; same pattern)
+- Day 6-7: Python graphs & top-k — `02-python-coding/05-recommend-two-hop-follows.md`, `07-recommend-friends-of-friends.md`, `03-top-3-content-per-category.md`
 
 ### Week 2 — System design
 - Day 1: `03-system-design/dimensional-modeling-transactional.md`
@@ -145,11 +145,11 @@ Product-sense / experimentation rounds. Often a 30-45 min case-style round.
 - Day 5: Time yourself — pick any one and present it in 25 min
 
 ### Week 3 — Analytics + behavioral
-- Day 1-2: Analytics — read all 6 files, focus on metric definitions and pitfalls
-- Day 3-5: Write 5 STAR stories, time each at 3 minutes
+- Day 1-2: Analytics — read all 6 files in `04-analytics-experimentation/`, focus on metric definitions and pitfalls
+- Day 3-5: Write 5 STAR stories from `05-behavioral/`, time each at 3 minutes
 - Day 6-7: Mock round with a friend (one of each: SQL, system design, behavioral)
 
 ### Final 2 days
 - Re-read your optimized solutions
-- Cold-write the SQL for `#8` and `#19` from memory
+- Cold-write the SQL for `02-python-coding/04-sql-python-data-prep.md` and `01-sql-coding/10-car-rental-utilization-by-city.md` from memory
 - Practice saying each STAR story in 2 minutes
