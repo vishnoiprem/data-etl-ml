@@ -16,7 +16,8 @@ Recommended order if you're early in prep: **`01` → `03` → `05` → `04`** (
 
 | Folder | Questions | Best interview round |
 |---|---|---|
-| `01-sql-coding/` | 24 | Phone screen SQL + onsite coding |
+| `01-sql-coding/` | 13 | Phone screen SQL + onsite coding (SQL-only or SQL-dominant) |
+| `02-python-coding/` | 11 | Onsite Python coding (Python-dominant or Python-only) |
 | `03-system-design/` | 6 | Onsite system design (45 min) |
 | `04-analytics-experimentation/` | 6 | Onsite product analytics / metrics |
 | `05-behavioral/` | 5 | Onsite behavioral & leadership |
@@ -25,9 +26,9 @@ Recommended order if you're early in prep: **`01` → `03` → `05` → `04`** (
 
 ---
 
-## 01 — SQL & Python coding (24)
+## 01 — SQL (13)
 
-Foundational skills. Almost every Meta DE loop has at least one SQL round and one Python round.
+SQL-only and SQL-dominant coding problems. Almost every Meta DE loop has at least one SQL phone screen.
 
 | # | File | Topic |
 |---|---|---|
