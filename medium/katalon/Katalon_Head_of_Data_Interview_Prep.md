@@ -2,7 +2,7 @@
 
 > One file. Deep but memorable. Every technology in the job description gets: **hook** (one line to remember) -> **cheat card** (the facts) -> **questions with model answers** -> **trap** (what weak candidates say).
 
-Legend (CP AXTRA palette): 🔵 hook / remember this · 🟡 tip · 🟢 model answer · 🔴 trap / red flag
+Legend: 🔵 hook / remember this · 🟡 tip · 🟢 model answer · 🔴 trap / red flag
 
 ---
 
@@ -10,7 +10,7 @@ Legend (CP AXTRA palette): 🔵 hook / remember this · 🟡 tip · 🟢 model a
 
 1. Day 1: read Sections 1-5 (mnemonic, company, frameworks, 100-day plan, strategy). That alone gets you through the strategy round.
 2. Day 2-3: one technology section per sitting. Read the hook, say the cheat card out loud, then answer each question **without looking** and compare.
-3. Day 4: Section 21 (stories) — fill every `[f]` with your own real numbers. Model answers below use **illustrative numbers**; never say a number in the interview that is not yours.
+3. Day 4: Section 21 (stories) — fill every `[fre]` with your own real numbers. Model answers below use **illustrative numbers**; never say a number in the interview that is not yours.
 4. Last hour before: Section 23 (flashcards) and Section 22 (questions to ask).
 
 🟡 The model answers are written to be spoken in 60-90 seconds. Practice them out loud; written answers sound different from spoken ones.
@@ -951,7 +951,7 @@ Link to Katalon:     [BLANK: how this applies to their JD line]
 
 | Q | A |
 |---|---|
-| What is a data strategy in one sentence? | Decisions to improve + minimum capability + owners + ROI. |
+| What is a data strategy in one sentence? | Decisions to improve + minimum capability + owners + ROI. Decisions → Capabilities → Owners → ROI|
 | Medallion layers? | Bronze raw, silver cleaned, gold business marts. |
 | ETL vs ELT? | ELT loads raw into the warehouse then transforms there; cheaper compute elasticity, replayable. |
 | Idempotent pipeline? | Running twice for the same interval gives the same result (MERGE / overwrite partition). |
