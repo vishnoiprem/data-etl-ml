@@ -645,3 +645,47 @@ if __name__ == "__main__":
         print("Some implementations need fixing (or skip slow ones)")
     print("=" * 70)
     print(HOW_TO_THINK)
+
+
+def removeDuplicateLetters(s):
+    freq = {}
+    for ch in s:
+        freq[ch] = freq.get(ch, 0) + 1
+
+    stack = []
+    visited = set()
+
+    for ch in s:
+        freq[ch] -= 1
+
+        if ch in visited:
+            continue
+
+        while stack and ch < stack[-1] and freq[stack[-1]] > 0:
+            removed = stack.pop()
+            visited.remove(removed)
+
+        stack.append(ch)
+        visited.add(ch)
+
+    return "".join(stack)
+
+
+def main():
+    test_cases = [
+        "bcabc",
+        "cbacdcbc",
+        "bbcaacdd",
+        "abacb",
+        "azazaz",
+    ]
+    i = 1
+    for s in test_cases:
+        print(i, f"\tInput: {s}")
+        print(f"\tOutput: {removeDuplicateLetters(s)}")
+        print("-" * 100)
+        i += 1
+
+
+main();
+
