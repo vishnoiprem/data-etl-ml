@@ -690,3 +690,61 @@ def main():
 main();
 
 
+def flatten(nested_list):
+    stack = [nested_list]
+    result = []
+
+    while stack:
+        top = stack.pop()
+
+        if isinstance(top, list):
+            for item in reversed(top):
+                stack.append(item)
+        else:
+            result.append(top)
+
+    return result
+
+
+# Run it
+print(flatten([1, [2, 3], [4, [5, 6]]]))  # [1, 2, 3, 4, 5, 6]
+
+#
+# nested = [1, [2, 3]]
+#
+# Loop 1:
+#   stack = [[1, [2, 3]]]
+#   pop → [1, [2, 3]] (list)
+#   push reversed: [1], then [2, 3]
+#   stack = [[2, 3], 1]
+#
+# Loop 2:
+#   stack = [[2, 3], 1]
+#   pop → 1 (number)
+#   append to result
+#   result = [1]
+#   stack = [[2, 3]]
+#
+# Loop 3:
+#   stack = [[2, 3]]
+#   pop → [2, 3] (list)
+#   push reversed: [3], then [2]
+#   stack = [3, 2]
+#
+# Loop 4:
+#   stack = [3, 2]
+#   pop → 2 (number)
+#   append to result
+#   result = [1, 2]
+#   stack = [3]
+#
+# Loop 5:
+#   stack = [3]
+#   pop → 3 (number)
+#   append to result
+#   result = [1, 2, 3]
+#   stack = []
+#
+# Loop exits (stack empty)
+#
+# Final: [1, 2, 3] ✓
