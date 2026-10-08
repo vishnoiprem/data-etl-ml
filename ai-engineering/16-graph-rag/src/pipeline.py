@@ -16,6 +16,7 @@ from .graph_store import GraphStore
 from .ingestion import Doc, load_corpus, read_jsonl
 from .llm import LLMClient, get_llm
 from .retrievers import (
+    BM25Retriever,
     GraphRetriever,
     HybridRetriever,
     RetrievalResult,
