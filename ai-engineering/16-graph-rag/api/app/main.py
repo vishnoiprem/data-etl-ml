@@ -175,6 +175,23 @@ class EvalDetailRow(BaseModel):
     refused: bool
 
 
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=64)
+    password: str = Field(..., min_length=1, max_length=256)
+
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=2, max_length=64)
+    password: str = Field(..., min_length=4, max_length=256)
+    display_name: str = Field(default="", max_length=128)
+
+
+class MeResponse(BaseModel):
+    username: str
+    display_name: str
+    role: str
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Pipeline (lazy)
 # ─────────────────────────────────────────────────────────────────────────────
