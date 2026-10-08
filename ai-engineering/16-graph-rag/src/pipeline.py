@@ -132,27 +132,17 @@ class GraphRAGPipeline:
         logger.info("Pipeline loaded.")
 
     def _wire_retrievers(self) -> None:
+        vector_r = VectorRetriever(self.vector_index)
+        bm25_r = BM25Retriever(self.bm25_index)
+        graph_r = GraphRetriever(self.graph, self.vector_index)
         self._retrievers = {
-            "vector": VectorRetriever(self.vector_index),
-            "bm25": _BM25AsRetriever(self.bm25_index),
-            "graph": GraphRetriever(self.graph, self.vector_index),
+            "vector": vector_r,
+            "bm25": bm25_r,
+            "graph": graph_r,
             "hybrid": HybridRetriever(
-                {
-                    "vector": self._retrievers.get("vector") or VectorRetriever(self.vector_index),
-                    "bm25": _BM25AsRetriever(self.bm25_index),
-                    "graph": GraphRetriever(self.graph, self.vector_index),
-                }
+                {"vector": vector_r, "bm25": bm25_r, "graph": graph_r}
             ),
         }
-        # The hybrid dict above is built from any pre-existing retrievers + new
-        # ones; re-build cleanly:
-        self._retrievers["hybrid"] = HybridRetriever(
-            {
-                "vector": VectorRetriever(self.vector_index),
-                "bm25": _BM25AsRetriever(self.bm25_index),
-                "graph": GraphRetriever(self.graph, self.vector_index),
-            }
-        )
 
     # ---- query ---------------------------------------------------------
 
