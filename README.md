@@ -2,10 +2,54 @@
 
 > A working monorepo of production-style projects, hands-on labs, course notes,
 > interview playbooks, and writing on the data → ML → GenAI stack.
+> **Apache Spark · Apache Flink · Kafka · Airflow · AWS Bedrock · LangChain · LangGraph · RAG · Multi-Agent AI**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Made with Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/)
+[![Apache Flink](https://img.shields.io/badge/Apache%20Flink-Streaming-E6526F?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
+[![Kafka](https://img.shields.io/badge/Apache%20Kafka-Streaming-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![AWS](https://img.shields.io/badge/AWS-Bedrock%20%7C%20S3-FF9900?logo=amazonaws&logoColor=white)](https://aws.amazon.com/)
+[![LangChain](https://img.shields.io/badge/LangChain-RAG-1C3C3C)](https://www.langchain.com/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-1C3C3C)](https://langchain-ai.github.io/langgraph/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Maintained](https://img.shields.io/badge/Maintained-yes-brightgreen.svg)](.)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+<p align="left">
+  <a href="#at-a-glance--headline-projects"><b>Headline projects</b></a> ·
+  <a href="#skills-matrix"><b>Skills</b></a> ·
+  <a href="#featured-project--scb-aml-platform-deep-dive"><b>Featured: SCB AML</b></a> ·
+  <a href="#featured-project--realtime-stock-pipeline"><b>Streaming</b></a> ·
+  <a href="#featured-project--enterprise-rag-platform"><b>RAG / Agents</b></a> ·
+  <a href="#writing--interview-prep"><b>Writing</b></a> ·
+  <a href="#how-to-run-a-project-generic"><b>Run</b></a>
+</p>
 
 **Role target:** Senior / Lead Data Engineer · ML Engineer · AI Engineer · Solutions Architect
 **Coverage:** Batch ETL · Lakehouse · Streaming · ML · LLM Apps · Agentic AI · Cloud (AWS)
 **Status:** Living repo, ~10+ years of work consolidated in one tree for review.
+
+> Looking for a quick tour? Open [At a Glance](#at-a-glance--headline-projects).
+> If a link is broken, every project folder has its own `README.md` — start there.
+
+---
+
+## Table of Contents
+
+1. [At a Glance — Headline Projects](#at-a-glance--headline-projects)
+2. [Skills Matrix](#skills-matrix)
+3. [Repository Layout (Recommended)](#repository-layout-recommended)
+4. [How to Navigate This Repo](#how-to-navigate-this-repo)
+5. [How to Run a Project (Generic)](#how-to-run-a-project-generic)
+6. [Featured Project — SCB AML Platform](#featured-project--scb-aml-platform-deep-dive)
+7. [Featured Project — Realtime Stock Pipeline](#featured-project--realtime-stock-pipeline)
+8. [Featured Project — Enterprise RAG Platform](#featured-project--enterprise-rag-platform)
+9. [Writing & Interview Prep](#writing--interview-prep)
+10. [Conventions Used Across Projects](#conventions-used-across-projects)
+11. [Tech Highlights — Numbers & Outcomes](#tech-highlights--numbers--outcomes)
+12. [FAQ](#faq)
+13. [Contact](#contact)
 
 ---
 
