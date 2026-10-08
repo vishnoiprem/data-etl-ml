@@ -86,7 +86,7 @@ except Exception:
 if [ "${1:-}" = "--json" ]; then
   echo "{ \"scans\": ["
   first=1
-  for m in $MANIFESTS; do
+  while IFS= read -r m; do
     [ -z "$m" ] && continue
     src_json="$OUT_DIR/$(echo "$m" | tr '/' '_').src"
     pin_for_audit "$m" "$src_json"
@@ -103,7 +103,7 @@ import json
 d = json.load(open('$json'))
 print('    { \"manifest\": \"$m\", \"vulnerabilities\": $vulns, \"packages_affected\": $pkgs }')
 "
-  done
+  done < "$MANIFEST_LIST"
   echo "  ] }"
   exit 0
 fi
@@ -115,7 +115,7 @@ printf '%-58s %10s %10s\n' "--------" "-----" "--------"
 
 total_v=0
 total_p=0
-for m in $MANIFESTS; do
+while IFS= read -r m; do
   [ -z "$m" ] && continue
   src_json="$OUT_DIR/$(echo "$m" | tr '/' '_').src"
   pin_for_audit "$m" "$src_json"
@@ -129,7 +129,7 @@ for m in $MANIFESTS; do
   total_v=$((total_v + v))
   total_p=$((total_p + p))
   printf '%-58s %10s %10s\n' "$m" "$v" "$p"
-done
+done < "$MANIFEST_LIST"
 
 echo
 echo "TOTAL: $total_v vulnerabilities across $total_p packages"
