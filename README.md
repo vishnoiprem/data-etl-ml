@@ -1,6 +1,6 @@
 # Prem Vishnoi — Data, ETL, ML & AI Engineering Portfolio
 
-> **One repo. 4,000+ source files. 100+ docs. Real pipelines, not toy examples.**
+> **One repo. ~2,600 source files. 1,000+ docs. Real pipelines, not toy examples.**
 > A working monorepo of production-style projects, hands-on labs, course notes,
 > interview playbooks, and writing on the data → ML → GenAI stack.
 > **Apache Spark · Apache Flink · Kafka · Airflow · AWS Bedrock · LangChain · LangGraph · RAG · Multi-Agent AI**
