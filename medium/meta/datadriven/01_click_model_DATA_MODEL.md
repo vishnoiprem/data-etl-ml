@@ -566,25 +566,36 @@ Scan the prompt for these keywords → jump to that branch:
 ### Decision Tree
 
 ```
-                       "Design a system"
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
-        "real-time?"    "sub-second?"    "sub-100ms API?"
-              │               │               │
-              ▼               ▼               ▼
-      Streaming OLAP    OLTP + Streaming    OLTP only
-      (Pinot/Druid)       bridge          
-              │               │
-              │               ▼
-              │       Full End-to-End
-              │       (this doc, all sections)
-              │
-              └─── "daily/weekly analytics only?"
-                          │
-                          ▼
-                    Batch OLAP only
-                    (fact_event, fact_visit, rollups)
+                          "Design a system"
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              │                  │                  │
+       "real-time?"       "sub-second?"     "sub-100ms API?"
+              │                  │                  │
+              ▼                  ▼                  ▼
+     ┌────────────────┐ ┌─────────────────────┐ ┌───────────────┐
+     │ Streaming OLAP │ │  OLTP + Streaming   │ │  OLTP only    │
+     │ (Pinot / Druid)│ │      bridge         │ │ (HBase+Redis) │
+     └───────┬────────┘ └──────────┬──────────┘ └───────────────┘
+             │                     │
+             │                     ▼
+             │           ┌─────────────────────┐
+             │           │   Full End-to-End   │
+             │           │ (this doc, all sec) │
+             │           └─────────────────────┘
+             │
+             │
+             ▼
+   "daily/weekly analytics only?"
+                  │
+                  ▼
+           ┌─────────────────────┐
+           │     Batch OLAP      │
+           │  fact_event,        │
+           │  fact_visit,        │
+           │  rollups            │
+           └─────────────────────┘
 ```
 
 ---
