@@ -7,6 +7,10 @@
 > knowledge graph** behind a single API, and prove it works on an eval set
 > that includes adversarial / out-of-scope queries.
 
+**Full stack: React + FastAPI + ClickHouse — runs in one `docker compose up`.**
+See [`docker-compose.yml`](./docker-compose.yml) and the **Run the full stack**
+section below.
+
 This project is the **bridge** between the vector-RAG flagship
 (`01-enterprise-rag-platform`) and the regulated / multi-agent / LLMOps
 projects above it. It runs **fully local** — no AWS account, no Docker
