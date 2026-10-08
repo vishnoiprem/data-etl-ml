@@ -349,7 +349,7 @@ def query(req: QueryRequest, _user: User = Depends(get_current_user)) -> QueryRe
 
 
 @app.get("/eval/summary", response_model=EvalSummaryResponse)
-def eval_summary() -> EvalSummaryResponse:
+def eval_summary(_user: User = Depends(get_current_user)) -> EvalSummaryResponse:
     if ch is None:
         raise HTTPException(503, "ClickHouse not connected")
     rows = ch.query_df(
