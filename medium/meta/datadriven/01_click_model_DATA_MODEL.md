@@ -306,35 +306,47 @@ The OLAP tables above describe the **analyst-facing** side. Below is the **OLTP 
 ### Architecture
 
 ```
-[Mobile App / Web]
-     │  (HTTPS INSERT, < 50 ms SLA)
-     ▼
-+--------------------------------------------+
-|              OLTP LAYER                    |
-|                                            |
-|   Load Balancer                            |
-|      │                                     |
-|      ├──→  oltp_events         (HBase / Cassandra)
-|      ├──→  oltp_auth           (MySQL)      |
-|      ├──→  oltp_users          (MySQL)      |
-|      ├──→  oltp_devices        (HBase)      |
-|      └──→  oltp_sessions       (Redis)      |
-|                                            |
-+--------------------------------------------┘
-     │              │              │
-     │ Kafka CDC    │ binlog CDC   │  (Debezium / Maxwell)
-     ▼              ▼              ▼
-+--------------------------------------------+
-|          STREAM + BATCH ETL                |
-|                                            |
-|   Kafka topics → Flink / Spark Streaming   |
-|         │                                  |
-|         ▼                                  |
-|   Parquet landing on S3/HDFS               |
-|         │                                  |
-|         ▼                                  |
-|   Tables 3-7 above (OLAP)                  |
-+--------------------------------------------┘
+                      [ Mobile App / Web ]
+                              │
+                              │ (HTTPS INSERT, < 50 ms SLA)
+                              ▼
+   ┌──────────────────────────────────────────────────────────┐
+   │                       OLTP LAYER                         │
+   │                                                          │
+   │   ┌──────────────────────────────────────────────────┐   │
+   │   │              Load Balancer                       │   │
+   │   └───────┬─────────┬──────────┬───────────┬──────────┘   │
+   │           │         │          │           │              │
+   │           ▼         ▼          ▼           ▼              │
+   │   ┌────────────┐┌──────────┐┌──────────┐┌────────────┐   │
+   │   │ oltp_events││ oltp_auth ││oltp_users││ oltp_devices│  │
+   │   │ (HBase /   ││ (MySQL)   ││ (MySQL)  ││ (HBase)    │  │
+   │   │ Cassandra) ││          ││          ││            │  │
+   │   └────────────┘└──────────┘└──────────┘└────────────┘  │
+   │                                                          │
+   │   ┌──────────────────────────────────────────────────┐   │
+   │   │           oltp_sessions (Redis, TTL 30m)         │   │
+   │   └──────────────────────────────────────────────────┘   │
+   └────────────────────────┬─────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────────┐
+        │                   │                       │
+        ▼                   ▼                       ▼
+   Kafka CDC          binlog CDC              file CDC
+        │                   │                       │
+        └───────────────────┼───────────────────────┘
+                            ▼
+   ┌──────────────────────────────────────────────────────────┐
+   │               STREAM + BATCH ETL                         │
+   │                                                          │
+   │   Kafka topics  ──►  Flink / Spark Streaming             │
+   │                          │                               │
+   │                          ▼                               │
+   │   ──────────────────►   Parquet landing (S3 / HDFS)      │
+   │                          │                               │
+   │                          ▼                               │
+   │                Tables 3–7 above (OLAP)                   │
+   └──────────────────────────────────────────────────────────┘
 ```
 
 ### Why two stores?
