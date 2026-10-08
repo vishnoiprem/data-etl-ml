@@ -3,7 +3,7 @@ databricks-sql-connector==3.3.0
 sqlalchemy-databricks==0.2.0
 # Superset extras
 Pillow==10.0.0
-gevent==23.9.1
+gevent==26.9.0
 
 # Cache backend
 redis==5.0.0
