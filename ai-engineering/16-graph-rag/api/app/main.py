@@ -269,7 +269,7 @@ def strategies() -> dict[str, list[str]]:
 
 
 @app.get("/graph", response_model=GraphResponse)
-def graph() -> GraphResponse:
+def graph(_user: User = Depends(get_current_user)) -> GraphResponse:
     p = get_pipeline()
     g = p.graph
     nodes = [
@@ -284,7 +284,7 @@ def graph() -> GraphResponse:
 
 
 @app.get("/graph/stats")
-def graph_stats() -> dict[str, Any]:
+def graph_stats(_user: User = Depends(get_current_user)) -> dict[str, Any]:
     p = get_pipeline()
     g = p.graph._g  # noqa: SLF001
     type_dist: dict[str, int] = {}
