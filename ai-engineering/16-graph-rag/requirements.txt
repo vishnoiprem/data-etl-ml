@@ -1,0 +1,19 @@
+-r ../shared/requirements.txt
+
+# Graph store (local stand-in for Neptune / Neo4j)
+networkx>=3.2
+
+# Embeddings & retrieval (LOCAL mode)
+sentence-transformers>=2.7.0
+faiss-cpu>=1.8.0
+rank-bm25>=0.2.2
+
+# Document processing
+markdown>=3.6
+
+# Numerics
+numpy>=1.26.0
+scikit-learn>=1.5.0
+
+# LLM (optional — mock fallback if not installed / no key)
+anthropic>=0.39.0
