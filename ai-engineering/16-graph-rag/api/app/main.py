@@ -386,6 +386,7 @@ def eval_rows(
     kind: str | None = Query(None),
     strategy: str | None = Query(None),
     limit: int = Query(100, le=1000),
+    _user: User = Depends(get_current_user),
 ) -> list[EvalDetailRow]:
     if ch is None:
         raise HTTPException(503, "ClickHouse not connected")
