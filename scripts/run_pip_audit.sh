@@ -27,8 +27,12 @@ OUT_DIR="$REPO_ROOT/.puku-cli"
 mkdir -p "$OUT_DIR"
 
 # Discover manifests (top-level + per-project), excluding anything that
-# doesn't look like a pip requirements file.
-mapfile -t MANIFESTS < <(
+# doesn't look like a pip requirements file. POSIX-compatible (no mapfile).
+MANIFESTS=""
+while IFS= read -r m; do
+  MANIFESTS="$MANIFESTS$m
+"
+done < <(
   find . \
     -path "*/.git/*"      -prune -o \
     -path "*/.idea/*"     -prune -o \
