@@ -55,7 +55,7 @@ streamlit>=1.32.0
 # Infrastructure
 redis>=5.0.0
 python-dotenv==1.0.0
-protobuf>=5.27.0
+protobuf>=7.36.2
 
 # Visualization
 matplotlib>=3.9.0
