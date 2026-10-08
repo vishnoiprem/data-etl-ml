@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# 16-graph-rag — full stack: ClickHouse + FastAPI + React
+#
+# Usage:
+#   docker compose up -d          # start everything
+#   docker compose logs -f api    # follow API logs
+#   docker compose down -v        # stop + delete data
+#
+# After `up`, open:
+#   http://localhost:5173  → React dashboard
+#   http://localhost:8000  → FastAPI (auto OpenAPI at /docs)
+#   http://localhost:8123  → ClickHouse HTTP
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: graph-rag-clickhouse
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # native protocol
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: graph-rag-api
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_DB: graph_rag
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      LLM_MODE: ${LLM_MODE:-auto}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DATA_DIR: /app/data
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+      - ./sample_data:/app/sample_data
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: graph-rag-web
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web/src:/app/src
+      - ./web/index.html:/app/index.html
+
+volumes:
+  clickhouse-data:
