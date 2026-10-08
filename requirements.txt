@@ -9,7 +9,7 @@ python-multipart==0.0.20
 anyio==4.14.2
 soupsieve==2.7
 multidict==6.7.0
-mistune==4.0.0
+mistune==3.1.0
 
 # Core Data Science
 pandas==2.2.1
