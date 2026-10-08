@@ -154,7 +154,7 @@ class MockLLM(LLMClient):
         # The first ~1000 chars of the prompt always include the user's question
         # (we don't parse it carefully — we just match keywords).
         # Also fall through to a generic "I don't know" for clearly OOS questions.
-        if re.search(r"\b(ceo|home address|personal phone|ssn|social security)\b", prompt, re.I):
+        if re.search(r"\b(ceo|home address|personal phone|ssn|social security|salary|compensation|acquisition|bypass|how do i (cheat|skip|circumvent))\b", prompt, re.I):
             return "I don't have that information in the available documentation."
 
         for pattern, answer in _MOCK_RULES:
