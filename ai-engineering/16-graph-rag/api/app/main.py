@@ -304,7 +304,7 @@ def graph_stats(_user: User = Depends(get_current_user)) -> dict[str, Any]:
 
 
 @app.post("/query", response_model=QueryResponse)
-def query(req: QueryRequest) -> QueryResponse:
+def query(req: QueryRequest, _user: User = Depends(get_current_user)) -> QueryResponse:
     p = get_pipeline()
     t0 = time.perf_counter()
     result = p.retrieve(req.question, strategy=req.strategy)
