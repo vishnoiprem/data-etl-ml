@@ -27,6 +27,9 @@ query:
 eval:
 	$(PYTHON) scripts/evaluate.py
 
+dashboard:
+	$(PYTHON) -m streamlit run dashboard.py --server.headless true --server.port 8501
+
 test:
 	LLM_MODE=mock $(PYTHON) -m pytest tests/ -v
 
