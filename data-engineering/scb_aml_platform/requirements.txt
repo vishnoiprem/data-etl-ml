@@ -18,8 +18,8 @@ python-multipart==0.0.20
 anyio==4.14.2
 soupsieve==2.7
 multidict==6.7.0
-mistune==4.0.0
-tornado==6.5.0
+mistune==3.1.0
+tornado==6.5.9
 jupyterlab==4.6.4
 jupyter-server==2.21.0
 notebook==7.0.0
