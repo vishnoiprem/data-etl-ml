@@ -1,3 +1,15 @@
+# ── Security overrides (Tier 1)
+# Pinned transitively; do not remove without re-running pip-audit.
+urllib3>=2.8.0
+pyjwt>=2.10.1
+werkzeug>=3.1.9
+starlette>=0.41
+python-multipart>=0.0.20
+anyio>=4.14.2
+soupsieve>=2.7
+multidict>=6.7
+mistune>=4.0
+
 # Core Data Science
 pandas==2.2.1
 numpy==1.26.4
