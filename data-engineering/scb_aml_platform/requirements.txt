@@ -8,6 +8,21 @@
 apache-airflow==2.7.3
 
 
+# ── Security overrides (Tier 1) — transitive pins, do not remove
+urllib3>=2.8.0
+pyjwt>=2.10.1
+werkzeug>=3.1.9
+starlette>=0.41
+python-multipart>=0.0.20
+anyio>=4.14.2
+soupsieve>=2.7
+multidict>=6.7
+mistune>=4.0
+tornado>=6.5
+jupyterlab>=4.6.4
+jupyter-server>=2.21.0
+notebook>=7.0.0
+
 
 # ── Core Data Processing
 pyspark==3.3.2
