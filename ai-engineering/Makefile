@@ -5,7 +5,8 @@ PIP := $(PYTHON) -m pip
 
 PROJECTS := 01-enterprise-rag-platform 02-llm-fine-tuning 03-multi-agent-platform \
             04-fm-evaluation 05-distributed-inference 06-regulated-industry \
-            07-prompt-engineering 08-llmops-platform
+            07-prompt-engineering 08-llmops-platform \
+            16-graph-rag
 
 setup:
 	$(PIP) install --upgrade pip
