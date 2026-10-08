@@ -188,6 +188,9 @@ class MockLLM(LLMClient):
         if not m:
             return {"triples": []}
         chunk_id = m.group(1)
+        # Normalise: only the basename, since chunk_id is "foo.md#0" and the
+        # canned map uses "foo.md" as the key.
+        chunk_id = chunk_id.split("#")[0]
         triples = _MOCK_TRIPLES.get(chunk_id, [])
         return {"triples": triples}
 
