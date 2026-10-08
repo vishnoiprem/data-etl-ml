@@ -37,7 +37,7 @@ fuzzywuzzy==0.18.0
 python-Levenshtein==0.21.1
 
 # ── Elasticsearch (Lucid Search)
-elasticsearch==8.9.0
+elasticsearch==9.5.1
 elasticsearch-dsl==8.9.0
 
 # ── Kafka (ingestion simulation)
