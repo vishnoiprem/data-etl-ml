@@ -14,7 +14,7 @@
 #   airflow webserver --port 8080 &
 #   airflow scheduler &
 
-apache-airflow==2.7.3
+apache-airflow==3.3.2
 sqlalchemy==1.4.52
 pandas==2.0.3
 loguru==0.7.2

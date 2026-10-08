@@ -5,7 +5,7 @@
 #       sqlalchemy>=2.0 (airflow 2.7 requires sqlalchemy<2.0).
 #       For Airflow, see requirements-airflow.txt (separate install).
 #       The platform runs fully via pipeline_orchestrator.py without Airflow.
-apache-airflow==2.7.3
+apache-airflow==3.3.2
 
 
 # ── Security overrides (Tier 1) — transitive pins, do not remove
