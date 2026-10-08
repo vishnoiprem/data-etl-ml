@@ -293,6 +293,10 @@ The `medium/` folder holds long-form articles and interview playbooks. A selecti
 
 See `medium/README.md` for the full index.
 
+> 🎬 Looking for live demos? See [DEMOS.md](DEMOS.md).
+
+---
+
 ---
 
 ## Conventions Used Across Projects
