@@ -9,30 +9,30 @@ A complete dimensional + fact model for clickstream visit + daily engagement, wi
 ## Entity-Relationship Overview
 
 ```
-                +----------------+
-                |   dim_user     |
-                +----------------+
-                       |
-                       |  user_id
-                       v
-+----------+   +----------------+   +-------------------+
-| dim_device|-->|  fact_event    |-->| fact_auth_event   |
-+----------+   | (raw clickstream)|  | (signin / signout)|
-              +----------------+   +-------------------+
-                       |
-        +--------------+---------------+
-        |                              |
-        v                              v
-+---------------+        +----------------------------+
-|  fact_visit   |<------| dim_device_ownership        |
-| (sessionized) |       | (who held device & when)    |
-+---------------+        +----------------------------+
-        |
-        v
-+---------------------------+
-| agg_daily_page_device     |
-| (daily rollup)            |
-+---------------------------+
+                  +-----------------+
+                  |     dim_user    |
+                  +-----------------+
+                           |
+                           | user_id
+                           v
+  +-----------+    +-----------------+    +-----------------------+
+  | dim_device|--->|    fact_event   |--->|    fact_auth_event    |
+  +-----------+    | (raw clickstream)|    |  (signin / signout)   |
+                   +-----------------+    +-----------------------+
+                           |
+            +--------------+----------------+
+            |                               |
+            v                               v
+  +-------------------+    +--------------------------------+
+  |     fact_visit   <------|      dim_device_ownership     |
+  |   (sessionized)    |    |   (who held device & when)   |
+  +-------------------+    +--------------------------------+
+            |
+            v
+  +---------------------------+
+  |   agg_daily_page_device   |
+  |      (daily rollup)       |
+  +---------------------------+
 ```
 
 ---
