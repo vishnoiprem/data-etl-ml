@@ -62,26 +62,27 @@
 ### 1.2 Apache Druid — Imply / Kafka origin, time-series first
 
 ```
-                  ┌────────────────┐         ┌───────────────────┐
-                  │  COORDINATOR   │         │   OVERLORD        │
-                  │  (segments,    │         │   (task mgmt /    │
-                  │   load balance)│         │    ingestion)     │
-                  └────────────────┘         └───────────────────┘
-                            │                          │
-                            ▼                          ▼
-            ┌────────────────────────┐    ┌────────────────────────┐
-            │     HISTORICALS        │    │   MIDDLE MANAGERS     │
-            │ (cold segments,        │    │ (real-time ingestion, │
-            │  deep storage, S3/HDFS)│    │  in-memory + persist) │
-            └────────────────────────┘    └────────────────────────┘
-                            ▲                          ▲
-                            │                          │
-                            └──────────┬───────────────┘
-                                       ▼
-                              ┌─────────────────┐
-                              │    BROKER       │  (stateless query)
-                              │    ROUTER       │  (stateless API)
-                              └─────────────────┘
+        ┌──────────────────────┐                  ┌──────────────────────┐
+        │     COORDINATOR      │                  │       OVERLORD       │
+        │ (segments,           │                  │  (task mgmt /        │
+        │  load balance,       │                  │   ingestion)         │
+        │  deep-storage)       │                  │                      │
+        └──────────┬───────────┘                  └──────────┬───────────┘
+                   │                                       │
+                   ▼ schedules segments                    ▼ assigns tasks
+        ┌──────────────────────┐                  ┌──────────────────────┐
+        │     HISTORICALS      │                  │   MIDDLE MANAGERS    │
+        │  (cold segments,     │                  │ (real-time ingest,   │
+        │   deep storage,     │                  │  in-memory + persist)│
+        │   S3/HDFS)           │                  │                      │
+        └─────────▲────────────┘                  └─────────▲────────────┘
+                  │                                       │
+                  └─────────┬─────────────────────────────┘
+                            ▼ served from
+                ┌──────────────────────┐
+                │     BROKER          │  (stateless query)
+                │     ROUTER          │  (stateless API)
+                └──────────────────────┘
 ```
 
 | Component | Role |
