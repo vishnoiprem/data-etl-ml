@@ -1,1 +1,0 @@
-{"version":3,"file":"topologyVector.js","sourceRoot":"","sources":["../../../src/vector/geometry/topologyVector.ts"],"names":[],"mappings":"","sourcesContent":["export type TopologyVector = {\n    readonly geometryOffsets?: Uint32Array;\n    readonly partOffsets?: Uint32Array;\n    readonly ringOffsets?: Uint32Array;\n};\n"]}

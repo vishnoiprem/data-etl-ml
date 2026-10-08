@@ -1,9 +1,0 @@
-export declare enum LengthType {
-    VAR_BINARY = "VAR_BINARY",
-    GEOMETRIES = "GEOMETRIES",
-    PARTS = "PARTS",
-    RINGS = "RINGS",
-    TRIANGLES = "TRIANGLES",
-    SYMBOL = "SYMBOL",
-    DICTIONARY = "DICTIONARY"
-}

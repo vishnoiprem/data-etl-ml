@@ -1,1 +1,0 @@
-{"version":3,"file":"geojson-to-tile.d.ts","sourceRoot":"","sources":["../src/geojson-to-tile.ts"],"names":[],"mappings":"AAMA,OAAO,KAAK,EAAC,oBAAoB,EAAE,aAAa,EAAC,MAAM,eAAe,CAAC;AAEvE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GA+BG;AAEH,wBAAgB,aAAa,CAAC,IAAI,EAAE,OAAO,CAAC,OAAO,EAAE,CAAC,EAAE,MAAM,EAAE,CAAC,EAAE,MAAM,EAAE,CAAC,EAAE,MAAM,EAAE,OAAO,GAAE,oBAAyB,GAAG,aAAa,CAgBvI"}
