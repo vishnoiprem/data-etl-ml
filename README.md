@@ -529,7 +529,7 @@ The `medium/` folder holds long-form articles and interview playbooks.
 - **200+** AML features engineered per customer
 - **Sub-200ms** search latency on Elasticsearch
 - **7-year** retention per MAS regulatory requirement
-- **4,000+** source files; **1,100+** docs / notebooks
+- **2,600+** source files; **1,000+** docs / notebooks across **149** READMEs
 - Multiple **production-style** RAG and agentic-AI builds with cost/eval harnesses
 
 ---
