@@ -31,7 +31,7 @@ pytest-spark>=0.6.0
 pytest-cov>=4.1.0
 
 # Development
-black>=23.0.0
+black>=26.10.0
 flake8>=6.0.0
 mypy>=1.5.0
 pre-commit>=3.3.0
