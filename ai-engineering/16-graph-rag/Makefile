@@ -1,4 +1,4 @@
-.PHONY: install ingest query api eval demo test clean
+.PHONY: install ingest query api eval demo dashboard test clean
 
 PYTHON := python3
 
