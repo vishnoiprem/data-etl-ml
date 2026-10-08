@@ -1,0 +1,39 @@
+./Spark/document-processing/requirements.txt
+./agentic-ai/1-wikipedia_mcp_assistant/requirements.txt
+./agentic-ai/2-enterprise-search-agent-full/requirements.txt
+./agentic-ai/3-aws-bedrock-aurora-s3/requirements.txt
+./agentic-ai/6_wiki_rag_react_project/requirements.txt
+./agentic-ai/7_Bedrock_course/imageApi/py/requirements-dev.txt
+./agentic-ai/7_Bedrock_course/imageApi/py/requirements.txt
+./agentic-ai/7_Bedrock_course/py/requirements.txt
+./agentic-ai/7_Bedrock_course/recap/py-starter/requirements-dev.txt
+./agentic-ai/7_Bedrock_course/recap/py-starter/requirements.txt
+./agentic-ai/7_Bedrock_course/textApi/py/requirements-dev.txt
+./agentic-ai/7_Bedrock_course/textApi/py/requirements.txt
+./ai-engineering/01-enterprise-rag-platform/requirements.txt
+./ai-engineering/02-llm-fine-tuning/requirements.txt
+./ai-engineering/03-multi-agent-platform/requirements.txt
+./ai-engineering/04-fm-evaluation/requirements.txt
+./ai-engineering/05-distributed-inference/requirements.txt
+./ai-engineering/06-regulated-industry/requirements.txt
+./ai-engineering/07-prompt-engineering/requirements.txt
+./ai-engineering/08-llmops-platform/requirements.txt
+./ai-engineering/10-hello-world-mlops-main/requirements.txt
+./ai-engineering/15-code-fix-agent/requirements.txt
+./ai-engineering/9-Logistics-Route-Optimisation/requirements.txt
+./ai-engineering/ai-agent/synapse/requirements.txt
+./ai-engineering/shared/requirements.txt
+./data-engineering/e-commerce-end-2end/requirements.txt
+./data-engineering/financial-reporting-platform/requirements.txt
+./data-engineering/lazada-superset/requirements.txt
+./data-engineering/scb_aml_platform/requirements-airflow.txt
+./data-engineering/scb_aml_platform/requirements.txt
+./flink-cdc-dashboard/dashboard/requirements.txt
+./flink-cdc-dashboard/requirements.txt
+./ml/GenAI-Pinnacle-Master/Mastering-LLMOps- From-Build-Deployment/Mastering LLMOps From Build to Deployment/Hands-on Code/notebooks/3_sagemaker/1_training_script_mode/requirements.txt
+./ml/GenAI-Pinnacle-Master/Mastering-LLMOps- From-Build-Deployment/Mastering LLMOps From Build to Deployment/Hands-on Code/notebooks/3_sagemaker/1_training_script_mode/requirements_local.txt
+./ml/GenAI-Pinnacle-Master/Mastering-LLMOps- From-Build-Deployment/Mastering LLMOps From Build to Deployment/Hands-on Code/requirements.txt
+./ml/ai-agent/AdvancedAgenticSystem/requirements.txt
+./ml/ai-agent/requirements.txt
+./realtime-stock-pipeline/requirements.txt
+./requirements.txt
