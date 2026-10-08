@@ -113,45 +113,40 @@ or **Neo4j** plugs in for production. See
 ├── README.md                ← you are here
 ├── ARCHITECTURE.md          ← ADRs (NetworkX vs Neptune, RRF, JSON-schema)
 ├── Makefile                 ← install / ingest / query / eval / test / clean
+├── docker-compose.yml       ← clickhouse + api + web (one-command stack)
 ├── requirements.txt         ← -r ../shared/requirements.txt + networkx, faiss-cpu, rank-bm25, ...
 ├── .env.example             ← LLM_MODE, ANTHROPIC_API_KEY, EMBED_MODEL
 │
-├── src/
-│   ├── config.py            ← pydantic-settings, env-driven
-│   ├── llm.py               ← LLMClient ABC + MockLLM + AnthropicLLM
-│   ├── embeddings.py        ← lazy sentence-transformers loader
-│   ├── ingestion.py         ← markdown → chunks
-│   ├── vector_index.py      ← FAISS inner-product + parallel chunk store
-│   ├── bm25_index.py        ← rank-bm25 wrapper
-│   ├── graph_store.py       ← NetworkX in-mem, SQLite-mirrored
-│   ├── graph_builder.py     ← LLM triple extraction per chunk
-│   ├── retrievers.py        ← Vector, BM25, Graph, Hybrid (RRF)
-│   ├── generation.py        ← grounded answer + citations
-│   └── pipeline.py          ← end-to-end orchestrator
+├── src/                     ← core library (Python)
+│   ├── config.py, llm.py, embeddings.py, ingestion.py
+│   ├── vector_index.py, bm25_index.py, graph_store.py, graph_builder.py
+│   ├── retrievers.py, generation.py, pipeline.py
+│
+├── api/                     ← FastAPI service
+│   ├── app/main.py          ← /health /graph /query /eval/summary /ingest/*
+│   └── Dockerfile
+│
+├── web/                     ← React + Vite + Tailwind + Plotly + Cytoscape
+│   ├── src/App.tsx
+│   ├── src/components/      ← QueryPanel, KnowledgeGraphView, EvalDashboard, ui/*
+│   ├── src/lib/api.ts       ← typed API client
+│   ├── package.json
+│   └── Dockerfile
+│
+├── db/
+│   └── init.sql             ← ClickHouse schema (eval_results, query_log, graph_snapshot)
 │
 ├── scripts/
-│   ├── ingest.py            ← `python scripts/ingest.py`
-│   ├── query.py             ← `python scripts/query.py "..." --strategy hybrid`
-│   ├── evaluate.py          ← `python scripts/evaluate.py`
-│   └── extract_demo.py      ← show the LLM extracting a sample triple
+│   ├── ingest.py            ← build local indices
+│   ├── query.py             ← CLI query
+│   ├── evaluate.py          ← run eval, print Markdown table
+│   ├── extract_demo.py      ← show LLM extracting a sample triple
+│   └── seed_clickhouse.py   ← write eval + graph into ClickHouse
 │
-├── sample_data/
-│   ├── corpus/              ← 9 fictional AcmeCorp .md docs (with cross-refs)
-│   ├── eval_golden.jsonl    ← 15 single-hop Qs (every strategy should pass)
-│   ├── eval_twohop.jsonl    ← 8 two-hop Qs (graph + hybrid should win)
-│   └── eval_adversarial.jsonl ← 5 OOS Qs (every strategy should refuse)
-│
-├── data/                    ← built indices land here (gitignored)
-│   ├── vector.index, vector.jsonl
-│   ├── bm25.jsonl
-│   ├── chunks.jsonl
-│   └── graph.sqlite
-│
-└── tests/
-    ├── test_graph.py        ← GraphStore unit tests
-    ├── test_retrievers.py   ← two-hop graph retrieval test
-    ├── test_pipeline.py     ← end-to-end smoke (mock mode)
-    └── test_evaluation.py   ← eval harness sanity
+├── sample_data/             ← AcmeCorp corpus + 3 eval JSONL files
+├── data/                    ← built indices (gitignored)
+├── tests/                   ← pytest, mock mode, no API key needed
+└── dashboard.py             ← original Streamlit dashboard (still works, no DB)
 ```
 
 ---
