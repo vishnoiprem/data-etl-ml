@@ -1,17 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { QueryPanel } from "@/components/QueryPanel";
 import { KnowledgeGraphView } from "@/components/KnowledgeGraphView";
 import { EvalDashboard } from "@/components/EvalDashboard";
-import { STRATEGIES } from "@/lib/api";
+import { LoginPage } from "@/components/LoginPage";
+import { STRATEGIES, logout, me, type Me } from "@/lib/api";
+import { LogOut, RefreshCw, User as UserIcon } from "lucide-react";
 
 const MONEY_QUESTION =
   "I'm a new hire about to travel internationally for a client visit. What is the approval path?";
 
 export default function App() {
+  const [user, setUser] = useState<Me | null>(null);
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [customQuestion, setCustomQuestion] = useState(MONEY_QUESTION);
+
+  useEffect(() => {
+    (async () => {
+      const u = await me();
+      setUser(u);
+      setBootstrapping(false);
+    })();
+  }, []);
+
+  if (bootstrapping) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">
+        <RefreshCw className="h-5 w-5 animate-spin mr-2" />
+        Loading…
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage onSuccess={async () => setUser(await me())} />;
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -22,8 +48,23 @@ export default function App() {
             <h1 className="text-lg font-semibold">Graph RAG</h1>
             <span className="text-xs text-muted-foreground">project 16 · ai-engineering</span>
           </div>
-          <div className="text-xs text-muted-foreground">
-            React + FastAPI + ClickHouse
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="font-normal">
+              <UserIcon className="h-3 w-3 mr-1" />
+              {user.display_name}
+              <span className="text-muted-foreground ml-1">({user.role})</span>
+            </Badge>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                await logout();
+                setUser(null);
+              }}
+            >
+              <LogOut className="h-3.5 w-3.5 mr-1" />
+              Sign out
+            </Button>
           </div>
         </div>
       </header>
@@ -38,7 +79,6 @@ export default function App() {
             <TabsTrigger value="eval">📈 Eval</TabsTrigger>
           </TabsList>
 
-          {/* ── Overview ─────────────────────────────────────────────── */}
           <TabsContent value="overview">
             <Card>
               <CardHeader>
@@ -72,7 +112,6 @@ export default function App() {
             </Card>
           </TabsContent>
 
-          {/* ── Money Shot ───────────────────────────────────────────── */}
           <TabsContent value="money">
             <div className="space-y-3">
               <Card>
@@ -109,7 +148,6 @@ export default function App() {
             </div>
           </TabsContent>
 
-          {/* ── Try It Yourself ──────────────────────────────────────── */}
           <TabsContent value="try">
             <Card>
               <CardHeader>
@@ -131,12 +169,10 @@ export default function App() {
             </Card>
           </TabsContent>
 
-          {/* ── Graph ────────────────────────────────────────────────── */}
           <TabsContent value="graph">
             <KnowledgeGraphView />
           </TabsContent>
 
-          {/* ── Eval ─────────────────────────────────────────────────── */}
           <TabsContent value="eval">
             <EvalDashboard />
           </TabsContent>
