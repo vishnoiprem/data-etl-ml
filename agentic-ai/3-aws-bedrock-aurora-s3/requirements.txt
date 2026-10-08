@@ -6,5 +6,5 @@ boto3>=1.40
 langchain-aws>=1.7
 langchain-classic>=1.0
 langchain-core>=1.0
-python-dotenv>=1.0
+python-dotenv>=1.2.4
 streamlit>=1.40
