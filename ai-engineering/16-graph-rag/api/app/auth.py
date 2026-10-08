@@ -19,7 +19,9 @@ from fastapi import Cookie, Depends, HTTPException, Response, status
 from jose import JWTError, jwt  # type: ignore
 from loguru import logger
 
-from api.app.main import CHClient, ch  # noqa: E402
+# NOTE: We intentionally do NOT import `ch` from api.app.main at module
+# load — that creates a circular import.  Callers pass the CHClient or
+# use `get_ch()` to fetch the live one.
 
 
 # ─────────────────────────────────────────────────────────────────────────────
