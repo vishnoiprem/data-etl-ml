@@ -48,6 +48,44 @@ done < <(
     -type f -name "requirements*.txt" -print 2>/dev/null | sort
 )
 
+# pip-audit requires every line to be pinned (==). We respect user-facing
+# `>=` ranges in the source manifests, but for auditing we materialise a
+# pinned copy in $OUT_DIR (resolved to currently-installed versions if any,
+# else the most recent stable release on PyPI).
+pin_for_audit() {
+  local src="$1" dst="$2"
+  : > "$dst"
+  while IFS= read -r line; do
+    case "$line" in
+      ""|\#*|"-r "*|"-e "*|*"--"*)
+        printf '%s\n' "$line" >> "$dst" ;;
+      *)
+        # Extract the package name (everything up to the first operator or whitespace)
+        pkg=$(printf '%s' "$line" | sed -E 's/^([A-Za-z0-9_.\-]+).*/\1/')
+        pinned=$(grep -E "^${pkg}==|^${pkg} @ " "$src" 2>/dev/null | head -1)
+        if [ -n "$pinned" ]; then
+          printf '%s\n' "$pinned" >> "$dst"
+        else
+          # Resolve to a known pinned version: prefer installed, else keep
+          # the original >= range if everything is already pinned.
+          resolved=$(.env/bin/python -c "
+import importlib.metadata as m, sys
+try:
+    print(m.version('${pkg}'))
+except Exception:
+    sys.exit(1)
+" 2>/dev/null || true)
+          if [ -n "$resolved" ]; then
+            printf '%s==%s\n' "$pkg" "$resolved" >> "$dst"
+          else
+            printf '%s\n' "$line" >> "$dst"
+          fi
+        fi
+        ;;
+    esac
+  done < "$src"
+}
+
 if [ "${1:-}" = "--json" ]; then
   echo "{ \"scans\": ["
   first=1
