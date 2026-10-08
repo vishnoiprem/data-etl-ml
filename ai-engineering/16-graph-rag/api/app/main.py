@@ -432,7 +432,7 @@ def eval_rows(
 
 
 @app.post("/ingest/eval")
-def ingest_eval() -> dict[str, Any]:
+def ingest_eval(_user: User = Depends(get_current_user)) -> dict[str, Any]:
     """Re-run the eval and write results to ClickHouse."""
     if ch is None:
         raise HTTPException(503, "ClickHouse not connected")
