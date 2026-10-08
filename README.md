@@ -43,8 +43,8 @@
 | Metric | Value | Source |
 |---|---|---|
 | Production-style projects | **15+** | `01-projects/` (recommended) |
-| Total source files (`.py`, `.sql`, `.yml`, `.yaml`, `Dockerfile`, `.json`) | **4,000+** | working tree |
-| Total docs / notebooks (`.md`, `.ipynb`) | **1,100+** | working tree |
+| Total source files (`.py`, `.sql`, `.yml`, `.yaml`, `Dockerfile`, `.json`) | **2,600+** | `bash scripts/repo_stats.sh` |
+| Total docs / notebooks (`.md`, `.ipynb`) | **1,000+** | `bash scripts/repo_stats.sh` |
 | Country coverage in AML pipeline | **15** | `data-engineering/scb_aml_platform/` |
 | Hive ODS tables modeled | **750+** | `data-engineering/scb_aml_platform/hive/ddl/` |
 | Daily transactions at T+1 SLA | **50M+** | `data-engineering/scb_aml_platform/` |
