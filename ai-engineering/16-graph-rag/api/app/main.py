@@ -226,7 +226,7 @@ def health() -> dict[str, str]:
 # ── Auth ─────────────────────────────────────────────────────────────────────
 
 @app.post("/auth/login")
-def login(req: LoginRequest, response: Response) -> MeResponse:
+def login(req: LoginRequest, resp: Response) -> MeResponse:
     if ch is None:
         raise HTTPException(503, "ClickHouse not connected")
     user_row = find_user(ch, req.username)
@@ -235,7 +235,7 @@ def login(req: LoginRequest, response: Response) -> MeResponse:
     username, _hash, display_name, role = user_row
     user = User(username=username, display_name=display_name, role=role)
     token = issue_token(user)
-    set_session_cookie(response, token)
+    set_session_cookie(resp, token)
     try:
         update_last_login(ch, username)
     except Exception as e:
@@ -244,8 +244,8 @@ def login(req: LoginRequest, response: Response) -> MeResponse:
 
 
 @app.post("/auth/logout")
-def logout(response: Response) -> dict[str, str]:
-    clear_session_cookie(response)
+def logout(resp: Response) -> dict[str, str]:
+    clear_session_cookie(resp)
     return {"status": "ok"}
 
 
