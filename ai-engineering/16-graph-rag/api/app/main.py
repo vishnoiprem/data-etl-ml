@@ -26,7 +26,7 @@ from typing import Any, Literal
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import clickhouse_connect  # type: ignore
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 from pydantic import BaseModel, Field
