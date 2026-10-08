@@ -1,6 +1,6 @@
 # AI Engineering Portfolio — The Amazon Way
 
-A production-minded portfolio of 8 GenAI/ML projects built around AWS best practices and the *Working Backwards* philosophy. Each project starts from a customer problem, defines measurable success criteria, and lands on a scalable, cost-aware architecture.
+A production-minded portfolio of 9 GenAI/ML projects built around AWS best practices and the *Working Backwards* philosophy. Each project starts from a customer problem, defines measurable success criteria, and lands on a scalable, cost-aware architecture.
 
 ## Projects
 
