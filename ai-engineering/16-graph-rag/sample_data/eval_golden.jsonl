@@ -1,0 +1,15 @@
+{"question": "How many days of PTO does a new full-time employee get per year?", "expected_doc_ids": ["pto-policy.md"], "expected_keywords": ["20 days"], "kind": "single-hop"}
+{"question": "When does PTO accrual start for a new hire?", "expected_doc_ids": ["pto-policy.md"], "expected_keywords": ["day 1"], "kind": "single-hop"}
+{"question": "What is the carryover cap on unused PTO?", "expected_doc_ids": ["pto-policy.md"], "expected_keywords": ["5 days"], "kind": "single-hop"}
+{"question": "How many weeks of paid parental leave does the primary caregiver get?", "expected_doc_ids": ["leave-policy.md"], "expected_keywords": ["16 weeks"], "kind": "single-hop"}
+{"question": "Within how many days must I file an expense?", "expected_doc_ids": ["expense-policy.md"], "expected_keywords": ["30 days"], "kind": "single-hop"}
+{"question": "What is the per-diem for international meals?", "expected_doc_ids": ["expense-policy.md"], "expected_keywords": ["100"], "kind": "single-hop"}
+{"question": "What is the on-call shift length?", "expected_doc_ids": ["on-call.md"], "expected_keywords": ["7 days"], "kind": "single-hop"}
+{"question": "How long after an interview must a scorecard be turned in?", "expected_doc_ids": ["hiring.md"], "expected_keywords": ["24 hours"], "kind": "single-hop"}
+{"question": "What is the default IAM role duration for a vendor?", "expected_doc_ids": ["vendor-access.md"], "expected_keywords": ["90 days"], "kind": "single-hop"}
+{"question": "How many floating holidays does AcmeCorp offer?", "expected_doc_ids": ["pto-policy.md"], "expected_keywords": ["2"], "kind": "single-hop"}
+{"question": "What tool does AcmeCorp use for paging?", "expected_doc_ids": ["on-call.md"], "expected_keywords": ["PagerDuty"], "kind": "single-hop"}
+{"question": "What naming convention is used for projects?", "expected_doc_ids": ["project-naming.md"], "expected_keywords": ["constellation"], "kind": "single-hop"}
+{"question": "How much is the on-call pay for the primary rotation?", "expected_doc_ids": ["on-call.md"], "expected_keywords": ["$250"], "kind": "single-hop"}
+{"question": "What does the IT runbook cover for day-1 setup?", "expected_doc_ids": ["it-runbooks.md"], "expected_keywords": ["Laptop"], "kind": "single-hop"}
+{"question": "How long is the new-hire onboarding program?", "expected_doc_ids": ["onboarding.md"], "expected_keywords": ["30", "90"], "kind": "single-hop"}
