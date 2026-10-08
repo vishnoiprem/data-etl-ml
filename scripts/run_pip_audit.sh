@@ -47,7 +47,8 @@ done < <(
 if [ "${1:-}" = "--json" ]; then
   echo "{ \"scans\": ["
   first=1
-  for m in "${MANIFESTS[@]}"; do
+  for m in $MANIFESTS; do
+    [ -z "$m" ] && continue
     json="$OUT_DIR/$(echo "$m" | tr '/' '_').json"
     if ! "$PIP_AUDIT" -r "$m" --no-deps --disable-pip --format json -o "$json" 2>/dev/null; then
       # Manifest hygiene: at least one unpinned entry. Still try to continue.
@@ -74,7 +75,8 @@ printf '%-58s %10s %10s\n' "--------" "-----" "--------"
 
 total_v=0
 total_p=0
-for m in "${MANIFESTS[@]}"; do
+for m in $MANIFESTS; do
+  [ -z "$m" ] && continue
   json="$OUT_DIR/$(echo "$m" | tr '/' '_').json"
   if ! "$PIP_AUDIT" -r "$m" --no-deps --disable-pip --format json -o "$json" 2>/dev/null; then
     printf '%-58s %10s %10s\n' "$m" "(unpinned)" "—"
