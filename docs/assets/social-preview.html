@@ -1,0 +1,104 @@
+<!doctype html>
+<!--
+  Open this file in any browser, then:
+    - macOS:  Cmd+Shift+4 then drag the visible viewport, OR
+    - Chrome: DevTools → toggle device (1280x640) → "Capture screenshot"
+    - Figma/Canva: paste this content as a starter.
+  Save the result as `.github/social-preview.png`.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Prem Vishnoi — Social Preview</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --fg: #f0f6fc;
+    --muted: #8b949e;
+    --accent: #ff9900;     /* AWS */
+    --accent2: #e25a1c;    /* Spark */
+    --accent3: #1f6feb;    /* GitHub blue */
+    --border: #30363d;
+  }
+  html, body { margin:0; padding:0; background:#000; }
+  .card {
+    width: 1280px;
+    height: 640px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, "Segoe UI", Inter, system-ui, sans-serif;
+    box-sizing: border-box;
+    padding: 80px 96px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid var(--border);
+  }
+  .top { display: flex; align-items: center; gap: 16px; }
+  .avatar {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    color: #0d1117; font-weight: 800; font-size: 40px;
+    border: 3px solid var(--fg);
+  }
+  .name { font-size: 56px; font-weight: 800; letter-spacing: -1px; }
+  .role { font-size: 28px; color: var(--muted); margin-top: 6px; }
+
+  .stack {
+    font-size: 26px;
+    color: var(--fg);
+    line-height: 1.5;
+  }
+  .pill {
+    display: inline-block;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin: 4px 6px 0 0;
+    color: var(--fg);
+    background: #161b22;
+  }
+  .pill.s { color: var(--accent2); border-color: var(--accent2); }
+  .pill.a { color: var(--accent);  border-color: var(--accent);  }
+  .pill.g { color: var(--accent3); border-color: var(--accent3); }
+
+  .bottom {
+    display: flex; justify-content: space-between; align-items: end;
+    font-size: 22px; color: var(--muted);
+  }
+  .num { color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div>
+    <div class="top">
+      <div class="avatar">PV</div>
+      <div>
+        <div class="name">Prem Vishnoi</div>
+        <div class="role">Data · ETL · ML · AI Engineering Portfolio</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <span class="pill s">Apache Spark</span>
+    <span class="pill s">Apache Flink</span>
+    <span class="pill s">Kafka</span>
+    <span class="pill s">Airflow</span>
+    <span class="pill a">AWS Bedrock</span>
+    <span class="pill a">S3 · Glue · ECS</span>
+    <span class="pill g">LangChain</span>
+    <span class="pill g">LangGraph</span>
+    <span class="pill g">RAG</span>
+    <span class="pill g">Multi-Agent</span>
+  </div>
+
+  <div class="bottom">
+    <div><span class="num">15+</span> production-style projects &nbsp;·&nbsp; 1 repo</div>
+    <div>github.com/&lt;your-handle&gt;/data-etl-ml</div>
+  </div>
+</div>
+</body>
+</html>
