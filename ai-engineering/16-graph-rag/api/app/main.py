@@ -223,6 +223,46 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+# ── Auth ─────────────────────────────────────────────────────────────────────
+
+@app.post("/auth/login")
+def login(req: LoginRequest, response: Response) -> MeResponse:
+    user_row = find_user(req.username)
+    if not user_row or not _verify_password(req.password, user_row[1]):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
+    username, _hash, display_name, role = user_row
+    user = User(username=username, display_name=display_name, role=role)
+    token = issue_token(user)
+    set_session_cookie(response, token)
+    try:
+        update_last_login(username)
+    except Exception as e:
+        logger.warning(f"update_last_login failed (non-fatal): {e}")
+    return MeResponse(**user.__dict__)
+
+
+@app.post("/auth/logout")
+def logout(response: Response) -> dict[str, str]:
+    clear_session_cookie(response)
+    return {"status": "ok"}
+
+
+@app.get("/auth/me")
+def me(user: User = Depends(get_current_user)) -> MeResponse:
+    return MeResponse(**user.__dict__)
+
+
+@app.post("/auth/register")
+def register(req: RegisterRequest, _user: User = Depends(get_current_user)) -> MeResponse:
+    """Admin-only in spirit (any logged-in user can register, for demo simplicity)."""
+    if find_user(req.username):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Username already taken")
+    register_user(req.username, req.password, req.display_name)
+    return MeResponse(username=req.username, display_name=req.display_name or req.username, role="user")
+
+
+# ── Open endpoints (no auth) ─────────────────────────────────────────────────
+
 @app.get("/strategies")
 def strategies() -> dict[str, list[str]]:
     return {"strategies": list(STRATEGIES)}
