@@ -91,10 +91,11 @@ if [ "${1:-}" = "--json" ]; then
   first=1
   for m in $MANIFESTS; do
     [ -z "$m" ] && continue
+    src_json="$OUT_DIR/$(echo "$m" | tr '/' '_').src"
+    pin_for_audit "$m" "$src_json"
     json="$OUT_DIR/$(echo "$m" | tr '/' '_').json"
-    if ! "$PIP_AUDIT" -r "$m" --no-deps --disable-pip --format json -o "$json" 2>/dev/null; then
-      # Manifest hygiene: at least one unpinned entry. Still try to continue.
-      echo "  (skipping $m — un-pinned entries)" >&2
+    if ! "$PIP_AUDIT" -r "$src_json" --no-deps --disable-pip --format json -o "$json" 2>/dev/null; then
+      echo "  (skipping $m — pip-audit rejected)" >&2
       continue
     fi
     vulns=$(.env/bin/python -c "import json,sys; d=json.load(open('$json')); print(sum(len(x.get('vulns',[])) for x in d.get('dependencies',[])))" 2>/dev/null || echo "0")
@@ -119,9 +120,11 @@ total_v=0
 total_p=0
 for m in $MANIFESTS; do
   [ -z "$m" ] && continue
+  src_json="$OUT_DIR/$(echo "$m" | tr '/' '_').src"
+  pin_for_audit "$m" "$src_json"
   json="$OUT_DIR/$(echo "$m" | tr '/' '_').json"
-  if ! "$PIP_AUDIT" -r "$m" --no-deps --disable-pip --format json -o "$json" 2>/dev/null; then
-    printf '%-58s %10s %10s\n' "$m" "(unpinned)" "—"
+  if ! "$PIP_AUDIT" -r "$src_json" --no-deps --disable-pip --format json -o "$json" 2>/dev/null; then
+    printf '%-58s %10s %10s\n' "$m" "(rejected)" "—"
     continue
   fi
   v=$(.env/bin/python -c "import json; d=json.load(open('$json')); print(sum(len(x.get('vulns',[])) for x in d.get('dependencies',[])))" 2>/dev/null || echo 0)
