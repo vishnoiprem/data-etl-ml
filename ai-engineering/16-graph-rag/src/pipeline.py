@@ -7,7 +7,7 @@ from pathlib import Path
 
 from loguru import logger
 
-from .bm25_index import BM25Index
+from .bm25_index import BM25Index  # noqa: F401  — re-exported for tests
 from .config import get_settings
 from .embeddings import _get_model  # noqa: F401  — warm-load the model
 from .generation import Answer, AnswerGenerator
