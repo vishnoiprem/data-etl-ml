@@ -81,12 +81,12 @@ export function KnowledgeGraphView() {
             height: "data(size)" as any,
             "border-color": "#1e293b",
             "border-width": 1,
-          },
+          } as any,
         },
         {
           selector: "edge",
           style: {
-            width: "0.8",
+            width: 0.8,
             "line-color": "#475569",
             "target-arrow-color": "#475569",
             "target-arrow-shape": "triangle",
@@ -98,7 +98,7 @@ export function KnowledgeGraphView() {
             "text-background-color": "#0f172a",
             "text-background-opacity": 0.6,
             "text-background-padding": 2,
-          },
+          } as any,
         },
       ],
       layout: {
