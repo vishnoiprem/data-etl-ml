@@ -1,0 +1,4 @@
+# Local development install — pulls in the shared package and
+# preserves the relative `requirements.txt` for in-repo use.
+-r ../shared/requirements.txt
+-r requirements.txt
