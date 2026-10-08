@@ -296,3 +296,235 @@ PARTITION BY dt;
 | `is_authenticated` flag | Trivial to derive; keep only if dashboards filter on it |
 | SCD2 on `dim_user` | User attributes are immutable |
 | `dim_device.os_version` etc. | Only need device_type for analyst reporting |
+
+---
+
+## OLTP Landing Layer (Above the OLAP Fact Tables)
+
+The OLAP tables above describe the **analyst-facing** side. Below is the **OLTP layer** that catches live clicks, performs point lookups, and feeds the OLAP layer via CDC / streaming.
+
+### Architecture
+
+```
+[Mobile App / Web]
+     │  (HTTPS INSERT, < 50 ms SLA)
+     ▼
++--------------------------------------------+
+|              OLTP LAYER                    |
+|                                            |
+|   Load Balancer                            |
+|      │                                     |
+|      ├──→  oltp_events         (HBase / Cassandra)
+|      ├──→  oltp_auth           (MySQL)      |
+|      ├──→  oltp_users          (MySQL)      |
+|      ├──→  oltp_devices        (HBase)      |
+|      └──→  oltp_sessions       (Redis)      |
+|                                            |
++--------------------------------------------┘
+     │              │              │
+     │ Kafka CDC    │ binlog CDC   │  (Debezium / Maxwell)
+     ▼              ▼              ▼
++--------------------------------------------+
+|          STREAM + BATCH ETL                |
+|                                            |
+|   Kafka topics → Flink / Spark Streaming   |
+|         │                                  |
+|         ▼                                  |
+|   Parquet landing on S3/HDFS               |
+|         │                                  |
+|         ▼                                  |
+|   Tables 3-7 above (OLAP)                  |
++--------------------------------------------┘
+```
+
+### Why two stores?
+
+| Concern | OLTP store chosen | Why |
+|---|---|---|
+| Billions of writes/day from clicks | **HBase / Cassandra** | Wide-column, row-key sharded by `(device_id, ts)`, append-only — survives write spikes; no contention on the row key path |
+| Auth + user metadata (point lookups, ACID) | **MySQL** | ACID for `users`, `auth_events`; replication for read scaling |
+| Hot session state (TTL: 30 min inactivity) | **Redis** | In-memory, automatic expiration, lookup on every click to test if visit should continue |
+| Devices (write-once, read-many) | **HBase** | One row per device; mutable attributes (model, OS) are write-light |
+
+---
+
+### 1. `oltp_events` (Click Landing — OLTP)
+
+**Store:** HBase / Cassandra
+**Grain:** one row per click; row key = `(device_id, event_ts, event_id)` for locality + append-only writes.
+**SLA:** ingest < 10 ms p99, return 200 OK to client immediately.
+
+```sql
+-- HBase schema sketch
+CREATE TABLE oltp_events (
+  row_key   VARBINARY,              -- hash(device_id) | reverse(event_ts) | event_id
+  cf:meta   -- device_id, user_id (NULL if anonymous), page, event_type, app_version
+  cf:auth   -- session_token_hash
+  cf:dt     -- DATE(event_ts) for partition pruning
+);
+-- TTL = 30 days (then ETL'd to S3 / Parquet)
+```
+
+| Field | Source | Notes |
+|---|---|---|
+| `device_id` | Client SDK | Hardware-derived IDFA / cookie |
+| `user_id` | Server-side | NULL until signin → resolved later |
+| `event_ts` | Client | Wall-clock; reconcile via `received_ts` |
+| `page` | Client | URL or screen name |
+| `session_token` | Server | SHA-256 of session cookie → lookup against Redis `oltp_sessions` |
+
+**Why HBase, not MySQL?**
+- 100k+ writes/sec sustained per cluster; MySQL row-locks on hot partitions become a bottleneck.
+- Append-only — no UPDATE traffic; tall-narrow columns fit HBase's storage model.
+- Auto-sharding by row key (`device_id`) keeps a single device's events on the same region server (good for sessionization in the OLAP layer).
+
+---
+
+### 2. `oltp_auth` (Signin / Signout — OLTP)
+
+**Store:** MySQL (ACID, transactional signin flow)
+**Grain:** one row per auth event.
+
+```sql
+CREATE TABLE oltp_auth (
+  auth_id        BIGINT       PRIMARY KEY AUTO_INCREMENT,
+  device_id      BIGINT       NOT NULL,
+  user_id        BIGINT       NOT NULL,
+  auth_ts        TIMESTAMP(3) NOT NULL,
+  auth_type      ENUM('signin','signout') NOT NULL,
+  session_token  CHAR(64)     NOT NULL,            -- SHA-256 hex
+  ip_address     VARBINARY(16),
+  user_agent     STRING,
+  INDEX idx_device_ts (device_id, auth_ts DESC)
+);
+```
+
+**Workflow on sign-in:**
+1. App calls `POST /signin` (user + password / OAuth)
+2. Server creates row in `oltp_auth` (atomic with `oltp_users.last_login_ts`)
+3. Server creates Redis key `oltp_sessions:<token>` with TTL = 30 min (refreshed on activity)
+4. Server returns session token to app
+5. CDC → Kafka topic `cdc.oltp_auth` → downstream Lambda/Flink → `fact_auth_event` (OLAP)
+
+---
+
+### 3. `oltp_users` (User Master)
+
+**Store:** MySQL — normalized, ACID.
+
+```sql
+CREATE TABLE oltp_users (
+  user_id          BIGINT       PRIMARY KEY,
+  email            STRING       UNIQUE,
+  phone            STRING,
+  hashed_password  STRING,
+  registration_ts  TIMESTAMP   NOT NULL,
+  last_login_ts    TIMESTAMP,
+  account_status   ENUM('active','suspended','deleted') DEFAULT 'active',
+  updated_ts       TIMESTAMP   NOT NULL
+);
+```
+
+**Avoided in OLTP:**
+- Aggregations (those live in OLAP)
+- Free-text profile blobs
+- Anything analysts want — kept lean for fast point reads
+
+---
+
+### 4. `oltp_devices` (Device Registry)
+
+**Store:** HBase — write-once / read-many.
+
+```sql
+-- HBase row per device; never updated frequently
+Row key = hash(device_id)
+cf:profile: device_type, os, os_version, app_version, manufacturer
+cf:first:  first_seen_ts, first_user_id
+```
+
+**Use case:** "This device hit us for the first time" — creates a row; subsequent reads return cached attributes.
+
+---
+
+### 5. `oltp_sessions` (Hot Session State in Redis)
+
+**Store:** Redis cluster, with TTL = 30 min (sliding).
+
+```sql
+-- Key:   session:<token>
+-- Value: hash { device_id, user_id, last_event_ts, visit_id }
+-- TTL:   30 min, refreshed on every click
+EXPIRE session:<token> 1800
+```
+
+**Why Redis (not HBase/MySQL):**
+- O(1) point lookup on every click ("is this the same visit?")
+- Atomic INCR + EXPIRE for "30-min no gap" rule — no need to scan `fact_event`
+- Auto-evicts dead sessions for free
+
+**Lookup flow per click:**
+```
+1. App sends click + session_token
+2. Backend GET session:<token> from Redis
+3. If exists → reuse visit_id; INCR event_count; EXPIRE
+4. If TTL expired or missing → start NEW visit_id, write to oltp_events (HBase)
+5. Write-through to oltp_events ensures durability even if Redis evicts
+```
+
+---
+
+### CDC / Streaming Bridge (OLTP → OLAP)
+
+| Source | CDC tool | Kafka topic | Downstream consumer | Target OLAP table |
+|---|---|---|---|---|
+| `oltp_events` (HBase) | HBase replication or Kafka producer | `ods.clicks` | Spark Streaming / Flink | `fact_event` |
+| `oltp_auth` (MySQL) | Debezium / Maxwell | `cdc.oltp_auth` | Flink | `fact_auth_event` |
+| `oltp_users` (MySQL) | Debezium | `cdc.oltp_users` | Spark batch | `dim_user` |
+| `oltp_devices` (HBase) | HBase replication | `ods.devices` | Spark batch | `dim_device` |
+
+**Idempotency:** every Kafka message carries the original OLTP `event_id` / `auth_id`; the OLAP loader uses `INSERT … ON DUPLICATE KEY UPDATE` or `MERGE INTO` to avoid duplicates during re-delivery.
+
+**Schema evolution:** use **Avro / Protobuf** for Kafka payload (Confluent Schema Registry, or Meta's internal equivalent) — adds columns without breaking downstream consumers.
+
+---
+
+### Latency SLA Table
+
+| Surface | SLA | Layer |
+|---|---|---|
+| App → server click ingest | < 50 ms p99 | OLTP (HBase write) |
+| Sign-in → session created | < 200 ms p99 | OLTP (MySQL + Redis) |
+| Session continuity (same visit) | < 10 ms p99 | OLTP (Redis lookup) |
+| Click visible in `fact_event` (OLAP) | < 5 min | Kafka → Spark Streaming |
+| `fact_visit` materialized | < 1 hour | Spark batch |
+| `agg_daily_page_device` latest | < 24 hours | Nightly rollup |
+| Real-time dashboard tile ("active users now") | < 1 sec | Streaming OLAP (Pinot / Druid) |
+
+---
+
+### What Lives Where — Final Map
+
+| Question | System | Table |
+|---|---|---|
+| "Accept this click right now" | **OLTP** | `oltp_events` (HBase) |
+| "Is this the same visit?" | **OLTP** | `oltp_sessions` (Redis) |
+| "User signed in on this device" | **OLTP** | `oltp_auth` (MySQL) |
+| "User profile lookup" | **OLTP** | `oltp_users` (MySQL) |
+| "Daily engagement by page & device" | **OLAP** | `agg_daily_page_device` |
+| "Average session duration last week" | **OLAP** | `fact_visit` |
+| "Drop-off funnel on page X" | **OLAP** | `fact_visit` + `fact_event` drill |
+| "Who held this device at 10am?" | **OLAP** | `dim_device_ownership` |
+| "Active users right now" | **Real-time OLAP** | Pinot/Druid stream from Kafka |
+
+---
+
+### Easy-to-Remove Pieces (OLTP additions)
+
+| Component | Drop when… |
+|---|---|
+| Redis `oltp_sessions` | Sessions are computed purely in OLAP batch (acceptable for non-realtime use cases) |
+| Separate `oltp_devices` table | Devices fit naturally inside `oltp_events` payload if app already has them |
+| CDC layer (Kafka → Debezium) | Small scale — run a nightly `mysqldump` → Hive instead |
+| HBase for `oltp_events` | Low write volume → MySQL with shard-by-`device_id` partitions works |
+| Streaming OLAP / Pinot | Batch-only analytics acceptable; no real-time dashboards |
