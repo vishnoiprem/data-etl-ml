@@ -473,7 +473,7 @@ def ingest_eval(_user: User = Depends(get_current_user)) -> dict[str, Any]:
 
 
 @app.post("/ingest/graph")
-def ingest_graph() -> dict[str, Any]:
+def ingest_graph(_user: User = Depends(get_current_user)) -> dict[str, Any]:
     """Snapshot the current in-memory graph into ClickHouse."""
     if ch is None:
         raise HTTPException(503, "ClickHouse not connected")
