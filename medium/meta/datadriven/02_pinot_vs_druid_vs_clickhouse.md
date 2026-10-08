@@ -466,3 +466,554 @@ When asked "Why X over Y":
 | Meta Engineering (Folley / Scuba) | Why Scuba wasn't open-sourced |
 
 > All comparisons are working-level approximations. Always validate with **your own load** using [Benchmarks](https://clickhouse.com/benchmark).
+
+---
+
+## 11. Docker Quickstart for Each Engine
+
+All three engines are runnable locally with Docker. The patterns below are the **canonical** layouts from their official `docker-compose.yml`s.
+
+### 11.1 Apache Pinot — Single docker-compose for the Reference Cluster
+
+#### Prerequisites
+- Docker 24+, Docker Compose v2
+- 8 GB RAM available (default cluster is light)
+
+#### Minimal `docker-compose.yml`
+
+```yaml
+# docker-compose-pinot.yml
+# Source: apache/pinot > docker-compose.yml (official)
+# https://github.com/apache/pinot/tree/master/docker
+
+version: '3.8'
+
+services:
+  zookeeper:
+    image: zookeeper:3.9
+    container_name: pinot-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  pinot-controller:
+    image: apachepinot/pinot:1.2.0
+    container_name: pinot-controller
+    command: "bin/pinot-admin.sh start Controller"
+    volumes:
+      - ./pinot/config:/config
+    ports:
+      - "9000:9000"   # controller API
+    depends_on:
+      - zookeeper
+    environment:
+      JAVA_OPTS: "-Xms512M -Xmx1G"
+
+  pinot-broker:
+    image: apachepinot/pinot:1.2.0
+    container_name: pinot-broker
+    command: "bin/pinot-admin.sh start Broker"
+    volumes:
+      - ./pinot/config:/config
+    ports:
+      - "8099:8099"   # broker API
+    depends_on:
+      - pinot-controller
+    environment:
+      JAVA_OPTS: "-Xms512M -Xmx1G"
+
+  pinot-server:
+    image: apachepinot/pinot:1.2.0
+    container_name: pinot-server
+    command: "bin/pinot-admin.sh start Server"
+    volumes:
+      - ./pinot/config:/config
+      - ./pinot/data:/data
+    ports:
+      - "8098:8098"   # server admin
+    depends_on:
+      - pinot-controller
+    environment:
+      JAVA_OPTS: "-Xms1G -Xmx2G"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: pinot-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+```
+
+#### Start it
+
+```bash
+mkdir -p pinot/config pinot/data
+docker compose -f docker-compose-pinot.yml up -d
+
+# Tail logs
+docker compose -f docker-compose-pinot.yml logs -f pinot-controller
+```
+
+#### Ingest a CSV of click events
+
+Place `clicks.csv` next to your config dir, then:
+
+```bash
+docker exec -it pinot-controller bash -lc "
+  bin/pinot-admin.sh IngestJob \
+    -jobSpecFile /config/ingestion-job-spec.yml
+"
+```
+
+Where `ingestion-job-spec.yml` is:
+
+```yaml
+executionFrameworkSpec:
+  name: standalone
+  segmentGenerationJobRunnerClassName: org.apache.pinot.tools.standalone.StandaloneSegmentGenerationJobRunner
+jobType: SegmentCreation
+inputDirURI: /data/clicks
+includeFileNamePattern: '*.csv'
+outputDirURI: /data/clicks/segments
+overwriteOutput: true
+recordReaderSpec:
+  dataFormat: csv
+  csvHeader: event_id,device_id,user_id,event_ts,page,event_type
+  delimiter: ','
+tableSpec:
+  tableName: events
+  schemaURI: /config/events_schema.json
+  tableConfigURI: /config/events_table.json
+```
+
+#### Query it
+
+```bash
+# Via broker REST
+curl -s "http://localhost:8099/query/sql" \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "sql": "SELECT page, COUNT(*) FROM events GROUP BY page ORDER BY COUNT(*) DESC LIMIT 10"
+      }' | jq
+
+# Browser UI (Controller): http://localhost:9000/
+```
+
+#### Common commands
+
+| Task | Command |
+|---|---|
+| Stop | `docker compose -f docker-compose-pinot.yml down` |
+| Reset data | `docker compose -f docker-compose-pinot.yml down -v` |
+| Open controller UI | `http://localhost:9000/` |
+| Broker endpoint | `http://localhost:8099/` |
+
+---
+
+### 11.2 Apache Druid — Single-Broker Cluster via `docker-compose.yml`
+
+#### Prerequisites
+- Docker 24+, Compose v2
+- 8 GB RAM (more than Pinot because JVMs add up)
+
+#### Minimal `docker-compose.yml`
+
+```yaml
+# docker-compose-druid.yml
+# Source: apache/druid > distribution/docker/docker-compose.yml
+# https://github.com/apache/druid/tree/master/distribution/docker
+
+version: "3.8"
+
+volumes:
+  druid_shared: {}
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: druid-postgres
+    environment:
+      POSTGRES_USER: druid
+      POSTGRES_PASSWORD: druid
+    volumes:
+      - druid_shared:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  zookeeper:
+    image: zookeeper:3.9
+    container_name: druid-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  coordinator:
+    image: apache/druid:28.0.1
+    container_name: druid-coordinator
+    volumes:
+      - druid_shared:/opt/druid/var
+    ports:
+      - "8081:8081"
+    depends_on: [zookeeper, postgres]
+    env_file: [druid.env]
+    command: ["coordinator"]
+
+  broker:
+    image: apache/druid:28.0.1
+    container_name: druid-broker
+    volumes:
+      - druid_shared:/opt/druid/var
+    ports:
+      - "8082:8082"
+    depends_on: [zookeeper, postgres, coordinator]
+    env_file: [druid.env]
+    command: ["broker", "./conf/supervisord/druid.conf"]
+
+  historical:
+    image: apache/druid:28.0.1
+    container_name: druid-historical
+    volumes:
+      - druid_shared:/opt/druid/var
+    depends_on: [zookeeper, postgres, coordinator]
+    env_file: [druid.env]
+    command: ["historical", "./conf/supervisord/druid.conf"]
+
+  overlord:
+    image: apache/druid:28.0.1
+    container_name: druid-overlord
+    volumes:
+      - druid_shared:/opt/druid/var
+    ports:
+      - "8090:8090"
+    depends_on: [zookeeper, postgres, coordinator]
+    env_file: [druid.env]
+    command: ["overlord"]
+
+  middlemanager:
+    image: apache/druid:28.0.1
+    container_name: druid-middlemanager
+    volumes:
+      - druid_shared:/opt/druid/var
+    depends_on: [zookeeper, postgres, overlord]
+    env_file: [druid.env]
+    command: ["middleManager"]
+
+  router:
+    image: apache/druid:28.0.1
+    container_name: druid-router
+    volumes:
+      - druid_shared:/opt/druid/var
+    ports:
+      - "8888:8888"   # unified API
+      - "9090:9090"
+    depends_on: [broker]
+    env_file: [druid.env]
+    command: ["router"]
+```
+
+#### `druid.env` (required by every Druid service)
+
+```bash
+# druid.env
+DRUID_VERSION=28.0.1
+DRUID_JAVA_VERSION=17
+JAVA_TOOL_OPTIONS=-XX:+UseContainerSupport
+DRUID_COMMON_CONF_DIR=/opt/druid/conf/druid/_common
+druid_discovery_type=zk
+druid_zk_service_host=zookeeper
+druid_zk_service_port=2181
+
+druid_metadata_storage_type=postgresql
+druid_metadata_storage_connector_connectURI=jdbc:postgresql://postgres:5432/druid
+druid_metadata_storage_connector_user=druid
+druid_metadata_storage_connector_password=druid
+
+druid_storage_type=local
+druid_storage_storage_path=/opt/druid/var/data
+```
+
+#### Start it
+
+```bash
+mkdir druid && cd druid
+wget https://raw.githubusercontent.com/apache/druid/master/distribution/docker/docker-compose.yml
+wget https://raw.githubusercontent.com/apache/druid/master/distribution/docker/druid.env -O druid.env
+
+# Start; takes ~1-2 min for first JVM warmup
+docker compose up -d
+
+# Wait for health
+docker compose logs -f router
+```
+
+#### Ingest sample data
+
+Use the native ingestion API (drop a JSON spec):
+
+```bash
+curl -XPOST -H'Content-Type: application/json' \
+  http://localhost:8081/druid/indexer/v1/task \
+  -d @sample-ingest.json
+```
+
+Where `sample-ingest.json` is a Druid streaming spec (mirrors §2.3 of this article):
+
+```json
+{
+  "type": "index_parallel",
+  "spec": {
+    "ioConfig": {
+      "type": "index",
+      "inputSource": {
+        "type": "local",
+        "baseDir": "/opt/druid/var/",
+        "filter": "wikiticker-2015-09-12-sampled.json.gz"
+      },
+      "inputFormat": { "type": "json" }
+    },
+    "dataSchema": {
+      "dataSource": "wikiticker",
+      "timestampSpec": { "column": "time", "format": "auto" },
+      "dimensionsSpec": { "dimensions": ["channel","user","comment"] }
+    }
+  }
+}
+```
+
+#### Query it
+
+```bash
+# Druid SQL via router API
+curl -XPOST -H'Content-Type: application/json' \
+  http://localhost:8888/druid/v2/sql \
+  -d '{
+        "query": "SELECT channel, COUNT(*) AS cnt FROM wikiticker GROUP BY channel ORDER BY cnt DESC LIMIT 5"
+      }' | jq
+
+# UI: http://localhost:8888/unified-console.html
+```
+
+#### Common commands
+
+| Task | Command |
+|---|---|
+| Stop | `docker compose down` |
+| Wipe (incl. volumes) | `docker compose down -v` |
+| Unified Console | `http://localhost:8888/unified-console.html` |
+| Coordinator UI | `http://localhost:8081/` |
+
+---
+
+### 11.3 ClickHouse — Single-node via Docker Compose
+
+#### Prerequisites
+- Docker 24+, Compose v2
+- 4 GB RAM (single binary is light)
+
+#### Minimal `docker-compose.yml`
+
+```yaml
+# docker-compose-clickhouse.yml
+# Source: clickhouse/clickhouse-server > docker-compose.yml
+# https://github.com/clickhouse/clickhouse
+
+version: "3.8"
+
+services:
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:24.3
+    container_name: clickhouse-server
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # native TCP
+      - "9009:9009"   # inter-server replication
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse
+      - ./clickhouse/logs:/var/log/clickhouse-server
+      - ./clickhouse/conf:/etc/clickhouse-server
+      - ./clickhouse/init:/docker-entrypoint-initdb.d
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ch_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+
+  clickhouse-client:
+    image: clickhouse/clickhouse-client:24.3
+    container_name: clickhouse-client
+    depends_on:
+      - clickhouse-server
+    entrypoint:
+      - clickhouse-client
+      - --host=clickhouse-server
+      - --user=default
+      - --password=ch_password
+      - --multiquery
+    stdin_open: true
+    tty: true
+```
+
+#### Custom config (optional)
+
+```xml
+<!-- clickhouse/conf/config.d/storage.xml -->
+<clickhouse>
+  <storage_configuration>
+    <disks>
+      <default><path>/var/lib/clickhouse/</path></default>
+      <s3><type>s3</type><endpoint>https://s3.amazonaws.com</endpoint></disk>
+    </disks>
+  </storage_configuration>
+</clickhouse>
+```
+
+#### Seed schema at first boot
+
+```sql
+-- clickhouse/init/01-events.sql
+CREATE TABLE events_local (
+  event_id   UInt64,
+  device_id  UInt64,
+  user_id    Nullable(UInt64),
+  event_ts   DateTime,
+  page       String,
+  event_type LowCardinality(String)
+) ENGINE = MergeTree
+PARTITION BY toYYYYMM(event_ts)
+ORDER BY (device_id, event_ts);
+
+CREATE TABLE events AS events_local
+ENGINE = Distributed('cluster', default, events_local);
+```
+
+#### Start it
+
+```bash
+mkdir -p clickhouse/{data,logs,conf/config.d,init}
+docker compose -f docker-compose-clickhouse.yml up -d
+
+# Tail server log
+docker logs -f clickhouse-server
+```
+
+#### Query it
+
+```bash
+# HTTP API
+curl -s 'http://localhost:8123/?query=SELECT+version()' \
+  --user default:ch_password
+
+# clickhouse-client (interactive)
+docker exec -it clickhouse-client clickhouse-client -q "
+  SELECT page, COUNT(*) AS cnt
+  FROM events_local
+  WHERE event_ts >= now() - INTERVAL 1 DAY
+  GROUP BY page
+  ORDER BY cnt DESC
+  LIMIT 10
+"
+
+# Web UI: launch separately if needed
+docker run -d --name ch-ui --network host \
+  -p 8124:80 \
+  ghcr.io/caioricciuti/ch-ui
+# http://localhost:8124 — connect to localhost:8123
+```
+
+#### Common commands
+
+| Task | Command |
+|---|---|
+| Stop | `docker compose -f docker-compose-clickhouse.yml down` |
+| Reset data | `docker compose -f docker-compose-clickhouse.yml down -v` |
+| Server logs | `docker logs -f clickhouse-server` |
+| HTTP UI | `http://localhost:8123/play` (if Play enabled) |
+
+---
+
+### 11.4 Comparing the Three Setups Side-by-Side
+
+| Aspect | Pinot | Druid | ClickHouse |
+|---|---|---|---|
+| Containers | 5 (zookeeper + controller + broker + server + kafka) | 8 (postgres + zookeeper + coordinator + broker + historical + overlord + middlemanager + router) | 2 (server + client) |
+| Min memory | 8 GB | 8-12 GB | 4 GB |
+| First-boot time | ~30 sec | ~90-120 sec (JVM warm) | ~10-30 sec |
+| Ports exposed | 9000, 8099, 8098, 9092 | 8888, 8081, 8090, 2181, 5432 | 8123, 9000, 9009 |
+| Default UI | `http://localhost:9000/` | `http://localhost:8888/unified-console.html` | None (HTTP only) |
+| Reset command | `docker compose … down -v` | `docker compose … down -v` | `docker compose … down -v` |
+
+> **Tip:** all three can share a single machine for local testing; just run each `docker-compose` against different ports if you spin up more than one at once.
+
+---
+
+### 11.5 Troubleshooting
+
+| Symptom | Engine | Fix |
+|---|---|---|
+| `pinot-controller` stays unhealthy | Pinot | Check `zookeeper` logs; bump `JAVA_OPTS` from 512M → 1G |
+| `druid-coordinator` loops on "still waiting" | Druid | Postgres not healthy; check `postgres` service first |
+| `clickhouse-server` exits with code 137 | ClickHouse | Out of memory; raise Docker Desktop RAM to 4 GB+ |
+| Cannot connect from client to server | ClickHouse | Verify `CLICKHOUSE_USER` and `CLICKHOUSE_PASSWORD` are set |
+| "No broker available" on query | Druid | `broker` is up but `historical` is still loading segments; wait 60 sec |
+| Uploads fail in Pinot controller UI | Pinot | Controller data dir permissions; `./pinot/data` not writable |
+| Kafka topic not found | All | Create topic explicitly: `docker exec -it pinot-kafka kafka-topics --create --topic clicks --bootstrap-server localhost:9092 --partitions 3` |
+
+---
+
+### 11.6 A Single One-Liner to Test All Three in Turn
+
+```bash
+# 1. Pinot
+docker compose -f docker-compose-pinot.yml up -d
+sleep 30 && curl -sS 'http://localhost:8099/health' && echo "Pinot OK"
+
+# 2. Druid
+docker compose -f docker-compose-druid.yml down
+docker compose -f docker-compose-druid.yml up -d
+sleep 90 && curl -sS 'http://localhost:8888/status' && echo "Druid OK"
+
+# 3. ClickHouse
+docker compose -f docker-compose-clickhouse.yml down
+docker compose -f docker-compose-clickhouse.yml up -d
+sleep 20 && curl -sS 'http://localhost:8123/?query=SELECT+version()' --user default:ch_password && echo "ClickHouse OK"
+```
+
+---
+
+## 12. Final Format Cheat Sheet — Pick a Section When You Need It
+
+| If you are… | Read this section first |
+|---|---|
+| Doing an interview | TL;DR → §4 (when to use) → §6 (capability matrix) → §8 (interview cheat sheet) |
+| Writing a design doc | §1 (architecture) → §2 (working model) → §3 (cost) → §9 (final picks) |
+| Picking a tool for your team | §6 (capability matrix) → §4 (when to use) → §3 (cost) → §11 (Docker quickstart) |
+| Setting up a local sandbox | §11 entirely (Pinot / Druid / ClickHouse docker-compose) |
+| Debugging a production cluster | §7 (production playbook) → §11.5 (troubleshooting) |
+
+---
+
+## 13. Format Conventions Used in This Document
+
+| Convention | Meaning |
+|---|---|
+| `code` | Inline code: filenames, commands, ports |
+| **bold** | Section emphasis, the key term on a line |
+| > blockquote | Note / warning / asides |
+| ```yaml / sql / json ``` | Copy-pastable configuration / query |
+| ✔ / ✗ | Yes / No capability |
+| §section | Cross-reference inside the doc |
+| →  arrow | Data flow in diagrams |
