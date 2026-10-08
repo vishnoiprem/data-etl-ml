@@ -56,9 +56,8 @@ def _verify_password(plain: str, hashed: str) -> bool:
         return False
 
 
-def ensure_default_admin() -> None:
-    """Insert the default admin if no users exist yet."""
-    assert ch is not None
+def ensure_default_admin(ch) -> None:
+    """Insert the default admin if no users exist yet.  `ch` is the live CHClient."""
     rows = ch.query_df("SELECT count() AS n FROM graph_rag.users")
     n = int(rows[0]["n"]) if rows else 0
     if n > 0:
@@ -79,13 +78,12 @@ def ensure_default_admin() -> None:
     logger.info(f"Default admin created: {admin_user!r} (change the password!)")
 
 
-def find_user(username: str) -> tuple[str, str, str, str] | None:
+def find_user(ch, username: str) -> tuple[str, str, str, str] | None:
     """Return (username, password_hash, display_name, role) or None."""
-    assert ch is not None
+    safe = username.replace("'", "''")
     rows = ch.query_df(
         f"SELECT username, password_hash, display_name, role "
-        f"FROM graph_rag.users FINAL WHERE username = '{username.replace(chr(39), chr(39)*2)}' "
-        f"LIMIT 1"
+        f"FROM graph_rag.users FINAL WHERE username = '{safe}' LIMIT 1"
     )
     if not rows:
         return None
@@ -93,8 +91,7 @@ def find_user(username: str) -> tuple[str, str, str, str] | None:
     return r["username"], r["password_hash"], r["display_name"], r["role"]
 
 
-def register_user(username: str, password: str, display_name: str = "", role: str = "user") -> None:
-    assert ch is not None
+def register_user(ch, username: str, password: str, display_name: str = "", role: str = "user") -> None:
     ch.insert_dicts(
         "users",
         [
@@ -108,9 +105,9 @@ def register_user(username: str, password: str, display_name: str = "", role: st
     )
 
 
-def update_last_login(username: str) -> None:
-    assert ch is not None
-    # ClickHouse doesn't have UPDATE; we use ReplacingMergeTree and re-insert
+def update_last_login(ch, username: str) -> None:
+    # ClickHouse has no UPDATE; we re-insert with a fresh created_at so
+    # ReplacingMergeTree picks it up.
     rows = ch.query_df(
         f"SELECT username, password_hash, display_name, role FROM graph_rag.users FINAL WHERE username = '{username}'"
     )
