@@ -1,4 +1,6 @@
-# Working: The Gaps Between Clicks (Google)
+# Working: The Gaps Between Clicks
+
+> **Note on attribution:** The problem statement as quoted below is from Google's interview archive ("The Gaps Between Clicks"). It is filed here under `medium/meta/datadriven/` because the underlying modeling challenge — visit-level analysis + daily rollups + identity stitching + shared-device ownership credit — is identical to problems posed at Meta (FB/IG/WhatsApp) on data-engineering and analytics-infra interviews. SQL examples use Presto/Hive syntax (Meta-style); PySpark remains relevant for large-scale batch.
 
 ## Problem Statement (Restated)
 
