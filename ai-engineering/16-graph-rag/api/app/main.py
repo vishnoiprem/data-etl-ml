@@ -35,6 +35,20 @@ from src.config import PROJECT_ROOT, get_settings  # noqa: E402
 from src.generation import Answer, Citation  # noqa: E402
 from src.pipeline import STRATEGIES, GraphRAGPipeline  # noqa: E402
 
+from api.app.auth import (  # noqa: E402
+    COOKIE_NAME,
+    User,
+    clear_session_cookie,
+    ensure_default_admin,
+    find_user,
+    get_current_user,
+    issue_token,
+    register_user,
+    set_session_cookie,
+    update_last_login,
+    _verify_password,
+)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ClickHouse client (lifespan-managed)
