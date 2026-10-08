@@ -1,5 +1,11 @@
 const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000";
 
+export interface Me {
+  username: string;
+  display_name: string;
+  role: string;
+}
+
 export interface Citation {
   chunk_id: string;
   doc_id: string;
