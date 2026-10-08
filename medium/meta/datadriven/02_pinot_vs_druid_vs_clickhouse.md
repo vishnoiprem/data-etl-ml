@@ -25,26 +25,28 @@
 ### 1.1 Apache Pinot — LinkedIn origin, dashboard-first
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │            CONTROLLER              │
-                    │  (cluster coordinator, Helix)       │
-                    └─────────────────────────────────────┘
-                                │            │
-                manages          │            │          manages
-                                ▼            ▼
-                    ┌──────────────┐  ┌─────────────────┐
-                    │   BROKERS    │  │   SERVERS       │
-                    │  (stateless  │  │  (stateful:     │
-                    │   query      │  │   hold segments │
-                    │   routing)   │  │   + indices)    │
-                    └──────────────┘  └─────────────────┘
-                                ▲            ▲
-                                │            │
-                    ┌───────────┴──┐  ┌──────┴────────┐
-                    │   MINIONS    │  │  INGESTION    │
-                    │ (batch tasks │  │  (Kafka, S3,  │
-                    │  + compactor)│  │   HDFS, etc.) │
-                    └──────────────┘  └───────────────┘
+                       ┌──────────────────────────────────────┐
+                       │              CONTROLLER             │
+                       │     (cluster coordinator, Helix)     │
+                       │        manages configs & segments   │
+                       └───────┬──────────────────┬───────────┘
+                               │                  │
+                               │ 1. plan / route  │ 1. plan / route
+                               ▼                  ▼
+                  ┌────────────────────┐  ┌──────────────────────┐
+                  │      BROKERS       │  │       SERVERS        │
+                  │     (stateless)    │  │      (stateful)      │
+                  │  scatter-gather    │  │  hold segments       │
+                  │  query planning    │  │  + indexes           │
+                  └─────────▲──────────┘  └─────────▲────────────┘
+                            │                     │
+                  feedback / metrics             │
+                            │                     │
+                  ┌─────────┴──────────┐  ┌───────┴────────────┐
+                  │       MINIONS      │  │      INGESTION     │
+                  │   batch tasks      │  │   Kafka, S3,       │
+                  │  compaction        │  │   HDFS, GCS        │
+                  └────────────────────┘  └────────────────────┘
 ```
 
 | Component | Role |
