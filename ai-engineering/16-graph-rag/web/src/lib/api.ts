@@ -64,7 +64,7 @@ export interface EvalDetailRow {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const r = await fetch(`${API_URL}${path}`);
+  const r = await fetch(`${API_URL}${path}`, { credentials: "include" });
   if (!r.ok) throw new Error(`${r.status} ${r.statusText}: ${await r.text()}`);
   return r.json();
 }
@@ -72,11 +72,28 @@ export async function apiGet<T>(path: string): Promise<T> {
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   const r = await fetch(`${API_URL}${path}`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error(`${r.status} ${r.statusText}: ${await r.text()}`);
   return r.json();
+}
+
+export async function login(username: string, password: string): Promise<Me> {
+  return apiPost<Me>("/auth/login", { username, password });
+}
+
+export async function logout(): Promise<void> {
+  await apiPost("/auth/logout", {});
+}
+
+export async function me(): Promise<Me | null> {
+  try {
+    return await apiGet<Me>("/auth/me");
+  } catch {
+    return null;
+  }
 }
 
 export const STRATEGIES = ["vector", "bm25", "graph", "hybrid"] as const;
