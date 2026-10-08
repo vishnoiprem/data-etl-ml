@@ -89,7 +89,7 @@ jobs:
               --format sarif --output .audit/pip-audit.sarif || true
       - name: Upload to code-scanning
         if: hashFiles('.audit/pip-audit.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: .audit/pip-audit.sarif
           category: pip-audit
