@@ -227,7 +227,9 @@ def health() -> dict[str, str]:
 
 @app.post("/auth/login")
 def login(req: LoginRequest, response: Response) -> MeResponse:
-    user_row = find_user(req.username)
+    if ch is None:
+        raise HTTPException(503, "ClickHouse not connected")
+    user_row = find_user(ch, req.username)
     if not user_row or not _verify_password(req.password, user_row[1]):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
     username, _hash, display_name, role = user_row
@@ -235,7 +237,7 @@ def login(req: LoginRequest, response: Response) -> MeResponse:
     token = issue_token(user)
     set_session_cookie(response, token)
     try:
-        update_last_login(username)
+        update_last_login(ch, username)
     except Exception as e:
         logger.warning(f"update_last_login failed (non-fatal): {e}")
     return MeResponse(**user.__dict__)
