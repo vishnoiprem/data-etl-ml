@@ -169,17 +169,32 @@ make test
 
 ```bash
 cd ai-engineering/16-graph-rag
-cp .env.example .env       # add ANTHROPIC_API_KEY if you want the real LLM
+cp .env.example .env       # add ANTHROPIC_API_KEY and ADMIN_PASSWORD
 docker compose up -d --build
 
-# Open the React dashboard
+# Open the React dashboard — login screen first
 open http://localhost:5173
 
-# Or hit the API directly
-curl http://localhost:8000/health
-curl http://localhost:8000/eval/summary
-curl -X POST http://localhost:8000/query \
+# Default credentials: admin / admin  (change ADMIN_PASSWORD in .env!)
+# Register a new user: hit /auth/register with a logged-in session cookie
+```
+
+**Auth.** All non-`/health` routes are protected by a JWT-in-HttpOnly-cookie
+session. The default `admin / admin` user is auto-created on first boot
+(override via `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env`). Passwords
+are stored as bcrypt hashes in the `graph_rag.users` ClickHouse table.
+
+```bash
+# Login and get a cookie
+curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin"}' \
+  -c /tmp/cookies.txt
+
+# Use the cookie to call a protected endpoint
+curl http://localhost:8000/eval/summary -b /tmp/cookies.txt
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" -b /tmp/cookies.txt \
   -d '{"question":"What is the PTO policy?","strategy":"hybrid"}'
 ```
 
