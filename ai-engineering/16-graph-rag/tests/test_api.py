@@ -51,10 +51,16 @@ def fake_ch():
 def client(fake_ch):
     """Return a fresh TestClient per test, with the lifespan-managed ch
     global pointed at a fresh fake.  This guarantees no cookie leakage
-    between tests."""
+    between tests.
+
+    NOTE: We deliberately do NOT use the TestClient as a context manager,
+    because that triggers FastAPI's lifespan handler, which tries to
+    connect to a real ClickHouse.  We patch `api_main.ch` directly so
+    the routes pick up the fake without any network I/O.
+    """
     api_main.ch = fake_ch  # type: ignore[attr-defined]
-    with TestClient(api_main.app) as c:
-        yield c
+    c = TestClient(api_main.app)
+    yield c
 
 
 def test_health(client) -> None:
