@@ -49,6 +49,9 @@ services:
       LLM_MODE: ${LLM_MODE:-auto}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       DATA_DIR: /app/data
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      JWT_SECRET: ${JWT_SECRET:-}
     ports:
       - "8000:8000"
     volumes:
