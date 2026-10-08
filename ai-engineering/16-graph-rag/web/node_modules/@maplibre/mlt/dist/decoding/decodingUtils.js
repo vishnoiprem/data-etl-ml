@@ -1,0 +1,176 @@
+import { VectorType } from "../vector/vectorType";
+import { decodeStreamMetadata } from "../metadata/tile/streamMetadataDecoder";
+import { unpackNullableBoolean, unpackNullable } from "./unpackNullableUtils";
+export function skipColumn(numStreams, tile, offset) {
+    //TODO: add size of column in Mlt for fast skipping
+    for (let i = 0; i < numStreams; i++) {
+        const streamMetadata = decodeStreamMetadata(tile, offset);
+        offset.add(streamMetadata.byteLength);
+    }
+}
+export function decodeBooleanRle(buffer, numBooleans, byteLength, pos, nullabilityBuffer) {
+    const numBytes = Math.ceil(numBooleans / 8.0);
+    const values = decodeByteRle(buffer, numBytes, byteLength, pos);
+    if (nullabilityBuffer) {
+        return unpackNullableBoolean(values, numBooleans, nullabilityBuffer);
+    }
+    return values;
+}
+export function decodeByteRle(buffer, numBytes, byteLength, pos) {
+    const values = new Uint8Array(numBytes);
+    let valueOffset = 0;
+    const streamEndPos = pos.get() + byteLength;
+    while (valueOffset < numBytes) {
+        if (pos.get() >= streamEndPos) {
+            break;
+        }
+        const header = buffer[pos.increment()];
+        /* Runs */
+        if (header <= 0x7f) {
+            const numRuns = header + 3;
+            const value = buffer[pos.increment()];
+            const endValueOffset = Math.min(valueOffset + numRuns, numBytes);
+            values.fill(value, valueOffset, endValueOffset);
+            valueOffset = endValueOffset;
+        }
+        else {
+            /* Literals */
+            const numLiterals = 256 - header;
+            for (let i = 0; i < numLiterals && valueOffset < numBytes; i++) {
+                values[valueOffset++] = buffer[pos.increment()];
+            }
+        }
+    }
+    pos.set(streamEndPos);
+    return values;
+}
+export function decodeFloatsLE(encodedValues, pos, numValues, nullabilityBuffer) {
+    const currentPos = pos.get();
+    const newOffset = currentPos + numValues * Float32Array.BYTES_PER_ELEMENT;
+    const newBuf = new Uint8Array(encodedValues.subarray(currentPos, newOffset)).buffer;
+    const fb = new Float32Array(newBuf);
+    pos.set(newOffset);
+    if (nullabilityBuffer) {
+        return unpackNullable(fb, nullabilityBuffer, 0);
+    }
+    return fb;
+}
+export function decodeDoublesLE(encodedValues, pos, numValues, nullabilityBuffer) {
+    const currentPos = pos.get();
+    const newOffset = currentPos + numValues * Float64Array.BYTES_PER_ELEMENT;
+    const newBuf = new Uint8Array(encodedValues.subarray(currentPos, newOffset)).buffer;
+    const fb = new Float64Array(newBuf);
+    pos.set(newOffset);
+    if (nullabilityBuffer) {
+        return unpackNullable(fb, nullabilityBuffer, 0);
+    }
+    return fb;
+}
+export function decodeUint32sLE(encodedValues, pos, numValues) {
+    const currentPos = pos.get();
+    const byteLength = numValues * Uint32Array.BYTES_PER_ELEMENT;
+    const view = new DataView(encodedValues.buffer, encodedValues.byteOffset, encodedValues.byteLength);
+    const values = new Uint32Array(numValues);
+    for (let i = 0; i < numValues; i++) {
+        values[i] = view.getUint32(currentPos + i * Uint32Array.BYTES_PER_ELEMENT, true);
+    }
+    pos.add(byteLength);
+    return values;
+}
+export function decodeUint64sLE(encodedValues, pos, numValues) {
+    const currentPos = pos.get();
+    const byteLength = numValues * BigUint64Array.BYTES_PER_ELEMENT;
+    const view = new DataView(encodedValues.buffer, encodedValues.byteOffset, encodedValues.byteLength);
+    const values = new BigUint64Array(numValues);
+    for (let i = 0; i < numValues; i++) {
+        values[i] = view.getBigUint64(currentPos + i * BigUint64Array.BYTES_PER_ELEMENT, true);
+    }
+    pos.add(byteLength);
+    return values;
+}
+const TEXT_DECODER_MIN_LENGTH = 12;
+const utf8TextDecoder = new TextDecoder();
+// Source: https://github.com/mapbox/pbf/issues/106
+export function decodeString(buf, pos, end) {
+    if (end - pos >= TEXT_DECODER_MIN_LENGTH) {
+        // longer strings are fast with the built-in browser TextDecoder API
+        return utf8TextDecoder.decode(buf.subarray(pos, end));
+    }
+    // short strings are fast with custom implementation
+    return readUtf8(buf, pos, end);
+}
+function readUtf8(buf, pos, end) {
+    let str = "";
+    let i = pos;
+    while (i < end) {
+        const b0 = buf[i];
+        let c = null; // codepoint
+        let bytesPerSequence = b0 > 0xef ? 4 : b0 > 0xdf ? 3 : b0 > 0xbf ? 2 : 1;
+        if (i + bytesPerSequence > end)
+            break;
+        let b1;
+        let b2;
+        let b3;
+        if (bytesPerSequence === 1) {
+            if (b0 < 0x80) {
+                c = b0;
+            }
+        }
+        else if (bytesPerSequence === 2) {
+            b1 = buf[i + 1];
+            if ((b1 & 0xc0) === 0x80) {
+                c = ((b0 & 0x1f) << 0x6) | (b1 & 0x3f);
+                if (c <= 0x7f) {
+                    c = null;
+                }
+            }
+        }
+        else if (bytesPerSequence === 3) {
+            b1 = buf[i + 1];
+            b2 = buf[i + 2];
+            if ((b1 & 0xc0) === 0x80 && (b2 & 0xc0) === 0x80) {
+                c = ((b0 & 0xf) << 0xc) | ((b1 & 0x3f) << 0x6) | (b2 & 0x3f);
+                if (c <= 0x7ff || (c >= 0xd800 && c <= 0xdfff)) {
+                    c = null;
+                }
+            }
+        }
+        else if (bytesPerSequence === 4) {
+            b1 = buf[i + 1];
+            b2 = buf[i + 2];
+            b3 = buf[i + 3];
+            if ((b1 & 0xc0) === 0x80 && (b2 & 0xc0) === 0x80 && (b3 & 0xc0) === 0x80) {
+                c = ((b0 & 0xf) << 0x12) | ((b1 & 0x3f) << 0xc) | ((b2 & 0x3f) << 0x6) | (b3 & 0x3f);
+                if (c <= 0xffff || c >= 0x110000) {
+                    c = null;
+                }
+            }
+        }
+        if (c === null) {
+            c = 0xfffd;
+            bytesPerSequence = 1;
+        }
+        else if (c > 0xffff) {
+            c -= 0x10000;
+            str += String.fromCharCode(((c >>> 10) & 0x3ff) | 0xd800);
+            c = 0xdc00 | (c & 0x3ff);
+        }
+        str += String.fromCharCode(c);
+        i += bytesPerSequence;
+    }
+    return str;
+}
+export function getVectorTypeBooleanStream(numFeatures, byteLength, data, offset) {
+    const valuesPerRun = 0x83;
+    // TODO: use VectorType metadata field for to test which VectorType is used
+    return Math.ceil(numFeatures / valuesPerRun) * 2 === byteLength &&
+        /* Test the first value byte if all bits are set to true */
+        (data[offset.get() + 1] & 0xff) === (bitCount(numFeatures) << 2) - 1
+        ? VectorType.CONST
+        : VectorType.FLAT;
+}
+function bitCount(number) {
+    //TODO: refactor to get rid of special case handling
+    return number === 0 ? 1 : Math.floor(Math.log2(number) + 1);
+}
+//# sourceMappingURL=decodingUtils.js.map

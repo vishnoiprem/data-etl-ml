@@ -1,0 +1,15 @@
+import {describe, test, expect} from 'vitest';
+import {Anchor} from './anchor.ts';
+
+describe('Anchor', () => {
+    test('constructor', () => {
+        expect(new Anchor(0, 0, 0)).toBeInstanceOf(Anchor);
+        expect(new Anchor(0, 0, 0, 0)).toBeInstanceOf(Anchor);
+    });
+    test('clone', () => {
+        const a = new Anchor(1, 2, 3);
+        const b = new Anchor(1, 2, 3);
+        expect(a.clone()).toEqual(b);
+        expect(a.clone()).toEqual(a);
+    });
+});

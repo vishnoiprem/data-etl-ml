@@ -1,0 +1,9 @@
+export declare function encodeFloatsLE(values: Float32Array): Uint8Array;
+export declare function encodeDoubleLE(values: Float64Array): Uint8Array;
+export declare function encodeUint32sLE(values: Uint32Array): Uint8Array;
+export declare function encodeUint64sLE(values: BigUint64Array): Uint8Array;
+export declare function encodeBooleanRle(values: boolean[]): Uint8Array;
+export declare function encodeByteRle(values: Uint8Array): Uint8Array;
+export declare function encodeStrings(strings: string[]): Uint8Array;
+export declare function createStringLengths(strings: string[]): Uint32Array;
+export declare function concatenateBuffers(...buffers: Uint8Array[]): Uint8Array;

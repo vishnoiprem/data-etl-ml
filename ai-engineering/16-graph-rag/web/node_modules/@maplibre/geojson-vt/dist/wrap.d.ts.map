@@ -1,0 +1,1 @@
+{"version":3,"file":"wrap.d.ts","sourceRoot":"","sources":["../src/wrap.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAE,wBAAwB,EAAE,gBAAgB,EAA+B,MAAM,eAAe,CAAC;AAG7G,wBAAgB,IAAI,CAAC,QAAQ,EAAE,wBAAwB,EAAE,EAAE,OAAO,EAAE,gBAAgB,GAAG,wBAAwB,EAAE,CAehH"}

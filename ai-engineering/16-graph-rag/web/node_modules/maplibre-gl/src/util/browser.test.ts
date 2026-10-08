@@ -1,0 +1,247 @@
+import {describe, test, expect, beforeEach, vi, afterEach} from 'vitest';
+import {beforeMapTest, createMap as globalCreateMap} from './test/util.ts';
+import {browser} from './browser.ts';
+import {AbortError} from './abort_error.ts';
+
+describe('browser', () => {
+    describe('frame',() => {
+        let originalRAF: typeof window.requestAnimationFrame;
+        let originalCAF: typeof window.cancelAnimationFrame;
+        let rafCallbacks: Array<{id: number; callback: FrameRequestCallback}> = [];
+        let rafIdCounter = 0;
+
+        /** Mimic scheduling RAFs for later */
+        function flushAllRAFs() {
+            const pending = [...rafCallbacks];
+            rafCallbacks = [];
+            for (const {callback} of pending) {
+                callback(performance.now());
+            }
+        }
+
+        beforeEach(() => {
+            originalRAF = window.requestAnimationFrame;
+            originalCAF = window.cancelAnimationFrame;
+            rafCallbacks = [];
+            rafIdCounter = 0;
+            vi.spyOn(window, 'requestAnimationFrame').mockImplementation(cb => {
+                rafIdCounter++;
+                const id = rafIdCounter;
+                rafCallbacks.push({id, callback: cb});
+                return id;
+            });
+            vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(id => {
+                rafCallbacks = rafCallbacks.filter(entry => entry.id !== id);
+            });
+        });
+
+        afterEach(() => {
+            window.requestAnimationFrame = originalRAF;
+            window.cancelAnimationFrame = originalCAF;
+            vi.restoreAllMocks();
+        });
+
+        test('calls requestAnimationFrame and invokes fn callback with timestamp', () => {
+            const abortController = new AbortController();
+            const addListenerSpy = vi.spyOn(abortController.signal, 'addEventListener');
+            const removeListenerSpy = vi.spyOn(abortController.signal, 'removeEventListener');
+
+            const fn = vi.fn();
+            const reject = vi.fn();
+
+            browser.frame(abortController, fn, reject);
+
+            expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
+
+            flushAllRAFs();
+
+            expect(fn).toHaveBeenCalledTimes(1);
+            const callArg = fn.mock.calls[0][0];
+            expect(callArg).toBeTypeOf('number');
+
+            expect(window.cancelAnimationFrame).not.toHaveBeenCalled();
+            expect(reject).not.toHaveBeenCalled();
+
+            // cleanup leftover listeners
+            expect(addListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function), false);
+            expect(removeListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function), false);
+        });
+
+        test('when AbortController is aborted before frame fires, calls cancelAnimationFrame and reject', () => {
+            // We override the default mock so that the callback is NOT called immediately
+            // giving us time to abort.
+            (vi.mocked(window.requestAnimationFrame)).mockReturnValue(
+                42
+            );
+
+            const abortController = new AbortController();
+            const addListenerSpy = vi.spyOn(abortController.signal, 'addEventListener');
+            const removeListenerSpy = vi.spyOn(abortController.signal, 'removeEventListener');
+
+            const fn = vi.fn();
+            const reject = vi.fn();
+
+            browser.frame(abortController, fn, reject);
+
+            abortController.abort();
+
+            // Now we expect cancelAnimationFrame to be called with the ID 42
+            expect(window.cancelAnimationFrame).toHaveBeenCalledTimes(1);
+            expect(window.cancelAnimationFrame).toHaveBeenCalledWith(42);
+
+            // Expect reject to be called
+            expect(reject).toHaveBeenCalledTimes(1);
+            const errorArg = reject.mock.calls[0][0];
+            expect(errorArg).toBeInstanceOf(Error);
+            expect(errorArg.message).toMatch(/abort/i);
+
+            // fn should never have been called because we never triggered the RAF callback
+            expect(fn).not.toHaveBeenCalled();
+
+            // cleanup leftover listeners
+            expect(addListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function), false);
+            expect(removeListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function), false);
+        });
+
+        test('when AbortController is aborted after frame fires, fn is invoked anyway', () => {
+            const abortController = new AbortController();
+            const addListenerSpy = vi.spyOn(abortController.signal, 'addEventListener');
+            const removeListenerSpy = vi.spyOn(abortController.signal, 'removeEventListener');
+
+            const fn = vi.fn();
+            const reject = vi.fn();
+
+            browser.frame(abortController, fn, reject);
+
+            flushAllRAFs();
+
+            // The callback should have already been called
+            expect(fn).toHaveBeenCalledTimes(1);
+
+            // The callback runs immediately in our default mock
+            // so if we abort now, it's too late to cancel the frame
+            abortController.abort();
+
+            // Because callback already fired, there's no need to cancel
+            expect(window.cancelAnimationFrame).not.toHaveBeenCalled();
+            // And reject shouldn't be called either
+            expect(reject).not.toHaveBeenCalled();
+
+            // cleanup leftover listeners
+            expect(addListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function), false);
+            expect(removeListenerSpy).toHaveBeenCalledWith('abort', expect.any(Function), false);
+        });
+    });
+
+    describe('frameAsync',()=>{
+        test('expect RAF to be called and receive RAF id', async () => {
+            const id = await browser.frameAsync(new AbortController());
+            expect(id).toBeTruthy();
+        });
+
+        test('throw error when abort is called', async () => {
+            const abortController = new AbortController();
+            const promise = browser.frameAsync(abortController);
+            abortController.abort();
+            await expect(promise).rejects.toThrow(AbortError);
+        });
+    });
+
+    describe('reduceMotion', () => {
+        const createMap = (options: {reduceMotion?: boolean}) => {
+            beforeMapTest();
+            const container = window.document.createElement('div');
+            window.document.body.appendChild(container);
+            Object.defineProperty(container, 'clientWidth', {value: 512});
+            Object.defineProperty(container, 'clientHeight', {value: 512});
+            return globalCreateMap({container, ...options});
+        };
+
+        test('reduceMotion set to true', () => {
+            createMap({reduceMotion: true});
+            expect(browser.prefersReducedMotion).toBe(true);
+        });
+
+        test('reduceMotion set to false', () => {
+            createMap({reduceMotion: false});
+            expect(browser.prefersReducedMotion).toBe(false);
+        });
+
+        test('reduceMotion set to undefined', () => {
+            const browserDefault = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            createMap({});
+            expect(browser.prefersReducedMotion).toBe(browserDefault);
+        });
+    });
+
+    test('hardwareConcurrency', () => {
+        expect(browser.hardwareConcurrency).toBeTypeOf('number');
+    });
+
+    describe('getImageCanvasContext', () => {
+        const image = {width: 4, height: 3} as unknown as ImageBitmap;
+
+        /**
+         * A canvas that records `drawImage` instead of rasterising. `getImageData` answers with the
+         * bytes `isOffscreenCanvasDistorted` expects, or with zeroes to fail it (see #3185).
+         */
+        function createFakeCanvas(distorted = false) {
+            const canvas = {width: 0, height: 0, getContext: () => context};
+            const context = {
+                canvas,
+                fillRect: () => {},
+                drawImage: vi.fn(),
+                getImageData: (_x: number, _y: number, width: number, height: number) => ({
+                    data: Uint8ClampedArray.from({length: width * height * 4}, (_, i) => distorted ? 0 : i)
+                })
+            };
+            return canvas;
+        }
+
+        /**
+         * Draws `image` through a fresh copy of `browser.ts`, since the two `OffscreenCanvas` probes
+         * behind `getImageCanvasContext` cache their answer in module scope. Only the document canvas
+         * comes back sized, so `context.canvas.width` says which path ran.
+         */
+        async function drawImageWith(OffscreenCanvas: unknown) {
+            vi.stubGlobal('OffscreenCanvas', OffscreenCanvas);
+            vi.stubGlobal('createImageBitmap', vi.fn());
+            vi.spyOn(window.document, 'createElement').mockReturnValue(createFakeCanvas() as unknown as HTMLElement);
+            vi.resetModules();
+            return (await import('./browser.ts')).browser.getImageCanvasContext(image);
+        }
+
+        afterEach(() => {
+            vi.unstubAllGlobals();
+            vi.restoreAllMocks();
+            vi.resetModules();
+        });
+
+        test('draws into an OffscreenCanvas sized to the image when the browser has one that reads back faithfully', async () => {
+            const OffscreenCanvasStub = vi.fn(function () {
+                return createFakeCanvas();
+            });
+
+            const context = await drawImageWith(OffscreenCanvasStub);
+
+            expect(OffscreenCanvasStub).toHaveBeenCalledWith(4, 3);
+            expect(context.drawImage).toHaveBeenCalledWith(image, 0, 0, 4, 3);
+        });
+
+        test('draws into a document canvas sized to the image when the browser has no OffscreenCanvas', async () => {
+            const context = await drawImageWith(undefined);
+
+            expect([context.canvas.width, context.canvas.height]).toEqual([4, 3]);
+            expect(context.drawImage).toHaveBeenCalledWith(image, 0, 0, 4, 3);
+        });
+
+        test('falls back to a document canvas when the OffscreenCanvas distorts pixels', async () => {
+            const context = await drawImageWith(vi.fn(function () {
+                return createFakeCanvas(true);
+            }));
+
+            expect([context.canvas.width, context.canvas.height]).toEqual([4, 3]);
+            expect(context.drawImage).toHaveBeenCalledWith(image, 0, 0, 4, 3);
+        });
+    });
+});

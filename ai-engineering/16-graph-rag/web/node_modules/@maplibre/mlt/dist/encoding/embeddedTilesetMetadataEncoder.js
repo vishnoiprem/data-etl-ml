@@ -1,0 +1,41 @@
+import { ColumnTypeCode } from "../metadata/tileset/typeMap";
+import IntWrapper from "../decoding/intWrapper";
+import { encodeVarintInt32Value } from "./integerEncodingUtils";
+import { concatenateBuffers } from "../decoding/decodingTestUtils";
+/**
+ * Encodes a single typeCode as a varint.
+ */
+export function encodeTypeCode(typeCode) {
+    const buffer = new Uint8Array(5);
+    const offset = new IntWrapper(0);
+    encodeVarintInt32Value(typeCode, buffer, offset);
+    return buffer.slice(0, offset.get());
+}
+/**
+ * Encodes a field name as a length-prefixed UTF-8 string.
+ */
+export function encodeFieldName(name) {
+    const textEncoder = new TextEncoder();
+    const nameBytes = textEncoder.encode(name);
+    const lengthBuf = new Uint8Array(5);
+    const offset = new IntWrapper(0);
+    encodeVarintInt32Value(nameBytes.length, lengthBuf, offset);
+    const lengthSlice = lengthBuf.slice(0, offset.get());
+    return concatenateBuffers(lengthSlice, nameBytes);
+}
+/**
+ * Encodes a child count as a varint.
+ */
+export function encodeChildCount(count) {
+    const buffer = new Uint8Array(5);
+    const offset = new IntWrapper(0);
+    encodeVarintInt32Value(count, buffer, offset);
+    return buffer.slice(0, offset.get());
+}
+/**
+ * Computes typeCode for a scalar field.
+ */
+export function scalarTypeCode(scalarType, nullable) {
+    return ColumnTypeCode.SCALAR_BASE + scalarType * 2 + (nullable ? 1 : 0);
+}
+//# sourceMappingURL=embeddedTilesetMetadataEncoder.js.map

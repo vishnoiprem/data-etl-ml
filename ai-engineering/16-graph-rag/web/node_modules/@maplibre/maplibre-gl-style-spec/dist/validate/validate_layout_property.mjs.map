@@ -1,0 +1,1 @@
+{"version":3,"file":"validate_layout_property.mjs","names":[],"sources":["../../src/validate/validate_layout_property.ts"],"sourcesContent":["import {validateProperty} from './validate_property';\n\nexport function validateLayoutProperty(options) {\n    return validateProperty(options, 'layout');\n}\n"],"mappings":";;AAEA,SAAgB,uBAAuB,SAAS;CAC5C,OAAO,iBAAiB,SAAS,QAAQ;AAC7C"}

@@ -1,0 +1,15 @@
+export var PhysicalLevelTechnique;
+(function (PhysicalLevelTechnique) {
+    PhysicalLevelTechnique["NONE"] = "NONE";
+    /**
+     * Preferred option, tends to produce the best compression ratio and decoding performance.
+     * But currently only limited to 32 bit integer.
+     */
+    PhysicalLevelTechnique["FAST_PFOR"] = "FAST_PFOR";
+    /**
+     * Can produce better results in combination with a heavyweight compression scheme like Gzip.
+     * Simple compression scheme where the decoder are easier to implement compared to FastPfor.
+     */
+    PhysicalLevelTechnique["VARINT"] = "VARINT";
+})(PhysicalLevelTechnique || (PhysicalLevelTechnique = {}));
+//# sourceMappingURL=physicalLevelTechnique.js.map

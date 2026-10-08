@@ -1,0 +1,1 @@
+{"version":3,"file":"fixedSizeVector.js","sourceRoot":"","sources":["../../src/vector/fixedSizeVector.ts"],"names":[],"mappings":"AAAA,OAAO,MAAM,MAAM,UAAU,CAAC;AAE9B,MAAM,OAAgB,eAA8C,SAAQ,MAAY;CAAG","sourcesContent":["import Vector from \"./vector\";\n\nexport abstract class FixedSizeVector<T extends ArrayBufferView, K> extends Vector<T, K> {}\n"]}

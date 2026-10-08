@@ -1,0 +1,1 @@
+{"version":3,"file":"is_object_literal.mjs","names":[],"sources":["../../src/util/is_object_literal.ts"],"sourcesContent":["export function isObjectLiteral(anything: unknown): anything is Record<string, unknown> {\n    return Boolean(anything) && anything.constructor === Object;\n}\n"],"mappings":";AAAA,SAAgB,gBAAgB,UAAwD;CACpF,OAAO,QAAQ,QAAQ,KAAK,SAAS,gBAAgB;AACzD"}

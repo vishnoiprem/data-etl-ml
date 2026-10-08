@@ -1,0 +1,12 @@
+import type IntWrapper from "./intWrapper";
+import { VectorType } from "../vector/vectorType";
+import type BitVector from "../vector/flat/bitVector";
+export declare function skipColumn(numStreams: number, tile: Uint8Array, offset: IntWrapper): void;
+export declare function decodeBooleanRle(buffer: Uint8Array, numBooleans: number, byteLength: number, pos: IntWrapper, nullabilityBuffer?: BitVector): Uint8Array;
+export declare function decodeByteRle(buffer: Uint8Array, numBytes: number, byteLength: number, pos: IntWrapper): Uint8Array;
+export declare function decodeFloatsLE(encodedValues: Uint8Array, pos: IntWrapper, numValues: number, nullabilityBuffer?: BitVector): Float32Array;
+export declare function decodeDoublesLE(encodedValues: Uint8Array, pos: IntWrapper, numValues: number, nullabilityBuffer?: BitVector): Float64Array;
+export declare function decodeUint32sLE(encodedValues: Uint8Array, pos: IntWrapper, numValues: number): Uint32Array;
+export declare function decodeUint64sLE(encodedValues: Uint8Array, pos: IntWrapper, numValues: number): BigUint64Array;
+export declare function decodeString(buf: Uint8Array, pos: number, end: number): string;
+export declare function getVectorTypeBooleanStream(numFeatures: number, byteLength: number, data: Uint8Array, offset: IntWrapper): VectorType;

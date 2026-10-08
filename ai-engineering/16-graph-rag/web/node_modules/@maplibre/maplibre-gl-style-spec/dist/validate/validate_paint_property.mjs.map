@@ -1,0 +1,1 @@
+{"version":3,"file":"validate_paint_property.mjs","names":[],"sources":["../../src/validate/validate_paint_property.ts"],"sourcesContent":["import {validateProperty} from './validate_property';\n\nexport function validatePaintProperty(options) {\n    return validateProperty(options, 'paint');\n}\n"],"mappings":";;AAEA,SAAgB,sBAAsB,SAAS;CAC3C,OAAO,iBAAiB,SAAS,OAAO;AAC5C"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"ref_properties.mjs","names":[],"sources":["../../src/util/ref_properties.ts"],"sourcesContent":["export const refProperties = [\n    'type',\n    'source',\n    'source-layer',\n    'minzoom',\n    'maxzoom',\n    'filter',\n    'layout'\n];\n"],"mappings":";AAAA,MAAa,gBAAgB;CACzB;CACA;CACA;CACA;CACA;CACA;CACA;AACJ"}

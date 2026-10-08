@@ -1,0 +1,18 @@
+import { ValidationError } from "../error/validation_error.mjs";
+import { getType } from "../util/get_type.mjs";
+//#region src/validate/validate_number.ts
+function validateNumber(options) {
+	const key = options.key;
+	const value = options.value;
+	const valueSpec = options.valueSpec;
+	let type = getType(value);
+	if (type === "number" && value !== value) type = "NaN";
+	if (type !== "number") return [new ValidationError(key, value, `number expected, ${type} found`)];
+	if ("minimum" in valueSpec && value < valueSpec.minimum) return [new ValidationError(key, value, `${value} is less than the minimum value ${valueSpec.minimum}`)];
+	if ("maximum" in valueSpec && value > valueSpec.maximum) return [new ValidationError(key, value, `${value} is greater than the maximum value ${valueSpec.maximum}`)];
+	return [];
+}
+//#endregion
+export { validateNumber };
+
+//# sourceMappingURL=validate_number.mjs.map

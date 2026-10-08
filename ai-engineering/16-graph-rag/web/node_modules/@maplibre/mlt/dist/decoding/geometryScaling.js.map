@@ -1,0 +1,1 @@
+{"version":3,"file":"geometryScaling.js","sourceRoot":"","sources":["../../src/decoding/geometryScaling.ts"],"names":[],"mappings":"","sourcesContent":["export default interface GeometryScaling {\n    extent: number;\n    min: number;\n    max: number;\n    scale?: number;\n}\n"]}
