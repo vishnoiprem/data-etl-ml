@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from fastapi.testclient import TestClient
 
 from api.app import main as api_main
-from tests._fake_ch import FakeCHClient
+from _fake_ch import FakeCHClient
 
 
 # Patch BEFORE TestClient(app) so the lifespan handler uses the fake
