@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir --upgrade pip
 # Install Python deps
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt && \
-    pip install --no-cache-dir fastapi 'uvicorn[standard]' clickhouse-connect pydantic-settings
+    pip install --no-cache-dir fastapi 'uvicorn[standard]' clickhouse-connect pydantic-settings bcrypt 'python-jose[cryptography]'
 
 # Copy source
 COPY src /app/src
