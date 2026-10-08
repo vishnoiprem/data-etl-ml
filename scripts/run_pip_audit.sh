@@ -29,12 +29,9 @@ mkdir -p "$OUT_DIR"
 # Discover manifests (top-level + per-project), excluding anything that
 # doesn't look like a pip requirements file. POSIX-compatible (no mapfile).
 # Excludes vendored / template / dist folders — those are not source-of-truth.
-MANIFESTS=""
-while IFS= read -r m; do
-  MANIFESTS="$MANIFESTS$m
-"
-done < <(
-  find . \
+MANIFEST_LIST="$OUT_DIR/manifests.txt"
+: > "$MANIFEST_LIST"
+find . \
     -path "*/.git/*"      -prune -o \
     -path "*/.idea/*"     -prune -o \
     -path "*/.pytest_cache/*" -prune -o \
@@ -45,8 +42,8 @@ done < <(
     -path "*/dist/*"      -prune -o \
     -path "*/sam-installation/aws-sam-cli-src/*" -prune -o \
     -path "*/cookiecutter-*/*" -prune -o \
-    -type f -name "requirements*.txt" -print 2>/dev/null | sort
-)
+    -type f -name "requirements*.txt" -print 2>/dev/null \
+  | sort > "$MANIFEST_LIST"
 
 # pip-audit requires every line to be pinned (==). We respect user-facing
 # `>=` ranges in the source manifests, but for auditing we materialise a
