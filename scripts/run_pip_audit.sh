@@ -28,6 +28,7 @@ mkdir -p "$OUT_DIR"
 
 # Discover manifests (top-level + per-project), excluding anything that
 # doesn't look like a pip requirements file. POSIX-compatible (no mapfile).
+# Excludes vendored / template / dist folders — those are not source-of-truth.
 MANIFESTS=""
 while IFS= read -r m; do
   MANIFESTS="$MANIFESTS$m
@@ -41,6 +42,9 @@ done < <(
     -path "*/.venv/*"     -prune -o \
     -path "*/.env/*"      -prune -o \
     -path "*/.puku-cli/*" -prune -o \
+    -path "*/dist/*"      -prune -o \
+    -path "*/sam-installation/aws-sam-cli-src/*" -prune -o \
+    -path "*/cookiecutter-*/*" -prune -o \
     -type f -name "requirements*.txt" -print 2>/dev/null | sort
 )
 
