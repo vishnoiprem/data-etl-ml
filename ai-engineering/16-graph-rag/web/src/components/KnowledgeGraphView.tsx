@@ -86,7 +86,7 @@ export function KnowledgeGraphView() {
         {
           selector: "edge",
           style: {
-            width: 0.8,
+            width: "0.8",
             "line-color": "#475569",
             "target-arrow-color": "#475569",
             "target-arrow-shape": "triangle",
