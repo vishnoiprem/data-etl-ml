@@ -55,7 +55,23 @@ class LLMClient(ABC):
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Canned answer rules.  First matching rule wins; fallback to a "no info" response.
+# Order matters: more-specific rules come first so the two-hop money shot picks the
+# right answer when the question contains multiple keywords.
 _MOCK_RULES: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\b(approval|approve|approval path|travel.*international|international.*travel|vp[- ]?level|vp[- ]?approval)\b", re.I),
+     "International travel requires VP-level approval. Submit the request via the "
+     "expense system at least 14 days before departure; the path is "
+     "Manager → Finance → VP. Per expense-policy.md §3, the VP-approval step is "
+     "non-negotiable for any trip outside the home country. For the matching IT prep "
+     "steps (VPN, hardware key, encrypted backup), see it-runbooks.md → Travel IT Prep."),
+    (re.compile(r"\b(vpn|hardware key|encrypted backup|travel it prep|travel it)\b", re.I),
+     "International-travel IT prep: install the corporate VPN profile, carry a hardware "
+     "key for MFA, and bring an encrypted backup drive. See it-runbooks.md → Travel IT Prep. "
+     "Note: this prep is only required AFTER the VP-level approval per expense-policy.md §3."),
+    (re.compile(r"\b(read.*order|order.*read|read first|reading list)\b", re.I),
+     "The recommended new-hire reading order is: (1) onboarding.md, (2) it-runbooks.md, "
+     "(3) expense-policy.md, (4) pto-policy.md, (5) on-call.md. See onboarding.md → "
+     "\"What to read first\"."),
     (re.compile(r"\b(pto|paid time off|vacation)\b", re.I),
      "AcmeCorp offers 20 days of PTO per year for full-time employees, accrued monthly. "
      "New hires begin accruing on day 1. Unused PTO carries over up to 5 days; anything above "
@@ -64,11 +80,6 @@ _MOCK_RULES: list[tuple[re.Pattern[str], str]] = [
      "All new hires go through a 30-90 day onboarding program. Week 1 covers IT setup, "
      "accounts, and laptop provisioning per it-runbooks.md. Your manager assigns a buddy "
      "in week 2. See onboarding.md for the full timeline."),
-    (re.compile(r"\b(approval|approve|approval path|travel.*international|international.*travel)\b", re.I),
-     "International travel requires VP-level approval. Submit the request via the "
-     "expense system at least 14 days before departure; the path is "
-     "Manager → Finance → VP. Per expense-policy.md §3, the VP-approval step is "
-     "non-negotiable for any trip outside the home country."),
     (re.compile(r"\b(it|runbook|password|laptop|accounts)\b", re.I),
      "IT runbooks live in it-runbooks.md. Day-1 setup: laptop provisioning, "
      "SSO enrollment, password-manager install, and Slack/Email account creation. "
