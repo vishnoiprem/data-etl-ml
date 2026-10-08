@@ -76,3 +76,20 @@ CREATE TABLE IF NOT EXISTS graph_rag.graph_snapshot
 )
 ENGINE = ReplacingMergeTree(created_at)
 ORDER BY (head, rel, tail);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- users — for the dashboard login. Passwords are bcrypt-hashed.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS graph_rag.users
+(
+    username        String,
+    password_hash   String,           -- bcrypt
+    display_name    String,
+    role            LowCardinality(String) DEFAULT 'user',  -- 'user' | 'admin'
+    created_at      DateTime DEFAULT now(),
+    last_login_at   Nullable(DateTime)
+)
+ENGINE = ReplacingMergeTree(created_at)
+ORDER BY username;
