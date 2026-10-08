@@ -38,7 +38,7 @@ spacy>=3.8.0
 rouge==1.0.1
 
 # Big Data
-pyarrow>=17.0.0
+pyarrow>=25.0.1
 dask==2024.5.1
 distributed==2024.5.1
 
