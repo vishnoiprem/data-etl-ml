@@ -1,5 +1,7 @@
 # Data Model — The Gaps Between Clicks
 
+> **Note on attribution:** The problem statement as quoted in `WORKING.md` is from Google's interview archive ("The Gaps Between Clicks"). It is filed under `medium/meta/datadriven/` because the modeling challenge — visit-level + daily-rollup analysis, anonymous-to-signed-in stitching, and shared-device ownership credit — is the same class of problem Meta asks on data-engineering and analytics-infra interviews for surfaces like FB/IG/WhatsApp. SQL examples below use Presto/Hive-style syntax (Meta's internal stack on top of Hive + Pinot/Presto + Spark).
+
 A complete dimensional + fact model for clickstream visit + daily engagement, with identity stitching and shared-device ownership credit.
 
 ---
