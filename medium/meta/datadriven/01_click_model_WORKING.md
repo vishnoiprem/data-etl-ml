@@ -78,22 +78,21 @@ For each visit `[start_ts, end_ts]`, find the **overlapping device-ownership win
 ### High-Level Architecture
 
 ```
-                         ┌────────────────────┐
-RAW clickstream  ────────►│     fact_event     │  (one row per click)
-                         └─────────┬──────────┘
-                                   │
-        ┌──────────────────────────┼──────────────────────────┐
-        │                          │                          │
-        ▼                          ▼                          ▼
-  ┌────────────────┐      ┌────────────────────┐    ┌──────────────────────┐
-  │   fact_visit   │      │  fact_identity_link │    │  fact_device_        │
-  │  (sessionize)  │      │  (anonymous→user)   │    │  ownership           │
-  └───────┬────────┘      └─────────────────────┘    │  (auth-event)        │
-          │                                           └──────────────────────┘
-          ▼
-  ┌────────────────────────┐
-  │ agg_daily_page_device  │   ◄── rolls up visits by day x page x device
-  └────────────────────────┘
+                          ┌───────────────────┐
+                          │     fact_event    │
+                          └─────────┬─────────┘
+                                    │
+                                    ▼
+   ┌─────────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
+   │      fact_visit     │  │  fact_identity_     │  │  fact_device_       │
+   │     (sessionize)    │  │       link         │  │     ownership       │
+   │                     │  │ (anonymous → user) │  │  (auth-event)       │
+   └──────────┬──────────┘  └─────────────────────┘  └─────────────────────┘
+              │
+              ▼
+   ┌────────────────────────┐
+   │  agg_daily_page_device │   ◄── rolls up visits by day × page × device
+   └────────────────────────┘
 ```
 
 ### Data Model
