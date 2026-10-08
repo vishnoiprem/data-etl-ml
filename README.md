@@ -322,7 +322,43 @@ See `medium/README.md` for the full index.
 - **Author:** Prem Vishnoi — Big Data / AI Consultant
 - **Resume:** see `Resume/`
 - **Articles:** see `medium/`
+- **Issues & PRs:** see [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Code of Conduct:** see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **License:** [MIT](LICENSE)
+
+---
+
+## FAQ
+
+**Q: Is this production code or course work?**
+Both. Look for the badge at the top of each inner README:
+`production-style` projects are built end-to-end and runnable.
+`lab` folders are exercises or course work.
+
+**Q: Where do I start?**
+Recruiters: read the [At a Glance table](#at-a-glance--headline-projects).
+Engineers: pick a headline project, then follow its inner `README.md` to run it.
+
+**Q: Can I use this code?**
+Yes — [MIT](LICENSE). Please keep attribution and don't commit secrets or real data.
+
+**Q: How do I cite a project in an article / CV?**
+The repo, the folder name, and the inner README. Most projects have a one-line
+"summary" block at the top of their README you can quote directly.
+
+**Q: Where's the streaming demo GIF / RAG screen-cast?**
+See `.github/REPO_ABOUT.md` for media checklist (you'll need to record & drop
+files in `docs/assets/` — the README has placeholder hooks for them).
 
 ---
 
 *All data shown in any demo is synthetic. No real customer or transactional data is included in this repo.*
+
+<!--
+README SEO keywords (informational; doesn't change what the rendered page shows):
+apache spark, pyspark, spark structured streaming, kafka, flink, flink cdc,
+etl pipeline example, data engineering portfolio, aws bedrock, amazon bedrock,
+rag retrieval augmented generation, langchain, langgraph, multi-agent,
+weaviate, pinecone, vector database, llmops, prompt engineering,
+hive, delta lake, iceberg, dbt, airflow, docker, terraform, mlops.
+-->
