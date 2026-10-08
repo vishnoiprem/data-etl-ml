@@ -9,7 +9,6 @@ from loguru import logger
 
 from .bm25_index import BM25Index  # noqa: F401  — re-exported for tests
 from .config import get_settings
-from .embeddings import _get_model  # noqa: F401  — warm-load the model
 from .generation import Answer, AnswerGenerator
 from .graph_builder import build_graph
 from .graph_store import GraphStore
