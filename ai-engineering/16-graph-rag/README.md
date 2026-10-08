@@ -153,37 +153,47 @@ or **Neo4j** plugs in for production. See
 
 ## 5. Quick Start
 
+### A. Local-only (no Docker, no DB) — original Python pipeline
+
 ```bash
 cd ai-engineering/16-graph-rag
-
-# 1. Install (only adds networkx; everything else is already in 01-...)
 make install
-
-# 2. Build indices + graph from sample_data/corpus
 make ingest
-
-# 3. Ask a question (default strategy: hybrid)
 make query Q="What is the PTO policy for new hires?"
-
-# 4. Compare strategies on the two-hop money shot
-make query Q="I'm a new hire about to travel internationally for a client visit. What is the approval path?" STRATEGY=vector
-make query Q="I'm a new hire about to travel internationally for a client visit. What is the approval path?" STRATEGY=hybrid
-
-# 5. Run the full eval (all 28 questions × 4 strategies)
+make query Q="I'm a new hire about to travel internationally. What's the approval path?" STRATEGY=hybrid
 make eval
-
-# 6. Run the test suite (no API key needed — uses MockLLM)
 make test
 ```
 
+### B. Full stack (React + FastAPI + ClickHouse) — `docker compose up`
+
+```bash
+cd ai-engineering/16-graph-rag
+cp .env.example .env       # add ANTHROPIC_API_KEY if you want the real LLM
+docker compose up -d --build
+
+# Open the React dashboard
+open http://localhost:5173
+
+# Or hit the API directly
+curl http://localhost:8000/health
+curl http://localhost:8000/eval/summary
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What is the PTO policy?","strategy":"hybrid"}'
+```
+
+Then in the dashboard, click **Re-ingest from API** on the Eval tab to
+populate ClickHouse with eval results, and the **Graph** tab to interact
+with the live network.
+
 **Works with no API key.** If `ANTHROPIC_API_KEY` is unset, `LLM_MODE=auto`
 falls back to `MockLLM` — a deterministic implementation that returns
-canned answers + canned triples for the AcmeCorp corpus. The same `make
-eval` and `make test` commands run end-to-end.
+canned answers + canned triples for the AcmeCorp corpus. The same
+commands run end-to-end against the full stack.
 
-To use a real LLM, copy `.env.example` to `.env`, paste your
-`ANTHROPIC_API_KEY`, and re-run `make ingest` to rebuild the graph with
-real triple extraction.
+To use a real LLM, edit `.env`, set `LLM_MODE=real` and paste your
+`ANTHROPIC_API_KEY`, then `docker compose up -d --build api web`.
 
 ---
 
