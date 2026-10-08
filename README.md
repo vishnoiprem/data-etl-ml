@@ -57,6 +57,7 @@
 | Vector retrieval techniques (RAG) | **4** | `vector · bm25 · hybrid · reranker` |
 | Course tracks completed | **5** | `ai-engineering/13-ai-engineering-course/`, etc. |
 | Long-form articles | **40+** | `medium/` |
+| `README.md` files across the repo | **149** | `bash scripts/repo_stats.sh` |
 
 ---
 
