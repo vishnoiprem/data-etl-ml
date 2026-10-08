@@ -162,14 +162,17 @@ class MockLLM(LLMClient):
     name = "mock"
 
     def complete(self, prompt: str, system: str = "") -> str:
-        # The first ~1000 chars of the prompt always include the user's question
-        # (we don't parse it carefully — we just match keywords).
-        # Also fall through to a generic "I don't know" for clearly OOS questions.
-        if re.search(r"\b(ceo|home address|personal phone|ssn|social security|salary|compensation|acquisition|bypass|how do i (cheat|skip|circumvent))\b", prompt, re.I):
+        # Match against the QUESTION, not the full prompt.  The full prompt
+        # contains the retrieved context, which would trip the keyword rules
+        # (e.g. "VP" appearing in a cited chunk).
+        m = re.search(r"Question:\s*(.+?)\s*(?:Answer:|$)", prompt, re.DOTALL)
+        question = m.group(1) if m else prompt
+
+        if re.search(r"\b(ceo|home address|personal phone|ssn|social security|salary|compensation|acquisition|bypass|how do i (cheat|skip|circumvent))\b", question, re.I):
             return "I don't have that information in the available documentation."
 
         for pattern, answer in _MOCK_RULES:
-            if pattern.search(prompt):
+            if pattern.search(question):
                 return answer
         return "I don't have that information in the available documentation."
 
