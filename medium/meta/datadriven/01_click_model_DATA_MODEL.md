@@ -528,3 +528,182 @@ EXPIRE session:<token> 1800
 | CDC layer (Kafka → Debezium) | Small scale — run a nightly `mysqldump` → Hive instead |
 | HBase for `oltp_events` | Low write volume → MySQL with shard-by-`device_id` partitions works |
 | Streaming OLAP / Pinot | Batch-only analytics acceptable; no real-time dashboards |
+
+---
+
+## "Which System Should I Design?" — Decision Tree for Click Problems
+
+When an interviewer says *"design a system"* about clickstream, this is the framework to choose **what to actually build**. Read their question; pick the leaf.
+
+### Quick Listening Test
+
+Scan the prompt for these keywords → jump to that branch:
+
+| Keywords in the prompt | Branch | Skip |
+|---|---|---|
+| "API", "request", "live", "< 100ms", "sub-second" | **OLTP path** | OLAP rollups, Parquet |
+| "real-time dashboard", "active users now", "right now", "live tile" | **Streaming OLAP** | Nightly rollups, batch sessionization |
+| "analytics", "roll-up", "daily", "weekly", "report", "analyst" | **Batch OLAP** | Redis session state, CDC |
+| "schema", "fact table", "dimension", "warehouse", "how would you model" | **OLAP model** | HBase row keys, OLTP replication |
+| "pipeline", "ETL", "ingestion", "Kinesis/Kafka", "how do events arrive" | **OLTP + Streaming bridge** | Fact tables themselves |
+| "scale to N billion events/day" | **Architecture + numbers** | Full design, focused on bottlenecks |
+| Nothing specific | **End-to-end default** (this doc) | — |
+
+---
+
+### Decision Tree
+
+```
+                       "Design a system"
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+        "real-time?"    "sub-second?"    "sub-100ms API?"
+              │               │               │
+              ▼               ▼               ▼
+      Streaming OLAP    OLTP + Streaming    OLTP only
+      (Pinot/Druid)       bridge          
+              │               │
+              │               ▼
+              │       Full End-to-End
+              │       (this doc, all sections)
+              │
+              └─── "daily/weekly analytics only?"
+                          │
+                          ▼
+                    Batch OLAP only
+                    (fact_event, fact_visit, rollups)
+```
+
+---
+
+### Branch 1: OLTP Only — "How would you ingest clicks?"
+
+**When to use:** interviewer asks only about accepting events; no analytics questions.
+
+**Stack:**
+- Load balancer → API server → **HBase** (write) + **Redis** (session state) + **MySQL** (auth/users)
+
+**Key answers:**
+- HBase row key = `(device_id, reverse(event_ts))` for write locality
+- Redis holds `visit_id` with 30-min sliding TTL
+- CDC from MySQL → Kafka for downstream
+
+**Skip:** `fact_visit`, sessionization job, Presto, Parquet.
+
+---
+
+### Branch 2: Batch OLAP Only — "How would you model analyst queries?"
+
+**When to use:** interviewer wants the warehouse schema only; no live traffic.
+
+**Stack:**
+- Parquet on S3/HDFS → **Spark / Hive / Presto**
+
+**Key answers:**
+- Partition `fact_event` by `DATE(event_ts)`, cluster by `device_id`
+- Sessionization in Spark (Step A in WORKING.md)
+- Identity stitching in Spark (Step B)
+- Ownership windows derived from `fact_auth_event`
+- Pre-aggregate `agg_daily_page_device` nightly
+
+**Skip:** HBase, Redis, CDC, MySQL.
+
+---
+
+### Branch 3: Streaming OLAP — "Show active users right now"
+
+**When to use:** interviewer specifies sub-second freshness for dashboards.
+
+**Stack:**
+- Kafka clicks → **Flink / Spark Streaming** → **Pinot / Druid / Scuba realtime**
+
+**Key answers:**
+- Sliding window of 30 min → emit current `visit_id` events
+- Late-arriving auth → stateful re-key in Flink
+- Stream aggregated K-V (visit_id → visit_metrics) into Pinot
+- Dashboard queries push down to Pinot (sub-second)
+
+**Trade-off:** harder to recompute history; **keep batch pipeline in parallel** as the source of truth.
+
+---
+
+### Branch 4: Full End-to-End — Default Safe Answer
+
+**When to use:** prompt mentions both live and analytical use cases; or no specifics.
+
+**Stack:** OLTP (HBase/MySQL/Redis) + Kafka + Spark Streaming + Spark Batch + Presto.
+
+**Order to present:**
+1. **OLTP layer** — accept clicks, point lookups, hot session state.
+2. **CDC bridge** — Kafka topics for events, auth, users, devices.
+3. **OLAP batch** — `fact_event`, `fact_visit`, `agg_daily_page_device`.
+4. **(Optional) streaming OLAP** — only if real-time dashboards mentioned.
+
+This is the layout of this whole document.
+
+---
+
+### Branch 5: Schema Only — "How would you model this?"
+
+**When to use:** interviewer says "just give me the schema" or "what tables?"
+
+**Answer:** jump to the [OLAP section](#) and present 7 tables in order:
+1. `dim_user`
+2. `dim_device`
+3. `fact_event`
+4. `fact_auth_event`
+5. `dim_device_ownership`
+6. `fact_visit`
+7. `agg_daily_page_device`
+
+Mention grain and one non-obvious trick per table (30-min gap, identity stitching, ownership window, etc.).
+
+---
+
+### Branch 6: Numbers / Scale Round — "How big?"
+
+**When to use:** interviewer presses on scale numbers, cost, capacity.
+
+**Key numbers to know:**
+
+| Metric | Value |
+|---|---|
+| Clicks/day (large consumer product) | 1-50 billion |
+| Peak writes/sec | 500k - 5M |
+| Avg session events | 10-50 |
+| Visits/day | 100M - 5B |
+| Auth events/day | 100M - 10B (heavy traffic sites) |
+| Storage of raw Parquet / day | ~1-50 TB compressed |
+| Storage of `fact_visit` / day | ~10-100 GB |
+| Storage of `agg_daily_page_device` / day | ~1-10 GB |
+| Presto query latency (rollup table, day scan) | 1-10 sec |
+| Spark sessionization job (1-day data) | 10-60 min on 100-1000 node cluster |
+| HBase cluster size for 1M writes/sec | ~50-200 region servers |
+
+---
+
+### How to Start the Interview (90 seconds)
+
+> "The click problem has **two layers**. Let me ask: is the focus on the live write path (OLTP), the analyst query path (OLAP), or end-to-end?"
+
+Then either:
+- **OLTP focus:** draw `App → LB → API → HBase/Redis/MySQL`; explain row keys + session state.
+- **OLAP focus:** draw `Kafka → Parquet → fact_* → agg_*`; explain sessionization + stitching.
+- **End-to-end:** draw both, in that order, OLTP first (where data lands), then OLAP (where it gets analyzed).
+
+The decision tree above is your escape valve when the prompt is ambiguous.
+
+---
+
+### Anti-Patterns to Avoid in a Click-System Design
+
+| Anti-pattern | Why it's wrong |
+|---|---|
+| Putting `fact_event` in MySQL | Locks + cost at billions/day |
+| Running nightly aggregations in the OLTP path | Blocks writes; creates stale data |
+| Sessionizing clicks in MySQL with `LAG()` over a billion rows | Single query kills the DB |
+| Treating `user_id` as non-NULL on first click | Breaks anonymous → signed-in stitching |
+| Ignoring ownership windows on shared devices | Misattributes visits; fails the literal problem statement |
+| Designing only one layer | Missing the "visit + daily rollup" requirement |
+| Confusing "session" (technical) with "visit" (business) | 30-min gap is technical; "visit credit" needs ownership join |
