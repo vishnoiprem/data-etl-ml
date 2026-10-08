@@ -198,13 +198,3 @@ class GraphRAGPipeline:
         return report
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Small adapter so BM25Index exposes the Retriever protocol via composition
-# ─────────────────────────────────────────────────────────────────────────────
-
-from .bm25_index import BM25Index as _BM25  # noqa: E402
-from .retrievers import BM25Retriever as _BM25R  # noqa: E402
-
-
-def _BM25AsRetriever(idx: BM25Index) -> _BM25R:
-    return _BM25R(idx)
