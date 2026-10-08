@@ -1,4 +1,14 @@
--r ../shared/requirements.txt
+# Self-contained install (no shared/ dependency) for the docker build.
+# The local venv install path still uses `-r ../shared/requirements.txt`
+# from the requirements-dev.txt at the repo root.
+
+# Core
+python-dotenv>=1.0.1
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+loguru>=0.7.2
+typer>=0.12.0
+rich>=13.7.0
 
 # Graph store (local stand-in for Neptune / Neo4j)
 networkx>=3.2
