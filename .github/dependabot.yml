@@ -38,6 +38,11 @@ updates:
           - "aiohttp"
           - "pyjwt"
           - "setuptools"
+          - "pypdf"
+          - "tornado"
+          - "transformers"
+          - "protobuf"
+          - "nltk"
       python-minor-and-patch:
         applies-to: version-updates
         update-types:
@@ -75,12 +80,145 @@ updates:
           - "aiohttp"
           - "pyjwt"
           - "setuptools"
+          - "pypdf"
+          - "tornado"
+          - "transformers"
+          - "protobuf"
       python-minor-and-patch:
         applies-to: version-updates
         update-types:
           - "minor"
           - "patch"
         patterns: ["*"]
+
+  # data-engineering (NEW: previously unscanned)
+  - package-ecosystem: "pip"
+    directory: "/data-engineering"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "data-engineering"
+    commit-message:
+      prefix: "chore(de)"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns: ["*"]
+      python-minor-and-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
+  # agentic-ai (NEW: LangChain / Bedrock samples)
+  - package-ecosystem: "pip"
+    directory: "/agentic-ai"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "agentic-ai"
+    commit-message:
+      prefix: "chore(agentic)"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns:
+          - "langchain"
+          - "langchain-core"
+          - "langchain-aws"
+          - "openai"
+          - "anthropic"
+
+  # Spark reference (NEW)
+  - package-ecosystem: "pip"
+    directory: "/Spark"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "spark"
+    commit-message:
+      prefix: "chore(spark)"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+  # realtime-stock-pipeline (NEW)
+  - package-ecosystem: "pip"
+    directory: "/realtime-stock-pipeline"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+    commit-message:
+      prefix: "chore(rts)"
+      include: "scope"
+
+  # flink-cdc-dashboard (NEW)
+  - package-ecosystem: "pip"
+    directory: "/flink-cdc-dashboard"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+    commit-message:
+      prefix: "chore(flink)"
+      include: "scope"
+
+  # ml reference (NEW)
+  - package-ecosystem: "pip"
+    directory: "/ml"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+    commit-message:
+      prefix: "chore(ml)"
+      include: "scope"
+
+  # ⚠ Vendored AWS SAM CLI source — DISABLED.
+  # Pull upstream fixes from https://github.com/aws/aws-sam-cli instead.
 
   # npm ecosystem (TypeScript starters)
   - package-ecosystem: "npm"
@@ -151,7 +289,3 @@ updates:
       github-actions-security:
         applies-to: security-updates
         patterns: ["*"]
-
-# Disable version updates for non-active areas (legacy course code) —
-# they generate noise without adding value. Security-only updates still run.
-# To enable weekly version bumps on those, add more `updates` blocks below.
