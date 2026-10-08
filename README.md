@@ -378,16 +378,15 @@ data-etl-ml/
 │   ├── pincel-ai-program/
 │   ├── sam-installation/
 │   └── Senior Delivery Consultant - Data Engineering/
-├── infra/                      # Docker, env, scripts
-│   ├── docker-compose.yml
-│   ├── .env/
-│   ├── requirements.txt
-│   └── clean_repo.sh
 ├── docs/                       # Screenshots, demo GIFs, social preview HTML
 │   └── assets/
 ├── scripts/                    # repo_stats.sh and similar
+├── infra/                      # Top-level Docker, env, requirements
+│   ├── docker-compose.yml
+│   ├── requirements.txt
+│   └── clean_repo.sh
 ├── .github/                    # REPO_ABOUT, SOCIAL_PREVIEW, issue/PR templates
-├── LICENSE
+├── LICENSE                     # MIT
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── DEMOS.md
