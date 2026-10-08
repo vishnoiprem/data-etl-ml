@@ -1,0 +1,8 @@
+{"question": "I'm a new hire about to travel internationally for a client visit. What is the approval path?", "expected_doc_ids": ["onboarding.md", "it-runbooks.md", "expense-policy.md"], "expected_keywords": ["VP", "manager", "Finance"], "kind": "two-hop"}
+{"question": "What IT preparation is required for an internationally-approved business trip?", "expected_doc_ids": ["it-runbooks.md", "expense-policy.md"], "expected_keywords": ["VPN", "hardware key"], "kind": "two-hop"}
+{"question": "As a new hire, what is the order in which I should read the company docs?", "expected_doc_ids": ["onboarding.md"], "expected_keywords": ["it-runbooks", "expense"], "kind": "two-hop"}
+{"question": "If my laptop is lost while traveling internationally, what is the process?", "expected_doc_ids": ["it-runbooks.md"], "expected_keywords": ["page Security"], "kind": "two-hop"}
+{"question": "How does a new hire's first expense reimbursement interact with the corporate travel policy?", "expected_doc_ids": ["onboarding.md", "expense-policy.md"], "expected_keywords": ["30 days", "expense"], "kind": "two-hop"}
+{"question": "What is the connection between the day-1 IT setup and the expense policy for new hires?", "expected_doc_ids": ["onboarding.md", "it-runbooks.md", "expense-policy.md"], "expected_keywords": ["expense", "IT"], "kind": "two-hop"}
+{"question": "If I'm an SEV1 on-call engineer and need to fly out for an incident, what is the full approval path?", "expected_doc_ids": ["on-call.md", "expense-policy.md"], "expected_keywords": ["VP", "manager"], "kind": "two-hop"}
+{"question": "How does the on-call rotation interact with the IT paging system?", "expected_doc_ids": ["on-call.md", "it-runbooks.md"], "expected_keywords": ["PagerDuty"], "kind": "two-hop"}
