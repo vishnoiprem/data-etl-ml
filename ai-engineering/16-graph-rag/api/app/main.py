@@ -85,6 +85,10 @@ async def lifespan(app: FastAPI):
     global ch
     logger.info("API startup — connecting to ClickHouse …")
     ch = CHClient()
+    try:
+        ensure_default_admin()
+    except Exception as e:
+        logger.warning(f"ensure_default_admin failed (non-fatal): {e}")
     logger.info("API ready.")
     yield
     logger.info("API shutdown.")
