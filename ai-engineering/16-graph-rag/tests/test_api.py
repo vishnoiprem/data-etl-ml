@@ -113,25 +113,29 @@ def test_full_auth_flow(client, fake_ch) -> None:
     assert r2.status_code == 200
     assert r2.json()["username"] == "alice"
 
-    # 3. /auth/me fails without the cookie
-    r3 = client.get("/auth/me", cookies={})
+    # 3. /auth/me fails without the cookie — use a *fresh* client so the
+    #    cookie jar from step 1 doesn't leak in.  TestClient shares cookies
+    #    across requests, and `cookies={}` doesn't clear them.
+    fresh = TestClient(api_main.app)
+    api_main.ch = fake_ch  # type: ignore[attr-defined]
+    r3 = fresh.get("/auth/me")
     assert r3.status_code == 401
 
     # 4. /eval/summary fails without the cookie
-    r4 = client.get("/eval/summary", cookies={})
+    r4 = fresh.get("/eval/summary")
     assert r4.status_code == 401
 
     # 5. /eval/summary works with the cookie
-    r5 = client.get("/eval/summary", cookies={"grag_session": cookie})
+    r5 = fresh.get("/eval/summary", cookies={"grag_session": cookie})
     assert r5.status_code == 200
     assert r5.json() == {"rows": []}  # empty ClickHouse is fine
 
     # 6. Logout
-    r6 = client.post("/auth/logout", cookies={"grag_session": cookie})
+    r6 = fresh.post("/auth/logout", cookies={"grag_session": cookie})
     assert r6.status_code == 200
 
     # 7. After logout, cookie is cleared
-    r7 = client.get("/auth/me", cookies={})
+    r7 = fresh.get("/auth/me")
     assert r7.status_code == 401
 
 
