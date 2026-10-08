@@ -231,4 +231,13 @@ One sentence to win Senior IC: After each block, say tradeoff: "I chose daily ba
 
 You have both emails now — Leadership (Scope/Influence/Leadership + AI) and Technical (4 blocks). Want me to run a full mock of the Technical 1-hour right now? I'll play the senior engineer and time each block strictly.
 
+ 
+  1. “What was your highest-impact project at Makro or Lazada? How did you measure the impact?” 
+  2. “Describe a disagreement with a stakeholder. What did you do?” 
+  3. “Tell me about delivering under a tight deadline. What did you deprioritize?” 
+  4. “How did you mentor someone while giving them ownership?” 
+  5. “When multiple engineers contributed, how did you recognize their work?” 
+  6. “Tell me about a failure you owned and what changed afterward.”
+
+
 
