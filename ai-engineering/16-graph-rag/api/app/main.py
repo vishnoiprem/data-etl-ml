@@ -257,9 +257,11 @@ def me(user: User = Depends(get_current_user)) -> MeResponse:
 @app.post("/auth/register")
 def register(req: RegisterRequest, _user: User = Depends(get_current_user)) -> MeResponse:
     """Admin-only in spirit (any logged-in user can register, for demo simplicity)."""
-    if find_user(req.username):
+    if ch is None:
+        raise HTTPException(503, "ClickHouse not connected")
+    if find_user(ch, req.username):
         raise HTTPException(status.HTTP_409_CONFLICT, "Username already taken")
-    register_user(req.username, req.password, req.display_name)
+    register_user(ch, req.username, req.password, req.display_name)
     return MeResponse(username=req.username, display_name=req.display_name or req.username, role="user")
 
 
