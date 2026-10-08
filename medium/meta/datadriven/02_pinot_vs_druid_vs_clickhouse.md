@@ -100,21 +100,27 @@
 ### 1.3 ClickHouse — Yandex origin, single-binary columnar
 
 ```
-                 ┌──────────────────────────────────────┐
-                 │       clickhouse-server (C++)       │
-                 │   - ZooKeeper (replicated cluster)  │
-                 │   - ClickHouse Keeper (replacement) │
-                 │   - local filesystem (MergeTree)    │
-                 └──────────────────────────────────────┘
-                              ▲    ▲    ▲
-                              │    │    │
-                  Shard 1     │    │    │    Shard N
-                  ┌────────────┐  │  ┌────────────┐
-                  │   Replica 1│◄─┼─►│  Replica N │
-                  │  (Repli-   │  │  │            │
-                  │  cated-    │  │  │            │
-                  │  MergeTree)│  │  │            │
-                  └────────────┘  │  └────────────┘
+                ┌────────────────────────────────────────────────┐
+                │              clickhouse-server (C++)          │
+                │   ZooKeeper / ClickHouse Keeper               │
+                │   Local filesystem (MergeTree engines)        │
+                │   Vectorized + columnar executor              │
+                └─┬────────────────┬─────────────────┬───────────┘
+                  │                │                 │
+                  │                │                 │
+        ┌─────────┴────────┐ ┌─────┴──────┐ ┌────────┴────────┐
+        │      Shard 1     │ │   Shard 2  │ │    Shard N     │
+        │ ┌──────────────┐ │ │            │ │                 │
+        │ │   Replica 1  │ │ │            │ │                 │
+        │ │ Replicated-  │ │ │            │ │                 │
+        │ │  MergeTree   │ │ │            │ │                 │
+        │ └──────────────┘ │ │            │ │                 │
+        │ ┌──────────────┐ │ │            │ │                 │
+        │ │   Replica 2  │◄┼─┼────────────┼─┼─────────────────┤
+        │ │ Replicated-  │ │ │            │ │                 │
+        │ │  MergeTree   │ │ │            │ │                 │
+        │ └──────────────┘ │ │            │ │                 │
+        └──────────────────┘ └────────────┘ └─────────────────┘
 ```
 
 | Component | Role |
