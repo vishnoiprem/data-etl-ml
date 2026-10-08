@@ -14,6 +14,7 @@ A production-minded portfolio of 8 GenAI/ML projects built around AWS best pract
 | 6 | [Regulated-Industry Architecture](./06-regulated-industry) | Private-network AI, audit, guardrails | VPC, KMS, Bedrock Guardrails |
 | 7 | [Prompt Engineering Platform](./07-prompt-engineering) | Versioning, A/B testing, templates | Bedrock Prompt Management, DynamoDB |
 | 8 | [LLMOps Platform](./08-llmops-platform) | End-to-end MLOps for GenAI | SageMaker Pipelines, EventBridge |
+| 16 | [Graph RAG](./16-graph-rag) | Hybrid retrieval (vector + BM25 + KG), two-hop reasoning, RRF fusion | NetworkX, FAISS, rank-bm25, Anthropic Claude |
 
 ## Repository Philosophy
 
