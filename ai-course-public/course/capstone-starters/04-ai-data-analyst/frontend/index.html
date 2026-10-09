@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Data Analyst</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #222; line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 32px; }
+    .card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    input[type=text], input[type=password], input[type=email] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; margin-bottom: 8px; }
+    button { background: #2c3e50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; }
+    button:hover { background: #34495e; }
+    button:disabled { background: #95a5a6; cursor: not-allowed; }
+    .hidden { display: none; }
+    .error { color: #c0392b; padding: 8px; background: #fadbd8; border-radius: 4px; margin: 8px 0; }
+    .success { color: #27ae60; padding: 8px; background: #d5f4e6; border-radius: 4px; margin: 8px 0; }
+    .upload-area { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; }
+    .upload-area:hover { border-color: #2c3e50; background: #fafbfc; }
+    pre { background: #f4f4f4; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+    th { background: #f4f4f4; }
+    #chart { min-height: 300px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 AI Data Analyst</h1>
+    <p class="subtitle">Upload a CSV. Ask questions. Get answers + charts.</p>
+
+    <div id="auth-section" class="card">
+      <h2>Sign in or sign up</h2>
+      <input type="email" id="email" placeholder="you@example.com" />
+      <input type="password" id="password" placeholder="Password" />
+      <div>
+        <button onclick="signup()">Sign up</button>
+        <button onclick="login()">Log in</button>
+      </div>
+      <div id="auth-error"></div>
+    </div>
+
+    <div id="app-section" class="hidden">
+      <div class="card">
+        <h2>Upload a CSV</h2>
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+          <p>📤 Click to upload a CSV (max 100MB)</p>
+          <input type="file" id="file-input" accept=".csv" style="display:none" />
+        </div>
+        <div id="upload-status"></div>
+      </div>
+
+      <div class="card" id="ask-card" style="display:none">
+        <h2>Ask a question</h2>
+        <input type="text" id="question" placeholder="e.g., What's the average revenue by region?" />
+        <button onclick="ask()" id="ask-btn">Ask</button>
+        <div id="ask-status"></div>
+      </div>
+
+      <div class="card" id="result-card" style="display:none">
+        <h2>Result</h2>
+        <p><strong>Insight:</strong> <span id="result-insight"></span></p>
+        <h3>Chart</h3>
+        <div id="chart"></div>
+        <h3>Generated code</h3>
+        <pre id="result-code"></pre>
+        <h3>Table (first 20 rows)</h3>
+        <div id="result-table"></div>
+      </div>
+
+      <div class="card">
+        <h2>Your datasets</h2>
+        <div id="datasets"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    let selectedFile = null;
+    let currentDatasetId = null;
+    if (token) showApp();
+
+    document.getElementById('file-input').addEventListener('change', e => { selectedFile = e.target.files[0]; });
+
+    function showApp() {
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('app-section').classList.remove('hidden');
+      loadDatasets();
+    }
+
+    async function api(path, opts = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (opts.body && !(opts.body instanceof FormData)) opts.body = JSON.stringify(opts.body);
+      const res = await fetch(path, { ...opts, headers });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || 'Request failed');
+      }
+      return res.json();
+    }
+
+    function showError(elId, msg) { document.getElementById(elId).innerHTML = `<div class="error">${msg}</div>`; }
+    function showSuccess(elId, msg) { document.getElementById(elId).innerHTML = `<div class="success">${msg}</div>`; }
+
+    async function signup() {
+      try {
+        const r = await api('/auth/signup', { method: 'POST', body: { email: email.value, password: password.value } });
+        token = r.token; localStorage.setItem('token', token); location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+    async function login() {
+      try {
+        const r = await api('/auth/login', { method: 'POST', body: { email: email.value, password: password.value } });
+        token = r.token; localStorage.setItem('token', token); location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+
+    async function uploadCsv() {
+      if (!selectedFile) { showError('upload-status', 'Pick a file first'); return; }
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+      try {
+        const r = await fetch('/datasets/upload', { method: 'POST', body: fd, headers: { 'Authorization': 'Bearer ' + token } });
+        if (!r.ok) throw new Error((await r.json()).detail);
+        const j = await r.json();
+        showSuccess('upload-status', `Uploaded "${j.name}" (${j.n_rows.toLocaleString()} rows, ${j.n_cols} cols)`);
+        currentDatasetId = j.dataset_id;
+        document.getElementById('ask-card').style.display = 'block';
+        loadDatasets();
+      } catch (e) { showError('upload-status', e.message); }
+    }
+
+    async function ask() {
+      const q = document.getElementById('question').value;
+      if (!q || !currentDatasetId) return;
+      const btn = document.getElementById('ask-btn');
+      btn.disabled = true; btn.textContent = 'Analyzing...';
+      try {
+        const r = await api('/analyze', { method: 'POST', body: { dataset_id: currentDatasetId, question: q } });
+        document.getElementById('result-card').style.display = 'block';
+        document.getElementById('result-insight').textContent = r.insight;
+        document.getElementById('result-code').textContent = r.code;
+        if (r.chart) Plotly.newPlot('chart', r.chart.data, r.chart.layout);
+        const rows = r.result.slice(0, 20);
+        if (rows.length) {
+          const cols = Object.keys(rows[0]);
+          document.getElementById('result-table').innerHTML =
+            '<table><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>' +
+            rows.map(row => '<tr>' + cols.map(c => `<td>${row[c]}</td>`).join('') + '</tr>').join('') + '</table>';
+        }
+        showSuccess('ask-status', `Done in ${(r.latency_ms/1000).toFixed(1)}s, $${r.cost_usd.toFixed(4)}`);
+      } catch (e) {
+        showError('ask-status', e.message);
+      } finally {
+        btn.disabled = false; btn.textContent = 'Ask';
+      }
+    }
+
+    async function loadDatasets() {
+      try {
+        const ds = await api('/datasets');
+        document.getElementById('datasets').innerHTML = ds.length
+          ? ds.map(d => `<p>📋 <a href="#" onclick="currentDatasetId='${d.id}';document.getElementById('ask-card').style.display='block';return false">${d.name}</a> <span style="color:#888;font-size:12px">(${d.n_rows.toLocaleString()} rows × ${d.n_cols} cols)</span></p>`).join('')
+          : '<p>No datasets yet. Upload one above.</p>';
+      } catch (e) { showError('datasets', e.message); }
+    }
+
+    // Trigger upload when file is selected
+    document.getElementById('file-input').addEventListener('change', () => { if (selectedFile) uploadCsv(); });
+  </script>
+</body>
+</html>
