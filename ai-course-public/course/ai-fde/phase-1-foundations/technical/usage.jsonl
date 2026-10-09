@@ -1,0 +1,1 @@
+{"ts": "2026-10-09T12:26:34.514762+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 914, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
