@@ -309,9 +309,17 @@ class NewsfeedService:
         The celebrity path kicks in when a followed user has more followers
         than a threshold — those authors skip the fanout, so we have to
         pick their posts up here. The threshold is intentionally simple.
+        Also include the viewer's own posts so they see their own
+        activity in the feed.
         """
         ids = list(self.feeds.get(f"{FEED_NS}:{viewer_id}") or [])
         fanout_set = set(ids)
+        # The viewer's own posts aren't fanned out to themselves, so add
+        # them here to keep them visible in their own feed.
+        for pid in self.posts_by.get(f"{POSTS_BY_NS}:{viewer_id}") or []:
+            if pid not in fanout_set:
+                ids.append(pid)
+                fanout_set.add(pid)
         # For each followee, pull their recent posts if they look like a
         # celebrity (skipped fanout).  Cheap enough at our scale.
         THRESHOLD = 1000

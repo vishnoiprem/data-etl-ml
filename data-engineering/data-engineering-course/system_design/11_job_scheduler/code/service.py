@@ -486,6 +486,32 @@ class JobScheduler:
         return True
 
     def _execute(self, job: Job, trigger: str) -> Run:
+        # For DAGs we don't create a parent run — the parent's "run" is
+        # the orchestration of its children, each of which gets its
+        # own Run.  We return a synthetic run for API compatibility.
+        if job.kind == "dag":
+            ok, detail = self._run_dag(job)
+            run = Run(
+                run_id=self.idgen.next_id(),
+                job_id=job.job_id,
+                started_at=self.time_fn(),
+                finished_at=self.time_fn(),
+                trigger=trigger,
+                status="success" if ok else "failed",
+                result=detail if ok else None,
+                error=None if ok else str(detail),
+            )
+            # Update job-level counters / last_error.
+            data = self.store.get(f"job:{job.job_id}") or {}
+            data["run_count"] = int(data.get("run_count", 0)) + 1
+            if run.status == "failed":
+                data["last_error"] = run.error
+            else:
+                data["last_error"] = None
+            data["updated_at"] = self.time_fn()
+            self.store.set(f"job:{job.job_id}", data)
+            return run
+
         run = Run(
             run_id=self.idgen.next_id(),
             job_id=job.job_id,
@@ -495,18 +521,11 @@ class JobScheduler:
         )
         self._persist_run(run)
 
-        if job.kind == "dag":
-            ok, detail = self._run_dag(job)
-            run.finished_at = self.time_fn()
-            run.status = "success" if ok else "failed"
-            run.result = detail if ok else None
-            run.error = None if ok else str(detail)
-        else:
-            ok, detail = self.runner.run(job, job.payload)
-            run.finished_at = self.time_fn()
-            run.status = "success" if ok else "failed"
-            run.result = detail if ok else None
-            run.error = None if ok else str(detail)
+        ok, detail = self.runner.run(job, job.payload)
+        run.finished_at = self.time_fn()
+        run.status = "success" if ok else "failed"
+        run.result = detail if ok else None
+        run.error = None if ok else str(detail)
 
         self._persist_run(run)
 

@@ -63,9 +63,12 @@ class FileUploaderTests(unittest.TestCase):
         self.assertEqual(again.status, "in_progress")
 
     def test_put_chunk_rejects_oversize(self):
-        up = self.svc.initiate("a.txt", 1000, "text/plain", chunk_size=8)
+        # use a chunk size that's at the clamp ceiling so a 64-byte
+        # payload still exceeds it; the validate_chunk_size helper
+        # would otherwise raise MIN_CHUNK_SIZE for small values.
+        up = self.svc.initiate("a.txt", 1000, "text/plain", chunk_size=64)
         with self.assertRaises(ValueError):
-            self.svc.put_chunk(up.upload_id, 0, b"x" * 64)
+            self.svc.put_chunk(up.upload_id, 0, b"x" * 128)
 
     # ---- missing chunks / status ---------------------------------------
 
