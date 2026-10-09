@@ -1,1 +1,8 @@
 {"ts": "2026-10-09T12:26:34.514762+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 914, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:10.507881+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 67, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:11.262013+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 77, "output_tokens": 58, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:11.958186+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 69, "output_tokens": 88, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:17.484332+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 917, "output_tokens": 65, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:18.174843+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 914, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:18.863901+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 67, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:31:19.707455+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 55, "output_tokens": 40, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
