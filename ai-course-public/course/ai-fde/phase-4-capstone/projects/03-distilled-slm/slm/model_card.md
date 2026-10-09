@@ -150,6 +150,6 @@ ollama create pf-drafter -f slm/Modelfile
 - [`train.py`](./train.py) — the LoRA fine-tune
 - [`serve.py`](./serve.py) — the HTTP serve (mock or ollama)
 - [`eval.py`](./eval.py) — the eval harness
-- [`../04-ai-data-analyst/`](../04-ai-data-analyst/) — a different
+- [`../../04-ai-data-analyst/`](../../04-ai-data-analyst/) — a different
   customer, a different security model — the project that proves
   the FDE pattern transfers.

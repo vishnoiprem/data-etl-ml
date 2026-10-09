@@ -120,7 +120,7 @@ phase-2-core-build/
 
 ## Phase 3 close (Deployment Depth) — what shipped
 
-Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in this same `phase-2-core-build/` directory because the course was numbered before Phase 3 existed; the labeling gap is intentional and the `phase-4-capstone/` directory picks up the Phase 4 numbering without renaming).
+Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in `../phase-3-deployment/` (sibling of this directory). The numbering gap is intentional; the course keeps `phase-2-core-build/` as the directory name because Phase 3 is a deployment lift on the Phase 2 service code, not a separate codebase.; the labeling gap is intentional and the `phase-4-capstone/` directory picks up the Phase 4 numbering without renaming).
 
 ### 5 Phase 2 commitments → 5 Phase 3 deliverables
 

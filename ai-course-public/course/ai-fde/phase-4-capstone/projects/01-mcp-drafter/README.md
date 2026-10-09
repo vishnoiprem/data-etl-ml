@@ -42,7 +42,22 @@ See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full design doc.
 | `translate.to` | 5 | cs_junior, cs_senior, it | Translate text to a target language |
 | `escalate.to_human` | 1 | cs_junior, cs_senior, it | Page a human via Slack |
 
-The unified budget is **60 credits/min/user**. A `cs_senior` calling
+The unified budget is **60 credits/min/user**.
+
+### Customer role mapping
+
+The MCP server uses **functional role names** (cs_junior / cs_senior / ops / it / system) that map to the PacificFreight customer story:
+
+| Role | Person | What they do |
+|---|---|---|
+| `cs_junior` | Mei (CS lead) | Daily user; 150 drafts/day; the source of truth for "good" |
+| `cs_senior` | Alice (CS lead, escalations) | Can issue refunds |
+| `ops` | Sarah (ops manager) | Read-only; uses the dashboard |
+| `it` | Daniel (IT owner) | Owns the VM, the runbook, the cost ceiling |
+| `system` | internal services | Service-to-service calls; restricted to `tracker.lookup` |
+
+This separation matters because the **functional role is the contract** (the drafter checks `request.role == "cs_junior"`), while the **person is the narrative** (the case study names Mei). The two are kept in sync via the RACI in `phase-3-deployment/consulting/raci.md`.
+ A `cs_senior` calling
 `refund.create` (10) + `translate.to` (5) + `tracker.lookup` (1) consumes
 16 credits — well under the budget.
 

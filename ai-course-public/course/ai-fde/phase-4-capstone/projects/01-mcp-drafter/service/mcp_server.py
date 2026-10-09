@@ -92,6 +92,12 @@ def _load_policies(path: Path | None = None) -> dict:
         return _DEFAULT_POLICIES
 
 
+# Customer role mapping (this is the contract; tests use these role names):
+#   cs_junior  → Mei (CS lead, daily user)
+#   cs_senior  → Alice (CS lead, escalations)
+#   ops        → Sarah (ops manager, secondary user)
+#   it         → Daniel (IT owner, owns the VM + the runbook)
+#   system     → internal service-to-service calls
 _DEFAULT_POLICIES: dict = {
     "roles": {
         "cs_junior": {"can_call": ["tracker.lookup", "translate.to", "escalate.to_human"]},

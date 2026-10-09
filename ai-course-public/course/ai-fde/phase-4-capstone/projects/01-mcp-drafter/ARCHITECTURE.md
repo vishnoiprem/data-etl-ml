@@ -437,9 +437,9 @@ jobs:
 
 - **MCP spec**: Anthropic, "Model Context Protocol," Nov 2024. [https://modelcontextprotocol.io](https://modelcontextprotocol.io)
 - **JSON-RPC 2.0 spec**: [https://www.jsonrpc.org/specification](https://www.jsonrpc.org/specification)
-- **The Phase 3 service**: `course/ai-fde/phase-2-core-build/service/app.py` (unmodified)
-- **The Phase 3 rate limiter**: `course/ai-fde/phase-2-core-build/service/circuit.py::TokenBucketRateLimiter`
-- **The Phase 3 eval set**: `course/ai-fde/phase-2-core-build/shared/eval_set.jsonl`
+- **The Phase 3 service**: `course/ai-fde/phase-2-core-build/service/app.py` (Phase 2 service code, hardened in Phase 3) (unmodified)
+- **The Phase 3 rate limiter**: `course/ai-fde/phase-2-core-build/service/circuit.py::TokenBucketRateLimiter` (Phase 2 service code, hardened in Phase 3)
+- **The Phase 3 eval set**: `course/ai-fde/phase-2-core-build/shared/eval_set.jsonl` (Phase 2 corpus, used in Phase 3)
 - **RBAC patterns**: AWS IAM policy language; Kubernetes RBAC; OPA Rego.
 - **Rate-limit algorithms**: Cloudflare's "Rate Limiting" blog; Stripe's "Scaling your API with rate limiters"; NGINX `limit_req` documentation.
 - **Industry comparison**: Anthropic MCP, OpenAI function-calling, LangChain Tools, CrewAI Tools — all use JSON-Schema-based tool definitions; this implementation is the minimal pattern.

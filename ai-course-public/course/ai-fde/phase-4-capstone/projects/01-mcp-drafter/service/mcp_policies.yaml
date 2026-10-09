@@ -15,7 +15,7 @@
 
 # --- Roles (who is calling) -------------------------------------------------
 roles:
-  cs_junior:
+  cs_mei:
     description: "Junior CS team member (e.g. Mei)"
     can_call: [tracker.lookup, translate.to, escalate.to_human]
 
@@ -23,11 +23,11 @@ roles:
     description: "Senior CS team member — can issue refunds"
     can_call: [tracker.lookup, refund.create, translate.to, escalate.to_human]
 
-  ops:
+  ops_sarah:
     description: "Ops manager (e.g. Sarah) — read-only on tracker"
     can_call: [tracker.lookup]
 
-  it:
+  it_daniel:
     description: "IT owner (e.g. Daniel) — full access"
     can_call: [tracker.lookup, refund.create, translate.to, escalate.to_human]
 

@@ -562,8 +562,8 @@ systemctl --user restart acme-analyst
 
 ## 12. References
 
-- **The Phase 3 service (reused)**: `course/ai-fde/phase-2-core-build/service/app.py`
-- **The Phase 3 eval set (reused)**: `course/ai-fde/phase-2-core-build/shared/eval_set.jsonl`
+- **The Phase 3 service (reused)**: `course/ai-fde/phase-2-core-build/service/app.py` (the Phase 2 service code, hardened in Phase 3)
+- **The Phase 3 eval set (reused)**: `course/ai-fde/phase-2-core-build/shared/eval_set.jsonl` (Phase 2 corpus, reused)
 - **Subprocess + rlimit pattern**: Python docs, `subprocess` module; `resource.setrlimit` for memory.
 - **gVisor**: Google's user-space kernel for containers. https://gvisor.dev/
 - **Firecracker**: AWS's microVM for serverless. https://firecracker-microvm.github.io/

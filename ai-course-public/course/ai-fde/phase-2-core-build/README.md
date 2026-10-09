@@ -118,8 +118,8 @@ This is the smallest phase. **The hardest thing is not the code, it's resisting 
 
 When you finish Phase 2 you have a service that passes pytest, has an eval harness, and is documented well enough that a new engineer can pick it up. **That's the bar.**
 
-Phase 3 (in `../phase-2-core-build/`) lifts this to: hybrid retrieval (BM25 + dense + RRF), a circuit breaker, rate limiting, redaction, telemetry, a runbook + RACI + on-call rotation, and a GO/NO-GO gate. The service goes from "works on my laptop" to "runs in production with a team that owns it."
+Phase 3 (in `../phase-3-deployment/`) lifts this to: hybrid retrieval (BM25 + dense + RRF), a circuit breaker, rate limiting, redaction, telemetry, a runbook + RACI + on-call rotation, and a GO/NO-GO gate. The service goes from "works on my laptop" to "runs in production with a team that owns it."
 
 Phase 4 (in `../phase-4-capstone/`) takes the Phase 3 service and turns it into a **platform**: MCP for tool use, multi-agent for complex cases, a distilled SLM for cost, a fresh engagement for breadth, plus 5 case studies and a capstone presentation.
 
-Read [`../phase-2-core-build/scenario-lift.md`](../phase-2-core-build/scenario-lift.md) for the Phase 3 lift.
+Read [`../phase-3-deployment/scenario-lift.md`](../phase-3-deployment/scenario-lift.md) for the Phase 3 lift.
