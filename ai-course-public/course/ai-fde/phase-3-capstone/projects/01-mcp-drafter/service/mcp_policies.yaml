@@ -1,0 +1,110 @@
+# MCP policies for the PacificFreight drafter.
+#
+# This file is the **contract** between the drafter (the LLM) and the
+# PacificFreight IT team. It says:
+#   1. Who can call which tool (role-based access control).
+#   2. How often each tool can be called (rate limit).
+#   3. What the cost-equivalent of each tool is in credit units (so the
+#      Phase 3 rate limiter can apply a unified budget).
+#
+# The drafter reads this file at startup. A new role is added by editing
+# this file — no code change. A new tool is added by:
+#   1. Implementing it in `mcp_server.py::TOOL_REGISTRY`.
+#   2. Adding it to the `tools` list below.
+#   3. Adding a rate limit and role grants.
+
+# --- Roles (who is calling) -------------------------------------------------
+roles:
+  cs_junior:
+    description: "Junior CS team member (e.g. Mei)"
+    can_call: [tracker.lookup, translate.to, escalate.to_human]
+
+  cs_senior:
+    description: "Senior CS team member — can issue refunds"
+    can_call: [tracker.lookup, refund.create, translate.to, escalate.to_human]
+
+  ops:
+    description: "Ops manager (e.g. Sarah) — read-only on tracker"
+    can_call: [tracker.lookup]
+
+  it:
+    description: "IT owner (e.g. Daniel) — full access"
+    can_call: [tracker.lookup, refund.create, translate.to, escalate.to_human]
+
+  system:
+    description: "Internal pipeline calls (the eval suite, the iteration report)"
+    can_call: [tracker.lookup]
+
+# --- Rate limits (per-user, sliding window) --------------------------------
+# Each limit is enforced by the in-process token bucket. When the bucket
+# runs dry, the tool returns 429. The budget is the SUM of cost_credits
+# across all tool calls in a 1-minute window — the unified ceiling.
+rate_limits:
+  tracker.lookup:
+    per_user_per_min: 60
+    per_user_per_day: 5000
+    cost_credits: 1
+  refund.create:
+    per_user_per_min: 5
+    per_user_per_day: 50
+    cost_credits: 10
+  translate.to:
+    per_user_per_min: 20
+    per_user_per_day: 500
+    cost_credits: 5
+  escalate.to_human:
+    per_user_per_min: 10
+    per_user_per_day: 100
+    cost_credits: 1
+
+# --- Tool catalog (what the drafter can call) -------------------------------
+# The drafter's system prompt lists these. Each tool's `input_schema` is
+# a JSON-Schema-style dict that the LLM uses to construct the call.
+tools:
+  - name: tracker.lookup
+    description: "Look up a PacificFreight shipment by ID. Returns status, last_event, customer, destination."
+    input_schema:
+      type: object
+      properties:
+        shipment_id:
+          type: string
+          pattern: "^PF-\\d{4,5}$"
+          description: "The PacificFreight shipment ID, e.g. PF-1003"
+      required: [shipment_id]
+
+  - name: refund.create
+    description: "Initiate a refund for a shipment. Triggers the refund workflow in the finance system. REQUIRES senior CS role."
+    input_schema:
+      type: object
+      properties:
+        shipment_id: {type: string, pattern: "^PF-\\d{4,5}$"}
+        reason: {type: string, description: "Why the refund is being issued (e.g. 'lost in transit', 'duplicate charge')"}
+        amount_usd: {type: number, minimum: 0, maximum: 1000}
+      required: [shipment_id, reason, amount_usd]
+
+  - name: translate.to
+    description: "Translate text to a target language (ISO 639-1 code: en, vi, zh, ja, ko, th). Uses an internal translation model."
+    input_schema:
+      type: object
+      properties:
+        text: {type: string, description: "The text to translate"}
+        lang: {type: string, pattern: "^(en|vi|zh|ja|ko|th)$"}
+      required: [text, lang]
+
+  - name: escalate.to_human
+    description: "Escalate the conversation to a human CS agent. The agent gets a Slack notification with the email + the draft + the reason."
+    input_schema:
+      type: object
+      properties:
+        reason: {type: string, description: "Why this needs human attention (e.g. 'customer is upset', 'refund request over $500')"}
+        priority: {type: string, enum: [low, medium, high]}
+      required: [reason, priority]
+
+# --- Default budget (the unified ceiling) -----------------------------------
+# The rate limiter treats the SUM of cost_credits across all tool calls
+# in a 1-minute window as the budget. A cs_senior user calling
+# refund.create (10 credits) + translate.to (5 credits) + tracker.lookup
+# (1 credit) = 16 credits/min — well under the default of 60 credits/min.
+budget:
+  default_per_user_per_min: 60
+  default_per_user_per_day: 2000
