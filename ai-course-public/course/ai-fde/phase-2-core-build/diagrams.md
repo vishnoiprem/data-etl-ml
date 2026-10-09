@@ -1,251 +1,298 @@
-# Course flow diagrams — the 4-phase journey
+# 🎨 The 4-Phase Journey — Pictures First
 
-> **If you can read a flowchart, you can read this course.** Each diagram is a picture of one phase, drawn like a 4th-grade teacher would draw it: boxes, arrows, plain words.
-
----
-
-## The big picture (all 4 phases)
-
-```
-                     THE AI FDE JOURNEY
-                     ==================
-
-   "I wrote a tool"        "the tool is a          "it runs 24/7       "it's a platform
-                           service"               for everyone"       the team extends"
-        │                       │                       │                     │
-        ▼                       ▼                       ▼                     ▼
-   ┌─────────┐             ┌──────────┐            ┌──────────┐          ┌──────────┐
-   │ PHASE 1 │ ──────────▶ │ PHASE 2  │ ────────▶ │ PHASE 3  │ ───────▶ │ PHASE 4  │
-   │Founda-  │             │ Core     │            │ Deploy-  │          │ Capstone │
-   │tions    │             │ Build    │            │ ment     │          │          │
-   └─────────┘             └──────────┘            └──────────┘          └──────────┘
-   1 week                  2 weeks                 2 weeks               4 weeks
-   • CLI tool              • FastAPI service       • Circuit breaker     • MCP tools
-   • 1-pager               • RAG                   • Rate limiter        • Multi-agent
-   • Sample emails         • Eval harness          • Hybrid retrieval    • Distilled SLM
-   • Solution outline      • Docker                • Runbook + RACI      • 5 case studies
-   • 5 questions           • 13 pytest ✓           • On-call rotation    • Portfolio
-   • Style guide           • 3 docs (PRD,etc)      • 3-loop cadence      • Capstone demo
-   • Tracker data          • 3 ADRs                • 13 pytest ✓         • 4 projects ✓
-```
-
-**The pattern:** every phase takes what the last phase made and makes it *better, stronger, more real*. Like a Pokemon evolving. Phase 1 = the egg. Phase 4 = the fully evolved thing.
+> **Read this like a comic book.** Each picture shows what you build in one phase. The words under the picture tell you why you should care. If you can read a flowchart, you can read this course.
 
 ---
 
-## Phase 1: Foundations (the egg)
+## 🗺️ The whole map (4 phases, 9 weeks)
 
 ```
-    WHAT YOU START WITH
-    ===================
+   4th-grader view of the AI FDE course
+   ════════════════════════════════════
 
-    Customer email: "Where is my parcel PF-1003?"
-                    │
-                    ▼
-    ┌──────────────────────────────┐
-    │   Phase 1 CLI tool           │
-    │   (runs in Mei's terminal)   │
-    │                              │
-    │   reads shipments.json       │
-    │   reads style-guide.md       │
-    │   asks the LLM for a draft   │
-    │   prints the draft           │
-    └──────────────────────────────┘
-                    │
-                    ▼
-    Draft: "Hi! Your parcel PF-1003 is in customs."
+   🌱 PHASE 1         🚗 PHASE 2         🏎️ PHASE 3         🚀 PHASE 4
+   Seed               Car                Race car           Rocket ship
+   ──────             ─────              ────────           ──────────
+   1 week             2 weeks            2 weeks            4 weeks
 
-    PROBLEM: only Mei can use it. It lives on her laptop.
+   Just on            Anyone can          Survives           The team
+   Mei's              use it             crashes            can extend
+   laptop                                and storms         it forever
+
+        │                  │                  │                   │
+        └──────────────────┴──────────────────┴───────────────────┘
+                                  │
+                                  ▼
+                        4 projects + 5 case studies
+                        + 1 portfolio + 1 demo
 ```
 
-**The story:** Mei builds a Python script that reads the tracker, looks at the style guide, and asks the LLM "write me a draft reply." It works on her laptop. But only on her laptop.
+**Translation:** You start with a seed (a CLI tool that only Mei can use). You grow it into a car (a service anyone can call). Then a race car (it survives crashes). Then a rocket ship (the team can add new parts without you).
 
 ---
 
-## Phase 2: Core Build (the service)
+## 🌱 Phase 1 — The Seed (1 week)
 
 ```
-    WHAT YOU BUILD
-    ==============
+   ┌──────────────────────────────────────────────────────────┐
+   │  📧 Customer email                                      │
+   │  "Where is my parcel PF-1003?"                           │
+   └────────────────────┬─────────────────────────────────────┘
+                        │  Mei types it in
+                        ▼
+   ┌──────────────────────────────────────────────────────────┐
+   │  🐍 Mei's terminal                                      │
+   │  ┌────────────────────────────────────────────────┐      │
+   │  │  $ python3 drafter.py --shipment PF-1003       │      │
+   │  │                                                │      │
+   │  │  👉 reads shipments.json    (the tracker)      │      │
+   │  │  👉 reads style-guide.md    (how to talk)      │      │
+   │  │  👉 asks the LLM            (write a draft)    │      │
+   │  │  👉 prints the draft        (Mei copies it)    │      │
+   │  └────────────────────────────────────────────────┘      │
+   └────────────────────┬─────────────────────────────────────┘
+                        │  prints
+                        ▼
+   ┌──────────────────────────────────────────────────────────┐
+   │  ✉️  Draft: "Hi! Your parcel PF-1003 is in customs."      │
+   └──────────────────────────────────────────────────────────┘
 
-    Customer email: "Where is my parcel?"
-                    │
-                    ▼
-    ┌──────────────────────────────┐
-    │   FastAPI service            │  ◀── anyone on the team
-    │   (runs on Daniel's VM)      │      can call this now
-    │                              │      (no laptop needed)
-    │   GET  /health               │
-    │   POST /draft                │  ◀── the same Mei-call,
-    │   POST /retrieve             │      but over HTTP
-    │   POST /eval                 │  ◀── grades itself
-    └──────────────────────────────┘
-        │           │           │
-        │           │           │
-        ▼           ▼           ▼
-    ┌────────┐ ┌────────┐ ┌────────┐
-    │Mock    │ │Mock    │ │30-row  │
-    │LLM     │ │store   │ │eval    │
-    │back-   │ │(token  │ │set     │
-    │end     │ │overlap)│ │        │
-    └────────┘ └────────┘ └────────┘
-
-    YOU ALSO WRITE (the docs that justify the service):
-    • discovery-deck.md     (what we heard from the customer)
-    • pacificfreight-prd.md (what we're building)
-    • pacificfreight-design.md (how we're building it)
-    • 0001-fastapi.md ADR   (why FastAPI and not Flask)
-    • 0002-mock-store.md    (why a mock store and not Pinecone)
-    • 0003-regression-5%.md (why we trip on 5% drop)
-
-    AT THE END: 13/13 pytest cases pass. Service runs in Docker.
+   😟 Problem:  only Mei can use it.  It lives on her laptop.
+                When Mei is on vacation, the drafter doesn't exist.
 ```
 
-**The story:** Same drafter, but now wrapped in a web service. Anyone at PacificFreight can call it from their browser, not just Mei. The service has its own tests. The customer has the docs to read about why the service is built the way it is.
+**The motivation:** Mei is one person. If only she can use the drafter, only her customers get fast replies. The other 11 people at PacificFreight have to write every email by hand. **That's why we need Phase 2.**
 
 ---
 
-## Phase 3: Deployment (the safety net)
+## 🚗 Phase 2 — The Car (2 weeks)
 
 ```
-    WHAT CHANGES
-    ============
-
-    Customer email
-         │
-         ▼
-    ┌──────────────────────────────┐
-    │  FastAPI service (Phase 2)   │
-    │  + Phase 3 hardening:        │
-    │                              │
-    │  ⚡ /draft/stream     (SSE)  │  ◀── Mei sees the first
-    │  👍 /feedback         (rate) │      word in 200ms, not 1.8s
-    │  📊 /metrics     (Prometheus)│
-    │  🛡 /circuit/state    (live) │
-    └──────────────────────────────┘
-         │              │              │
-         │              │              │
-         ▼              ▼              ▼
-    ┌──────────┐  ┌──────────┐  ┌──────────┐
-    │ HYBRID   │  │ CIRCUIT  │  │  CADDY   │
-    │ RETRIEVER│  │ BREAKER  │  │ (TLS +   │
-    │          │  │          │  │  rate-   │
-    │ BM25 +   │  │ if OpenAI│  │  limit   │
-    │ dense +  │  │ is down  │  │  at the  │
-    │ RRF      │  │ for 30s, │  │  edge)   │
-    │          │  │ fall back│  │          │
-    │ beats    │  │ to last  │  │          │
-    │ the mock │  │ good     │  │          │
-    │ store    │  │ cached   │  │          │
-    │          │  │ answer   │  │          │
-    └──────────┘  └──────────┘  └──────────┘
-
-    OPS ARTIFACTS (the docs that survive the FDE's exit):
-    • runbook.md             "What to do at 2am"
-    • raci.md                "Who decides what"
-    • on-call-rotation.md    "Whose phone rings"
-
-    CONSULTING ARTIFACTS:
-    • stakeholder-map.md     3+1 audiences, decision matrix
-    • iteration-cadence.md   3-loop Mon daily/weekly/monthly
-    • 5-question handoff test  "FDE has left" — pass/fail
-
-    AT THE END: 13/13 pytest ✓. Survives an OpenAI outage.
-```
-
-**The story:** The service is now "production-grade." It has a safety net for when OpenAI goes down, a rate limiter so Mei can't accidentally burn $50, a PII redactor so customer emails don't leak into logs, a hybrid retriever that catches queries the mock store missed, and a feedback loop so Mei's thumbs-up/down flows back into next Monday's iteration. Plus three docs (runbook, RACI, on-call) that let a new FDE take over the engagement on day 1.
-
----
-
-## Phase 4: Capstone (the platform)
-
-```
-    WHAT YOU BUILD ON TOP
-    =====================
-
-    Phase 3 service
-         │
-         ├──── Project 1: MCP ──────────────┐
-         │     (Mei adds tools:              │
-         │      refund, translate,           │
-         │      escalate — without           │
-         │      re-deploying)                │
-         │                                  │
-         ├──── Project 2: Multi-agent ──────┤
-         │     (complex multi-shipment       │
-         │      cases handled by 3 agents:   │
-         │      Mei, Sarah, Daniel)          │
-         │                                  │
-         └──── Project 3: Distilled SLM ─────┤
-               (Qwen 1.5B trained on          │
-                Mei's drafts, 5% of GPT's      │
-                cost, 91% of its quality)      │
-                                              │
-         ┌──── Project 4: Fresh engagement ──┤
-         │     (a NEW customer, a NEW        │
-         │      domain — the AI Data         │
-         │      Analyst, code sandbox)       │
-         │                                  │
-         ├──── 5 case studies ──────────────┤
-         │     (PF drafter, PIVOT, postmortem,│
-         │      SLM cost, handoff)            │
-         │                                  │
-         └──── Portfolio + capstone demo ───┘
-               (the 10-min presentation to
-                the evaluation panel)
-```
-
-**The story:** Phase 3 made the service survive the customer. Phase 4 makes the service a **platform** the team can extend without the FDE. MCP means new tools can be added without re-deploying. Multi-agent means complex cases (multi-shipment) are handled end-to-end. The SLM means the cost ceiling stays at $5/month even at 10× growth. Project 4 (the AI Data Analyst) is a fresh engagement — a new customer, a new domain — to prove the FDE pattern transfers. The 5 case studies + portfolio + capstone presentation are the artifacts the FDE takes to a job interview.
-
----
-
-## Why this matters (the FDE lens)
-
-```
-    MOST AI PROJECTS DIE HERE:
-    ══════════════════════════
-
-    ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐
-    │ Demo │ ─▶ │ Pilot│ ─▶ │ "Who │ ─▶ │ ...  │
-    │ works│    │ works│    │ owns │    │ dead │
-    └──────┘    └──────┘    │this?"│    └──────┘
-                            └──────┘
-                                │
+                    ┌────────────────────────┐
+                    │  📧 Customer email     │
+                    │  "Where is my parcel?"  │
+                    └───────────┬────────────┘
+                                │  HTTP POST
                                 ▼
-                          (no answer)
-                                │
-                                ▼
-                          (no one runs it)
-                                │
-                                ▼
-                          (it dies)
+   ┌────────────────────────────────────────────────────────┐
+   │  🚗  FastAPI service  (runs on Daniel's VM)            │
+   │                                                        │
+   │   🟢 GET  /health        ← "are you alive?"           │
+   │   📨 POST /draft         ← "write me a draft"         │
+   │   🔍 POST /retrieve      ← "find the right chunks"    │
+   │   📊 POST /eval          ← "grade yourself"           │
+   │                                                        │
+   │   (anyone at PacificFreight can call this)             │
+   └────┬──────────────┬──────────────┬────────────────────┘
+        │              │              │
+        ▼              ▼              ▼
+   ┌─────────┐   ┌─────────┐   ┌──────────┐
+   │ 🤖 Mock │   │ 📚 Mock │   │ 📋 30-row │
+   │  LLM    │   │  store  │   │  eval set │
+   │         │   │         │   │           │
+   │ "I'm a  │   │ "I find │   │ "you got  │
+   │  fake   │   │  the    │   │  78%      │
+   │  AI"    │   │  right  │   │  right!"  │
+   │         │   │  stuff" │   │           │
+   └─────────┘   └─────────┘   └──────────┘
 
+   📄 You also write 6 documents:
+   ┌────────────────────────────────────────────┐
+   │ 📋 discovery-deck.md     (what we heard)   │
+   │ 📋 pacificfreight-prd.md (what to build)  │
+   │ 📋 design-doc.md         (how to build)   │
+   │ 📋 ADR-0001-fastapi.md   (why FastAPI)    │
+   │ 📋 ADR-0002-mock-store.md(why mock store) │
+   │ 📋 ADR-0003-regression.md(why 5% trip)    │
+   └────────────────────────────────────────────┘
 
-    THIS COURSE TEACHES YOU TO GO HERE INSTEAD:
-    ════════════════════════════════════════════
-
-    ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐
-    │ Demo │ ─▶ │ Pilot│ ─▶ │Prod  │ ─▶ │Plat- │ ─▶ │Exit  │
-    │ works│    │ works│    │grade │    │form  │    │clean │
-    └──────┘    └──────┘    └──────┘    └──────┘    └──────┘
-       │           │           │           │           │
-    Phase 1     Phase 2     Phase 3     Phase 4     handoff
-    foun-       core        deploy-     cap-        test
-    dations     build       ment        stone       passes
+   ✅ End of Phase 2:  13/13 pytest cases pass.
+   🎉 The car drives!
 ```
 
-**The story:** Most AI projects die at "Who owns this?" because no one wrote the runbook. This course teaches you to write the runbook, the RACI, the iteration cadence, the 5-question handoff test. By the end, the customer can fire you and the system keeps running. **That is the FDE's job.**
+**The motivation:** Now the drafter is a car, not a seed. Anyone at the company can ride in it. It has 4 doors (endpoints) and seatbelts (tests). The 6 documents are the owner's manual — when a new engineer joins, they read the manual and know how the car works.
 
 ---
 
-## How long does the whole course take?
+## 🏎️ Phase 3 — The Race Car (2 weeks)
 
-| Phase | What | Time |
-|---|---|---|
-| 1 | Foundations (CLI + brief) | 1 week |
-| 2 | Core Build (service + docs) | 2 weeks |
-| 3 | Deployment (production) | 2 weeks |
-| 4 | Capstone (platform + portfolio) | 4 weeks |
-| **Total** | | **~9 weeks** |
+The car drives. But what if the road is bad? What if the engine catches fire? **Phase 3 adds the safety gear.**
 
-That's about 2 months full-time, or 4-5 months part-time. By the end, you have: a working service, a portfolio of 4 projects, 5 case studies, and a capstone presentation. Enough to walk into a job interview and say "I build AI services that survive the customer."
+```
+   Same Phase 2 service, but now with safety gear bolted on:
+
+   ┌─────────────────────────────────────────────────────────┐
+   │  🏎️  Hardened FastAPI service                           │
+   │                                                         │
+   │   ⚡ /draft/stream   ← Mei sees the first word in 200ms │
+   │   👍 /feedback       ← Mei says "good" or "bad"         │
+   │   📈 /metrics        ← Prometheus counters             │
+   │   🛡️  /circuit/state  ← "is the engine on fire?"        │
+   └────┬──────────────┬──────────────┬──────────────────────┘
+        │              │              │
+        ▼              ▼              ▼
+
+   ┌────────────┐  ┌────────────┐  ┌────────────┐
+   │ 🧠 HYBRID  │  │ 🔌 CIRCUIT │  │ 🛡️  CADDY  │
+   │  RETRIEVER │  │  BREAKER   │  │  (TLS +    │
+   │            │  │            │  │  edge rate │
+   │ BM25 ✚    │  │ If OpenAI  │  │  limiting) │
+   │ dense ✚   │  │ is down    │  │            │
+   │ RRF merge │  │ for 30s,   │  │ Encrypts   │
+   │            │  │ use the    │  │ traffic    │
+   │ beats the  │  │ cached     │  │ + blocks   │
+   │ mock store │  │ last-good  │  │ bad guys   │
+   │ on real    │  │ answer     │  │ at the     │
+   │ queries    │  │ (no 503!)  │  │ door       │
+   └────────────┘  └────────────┘  └────────────┘
+
+   📄 You also write 3 ops docs (the race team):
+   ┌─────────────────────────────────────────────────┐
+   │ 📕 runbook.md           "what to do at 2am"     │
+   │ 📋 raci.md              "who decides what"      │
+   │ 📞 on-call-rotation.md  "whose phone rings"     │
+   └─────────────────────────────────────────────────┘
+
+   📄 And 3 consulting docs (the racing strategy):
+   ┌─────────────────────────────────────────────────┐
+   │ 👥 stakeholder-map.md   Mei/Sarah/Daniel + exec │
+   │ 🔄 iteration-cadence.md Mon daily/week/month    │
+   │ 🪪 5-question handoff   "FDE has left" — pass?  │
+   └─────────────────────────────────────────────────┘
+
+   ✅ End of Phase 3:  13/13 pytest still pass.
+   🏁 The race car has seatbelts, airbags, and a pit crew.
+```
+
+**The motivation:** When OpenAI goes down (it will), the drafter doesn't crash — it shows Mei the last good answer. When Mei's email has a customer's phone number, it doesn't leak into the logs. When Mei accidentally loops the drafter 1000 times, the rate limiter says "no more, that would cost $50." The 3 ops docs are the **pit crew** — when something breaks, the customer can fix it without you.
+
+---
+
+## 🚀 Phase 4 — The Rocket Ship (4 weeks)
+
+Now the drafter is a race car. **But what if the team wants to add new features?** A new tool? A new agent? A new cheaper engine? **Phase 4 turns the car into a rocket ship that the team can re-build without you.**
+
+```
+   The Phase 3 race car is now a rocket ship with 4 new modules bolted on:
+
+                  ┌──────────────────────────┐
+                  │  🚀 Phase 4 Rocket       │
+                  │                          │
+                  │   Phase 3 service        │
+                  │       +                  │
+                  │   4 new modules:         │
+                  └──────┬───────────────────┘
+                         │
+        ┌────────────────┼────────────────┬──────────────────┐
+        │                │                │                  │
+        ▼                ▼                ▼                  ▼
+
+   ┌──────────┐    ┌──────────┐    ┌──────────┐       ┌──────────┐
+   │ 🔧 MCP   │    │ 🤖 AGENT │    │ 🧠 SLM   │       │ 📊 DATA  │
+   │  server  │    │  squad   │    │  trained │       │  analyst │
+   │          │    │          │    │  by you  │       │          │
+   │ Mei adds │    │ 3 agents │    │          │       │ A NEW    │
+   │ new tools│    │ handle   │    │ Qwen 1.5B│       │ customer,│
+   │ without  │    │ complex  │    │ trained  │       │ a NEW    │
+   │ redeploy-│    │ multi-   │    │ on Mei's │       │ domain — │
+   │ ing:     │    │ shipment │    │ 4 weeks  │       │ proves   │
+   │          │    │ cases    │    │ of       │       │ the FDE  │
+   │ • refund │    │          │    │ drafts   │       │ pattern  │
+   │ • trans- │    │ • Mei    │    │          │       │ transfers│
+   │   late   │    │ • Sarah  │    │ 5% of    │       │          │
+   │ • escalate   │ • Daniel │    │ GPT cost │       │ • sandbox│
+   │          │    │          │    │ 91% qual │       │ • block- │
+   │ (no eng  │    │ (each has│    │          │       │   list   │
+   │  needed) │    │  own     │    │ (the cost│       │ • new    │
+   │          │    │  circuit)│    │  ceiling │       │   design │
+   │          │    │          │    │  stays!) │       │   doc    │
+   └──────────┘    └──────────┘    └──────────┘       └──────────┘
+
+   📚 And 5 case studies (the lessons learned):
+   ┌────────────────────────────────────────────────────────┐
+   │ 📖 engagement-1-pf-drafter.md    the whole story      │
+   │ 📖 engagement-2-pivot.md         "we said NO"         │
+   │ 📖 engagement-3-postmortem.md    "the 10-min outage"  │
+   │ 📖 engagement-4-slm-cost.md      "5% cost, 91% qual"  │
+   │ 📖 engagement-5-handoff.md       "FDE has left" test  │
+   └────────────────────────────────────────────────────────┘
+
+   🎤 And 1 capstone presentation:
+   ┌────────────────────────────────────────────────────────┐
+   │ 🎬 7 slides, 10 minutes, live demo to the panel       │
+   │                                                        │
+   │  1. the FDE pattern              (1 min)               │
+   │  2. PF drafter live demo         (3 min)               │
+   │  3. MCP server live demo         (2 min)               │
+   │  4. multi-agent trace            (1 min)               │
+   │  5. SLM cost model               (1 min)               │
+   │  6. 5-question handoff test      (1 min)               │
+   │  7. what I'd do differently      (1 min)               │
+   └────────────────────────────────────────────────────────┘
+
+   ✅ End of Phase 4:  25/25 pytest pass.
+   🌍 The rocket flies itself.
+```
+
+**The motivation:** The car was great, but it only had one engine. The rocket has 4 engines, and the team can add a 5th without calling the engineer who built it. The SLM is the cheap engine — it costs 5% of the expensive one and does 91% as well. The data analyst is a new rocket for a new customer — proves the same design works for someone else.
+
+---
+
+## 🎯 The big "WHY" (one picture)
+
+```
+   Most AI projects die here.                  This course takes you here.
+   ════════════════════════                    ═════════════════════════
+
+       📺 DEMO                                       📺 DEMO
+        │ works                                       │ works
+        ▼                                             ▼
+       🧪 PILOT                                      🧪 PILOT
+        │ works                                       │ works
+        ▼                                             ▼
+       😱 "WHO OWNS                                🏭 PRODUCTION
+        │  THIS?"                                    │ service
+        ▼                                            ▼
+       🪦 nobody                  ───────▶         📕 RUNBOOK
+        │  the project                             📋 RACI
+        ▼  dies                                     📞 ON-CALL
+       💀 dead                                      │
+                                                    ▼
+                                                  ✅ 5-question
+                                                     handoff test
+                                                    │
+                                                    ▼
+                                                  🚪 FDE exits.
+                                                     System keeps
+                                                     running.
+                                                     🎉
+```
+
+**The story in one line:** Most AI projects die because nobody wrote the runbook. This course makes you write the runbook, the RACI, the on-call rotation, the handoff test. By the end, the customer can fire you tomorrow and the system runs without you. **That is the FDE's job — to make themselves unnecessary.**
+
+---
+
+## ⏱️ How long does the whole course take?
+
+```
+   ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+   │ PHASE 1 │    │ PHASE 2 │    │ PHASE 3 │    │ PHASE 4 │
+   │  🌱     │    │  🚗     │    │  🏎️     │    │  🚀     │
+   │         │    │         │    │         │    │         │
+   │  1 wk   │ ─▶ │  2 wks  │ ─▶ │  2 wks  │ ─▶ │  4 wks  │
+   │         │    │         │    │         │    │         │
+   │  ~300   │    │  ~600   │    │ ~1500   │    │ ~3000   │
+   │  lines  │    │  lines  │    │  lines  │    │  lines  │
+   └─────────┘    └─────────┘    └─────────┘    └─────────┘
+        │              │              │              │
+        └──────────────┴──────────────┴──────────────┘
+                              │
+                              ▼
+                    ⏱️  ~9 weeks total
+                    📦  ~5400 lines of code
+                    📄  ~25 documents
+                    🎯  25/25 tests pass
+                    🎤  1 capstone presentation
+```
+
+That's about **2 months full-time** or **4-5 months part-time**. By the end, you have a working service, a portfolio of 4 projects, 5 case studies, and a demo you can show in a job interview. Enough to walk in and say: **"I build AI services that survive the customer."**
