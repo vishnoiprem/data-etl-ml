@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard — AIForBiz</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">AI<span>ForBiz</span></a>
+      <div>
+        <a href="/">Home</a>
+        <a href="/prompts">Prompts</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>🔒 Admin Dashboard</h1>
+    <p class="lede">All your business metrics in one place.</p>
+
+    <div class="stats" id="stats"></div>
+
+    <section class="card">
+      <h2>📧 Email Signups (<span id="signup-count">0</span>)</h2>
+      <table id="signups-table">
+        <thead><tr><th>ID</th><th>Email</th><th>Name</th><th>Source</th><th>When</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>💰 Sales (<span id="sales-count">0</span>)</h2>
+      <table id="sales-table">
+        <thead><tr><th>ID</th><th>Email</th><th>Product</th><th>Amount</th><th>When</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <p class="cta-link"><a href="/admin/api/signups" target="_blank">View raw signups JSON</a> · <a href="/admin/api/sales" target="_blank">View raw sales JSON</a></p>
+  </main>
+
+  <script>
+    async function loadStats() {
+      const res = await fetch('/admin/api/stats');
+      const s = await res.json();
+      document.getElementById('stats').innerHTML = `
+        <div class="stat"><strong>${s.total_signups}</strong><span>Signups</span></div>
+        <div class="stat"><strong>${s.total_sales}</strong><span>Sales</span></div>
+        <div class="stat"><strong>$${s.total_revenue}</strong><span>Revenue</span></div>
+        <div class="stat"><strong>${s.conversion_rate.toFixed(1)}%</strong><span>Conversion</span></div>
+        <div class="stat"><strong>$${s.average_order_value.toFixed(0)}</strong><span>AOV</span></div>
+      `;
+    }
+
+    async function loadSignups() {
+      const res = await fetch('/admin/api/signups');
+      const signups = await res.json();
+      document.getElementById('signup-count').textContent = signups.length;
+      const tbody = document.querySelector('#signups-table tbody');
+      tbody.innerHTML = signups.map(s => `
+        <tr>
+          <td>${s.id}</td>
+          <td>${s.email}</td>
+          <td>${s.name || '-'}</td>
+          <td>${s.source}</td>
+          <td>${new Date(s.timestamp).toLocaleString()}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="5">No signups yet</td></tr>';
+    }
+
+    async function loadSales() {
+      const res = await fetch('/admin/api/sales');
+      const data = await res.json();
+      document.getElementById('sales-count').textContent = data.count;
+      const tbody = document.querySelector('#sales-table tbody');
+      tbody.innerHTML = data.sales.map(s => `
+        <tr>
+          <td>${s.id}</td>
+          <td>${s.email}</td>
+          <td>${s.product_name}</td>
+          <td>$${s.amount}</td>
+          <td>${new Date(s.timestamp).toLocaleString()}</td>
+        </tr>
+      `).join('') || '<tr><td colspan="5">No sales yet</td></tr>';
+    }
+
+    loadStats();
+    loadSignups();
+    loadSales();
+
+    // Auto-refresh every 10 seconds
+    setInterval(() => { loadStats(); loadSignups(); loadSales(); }, 10000);
+  </script>
+</body>
+</html>
