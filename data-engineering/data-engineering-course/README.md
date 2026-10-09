@@ -1,10 +1,17 @@
-# System Design Course — Read-Heavy Systems
+# System Design Course — Full Curriculum
 
-A **fully working, runnable** System Design course covering 6 read-heavy systems.
-Every module includes a design document, a working Python implementation, and
-unit tests you can run end-to-end on your laptop.
+A **fully working, runnable** System Design course covering **71 lessons across
+11 modules**. Every system includes a design document, a working Python
+implementation, and unit tests you can run end-to-end on your laptop.
 
-> **Course format:** 6 lessons · 4 videos · ~6–10 hours of hands-on work.
+> **Course format:** 71 lessons · 32 videos · ~18 hours of hands-on work.
+>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi)
+>
+> **Companion reading:** [data-engineering-course/data-engineering-course on Medium](https://medium.com/@premvishnoi)
+>
+> Inspired by the system design curriculum taught at top engineering
+> organizations; fully implemented so you can run every system on your laptop.
 
 ## What you will build
 

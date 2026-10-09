@@ -170,39 +170,70 @@ def transform_code_cell(src: str) -> str:
     return "\n".join(out)
 
 
-def inject_helper_import(nb: dict) -> None:
-    """Insert the import cell as the first code cell (after any leading markdown)."""
-    # Find first code cell index
+def inject_helper_import(nb) -> None:
+    """Insert the import cell as the first code cell (after any leading markdown).
+
+    Works with both nbformat NotebookNode and raw dict.
+    """
+    # Detect attribute-style (nbformat) vs dict-style
+    if hasattr(nb.cells[0], "cell_type"):
+        cells = nb.cells
+    else:
+        cells = nb["cells"]
     first_code = 0
-    for i, c in enumerate(nb["cells"]):
-        if c["cell_type"] == "code":
+    for i, c in enumerate(cells):
+        ct = c.cell_type if hasattr(c, "cell_type") else c["cell_type"]
+        if ct == "code":
             first_code = i
             break
-    # Build new cell
-    new_cell = {
-        "cell_type": "code",
-        "execution_count": None,
-        "metadata": {},
-        "outputs": [],
-        "source": [NB_HELPERS_IMPORT],
-    }
-    nb["cells"].insert(first_code, new_cell)
+    if hasattr(nb, "cells"):
+        # nbformat
+        from nbformat.v4 import new_code_cell
+        new_cell = new_code_cell(source=NB_HELPERS_IMPORT)
+        cells.insert(first_code, new_cell)
+    else:
+        # raw dict
+        new_cell = {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": NB_HELPERS_IMPORT,
+        }
+        cells.insert(first_code, new_cell)
 
 
 def transform_notebook_inplace(path: Path) -> None:
-    """Transform a single notebook in place."""
+    """Transform a single notebook in place. Uses nbformat to avoid double-escaping."""
+    try:
+        import nbformat  # type: ignore
+        from nbformat import read as nb_read, write as nb_write
+    except ImportError:
+        nbformat = None
+    if nbformat is not None:
+        nb = nb_read(path, as_version=4)
+        # 1. Inject the import cell
+        inject_helper_import(nb)
+        # 2. Transform all OTHER code cells (skip the just-injected one)
+        for c in list(nb.cells)[1:]:
+            if c.cell_type == "code":
+                new_src = transform_code_cell(c.source)
+                c.source = new_src
+        # 3. Clear all existing outputs (so re-execution regenerates them)
+        for c in nb.cells:
+            if c.cell_type == "code":
+                c.outputs = []
+                c.execution_count = None
+        nb_write(nb, path)
+        return
+    # Fallback: pure JSON (dict-style)
     nb = json.loads(path.read_text(encoding="utf-8"))
-    # 1. Inject the import cell
     inject_helper_import(nb)
-    # 2. Transform all OTHER code cells (skip the just-injected one)
     for c in nb["cells"][1:]:
         if c["cell_type"] == "code":
             src = "".join(c["source"]) if isinstance(c["source"], list) else c["source"]
             new_src = transform_code_cell(src)
-            c["source"] = new_src.splitlines(keepends=True)
-            if c["source"] and not c["source"][-1].endswith("\n"):
-                c["source"][-1] += "\n"
-    # 3. Clear all existing outputs (so re-execution regenerates them)
+            c["source"] = new_src
     for c in nb["cells"]:
         if c["cell_type"] == "code":
             c["outputs"] = []
