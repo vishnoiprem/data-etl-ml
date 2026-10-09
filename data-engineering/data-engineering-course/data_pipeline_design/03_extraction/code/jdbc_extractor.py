@@ -14,7 +14,7 @@ Both extractors use a pluggable ``watermark_store`` (a dict in
 tests, a real database in production) so the watermark survives
 restarts.
 
-Author: Prem Vishnoi <prem.vishnoi.example.com>
+Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
 
 from __future__ import annotations

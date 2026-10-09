@@ -17,7 +17,7 @@ The model SQL is intentionally explicit (no Jinja, no ``ref``)
 so it can be read top-to-bottom by someone who has never used
 dbt.
 
-Author: Prem Vishnoi <prem.vishnoi.example.com>
+Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
 
 from __future__ import annotations

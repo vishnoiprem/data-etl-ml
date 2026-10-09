@@ -18,7 +18,11 @@ def solve_invert_tree(root):
 
 
 if __name__ == "__main__":
+    import os
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from _tree_helpers import from_level_order  # type: ignore
+    from p65_level_order import solve_level_order  # type: ignore
     root = from_level_order([4, 2, 7, 1, 3, 6, 9])
     inv = solve_invert_tree(root)
     print(solve_level_order(inv))  # [[4], [7, 2], [9, 6, 3, 1]]

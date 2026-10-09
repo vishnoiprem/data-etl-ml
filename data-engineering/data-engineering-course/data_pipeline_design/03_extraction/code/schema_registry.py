@@ -13,7 +13,7 @@ The registry stores the latest schema per topic. ``check_compatibility``
 rejects non-backward-compatible changes. ``check_contract`` validates
 a sample row against the latest schema.
 
-Author: Prem Vishnoi <prem.vishnoi.example.com>
+Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
 
 from __future__ import annotations

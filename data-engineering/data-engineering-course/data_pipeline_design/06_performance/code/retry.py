@@ -15,7 +15,7 @@ Usage::
     def pickier():
         ...
 
-Author: Prem Vishnoi <prem.vishnoi.example.com>
+Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
 
 from __future__ import annotations

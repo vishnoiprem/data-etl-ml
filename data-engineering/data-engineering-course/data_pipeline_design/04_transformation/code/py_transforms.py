@@ -9,7 +9,7 @@ This module provides tiny, dependency-free helpers that work on
 plain ``list[dict]`` inputs. The same patterns work in pandas
 or PySpark with minimal changes.
 
-Author: Prem Vishnoi <prem.vishnoi.example.com>
+Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
 
 from __future__ import annotations

@@ -123,13 +123,13 @@ data-engineering-course/
 │   ├── README.md
 │   └── exercise.md
 │
-├── sql_interviews/                 # Track 10: 9 modules, 45 lessons
-│   ├── 01_overview/                # 4 lessons
-│   ├── 02_fast_track/              # 10 lessons
-│   ├── 03_basic_querying/          # 9 lessons
-│   ├── 04_aggregations/            # 8 lessons
-│   ├── 05_joins/                   # 9 lessons
-│   ├── 06_window_functions/        # 5 lessons
+├── sql_interviews/                 # Track 10: 9 modules, 98 lessons
+│   ├── 01_overview/                # 3 lessons
+│   ├── 02_fast_track/              # 9 lessons
+│   ├── 03_basic_querying/          # 8 lessons
+│   ├── 04_aggregations/            # 7 lessons
+│   ├── 05_joins/                   # 8 lessons
+│   ├── 06_window_functions/        # 4 lessons
 │   ├── 07_easy_practice/           # 14 problems + tests
 │   ├── 08_medium_practice/         # 31 problems + tests
 │   ├── 09_hard_practice/           # 14 problems + tests

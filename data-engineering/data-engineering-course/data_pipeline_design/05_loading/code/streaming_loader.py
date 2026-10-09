@@ -14,7 +14,7 @@ The pattern:
 The in-memory broker is for tests and demos. In production
 this is Kafka / Kinesis / Pub/Sub.
 
-Author: Prem Vishnoi <prem.vishnoi.example.com>
+Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
 
 from __future__ import annotations

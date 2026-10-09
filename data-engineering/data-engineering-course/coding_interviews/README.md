@@ -54,7 +54,7 @@ python3 -m unittest discover -s coding_interviews/04_arrays/tests -v
 
 - Function signature: `def solve_X(input) -> output`
 - Docstring includes 1-line description + complexity
-- Each file is self-contained (stdlib only) — no shared module beyond `common.analytics`
+- Each file is self-contained (stdlib only) — no shared module beyond standard library
 - Variable names are spelled out (`left`, `right`, `mid` — never `l`, `r`, `m`)
 - Comments on non-obvious steps; alternatives noted when relevant
 
