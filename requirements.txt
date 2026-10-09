@@ -4,7 +4,7 @@
 urllib3==2.8.0
 pyjwt==2.10.1
 werkzeug==3.1.9
-starlette==0.41.0
+starlette==1.7.0
 python-multipart==0.0.20
 anyio==4.14.2
 soupsieve==2.7
