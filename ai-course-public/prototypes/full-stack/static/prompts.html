@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Free AI Prompts — AIForBiz</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">AI<span>ForBiz</span></a>
+      <div>
+        <a href="/">Home</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/admin">Admin</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>🧰 Free AI Prompts for Your Business</h1>
+    <p class="lede">Pick a category, fill in the blanks, get a ready-to-use prompt.</p>
+
+    <div class="prompt-tool">
+      <div class="form-section">
+        <label>Category</label>
+        <select id="category"></select>
+
+        <label>Prompt</label>
+        <select id="prompt-title"></select>
+
+        <div id="inputs"></div>
+
+        <button id="generate">Generate Prompt</button>
+      </div>
+
+      <div class="output-section">
+        <h3>Your prompt:</h3>
+        <pre id="output">Pick a category and fill in the form to generate a prompt.</pre>
+        <button id="copy" class="copy-btn">📋 Copy to Clipboard</button>
+      </div>
+    </div>
+
+    <p class="cta-link"><a href="/pricing">→ Want the full course with 100+ prompts? See pricing</a></p>
+  </main>
+
+  <script>
+    let allPrompts = {};
+
+    async function loadPrompts() {
+      const res = await fetch('/api/prompts');
+      allPrompts = await res.json();
+      const catSelect = document.getElementById('category');
+      catSelect.innerHTML = Object.keys(allPrompts).map(c =>
+        `<option value="${c}">${c.replace('_', ' ')}</option>`
+      ).join('');
+      catSelect.dispatchEvent(new Event('change'));
+    }
+
+    document.getElementById('category').addEventListener('change', (e) => {
+      const cat = e.target.value;
+      const titleSelect = document.getElementById('prompt-title');
+      titleSelect.innerHTML = allPrompts[cat].map(p =>
+        `<option value="${p.title}">${p.title}</option>`
+      ).join('');
+      titleSelect.dispatchEvent(new Event('change'));
+    });
+
+    document.getElementById('prompt-title').addEventListener('change', async (e) => {
+      const cat = document.getElementById('category').value;
+      const title = e.target.value;
+      const res = await fetch(`/api/prompts/${cat}/${encodeURIComponent(title)}`);
+      const data = await res.json();
+      // Find variables in {var_name} format
+      const vars = [...data.prompt.matchAll(/\{(\w+)\}/g)].map(m => m[1]);
+      const uniqueVars = [...new Set(vars)];
+      document.getElementById('inputs').innerHTML = uniqueVars.map(v =>
+        `<label>${v.replace('_', ' ')}</label>
+         <input id="var-${v}" placeholder="e.g. online clothing store">`
+      ).join('');
+      // Store template
+      document.getElementById('inputs').dataset.template = data.prompt;
+    });
+
+    document.getElementById('generate').addEventListener('click', async () => {
+      const cat = document.getElementById('category').value;
+      const title = document.getElementById('prompt-title').value;
+      const inputs = document.querySelectorAll('#inputs input');
+      const params = new URLSearchParams();
+      inputs.forEach(i => {
+        if (i.value) params.append(i.id.replace('var-', ''), i.value);
+      });
+      const res = await fetch(`/api/prompts/${cat}/${encodeURIComponent(title)}?${params}`);
+      const data = await res.json();
+      document.getElementById('output').textContent = data.prompt;
+    });
+
+    document.getElementById('copy').addEventListener('click', () => {
+      const text = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(text);
+      event.target.textContent = '✅ Copied!';
+      setTimeout(() => event.target.textContent = '📋 Copy to Clipboard', 2000);
+    });
+
+    loadPrompts();
+  </script>
+</body>
+</html>
