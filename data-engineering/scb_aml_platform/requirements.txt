@@ -28,7 +28,7 @@ notebook==7.0.0
 # ── Core Data Processing
 pyspark==3.3.2
 pandas==2.0.3
-numpy==1.24.4
+numpy==2.2.6
 pyarrow==12.0.1
 
 # ── Fuzzy Matching / Entity Resolution
