@@ -7,4 +7,4 @@ llama-index-embeddings-huggingface>=0.2.2,<0.3
 sentence-transformers>=3.0,<4
 wikipedia>=1.4,<2
 PyYAML>=6,<7
-pydantic>=2.7,<3
+pydantic>=2.13.5,<3
