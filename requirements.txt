@@ -2,14 +2,14 @@
 # Pinned transitively; do not remove without re-running pip-audit.
 # See docs/SECURITY_AUDIT.md for the upstream CVEs.
 urllib3==2.8.0
-pyjwt==2.10.1
+pyjwt==2.15.1
 werkzeug==3.1.9
 starlette==0.41.0
-python-multipart==0.0.20
-anyio==4.14.2
-soupsieve==2.7
+python-multipart==0.0.32
+anyio==4.15.1
+soupsieve==2.10
 multidict==6.7.0
-mistune==3.1.0
+mistune==3.3.4
 
 # Core Data Science
 pandas>=2.2.3
@@ -18,11 +18,11 @@ scikit-learn>=1.5.0
 
 # Machine Learning
 xgboost==2.0.3
-imbalanced-learn==0.12.0
-shap==0.45.0
+imbalanced-learn==0.14.2
+shap==0.49.1
 
 # Deep Learning - Updated to current TensorFlow
-tensorflow==2.20.0
+tensorflow==2.21.0
 # Note: tf-keras is now integrated into TensorFlow 2.20.0
 
 # PyTorch Ecosystem
@@ -45,21 +45,21 @@ distributed==2024.5.1
 # Vector Databases
 pinecone-client==3.2.0
 chromadb==0.4.22
-faiss-cpu==1.8.0
+faiss-cpu==1.15.1
 
 # Web Framework
-fastapi==0.115.6
+fastapi==0.142.2
 uvicorn>=0.32.0
-streamlit>=1.32.0
+streamlit>=1.65.0
 
 # Infrastructure
 redis>=5.0.0
-python-dotenv==1.0.0
+python-dotenv==1.2.4
 protobuf>=5.27.0
 
 # Visualization
 matplotlib>=3.9.0
-seaborn==0.13.0
+seaborn==0.13.2
 plotly==5.15.0
 
 # Development
