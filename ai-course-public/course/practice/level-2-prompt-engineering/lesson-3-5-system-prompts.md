@@ -1,0 +1,141 @@
+# Lesson 3.5: System Prompts That Work
+
+> **Anatomy of a great system prompt. Persona, capabilities, constraints. Customer service bot.**
+> 20 min. Code: System prompt design + quality scoring.
+
+## 🎯 Architect Level
+
+- [ ] 🟢 **Junior (1-2 yrs)** — implement and run
+- [ ] 🟡 **Mid (3-5 yrs)** — extend with monitoring
+- [ ] 🟠 **Senior (6-10 yrs)** — add multi-tenancy
+- [ ] 🔴 **Staff (10+ yrs)** — design the SLA, capacity model, incident playbook
+
+> *Picking the right level is a one-time decision per lab. Pick the highest level you can honestly complete. Move up next time.*
+
+---
+
+## 🧠 Concept (5 min)
+
+A system prompt is **configuration, not instruction**. It sets who the model is and what it can do. Anatomy of a great system prompt: (1) **Persona** -- 'You are a customer service agent for Acme Corp.' (2) **Capabilities** -- 'You can look up orders, process refunds, and escalate to a human.' (3) **Constraints** -- 'Never share other customers' data. Never promise a refund without checking the order status. Always be polite.' (4) **Output format** -- 'Use the customer's name. Keep responses under 100 words. Use bullet points for steps.' (5) **Examples** -- 2-3 short example interactions. Length matters: 200-1000 tokens is the sweet spot. Too short (<50) gives a generic assistant. Too long (>2000) hits context-window cost without quality gain. Claude and GPT-4o respond well to structured system prompts with markdown headers.
+
+---
+
+## 🛠️ Build It (45 min)
+
+### Spec
+
+Build a customer service bot system prompt: (1) write a 300-token system prompt for an e-commerce support bot, (2) include persona, capabilities, constraints, output format, and 3 examples, (3) test it against 5 user queries (refund, shipping, complaint, product question, escalation), (4) score the responses on a rubric.
+
+### Acceptance Criteria
+
+**Functional:**
+- [ ] Program runs without errors (mocked APIs so no key required)
+- [ ] All TODO functions have a working implementation
+- [ ] Demo function exercises the full flow
+- [ ] At least one structured output (dict, dataclass, or Pydantic model)
+
+**Quality:**
+- [ ] All functions have docstrings
+- [ ] Code is readable in <5 minutes
+- [ ] No magic numbers — use named constants
+- [ ] Type hints on all public functions
+
+**Observability (Mid+):**
+- [ ] Logs every significant operation
+- [ ] Tracks token usage and cost where applicable
+- [ ] For Senior+: handles concurrency / multi-tenant isolation
+
+### Starter Code
+
+Open `lesson-3-5-system-prompts.py` in the same folder. It has a `TODO` per step.
+
+### Solution
+
+The same `.py` file has the complete solution after the `# === SOLUTION ===` divider. Run the file; the starter section runs first and demonstrates the concept, then the solution section shows a production-grade version.
+
+---
+
+## 🏛️ Architect Notes
+
+### Trade-offs
+
+| Choice | Pros | Cons | Pick when |
+|---|---|---|---|
+| Mock everything (this lab) | Runs anywhere, no API key, no cost | Doesn't catch real-API issues | Learning, CI, demos |
+| Real API (gpt-4o-mini) | Real quality, real latency, real cost | Needs key, costs money, flakes in CI | Final integration testing |
+| Hybrid (mock + real) | Best of both — fast iteration, real validation | More code to maintain | Production codebases |
+| Snapshot tests (vcr.py) | Deterministic, replay real API responses | Stale recordings | CI for LLM apps |
+
+**Architect insight:** The mock-first approach lets you iterate 10x faster in the design phase. Move to real API only when the design is stable.
+
+### Capacity Model
+
+| Volume | Latency p50 | Latency p99 | Cost/day | Notes |
+|---|---|---|---|---|
+| 1 req | <100ms | <500ms | $0 | Single-threaded mock |
+| 100 req/min | <200ms | <1s | ~$0.10 | Async I/O, in-memory state |
+| 10K req/min | <500ms | <3s | ~$10 | Connection pool, rate limiting |
+| 100K req/min | <1s | <5s | ~$100 | Distributed, queue, monitoring |
+
+**Rule of thumb:** Mock-based systems are CPU-bound; real LLM calls are network-bound. Plan for the network bound case from day one.
+
+### Cost Model (per 1M tokens, 2026)
+
+| Model | Input ($/1M tokens) | Output ($/1M tokens) |
+|---|---|---|
+| GPT-4o | $5.00 | $15.00 |
+| GPT-4o-mini | $0.15 | $0.60 |
+| Claude 3.5 Sonnet | $3.00 | $15.00 |
+| Claude 3.5 Haiku | $0.80 | $4.00 |
+| Gemini 1.5 Pro | $1.25 | $5.00 |
+| Gemini 1.5 Flash | $0.075 | $0.30 |
+| Llama 3 70B (self-hosted) | $0.10 | $0.10 |
+
+### When NOT to use this lab's content
+
+**Don't ship a mock to production.** The mock is for learning. The patterns and architecture translate, but the actual LLM calls need real keys, real rate limits, real error handling.
+
+**Don't over-engineer the abstraction.** A wrapper class is good. Five levels of inheritance is bad. Start simple.
+
+**Don't skip observability.** Even in a lab, log every step. The habit matters.
+
+### Production Checklist
+
+- [ ] All LLM calls wrapped with retry + timeout
+- [ ] Token usage and cost logged on every call
+- [ ] Errors categorized (transient, permanent, degraded)
+- [ ] Rate limits respected (per-user and per-org)
+- [ ] PII handling: never log user data
+- [ ] Observability: traces, metrics, logs all flowing
+- [ ] Tests: unit, integration, and eval suite
+- [ ] Cost dashboard updated daily
+
+---
+
+## 🌙 Reflect (10 min)
+
+Answer these in your own notes (or a comment at the bottom of the `.py` file):
+
+1. **What did I build?**
+   System Prompts That Work. What did you learn that you didn't expect?
+
+2. **What was hard?**
+   Was it the API design? The cost math? The trade-off thinking?
+
+3. **What would I change at 10× scale?**
+   If this code had to handle 10x the load or 10x the users, what would break first?
+
+4. **What's tomorrow's lab?**
+   Lesson 3.6: Structured Outputs.
+
+---
+
+## References
+
+- [`openai` Python SDK](https://github.com/openai/openai-python) — the OpenAI client library
+- [`anthropic` Python SDK](https://github.com/anthropics/anthropic-sdk-python) — the Anthropic client library
+- [`pydantic` v2 docs](https://docs.pydantic.dev/) — data validation
+- [`tenacity` docs](https://tenacity.readthedocs.io/) — retries
+- [Codebook § 2.0](../../workbooks/ai-engineer-codebook.md) — the chapter for this level
+- [Paired codebook exercises](../../workbooks/exercises/) — extend what you learned here
+- [Capstone starter](../../capstone-starters/) — relevant starter code

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Research Assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5; color: #222; line-height: 1.6;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 32px; }
+    .card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    input[type=text], input[type=password], input[type=email], textarea {
+      width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;
+    }
+    textarea { min-height: 80px; font-family: inherit; }
+    button {
+      background: #2c3e50; color: white; border: none; padding: 10px 20px;
+      border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px;
+    }
+    button:hover { background: #34495e; }
+    button:disabled { background: #95a5a6; cursor: not-allowed; }
+    .hidden { display: none; }
+    .error { color: #c0392b; padding: 8px; background: #fadbd8; border-radius: 4px; margin: 8px 0; }
+    .success { color: #27ae60; padding: 8px; background: #d5f4e6; border-radius: 4px; margin: 8px 0; }
+    .report { white-space: pre-wrap; background: #fafafa; padding: 16px; border-radius: 4px; font-size: 14px; }
+    .meta { color: #888; font-size: 12px; margin-top: 8px; }
+    .source { background: #f0f4f8; padding: 6px 10px; margin: 4px 0; border-radius: 4px; font-size: 13px; }
+    .source a { color: #2c3e50; text-decoration: none; }
+    .source a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 AI Research Assistant</h1>
+    <p class="subtitle">Ask a research question. Get a cited report.</p>
+
+    <div id="auth-section" class="card">
+      <h2>Sign in or sign up</h2>
+      <input type="email" id="email" placeholder="you@example.com" />
+      <input type="password" id="password" placeholder="Password" />
+      <div>
+        <button onclick="signup()">Sign up</button>
+        <button onclick="login()">Log in</button>
+      </div>
+      <div id="auth-error"></div>
+    </div>
+
+    <div id="app-section" class="hidden">
+      <div class="card">
+        <h2>Ask a research question</h2>
+        <textarea id="question" placeholder="e.g., Compare Stripe and Adyen for a US-based SaaS company processing $5M/year"></textarea>
+        <button onclick="research()" id="research-btn">Research</button>
+        <div id="research-status"></div>
+      </div>
+
+      <div id="report-card" class="card hidden">
+        <h2>Report</h2>
+        <div class="meta" id="report-meta"></div>
+        <div class="report" id="report-body"></div>
+        <h3 style="margin-top:16px">Sources</h3>
+        <div id="report-sources"></div>
+      </div>
+
+      <div class="card">
+        <h2>Your past reports</h2>
+        <div id="reports"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    if (token) {
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('app-section').classList.remove('hidden');
+      loadReports();
+    }
+
+    async function api(path, opts = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(path, { ...opts, headers });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || 'Request failed');
+      }
+      return res.json();
+    }
+
+    function showError(elId, msg) { document.getElementById(elId).innerHTML = `<div class="error">${msg}</div>`; }
+    function showSuccess(elId, msg) { document.getElementById(elId).innerHTML = `<div class="success">${msg}</div>`; }
+
+    async function signup() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const r = await api('/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) });
+        token = r.token;
+        localStorage.setItem('token', token);
+        location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const r = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+        token = r.token;
+        localStorage.setItem('token', token);
+        location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+
+    async function research() {
+      const question = document.getElementById('question').value;
+      if (!question) return;
+      const btn = document.getElementById('research-btn');
+      btn.disabled = true;
+      btn.textContent = 'Researching... (may take 1-2 min)';
+      try {
+        const r = await api('/research', { method: 'POST', body: JSON.stringify({ question }) });
+        if (r.status === 'completed') {
+          showSuccess('research-status', `Done in ${(r.latency_ms/1000).toFixed(1)}s, $${r.cost_usd.toFixed(3)}`);
+          loadReport(r.job_id);
+        } else {
+          showError('research-status', `Research failed: ${r.status}`);
+        }
+        loadReports();
+      } catch (e) {
+        showError('research-status', e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Research';
+      }
+    }
+
+    async function loadReport(id) {
+      try {
+        const r = await api('/report/' + id);
+        document.getElementById('report-card').classList.remove('hidden');
+        document.getElementById('report-meta').textContent = `${r.latency_ms}ms · $${r.cost_usd.toFixed(3)} · ${r.sources.length} sources`;
+        document.getElementById('report-body').textContent = r.report;
+        document.getElementById('report-sources').innerHTML = r.sources
+          .map(s => `<div class="source"><a href="${s.url}" target="_blank">${s.title}</a> — ${s.url}</div>`)
+          .join('');
+      } catch (e) { showError('research-status', e.message); }
+    }
+
+    async function loadReports() {
+      try {
+        const reports = await api('/reports');
+        document.getElementById('reports').innerHTML = reports.length
+          ? reports.map(r => `<p>📑 <a href="#" onclick="loadReport('${r.id}');return false">${r.question}</a> <span class="meta">(${r.status}, $${r.cost_usd.toFixed(3)})</span></p>`).join('')
+          : '<p>No reports yet. Try one above.</p>';
+      } catch (e) { showError('reports', e.message); }
+    }
+  </script>
+</body>
+</html>

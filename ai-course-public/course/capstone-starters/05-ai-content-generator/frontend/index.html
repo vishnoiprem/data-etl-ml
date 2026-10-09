@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Content Generator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #222; line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 32px; }
+    .card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    input[type=text], input[type=password], input[type=email], select, textarea {
+      width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; margin-bottom: 8px;
+    }
+    button { background: #2c3e50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px; }
+    button:hover { background: #34495e; }
+    button:disabled { background: #95a5a6; cursor: not-allowed; }
+    .hidden { display: none; }
+    .error { color: #c0392b; padding: 8px; background: #fadbd8; border-radius: 4px; margin: 8px 0; }
+    .success { color: #27ae60; padding: 8px; background: #d5f4e6; border-radius: 4px; margin: 8px 0; }
+    .seo-score { display: inline-block; padding: 12px 20px; border-radius: 6px; color: white; font-weight: 600; font-size: 18px; }
+    .seo-high { background: #27ae60; }
+    .seo-mid { background: #f39c12; }
+    .seo-low { background: #c0392b; }
+    .metric { background: #f8f9fa; padding: 8px 12px; margin: 6px 0; border-radius: 4px; font-size: 13px; }
+    .metric strong { color: #2c3e50; }
+    .article-body { white-space: pre-wrap; background: #fafafa; padding: 16px; border-radius: 4px; font-size: 14px; max-height: 600px; overflow-y: auto; }
+    .meta-box { background: #ecf0f1; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✍️ AI Content Generator</h1>
+    <p class="subtitle">SEO-optimized blog posts in 60 seconds.</p>
+
+    <div id="auth-section" class="card">
+      <h2>Sign in or sign up</h2>
+      <input type="email" id="email" placeholder="you@example.com" />
+      <input type="password" id="password" placeholder="Password" />
+      <div>
+        <button onclick="signup()">Sign up</button>
+        <button onclick="login()">Log in</button>
+      </div>
+      <div id="auth-error"></div>
+    </div>
+
+    <div id="app-section" class="hidden">
+      <div class="card">
+        <h2>Generate an article</h2>
+        <input type="text" id="topic" placeholder="Topic (e.g., How to choose a CRM for a startup)" />
+        <input type="text" id="keyword" placeholder="Target keyword (e.g., best CRM for startups)" />
+        <label>Target word count: <input type="number" id="target_words" value="1500" min="300" max="5000" /></label>
+        <select id="tone">
+          <option value="informative">Informative</option>
+          <option value="witty">Witty</option>
+          <option value="formal">Formal</option>
+          <option value="casual">Casual</option>
+          <option value="persuasive">Persuasive</option>
+        </select>
+        <button onclick="generate()" id="generate-btn">Generate</button>
+        <div id="generate-status"></div>
+      </div>
+
+      <div id="result-card" class="card hidden">
+        <h2>Result</h2>
+        <p><strong>Topic:</strong> <span id="result-topic"></span></p>
+        <p><strong>SEO Score:</strong> <span class="seo-score" id="result-seo">--</span></p>
+        <h3>Meta</h3>
+        <div class="meta-box" id="result-meta"></div>
+        <h3>SEO Breakdown</h3>
+        <div id="result-breakdown"></div>
+        <h3>Outline</h3>
+        <div id="result-outline"></div>
+        <h3>Article</h3>
+        <div class="article-body" id="result-body"></div>
+      </div>
+
+      <div class="card">
+        <h2>Your articles</h2>
+        <div id="articles"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    if (token) showApp();
+
+    function showApp() {
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('app-section').classList.remove('hidden');
+      loadArticles();
+    }
+
+    async function api(path, opts = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(path, { ...opts, headers });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || 'Request failed');
+      }
+      return res.json();
+    }
+    function showError(elId, msg) { document.getElementById(elId).innerHTML = `<div class="error">${msg}</div>`; }
+    function showSuccess(elId, msg) { document.getElementById(elId).innerHTML = `<div class="success">${msg}</div>`; }
+
+    async function signup() {
+      try {
+        const r = await api('/auth/signup', { method: 'POST', body: { email: email.value, password: password.value } });
+        token = r.token; localStorage.setItem('token', token); location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+    async function login() {
+      try {
+        const r = await api('/auth/login', { method: 'POST', body: { email: email.value, password: password.value } });
+        token = r.token; localStorage.setItem('token', token); location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+
+    async function generate() {
+      const topic = document.getElementById('topic').value;
+      const keyword = document.getElementById('keyword').value;
+      const target_words = parseInt(document.getElementById('target_words').value);
+      const tone = document.getElementById('tone').value;
+      if (!topic || !keyword) return;
+      const btn = document.getElementById('generate-btn');
+      btn.disabled = true; btn.textContent = 'Generating... (60s)';
+      try {
+        const r = await api('/generate', { method: 'POST', body: { topic, keyword, target_words, tone } });
+        document.getElementById('result-card').classList.remove('hidden');
+        document.getElementById('result-topic').textContent = r.topic;
+        const seo = r.seo_report.overall_score;
+        const el = document.getElementById('result-seo');
+        el.textContent = seo + ' / 100';
+        el.className = 'seo-score ' + (seo >= 75 ? 'seo-high' : seo >= 50 ? 'seo-mid' : 'seo-low');
+        document.getElementById('result-meta').innerHTML = `<strong>Title (${r.meta_title.length} chars):</strong> ${r.meta_title}<br><br><strong>Description (${r.meta_description.length} chars):</strong> ${r.meta_description}`;
+        const br = r.seo_report.breakdown;
+        document.getElementById('result-breakdown').innerHTML = Object.entries(br).map(([k, v]) =>
+          `<div class="metric"><strong>${k.replace(/_/g,' ')}:</strong> ${v.score} / ${v.max} <span style="color:#888">${Object.entries(v).filter(([k2])=>k2!=='score'&&k2!=='max').map(([k2,v2])=>`${k2}=${v2}`).join(', ')}</span></div>`
+        ).join('');
+        document.getElementById('result-outline').innerHTML = '<ol>' + r.outline.map(s => `<li>${s}</li>`).join('') + '</ol>';
+        document.getElementById('result-body').textContent = r.body;
+        showSuccess('generate-status', `Done in ${(r.latency_ms/1000).toFixed(1)}s, $${r.cost_usd.toFixed(4)}`);
+        loadArticles();
+      } catch (e) { showError('generate-status', e.message); }
+      finally { btn.disabled = false; btn.textContent = 'Generate'; }
+    }
+
+    async function loadArticles() {
+      try {
+        const arts = await api('/articles');
+        document.getElementById('articles').innerHTML = arts.length
+          ? arts.map(a => `<p>📝 ${a.topic} <span style="color:#888;font-size:12px">(${a.keyword}, target ${a.target_words}w, $${a.cost_usd.toFixed(4)})</span></p>`).join('')
+          : '<p>No articles yet. Generate one above.</p>';
+      } catch (e) { showError('articles', e.message); }
+    }
+  </script>
+</body>
+</html>
