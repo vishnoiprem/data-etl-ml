@@ -71,7 +71,7 @@ pytest-asyncio==0.21.1
 
 # ── Notebooks
 jupyter==1.0.0
-ipykernel==6.25.2
+ipykernel==7.3.0
 matplotlib==3.7.3
 seaborn==0.12.2
 plotly==5.17.0
