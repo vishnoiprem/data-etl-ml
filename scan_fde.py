@@ -1,5 +1,11 @@
 """
-scan_fde.py — single for-loop scan of the entire FDE course (v2).
+scan_fde.py — single for-loop scan of the entire FDE course (v3).
+
+v3 additions:
+  - Phase 5 (Redis / OAuth / gVisor / multi-region) test files are scanned
+  - Phase 6 (interview prep) cross-references are validated
+  - Test counts include Phase 5's 4 + 3 + 2 + 1 = 10 new tests
+  - Endpoint count covers Phase 4 additions where applicable
 
 Refinements over v1:
   - The phase-leak regex now requires the reference to be a DIRECTORY mention,
@@ -152,6 +158,12 @@ p4_test_files = []
 for proj in (ROOT / "phase-4-capstone/projects").iterdir():
     if proj.is_dir():
         p4_test_files.extend(p for p in proj.rglob("test_*.py") if "/__pycache__/" not in str(p))
+p5_test_files = []
+p5_dir = ROOT / "phase-5-advanced/projects"
+if p5_dir.exists():
+    for proj in p5_dir.iterdir():
+        if proj.is_dir():
+            p5_test_files.extend(p for p in proj.rglob("test_*.py") if "/__pycache__/" not in str(p))
 
 
 def count_test_fns(p: Path) -> int:
@@ -160,9 +172,16 @@ def count_test_fns(p: Path) -> int:
 
 p2_n = sum(count_test_fns(p) for p in p2_test_files)
 p4_n = sum(count_test_fns(p) for p in p4_test_files)
+p5_n = sum(count_test_fns(p) for p in p5_test_files)
 print(f"  Phase 2 test files: {len(p2_test_files)} | functions: {p2_n}")
 print(f"  Phase 4 test files: {len(p4_test_files)} | functions: {p4_n}")
-print(f"  TOTAL: {p2_n + p4_n}")
+print(f"  Phase 5 test files: {len(p5_test_files)} | functions: {p5_n}")
+print(f"  TOTAL: {p2_n + p4_n + p5_n}")
+print(f"  TARGET: 35/35 (Phase 2 + Phase 4 + Phase 5)")
+if p2_n + p4_n + p5_n != 35:
+    bug("TEST_COUNT",
+        ROOT / "scan_fde.py",
+        f"test count {p2_n + p4_n + p5_n} != 35 target")
 
 # ---------- report ----------
 print()

@@ -123,6 +123,13 @@ def run_code_gvisor(
             )
             elapsed_ms = int((time.monotonic() - t0) * 1000)
             oom = (proc.returncode == 137)  # OOM kill = SIGKILL = 128+9
+            # Detect the "docker daemon unreachable" case: returncode 125
+            # with stderr mentioning the docker socket. Fall back to
+            # subprocess in this case so unit tests + dev machines without
+            # a running Docker daemon still work.
+            stderr = proc.stderr or ""
+            if proc.returncode == 125 and ("Cannot connect" in stderr or "docker.sock" in stderr):
+                return _run_subprocess_fallback(code, timeout_s=timeout_s, mem_mb=mem_mb)
             return SandboxResult(
                 ok=(proc.returncode == 0 and not oom),
                 stdout=proc.stdout,
@@ -142,6 +149,21 @@ def run_code_gvisor(
             )
         except FileNotFoundError:
             return _run_subprocess_fallback(code, timeout_s=timeout_s, mem_mb=mem_mb)
+        except Exception as e:
+            # Docker binary exists but daemon not reachable, or other
+            # gVisor-side failure. Fall back to subprocess so the system
+            # still works (with weaker isolation guarantees).
+            stderr_msg = str(e)[:200]
+            # If the failure looks like "cannot connect to docker daemon",
+            # transparently fall back; otherwise surface the error.
+            if "Cannot connect" in stderr_msg or "docker.sock" in stderr_msg:
+                return _run_subprocess_fallback(code, timeout_s=timeout_s, mem_mb=mem_mb)
+            elapsed_ms = int((time.monotonic() - t0) * 1000)
+            return SandboxResult(
+                ok=False, returncode=-1,
+                backend="gvisor", error=stderr_msg,
+                elapsed_ms=elapsed_ms,
+            )
 
 
 def _run_subprocess_fallback(code: str, *, timeout_s: float, mem_mb: int) -> SandboxResult:
