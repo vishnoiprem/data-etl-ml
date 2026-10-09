@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI for Small Business Owners — Save 10+ Hours a Week</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">AI<span>ForBiz</span></a>
+      <div>
+        <a href="/prompts">Free Prompts</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/admin">Admin</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <p class="kicker">For business owners in 🇸🇬 🇹🇼 🇻🇳</p>
+      <h1>Save 10+ hours every week<br>with AI — in 7 days</h1>
+      <p class="sub">A practical course for non-tech business owners. Use ChatGPT, Claude, and free AI tools to automate emails, content, and admin.</p>
+
+      <form id="signup" class="hero-form">
+        <input type="email" id="email" placeholder="your@email.com" required>
+        <button type="submit">Get Free AI Prompts Pack</button>
+      </form>
+      <p id="msg"></p>
+
+      <div class="hero-stats">
+        <div><strong>10+ hrs</strong><span>saved per week</span></div>
+        <div><strong>7 days</strong><span>to results</span></div>
+        <div><strong>$0</strong><span>extra tools</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container features">
+    <h2>What you'll learn</h2>
+    <div class="grid">
+      <div class="card">📧<h3>Auto-reply</h3><p>Build a system that handles 80% of customer questions</p></div>
+      <div class="card">📝<h3>Content machine</h3><p>30 days of posts in 1 hour</p></div>
+      <div class="card">💼<h3>Replace VA</h3><p>Save $500+/month with AI admin</p></div>
+      <div class="card">🎯<h3>7-day plan</h3><p>One task per day. Done in a week.</p></div>
+    </div>
+  </section>
+
+  <footer class="container">
+    <p>Built with the AIForBiz prototype · <a href="/admin">View Admin</a></p>
+  </footer>
+
+  <script>
+    document.getElementById('signup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email, source: 'landing_page'})
+      });
+      const data = await res.json();
+      document.getElementById('msg').textContent = '✅ Check your email! Redirecting to free prompts...';
+      setTimeout(() => location.href = '/prompts', 1500);
+    });
+  </script>
+</body>
+</html>
