@@ -2,13 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — AIForBiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
   <header>
     <nav class="container">
-      <a href="/" class="logo">AI<span>ForBiz</span></a>
+      <a href="/" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
       <div>
         <a href="/">Home</a>
         <a href="/prompts">Free Prompts</a>
@@ -17,20 +30,36 @@
     </nav>
   </header>
 
-  <main class="container">
-    <h1>Simple, honest pricing</h1>
-    <p class="lede">One course. Lifetime access. All updates free. 14-day money-back guarantee.</p>
-
-    <div class="pricing" id="pricing"></div>
-
-    <div id="checkout-form" class="checkout hidden">
-      <h2>Checkout: <span id="product-name"></span> — $<span id="product-price"></span></h2>
-      <p>(This is a MOCK checkout. In production, this is where Stripe/PayPal would appear.)</p>
-      <input type="email" id="checkout-email" placeholder="your@email.com" required>
-      <button id="pay">Complete Purchase (MOCK)</button>
-      <p id="checkout-msg"></p>
+  <section class="hero" style="padding: 80px 0 40px;">
+    <div class="container">
+      <p class="kicker">Pricing</p>
+      <h1>Simple, honest pricing.</h1>
+      <p class="sub">14-day money-back guarantee · Lifetime access · All future updates free</p>
     </div>
-  </main>
+  </section>
+
+  <section style="padding: 40px 0 80px;">
+    <div class="container">
+      <div class="pricing" id="pricing"></div>
+
+      <div id="checkout-form" class="checkout hidden">
+        <h2 style="font-size: 28px;">Checkout: <span id="product-name"></span></h2>
+        <p class="lede" style="font-size: 18px; margin-bottom: 0;">$<span id="product-price"></span> — One-time payment</p>
+
+        <div class="checkout-note">
+          ⚠️ This is a <strong>mock checkout</strong>. In production, this is where Stripe/PayPal would appear.
+        </div>
+
+        <input type="email" id="checkout-email" placeholder="your@email.com" required>
+        <button id="pay" class="btn btn-primary btn-lg">Complete Purchase →</button>
+        <p id="checkout-msg"></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 AIForBiz · Made with ❤️ in Singapore</p>
+  </footer>
 
   <script>
     let selectedProduct = null;
@@ -40,11 +69,13 @@
       const products = await res.json();
       const html = Object.entries(products).map(([key, p]) => `
         <div class="price-card ${key === 'main' ? 'featured' : ''}">
-          ${key === 'main' ? '<div class="badge">Most Popular</div>' : ''}
-          <h3>${p.name}</h3>
+          ${key === 'main' ? '<div class="price-badge">★ Most Popular ★</div>' : ''}
+          <div class="price-tier">${p.name}</div>
           <div class="price">$${p.price}</div>
-          <p>${p.description}</p>
-          <button onclick="selectProduct('${key}')">Choose ${p.name}</button>
+          <p class="price-desc">${p.description}</p>
+          <button class="btn ${key === 'main' ? 'btn-primary' : 'btn-secondary'}" onclick="selectProduct('${key}')">
+            Choose ${p.name} →
+          </button>
         </div>
       `).join('');
       document.getElementById('pricing').innerHTML = html;
@@ -57,25 +88,40 @@
         document.getElementById('product-name').textContent = p.name;
         document.getElementById('product-price').textContent = p.price;
         document.getElementById('checkout-form').classList.remove('hidden');
-        document.getElementById('checkout-form').scrollIntoView({behavior: 'smooth'});
+        setTimeout(() => {
+          document.getElementById('checkout-form').scrollIntoView({behavior: 'smooth', block: 'center'});
+        }, 100);
       });
     }
 
     document.getElementById('pay').addEventListener('click', async () => {
       const email = document.getElementById('checkout-email').value;
-      if (!email) return;
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          email,
-          product: selectedProduct,
-          payment_token: 'mock_' + Date.now()
-        })
-      });
-      const data = await res.json();
-      document.getElementById('checkout-msg').textContent = data.message;
-      document.getElementById('checkout-msg').style.color = '#27AE60';
+      const msg = document.getElementById('checkout-msg');
+      if (!email || !email.includes('@')) {
+        msg.textContent = 'Please enter a valid email.';
+        msg.style.color = 'var(--red)';
+        return;
+      }
+      const btn = document.getElementById('pay');
+      const orig = btn.textContent;
+      btn.textContent = 'Processing...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email, product: selectedProduct, payment_token: 'mock_' + Date.now()})
+        });
+        const data = await res.json();
+        msg.textContent = data.message || '🎉 Purchase complete!';
+        msg.style.color = 'var(--green)';
+        btn.textContent = '✓ Done!';
+      } catch (err) {
+        msg.textContent = 'Something went wrong.';
+        msg.style.color = 'var(--red)';
+        btn.textContent = orig;
+        btn.disabled = false;
+      }
     });
 
     loadProducts();
