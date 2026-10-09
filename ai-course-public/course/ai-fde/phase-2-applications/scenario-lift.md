@@ -115,3 +115,53 @@ phase-2-applications/
 ---
 
 **What's after the Phase 2 lift** — Phase 3 takes this service from "deployable" to "in production": streaming responses, hosted vector DB, real auth, observability, rate limiting. The Phase 2 service is the smallest end-to-end thing that proves the system survives a customer pilot; Phase 3 proves it survives a rollout.
+
+---
+
+## Phase 3 close (Deployment Depth) — what shipped
+
+Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in this same `phase-2-applications/` directory because the course was numbered before Phase 3 existed; the labeling gap is intentional and the `phase-3-capstone/` directory picks up the Phase 4 numbering without renaming).
+
+### 5 Phase 2 commitments → 5 Phase 3 deliverables
+
+| Commitment | Phase 3 deliverable | File |
+|---|---|---|
+| Tracker API (Daniel) | Hybrid retriever (BM25 + dense + RRF, k=60) — survives stale `shipments.json` by ID-weighting BM25 | `service/retrieval_v2.py` |
+| Runbook + paging policy | 4-SEV runbook, RACI matrix (12 artifacts × 4 stakeholders), weekly on-call rotation | `consulting/04-runbook.md`, `05-raci.md`, `06-on-call-rotation.md` |
+| Web UI / auto-send | `/draft/stream` (SSE) + `/feedback` (the start of the iteration loop) | `service/app.py` (+150 lines) |
+| Embedding model + auth | In-process redactor + rate limiter; auth explicitly deferred to Phase 4 | `service/circuit.py` |
+| GO/NO-GO | C1 stakeholder-alignment pre-commits the criteria (thumbs-up ≥ 80%, hallucination < 1%, P95 < 4s, cost < $5/mo, 0 unresolved SEV-1) | `consulting/04-stakeholder-alignment.md` |
+
+### 3 new technical lessons (T1–T3)
+
+| Lesson | File | What it ships |
+|---|---|---|
+| T1 — Advanced retrieval and RAG | `technical/01-advanced-retrieval.md` + `.py` | `HybridRetriever` with BM25 + dense + RRF + cross-encoder stub; `POST /admin/reindex` to swap corpus at runtime |
+| T2 — Eval, monitoring, iteration | `technical/02-eval-monitoring-iteration.md` + `.py` | `/feedback` (thumbs), `/metrics` (Prometheus), `usage.jsonl` (per-draft + per-feedback), `render_iteration_report()` (one-screen markdown joining the 3 loops) |
+| T3 — Scale, reliability, security | `technical/03-scale-reliability-security.md` + `.py` | `CircuitBreaker` (3 trip signals, 3-tier fallback), `TokenBucketRateLimiter` (per-user, in-process), `Redactor` (email/phone/passport), `GET /circuit/state` |
+
+### 3 new consulting lessons (C1–C3)
+
+| Lesson | File | What it ships |
+|---|---|---|
+| C1 — Stakeholder alignment | `consulting/04-stakeholder-alignment.md` | 3+1 audience map, decision-rights matrix, GO/NO-GO criteria |
+| C2 — Delivery planning & iteration | `consulting/05-delivery-iteration.md` | Weekly cadence (Mon review → Fri ship), experiment template (hypothesis → change → measurement → success criterion), 4-week plan, ADR log pattern |
+| C3 — Ownership handoff | `consulting/06-ownership-handoff.md` | Runbook + RACI + on-call + 5-question "FDE has left" test + fire-drill protocol |
+
+### The end-of-Phase-3 scorecard
+
+| | End of Phase 3 |
+|---|---|
+| **Endpoints** | 10 (4 Phase 2 + 5 Phase 3 + 1 health) — `/health`, `/draft`, `/draft/stream`, `/retrieve`, `/eval`, `/feedback`, `/metrics`, `/admin/reindex`, `/circuit/state` |
+| **Tests** | 13/13 pytest pass in 1.38s (`service/tests/test_app.py`) |
+| **Eval set** | 30 rows, 4 RAGAS metrics, baseline + 0.05 regression threshold |
+| **Service code** | ~2,500 lines (Phase 2: 1,400 + Phase 3: 1,100) |
+| **Thumbs-up rate (pilot)** | 82% (target 80%) |
+| **P95 latency** | 1.8s (target < 4.0s) |
+| **Cost** | $0.50/week (ceiling $5/month) |
+| **Handoff artifacts** | runbook (4 SEV levels) + RACI (12 artifacts × 4 stakeholders, exactly one A per row) + on-call rotation (3 lanes × 4 tiers) + 5-question "FDE has left" test |
+
+**The FDE has left.** Mei sends 150 emails/day through the drafter. Sarah reviews the Monday iteration report. Daniel owns the VM, the model, and the runbook. The 3-loop iteration cadence (online metrics + offline eval + user feedback) runs every week. The 3 failure-mode primitives (redactor + rate limiter + circuit breaker) keep the service up.
+
+**What's after Phase 3** — Phase 4 lives in `course/ai-fde/phase-3-capstone/`. It takes the Phase 3 service and turns it into a **platform**: MCP for tool use, multi-agent for complex cases, a distilled SLM for cost, a fresh engagement for breadth. 4 projects + 5 case studies + portfolio + capstone presentation. See `phase-3-capstone/scenario-brief.md` for the week-by-week plan.
+
