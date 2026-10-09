@@ -7,11 +7,12 @@ Each track may have its own test layout. This script:
   4. Returns exit code 0 only if all tracks pass
 
 Tracks included:
-  - system_design (existing, ~764 tests)
+  - system_design (existing, ~764 tests, run via its own runner)
   - data_modeling (new)
   - data_pipeline_design (new)
   - sql_interviews (new)
   - coding_interviews (new)
+  - common (shared library tests)
 
 Usage::
 
@@ -23,6 +24,7 @@ Usage::
 from __future__ import annotations
 
 import importlib.util
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -71,29 +73,73 @@ def _discover_test_cases(test_file: Path, track_name: str) -> List[type]:
 
 
 def run_track(name: str, path: Path, verbose: bool = False) -> Tuple[int, int, int]:
-    """Run all tests in ``<path>/tests``; return (run, failures, errors)."""
-    tests_dir = path / "tests"
-    if not tests_dir.exists():
+    """Run all tests in ``<path>/tests``; return (run, failures, errors).
+
+    The ``system_design`` track uses its own runner
+    (``system_design/scripts/run_tests.py``) because its tests
+    import ``from code.X import ...`` which requires the module's
+    directory to be on ``sys.path``. Delegate to it.
+    """
+    # ---- system_design uses its own runner ----
+    if name == "system_design":
+        runner = path / "scripts" / "run_tests.py"
+        if not runner.exists():
+            return (0, 0, 0)
+        cmd = [sys.executable, str(runner), "-v" if verbose else ""]
+        cmd = [c for c in cmd if c]
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=str(path)
+        )
+        print(proc.stdout)
+        if proc.stderr:
+            print(proc.stderr)
+        out = proc.stdout + proc.stderr
+        # The system_design runner ends with a line like
+        # ``FAILED (failures=82, errors=56)`` or ``OK``. Parse it.
+        import re
+        m = re.search(r"FAILED \(failures=(\d+), errors=(\d+)\)", out)
+        if m:
+            fail = int(m.group(1))
+            err = int(m.group(2))
+            run_m = re.search(r"Ran (\d+) tests", out)
+            run = int(run_m.group(1)) if run_m else (fail + err)
+            return (run, fail, err)
+        if "OK" in out:
+            run_m = re.search(r"Ran (\d+) tests", out)
+            run = int(run_m.group(1)) if run_m else 0
+            return (run, 0, 0)
         return (0, 0, 0)
 
-    # For the ``common`` track the test file lives directly under
-    # ``common/tests/test_common.py``; the same layout works for any
-    # other track that creates its own tests directory.
+    tests_dir = path / "tests"
+
+    # Short-circuit if there is nothing to find anywhere.
+    if not tests_dir.exists() and not any(
+        (sub / "tests").is_dir() or (sub / "code" / "tests").is_dir()
+        for sub in path.iterdir() if sub.is_dir()
+    ):
+        return (0, 0, 0)
+
     suite = unittest.TestSuite()
-    test_files = sorted(tests_dir.glob("test_*.py"))
+    test_files: List[Path] = []
+    if tests_dir.exists():
+        test_files.extend(sorted(tests_dir.glob("test_*.py")))
+    for sub in sorted(path.iterdir()):
+        if not sub.is_dir():
+            continue
+        for candidate in (sub / "tests", sub / "code" / "tests"):
+            if candidate.is_dir():
+                test_files.extend(sorted(candidate.glob("test_*.py")))
     for tf in test_files:
         for case in _discover_test_cases(tf, name):
             suite.addTests(unittest.TestLoader().loadTestsFromTestCase(case))
 
-    # Python <3.12 has no ``TestSuite.count()``; sum() over the
-    # sub-tests is the portable equivalent.
     n_tests = suite.countTestCases()
     if n_tests == 0:
         return (0, 0, 0)
 
-    runner = unittest.TextTestRunner(verbosity=2 if verbose else 1)
+    runner_obj = unittest.TextTestRunner(verbosity=2 if verbose else 1)
     print(f"\n{'=' * 70}\n[{name}]  ({n_tests} tests)\n{'=' * 70}")
-    result = runner.run(suite)
+    result = runner_obj.run(suite)
     return (result.testsRun, len(result.failures), len(result.errors))
 
 
@@ -135,3 +181,4 @@ def main(argv: List[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

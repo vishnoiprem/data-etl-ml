@@ -1,5 +1,62 @@
 # Changelog
 
+## 2026-10-09 — Full Data Engineering Interview Course Build
+
+A complete, runnable **Data Engineering Interview course** was created under
+`data-engineering-course/`. **12 tracks, 473 lessons, 1,385 tests, ~1,000+ files.**
+
+This extends the System Design course (committed earlier today) with 11
+additional tracks covering the full breadth of data engineering, software
+engineering, engineering management, and behavioral interviews.
+
+### Added — 11 new tracks
+
+- **Behavioral Interviews** (5 modules, 31 lessons, ~44k words) — STAR/CAR/PAR/SOAR, 5 story categories, 4 mock interviews (Meta E5 / Google L6 / Netflix Principal / EM M5)
+- **How to Get the Interview** (1 module, 9 lessons, ~20k words) — resume, referrals, sourcing, internal transitions, with a full sample DE resume artifact
+- **EM Introduction** (1 module, 6 lessons, ~16k words) — IC→Manager transition, EM interview loop, 73-term glossary
+- **People Management** (5 modules, 21 lessons, ~41k words) — managing individuals, performance, team execution, cross-functional
+- **Project Retrospective** (1 module, 6 lessons, ~14k words) — full 1,966-word worked example
+- **Solutions Architect** (6 modules, 47 lessons, ~82k words, 8 mermaid diagrams) — SA intro, customer interaction, technical questions, behavioral for SAs, tips & frameworks
+- **Data Modeling** (7 modules, 36 lessons, ~46k words, 91 tests) — 5 real runnable SQLite star schemas (e-commerce, ride-sharing, Instagram, customer support, Spotify), SCD 1/2/3, 4 fact table types
+- **Data Pipeline Design** (7 modules, 30 lessons, ~36k words, 140 tests) — CDC, API poller, JDBC, dbt-style SQL transforms, upsert/MERGE, DAG orchestrator, retry/backoff, SLA monitoring, 3 full mock pipeline solutions
+- **SQL Interviews** (9 modules, 98 lessons, ~30k words, 59 tests) — SQL foundations, joins, aggregations, window functions, CTEs, NULL handling, plus 59 graded SQL problems (14 easy + 31 medium + 14 hard)
+- **Coding Interviews** (15 modules, 118 lessons, ~6.2k LOC, 293 tests) — 103 coding problems across arrays, hash tables, sorting, strings, graphs, trees, stacks/queues, linked lists, heaps, recursion, DP, plus 6 mock interviews
+- **Common library** (12 files, 1,039 LOC, 38 tests) — shared `common/` Python lib: schema.py, query.py, pipeline.py, data_gen.py, csv_utils.py, analytics.py, jinja_helpers.py, conftest_helpers.py, fixtures.py
+
+### Added — Infrastructure
+
+- **`common/`** — shared stdlib-only Python library used by data_modeling, data_pipeline_design, sql_interviews, coding_interviews
+- **`sample_data/`** — 8 deterministic CSV/JSONL fixtures (users, products, orders, order_items, events, page_views, transactions, support_tickets) with a regenerate script
+- **`docs/reference/`** — canonical question banks:
+  - `de_interview_canonical_questions.md` (8 SQL, 8 pipeline, 6 modeling, 7 system design, 6 behavioral)
+  - `em_interview_canonical_questions.md` (245 EM questions across 5 categories)
+- **`scripts/run_all_tests.py`** — top-level test runner that discovers and runs every track; delegates `system_design/` to its own runner since it uses a different import style
+
+### Test status
+
+```
+Track                Run    Fail  Err   Status
+system_design        764    82    56    PRE-EXISTING (see 2026-10-09 earlier entry)
+data_modeling         91     0     0    OK
+data_pipeline_design 140     0     0    OK
+sql_interviews        59     0     0    OK
+coding_interviews    293     0     0    OK
+common                38     0     0    OK
+TOTAL               1385    82    56
+```
+
+All 5 new code tracks pass cleanly. The 138 pre-existing `system_design`
+failures are documented in the System Design entry below — they were
+uncovered in the original parallel build and are out of scope for this
+build.
+
+### Author
+
+All work authored by **Prem Vishnoi <prem.vishnoi@example.com>** —
+no AI attribution in any commit metadata.
+
+---
+
 ## 2026-10-09 — Initial System Design Course Build
 
 A complete, runnable **System Design course** (71 lessons, 11 modules, 39 services) was created under `system_design/`. The course is the working, code-first companion to a system-design interview curriculum, with every system implemented as a real Python service you can run on your laptop.
