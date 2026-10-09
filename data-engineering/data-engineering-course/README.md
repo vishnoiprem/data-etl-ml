@@ -123,13 +123,13 @@ data-engineering-course/
 │   ├── README.md
 │   └── exercise.md
 │
-├── sql_interviews/                 # Track 10: 9 modules, 98 lessons
-│   ├── 01_sql_foundations/         # 8 lessons
-│   ├── 02_joins_and_set_ops/       # 7 lessons
-│   ├── 03_aggregations_and_grouping/  # 6 lessons
-│   ├── 04_window_functions/        # 8 lessons
-│   ├── 05_ctes_and_recursion/      # 4 lessons
-│   ├── 06_nulls_dml_and_meta/      # 6 lessons
+├── sql_interviews/                 # Track 10: 9 modules, 45 lessons
+│   ├── 01_overview/                # 4 lessons
+│   ├── 02_fast_track/              # 10 lessons
+│   ├── 03_basic_querying/          # 9 lessons
+│   ├── 04_aggregations/            # 8 lessons
+│   ├── 05_joins/                   # 9 lessons
+│   ├── 06_window_functions/        # 5 lessons
 │   ├── 07_easy_practice/           # 14 problems + tests
 │   ├── 08_medium_practice/         # 31 problems + tests
 │   ├── 09_hard_practice/           # 14 problems + tests
@@ -173,13 +173,13 @@ data-engineering-course/
 │       ├── de_interview_canonical_questions.md
 │       └── em_interview_canonical_questions.md
 │
-├── exercises/                      # system_design module exercises
-├── notebooks/                      # exploratory notebooks
-│
 └── scripts/
-    ├── run_all_tests.py            # top-level test runner
-    └── requirements.txt
+    └── run_all_tests.py            # top-level test runner
 ```
+
+> Note: the `system_design/` track has its own `setup.py`, `exercises/`,
+> and `notebooks/` under it. This top-level course has none — every
+> dependency in the new tracks is pure-stdlib.
 
 ---
 
