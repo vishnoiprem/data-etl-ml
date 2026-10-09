@@ -41,7 +41,7 @@ from common.cache import TTLCache  # noqa: E402
 from common.metrics import MetricsRegistry  # noqa: E402
 from common.storage import KeyValueStore  # noqa: E402
 
-from service import TikTokService  # noqa: E402
+from service import FORYOU_CACHE_TTL_SECONDS, TikTokService  # noqa: E402
 
 
 def create_app(service: TikTokService | None = None) -> Flask:
@@ -52,8 +52,7 @@ def create_app(service: TikTokService | None = None) -> Flask:
             persist_path=str(HERE / "var" / "tiktok_service.json"),
         ),
         foryou_cache=TTLCache(
-            ttl_seconds=TikTokService.__init__.__defaults__[3]
-            if TikTokService.__init__.__defaults__ else 60.0,
+            ttl_seconds=FORYOU_CACHE_TTL_SECONDS,
             max_entries=50_000,
         ),
     )

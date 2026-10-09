@@ -211,7 +211,7 @@ class TikTokService:
         if not data:
             return None
         self.cache.set(cache_key, data, self.cache_ttl)
-        return Video(**cached) if cached else Video(**data)
+        return Video(**data)
 
     # ---- views + engagement -------------------------------------------
 

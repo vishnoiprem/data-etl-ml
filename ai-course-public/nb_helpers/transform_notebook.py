@@ -156,17 +156,43 @@ def transform_print_call(line: str) -> str | None:
 
 
 def transform_code_cell(src: str) -> str:
-    """Transform a code cell's source. Mutates the print() lines."""
+    r"""Transform a code cell's source. Mutates the print() lines.
+
+    Handles:
+      - Single-line print() calls (via transform_print_call)
+      - Multi-line triple-quoted print() blocks
+        -> a single display_box(<text>, kind=..., mono=True)
+    """
+    # First, expand any multi-line triple-quoted print() blocks.
+    # Pattern: print(QQQ ... QQQ)  on possibly multiple lines, ending with QQQ)
+    triple_pattern = re.compile(
+        r'^[ \t]*print\s*\(\s*("""|\'\'\')([\s\S]*?)\1\s*\)[ \t]*(#.*)?$',
+        re.MULTILINE,
+    )
+
+    def _triple_repl(m: re.Match) -> str:
+        indent = m.group(0)[: len(m.group(0)) - len(m.group(0).lstrip())]
+        text = m.group(2)
+        # dedent: strip common leading whitespace from non-blank lines
+        nonblank = [ln for ln in text.split("\n") if ln.strip()]
+        common = min((len(ln) - len(ln.lstrip()) for ln in nonblank), default=0)
+        lines = [ln[common:] if len(ln) >= common else ln for ln in text.split("\n")]
+        body = "\n".join(lines)
+        kind = detect_kind(body)
+        comment = ("  " + m.group(3)) if m.group(3) else ""
+        return f'{indent}display_box({repr(body)}, kind="{kind}", mono=True){comment}'
+
+    src = triple_pattern.sub(_triple_repl, src)
+
+    # Then process remaining single-line print() calls.
     lines = src.split("\n")
     out = []
-    skip_next_blank = False
     for line in lines:
         transformed = transform_print_call(line)
         if transformed is None:
             out.append(line)
         else:
             out.append(transformed)
-            skip_next_blank = False
     return "\n".join(out)
 
 
