@@ -1,8 +1,8 @@
-# Technical Track — AI FDE Phase 2
+# Technical Track — AI FDE Phase 3
 
-> **From a CLI to a deployable AI service.** Three lessons, ~3 hours total. All code runs without an API key (mock LLM backend by default).
+> **From a working service to a production system.** Three lessons, ~2.5 hours total. Builds on the Phase 2 service in `../phase-2-core-build/`.
 
-This track teaches the **engineering craft** of taking an AI tool out of the terminal and into a service. Every lesson ends with runnable code you can demo to the customer on a video call.
+This track teaches the **production engineering craft** of taking an AI service out of "works on Daniel's laptop" and into "runs 24/7 for Mei and Sarah." Every lesson ends with runnable code + a pytest case that passes against the hardened Phase 2 service.
 
 ---
 
@@ -10,78 +10,107 @@ This track teaches the **engineering craft** of taking an AI tool out of the ter
 
 | # | Lesson | What you build | Time |
 |---|---|---|---|
-| 01 | [LLM applications and workflows](./technical/01-llm-applications.md) | A FastAPI app with `/draft`, `/health` — wraps the Phase 1 logic in a service | 40 min |
-| 02 | [Context engineering and RAG foundations](./technical/02-context-rag.md) | A `/retrieve` endpoint backed by a mock vector store over `shipments.json` + `style-guide.md`; `/draft` now augments the prompt with retrieved context | 50 min |
-| 03 | [Early evaluation, reliability, and application-layer patterns](./technical/03-eval-reliability.md) | A `/eval` endpoint + a CLI that grades drafts against the 30-row eval set, saves a baseline, and trips a regression check | 50 min |
+| 01 | [Advanced retrieval and RAG](./technical/01-advanced-retrieval.md) | A hybrid retriever (BM25 + dense + RRF) in `../phase-2-core-build/service/retrieval_v2.py` (~250 lines). Replaces the Phase 2 token-overlap mock store. | 45 min |
+| 02 | [Evaluation, monitoring, and iteration](./technical/02-eval-monitoring-iteration.md) | Adds `/draft/stream` (SSE), `/feedback` (thumbs up/down), `/metrics` (Prometheus), and `render_iteration_report.py` to the Phase 2 service. | 45 min |
+| 03 | [Scale, reliability, and security failure handling](./technical/03-scale-reliability-security.md) | A `circuit.py` (~400 lines) with `CircuitBreaker` + `TokenBucketRateLimiter` + `Redactor` + `TTLCache` + `make_tiered_fallback`. Plus `telemetry.py` and a `Caddyfile`. | 45 min |
 
-After lesson 03, the service is **deployable**: Dockerfile, docker-compose, pytest, `/health` endpoint, full coverage of the happy path and the failure paths.
-
----
-
-## What "Phase 2 technical" is NOT
-
-- It is **not** async-first. Phase 2 keeps handlers sync; the `hardcode/level-3-streaming/` track is where you graduate to `asyncio` + SSE.
-- It is **not** framework-heavy. No LangChain, no LlamaIndex, no Pinecone. Plain Python over a dict-of-lists. The frameworks are in `practice/level-4-rag/`.
-- It is **not** Kubernetes. One container, one process, one port.
-- It is **not** 1000-line systems. The whole service is ~600 lines across 3 files in `service/`, plus 3 lesson files in `technical/`.
+After lesson 03, the service is **production-grade**: 13/13 pytest cases pass, the circuit breaker trips on simulated outages, the rate limiter caps LLM calls per user, the redactor strips PII from logs, the metrics endpoint exposes Prometheus counters, and a Caddy reverse proxy terminates TLS.
 
 ---
 
-## The shared scenario (the Phase 2 lift)
+## How the track builds on Phase 2
 
-Read [`scenario-lift.md`](./scenario-lift.md). The short version:
-
-> Phase 1 drafter works when the CS person **already knows** the shipment ID. Phase 2 lifts this: the service can answer "where is my parcel?" even when the customer doesn't include an ID, by retrieving the right shipment from the tracker and the right policy from the style guide.
-
-Concretely, Phase 2 makes these changes to the Phase 1 tool:
-
-| Layer | Phase 1 (CLI) | Phase 2 (service) |
-|---|---|---|
-| Interface | `python3 04-first-ai-tool.py --shipment PF-1003` | `curl -X POST localhost:8000/draft -d '{"email":"...", "shipment_id":"PF-1003"}'` |
-| Retrieval | CS person looks up the shipment manually | Service retrieves the shipment from `shipments.json` + the right policy chunk from `style-guide.md` |
-| Context | System prompt = persona + style guide | System prompt = persona + style guide + **retrieved policy chunks** + **top-N retrieved shipments** |
-| Evaluation | Ad-hoc ("looks good to me") | A 30-row eval set + 4 RAGAS-style metrics + a regression baseline |
-| Deployment | Runs on the CS person's laptop | Dockerfile + docker-compose + `/health` for the deployment platform to check |
-
----
-
-## Code conventions (Phase 2)
-
-- Python 3.11+
-- FastAPI + uvicorn for the service
-- Pydantic for request/response models
-- `pytest` + `httpx` for the tests
-- Mock LLM backend by default (the same `complete()` from Phase 1)
-- Mock vector store by default (deterministic token-overlap retrieval — no embeddings API needed)
-- All code in `service/*.py` and `technical/*.py`
-
-### The reuse pattern
-
-Every technical .py file in Phase 2 starts with this import to reach Phase 1's unified LLM client:
-
-```python
-import importlib.util
-from pathlib import Path
-
-_spec = importlib.util.spec_from_file_location(
-    "pf_llm",
-    Path(__file__).parent.parent / "phase-1-foundations" / "technical" / "03-modern-ai-tooling.py",
-)
-pf_llm = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(pf_llm)  # type: ignore
-complete = pf_llm.complete
-PRICING = pf_llm.PRICING
+```
+Phase 2 service (in ../phase-2-core-build/service/)
+    │
+    ├── app.py           ← T2 adds /draft/stream, /feedback, /metrics
+    ├── circuit.py       ← T3 ADDS this file (new)
+    ├── retrieval_v2.py  ← T1 ADDS this file (replaces the mock store)
+    ├── eval.py          ← T2 adds render_iteration_report
+    ├── telemetry.py     ← T3 ADDS this file (new)
+    ├── Caddyfile        ← T3 ADDS this file (new)
+    └── tests/           ← 13/13 cases pass (the regression suite)
 ```
 
-This is the same pattern Phase 1's `04-first-ai-tool.py` uses. The reason: Phase 2 should not duplicate Phase 1's pricing, retry, log, and mock code — it should reuse them.
+The Phase 2 service is **not copied** into Phase 3. The Phase 3 lessons edit it in place via `importlib` indirection. The Phase 2 service stays the "single source of truth" for the drafter.
+
+---
+
+## What "Phase 3 technical" is NOT
+
+- It is **not** Kubernetes. One container, one process, one port, Caddy in front.
+- It is **not** a multi-region deployment. One VM, one Caddy, one service.
+- It is **not** framework-heavy. No LangChain, no LlamaIndex. Plain Python.
+- It is **not** async-everywhere. Only the streaming endpoint is async; the rest stay sync.
+
+---
+
+## Run the hardened service
+
+```bash
+cd ../phase-2-core-build/service
+pip install -r requirements.txt
+PF_LLM_PROVIDER=openai PF_OPENAI_API_KEY=sk-... uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+Or with the mock LLM backend (no API key needed):
+
+```bash
+cd ../phase-2-core-build/service
+uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+Then:
+
+```bash
+# Health
+curl localhost:8000/health
+
+# Draft (with hybrid retrieval)
+curl -X POST localhost:8000/draft -H 'Content-Type: application/json' \
+     -d '{"email":"Where is PF-1003?", "shipment_id":"PF-1003"}'
+
+# Stream
+curl -X POST localhost:8000/draft/stream -H 'Content-Type: application/json' \
+     -d '{"email":"Where is PF-1003?", "shipment_id":"PF-1003"}'
+
+# Feedback
+curl -X POST localhost:8000/feedback -H 'Content-Type: application/json' \
+     -d '{"draft_id":"abc-123", "rating":"up"}'
+
+# Metrics
+curl localhost:8000/metrics
+
+# Circuit state
+curl localhost:8000/circuit/state
+
+# Run the 13-test regression suite
+pytest tests/ -v
+```
+
+---
+
+## Run in Docker (with Caddy)
+
+```bash
+cd ../phase-2-core-build/service
+docker compose up
+```
+
+The `docker-compose.yml` brings up the FastAPI service behind a Caddy reverse proxy on port 443. Caddy handles TLS termination (Let's Encrypt) and per-IP rate limiting at the edge.
 
 ---
 
 ## What's next
 
-- The **Consulting Track** — the other half. The documents you'd hand the customer to justify this service.
-- **`course/practice/level-4-rag/`** — when you want to graduate to LangChain / LlamaIndex / real embeddings.
-- **`course/practice/level-6-production/`** — when you want to add observability, caching, async, and load testing.
-- **`course/hardcode/level-8-evaluation-testing/`** — when you want a 1000-line production RAGAS / LLM-as-judge harness.
-- **`course/hardcode/level-9-failure-handling/`** — when you want circuit breakers and hallucination detectors.
-- **`course/capstone-starters/01-ai-doc-qa/`** — the production version of this service, with FastAPI + JWT + Postgres + Pinecone.
+- The **Consulting Track** — the stakeholder map, iteration cadence, runbook, RACI, and on-call rotation that go with this service.
+- **Phase 4 (Capstone)** — `../phase-4-capstone/` — where the Phase 3 service is lifted into a platform: MCP, multi-agent, distilled SLM, fresh engagement.
+- **`course/practice/level-5-agents/`** — when you want LangGraph, ReAct, and multi-agent patterns (Phase 4 Project 2 builds on these).
+- **`course/practice/level-6-production/`** — when you want FT + deploy + observability patterns (Phase 4 Project 3 builds on these).
+- **`course/hardcode/level-9-failure-handling/`** — when you want more sandbox patterns and policy files (Phase 4 Projects 1 and 4 build on these).
+
+---
+
+**Last updated:** 2026-10-09
+**Phase:** 3 of 4 (Deployment & Reliability)
+**Prerequisite:** [Phase 2 — Core Build](../phase-2-core-build/)
