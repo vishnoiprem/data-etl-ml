@@ -396,6 +396,150 @@ def render_report(
 
 
 # ---------------------------------------------------------------------------
+# Phase 3: Iteration report (joins eval + feedback + cost)
+# ---------------------------------------------------------------------------
+def render_iteration_report(
+    *,
+    usage_log_path: Path,
+    since_seconds: float = 7 * 24 * 3600,  # default 7 days
+    baseline_path: Path | None = None,
+    eval_set_path: Path | None = None,
+) -> str:
+    """Render an iteration report joining:
+       - online metrics (drafts, errors, latency from usage.jsonl)
+       - feedback (thumbs up/down from /feedback)
+       - cost (sum of cost_usd)
+       - eval (optional re-run of the eval set vs baseline)
+
+    This is the artifact the FDE reviews every Monday in the iteration
+    cadence. Designed to fit in one screen: top-line health, then
+    feedback breakdown, then per-day totals.
+    """
+    now = time.time()
+    cutoff = now - since_seconds
+    events: list[dict] = []
+    if usage_log_path.exists():
+        with usage_log_path.open() as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if e.get("ts", 0) >= cutoff:
+                    events.append(e)
+
+    # Partition events
+    drafts = [e for e in events if e.get("outcome") in ("ok", "fallback", "error")]
+    feedbacks = [e for e in events if e.get("outcome") == "feedback"]
+    fallbacks = [e for e in events if e.get("outcome") == "fallback"]
+    rate_limited = [e for e in events if e.get("outcome") == "rate_limited"]
+
+    # Feedback breakdown
+    thumbs_up = sum(1 for e in feedbacks if e.get("feedback_rating") == 1)
+    thumbs_down = sum(1 for e in feedbacks if e.get("feedback_rating") == -1)
+    thumbs_neutral = sum(1 for e in feedbacks if e.get("feedback_rating") == 0)
+    total_thumbs = thumbs_up + thumbs_down + thumbs_neutral
+    thumbs_up_rate = (thumbs_up / total_thumbs * 100.0) if total_thumbs else 0.0
+
+    # Cost + latency
+    total_cost = sum(e.get("cost_usd", 0.0) for e in drafts)
+    latencies = [e.get("latency_ms", 0) for e in drafts if e.get("latency_ms", 0) > 0]
+    p50 = statistics.median(latencies) if latencies else 0.0
+    p95 = sorted(latencies)[int(0.95 * len(latencies))] if latencies else 0.0
+
+    # Per-day
+    per_day: dict[str, dict[str, float]] = {}
+    for e in drafts:
+        day = time.strftime("%Y-%m-%d", time.localtime(e.get("ts", 0)))
+        d = per_day.setdefault(day, {"n": 0, "cost": 0.0, "errors": 0})
+        d["n"] += 1
+        d["cost"] += e.get("cost_usd", 0.0)
+        if e.get("outcome") != "ok":
+            d["errors"] += 1
+
+    # Build the markdown
+    L: list[str] = []
+    L.append("# Iteration Report (Phase 3 T2)")
+    L.append("")
+    L.append(f"Window: last {int(since_seconds / 86400)} days  |  Cutoff: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(cutoff))}")
+    L.append("")
+
+    # Top-line health
+    L.append("## Top-line")
+    L.append("")
+    L.append(f"| Metric | Value |")
+    L.append(f"|---|---|")
+    L.append(f"| Drafts | {len(drafts)} |")
+    L.append(f"| Fallback responses | {len(fallbacks)} |")
+    L.append(f"| Rate-limited | {len(rate_limited)} |")
+    L.append(f"| Total cost | ${total_cost:.4f} |")
+    L.append(f"| P50 latency | {p50:.0f} ms |")
+    L.append(f"| P95 latency | {p95:.0f} ms |")
+    L.append("")
+
+    # Feedback
+    L.append("## Feedback (CS team thumbs)")
+    L.append("")
+    if total_thumbs == 0:
+        L.append("_No feedback recorded yet — the CS team hasn't used /feedback._")
+    else:
+        L.append(f"| Rating | Count | % |")
+        L.append(f"|---|---|---|")
+        L.append(f"| 👍 (+1) | {thumbs_up} | {thumbs_up/total_thumbs*100:.1f}% |")
+        L.append(f"| 👎 (-1) | {thumbs_down} | {thumbs_down/total_thumbs*100:.1f}% |")
+        L.append(f"| 😐 (0) | {thumbs_neutral} | {thumbs_neutral/total_thumbs*100:.1f}% |")
+        L.append("")
+        L.append(f"**Thumbs-up rate: {thumbs_up_rate:.1f}%**  (target: ≥ 80% for Phase 3 sign-off)")
+    L.append("")
+
+    # Per-day breakdown
+    L.append("## Per-day breakdown")
+    L.append("")
+    L.append("| Day | Drafts | Cost (USD) | Errors |")
+    L.append("|---|---|---|---|")
+    for day in sorted(per_day.keys()):
+        d = per_day[day]
+        L.append(f"| {day} | {int(d['n'])} | ${d['cost']:.4f} | {int(d['errors'])} |")
+    L.append("")
+
+    # Top notes (thumbs-down free text)
+    bad_notes = [e.get("note", "") for e in feedbacks
+                 if e.get("feedback_rating") == -1 and e.get("note")]
+    if bad_notes:
+        L.append("## Recent thumbs-down notes")
+        L.append("")
+        for note in bad_notes[:5]:
+            L.append(f"- {note}")
+        L.append("")
+
+    # Optional: eval delta vs baseline
+    if eval_set_path and eval_set_path.exists() and baseline_path and baseline_path.exists():
+        L.append("## Eval delta vs baseline")
+        L.append("")
+        try:
+            rows = _load_eval_set(eval_set_path)
+            agg = run_eval(_default_draft_fn, rows, verbose=False)
+            bd = load_baseline(baseline_path)
+            if bd:
+                L.append("| Metric | Current | Baseline | Delta |")
+                L.append("|---|---|---|---|")
+                for m in ("faithfulness", "answer_relevance", "context_precision", "context_recall"):
+                    cur = getattr(agg, m)
+                    base = bd.get(m, 0.0)
+                    delta = cur - base
+                    flag = "🔴" if delta < -0.05 else ("🟢" if delta > 0.02 else "🟡")
+                    L.append(f"| {m} | {cur:.4f} | {base:.4f} | {delta:+.4f} {flag} |")
+        except Exception as e:
+            L.append(f"_Eval run skipped: {e}_")
+        L.append("")
+
+    return "\n".join(L) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def _load_eval_set(path: Path) -> list[dict]:
@@ -470,14 +614,48 @@ def _default_draft_fn(row: dict) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--set", type=Path, required=True, help="Path to eval_set.jsonl")
-    parser.add_argument("--report", type=Path, default=Path("eval_report.md"))
-    parser.add_argument("--baseline", type=Path, default=None, help="baseline.jsonl to compare against")
-    parser.add_argument("--threshold", type=float, default=0.05, help="regression threshold (default 0.05)")
-    parser.add_argument("--save-baseline", type=Path, default=None, help="if set, write current aggregate as baseline.jsonl")
-    parser.add_argument("--verbose", action="store_true")
-    args = parser.parse_args()
+    sub = parser.add_subparsers(dest="cmd", required=False)
 
+    # Default: run the eval
+    p_eval = sub.add_parser("eval", help="Run the eval set and render a report (default)")
+    p_eval.add_argument("--set", type=Path, required=True, help="Path to eval_set.jsonl")
+    p_eval.add_argument("--report", type=Path, default=Path("eval_report.md"))
+    p_eval.add_argument("--baseline", type=Path, default=None, help="baseline.jsonl to compare against")
+    p_eval.add_argument("--threshold", type=float, default=0.05, help="regression threshold (default 0.05)")
+    p_eval.add_argument("--save-baseline", type=Path, default=None, help="if set, write current aggregate as baseline.jsonl")
+    p_eval.add_argument("--verbose", action="store_true")
+
+    # Phase 3: iteration report
+    p_iter = sub.add_parser("iteration-report", help="Render the weekly iteration report (Phase 3 T2)")
+    p_iter.add_argument("--usage-log", type=Path, default=Path("usage.jsonl"),
+                        help="Path to usage.jsonl (default: usage.jsonl)")
+    p_iter.add_argument("--since-days", type=float, default=7.0,
+                        help="Window in days (default 7)")
+    p_iter.add_argument("--report", type=Path, default=Path("iteration_report.md"),
+                        help="Output path (default: iteration_report.md)")
+    p_iter.add_argument("--baseline", type=Path, default=None,
+                        help="Optional baseline.jsonl to include an eval delta")
+    p_iter.add_argument("--eval-set", type=Path, default=None,
+                        help="Optional eval_set.jsonl to include an eval delta")
+
+    args = parser.parse_args()
+    if args.cmd is None or args.cmd == "eval":
+        return _run_eval_cmd(args)
+    if args.cmd == "iteration-report":
+        md = render_iteration_report(
+            usage_log_path=args.usage_log,
+            since_seconds=args.since_days * 86400.0,
+            baseline_path=args.baseline,
+            eval_set_path=args.eval_set,
+        )
+        args.report.write_text(md, encoding="utf-8")
+        print(f"Wrote iteration report to {args.report}", file=sys.stderr)
+        return 0
+    parser.print_help()
+    return 1
+
+
+def _run_eval_cmd(args) -> int:
     if not args.set.exists():
         print(f"ERROR: eval set not found at {args.set}", file=sys.stderr)
         return 1
@@ -492,8 +670,6 @@ def main() -> int:
     baseline_dict = load_baseline(args.baseline) if args.baseline else None
     baseline_agg: Aggregate | None = None
     if baseline_dict:
-        # Reconstruct a stub Aggregate from the baseline dict so the
-        # regression check can use the same code path.
         baseline_agg = Aggregate(
             n_rows=0, n_errors=0,
             faithfulness=baseline_dict.get("faithfulness", 0.0),
@@ -511,7 +687,6 @@ def main() -> int:
         save_baseline(aggregate, args.save_baseline)
         print(f"Saved baseline to {args.save_baseline}", file=sys.stderr)
 
-    # Exit non-zero if any metric regressed — handy in CI.
     if any(r.regressed for r in regressions):
         return 2
     return 0

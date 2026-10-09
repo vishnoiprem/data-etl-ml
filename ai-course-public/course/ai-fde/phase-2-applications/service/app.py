@@ -1,21 +1,28 @@
 """
-service/app.py — PacificFreight Phase 2 FastAPI service (the deliverable).
+service/app.py — PacificFreight Phase 2/3 FastAPI service (the deliverable).
 
 What this file does
 -------------------
-Exposes 4 endpoints:
+Exposes 9 endpoints:
 
-    GET  /health                → liveness probe (returns {"ok": true})
-    POST /draft                 → RAG-augmented draft of a customer reply
-    GET  /retrieve              → inspect what the retriever would return
-    POST /eval                  → run the eval set, return a markdown report
+    GET  /health                → liveness probe + circuit state + n_chunks
+    POST /draft                 → RAG-augmented draft (Phase 2 — unchanged contract)
+    GET  /retrieve              → inspect what the retriever would return (Phase 2)
+    POST /eval                  → run the eval set, return a markdown report (Phase 2)
+    POST /draft/stream          → SSE streaming variant of /draft (Phase 3 T1)
+    POST /feedback              → record a thumb on a draft (Phase 3 T2)
+    GET  /metrics               → Prometheus text format (Phase 3 T2)
+    POST /admin/reindex         → swap the retrieval corpus (Phase 3 T1)
+    GET  /circuit/state         → current circuit state + recent transitions (Phase 3 T3)
 
 The RAG pipeline (mirrors what Phase 1's CLI does, but over HTTP):
     1. Take the email + (optional) shipment_id.
-    2. Retrieve the top-K policy chunks (k=2) and top-K shipment chunks (k=1).
+    2. Retrieve the top-K policy chunks (k=2) and top-K shipment chunks (k=1)
+       using the Phase 3 hybrid retriever (BM25 + dense + RRF).
     3. If a shipment_id was given, also look it up in the tracker.
     4. Build a RAG-augmented system prompt.
-    5. Call Phase 1's `complete()` (mock by default; real OpenAI if keys set).
+    5. Call Phase 1's `complete()` through the circuit breaker (Phase 3 T3)
+       with rate limiting per user and PII redaction of the email body.
     6. Return the draft + the contexts that were used (so the eval harness
        can score it).
 
@@ -26,28 +33,33 @@ How to run
     uvicorn service.app:app --host 0.0.0.0 --port 8000
 
     # Or in Docker:
-    docker build -t pf-phase2 service/
+    docker build -t pf-phase2 service/       # build context = phase-2-applications/
     docker run --rm -p 8000:8000 pf-phase2
 
 What to read next
 -----------------
-- service/rag.py   — the mock vector store + retrieval
-- service/eval.py  — the eval harness + regression check
-- ../technical/    — the 3 lessons that walk through this code line by line
-- ../consulting/   — the 3 lessons that document why each piece is here
+- service/rag.py          — Phase 2 mock vector store
+- service/retrieval_v2.py — Phase 3 hybrid (BM25 + dense + RRF)
+- service/circuit.py      — Phase 3 circuit breaker + rate limiter + redactor
+- service/telemetry.py    — Phase 3 metrics + JSON logger + request_id middleware
+- service/eval.py         — the eval harness + regression check
+- ../technical/           — the 6 lessons that walk through this code
+- ../consulting/          — the 6 lessons that document why each piece is here
 """
 
 from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
 import sys
 import time
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import StreamingResponse, PlainTextResponse
 from pydantic import BaseModel, Field
 
 # Make sibling modules importable when running as a script or under uvicorn.
@@ -57,6 +69,9 @@ if str(_HERE) not in sys.path:
 
 import rag as rag_mod  # noqa: E402
 import eval as eval_mod  # noqa: E402
+import retrieval_v2 as retrieval_v2_mod  # noqa: E402
+import circuit as circuit_mod  # noqa: E402
+import telemetry as telemetry_mod  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +140,60 @@ class EvalRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Phase 3 Pydantic models
+# ---------------------------------------------------------------------------
+class FeedbackRequest(BaseModel):
+    draft_id: str = Field(..., description="The request_id (or arbitrary id) of the draft being rated")
+    rating: int = Field(..., ge=-1, le=1, description="-1 (bad), 0 (neutral), +1 (good)")
+    note: Optional[str] = Field(None, description="Free-text from the CS rep (optional)")
+
+
+class ReindexRequest(BaseModel):
+    policy_chunks: Optional[list[dict]] = Field(None, description="Replace the policy chunk corpus")
+    shipments: Optional[list[dict]] = Field(None, description="Replace the shipment chunk corpus")
+
+
+class ReindexResponse(BaseModel):
+    ok: bool
+    n_policy: int
+    n_shipment: int
+    n_total: int
+    rebuild_ms: int
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 module-level singletons
+# ---------------------------------------------------------------------------
+_RETRIEVER: retrieval_v2_mod.HybridRetriever | None = None
+_REDACTOR = circuit_mod.Redactor()
+_RATE_LIMITER = circuit_mod.TokenBucketRateLimiter(capacity=20, refill_rate=0.33)  # 20 burst, 1 every 3s = 20/min
+_USAGE_LOG = telemetry_mod.JsonLogger(
+    _HERE / "usage.jsonl" if _HERE.exists() else Path("usage.jsonl")
+)
+# LLM call wrapped in a circuit breaker. Failure threshold 25%, latency P99
+# 4s, cost $5/min — calibrated to PacificFreight's 150 emails/day profile.
+_LLM_CACHE = circuit_mod.TTLCache(max_size=64, ttl_seconds=600.0)
+_LLM_BREAKER = circuit_mod.CircuitBreaker(
+    name="openai",
+    fallback=circuit_mod.make_tiered_fallback(_LLM_CACHE, cheaper_fn=None),
+    config=circuit_mod.CircuitBreakerConfig(
+        failure_threshold=0.25,
+        latency_p99_ms_threshold=4000.0,
+        cost_per_min_usd_threshold=5.0,
+        min_calls_in_window=5,
+        cooldown_seconds=30.0,
+    ),
+)
+
+
+def _get_retriever() -> retrieval_v2_mod.HybridRetriever:
+    global _RETRIEVER
+    if _RETRIEVER is None:
+        _RETRIEVER = retrieval_v2_mod.HybridRetriever()
+    return _RETRIEVER
+
+
+# ---------------------------------------------------------------------------
 # Shared pipeline helpers
 # ---------------------------------------------------------------------------
 _PF_ID_RE = re.compile(r"PF-\s*(\d{4,5})")
@@ -133,11 +202,15 @@ _PF_ID_CLEAN_RE = re.compile(r"PF-\d{4,5}")
 _VECTOR_STORE: rag_mod.MockVectorStore | None = None
 
 
-def _get_vector_store() -> rag_mod.MockVectorStore:
-    global _VECTOR_STORE
-    if _VECTOR_STORE is None:
-        _VECTOR_STORE = rag_mod.MockVectorStore()
-    return _VECTOR_STORE
+def _get_vector_store():
+    """Phase 2 compat shim — returns the Phase 3 HybridRetriever.
+
+    Both expose `retrieve(query, k, source_filter) -> list[RetrievedChunk]`
+    with the same return shape, so Phase 2 callers (and tests) keep working.
+    The hybrid retriever uses BM25 + dense + RRF (T1 lesson) — better
+    ranking at the cost of one extra process step.
+    """
+    return _get_retriever()
 
 
 def _load_tracker() -> list[dict]:
@@ -182,47 +255,65 @@ PERSONA_AND_STYLE = (
 )
 
 
-def _draft_pipeline(req: DraftRequest) -> DraftResponse:
+def _draft_pipeline(req: DraftRequest, request_id: str = "") -> DraftResponse:
     started = time.monotonic()
-    store = _get_vector_store()
+    request_id = request_id or telemetry_mod.new_request_id()
+    store = _get_retriever()
     shipments = _load_tracker()
 
-    # 1. Determine the shipment_id.
+    # 1. Rate-limit per user (Phase 3 T3). Skippable in tests via env var
+    #    so the eval harness can run 30 back-to-back calls without tripping.
+    user_key = req.rep or "anonymous"
+    if os.environ.get("PF_DISABLE_RATE_LIMIT") != "1" and not _RATE_LIMITER.try_acquire(user_key):
+        telemetry_mod.REGISTRY.counter(
+            "pf_drafts_total", labels={"outcome": "rate_limited"}
+        ).inc()
+        _USAGE_LOG.log(
+            request_id=request_id, outcome="rate_limited", latency_ms=0,
+            model="n/a", cost_usd=0.0,
+            circuit_state=circuit_mod.STATE_NAME[_LLM_BREAKER.state],
+            user_id=user_key, note="rate_limiter_rejected",
+        )
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded for user '{user_key}'. Try again shortly.",
+        )
+
+    # 2. PII redaction of the email body (Phase 3 T3).
+    redacted_email = _REDACTOR.redact(req.email)
+    redaction_stats = _REDACTOR.stats()
+
+    # 3. Determine the shipment_id (from explicit param, else extract from email).
     shipment_id = req.shipment_id or _extract_id(req.email)
 
-    # 2. If we have a shipment_id, look it up.
+    # 4. If we have a shipment_id, look it up.
     shipment: dict | None = None
     if shipment_id:
         shipment = _find_shipment(shipments, shipment_id)
 
-    # 3. Retrieve: top-N policy chunks (whole corpus) + top-N shipment chunks.
-    policy_chunks = store.retrieve(req.email, k=req.n_policy_chunks, source_filter="policy")
-    shipment_chunks: list[rag_mod.RetrievedChunk] = []
+    # 5. Retrieve: top-N policy chunks (whole corpus) + top-N shipment chunks.
+    #    Uses the Phase 3 HybridRetriever (BM25 + dense + RRF) — see
+    #    service/retrieval_v2.py.
+    policy_chunks = store.retrieve(redacted_email, k=req.n_policy_chunks, source_filter="policy")
+    shipment_chunks: list = []
     if shipment_id:
-        # Use both the email AND the shipment id as the query so we find
-        # the right one even if the email is short.
-        q = f"{req.email} {shipment_id}"
+        q = f"{redacted_email} {shipment_id}"
         shipment_chunks = store.retrieve(q, k=req.n_shipment_chunks, source_filter="shipment")
 
     all_chunks = policy_chunks + shipment_chunks
 
-    # 4. Build the RAG prompt.
-    # System: persona + retrieved policy chunks (the "what to write like" context)
+    # 6. Build the RAG prompt.
     rep_name = req.rep or "Linh"
     base = PERSONA_AND_STYLE.format(rep=rep_name)
     system_prompt = rag_mod.build_rag_prompt(
         base_system=base,
-        email=req.email,
-        shipment=shipment,  # shipment summary goes in the system prompt as retrieved shipment context
+        email=redacted_email,
+        shipment=shipment,
         chunks=all_chunks,
     )
 
-    # 5. User prompt: the customer email + a "Shipment in tracker" line.
-    #    The "Shipment in tracker: - ID: PF-XXXX" line is the contract
-    #    Phase 1's mock backend looks for to return a canned reply. With
-    #    a real LLM (PF_LLM_PROVIDER=openai), the line just gives the
-    #    model the explicit ID for grounding.
-    user_prompt_parts = [f"Customer email:\n{req.email}\n"]
+    # 7. User prompt.
+    user_prompt_parts = [f"Customer email:\n{redacted_email}\n"]
     if shipment is not None:
         user_prompt_parts.append("Shipment in tracker:")
         user_prompt_parts.append(f"- ID: {shipment['id']}")
@@ -235,58 +326,128 @@ def _draft_pipeline(req: DraftRequest) -> DraftResponse:
     user_prompt_parts.append("\nDraft a reply.")
     user_prompt = "\n".join(user_prompt_parts)
 
-    # 6. Call Phase 1's complete().
-    result = complete(system=system_prompt, user=user_prompt)
+    # 8. Call Phase 1's complete() through the circuit breaker (Phase 3 T3).
+    def _do_complete():
+        return complete(system=system_prompt, user=user_prompt)
+
+    result = _LLM_BREAKER.call(_do_complete, __cost_usd=0.0)
     latency_ms = int((time.monotonic() - started) * 1000)
 
-    return DraftResponse(
-        ok=True,
-        draft=result.text,
-        shipment_id=shipment_id,
-        contexts=[
-            ContextSnippet(
-                id=c.id, source=c.source, score=c.score,
-                text=c.text, metadata=c.metadata,
-            )
-            for c in all_chunks
-        ],
-        model=result.model,
-        provider=result.provider,
-        is_mock=result.is_mock,
-        cost_usd=result.cost_usd,
-        latency_ms=latency_ms,
+    # 9. Telemetry: counters, histograms, structured log.
+    outcome = "ok"
+    fallback_tier = None
+    if isinstance(result, dict) and "fallback_tier" in result:
+        # Came from the tiered fallback.
+        outcome = "fallback"
+        fallback_tier = result.get("fallback_tier")
+        # Re-shape: produce a DraftResponse-shaped object from the fallback dict.
+        class _R:
+            text = result.get("draft", "")
+            model = result.get("model", "stub")
+            provider = "stub"
+            is_mock = True
+            cost_usd = result.get("cost_usd", 0.0)
+        # The /draft response shape is the same; the contexts are still ours.
+        response = DraftResponse(
+            ok=result.get("ok", True),
+            draft=_R.text,
+            shipment_id=shipment_id,
+            contexts=[
+                ContextSnippet(id=c.id, source=c.source, score=c.score,
+                               text=c.text, metadata=c.metadata)
+                for c in all_chunks
+            ],
+            model=_R.model, provider=_R.provider, is_mock=_R.is_mock,
+            cost_usd=_R.cost_usd, latency_ms=latency_ms,
+        )
+    else:
+        response = DraftResponse(
+            ok=True,
+            draft=result.text,
+            shipment_id=shipment_id,
+            contexts=[
+                ContextSnippet(id=c.id, source=c.source, score=c.score,
+                               text=c.text, metadata=c.metadata)
+                for c in all_chunks
+            ],
+            model=result.model,
+            provider=result.provider,
+            is_mock=result.is_mock,
+            cost_usd=result.cost_usd,
+            latency_ms=latency_ms,
+        )
+
+    telemetry_mod.REGISTRY.counter(
+        "pf_drafts_total", labels={"outcome": outcome}
+    ).inc()
+    telemetry_mod.REGISTRY.histogram(
+        "pf_draft_latency_seconds", labels={"outcome": outcome}
+    ).observe(latency_ms / 1000.0)
+    _USAGE_LOG.log(
+        request_id=request_id, outcome=outcome, latency_ms=latency_ms,
+        model=response.model, cost_usd=response.cost_usd,
+        circuit_state=circuit_mod.STATE_NAME[_LLM_BREAKER.state],
+        user_id=user_key, shipment_id=shipment_id, n_contexts=len(all_chunks),
+        note=fallback_tier or f"redacted:e={redaction_stats['emails']},p={redaction_stats['phones']}",
     )
+    return response
 
 
 # ---------------------------------------------------------------------------
 # FastAPI app
 # ---------------------------------------------------------------------------
 app = FastAPI(
-    title="PacificFreight Phase 2 — AI Drafter",
+    title="PacificFreight Phase 2/3 — AI Drafter",
     description=(
-        "RAG-augmented customer-service drafter. Wraps Phase 1's CLI "
-        "in an HTTP service with retrieval over the style guide and "
-        "the shipment tracker. Runs in mock mode by default; set "
-        "PF_LLM_PROVIDER=openai + PF_OPENAI_API_KEY to use real OpenAI."
+        "RAG-augmented customer-service drafter. Phase 2 added the RAG "
+        "service; Phase 3 added hybrid retrieval, streaming, feedback, "
+        "metrics, circuit breaker, and rate limiting. Runs in mock mode by "
+        "default; set PF_LLM_PROVIDER=openai + PF_OPENAI_API_KEY for real LLM."
     ),
-    version="0.2.0",
+    version="0.3.0",
 )
+
+
+@app.middleware("http")
+async def _request_id_middleware(request: Request, call_next):
+    """Generate a request_id per request, store in state, echo in header."""
+    rid = request.headers.get("x-request-id") or telemetry_mod.new_request_id()
+    request.state.request_id = rid
+    started = time.monotonic()
+    try:
+        response = await call_next(request)
+    except Exception:
+        elapsed = time.monotonic() - started
+        telemetry_mod.REGISTRY.histogram(
+            "pf_request_duration_seconds",
+            labels={"path": request.url.path, "outcome": "error"},
+        ).observe(elapsed)
+        raise
+    elapsed = time.monotonic() - started
+    telemetry_mod.REGISTRY.histogram(
+        "pf_request_duration_seconds",
+        labels={"path": request.url.path, "outcome": str(response.status_code)},
+    ).observe(elapsed)
+    response.headers["X-Request-Id"] = rid
+    return response
 
 
 @app.get("/health")
 def health() -> dict:
-    """Liveness probe. Returns 200 if the service is up."""
+    """Liveness probe + circuit state + chunk count."""
     return {
         "ok": True,
         "service": "pf-phase2",
-        "n_chunks_loaded": len(_get_vector_store().chunks),
+        "n_chunks_loaded": _get_retriever().n_chunks,
+        "circuit_state": circuit_mod.STATE_NAME[_LLM_BREAKER.state],
+        "rate_limiter": _RATE_LIMITER.stats(),
     }
 
 
 @app.post("/draft", response_model=DraftResponse)
-def draft(req: DraftRequest) -> DraftResponse:
+def draft(req: DraftRequest, request: Request) -> DraftResponse:
     """Draft a customer-service reply for the given email."""
-    return _draft_pipeline(req)
+    return _draft_pipeline(req, request_id=request.state.request_id)
 
 
 @app.get("/retrieve", response_model=RetrieveResponse)
@@ -300,7 +461,7 @@ def retrieve(
     Useful for debugging the RAG pipeline. `source` can be 'policy',
     'shipment', or omitted (both).
     """
-    store = _get_vector_store()
+    store = _get_retriever()
     chunks = store.retrieve(q, k=k, source_filter=source)
     return RetrieveResponse(
         ok=True,
@@ -313,6 +474,119 @@ def retrieve(
             for c in chunks
         ],
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 endpoints
+# ---------------------------------------------------------------------------
+@app.post("/draft/stream")
+def draft_stream(req: DraftRequest, request: Request):
+    """SSE streaming variant of /draft (Phase 3 T1).
+
+    Emits SSE events as the LLM produces tokens. With Phase 1's mock LLM,
+    the response is a single `done` event carrying the canned reply —
+    the real value here is the streaming protocol (events per token,
+    graceful close on client disconnect, JSON line per usage.jsonl).
+
+    For real OpenAI, swap `_stream_complete` for an OpenAI streaming call.
+    """
+    rid = request.state.request_id
+    started = time.monotonic()
+
+    def event_gen():
+        try:
+            # Run the full draft synchronously (mock LLM is fast); then
+            # yield it as one 'done' event. The SSE protocol is what matters.
+            result = _draft_pipeline(req, request_id=rid)
+            chunk = json.dumps({
+                "draft_id": rid,
+                "draft": result.draft,
+                "shipment_id": result.shipment_id,
+                "contexts": [c.model_dump() for c in result.contexts],
+                "model": result.model,
+                "is_mock": result.is_mock,
+                "cost_usd": result.cost_usd,
+                "latency_ms": result.latency_ms,
+            })
+            yield f"event: done\ndata: {chunk}\n\n"
+        except HTTPException as e:
+            err = json.dumps({"error": e.detail, "status": e.status_code})
+            yield f"event: error\ndata: {err}\n\n"
+        finally:
+            elapsed_ms = int((time.monotonic() - started) * 1000)
+            telemetry_mod.REGISTRY.histogram(
+                "pf_stream_duration_ms", labels={"outcome": "ok"}
+            ).observe(elapsed_ms)
+
+    return StreamingResponse(
+        event_gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Request-Id": rid},
+    )
+
+
+@app.post("/feedback")
+def feedback(req: FeedbackRequest, request: Request) -> dict:
+    """Record a thumb-up/down on a draft (Phase 3 T2)."""
+    rid = request.state.request_id
+    _USAGE_LOG.log(
+        request_id=req.draft_id, outcome="feedback",
+        latency_ms=0, model="n/a", cost_usd=0.0,
+        circuit_state=circuit_mod.STATE_NAME[_LLM_BREAKER.state],
+        user_id="cs_team", feedback_rating=req.rating, note=req.note or "",
+    )
+    telemetry_mod.REGISTRY.counter(
+        "pf_feedback_total", labels={"rating": str(req.rating)}
+    ).inc()
+    return {"ok": True, "draft_id": req.draft_id, "rating": req.rating}
+
+
+@app.get("/metrics")
+def metrics() -> PlainTextResponse:
+    """Prometheus text format (Phase 3 T2)."""
+    # Add the dynamic gauges (circuit state, rate limiter, n_chunks).
+    telemetry_mod.REGISTRY.gauge(
+        "pf_circuit_state", labels={"downstream": "openai"}
+    ).set(float(_LLM_BREAKER.state))
+    telemetry_mod.REGISTRY.gauge("pf_active_rate_limiters").set(
+        float(len(_RATE_LIMITER._buckets))
+    )
+    telemetry_mod.REGISTRY.gauge("pf_n_chunks_loaded").set(
+        float(_get_retriever().n_chunks)
+    )
+    return PlainTextResponse(
+        telemetry_mod.REGISTRY.render_prometheus(),
+        media_type="text/plain; version=0.0.4",
+    )
+
+
+@app.post("/admin/reindex", response_model=ReindexResponse)
+def admin_reindex(req: ReindexRequest) -> ReindexResponse:
+    """Swap the retrieval corpus at runtime (Phase 3 T1)."""
+    started = time.monotonic()
+    retriever = _get_retriever()
+    result = retriever.reindex(
+        policy_chunks=req.policy_chunks, shipments=req.shipments
+    )
+    rebuild_ms = int((time.monotonic() - started) * 1000)
+    telemetry_mod.REGISTRY.counter("pf_reindexes_total").inc()
+    return ReindexResponse(
+        ok=True,
+        n_policy=result["n_policy"],
+        n_shipment=result["n_shipment"],
+        n_total=result["n_total"],
+        rebuild_ms=rebuild_ms,
+    )
+
+
+@app.get("/circuit/state")
+def circuit_state() -> dict:
+    """Current circuit state + recent transitions (Phase 3 T3)."""
+    return {
+        "ok": True,
+        "llm": _LLM_BREAKER.snapshot(),
+        "cache": _LLM_CACHE.stats(),
+    }
 
 
 def _service_draft_fn(row: dict) -> dict:

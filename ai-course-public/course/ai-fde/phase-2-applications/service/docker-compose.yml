@@ -8,6 +8,7 @@ services:
       - PF_LLM_PROVIDER=${PF_LLM_PROVIDER:-mock}
       - PF_OPENAI_API_KEY=${PF_OPENAI_API_KEY:-}
       - PF_MODEL=${PF_MODEL:-mock-deterministic-v1}
+      - PF_DISABLE_RATE_LIMIT=${PF_DISABLE_RATE_LIMIT:-0}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
@@ -15,3 +16,16 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+    # Phase 3: SSE streaming — the dev uvicorn buffers Server-Sent Events.
+    # In production, front the service with caddy (or any reverse proxy) that
+    # passes the `text/event-stream` content-type through unbuffered.
+  pf-caddy:
+    image: caddy:2-alpine
+    container_name: pf-caddy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - pf-phase2
+    profiles: ["prod"]  # only starts when you `docker compose --profile prod up`
