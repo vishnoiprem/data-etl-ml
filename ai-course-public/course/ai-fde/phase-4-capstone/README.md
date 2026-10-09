@@ -37,7 +37,7 @@ An **AI FDE at the Phase 4 level** can take a Phase 1-3 service and turn it into
 
 ## The scenario (continued from Phase 1-2-3)
 
-**Customer:** PacificFreight Co., the 12-person cross-border logistics SMB (Mei, Sarah, Daniel). Continues from `course/ai-fde/phase-3-deployment/scenario-lift.md`.
+**Customer:** PacificFreight Co., the 12-person cross-border logistics SMB (Mei, Sarah, Daniel). Continues from `course/ai-fde/phase-2-core-build/scenario-lift.md`.
 
 **End of Phase 3 state:** Mei sends 150 emails/day through the drafter. Thumbs-up 82%. P95 1.8s. Cost $0.50/week. The 3-loop iteration cadence runs every Monday. Daniel owns the VM and the runbook.
 
@@ -58,7 +58,7 @@ ls case-studies/    # 5 + portfolio + presentation
 ls technical/       # 3 lesson .md files (the why)
 ```
 
-Each project is **self-contained** — it has its own `service/` (or `slm/`) dir, its own tests, its own `README.md`, and its own `ARCHITECTURE.md` (for projects 1 and 4). The shared base (Phase 1-3 service at `course/ai-fde/phase-3-deployment/service/`) is imported via `sys.path` indirection, not `pip install`.
+Each project is **self-contained** — it has its own `service/` (or `slm/`) dir, its own tests, its own `README.md`, and its own `ARCHITECTURE.md` (for projects 1 and 4). The shared base (Phase 1-3 service at `course/ai-fde/phase-2-core-build/service/`) is imported via `sys.path` indirection, not `pip install`.
 
 ```bash
 # Run a project's tests
@@ -68,7 +68,7 @@ cd projects/01-mcp-drafter && python3 -m pytest service/tests/ -v
 cd projects/02-multi-agent-dispatcher && python3 service/agents.py --case multi_shipment
 
 # Run a project's eval
-cd projects/03-distilled-slm && python3 slm/eval.py --baseline ../../phase-3-deployment/shared/baseline.jsonl
+cd projects/03-distilled-slm && python3 slm/eval.py --baseline ../../phase-2-core-build/shared/baseline.jsonl
 ```
 
 ---
@@ -84,6 +84,6 @@ cd projects/03-distilled-slm && python3 slm/eval.py --baseline ../../phase-3-dep
 
 ## What survives the FDE's exit
 
-The 4 projects are the work. The 5 case studies are the *lessons*. The portfolio is the *narrative*. The runbook (Phase 3, `phase-3-deployment/consulting/04-runbook.md`) is the *operational continuity*.
+The 4 projects are the work. The 5 case studies are the *lessons*. The portfolio is the *narrative*. The runbook (Phase 3, `phase-2-core-build/consulting/04-runbook.md`) is the *operational continuity*.
 
 The artifact that goes on the FDE's LinkedIn is `case-studies/PORTFOLIO-NARRATIVE.md` (the 1-page version). The artifact that goes in a job interview is the same file (the 3-page version, with code links). The artifact that goes in the 10-minute live demo is `case-studies/CAPSTONE-PRESENTATION.md` + the running services.

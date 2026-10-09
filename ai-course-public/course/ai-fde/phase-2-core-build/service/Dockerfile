@@ -5,7 +5,7 @@
 # resolve correctly.
 #
 # Build from `course/ai-fde/`:
-#     docker build -f phase-3-deployment/service/Dockerfile \
+#     docker build -f phase-2-core-build/service/Dockerfile \
 #            -t pf-phase2 .
 #
 # Run:
@@ -16,12 +16,12 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install deps first (so this layer is cached when only code changes).
-COPY phase-3-deployment/service/requirements.txt .
+COPY phase-2-core-build/service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the service source + the shared assets it needs at runtime.
-COPY phase-3-deployment/service/ /app/service/
-COPY phase-3-deployment/shared/ /app/shared/
+COPY phase-2-core-build/service/ /app/service/
+COPY phase-2-core-build/shared/ /app/shared/
 COPY phase-1-foundations/shared/ /app/phase-1-foundations/shared/
 
 WORKDIR /app/service

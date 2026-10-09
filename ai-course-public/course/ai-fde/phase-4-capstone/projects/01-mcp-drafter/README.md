@@ -228,7 +228,7 @@ prompt, its eval set, its 13/13 tests, its runbook — all unchanged.
 ## Next: integrate with the drafter
 
 To wire this into the Phase 3 service (the `/draft` endpoint that calls
-the LLM), see `course/ai-fde/phase-3-deployment/service/app.py` — the
+the LLM), see `course/ai-fde/phase-2-core-build/service/app.py` — the
 `/draft` handler can be extended to:
 
 1. List tools from `mcp_server.list_tools()` and inject them into the system prompt

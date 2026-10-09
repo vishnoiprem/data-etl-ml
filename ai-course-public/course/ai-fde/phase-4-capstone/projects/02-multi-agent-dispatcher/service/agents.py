@@ -67,7 +67,7 @@ _PROJ1 = _HERE.parent.parent / "01-mcp-drafter" / "service"
 # _HERE.parent.parent = .../phase-4-capstone/projects
 # _HERE.parent.parent.parent = .../phase-4-capstone
 # _HERE.parent.parent.parent.parent = .../ai-fde
-_PHASE3 = _HERE.parent.parent.parent.parent / "phase-3-deployment" / "service"
+_PHASE3 = _HERE.parent.parent.parent.parent / "phase-2-core-build" / "service"
 
 for p in (_PROJ1, _PHASE3):
     sp = str(p)

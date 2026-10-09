@@ -16,7 +16,7 @@
 
 ## Training data
 
-- **Source:** `course/ai-fde/phase-3-deployment/service/usage.jsonl`
+- **Source:** `course/ai-fde/phase-2-core-build/service/usage.jsonl`
   (the Phase 3 drafter's audit log of every draft)
 - **Volume:** ~1000 drafts (4 weeks of Mei's daily usage at 150 drafts/day)
 - **Filter:** `outcome=ok` AND (no feedback OR `rating=up`)
@@ -71,7 +71,7 @@ post-training:
 
 **Quality ratio vs GPT-4o-mini: 91%** (≥ 90% = pass — the brief's spec).
 
-The full eval set is at `course/ai-fde/phase-3-deployment/shared/eval_set.jsonl`.
+The full eval set is at `course/ai-fde/phase-2-core-build/shared/eval_set.jsonl`.
 To reproduce: `python3 slm/eval.py` (mock back-end) or
 `python3 slm/eval.py --serve-url http://localhost:8001` (real SLM).
 
@@ -129,7 +129,7 @@ The SLM respects the same operational boundaries as the Phase 3 drafter:
 
 ```bash
 # 1. Pull the latest usage.jsonl from the drafter
-cp ../phase-3-deployment/service/usage.jsonl data/usage.jsonl
+cp ../phase-2-core-build/service/usage.jsonl data/usage.jsonl
 
 # 2. Build the training set
 python3 slm/dataset.py --usage data/usage.jsonl --out data/train.parquet

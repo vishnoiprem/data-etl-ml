@@ -56,9 +56,9 @@ You do this in 4 steps:
 
 ```bash
 cd course/ai-fde/phase-4-capstone/projects/03-distilled-slm
-cp ../../phase-3-deployment/service/usage.jsonl slm/data/usage.jsonl
+cp ../../phase-2-core-build/service/usage.jsonl slm/data/usage.jsonl
 python3 slm/dataset.py --usage slm/data/usage.jsonl \
-                       --feedback ../../phase-3-deployment/service/feedback.jsonl \
+                       --feedback ../../phase-2-core-build/service/feedback.jsonl \
                        --out slm/data/train.parquet
 ```
 

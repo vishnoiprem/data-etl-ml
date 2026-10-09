@@ -12,6 +12,7 @@ Run:
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -20,10 +21,19 @@ from pathlib import Path
 SLM = Path(__file__).parent.parent
 sys.path.insert(0, str(SLM))
 
+# Load the slm/eval module by file path to avoid sys.path collisions
+# with Phase 3's service/eval.py (which several other conftest.py files
+# also add to sys.path). The module name is intentionally something
+# other than "eval" so it can't be shadowed.
+_EVAL_PATH = SLM / "eval.py"
+_spec = importlib.util.spec_from_file_location("slm_eval_module", _EVAL_PATH)
+slm_eval = importlib.util.module_from_spec(_spec)  # type: ignore
+sys.modules["slm_eval_module"] = slm_eval
+_spec.loader.exec_module(slm_eval)  # type: ignore
+
 import dataset  # noqa: E402
 import train  # noqa: E402
 import serve  # noqa: E402
-import eval as slm_eval  # noqa: E402
 
 
 _ADAPTER_DIR = SLM / "adapters" / "pf-drafter-lora"

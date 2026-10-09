@@ -230,8 +230,8 @@ blocklist patterns, the sandbox limits, and how to add a new one.
 - [`service/security.py`](./service/security.py) — the blocklist
 - [`service/sandbox.py`](./service/sandbox.py) — the subprocess runner
 - [`service/tests/test_sandbox.py`](./service/tests/test_sandbox.py) — the 3 tests
-- [`../../phase-3-deployment/service/retrieval_v2.py`](../../../phase-3-deployment/service/retrieval_v2.py) — Phase 3's retriever (you'd reuse this for RAG over the customer's docs)
-- [`../../phase-3-deployment/service/circuit.py`](../../../phase-3-deployment/service/circuit.py) — Phase 3's circuit breaker (you'd reuse this for the LLM call inside `/analyst`)
+- [`../../phase-2-core-build/service/retrieval_v2.py`](../../../phase-2-core-build/service/retrieval_v2.py) — Phase 3's retriever (you'd reuse this for RAG over the customer's docs)
+- [`../../phase-2-core-build/service/circuit.py`](../../../phase-2-core-build/service/circuit.py) — Phase 3's circuit breaker (you'd reuse this for the LLM call inside `/analyst`)
 - [`../01-mcp-drafter/`](../01-mcp-drafter/) — the MCP server (the same `tracker.lookup` tool could be exposed to the analyst for "join against the shipments table")
 - [`../02-multi-agent-dispatcher/`](../02-multi-agent-dispatcher/) — the multi-agent orchestrator (the analyst could be a 4th agent in a future customer)
 - [`../03-distilled-slm/`](../03-distilled-slm/) — the SLM (the code-generation prompt is small enough to be served by a 1.5B model, but Phase 5)

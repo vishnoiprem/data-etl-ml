@@ -83,7 +83,7 @@ Together, those three artifacts are what you hand to PacificFreight's exec spons
 ## Where each Phase 2 lesson lands
 
 ```
-phase-3-deployment/
+phase-2-core-build/
 ├── service/                  ← The deployable AI system
 │   ├── app.py                  (FastAPI: /draft, /retrieve, /eval, /health)
 │   ├── rag.py                  (MockVectorStore + retrieve() + build_rag_prompt())
@@ -120,7 +120,7 @@ phase-3-deployment/
 
 ## Phase 3 close (Deployment Depth) — what shipped
 
-Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in this same `phase-3-deployment/` directory because the course was numbered before Phase 3 existed; the labeling gap is intentional and the `phase-4-capstone/` directory picks up the Phase 4 numbering without renaming).
+Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in this same `phase-2-core-build/` directory because the course was numbered before Phase 3 existed; the labeling gap is intentional and the `phase-4-capstone/` directory picks up the Phase 4 numbering without renaming).
 
 ### 5 Phase 2 commitments → 5 Phase 3 deliverables
 

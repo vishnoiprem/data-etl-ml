@@ -18,6 +18,6 @@ if str(_PROJ1) not in sys.path:
 # SVC.parent.parent = .../projects
 # SVC.parent.parent.parent = .../phase-4-capstone
 # SVC.parent.parent.parent.parent = .../ai-fde  <-- HERE
-_PHASE3 = SVC.parent.parent.parent.parent / "phase-3-deployment" / "service"
+_PHASE3 = SVC.parent.parent.parent.parent / "phase-2-core-build" / "service"
 if str(_PHASE3) not in sys.path:
     sys.path.insert(0, str(_PHASE3))
