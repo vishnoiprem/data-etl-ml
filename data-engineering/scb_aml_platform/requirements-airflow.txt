@@ -17,4 +17,4 @@
 apache-airflow==2.7.3
 sqlalchemy==1.4.52
 pandas==2.0.3
-loguru==0.7.2
+loguru==0.7.3
