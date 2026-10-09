@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — AIForBiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
+      <div>
+        <a href="/">Home</a>
+        <a href="/prompts">Prompts</a>
+        <a href="/pricing">Pricing</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 60px 0 20px;">
+      <div class="container">
+        <p class="kicker">Admin Dashboard</p>
+        <h1>Your business at a glance.</h1>
+        <p class="sub">All your metrics in one place. Auto-refreshes every 10 seconds.</p>
+      </div>
+    </section>
+
+    <section style="padding: 20px 0 60px;">
+      <div class="container">
+        <div class="stats" id="stats"></div>
+
+        <div class="admin-card">
+          <h2>📧 Email Signups</h2>
+          <table id="signups-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Source</th>
+                <th>Signed Up</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="admin-card">
+          <h2>💰 Sales</h2>
+          <table id="sales-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <p class="api-links">
+          <a href="/admin/api/signups" target="_blank">View raw signups JSON</a> ·
+          <a href="/admin/api/sales" target="_blank">View raw sales JSON</a> ·
+          <a href="/docs" target="_blank">API docs</a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 AIForBiz · Made with ❤️ in Singapore</p>
+  </footer>
+
+  <script>
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('en-US', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/admin/api/stats');
+        const s = await res.json();
+        document.getElementById('stats').innerHTML = `
+          <div class="stat">
+            <strong>${s.total_signups}</strong>
+            <span>Signups</span>
+          </div>
+          <div class="stat">
+            <strong>${s.total_sales}</strong>
+            <span>Sales</span>
+          </div>
+          <div class="stat">
+            <strong>$${s.total_revenue.toLocaleString()}</strong>
+            <span>Revenue</span>
+          </div>
+          <div class="stat">
+            <strong>${s.conversion_rate.toFixed(1)}%</strong>
+            <span>Conversion</span>
+          </div>
+          <div class="stat">
+            <strong>$${s.average_order_value.toFixed(0)}</strong>
+            <span>Avg Order</span>
+          </div>
+        `;
+      } catch (e) {
+        console.error('Stats error:', e);
+      }
+    }
+
+    async function loadSignups() {
+      try {
+        const res = await fetch('/admin/api/signups');
+        const signups = await res.json();
+        const tbody = document.querySelector('#signups-table tbody');
+        if (signups.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No signups yet. Share your landing page to get started.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = signups.reverse().map(s => `
+          <tr>
+            <td>#${s.id}</td>
+            <td><strong>${s.email}</strong></td>
+            <td>${s.name || '—'}</td>
+            <td><code style="font-size: 12px; background: var(--gray-100); padding: 2px 8px; border-radius: 4px;">${s.source}</code></td>
+            <td>${formatDate(s.timestamp)}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('Signups error:', e);
+      }
+    }
+
+    async function loadSales() {
+      try {
+        const res = await fetch('/admin/api/sales');
+        const data = await res.json();
+        const tbody = document.querySelector('#sales-table tbody');
+        if (data.sales.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No sales yet. Your first sale is one click away.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.sales.reverse().map(s => `
+          <tr>
+            <td>#${s.id}</td>
+            <td><strong>${s.email}</strong></td>
+            <td>${s.product_name}</td>
+            <td><strong style="color: var(--green);">$${s.amount}</strong></td>
+            <td>${formatDate(s.timestamp)}</td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        console.error('Sales error:', e);
+      }
+    }
+
+    loadStats();
+    loadSignups();
+    loadSales();
+
+    // Auto-refresh every 10s
+    setInterval(() => { loadStats(); loadSignups(); loadSales(); }, 10000);
+
+    // Fade-in animation
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => e.isIntersecting && e.target.classList.add('in-view'));
+    });
+    document.querySelectorAll('.admin-card, .stat').forEach(el => {
+      el.classList.add('fade-in');
+      obs.observe(el);
+    });
+  </script>
+</body>
+</html>
