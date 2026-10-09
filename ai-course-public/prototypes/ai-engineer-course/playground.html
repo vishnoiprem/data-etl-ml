@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Playground — AI Engineer Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .playground-page { padding: 40px 0 60px; }
+    .playground-header { margin-bottom: 32px; }
+    .playground-layout { display: grid; grid-template-columns: 240px 1fr 1fr; gap: 16px; height: calc(100vh - 200px); min-height: 600px; }
+    @media (max-width: 1100px) { .playground-layout { grid-template-columns: 1fr; height: auto; } }
+
+    /* Sidebar */
+    .snippet-sidebar {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid var(--gray-200); padding: 16px; overflow-y: auto;
+    }
+    .snippet-sidebar h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gray-500); margin-bottom: 12px; padding: 0 8px; }
+    .snippet-item {
+      display: block; padding: 10px 12px; border-radius: 8px;
+      font-size: 13px; color: var(--gray-600); cursor: pointer;
+      transition: all 0.15s; text-decoration: none; line-height: 1.4;
+    }
+    .snippet-item:hover { background: var(--gray-100); color: var(--gray-700); }
+    .snippet-item.active { background: var(--blue); color: var(--white); }
+    .snippet-item strong { display: block; font-weight: 600; }
+    .snippet-item small { color: var(--gray-400); font-size: 11px; }
+    .snippet-item.active small { color: rgba(255,255,255,0.7); }
+
+    /* Editor */
+    .editor-panel {
+      background: var(--gray-700); border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .editor-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; background: rgba(0,0,0,0.3);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .editor-dots { display: flex; gap: 6px; }
+    .editor-dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+    .editor-filename { color: var(--gray-300); font-size: 12px; font-family: 'JetBrains Mono', monospace; flex: 1; text-align: center; }
+    .editor-actions { display: flex; gap: 8px; }
+    .editor-actions button {
+      padding: 6px 14px; border-radius: 6px;
+      background: var(--blue); color: var(--white); border: none;
+      font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .editor-actions button:hover { background: var(--blue-dark); }
+    .editor-actions .reset { background: transparent; color: var(--gray-300); border: 1px solid rgba(255,255,255,0.2); }
+    .editor-actions .reset:hover { background: rgba(255,255,255,0.1); }
+    .editor-textarea {
+      flex: 1; background: var(--gray-700); color: #E8E8ED;
+      border: none; padding: 16px 20px;
+      font-family: 'JetBrains Mono', 'Menlo', monospace;
+      font-size: 13px; line-height: 1.6; resize: none; outline: none;
+    }
+
+    /* Output */
+    .output-panel {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid var(--gray-200); display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .output-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    .output-tab {
+      padding: 6px 12px; border-radius: 6px; font-size: 13px;
+      color: var(--gray-500); cursor: pointer; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .output-tab.active { background: var(--white); color: var(--gray-700); box-shadow: var(--shadow-sm); }
+    .output-content {
+      flex: 1; padding: 20px; overflow-y: auto;
+      font-family: 'JetBrains Mono', 'Menlo', monospace;
+      font-size: 13px; line-height: 1.6; color: var(--gray-700);
+      background: var(--white);
+    }
+    .output-line { padding: 4px 0; white-space: pre-wrap; word-break: break-word; }
+    .output-line.tool-call { color: var(--blue); }
+    .output-line.tool-result { color: var(--green); }
+    .output-line.thought { color: var(--purple); font-style: italic; }
+    .output-line.final { color: var(--gray-700); font-weight: 600; background: var(--gray-100); padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+    .output-line.error { color: #D70015; }
+    .output-line.info { color: var(--gray-500); }
+    .output-empty { color: var(--gray-400); font-style: italic; text-align: center; padding: 40px 20px; }
+
+    /* Top bar */
+    .playground-top {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .playground-top h1 { font-size: 28px; margin: 0; }
+    .lesson-context {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; background: var(--gray-100); border-radius: 980px;
+      font-size: 13px; color: var(--gray-600);
+    }
+    .lesson-context strong { color: var(--gray-700); }
+
+    .model-selector {
+      margin-left: auto; display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; background: var(--white);
+      border: 1px solid var(--gray-200); border-radius: 980px; font-size: 13px;
+    }
+    .model-selector select { border: none; background: transparent; font-family: inherit; font-size: 13px; color: var(--gray-700); cursor: pointer; outline: none; }
+
+    .info-banner {
+      background: linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%);
+      border: 1px solid #BBDEFB; border-radius: var(--radius);
+      padding: 16px 20px; margin-bottom: 24px; font-size: 14px;
+      color: #1565C0; line-height: 1.5;
+    }
+    .info-banner strong { color: #0D47A1; }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+  </div>
+
+  <header>
+    <nav class="container">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="curriculum.html">Curriculum</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="playground.html" style="color: var(--blue); font-weight: 600;">Playground</a>
+        <a href="#" class="btn btn-secondary btn-sm">Sign in</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="playground-page">
+    <div class="container">
+      <div class="playground-top">
+        <h1>Code Playground</h1>
+        <div class="lesson-context">
+          Lesson: <strong id="current-lesson">8.2 — Building a ReAct Agent</strong>
+        </div>
+        <div class="model-selector">
+          <span>Model:</span>
+          <select>
+            <option>GPT-4o (simulated)</option>
+            <option>Claude 3.5 (simulated)</option>
+            <option>GPT-4o-mini (simulated)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="info-banner">
+        💡 <strong>Browser-based playground:</strong> This is a sandboxed environment that simulates LLM responses. Write Python-style code on the left, see simulated outputs on the right. The patterns and APIs are real — only the LLM responses are mocked. <a href="#" style="color: var(--blue);">Get the real course →</a>
+      </div>
+
+      <div class="playground-layout">
+        <!-- Snippet Sidebar -->
+        <aside class="snippet-sidebar">
+          <h4>📚 Course Snippets</h4>
+          <a class="snippet-item active" data-snippet="react-agent">
+            <strong>ReAct Agent</strong>
+            <small>Lesson 8.2</small>
+          </a>
+          <a class="snippet-item" data-snippet="rag">
+            <strong>RAG from Scratch</strong>
+            <small>Lesson 3.2</small>
+          </a>
+          <a class="snippet-item" data-snippet="streaming">
+            <strong>Streaming Chat</strong>
+            <small>Lesson 2.1</small>
+          </a>
+          <a class="snippet-item" data-snippet="function-calling">
+            <strong>Function Calling</strong>
+            <small>Lesson 2.3</small>
+          </a>
+          <a class="snippet-item" data-snippet="agent-tools">
+            <strong>Multi-Tool Agent</strong>
+            <small>Lesson 8.4</small>
+          </a>
+          <a class="snippet-item" data-snippet="prompt-cache">
+            <strong>Prompt Caching</strong>
+            <small>Lesson 2.5</small>
+          </a>
+
+          <h4 style="margin-top: 24px;">⚡ Quick Start</h4>
+          <a class="snippet-item" data-snippet="hello">
+            <strong>Hello World</strong>
+            <small>Starter</small>
+          </a>
+          <a class="snippet-item" data-snippet="embedding">
+            <strong>Embeddings</strong>
+            <small>Lesson 1.6</small>
+          </a>
+        </aside>
+
+        <!-- Code Editor -->
+        <div class="editor-panel">
+          <div class="editor-header">
+            <div class="editor-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="editor-filename" id="editor-filename">react_agent.py</div>
+            <div class="editor-actions">
+              <button class="reset" onclick="resetCode()">Reset</button>
+              <button onclick="runCode()">▶ Run</button>
+            </div>
+          </div>
+          <textarea class="editor-textarea" id="code-editor" spellcheck="false"></textarea>
+        </div>
+
+        <!-- Output -->
+        <div class="output-panel">
+          <div class="output-header">
+            <div class="output-tab active">Output</div>
+            <div class="output-tab">Tokens</div>
+            <div class="output-tab">Cost</div>
+          </div>
+          <div class="output-content" id="output">
+            <div class="output-empty">Click ▶ Run to execute your code.<br>Outputs will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 AIForBiz · <a href="index.html">Home</a> · <a href="curriculum.html">Curriculum</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Code snippets
+    const snippets = {
+      'react-agent': {
+        filename: 'react_agent.py',
+        code: `# ReAct Agent — Lesson 8.2
+# Build an agent that uses tools to answer questions
+
+from openai import OpenAI
+
+client = OpenAI()
+
+# Define tools
+TOOLS = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Get current weather for a city",
+        "parameters": {
+            "type": "object",
+            "properties": {"city": {"type": "string"}},
+            "required": ["city"]
+        }
+    }
+}]
+
+def get_weather(city: str) -> str:
+    return f"22°C, partly cloudy in {city}"
+
+# Run the agent
+def run_agent(query):
+    messages = [{"role": "user", "content": query}]
+
+    for i in range(5):
+        print(f"--- Iteration {i+1} ---")
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=TOOLS
+        )
+
+        if not response.tool_calls:
+            return response.choices[0].message.content
+
+        for call in response.tool_calls:
+            result = get_weather(**call.args)
+            print(f"🔧 {call.function.name}({call.args})")
+            print(f"📊 {result}")
+            messages.append({"role": "tool", "content": result})
+
+print(run_agent("What's the weather in Tokyo?"))`
+      },
+
+      'rag': {
+        filename: 'rag_from_scratch.py',
+        code: `# RAG from Scratch — Lesson 3.2
+# Build retrieval-augmented generation in 50 lines
+
+import numpy as np
+from openai import OpenAI
+
+client = OpenAI()
+
+# Step 1: Chunk documents
+def chunk(text, size=500):
+    words = text.split()
+    return [' '.join(words[i:i+size]) for i in range(0, len(words), size)]
+
+# Step 2: Embed chunks
+def embed(texts):
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=texts
+    )
+    return [e.embedding for e in response.data]
+
+# Step 3: Search
+def search(query, chunks, embeddings, k=3):
+    q_emb = embed([query])[0]
+    sims = np.dot(embeddings, q_emb) / (
+        np.linalg.norm(embeddings, axis=1) * np.linalg.norm(q_emb)
+    )
+    top = np.argsort(sims)[-k:][::-1]
+    return [chunks[i] for i in top]
+
+# Step 4: Generate answer
+def answer(question, chunks, embeddings):
+    context = "\\n\\n".join(search(question, chunks, embeddings))
+    prompt = f"""Answer based on the context.
+    If the answer isn't there, say 'I don't know.'
+
+    Context: {context}
+    Question: {question}"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
+
+# Try it
+chunks = chunk("AI is transforming software development. RAG solves hallucination.")
+embeddings = np.array(embed(chunks))
+print(answer("How does RAG help?", chunks, embeddings))`
+      },
+
+      'streaming': {
+        filename: 'streaming_chat.py',
+        code: `# Streaming responses — Lesson 2.1
+# See tokens as they're generated
+
+from openai import OpenAI
+
+client = OpenAI()
+
+stream = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Explain RAG in 3 sentences"}],
+    stream=True
+)
+
+print("Streaming response:")
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print("\\n\\n✓ Done")`
+      },
+
+      'function-calling': {
+        filename: 'function_calling.py',
+        code: `# Function calling — Lesson 2.3
+# Let the LLM call your functions
+
+from openai import OpenAI
+import json
+
+client = OpenAI()
+
+def get_stock_price(symbol: str) -> str:
+    prices = {"AAPL": "$175", "GOOGL": "$142", "MSFT": "$412"}
+    return prices.get(symbol.upper(), "Unknown")
+
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_stock_price",
+        "description": "Get current stock price for a ticker symbol",
+        "parameters": {
+            "type": "object",
+            "properties": {"symbol": {"type": "string"}},
+            "required": ["symbol"]
+        }
+    }
+}]
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "What's Apple's stock price?"}],
+    tools=tools
+)
+
+call = response.choices[0].message.tool_calls[0]
+args = json.loads(call.function.arguments)
+print(f"🔧 Calling: {call.function.name}({args})")
+
+result = get_stock_price(**args)
+print(f"📊 Result: {result}")
+print(f"\\nAAPL is trading at {result}.")`
+      },
+
+      'agent-tools': {
+        filename: 'multi_tool_agent.py',
+        code: `# Multi-tool agent — Lesson 8.4
+# Agent with 3 tools that chains them
+
+from openai import OpenAI
+
+client = OpenAI()
+
+# Mock tools
+def get_weather(city): return f"22°C in {city}"
+def search_web(query): return f"3 results for '{query}'"
+def calculate(expr): return str(eval(expr))
+
+TOOLS = [
+    {"type": "function", "function": {
+        "name": "get_weather",
+        "description": "Get weather for a city",
+        "parameters": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}
+    }},
+    {"type": "function", "function": {
+        "name": "search_web",
+        "description": "Search the web for information",
+        "parameters": {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}
+    }},
+    {"type": "function", "function": {
+        "name": "calculate",
+        "description": "Calculate a math expression",
+        "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}
+    }}
+]
+
+def run_agent(query):
+    messages = [{"role": "user", "content": query}]
+    tools_map = {"get_weather": get_weather, "search_web": search_web, "calculate": calculate}
+
+    for i in range(5):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=messages, tools=TOOLS
+        )
+        msg = response.choices[0].message
+
+        if not msg.tool_calls:
+            return msg.content
+
+        for call in msg.tool_calls:
+            import json
+            args = json.loads(call.function.arguments)
+            result = tools_map[call.function.name](**args)
+            print(f"🔧 {call.function.name}({args}) → {result}")
+            messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
+
+print(run_agent("What's the weather in Tokyo and what's 22 * 3?"))`
+      },
+
+      'prompt-cache': {
+        filename: 'prompt_caching.py',
+        code: `# Prompt caching — Lesson 2.5
+# Reduce costs by 90% with prompt caching
+
+from openai import OpenAI
+
+client = OpenAI()
+
+# Long system prompt (cacheable)
+LONG_SYSTEM_PROMPT = """
+You are an expert customer support agent for TechCorp.
+Our policies are:
+- 30-day money-back guarantee
+- Free shipping on orders over $50
+- 24/7 support via email
+- Returns must include original packaging
+[... 5000 more characters of policies ...]
+""" * 10  # Simulating a long doc
+
+# Without cache: full prompt is charged every time
+def without_cache(user_message):
+    return client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": LONG_SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ]
+    )
+
+# With cache: system prompt is cached and reused
+def with_cache(user_message):
+    return client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": LONG_SYSTEM_PROMPT},
+            {"role": "user", "content": user_message}
+        ],
+        extra_headers={"anthropic-beta": "prompt-caching-2024-07-31"}  # For Claude
+    )
+
+# Cost comparison
+print("Without caching: ~$0.015 per request")
+print("With caching:    ~$0.0015 per request")
+print("Savings: ~90%")`
+      },
+
+      'hello': {
+        filename: 'hello.py',
+        code: `# Your first AI call
+
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Say hello in 5 languages"}
+    ]
+)
+
+print(response.choices[0].message.content)`
+      },
+
+      'embedding': {
+        filename: 'embeddings.py',
+        code: `# Embeddings — Lesson 1.6
+# Convert text to vectors
+
+from openai import OpenAI
+import numpy as np
+
+client = OpenAI()
+
+texts = [
+    "I love programming",
+    "Coding is fun",
+    "The weather is nice",
+    "It's raining today"
+]
+
+# Get embeddings
+response = client.embeddings.create(
+    model="text-embedding-3-small",
+    input=texts
+)
+
+embeddings = [e.embedding for e in response.data]
+
+# Calculate similarities
+def cosine_sim(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+print("Similarity matrix:")
+for i, t1 in enumerate(texts):
+    for j, t2 in enumerate(texts):
+        if i < j:
+            sim = cosine_sim(embeddings[i], embeddings[j])
+            print(f"  {sim:.3f}  {t1!r}  ↔  {t2!r}")`
+      }
+    };
+
+    let currentSnippet = 'react-agent';
+    const editor = document.getElementById('code-editor');
+    const output = document.getElementById('output');
+
+    function loadSnippet(name) {
+      currentSnippet = name;
+      const snippet = snippets[name];
+      editor.value = snippet.code;
+      document.getElementById('editor-filename').textContent = snippet.filename;
+      document.querySelectorAll('.snippet-item').forEach(el => el.classList.remove('active'));
+      document.querySelector(`[data-snippet="${name}"]`).classList.add('active');
+      output.innerHTML = '<div class="output-empty">Click ▶ Run to execute your code.</div>';
+    }
+
+    function resetCode() { loadSnippet(currentSnippet); }
+
+    function addOutput(text, type = '') {
+      if (output.querySelector('.output-empty')) output.innerHTML = '';
+      const line = document.createElement('div');
+      line.className = 'output-line ' + type;
+      line.textContent = text;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // Simulated code execution
+    function runCode() {
+      output.innerHTML = '';
+      const code = editor.value;
+      addOutput('▶ Running...', 'info');
+      addOutput('', 'info');
+
+      // ReAct agent
+      if (code.includes('run_agent') && code.includes('TOOLS')) {
+        setTimeout(() => {
+          addOutput('--- Iteration 1 ---', 'info');
+          addOutput('🔧 Calling: get_weather({"city": "Tokyo"})', 'tool-call');
+          setTimeout(() => {
+            addOutput('📊 Result: 22°C, partly cloudy in Tokyo', 'tool-result');
+            addOutput('', 'info');
+            addOutput('--- Iteration 2 ---', 'info');
+            setTimeout(() => {
+              addOutput('✓ Final Answer: The current weather in Tokyo is 22°C with partly cloudy skies.', 'final');
+              addOutput('', 'info');
+              addOutput('Tokens used: 247 | Cost: $0.000037', 'info');
+            }, 600);
+          }, 600);
+        }, 400);
+      }
+      // RAG
+      else if (code.includes('def chunk') && code.includes('def embed')) {
+        setTimeout(() => {
+          addOutput('Chunking documents...', 'info');
+          addOutput('→ Created 1 chunk (500 tokens)', 'tool-result');
+          addOutput('', 'info');
+          addOutput('Generating embeddings...', 'info');
+          addOutput('→ 1 embedding created (1536 dimensions)', 'tool-result');
+          addOutput('', 'info');
+          addOutput('Searching for: "How does RAG help?"', 'info');
+          addOutput('→ Found 1 relevant chunks (similarity: 0.847)', 'tool-result');
+          addOutput('', 'info');
+          addOutput('✓ Final Answer: RAG (Retrieval-Augmented Generation) helps reduce hallucinations by grounding LLM responses in actual retrieved documents, rather than relying solely on the model\'s training data.', 'final');
+          addOutput('', 'info');
+          addOutput('Tokens used: 612 | Cost: $0.000092', 'info');
+        }, 400);
+      }
+      // Streaming
+      else if (code.includes('stream=True')) {
+        setTimeout(() => {
+          addOutput('Streaming response:', 'info');
+          addOutput('', 'info');
+          const tokens = ['Retrieval', '-', 'Augmented', ' Generation', ' (RAG', ')', ' combines', ' a', ' retrieval', ' system', ' with', ' a', ' language', ' model', ' to', ' provide', ' accurate', ',', ' grounded', ' answers', '.'];
+          let i = 0;
+          const interval = setInterval(() => {
+            if (i >= tokens.length) {
+              clearInterval(interval);
+              addOutput('', 'info');
+              addOutput('✓ Done', 'final');
+              addOutput('Tokens used: 89 | Cost: $0.000013', 'info');
+              return;
+            }
+            const line = document.createElement('div');
+            line.className = 'output-line';
+            line.textContent = tokens[i];
+            line.style.color = 'var(--blue)';
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+            i++;
+          }, 80);
+        }, 400);
+      }
+      // Function calling
+      else if (code.includes('get_stock_price')) {
+        setTimeout(() => {
+          addOutput('🔧 Calling: get_stock_price({"symbol": "AAPL"})', 'tool-call');
+          setTimeout(() => {
+            addOutput('📊 Result: $175', 'tool-result');
+            addOutput('', 'info');
+            addOutput('✓ AAPL is trading at $175.', 'final');
+            addOutput('', 'info');
+            addOutput('Tokens used: 156 | Cost: $0.000023', 'info');
+          }, 500);
+        }, 400);
+      }
+      // Multi-tool agent
+      else if (code.includes('multi_tool') || code.includes('search_web')) {
+        setTimeout(() => {
+          addOutput('🔧 get_weather({"city": "Tokyo"}) → 22°C in Tokyo', 'tool-call');
+          addOutput('🔧 calculate({"expression": "22 * 3"}) → 66', 'tool-call');
+          addOutput('', 'info');
+          addOutput('✓ Final Answer: The weather in Tokyo is 22°C, and 22 multiplied by 3 equals 66.', 'final');
+          addOutput('', 'info');
+          addOutput('Tokens used: 384 | Cost: $0.000058', 'info');
+        }, 800);
+      }
+      // Caching
+      else if (code.includes('LONG_SYSTEM_PROMPT')) {
+        setTimeout(() => {
+          addOutput('Without caching: ~$0.015 per request', 'info');
+          addOutput('With caching:    ~$0.0015 per request', 'info');
+          addOutput('', 'info');
+          addOutput('✓ Savings: ~90% on cached prompts', 'final');
+        }, 400);
+      }
+      // Embeddings
+      else if (code.includes('text-embedding')) {
+        setTimeout(() => {
+          addOutput('Similarity matrix:', 'info');
+          addOutput('', 'info');
+          addOutput('  0.892  "I love programming"  ↔  "Coding is fun"', 'tool-result');
+          addOutput('  0.234  "I love programming"  ↔  "The weather is nice"', 'info');
+          addOutput('  0.198  "I love programming"  ↔  "It\'s raining today"', 'info');
+          addOutput('  0.156  "Coding is fun"  ↔  "The weather is nice"', 'info');
+          addOutput('  0.189  "Coding is fun"  ↔  "It\'s raining today"', 'info');
+          addOutput('  0.743  "The weather is nice"  ↔  "It\'s raining today"', 'tool-result');
+          addOutput('', 'info');
+          addOutput('Tokens used: 24 | Cost: $0.000002', 'info');
+        }, 400);
+      }
+      // Default
+      else {
+        setTimeout(() => {
+          addOutput('Hello! (こんにちは)', 'final');
+          addOutput('Hola! (¡Hola!)', 'final');
+          addOutput('Bonjour! (Salut!)', 'final');
+          addOutput('Hallo! (Guten Tag)', 'final');
+          addOutput('Ciao! (Salve!)', 'final');
+          addOutput('', 'info');
+          addOutput('Tokens used: 28 | Cost: $0.000004', 'info');
+        }, 500);
+      }
+    }
+
+    // Snippet switching
+    document.querySelectorAll('.snippet-item').forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        loadSnippet(item.dataset.snippet);
+      });
+    });
+
+    // Tab switching
+    document.querySelectorAll('.output-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const text = tab.textContent;
+        if (text === 'Output') {
+          // Keep current output
+        } else if (text === 'Tokens') {
+          output.innerHTML = '<div class="output-line info">Token usage by model:</div><div class="output-line">gpt-4o-mini: 247 tokens</div><div class="output-line">gpt-4o: 247 tokens (3x cost)</div><div class="output-line">claude-3.5-sonnet: 247 tokens (5x cost)</div>';
+        } else if (text === 'Cost') {
+          output.innerHTML = '<div class="output-line info">Cost breakdown:</div><div class="output-line">Input: $0.000023</div><div class="output-line">Output: $0.000014</div><div class="output-line"><strong>Total: $0.000037</strong></div><div class="output-line info" style="margin-top: 12px;">At 10K requests/day: $0.37/day = $135/year</div>';
+        }
+      });
+    });
+
+    // Cmd/Ctrl+Enter to run
+    editor.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runCode();
+      }
+    });
+
+    // Load initial snippet
+    loadSnippet('react-agent');
+  </script>
+</body>
+</html>
