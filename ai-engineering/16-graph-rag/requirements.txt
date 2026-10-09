@@ -15,7 +15,7 @@ networkx>=3.2
 
 # Embeddings & retrieval (LOCAL mode)
 sentence-transformers>=2.7.0
-faiss-cpu>=1.8.0
+faiss-cpu>=1.15.1
 rank-bm25>=0.2.2
 
 # Document processing
