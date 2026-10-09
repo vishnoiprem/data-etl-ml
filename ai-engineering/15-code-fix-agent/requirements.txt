@@ -1,5 +1,5 @@
 # Code-fix agent
-openai>=1.0.0
+openai>=3.24.0
 pydantic>=2.5.0
 GitPython>=3.1.40
 pytest>=8.0.0
