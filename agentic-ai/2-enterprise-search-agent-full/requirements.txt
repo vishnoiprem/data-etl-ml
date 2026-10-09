@@ -3,7 +3,7 @@
 # lockfile, not in a demo's requirements file.
 fastapi>=0.115
 uvicorn>=0.34
-pydantic>=2.10
+pydantic>=2.13.5
 scikit-learn>=1.6
 numpy>=2.0
 pytest>=8.3
