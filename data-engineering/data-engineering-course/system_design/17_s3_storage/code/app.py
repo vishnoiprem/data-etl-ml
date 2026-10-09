@@ -137,6 +137,13 @@ def create_app(service: ObjectStoreService | None = None) -> Flask:
                 return jsonify({"error": str(e)}), 400
             mp_count.inc()
             return jsonify({"bucket": bucket, "key": key, "upload_id": upload_id}), 200
+        if request.args.get("uploadId") and request.args.get("complete"):
+            try:
+                res = service.complete_multipart(request.args.get("uploadId"))
+            except Exception as e:
+                return jsonify({"error": str(e)}), 400
+            mp_count.inc()
+            return jsonify(res), 200
         return jsonify({"error": "unsupported POST"}), 400
 
     @app.get("/metrics")

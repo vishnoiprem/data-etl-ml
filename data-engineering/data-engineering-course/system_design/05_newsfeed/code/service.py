@@ -196,6 +196,14 @@ class NewsfeedService:
         if follower_id in s:
             s.remove(follower_id)
             self.follows.set(f"{FOLLOW_NS}_by:{followee_id}", s)
+        # Purge the followee's posts from the follower's materialized feed.
+        feed = self.feeds.get(f"{FEED_NS}:{follower_id}") or []
+        author_posts = set(self.posts_by.get(f"{POSTS_BY_NS}:{followee_id}") or [])
+        if author_posts:
+            feed = [pid for pid in feed if pid not in author_posts]
+            self.feeds.set(f"{FEED_NS}:{follower_id}", feed)
+        # Bust this viewer's cached ranked feeds.
+        self.feed_cache.clear()
         for uid, key in [(follower_id, "following_count"),
                          (followee_id, "followers_count")]:
             u = self.get_user(uid)
@@ -271,11 +279,9 @@ class NewsfeedService:
         # Bust feed caches — the score has changed and we don't want to
         # serve stale rankings.  Any feed that could contain this post
         # is invalidated: the viewer's own feed plus every follower of
-        # the author.
-        self.feed_cache.delete(f"ranked_feed:{p.user_id}:*")
-        # Cheap and safe: delete by exact (viewer_id:limit) keys we know
-        # exist via the materialized feed of the author.
-        # (We use simple prefix-less deletes since our cache is in-memory.)
+        # the author.  Cheapest correct option for an in-memory cache
+        # is to clear it entirely.
+        self.feed_cache.clear()
         return {
             "post_id": post_id,
             "likes": p.likes,
@@ -292,8 +298,10 @@ class NewsfeedService:
         if len(feed) > FEED_CAP:
             feed = feed[-FEED_CAP:]
         self.feeds.set(f"{FEED_NS}:{viewer_id}", feed)
-        # Bust this viewer's cached ranked feeds.
-        self.feed_cache.delete(f"ranked_feed:{viewer_id}")
+        # Bust this viewer's cached ranked feeds. The cache key for
+        # rank_feed is `ranked_feed:{user_id}:{limit}` — we don't know
+        # the limit here, so just clear the cache (cheap, in-memory).
+        self.feed_cache.clear()
 
     def _candidate_post_ids(self, viewer_id: int) -> list[int]:
         """Materialized feed ∪ posts from followees for a "celebrity" merge.

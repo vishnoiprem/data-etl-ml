@@ -22,19 +22,21 @@ BLACK_WIN = "BLACK_WIN"
 DRAW = "DRAW"
 
 INITIAL_BOARD = [
-    list("rnbqkbnr"),
-    list(".ppppppp"),
-    list("........"),
-    list("........"),
-    list("........"),
-    list("........"),
-    list("PPPPPPPP"),
     list("RNBQKBNR"),
+    list("PPPPPPPP"),
+    list("........"),
+    list("........"),
+    list("........"),
+    list("........"),
+    list("pppppppp"),
+    list("rnbqkbnr"),
 ]
 
 
 def sq_to_idx(sq: str) -> tuple:
-    """algebraic like 'e2' -> (rank, file) zero-based."""
+    """algebraic like 'e2' -> (rank, file) zero-based.
+    Board is stored with rank-1 at index 0 (white's POV), rank-8 at index 7.
+    """
     if len(sq) != 2:
         raise ValueError(f"bad square: {sq}")
     f = ord(sq[0].lower()) - ord("a")
@@ -394,8 +396,8 @@ class ChessService:
         out = []
         if p == "p":
             direction = -1 if color == "W" else 1
-            start_rank = 6 if color == "W" else 1
-            promote_rank = 0 if color == "W" else 7
+            start_rank = 1 if color == "W" else 6
+            promote_rank = 7 if color == "W" else 0
             # Forward
             nr = r + direction
             if 0 <= nr < 8 and g.board[nr][f] == ".":
@@ -462,7 +464,7 @@ class ChessService:
                             out.append((nr, nf, None))
             # Castling
             if not self._in_check(g, color):
-                rank = 7 if color == "W" else 0
+                rank = 0 if color == "W" else 7
                 if r == rank and f == 4:
                     if color == "W":
                         if "K" in g.castling and g.board[rank][5] == "." and g.board[rank][6] == "." \

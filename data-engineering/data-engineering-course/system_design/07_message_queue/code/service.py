@@ -80,6 +80,10 @@ class Group:
     name: str
     created_at: float
     offsets: dict = field(default_factory=dict)  # "<topic>:<part>" -> int
+    # Snapshot of high-water marks per (topic, partition) at group
+    # creation time. Used so that reset="latest" doesn't accidentally
+    # skip records produced between group creation and first consume.
+    initial_offsets: dict = field(default_factory=dict)
     reset: str = DEFAULT_RESET  # "earliest" | "latest"
 
     def to_dict(self) -> dict:
@@ -234,8 +238,19 @@ class MessageQueueService:
         name = name.strip()
         if self.store.exists(self._k_group(name)):
             raise ValueError(f"group {name!r} already exists")
+        # Snapshot existing topic high-water marks so reset="latest"
+        # doesn't accidentally skip records produced between
+        # group creation and first consume.
+        initial: dict = {}
+        for t in self.list_topics():
+            for p in range(t.partitions):
+                initial[f"{t.name}:{p}"] = self.topic_log_size(t.name, p)
         g = Group(
-            name=name, created_at=time.time(), offsets={}, reset=reset
+            name=name,
+            created_at=time.time(),
+            offsets={},
+            initial_offsets=initial,
+            reset=reset,
         )
         self.store.set(self._k_group(name), g.to_dict())
         return g
@@ -345,9 +360,17 @@ class MessageQueueService:
                 start = int(g.offsets[key])
             else:
                 # New group / new partition — apply reset policy.
+                # For "latest" we use the snapshot taken when the
+                # group was created (so records produced between
+                # group creation and first consume are still
+                # visible).  For topics that didn't exist at group
+                # creation time we fall back to current log_len.
                 if log_len == 0:
                     continue  # nothing to read
-                start = 0 if policy == "earliest" else log_len
+                if policy == "earliest":
+                    start = 0
+                else:
+                    start = int(g.initial_offsets.get(key, log_len))
             if start >= log_len:
                 continue
             lag = log_len - start

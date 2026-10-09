@@ -16,11 +16,19 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import shutil
 import sys
 import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent.parent  # system_design/
+
+# Clear persisted KeyValueStore state from previous runs so each
+# session starts clean.  Each module's service uses a hardcoded
+# ``var/<name>.json`` path.
+_VAR_DIR = HERE / "var"
+if _VAR_DIR.is_dir():
+    shutil.rmtree(_VAR_DIR, ignore_errors=True)
 
 # Make `common` importable.
 sys.path.insert(0, str(HERE))
