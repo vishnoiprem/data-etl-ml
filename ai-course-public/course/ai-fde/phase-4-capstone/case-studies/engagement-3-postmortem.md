@@ -1,164 +1,277 @@
-# Case Study 3 — Postmortem: the week-11 hallucination incident
+# Case Study 3 — Postmortem: the Week-11 Hallucination Incident (2026-W11)
 
-> **TL;DR (1 page).** On a Wednesday at 14:23 SGT, the PacificFreight
-> drafter emitted 4 hallucinated drafts in 12 minutes. Mei reverted
-> all 4. I rolled back the deploy within 22 minutes. The cause was
-> a prompt change that bypassed the circuit breaker. The fix was
-> a CI gate that runs the eval set on every PR. **The lesson:**
-> incidents are inevitable. The recovery time is what matters.
-> The eval-driven iteration cadence is what makes recovery cheap.
+> **TL;DR.** On a Wednesday at 14:23 SGT, the PacificFreight drafter emitted **4 hallucinated drafts in 12 minutes**, misreporting shipment locations (saying "in HCMC" when they were still in Singapore). Mei reverted all 4 within 2 minutes each. I rolled back the deploy at 14:45. Total recovery time: **38 minutes** (vs 60-min SLO). Root cause: a 12-character prompt copy-edit ("HCMC" → "Ho Chi Minh City") that bypassed the circuit breaker during the deploy window and was combined with an unreported customs-system outage that left 4 shipments with unclear destinations. **The fix:** move the eval set into CI as a PR gate (fail on any metric drop > 0.05); add a post-deploy breaker-exercised hook; ban deploys during Mei's peak hours (14:00-16:00 SGT). **The lesson:** incidents are inevitable; the eval-set-in-CI is the cheap prevention; the runbook is the cheap recovery. **Mean Time To Detect (MTTD): 2 min** (Mei's re-read). **Mean Time To Recovery (MTTR): 38 min** (Daniel's rollback). **Customer impact: 4 drafts, all reverted before send.**
 
 ---
 
-## Timeline (all times SGT)
+## 1. Severity classification (the taxonomy we use)
 
-- **14:23** — Mei reports "draft for PF-1002 says it's delivered in
-  HCMC; the customer says it's still in Singapore." She reverts
-  the draft and pings Daniel.
-- **14:25** — Daniel opens the eval set, runs it against the
-  current deploy. **Faithfulness is 0.61** (down from 0.94 on
-  Monday's iteration report).
-- **14:31** — Daniel reverts the deploy to the previous version
-  (the one that ran at 09:00 today).
-- **14:33** — Eval re-run shows faithfulness back to 0.94.
-  Daniel confirms with Mei: "the bad drafts are gone."
-- **14:38** — Mei reports 3 more hallucinations in the past 12
-  minutes (drafts PF-1004, PF-1006, PF-1008 all said the
-  shipments were "in HCMC" when they were actually in Singapore).
-- **14:45** — I (the FDE) am paged. I look at the deploy diff:
-  the only change was a 12-character prompt edit ("in HCMC" →
-  "in Ho Chi Minh City").
-- **14:50** — Root cause identified: the prompt change bypassed
-  the circuit breaker. The breaker was tripped for 2 minutes
-  during the deploy (normal), but the new prompt went live before
-  the breaker recovered. The hallucinated drafts were generated
-  by the old model with the new prompt — a combination that
-  hadn't been tested.
-- **14:53** — Hotfix: revert the prompt, re-run the eval set,
-  re-deploy.
-- **15:01** — Eval green. Mei confirms no more hallucinations.
+| Severity | Definition | Customer impact | Response time | Page |
+|---|---|---|---|---|
+| **SEV-1** | All users, all drafts, > 30 min | Service unusable | < 60 min | Daniel + FDE |
+| **SEV-2** | One user, all drafts | Mei blocked | < 4 hr | Daniel |
+| **SEV-3** | Few drafts, breaker caught | Sub-perceptible | < 24 hr | Daniel (async) |
+| **SEV-4** | No user impact, internal-only | None | Next iteration review | Log only |
 
-**Total recovery time: 38 minutes.** Total customer impact: 4
-drafts, all reverted by Mei before sending.
+This incident is **SEV-1 candidate, downgraded to SEV-2** because: (a) Mei reverted all 4 drafts before sending, so customer-facing impact was zero; (b) only 4 of ~20 concurrent drafts were affected (the 4 shipments with unclear destinations due to the customs outage). The taxonomy lets us treat the same technical failure as different severities based on blast radius, not blast magnitude.
 
-## Root cause
+### 1.1 Blast-radius × blast-magnitude matrix
 
-The deploy pipeline was:
+|       | ≤ 5% users | ≤ 25% users | ≤ 100% users |
+|---|---|---|---|
+| **No customer-visible error** | SEV-4 | SEV-3 | SEV-3 |
+| **Customer-visible error (reverted)** | SEV-2 (this incident) | SEV-1 | SEV-1 |
+| **Customer-visible error (sent)** | SEV-1 | SEV-1 | SEV-1 |
 
-```
-PR merged → CI runs unit tests → build image → deploy to VM
-            ↳ (eval set NOT run here)
-```
+---
 
-The eval set was run **manually** every Monday at 09:00 SGT as
-part of the iteration cadence. The deploy pipeline didn't
-include it.
+## 2. Timeline (blameless, all times SGT, UTC+8)
 
-On Wednesday at 14:20, I merged a PR that changed the prompt
-("in HCMC" → "in Ho Chi Minh City" — a copy edit I was making
-for Mei because she prefers the longer form). The change
-passed the unit tests (the drafter's tests don't exercise the
-prompt). The image was built and deployed.
+| Time | Event | Actor | Evidence |
+|---|---|---|---|
+| **09:00** | Normal iteration cadence: eval set ran, faithfulness 0.94, ansrel 0.91, no regression | Daniel | `eval_report_week11.md` |
+| **14:14** | Customs-system outage begins upstream (4 shipments lose destination signal) | Customs (3rd party) | Customs vendor postmortem (not public) |
+| **14:20** | FDE merges PR #247: prompt string "HCMC" → "Ho Chi Minh City" | FDE | `git log`, PR #247 |
+| **14:21** | CI runs unit tests; PR merges | FDE | `actions/run/1234567` |
+| **14:23** | Deploy to uvicorn VM; rollout completes | Daniel (cron) | `journalctl` |
+| **14:23** | Mei sends email about PF-1002; drafter drafts "delivered in Ho Chi Minh City" | Mei + drafter | `usage.jsonl` row 4287 |
+| **14:23** | Mei re-reads draft, notices PF-1002 is still in Singapore, reverts | Mei | Slack DM to Daniel |
+| **14:25** | Daniel opens eval set, runs against current deploy | Daniel | terminal log |
+| **14:25** | **Eval green (0.94, no regression)** — Daniel does not rollback | Daniel | reasoning below |
+| **14:31** | Daniel reproduces deploy to previous commit (09:00); eval back to 0.94 | Daniel | `git checkout` + redeploy |
+| **14:33** | Mei reports 3 more hallucinations: PF-1004, PF-1006, PF-1008 | Mei | Slack DM |
+| **14:38** | FDE paged; reviews `git diff main..HEAD` | FDE | PagerDuty |
+| **14:45** | Root cause identified: prompt change + customs outage unreported | FDE | reasoning below |
+| **14:53** | Hotfix: revert prompt, re-run eval, redeploy | Daniel | terminal log |
+| **15:01** | Eval green; Mei confirms no more hallucinations | Mei | confirmation |
+| **15:01** | **Customer-facing impact: 4 drafts, all reverted, $0 of customer trust lost (per Mei's report)** | — | Slack |
 
-The new prompt + the old model + the bypassed breaker = the
-hallucinations. The "in Ho Chi Minh City" string confused the
-model's entity linking: it started treating "Singapore" as a
-fallback destination for any shipment whose actual destination
-was unclear. (4 shipments had unclear destinations that day
-because of a customs system outage that Daniel wasn't aware
-of yet.)
+**Total incident duration: 38 minutes** (14:23 first hallucination → 15:01 all-clear). **MTTD: 2 minutes** (Mei's re-read caught the first hallucination). **MTTR: 38 minutes.** Within the 60-min SEV-1 SLO.
 
-## What went well
+---
 
-- **Mei noticed within 2 minutes.** She'd been trained to
-  re-read every draft before sending; the re-read caught the
-  hallucination.
-- **Daniel had the eval set ready to run.** The eval set is
-  the spec; without it, the rollback would have been a guess.
-- **The rollback took 22 minutes** (from Mei's report to
-  the deploy being reverted). That's well under the 60-minute
-  SLO in the runbook.
+## 3. Root cause (5 Whys — the deepest layer)
 
-## What went poorly
+### 3.1 The proximate cause
 
-- **The eval set wasn't in the CI pipeline.** If it had been,
-  the PR would have failed CI before merge. The hallucination
-  wouldn't have happened.
-- **The bypassed circuit breaker was the mechanism.** The
-  breaker is supposed to catch quality drops. It didn't,
-  because it was tripped during the deploy and recovered
-  before the new prompt was actually exercised.
-- **The customer impact was 4 drafts.** Even though all 4
-  were reverted, the customer (Mei) lost 12 minutes of trust.
-  She's still a little more cautious about the drafter than
-  she was before.
+A 12-character prompt change ("HCMC" → "Ho Chi Minh City") deployed at 14:23. The new prompt was not seen by the eval set before deploying. The eval set has 30 rows with the standard fixtures; the deploy window happened during an unrelated customs outage.
 
-## Action items
+### 3.2 The 5 Whys
 
-| Owner | Action | Deadline |
+| # | Question | Answer |
 |---|---|---|
-| FDE | Move the eval set into CI (run on every PR, fail if any metric drops > 0.05) | EOW (Friday) |
-| FDE | Add a "deploy window" check (don't deploy between 14:00-16:00 SGT, Mei's peak) | EOW |
-| Daniel | Add a breaker-exercised-after-deploy hook (force 1 draft through after each deploy, log the faithfulness) | EONM (next Monday) |
-| Mei | Re-read the runbook, refresh the rollback procedure | EOM |
-| FDE | Write a public postmortem (this document) | Today |
+| 1 | Why did 4 hallucinated drafts get sent? | Mei noticed but the 30-min deploy had already generated 12 drafts and 4 of them got the destination wrong. |
+| 2 | Why did the destination entity-linking fail? | The LLM started treating "Singapore" as a fallback destination when it couldn't determine the actual destination from the context. The context was empty because the customs system was down. |
+| 3 | Why was the context empty? | The retrieval layer reads `shipments.json`, which is updated by a cron from the customs API. The customs API was down; the cron had failed for 6 hours; no one noticed. |
+| 4 | Why did no one notice the cron had failed? | The cron failure didn't trigger an alert because we don't have an alert on cron-failure for non-revenue-critical jobs. The eval set doesn't exercise the "shipment data is empty" case. |
+| 5 | Why didn't the eval set catch the prompt regression? | Because the eval set doesn't include the prompt-change-fixture — the 30 rows are stable, the prompts change. The deploy pipeline runs unit tests only, not the eval set. |
 
-## The fix (the eval set in CI)
+**The deepest root cause: the eval set was not in the CI pipeline.** Everything above (LLM behavior, retrieval behavior, cron failure) was incidental; the CI gap was the structural failure.
+
+### 3.3 The causal chain diagram
+
+```
+  Customs API down ─────────► Retrieval returns empty
+       │                          │
+       │                          ▼
+       │                    LLM context is empty
+       │                          │
+       │                          ▼
+       │                    LLM falls back to "Singapore" as
+       │                    a default destination
+       │                          │
+       │                          ▼
+       │                    4 hallucinated drafts
+       │                          │
+       │                          ▼
+       │                    Mei re-reads + reverts (MTTD 2 min)
+       │                          │
+       │                          ▼
+       │  PR #247 deploys ─► Slower recovery (deploy
+       │  during peak         window overlaps with the
+       │                      incident)
+       │
+       ▼
+  Eval set NOT in CI ───► PR #247 merged without
+                            eval-gate check
+```
+
+The eval-set-in-CI gap is the structural fix; the other 3 are tactical fixes that reduce blast radius but do not prevent the regression class.
+
+---
+
+## 4. What went well (the 3 wins)
+
+| Win | Why it mattered | Quantified |
+|---|---|---|
+| **Mei re-reads every draft before sending** | Caught all 4 hallucinations before customer impact | MTTD = 2 min vs typical AI-deployment MTTD of hours-to-days |
+| **Daniel had the eval set ready to run in 5 min** | Made rollback a deterministic decision, not a guess | 5 min from "Mei reports" to "deploy reverted" |
+| **The runbook section "hallucination detected" was up to date** | Daniel executed the playbook without paging me for the first 22 minutes | 22 min solo recovery before FDE page |
+
+### 4.1 Why Mei's re-read is the unsung hero
+
+Mei's habit of re-reading every draft before sending is **the single most important defense in this system**. The eval set catches regressions in batch (weekly); the circuit breaker catches live failures; the re-read catches anything the eval set didn't anticipate. A P95 cost of 0.3s per draft × 150 drafts/day = 45 seconds/day of Mei's time. Worth it. **The most important PE habit in the entire engagement is making sure the user re-reads LLM output before sending.** I documented this in the runbook's "Operational Boundaries" section.
+
+---
+
+## 5. What went poorly (the 3 losses)
+
+| Loss | Why it happened | Blast radius |
+|---|---|---|
+| **Eval set was NOT in the CI pipeline** | PR #247 merged without eval-gate; the deploy was "tested but not evaluated" | Drafter regressed for 31 min |
+| **Deploy window overlapped with Mei's peak** | No deploy-window guard; deploys are allowed 24/7 | Mei's worst 12 min of feedback happened mid-incident |
+| **Customs cron had no failure alert** | Non-revenue-critical job; never wrote the alert | Retrieval silently broken for 6 hr before the incident |
+
+### 5.1 What the circuit breaker caught vs missed
+
+The circuit breaker was tripped for 2 minutes during the deploy (normal pattern: brief spike while the new model loads), recovered, and then was "open" for the first 4 drafts. It correctly **did not catch** the hallucination because the hallucinated drafts did not throw an exception — they returned HTTP 200 with bad content. The circuit breaker catches **liveness failures**, not **quality failures**. The eval set in CI is the layer that catches quality failures before deploy.
+
+---
+
+## 6. The fix (the eval set in CI)
+
+### 6.1 The PR (merged week 11, day +1)
 
 ```yaml
 # .github/workflows/eval.yml
 name: eval-set
-on: [pull_request]
+on:
+  pull_request:
+    paths:
+      - 'service/**'
+      - 'shared/eval_set.jsonl'
+      - 'shared/style-guide.md'
+
 jobs:
   eval:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
       - run: pip install -r service/requirements.txt
-      - run: cd service && python3 eval.py --set ../shared/eval_set.jsonl --report eval_report.md
-      - uses: actions/upload-artifact@v4
-        with: { name: eval-report, path: service/eval_report.md }
-      - run: |
-          # Fail if any metric dropped by > 0.05 vs the baseline
-          python3 eval.py --set ../shared/eval_set.jsonl \
-                         --baseline ../shared/baseline.jsonl \
-                         --threshold 0.05 \
-                         --report eval_report.md
+      - name: Run eval set
+        run: |
+          cd service
+          python3 eval.py \
+            --set ../shared/eval_set.jsonl \
+            --baseline ../shared/baseline.jsonl \
+            --threshold 0.05 \
+            --report eval_report.md
+      - name: Upload eval report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: service/eval_report.md
+      - name: Fail on regression
+        run: |
+          if grep -q "REGRESSION" service/eval_report.md; then
+            echo "::error::Eval set regression > 0.05 on any metric"
+            exit 1
+          fi
 ```
 
-After this PR, every PR that touches the prompt fails CI if the
-eval metrics regress. The deploy pipeline is gated by the eval.
+**Behavior change:** any PR that touches `service/`, `shared/eval_set.jsonl`, or `shared/style-guide.md` now runs the eval set as a CI gate. A regression > 0.05 on any metric fails the PR. The deploy pipeline (`actions/deploy.yml`) is unchanged but now blocks on the eval gate.
 
-## Lessons
+### 6.2 The other 2 fixes
 
-1. **The eval set is the gate.** Every change that affects the
-   prompt, the retriever, or the model must pass the eval set
-   before merging. A unit test that doesn't exercise the prompt
-   is not enough.
-2. **The breaker is a backstop, not the primary defense.** The
-   breaker catches failures, but it can be bypassed during
-   deploys. The eval set in CI catches them earlier.
-3. **Incidents are inevitable.** Mei will see a hallucination
-   again. The recovery time (38 minutes in this case) is what
-   matters. The eval set + the runbook + the rollback procedure
-   are what make recovery cheap.
-4. **The postmortem is a public artifact.** This document is
-   published internally (PacificFreight) and externally
-   (in the case studies folder of this curriculum). The point
-   is not to assign blame — the prompt change was correct, the
-   "in Ho Chi Minh City" string is what Mei prefers — but to
-   teach the team how to respond.
+**Fix 2 — deploy-window guard:**
 
-## Closing
+```python
+# service/deploy.py
+from datetime import datetime, timezone
+import pytz
 
-This postmortem is what the eval-driven iteration cadence looks
-like when it fails. The cadence runs every Monday at 09:00 SGT;
-on a Wednesday at 14:23, the cadence caught a regression that
-should have been caught at the PR. The fix is mechanical: move
-the eval set into CI, fail the PR on regression.
+SGT = pytz.timezone("Asia/Singapore")
+PEAK_START = 14  # 14:00 SGT (Mei's peak hours)
+PEAK_END = 16    # 16:00 SGT
 
-The customer impact was 4 drafts, all reverted, with 38 minutes
-of recovery time. That's the operational boundary: hallucinations
-happen, and the system's job is to catch them fast and recover
-cleanly. **The eval set is the spec; the runbook is the contract;
-the recovery time is the score.**
+def is_peak_hour() -> bool:
+    now = datetime.now(SGT).hour
+    return PEAK_START <= now < PEAK_END
+
+def deploy_v2(...):
+    if is_peak_hour():
+        raise DeployBlockedError(
+            f"Deploys blocked 14:00-16:00 SGT (Mei's peak). "
+            f"Use --force to override."
+        )
+    ...
+```
+
+**Fix 3 — cron failure alert:**
+
+```yaml
+# monitoring/alerts.yml
+- alert: ShipmentCronStale
+  expr: time() - shipment_cron_last_success_timestamp_seconds > 3600
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "Shipment cron hasn't succeeded in > 1h"
+    runbook: "https://runbook.pf.internal/data-stale"
+```
+
+These 3 fixes are **not arbitrary**. Each maps to a layer of the causal chain (CI gap → deploy window → data staleness). A principal FDE writes fixes at the layer where they're structurally guaranteed to prevent the regression class, not at the layer of the most-recent symptom.
+
+---
+
+## 7. Action items (with owners and dates)
+
+| # | Action | Owner | Deadline | Status (60-day check) |
+|---|---|---|---|---|
+| 1 | Move eval set into CI; fail on regression > 0.05 | FDE | 2026-W11 Fri | ✅ Done (PR #251 merged) |
+| 2 | Add deploy-window guard (14:00-16:00 SGT) | FDE | 2026-W11 Fri | ✅ Done (PR #252) |
+| 3 | Add cron-failure alert (`ShipmentCronStale`) | Daniel | 2026-W12 Mon | ✅ Done (PR #253) |
+| 4 | Add breaker-exercised-after-deploy hook (force 1 draft through after deploy, log faithfulness) | Daniel | 2026-W13 Mon | ✅ Done (PR #258) |
+| 5 | Mei re-reads runbook; refresh rollback procedure | Mei | 2026-W13 Mon | ✅ Done (runbook signed) |
+| 6 | Public postmortem published (this document) | FDE | 2026-W11 Fri | ✅ Done (this file) |
+| 7 | Add "what changes if Singapore becomes our secondary lane" to scenario-lift.md | FDE | 2026-W14 | ✅ Done |
+
+**All 7 action items closed in < 14 days.** This is what a fast-iterating FDE engagement looks like.
+
+### 7.1 The 30/60/90-day follow-up
+
+| Check | Findings |
+|---|---|
+| **30 days** | 0 SEV-1 incidents. Eval CI gate has caught 1 regression (a typo in the `__init__.py` import) — would have been a SEV-1 in week 11. CI gate paid for itself in < 4 weeks. |
+| **60 days** | 0 SEV-1, 1 SEV-2 (a Mei-side copy-paste error — not the drafter's fault). Mei's thumbs-up rate stays at 82%. Bill at $0.49/wk. |
+| **90 days** | Eval CI gate has caught 3 regressions total (1 typo, 1 chunked-policy bug, 1 RRF hyperparameter drift). The gate is doing its job. |
+
+---
+
+## 8. Lessons (the 5 things a principal FDE takes away)
+
+### 8.1 The eval set is the gate
+
+Every change that affects the prompt, the retriever, or the model must pass the eval set before merging. **A unit test that doesn't exercise the prompt is not enough.** Unit tests check code; the eval set checks behavior. They are not substitutes.
+
+### 8.2 The breaker is a backstop, not the primary defense
+
+The circuit breaker catches **liveness failures** (5xx, timeout) but it does not catch **quality failures** (200 with bad content). The eval set in CI catches quality failures before deploy. The breaker catches them after deploy. **Both are necessary; neither is sufficient.**
+
+### 8.3 Incidents are inevitable; recovery time is the score
+
+Mei will see a hallucination again — the eval set can't anticipate every prompt edge case, and the LLM is non-deterministic by nature. The MTTR (38 min in this case) is what matters. The eval set + the runbook + the rollback procedure are what make recovery cheap. **The recovery time is the operationally-meaningful SLO.**
+
+### 8.4 The postmortem is a public artifact
+
+This document is published internally (PacificFreight) and externally (in the case studies folder of this curriculum). **The point is not to assign blame** — the prompt change was correct, the "in Ho Chi Minh City" string is what Mei prefers — but to teach the team how to respond. A postmortem that names individuals is a punishment document; a postmortem that names systems is a learning document. **The latter is what survives.**
+
+### 8.5 The deploy window matters
+
+Deploys during Mei's peak hours (14:00-16:00 SGT) amplify any incident by stacking it on top of the user's busiest window. **A 14:00-16:00 deploy block is cheap insurance** that costs 0 engineering effort and reduces the SEV-1 candidate rate by an estimated 40%.
+
+---
+
+## 9. References
+
+- **The eval-set-in-CI pattern**: Google SRE Book ch. 27 ("Reliable Product Launches at Scale"), ch. 17 ("Eliminating Toil").
+- **The blameless-postmortem template**: Kripa Krishnan (formerly Google), "The Postmortem: Learning from Failure," SREcon14 Americas.
+- **The 5-Whys technique**: original Ohno (Toyota Production System); adapted for software by Allspaw (2008) "Searching for the Root Cause."
+- **Severity taxonomy**: derived from Atlassian's incident-severity definitions, Jira Service Management docs, and PagerDuty's "Major Incident Management" reference.
+- **PacificFreight runbook**: `course/ai-fde/phase-3-deployment/consulting/runbook.md` — Section 4 ("Incident response"), Section 5 ("On-call rotation").
+- **The PR that fixed this**: PR #251 (`course/ai-fde/.github/workflows/eval.yml`).
+- **The baseline file**: `course/ai-fde/phase-2-core-build/shared/baseline.jsonl` (the eval-set baseline used by the CI gate).
