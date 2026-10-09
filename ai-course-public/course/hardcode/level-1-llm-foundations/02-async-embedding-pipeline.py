@@ -534,12 +534,16 @@ class VectorStore:
 
     def save(self) -> None:
         # Atomic write via tmp file rename.
-        tmp_v = self.vectors_path.with_suffix(".npy.tmp")
-        tmp_i = self.ids_path.with_suffix(".json.tmp")
-        np.save(str(tmp_v), self._vectors)
+        # NOTE: np.save auto-appends ".npy" to whatever path you give it, so we
+        # use a temp suffix that does NOT contain ".npy" to avoid the double
+        # extension (vectors.npy.tmp.npy) that breaks the rename below.
+        tmp_v = self.vectors_path.with_name(self.vectors_path.name + ".tmp")
+        tmp_i = self.ids_path.with_name(self.ids_path.name + ".tmp")
+        np.save(str(tmp_v), self._vectors)  # writes tmp_v + ".npy"
+        written_v = Path(str(tmp_v) + ".npy")
         with tmp_i.open("w") as fh:
             json.dump(self._ids, fh)
-        tmp_v.replace(self.vectors_path)
+        written_v.replace(self.vectors_path)
         tmp_i.replace(self.ids_path)
 
     def size(self) -> int:
@@ -832,6 +836,14 @@ async def _demo() -> None:
         output_dir="./_demo_embeddings",
         resume=False,
     )
+    # Clean any prior demo output so the run is idempotent.
+    out = Path(cfg.output_dir)
+    if out.exists():
+        for f in out.iterdir():
+            try:
+                f.unlink()
+            except OSError:
+                pass
     embedder = MockEmbedder(dim=cfg.dim)
     store = VectorStore(cfg.dim, cfg.output_dir)
     checkpoint = Checkpoint(cfg.output_dir)
