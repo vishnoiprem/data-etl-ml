@@ -6,3 +6,4 @@
 {"ts": "2026-10-09T12:31:18.174843+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 914, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
 {"ts": "2026-10-09T12:31:18.863901+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 67, "output_tokens": 38, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
 {"ts": "2026-10-09T12:31:19.707455+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 55, "output_tokens": 40, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}
+{"ts": "2026-10-09T12:43:22.817960+00:00", "model": "mock-deterministic-v1", "provider": "mock", "input_tokens": 55, "output_tokens": 40, "cost_usd": 0.0, "latency_ms": 0, "is_mock": true}

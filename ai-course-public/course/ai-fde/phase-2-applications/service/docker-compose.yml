@@ -1,0 +1,17 @@
+services:
+  pf-phase2:
+    build: .
+    container_name: pf-phase2
+    ports:
+      - "8000:8000"
+    environment:
+      - PF_LLM_PROVIDER=${PF_LLM_PROVIDER:-mock}
+      - PF_OPENAI_API_KEY=${PF_OPENAI_API_KEY:-}
+      - PF_MODEL=${PF_MODEL:-mock-deterministic-v1}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
