@@ -79,7 +79,7 @@ The handoff was clean. **All 3 stakeholders can answer their
 
 ### 1. The runbook
 
-`course/ai-fde/phase-2-applications/runbook.md` — 8 pages,
+`course/ai-fde/phase-3-deployment/runbook.md` — 8 pages,
 covering:
 - **Overview** (system diagram, the 10 endpoints, the 13/13
   tests)
@@ -116,7 +116,7 @@ contract (rate limit, breaker, redaction, audit log).
 
 ### 5. The handoff notes
 
-`course/ai-fde/phase-2-applications/handoff-notes.md` (3 pages):
+`course/ai-fde/phase-3-deployment/handoff-notes.md` (3 pages):
 - **What I did** (the 12-week timeline)
 - **What I didn't do** (the things I'd add with 4 more weeks)
 - **What's likely to break first** (the 3 failure modes I'm

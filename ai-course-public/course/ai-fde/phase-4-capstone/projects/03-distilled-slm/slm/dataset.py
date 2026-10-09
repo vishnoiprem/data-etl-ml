@@ -36,7 +36,7 @@ The training script (`train.py`) doesn't.
 How to run
 ----------
     # As a CLI
-    python3 dataset.py --usage ../phase-2-applications/service/usage.jsonl \\
+    python3 dataset.py --usage ../phase-3-deployment/service/usage.jsonl \\
                        --out data/train.jsonl
 """
 from __future__ import annotations

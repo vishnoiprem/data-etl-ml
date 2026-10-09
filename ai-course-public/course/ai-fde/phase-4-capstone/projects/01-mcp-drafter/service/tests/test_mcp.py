@@ -8,7 +8,7 @@ tests/test_mcp.py — MCP server tests for Phase 4 Project 1.
   4. test_fallback_when_mcp_server_returns_error
 
 Run:
-    cd course/ai-fde/phase-3-capstone/projects/01-mcp-drafter
+    cd course/ai-fde/phase-4-capstone/projects/01-mcp-drafter
     python3 -m pytest service/tests/test_mcp.py -v
 """
 from __future__ import annotations

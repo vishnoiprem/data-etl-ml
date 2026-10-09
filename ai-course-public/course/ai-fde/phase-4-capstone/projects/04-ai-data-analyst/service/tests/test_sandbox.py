@@ -7,7 +7,7 @@ tests/test_sandbox.py — AI Data Analyst sandbox tests for Phase 4 Project 4.
   3. test_memory_cap_works       (subprocess rlimit)
 
 Run:
-    cd course/ai-fde/phase-3-capstone/projects/04-ai-data-analyst
+    cd course/ai-fde/phase-4-capstone/projects/04-ai-data-analyst
     python3 -m pytest service/tests/test_sandbox.py -v
 """
 from __future__ import annotations

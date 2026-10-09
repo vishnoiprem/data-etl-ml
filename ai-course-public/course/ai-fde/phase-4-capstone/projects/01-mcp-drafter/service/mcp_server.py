@@ -30,7 +30,7 @@ to this server.
 Why a separate file
 -------------------
 The MCP server is a **sidecar process** in production. The drafter (in
-`phase-2-applications/service/app.py`) talks to it over HTTP. A failure
+`phase-3-deployment/service/app.py`) talks to it over HTTP. A failure
 of the MCP server does NOT take down the drafter — the drafter falls
 back to free-text drafts (the Phase 3 3-tier fallback pattern).
 
@@ -59,7 +59,7 @@ from typing import Any
 # We use sys.path indirection so this file is standalone-runnable.
 # ---------------------------------------------------------------------------
 def _import_phase3_circuit():
-    p3_service = Path(__file__).parent.parent.parent.parent / "phase-2-applications" / "service"
+    p3_service = Path(__file__).parent.parent.parent.parent / "phase-3-deployment" / "service"
     if str(p3_service) not in sys.path:
         sys.path.insert(0, str(p3_service))
     import circuit as _circuit  # type: ignore
@@ -144,7 +144,7 @@ def _tool_tracker_lookup(args: dict) -> dict:
     if not re.match(r"^PF-\d{4,5}$", sid):
         return {"ok": False, "error": f"invalid shipment_id: {sid!r}"}
     # Look up in Phase 1's shipments.json. The path is relative to the
-    # repo root: phase-3-capstone/projects/01-mcp-drafter/service/mcp_server.py
+    # repo root: phase-4-capstone/projects/01-mcp-drafter/service/mcp_server.py
     # → ../../../../../phase-1-foundations/shared/shipments.json
     shipments_path = (
         Path(__file__).parent.parent.parent.parent.parent

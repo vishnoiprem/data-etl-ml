@@ -55,10 +55,10 @@ You do this in 4 steps:
 ### Step 1 — Build the training set
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/03-distilled-slm
-cp ../../phase-2-applications/service/usage.jsonl slm/data/usage.jsonl
+cd course/ai-fde/phase-4-capstone/projects/03-distilled-slm
+cp ../../phase-3-deployment/service/usage.jsonl slm/data/usage.jsonl
 python3 slm/dataset.py --usage slm/data/usage.jsonl \
-                       --feedback ../../phase-2-applications/service/feedback.jsonl \
+                       --feedback ../../phase-3-deployment/service/feedback.jsonl \
                        --out slm/data/train.parquet
 ```
 
@@ -215,12 +215,12 @@ The drafter doesn't change. The model dropdown gains a
 
 ## 📦 Artifacts
 
-- `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/dataset.py` — the data prep
-- `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/train.py` — the LoRA fine-tune
-- `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/serve.py` — the HTTP serve
-- `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/eval.py` — the eval harness
-- `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/model_card.md` — the model card
-- `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/tests/test_slm.py` — the 2 tests
+- `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/dataset.py` — the data prep
+- `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/train.py` — the LoRA fine-tune
+- `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/serve.py` — the HTTP serve
+- `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/eval.py` — the eval harness
+- `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/model_card.md` — the model card
+- `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/tests/test_slm.py` — the 2 tests
 
 ## 🔗 Related lessons
 

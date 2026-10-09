@@ -14,7 +14,7 @@ Run from the service/ directory:
     pytest tests/ -v
 
 Or from the repo root:
-    pytest course/ai-fde/phase-2-applications/service/tests/ -v
+    pytest course/ai-fde/phase-3-deployment/service/tests/ -v
 """
 
 from __future__ import annotations

@@ -56,7 +56,7 @@ You do this in 3 steps:
 
 ### Step 1 — Implement the tool in Python
 
-Open `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service/mcp_server.py`
+Open `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service/mcp_server.py`
 and add:
 
 ```python
@@ -116,7 +116,7 @@ That's ~15 lines.
 ### Step 3 — Test
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/01-mcp-drafter
+cd course/ai-fde/phase-4-capstone/projects/01-mcp-drafter
 python3 -m pytest service/tests/test_mcp.py -v
 ```
 
@@ -225,10 +225,10 @@ The contract is the YAML. The drafter doesn't change.
 
 ## 📦 Artifacts
 
-- `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service/mcp_server.py` — the MCP server (4 tools, RBAC, rate limit, JSON-RPC 2.0)
-- `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service/mcp_policies.yaml` — the policy file
-- `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service/tests/test_mcp.py` — the 4 tests
-- `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/ARCHITECTURE.md` — the design doc
+- `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service/mcp_server.py` — the MCP server (4 tools, RBAC, rate limit, JSON-RPC 2.0)
+- `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service/mcp_policies.yaml` — the policy file
+- `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service/tests/test_mcp.py` — the 4 tests
+- `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/ARCHITECTURE.md` — the design doc
 
 ## 🔗 Related lessons
 

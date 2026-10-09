@@ -7,7 +7,7 @@ SVC = Path(__file__).parent.parent
 if str(SVC) not in sys.path:
     sys.path.insert(0, str(SVC))
 
-# Project 1's MCP server (sibling in phase-3-capstone/projects/)
+# Project 1's MCP server (sibling in phase-4-capstone/projects/)
 _PROJ1 = SVC.parent.parent / "01-mcp-drafter" / "service"
 if str(_PROJ1) not in sys.path:
     sys.path.insert(0, str(_PROJ1))
@@ -16,8 +16,8 @@ if str(_PROJ1) not in sys.path:
 # SVC = .../02-multi-agent-dispatcher/service
 # SVC.parent = .../02-multi-agent-dispatcher
 # SVC.parent.parent = .../projects
-# SVC.parent.parent.parent = .../phase-3-capstone
+# SVC.parent.parent.parent = .../phase-4-capstone
 # SVC.parent.parent.parent.parent = .../ai-fde  <-- HERE
-_PHASE3 = SVC.parent.parent.parent.parent / "phase-2-applications" / "service"
+_PHASE3 = SVC.parent.parent.parent.parent / "phase-3-deployment" / "service"
 if str(_PHASE3) not in sys.path:
     sys.path.insert(0, str(_PHASE3))

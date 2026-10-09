@@ -28,12 +28,12 @@ The RAG pipeline (mirrors what Phase 1's CLI does, but over HTTP):
 
 How to run
 ----------
-    # From the phase-2-applications/ directory:
+    # From the phase-3-deployment/ directory:
     pip install -r service/requirements.txt
     uvicorn service.app:app --host 0.0.0.0 --port 8000
 
     # Or in Docker:
-    docker build -t pf-phase2 service/       # build context = phase-2-applications/
+    docker build -t pf-phase2 service/       # build context = phase-3-deployment/
     docker run --rm -p 8000:8000 pf-phase2
 
 What to read next

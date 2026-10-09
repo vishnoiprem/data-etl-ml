@@ -58,11 +58,11 @@ _ADAPTER_META_PATH = _ADAPTER_DIR / "ADAPTER.json"
 # Reuse Phase 3's eval module. _HERE = .../03-distilled-slm/slm/eval.py
 # .parent = .../03-distilled-slm/slm
 # .parent.parent = .../03-distilled-slm
-# .parent.parent.parent = .../phase-3-capstone
-# .parent.parent.parent.parent = .../ai-fde  <-- phase-2-applications lives here
+# .parent.parent.parent = .../phase-4-capstone
+# .parent.parent.parent.parent = .../ai-fde  <-- phase-3-deployment lives here
 _PHASE3_EVAL_PATH = (
     _HERE.parent.parent.parent.parent
-    / "phase-2-applications" / "service" / "eval.py"
+    / "phase-3-deployment" / "service" / "eval.py"
 )
 _spec = importlib.util.spec_from_file_location("phase3_eval_module", _PHASE3_EVAL_PATH)
 phase3_eval = importlib.util.module_from_spec(_spec)  # type: ignore
@@ -72,7 +72,7 @@ _spec.loader.exec_module(phase3_eval)
 
 # Default eval set path
 DEFAULT_EVAL_SET = (
-    _HERE.parent.parent.parent.parent / "phase-2-applications" / "shared" / "eval_set.jsonl"
+    _HERE.parent.parent.parent.parent / "phase-3-deployment" / "shared" / "eval_set.jsonl"
 )
 
 
@@ -92,7 +92,7 @@ def _make_mock_draft_fn():
 
     # Lazy-load Phase 3's retriever (avoid hard dep at import time).
     _svc_path = (
-        _HERE.parent.parent.parent.parent / "phase-2-applications" / "service"
+        _HERE.parent.parent.parent.parent / "phase-3-deployment" / "service"
     )
     if str(_svc_path) not in sys.path:
         sys.path.insert(0, str(_svc_path))

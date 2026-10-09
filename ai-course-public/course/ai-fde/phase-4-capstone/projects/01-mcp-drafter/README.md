@@ -51,7 +51,7 @@ The unified budget is **60 credits/min/user**. A `cs_senior` calling
 ### 1. Standalone demo (no FastAPI needed)
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/01-mcp-drafter
+cd course/ai-fde/phase-4-capstone/projects/01-mcp-drafter
 python3 service/mcp_server.py
 ```
 
@@ -83,7 +83,7 @@ Expected output (6 scenarios):
 ### 2. Run the 4 tests
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/01-mcp-drafter
+cd course/ai-fde/phase-4-capstone/projects/01-mcp-drafter
 python3 -m pytest service/tests/test_mcp.py -v
 ```
 
@@ -99,7 +99,7 @@ The tests cover:
 
 ```python
 import sys
-sys.path.insert(0, "course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service")
+sys.path.insert(0, "course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service")
 import mcp_server
 
 server = mcp_server.MCPServer()
@@ -228,7 +228,7 @@ prompt, its eval set, its 13/13 tests, its runbook — all unchanged.
 ## Next: integrate with the drafter
 
 To wire this into the Phase 3 service (the `/draft` endpoint that calls
-the LLM), see `course/ai-fde/phase-2-applications/service/app.py` — the
+the LLM), see `course/ai-fde/phase-3-deployment/service/app.py` — the
 `/draft` handler can be extended to:
 
 1. List tools from `mcp_server.list_tools()` and inject them into the system prompt

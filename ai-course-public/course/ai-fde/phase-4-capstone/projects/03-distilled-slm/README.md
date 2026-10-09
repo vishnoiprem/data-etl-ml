@@ -66,8 +66,8 @@ hyperparams in `train.py::DEFAULT_HYPERPARAMS`. The downstream code
 ### 1. Build the training set
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/03-distilled-slm
-python3 slm/dataset.py --usage ../../phase-2-applications/service/usage.jsonl --out slm/data/train.jsonl
+cd course/ai-fde/phase-4-capstone/projects/03-distilled-slm
+python3 slm/dataset.py --usage ../../phase-3-deployment/service/usage.jsonl --out slm/data/train.jsonl
 ```
 
 Reads the Phase 3 drafter's audit log, filters to `outcome=ok` rows
@@ -131,7 +131,7 @@ Output:
 ### 5. Run the 2 tests
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/03-distilled-slm
+cd course/ai-fde/phase-4-capstone/projects/03-distilled-slm
 python3 -m pytest slm/tests/test_slm.py -v
 ```
 
@@ -161,7 +161,7 @@ no LLM cost spike.
 
 ```bash
 # 1. Pull the latest usage.jsonl from the drafter
-cp ../../phase-2-applications/service/usage.jsonl slm/data/usage.jsonl
+cp ../../phase-3-deployment/service/usage.jsonl slm/data/usage.jsonl
 
 # 2. Rebuild the training set
 python3 slm/dataset.py --usage slm/data/usage.jsonl --out slm/data/train.parquet

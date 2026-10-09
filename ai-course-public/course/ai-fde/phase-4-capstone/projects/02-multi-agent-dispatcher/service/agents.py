@@ -64,10 +64,10 @@ from typing import Any, Optional
 _HERE = Path(__file__).parent
 _PROJ1 = _HERE.parent.parent / "01-mcp-drafter" / "service"
 # _HERE = .../02-multi-agent-dispatcher/service
-# _HERE.parent.parent = .../phase-3-capstone/projects
-# _HERE.parent.parent.parent = .../phase-3-capstone
+# _HERE.parent.parent = .../phase-4-capstone/projects
+# _HERE.parent.parent.parent = .../phase-4-capstone
 # _HERE.parent.parent.parent.parent = .../ai-fde
-_PHASE3 = _HERE.parent.parent.parent.parent / "phase-2-applications" / "service"
+_PHASE3 = _HERE.parent.parent.parent.parent / "phase-3-deployment" / "service"
 
 for p in (_PROJ1, _PHASE3):
     sp = str(p)

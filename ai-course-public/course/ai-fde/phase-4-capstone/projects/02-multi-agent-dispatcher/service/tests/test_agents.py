@@ -7,7 +7,7 @@ tests/test_agents.py — Multi-agent dispatcher tests for Phase 4 Project 2.
   3. test_daniel_agent_escalates_on_high_risk
 
 Run:
-    cd course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher
+    cd course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher
     python3 -m pytest service/tests/test_agents.py -v
 """
 from __future__ import annotations

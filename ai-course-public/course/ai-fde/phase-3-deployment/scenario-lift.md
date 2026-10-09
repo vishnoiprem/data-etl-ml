@@ -83,7 +83,7 @@ Together, those three artifacts are what you hand to PacificFreight's exec spons
 ## Where each Phase 2 lesson lands
 
 ```
-phase-2-applications/
+phase-3-deployment/
 ├── service/                  ← The deployable AI system
 │   ├── app.py                  (FastAPI: /draft, /retrieve, /eval, /health)
 │   ├── rag.py                  (MockVectorStore + retrieve() + build_rag_prompt())
@@ -120,7 +120,7 @@ phase-2-applications/
 
 ## Phase 3 close (Deployment Depth) — what shipped
 
-Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in this same `phase-2-applications/` directory because the course was numbered before Phase 3 existed; the labeling gap is intentional and the `phase-3-capstone/` directory picks up the Phase 4 numbering without renaming).
+Phase 3 closed all 5 dangling commitments from the original brief. The directory layout above is unchanged at the top level; the new files are added alongside the Phase 2 ones (Phase 3 lives in this same `phase-3-deployment/` directory because the course was numbered before Phase 3 existed; the labeling gap is intentional and the `phase-4-capstone/` directory picks up the Phase 4 numbering without renaming).
 
 ### 5 Phase 2 commitments → 5 Phase 3 deliverables
 
@@ -163,5 +163,5 @@ Phase 3 closed all 5 dangling commitments from the original brief. The directory
 
 **The FDE has left.** Mei sends 150 emails/day through the drafter. Sarah reviews the Monday iteration report. Daniel owns the VM, the model, and the runbook. The 3-loop iteration cadence (online metrics + offline eval + user feedback) runs every week. The 3 failure-mode primitives (redactor + rate limiter + circuit breaker) keep the service up.
 
-**What's after Phase 3** — Phase 4 lives in `course/ai-fde/phase-3-capstone/`. It takes the Phase 3 service and turns it into a **platform**: MCP for tool use, multi-agent for complex cases, a distilled SLM for cost, a fresh engagement for breadth. 4 projects + 5 case studies + portfolio + capstone presentation. See `phase-3-capstone/scenario-brief.md` for the week-by-week plan.
+**What's after Phase 3** — Phase 4 lives in `course/ai-fde/phase-4-capstone/`. It takes the Phase 3 service and turns it into a **platform**: MCP for tool use, multi-agent for complex cases, a distilled SLM for cost, a fresh engagement for breadth. 4 projects + 5 case studies + portfolio + capstone presentation. See `phase-4-capstone/scenario-brief.md` for the week-by-week plan.
 

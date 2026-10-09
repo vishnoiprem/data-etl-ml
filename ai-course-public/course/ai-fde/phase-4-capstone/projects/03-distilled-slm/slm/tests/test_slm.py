@@ -7,7 +7,7 @@ tests/test_slm.py — SLM tests for Phase 4 Project 3.
      doesn't have expected_metrics; we use the synthetic mode)
 
 Run:
-    cd course/ai-fde/phase-3-capstone/projects/03-distilled-slm
+    cd course/ai-fde/phase-4-capstone/projects/03-distilled-slm
     python3 -m pytest slm/tests/test_slm.py -v
 """
 from __future__ import annotations

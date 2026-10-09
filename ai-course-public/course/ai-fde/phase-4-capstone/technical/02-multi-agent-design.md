@@ -65,7 +65,7 @@ legal team for review. You do this in 3 steps:
 
 ### Step 1 — Subclass `Agent`
 
-Open `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service/agents.py`
+Open `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service/agents.py`
 and add:
 
 ```python
@@ -145,8 +145,8 @@ the new agent:
 
 ```python
 import sys
-sys.path.insert(0, "course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service")
-sys.path.insert(0, "course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service")
+sys.path.insert(0, "course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service")
+sys.path.insert(0, "course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service")
 import agents
 
 d = agents.Dispatcher()
@@ -245,9 +245,9 @@ is the **first thing you look at when something goes wrong.**
 
 ## 📦 Artifacts
 
-- `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service/agents.py` — the 3 agents + the orchestrator
-- `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service/agents_state.py` — the shared state
-- `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service/tests/test_agents.py` — the 3 tests
+- `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service/agents.py` — the 3 agents + the orchestrator
+- `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service/agents_state.py` — the shared state
+- `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service/tests/test_agents.py` — the 3 tests
 
 ## 🔗 Related lessons
 

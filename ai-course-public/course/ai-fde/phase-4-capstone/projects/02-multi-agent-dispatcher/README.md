@@ -14,7 +14,7 @@
     ├── agents.py            # The 3 agents + the orchestrator
     ├── agents_state.py      # The shared state (the "bus" between agents)
     └── tests/
-        ├── conftest.py      # Adds 02/, 01-mcp-drafter/, and phase-2-applications/ to sys.path
+        ├── conftest.py      # Adds 02/, 01-mcp-drafter/, and phase-3-deployment/ to sys.path
         └── test_agents.py   # 3 tests (routing, shared state, risk escalation)
 ```
 
@@ -66,7 +66,7 @@ method instead of a `state.trace = [...]` assignment.
 ### 1. CLI demo (3 canned cases)
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher
+cd course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher
 python3 service/agents.py
 ```
 
@@ -87,7 +87,7 @@ Emits a JSON blob with all 3 agent outputs + the tool calls + the cost rollup.
 ### 3. Run the 3 tests
 
 ```bash
-cd course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher
+cd course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher
 python3 -m pytest service/tests/test_agents.py -v
 ```
 
@@ -102,8 +102,8 @@ The tests cover:
 
 ```python
 import sys
-sys.path.insert(0, "course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service")
-sys.path.insert(0, "course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/service")
+sys.path.insert(0, "course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service")
+sys.path.insert(0, "course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/service")
 import agents
 
 d = agents.Dispatcher()
@@ -203,7 +203,7 @@ mentions.
 ## Related
 
 - [`../01-mcp-drafter/`](../01-mcp-drafter/) — the tool layer this project uses
-- [`../../phase-2-applications/service/circuit.py`](../../../phase-2-applications/service/circuit.py) — the circuit breaker
-- [`../../phase-2-applications/service/retrieval_v2.py`](../../../phase-2-applications/service/retrieval_v2.py) — the hybrid retriever the drafter uses (not the dispatcher — the dispatcher uses the MCP server's `tracker.lookup` instead)
+- [`../../phase-3-deployment/service/circuit.py`](../../../phase-3-deployment/service/circuit.py) — the circuit breaker
+- [`../../phase-3-deployment/service/retrieval_v2.py`](../../../phase-3-deployment/service/retrieval_v2.py) — the hybrid retriever the drafter uses (not the dispatcher — the dispatcher uses the MCP server's `tracker.lookup` instead)
 - [`../03-distilled-slm/`](../03-distilled-slm/) — the project that fine-tunes a 1.5B model on Mei's drafts (could replace the MeiAgent's mock-LLM behavior in production)
 - [`../04-ai-data-analyst/`](../04-ai-data-analyst/) — the fresh-engagement project (different customer, different security model)
