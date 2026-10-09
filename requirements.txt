@@ -63,4 +63,4 @@ seaborn==0.13.0
 plotly==5.15.0
 
 # Development
-jupyterlab>=4.2.5
+jupyterlab>=4.6.4
