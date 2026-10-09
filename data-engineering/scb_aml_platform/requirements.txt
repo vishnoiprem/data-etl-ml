@@ -49,7 +49,7 @@ sqlalchemy==1.4.52  # last 1.4.x (Airflow 2.7 compat)
 PyHive==0.7.0
 
 # ── Data Generation (dummy data)
-faker==19.6.2
+faker==40.41.0
 
 # ── API (Lucid Search — FastAPI)
 fastapi==0.103.1
