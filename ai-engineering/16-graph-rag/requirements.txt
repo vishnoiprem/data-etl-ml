@@ -3,7 +3,7 @@
 # from the requirements-dev.txt at the repo root.
 
 # Core
-python-dotenv>=1.0.1
+python-dotenv>=1.2.4
 pydantic>=2.6.0
 pydantic-settings>=2.2.0
 loguru>=0.7.2
