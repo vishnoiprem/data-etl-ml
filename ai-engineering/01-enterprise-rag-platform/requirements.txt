@@ -6,7 +6,7 @@ faiss-cpu>=1.8.0
 rank-bm25>=0.2.2
 
 # Document processing
-pypdf>=4.2.0
+pypdf>=6.19.0
 markdown>=3.6
 beautifulsoup4>=4.12.0
 
