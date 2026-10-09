@@ -30,4 +30,4 @@ anthropic>=0.39.0
 
 # Dashboard
 streamlit>=1.32.0
-plotly>=5.20.0
+plotly>=7.1.0
