@@ -36,6 +36,7 @@
 | 12 | `12_cdk_v2_serverless/` | L71–L77 | 7 |
 | 13 | `13_cloudformation_serverless/` | L60–L70 | 11 |
 | 14 | `14_python_basics_appx/` | L78–L81 | 4 |
+| 15 | `15_fci_cluster_monitor/` | L82–L87 | 6 |
 | | **Total** | | **81** |
 
 ## Per-section layout
@@ -58,7 +59,7 @@ Every section folder has the same shape:
 └── assignments/           ← section-specific assignments (if any)
 ```
 
-## Quizzes (14)
+## Quizzes (16)
 
 | # | File |
 |---|---|
@@ -69,13 +70,14 @@ Every section folder has the same shape:
 | 5 | `quizzes/section_5.md` |
 | 6 | `quizzes/section_6.md` |
 | 7 | `quizzes/section_7.md` |
-| 8 | `quizzes/section_8.md` |
-| 9 | `quizzes/section_9.md` |
-| 10 | `quizzes/section_10.md` |
+| 8 | `quizzes/section_8.md` (12 questions) |
+| 9 | `quizzes/section_9.md` (13 questions) |
+| 10 | `quizzes/section_10.md` (11 questions) |
 | 11 | `quizzes/section_11.md` |
 | 12 | `quizzes/section_12.md` |
 | 13 | `quizzes/section_13.md` |
 | 14 | `quizzes/section_14.md` |
+| 15 | `quizzes/section_15.md` (Use Case 3 — FCI Cluster Monitor) |
 
 ## Assets
 

@@ -55,6 +55,7 @@ SECTIONS: dict[str, Path] = {
     "13_cloudformation_serverless": COURSE_ROOT
     / "13_cloudformation_serverless"
     / "code",
+    "15_fci_cluster_monitor": COURSE_ROOT / "15_fci_cluster_monitor" / "code",
 }
 
 
@@ -104,26 +105,37 @@ def run_pytest(
     if verbose:
         cmd.append("-v")
     cmd.extend(extra_args)
-    cmd.extend(str(p) for p in test_files)
 
+    # Some sections (notably 08_usecase2_apigw_lambda_s3) ship multiple
+    # ``test_lambda_function.py`` files in different sub-directories that
+    # would collide if pytest collected them in a single invocation. Run
+    # each test file in its own subprocess and aggregate the worst
+    # returncode so the summary still reflects the section's status.
     print(f"\n{'=' * 72}\n[{section}]  ({len(test_files)} test files)\n{'=' * 72}")
-    print("+", " ".join(cmd))
 
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    # Echo pytest's output so the user can see what happened even when
-    # we're aggregating across many sections.
-    if proc.stdout:
-        print(proc.stdout)
-    if proc.stderr:
-        print(proc.stderr, file=sys.stderr)
+    worst_rc = 0
+    combined_stdout: list[str] = []
+    combined_stderr: list[str] = []
+    for tf in test_files:
+        single_cmd = cmd + [str(tf)]
+        print("+", " ".join(single_cmd))
+        proc = subprocess.run(single_cmd, capture_output=True, text=True)
+        if proc.stdout:
+            print(proc.stdout)
+            combined_stdout.append(proc.stdout)
+        if proc.stderr:
+            print(proc.stderr, file=sys.stderr)
+            combined_stderr.append(proc.stderr)
+        if proc.returncode > worst_rc:
+            worst_rc = proc.returncode
 
     return SectionResult(
         name=section,
         path=code_dir,
-        returncode=proc.returncode,
+        returncode=worst_rc,
         test_files=test_files,
-        stdout=proc.stdout,
-        stderr=proc.stderr,
+        stdout="\n".join(combined_stdout),
+        stderr="\n".join(combined_stderr),
     )
 
 

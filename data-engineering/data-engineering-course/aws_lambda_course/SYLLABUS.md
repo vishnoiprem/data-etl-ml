@@ -1,7 +1,7 @@
 # SYLLABUS — AWS Lambda, Python (Boto3) & Serverless — Beginner to Advanced
 
 > **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
-> **Format:** **16 sections**, **81 lectures**, **~9h 11m** total. 3 hands-on enterprise use cases (banking, serverless CRUD, Bedrock GenAI). 16 quizzes (one per section). 4 downloadable resources.
+> **Format:** **16 sections**, **88 lectures** (L01–L81 + L31a, L36a–L36e, L44a, L82–L87), **~10h 30m** total. 4 hands-on enterprise use cases (banking, serverless CRUD, Bedrock GenAI, FCI cluster monitor). 16 quizzes (one per section). 7 assignments. 4 downloadable resources.
 > **Source:** Udemy-published curriculum "AWS Lambda, Python(Boto3) & Serverless- Beginner to Advanced" (October 2026 edition).
 
 This is the **authoritative lecture-to-file map**. The Udemy lecture order is preserved exactly as L01–L81 below. Section folders are numbered to match the Udemy course sections.
@@ -22,7 +22,7 @@ This is the **authoritative lecture-to-file map**. The Udemy lecture order is pr
 | 12 | L71–L77 | 45 | AWS CDK v2 — Implementing Serverless Use Case 2 |
 | 13 | L60–L70 | 73 | AWS CloudFormation — Implementing Serverless Use Case 2 |
 | 14 | L78–L81 | 32 | Python Basics — Appendix (PyCharm, Print, Variables, Data Types, Functions) |
-| 15 | (assets) | – | Diagrams, Mermaid, Architecture |
+| 15 | L82–L87 | 51 | Enterprise Use Case 3 — FCI Cluster Monitor (AWS MS AD + FSx + Lambda + SNS + EventBridge) |
 | 16 | (downloads) | – | PDF/zip resources |
 
 **Total: 81 lectures, ~9h 11m, 3 enterprise use cases, 16 quizzes, 4 downloads.**
@@ -127,11 +127,16 @@ This is the **authoritative lecture-to-file map**. The Udemy lecture order is pr
 
 ---
 
-## Section 9 — API Security: Lambda Authorizer & Cognito Authorizer (L36–L39, 44 min)
+## Section 9 — API Security: Lambda Authorizer & Cognito Authorizer (L36–L39, L36a–L36e, 44+ min)
 
 | L# | Title | Min | File |
 |---|---|---|---|
 | L36 | Securing APIs using AWS Lambda Authorizer — Theory | 3:30 | `09_api_security_lambda_cognito_auth/lecture_scripts/L36_lambda_authorizer_theory.md` |
+| L36a | Use Case 2 Architecture — Re-walked with a Security Lens | 8:00 | `09_api_security_lambda_cognito_auth/lecture_scripts/L36a_usecase2_architecture_revisited.md` |
+| L36b | Use Case 2 — Part 2: Add Lambda Authorizer to the API | 10:00 | `09_api_security_lambda_cognito_auth/lecture_scripts/L36b_usecase2_pt2_lambda_authorizer.md` |
+| L36c | Use Case 2 — Part 3: Add Cognito Authorizer to the API | 10:00 | `09_api_security_lambda_cognito_auth/lecture_scripts/L36c_usecase2_pt3_cognito_authorizer.md` |
+| L36d | API Keys and Usage Plans — Theory (re-walked for Use Case 2) | 5:00 | `09_api_security_lambda_cognito_auth/lecture_scripts/L36d_api_keys_theory.md` |
+| L36e | API Keys and Usage Plans — Hands On (re-walked for Use Case 2) | 12:00 | `09_api_security_lambda_cognito_auth/lecture_scripts/L36e_api_keys_hands_on.md` |
 | L37 | Securing APIs using AWS Lambda Authorizer — Hands On | 23:46 | `09_api_security_lambda_cognito_auth/lecture_scripts/L37_lambda_authorizer_hands_on.md` |
 | L38 | Securing APIs using AWS Cognito Authorizer — Theory | 2:42 | `09_api_security_lambda_cognito_auth/lecture_scripts/L38_cognito_authorizer_theory.md` |
 | L39 | Securing APIs using AWS Cognito Authorizer — Hands On | 14:11 | `09_api_security_lambda_cognito_auth/lecture_scripts/L39_cognito_authorizer_hands_on.md` |
@@ -147,6 +152,7 @@ This is the **authoritative lecture-to-file map**. The Udemy lecture order is pr
 | L42 | Generative AI — AWS Bedrock Overview | 2:24 | `10_generative_ai_bedrock/lecture_scripts/L42_bedrock_overview.md` |
 | L43 | Generative AI — AWS Lambda Prerequisites | 5:50 | `10_generative_ai_bedrock/lecture_scripts/L43_lambda_prereqs.md` |
 | L44 | Generative AI — Write AWS Lambda Function to access Bedrock | 20:36 | `10_generative_ai_bedrock/lecture_scripts/L44_lambda_bedrock.md` |
+| L44a | API Keys for Amazon Bedrock (Generate + Store + Inject) | 12:00 | `10_generative_ai_bedrock/lecture_scripts/L44a_api_keys_for_bedrock.md` |
 | L45 | Generative AI — Create REST API using API Gateway to access Bedrock | 5:34 | `10_generative_ai_bedrock/lecture_scripts/L45_apigw_bedrock.md` |
 | L46 | Generative AI — End to End Demo | 1:13 | `10_generative_ai_bedrock/lecture_scripts/L46_e2e_demo.md` |
 
@@ -227,6 +233,30 @@ This is the **authoritative lecture-to-file map**. The Udemy lecture order is pr
 
 ---
 
+## Section 15 — Enterprise Use Case 3: FCI Cluster Monitor (L82–L87, 51 min)
+
+> **New section.** Closes the third of three end-to-end enterprise use
+> cases in the course. Section 6 was a fully event-driven file pipeline,
+> section 8 was a serverless CRUD API, and this section is an **operations
+> automation**: monitor FSx for Windows File Server free storage, auto-grow
+> the volume, and page ops via SNS.
+
+| L# | Title | Min | File |
+|---|---|---|---|
+| L82 | Section Overview — Why an FCI Cluster Monitor? | 3:00 | `15_fci_cluster_monitor/lecture_scripts/L82_section_overview.md` |
+| L83 | FCI Cluster Architecture (AWS MS AD + FSx + Lambda + SNS + CloudWatch + EventBridge) | 8:00 | `15_fci_cluster_monitor/lecture_scripts/L83_architecture.md` |
+| L84 | AWS Managed Microsoft AD 101 | 8:00 | `15_fci_cluster_monitor/lecture_scripts/L84_aws_ms_ad.md` |
+| L85 | FSx for Windows File Server 101 | 7:00 | `15_fci_cluster_monitor/lecture_scripts/L85_fsx.md` |
+| L86 | The Monitor Lambda — check storage + grow volume | 15:00 | `15_fci_cluster_monitor/lecture_scripts/L86_monitor_lambda.md` |
+| L87 | EventBridge schedule + SNS topic + end-to-end test + course wrap-up | 12:00 | `15_fci_cluster_monitor/lecture_scripts/L87_eventbridge_sns_wrapup.md` |
+
+**Working code:** `15_fci_cluster_monitor/code/monitor_lambda/lambda_function.py` +
+`test_lambda_function.py` (7 moto tests pass) + `iam_policy.json` +
+`cloudformation/fci_monitor_stack.yaml` + `cloudformation/deploy.sh` +
+`event_payloads/scheduled_event.json`.
+
+---
+
 ## Quizzes (16 — one per section)
 
 | # | Section | File |
@@ -245,6 +275,7 @@ This is the **authoritative lecture-to-file map**. The Udemy lecture order is pr
 | 12 | CDK v2 | `quizzes/section_12.md` |
 | 13 | CloudFormation | `quizzes/section_13.md` |
 | 14 | Python Basics Appendix | `quizzes/section_14.md` |
+| 15 | Use Case 3 (FCI Cluster Monitor) | `quizzes/section_15.md` |
 
 ---
 

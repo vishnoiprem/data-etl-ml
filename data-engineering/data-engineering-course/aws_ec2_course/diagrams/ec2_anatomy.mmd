@@ -1,0 +1,22 @@
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+graph LR
+    A[AMI - Amazon Machine Image<br/>Boot Source]
+    B[Instance Type<br/>vCPU, RAM, Network]
+    C[EBS Volume<br/>Block Storage]
+    D[ENI - Elastic Network Interface<br/>Private IP, Public IP]
+    E[Key Pair<br/>SSH Authentication]
+    F[Security Group<br/>Stateful Firewall]
+    G[User Data<br/>Bootstrap Script]
+    H[IAM Role<br/>AWS API Access]
+    I[EC2 Instance]
+    J[Tags<br/>Metadata]
+
+    A --> I
+    B --> I
+    C --> I
+    D --> I
+    E --> I
+    F --> I
+    G --> I
+    H --> I
+    J --> I

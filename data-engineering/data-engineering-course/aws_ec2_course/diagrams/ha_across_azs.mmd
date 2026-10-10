@@ -1,0 +1,12 @@
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+graph LR
+    Internet[Internet]
+    R53[Route 53<br/>DNS]
+    ALB[Application Load Balancer<br/>ALB]
+    InstA[EC2 Instance<br/>AZ-a: us-east-1a]
+    InstB[EC2 Instance<br/>AZ-b: us-east-1b]
+
+    Internet --> R53
+    R53 --> ALB
+    ALB --> InstA
+    ALB --> InstB

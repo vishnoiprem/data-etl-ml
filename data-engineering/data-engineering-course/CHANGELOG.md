@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-10-10 — AWS EC2 + Load Balancing Crash Course (Udemy course author source)
+
+New track: `aws_ec2_course/`. The author-source companion for the
+Udemy course "AWS EC2 Crash Course + Load Balancing with Demos" (8
+sections, 38 lectures, 6 working boto3 + moto demos, 5 mermaid
+diagrams, 8 quizzes, 1 optional assignment). All code samples run
+offline via `pytest` + `moto` — no AWS account required.
+
+### Added — `aws_ec2_course/`
+- `README.md`, `SYLLABUS.md` (L01–L38 map), `DIRECTORY.md`, `CHANGELOG.md`, `requirements.txt`
+- 8 section folders, each with `README.md` and `lecture_scripts/`
+  - `01_intro_to_ec2/` (3 lectures, no code)
+  - `02_ec2_fundamentals/` (5 lectures + `region_az_demo.py` + tests)
+  - `03_creating_ec2/` (10 lectures + `launch_instance.py` + 6 moto tests)
+  - `04_ec2_pricing/` (4 lectures + `pricing_calc.py` + 6 tests)
+  - `05_managing_ec2/` (4 lectures + `snapshot_ami_demo.py` + 4 moto tests)
+  - `06_load_balancing_nlb/` (4 lectures + `nlb_create.py` + 4 moto tests)
+  - `07_load_balancing_alb/` (5 lectures + `alb_create.py` + 4 moto tests)
+  - `08_load_balancing_gwlb/` (3 lectures + `gwlb_create.py` + 3 moto tests)
+- 8 quizzes (`quizzes/section_1.md` … `section_8.md`, 8–12 questions each)
+- 6 mermaid diagrams in `diagrams/` (ec2_anatomy, regions_azs, ha_across_azs, alb_request_flow, nlb_request_flow, gwlb_request_flow)
+- 1 optional assignment (`assignments/assignment_1_ha_webapp.md`)
+- 2 scripts (`scripts/run_all_tests.py`, `scripts/bootstrap.sh`)
+
+### Verified
+- `python scripts/run_all_tests.py` reports `ALL PASS` — 30 tests
+  across 7 test files.
+
+## 2026-10-10 — AWS Lambda course updates (Use Case 3 + missing lectures)
+
+Update to `aws_lambda_course/`. Adds the 3rd enterprise use case
+(FCI Cluster Monitor), the missing Use Case 2 Part 3, the Use Case 2
+re-walk in section 9, and the Bedrock API Keys lecture in section 10.
+
+### Added — `aws_lambda_course/`
+- **Section 15 (new): L82–L87 — Enterprise Use Case 3: FCI Cluster Monitor**
+  (AWS Managed Microsoft AD + FSx for Windows + Lambda + SNS + EventBridge
+  + CloudWatch). 6 lecture scripts, `code/monitor_lambda/` with 7 moto
+  tests, `code/cloudformation/fci_monitor_stack.yaml` with a `DryRun`
+  parameter, `iam_policy.json` (least privilege), `deploy.sh`, and
+  `event_payloads/scheduled_event.json` fixture.
+- **L31a (section 8):** Use Case 2 Part 3 — unified GET + DELETE handler
+  with the full 4xx/5xx error model and CORS. 8 moto tests in
+  `code/api_pt3_handlers/`.
+- **L36a–L36e (section 9):** Use Case 2 re-walked with a security lens
+  (5 new lectures). Working code in `code/usecase2_with_auth/`.
+- **L44a (section 10):** API Keys for Amazon Bedrock. Working code in
+  `code/api_keys_for_bedrock/` (7 moto tests).
+- `quizzes/section_15.md` (10 questions, final quiz).
+- `assignments/assignment_7_fci_monitor.md` (optional extension).
+
+### Verified
+- `python scripts/run_all_tests.py` reports 102 tests across 9 sections
+  with **0 failures**.
+
 ## 2026-10-10 — AWS Glue — The Complete Masterclass (Udemy course author source)
 
 New track: `aws_glue_course/`. The author-source markdown for the Udemy course *AWS Glue - The Complete Masterclass* (11 sections, 78 lectures, 4h 11m, 3 role plays, 4 downloadable resources, 6 assignments, 11 quizzes). Section 1 lectures are written as full individual files (L01–L12). Sections 2–10 are bundled per-section (`SECTION_BUNDLE.md`) with one stub file per lecture so the SYLLABUS map resolves.

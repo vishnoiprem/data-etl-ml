@@ -1,7 +1,7 @@
 # AWS Lambda, Python (Boto3) & Serverless — Beginner to Advanced
 
 > **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
-> **Format:** **16 sections, 81 lectures, ~9h 11m total** (Udemy-published 2026 edition).
+> **Format:** **16 sections, 88 lectures (L01–L81 + L31a, L36a–L36e, L44a, L82–L87), ~10h 30m total** (Udemy-published 2026 edition).
 > **Based on:** "AWS Lambda, Python(Boto3) & Serverless- Beginner to Advanced" Udemy course.
 
 This is the local companion repo for the published Udemy course. The
@@ -46,14 +46,16 @@ lecture-to-file map in `SYLLABUS.md` is authoritative.
 | 4 | **Use Case 1:** S3 → Lambda → DynamoDB banking JSON pipeline | 6 | L23–L24 |
 | 5 | **Use Case 2:** API Gateway + Lambda + S3 CRUD (query string params) | 8 | L30–L32, L31a |
 | 6 | API Gateway API Keys + Usage Plan | 8 | L33–L34 |
-| 7 | Lambda Authorizer (custom JWT validation) | 9 | L36–L37 |
-| 8 | Cognito User Pool Authorizer | 9 | L38–L39 |
-| 9 | **GenAI use case:** Bedrock Cohere → Lambda → API Gateway (manufacturing defect summarizer) | 10 | L40–L46 |
-| 10 | Lambda in VPC (CloudWatch + ENI walkthrough) | 11 | L51–L52 |
-| 11 | CloudWatch Metrics + Logs hands-on for Lambda | 11 | L53–L56 |
-| 12 | Lambda Versions + Aliases | 11 | L57–L58 |
-| 13 | CloudFormation: full serverless stack with Parameters + Metadata | 13 | L60–L70 |
-| 14 | CDK v2 TypeScript: same serverless stack | 12 | L71–L77 |
+| 7 | Use Case 2 re-walked with a security lens (5 lectures) | 9 | L36a–L36e |
+| 8 | Lambda Authorizer (custom JWT validation) | 9 | L36–L37 |
+| 9 | Cognito User Pool Authorizer | 9 | L38–L39 |
+| 10 | **GenAI use case:** Bedrock Cohere → Lambda → API Gateway (manufacturing defect summarizer) | 10 | L40–L46, L44a |
+| 11 | Lambda in VPC (CloudWatch + ENI walkthrough) | 11 | L51–L52 |
+| 12 | CloudWatch Metrics + Logs hands-on for Lambda | 11 | L53–L56 |
+| 13 | Lambda Versions + Aliases | 11 | L57–L58 |
+| 14 | CloudFormation: full serverless stack with Parameters + Metadata | 13 | L60–L70 |
+| 15 | CDK v2 TypeScript: same serverless stack | 12 | L71–L77 |
+| 16 | **Use Case 3:** FCI Cluster Monitor (AWS MS AD + FSx + Lambda + SNS + EventBridge) | 15 | L82–L87 |
 
 ## Repo layout
 

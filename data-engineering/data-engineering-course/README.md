@@ -255,6 +255,24 @@ engineering work that this course builds on:
 
 ---
 
+## AWS companion courses (sibling tracks)
+
+Three sibling tracks sit at the repository root and follow the same
+"lecture-script + working code + moto tests" pattern. They are
+independent of the interview course above and stand on their own as
+Udemy-published curricula:
+
+| Track | Folder | Sections | Lectures | Tests |
+|---|---|---|---|---|
+| AWS Glue — The Complete Masterclass | `aws_glue_course/` | 11 | 78 | (PySpark ETL demos) |
+| AWS Lambda + Python (Boto3) + Serverless | `aws_lambda_course/` | 16 | 88 | 102 |
+| AWS EC2 + Load Balancing Crash Course | `aws_ec2_course/` | 8 | 38 | 30 |
+
+Each course has its own `README.md`, `SYLLABUS.md`, `DIRECTORY.md`,
+`CHANGELOG.md`, and `scripts/run_all_tests.py`.
+
+---
+
 ## Stats
 
 - **12 tracks** in 1 repository

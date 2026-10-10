@@ -1,0 +1,22 @@
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+graph TD
+    R[AWS Region: us-east-1<br/>N. Virginia]
+    AZ1[Availability Zone: us-east-1a]
+    AZ2[Availability Zone: us-east-1b]
+    AZ3[Availability Zone: us-east-1c]
+    DC1a[Data Center 1]
+    DC1b[Data Center 2]
+    DC2a[Data Center 1]
+    DC2b[Data Center 2]
+    DC3a[Data Center 1]
+    DC3b[Data Center 2]
+
+    R --> AZ1
+    R --> AZ2
+    R --> AZ3
+    AZ1 --> DC1a
+    AZ1 --> DC1b
+    AZ2 --> DC2a
+    AZ2 --> DC2b
+    AZ3 --> DC3a
+    AZ3 --> DC3b

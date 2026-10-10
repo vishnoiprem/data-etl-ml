@@ -1,0 +1,15 @@
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+sequenceDiagram
+    participant Client
+    participant ALB as ALB
+    participant Rules as Listener Rules
+    participant TG as Target Group
+    participant EC2 as EC2 Instance
+
+    Client->>ALB: HTTP/HTTPS Request
+    ALB->>Rules: Evaluate listener rules (L7)
+    Rules->>TG: Route to target group
+    TG->>EC2: Forward request
+    EC2->>TG: HTTP Response
+    TG->>ALB: Return response
+    ALB->>Client: HTTP/HTTPS Response

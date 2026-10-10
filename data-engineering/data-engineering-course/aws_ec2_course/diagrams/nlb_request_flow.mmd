@@ -1,0 +1,13 @@
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+sequenceDiagram
+    participant Client
+    participant NLB as NLB
+    participant TG as Target Group
+    participant EC2 as EC2 Instance
+
+    Client->>NLB: TCP Connection (L4 / TCP)
+    NLB->>TG: Forward TCP traffic
+    TG->>EC2: Deliver packets
+    EC2->>TG: TCP Response
+    TG->>NLB: Return response
+    NLB->>Client: TCP Response (L4 / TCP)

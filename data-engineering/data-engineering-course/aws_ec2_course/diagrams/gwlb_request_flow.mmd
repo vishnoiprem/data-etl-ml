@@ -1,0 +1,16 @@
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+sequenceDiagram
+    participant Client
+    participant VPCE as VPC Endpoint
+    participant GWLB as Gateway Load Balancer
+    participant Appliance as 3rd Party Appliance
+    participant Target as Target
+
+    Client->>VPCE: Send traffic
+    VPCE->>GWLB: Forward via GENEVE / UDP 6081
+    GWLB->>Appliance: Inspect / process traffic
+    Appliance->>GWLB: Return inspected traffic
+    GWLB->>Target: Forward to target via GENEVE / UDP 6081
+    Target->>GWLB: Response
+    GWLB->>VPCE: Return via GENEVE / UDP 6081
+    VPCE->>Client: Deliver response
