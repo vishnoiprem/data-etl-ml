@@ -7,6 +7,7 @@ Tests: tests/test_meta_screen_python.py
 
 from __future__ import annotations
 
+import csv
 from collections import Counter, defaultdict, deque
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
@@ -85,7 +86,6 @@ def summarize_by_page(path: str) -> Dict[str, int]:
     Missing file: print a message and return {}.
     Malformed row: skip and continue.
     """
-    import csv
     totals: Dict[str, int] = {}
     try:
         with open(path, newline='') as f:

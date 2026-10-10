@@ -270,6 +270,20 @@ CREATE TABLE dim_metric (
 
 ---
 
+## Killer follow-ups (per question)
+
+After the interviewer grades your schema, they will ask at least one
+follow-up. The follow-ups below are the ones that *separate E5 from E4*
+on this round. Skim them before you go in.
+
+- **Q1 (Reels):** "What if the algorithm changes weekly?" — answer: SCD2 on `dim_algorithm_version`. The fact row carries `algorithm_version_id` so historical metrics re-run under the version that was live at the time. (See the SCD2 point-in-time join test in `tests/test_onsite_schemas.py`.)
+- **Q2 (Cross-platform):** "How do you de-dupe a `user_id` that exists on 2 platforms?" — answer: bridge table `user_identity_bridge(unified_user_id, platform, platform_user_id, valid_from, valid_to)`. Each platform has its own native ID; the unified ID is the Meta-wide stable one. Q2's two-platform test exercises the bridge.
+- **Q3 (Ads Auction):** "Time-travel vs current-state — same query?" — answer: no. Time-travel joins to the dim version where `event_ts BETWEEN valid_from AND valid_to`. Current-state uses `WHERE is_current = 1`. Same fact table, two different dim joins. Q3's SCD2 ad_set version supports both.
+- **Q4 (Rideshare):** "How do you handle a trip that crossed midnight?" — answer: partition by `event_date` (not `event_ts`), and accept that the trip span is the source of truth. Late events for D-1 go to a D-1 partition; the trip-level fact reconciles. (Q4 ships trip + trip_event as two separate facts so the partition choice is explicit.)
+- **Q5 (Investigation):** "How do you know the drop is the metric, not the segment?" — answer: compare like_rate across segments in the same time bucket. If segment 1 drops and segment 2 holds, the drop is localized — your data model is a `(metric, time_bucket, segment)` grain, not `(metric, time_bucket)`. Q5's test asserts that segment 1 drops but segment 2 is stable.
+
+---
+
 ## What's in the SQLite file
 
 All 5 schemas (Reels, cross-platform, Ads Auction, ride-share, metric-investigation) are in

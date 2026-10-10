@@ -56,9 +56,10 @@ GROUP BY sender_id, DATE(sent_ts);
 **Step 4: cost** — give a per-1M-events projection with named numbers (S3 $23/TB-mo, EMR $0.05/vCPU-hr, egress $0.09/GB). The exact dollar figure is less important than the *order of magnitude* and the ability to name the bottleneck at 10x. See Module 11's `notebooks/05_meta_system_design_walkthrough.ipynb` for a fully worked example.
 
 **Step 5: failure modes**
-- Late events: idempotency key = (business_id, day) → INSERT OR REPLACE
+- Late events: idempotency key = (business_id, event_id) — the dedup table keys on a stable event ID, not on the partition date, so a late-arriving event at D-3 still replaces the same row (no double-count)
 - Schema drift: CI test that compares `INFORMATION_SCHEMA.COLUMNS` against the contract
-- Backfill: re-run over the affected date range; INSERT OR REPLACE handles dupes
+- Backfill: re-run over the affected date range; the idempotency key handles dupes natively
+- The exact upsert dialect varies (`MERGE INTO` on BigQuery / Snowflake / Redshift; `INSERT ... ON CONFLICT` on Postgres; `INSERT OR REPLACE` on SQLite for local tests). At Meta scale the warehouse is **Presto-on-Hive** and the idiom is `MERGE INTO`.
 
 ## The 3 most-asked 2026 product surfaces (from Interview101)
 

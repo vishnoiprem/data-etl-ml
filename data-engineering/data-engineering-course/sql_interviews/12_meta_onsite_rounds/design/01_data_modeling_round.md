@@ -22,7 +22,7 @@ You have 60 min. This is the round.
 4. **Name the SCD type** for each slowly-changing dimension. Default: Type 2 for any dim with a history.
 5. **Scale story** — what changes at 10x users, 10x events, 10x storage. Pick partition keys, sort keys, bucketing.
 
-## The 5 most-asked 2026 questions (verbatim, from Interview101)
+## The 5 most-asked 2026 questions
 
 | # | Question | Surface | Dims | Fact grain |
 |---|----------|---------|------|-----------|
@@ -32,7 +32,7 @@ You have 60 min. This is the round.
 | 4 | "Design a data model for a ride-sharing app like Uber. Walk through partitioning at scale." | Rideshare | rider, driver, city, time, trip | 1 row / trip + 1 row / trip_event |
 | 5 | "An Instagram metric is dropping. Walk through your root-cause analysis, the data model that would support it, and the follow-up." | Investigation | per-metric | 1 row / (metric, time-bucket, segment) |
 
-Source: [Aced 2026](https://www.aced.io/guides/meta-data-engineer-interview)
+Source: [Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer) (Q1, Q2, Q4, Q5) and [Aced 2026](https://www.aced.io/guides/meta-data-engineer-interview) (Q3 Ads Auction).
 
 ## What "good" looks like
 

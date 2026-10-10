@@ -13,6 +13,22 @@ Runnable notebook in `notebooks/01_meta_screen_sql.ipynb`.
 
 ---
 
+## TL;DR
+
+| # | Pattern tested | What it tests | 5-min target |
+|---|----------------|---------------|--------------|
+| 1 | Window function + cohort + HAVING filter | Filter *after* aggregation, not before | CTE → window → HAVING |
+| 2 | Time-window JOIN + self-comparison | Compare per-post to per-page peak | JOIN ON range → HAVING |
+| 3 | HAVING-then-RANK (qualifying-page predicate) | Filter dim by MIN before ranking | subquery → RANK() |
+| 4 | Sessionization (LAG + cumulative sum) | The signature Meta pattern | LAG → flag → SUM OVER |
+| 5 | Gaps-and-islands (date trick) | Longest streak per entity | ROW_NUMBER → DATE math |
+
+The pass bar is 3 of 5. Problem 4 is the **most-skipped** problem on the
+real test — it's the one most candidates haven't seen before. Problem 5 is
+the **most-failed** problem — the date trick is non-obvious.
+
+---
+
 ## Problem 1 — 7-day rolling retention by country
 
 > *"From the instagram_story_events table, compute the 7-day rolling

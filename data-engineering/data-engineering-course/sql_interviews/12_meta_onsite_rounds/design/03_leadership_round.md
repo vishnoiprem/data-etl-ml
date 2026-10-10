@@ -48,11 +48,11 @@ The leader move: *the manager was right about the deadline, you were right about
 
 > "Tell me about a process you improved that had a measurable business impact."
 
-**The good answer** uses the rideshare-funnel-pipeline as the canonical scenario:
-- Old: 8-day gap between ride-completed and dashboard-visible
+**The good answer** uses an ad-pipeline migration as the canonical scenario:
+- Old: 8-day gap between ad-impression and the attribution dashboard refreshing
 - New: < 1 hour
-- Mechanism: a daily snapshot fact + a streaming funnel fact; dashboard reads the snapshot for backfill, the streaming fact for current-day
-- The leader move: "I noticed the 8-day gap was a business decision, not a technical one — the BI team wanted 'settled' numbers. I negotiated the dual-track so PMs got both."
+- Mechanism: a daily snapshot fact + a streaming attribution fact; dashboard reads the snapshot for backfill, the streaming fact for current-day
+- The leader move: "I noticed the 8-day gap was a business decision, not a technical one — the BI team wanted 'settled' attribution to absorb late click-conversions. I negotiated the dual-track so PMs got both the 'settled' view and the same-day view, with a clear 'preliminary' label."
 
 ### Family 4 — New tool / system, fast
 

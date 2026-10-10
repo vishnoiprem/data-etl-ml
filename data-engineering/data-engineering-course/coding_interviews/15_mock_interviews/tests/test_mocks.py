@@ -17,6 +17,11 @@ from m115_meta_onsite import RateLimiter  # type: ignore  # noqa: E402
 from m116_google_onsite import WeightedRandom  # type: ignore  # noqa: E402
 from m117_senior_mixed import LFUCache  # type: ignore  # noqa: E402
 from m118_faang_final import ThreadSafeKV  # type: ignore  # noqa: E402
+from m119_meta_screen_v2 import (  # type: ignore  # noqa: E402
+    top_5_pages_by_upward_trend,
+    second_highest_per_department,
+    tumbling_window_counts,
+)
 
 
 class FizzBuzzTests(unittest.TestCase):
@@ -135,6 +140,57 @@ class ThreadSafeKVTests(unittest.TestCase):
         store.set("a", 1, ttl_seconds=10)
         store.delete("a")
         self.assertIsNone(store.get("a"))
+
+
+class M119MetaScreenV2Tests(unittest.TestCase):
+    """The 2026 Meta Python screen is pandas/dict, not DSA.
+    m119 ships 3 of the 5 problems; the other 2 live in
+    sql_interviews/11_meta_screen/code/meta_screen_python.py.
+    """
+
+    def test_upward_trend_returns_pages_with_positive_slope(self):
+        import pandas as pd
+        df = pd.DataFrame({
+            "page_id": [1]*7 + [2]*7 + [3]*7,
+            "day": list(range(7)) * 3,
+            "impressions": [10, 20, 30, 40, 50, 60, 70,    # up
+                            70, 60, 50, 40, 30, 20, 10,    # down
+                            10, 10, 10, 10, 10, 10, 10],   # flat
+        })
+        out = top_5_pages_by_upward_trend(df)
+        # Only page 1 has a positive slope.
+        self.assertEqual(out, [1])
+
+    def test_upward_trend_excludes_pages_with_fewer_than_5_days(self):
+        import pandas as pd
+        df = pd.DataFrame({
+            "page_id": [1]*6 + [2]*3,        # page 2 only has 3 days
+            "day": [0, 1, 2, 3, 4, 5, 0, 1, 2],
+            "impressions": [10, 20, 30, 40, 50, 60,  # page 1, up
+                            10, 20, 30],            # page 2, up but ignored
+        })
+        out = top_5_pages_by_upward_trend(df)
+        # page 2 excluded (< 5 days) -> only page 1
+        self.assertEqual(out, [1])
+
+    def test_second_highest_distinct_salary(self):
+        rows = [("a", "eng", 100), ("b", "eng", 90), ("c", "eng", 80),
+                ("d", "sales", 200), ("e", "sales", 100), ("f", "sales", 50)]
+        out = second_highest_per_department(rows)
+        # eng: 100, 90, 80 -> second-highest distinct = 90
+        # sales: 200, 100, 50 -> second-highest distinct = 100
+        self.assertEqual(out, {"eng": 90, "sales": 100})
+
+    def test_second_highest_returns_None_when_only_one_distinct(self):
+        rows = [("a", "eng", 100), ("b", "eng", 100), ("c", "eng", 100)]
+        out = second_highest_per_department(rows)
+        self.assertEqual(out, {"eng": None})
+
+    def test_tumbling_window_buckets(self):
+        # 15-min windows (900s): 0 and 300 -> bucket 0; 1200 and 1700 -> bucket 900
+        events = [(0, 1), (300, 1), (1200, 1), (1700, 1)]
+        out = tumbling_window_counts(events, window_seconds=900)
+        self.assertEqual(out, [(0, 2), (900, 2)])
 
 
 if __name__ == "__main__":
