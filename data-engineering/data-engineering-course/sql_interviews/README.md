@@ -1,6 +1,6 @@
 # SQL Interviews
 
-> **9 modules · 98 lessons · 6 videos · ~30 hours**
+> **10 modules · 102 lessons · 6 videos · ~32 hours**
 >
 > **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
 
@@ -24,6 +24,7 @@ sql_interviews/
 ├── 07_easy_practice/         14 lessons + 14 passing tests
 ├── 08_medium_practice/       31 lessons + 31 passing tests
 ├── 09_hard_practice/         14 lessons + 14 passing tests
+├── 10_query_performance/     4 lessons, EXPLAIN, indexes, joins, rewrites
 └── exercise.md               capstone: 5 interview-style questions
 ```
 
@@ -32,6 +33,17 @@ concepts. The last three (M07–M09) are pure code. Each problem in
 M07–M09 has a solution in `code/solutions.sql` and a test in
 `tests/test_*.py` that runs the solution against a seeded SQLite
 database and asserts the output.
+
+## 4-week study plan
+
+| Week | Focus | Modules | Hours |
+|---|---|---|---|
+| **1** | Foundations + Fast Track | M01 (Overview), M02 (Fast Track) | 6 |
+| **2** | Core SQL skills | M03 (Basic), M04 (Aggregations), M05 (Joins) | 10 |
+| **3** | Advanced + easy/medium practice | M06 (Window), M07 (Easy), first 15 of M08 (Medium) | 12 |
+| **4** | Hard practice + query performance | M08 (Medium remainder), M09 (Hard), M10 (Query Performance) | 14 |
+
+If you only have 2 weeks, skip M10 (Query Performance) and the last 7 of M09 (Hard). If you have 6 weeks, do M10 twice and redo every M09 problem until you can solve in 20 minutes.
 
 ## Running the tests
 

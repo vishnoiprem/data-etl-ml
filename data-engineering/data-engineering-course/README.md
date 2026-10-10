@@ -20,18 +20,24 @@ you can execute on your laptop.
 | # | Track | Modules | Lessons | Type | Tests |
 |---|---|---|---|---|---|
 | 01 | **System Design** | 11 | 71 | Code + design | 764 |
-| 02 | **Behavioral Interviews** | 5 | 31 | Prose only | — |
-| 03 | **How to Get the Interview** | 1 | 9 | Prose + 1 resume artifact | — |
+| 02 | **Behavioral Interviews** | 5 | 32 | Prose only | — |
+| 03 | **How to Get the Interview** | 2 | 13 | Prose + 1 resume artifact | — |
 | 04 | **EM Introduction** | 1 | 6 | Prose only | — |
 | 05 | **People Management** | 5 | 21 | Prose only | — |
 | 06 | **Project Retrospective** | 1 | 6 | Prose only | — |
 | 07 | **Solutions Architect** | 6 | 47 | Prose + 8 mermaid diagrams | — |
 | 08 | **Data Modeling** | 7 | 36 | Code + design | 91 |
-| 09 | **Data Pipeline Design (ETL)** | 7 | 30 | Code + design | 140 |
-| 10 | **SQL Interviews** | 9 | 98 | SQL + tests | 59 |
+| 09 | **Data Pipeline Design (ETL)** | 7 | 35 | Code + design | 164 |
+| 10 | **SQL Interviews** | 10 | 102 | SQL + tests | 67 |
 | 11 | **Coding Interviews** | 15 | 118 | Python + tests | 293 |
 | 12 | **Common library** | — | — | infra | 38 |
-| | **Total** | **69** | **473** | | **1,385** |
+| | **Total** | **70** | **487** | | **1,417** |
+
+The two new modules added in the most recent review pass:
+- **Track 03 / Module 02** — *Compensation, Leveling & Negotiation* (4 lessons) closes the loop after the offer
+- **Track 10 / Module 10** — *Query Performance & Optimization* (4 lessons) addresses the "this query is slow, how do you fix it?" interview question
+
+Plus 4 new design-only lessons (data lakehouse, deep-dive prep, recruiter screen, company-specific prep) under existing modules.
 
 ---
 
@@ -202,13 +208,13 @@ Expected output:
 
 ```
 [data_modeling]        91 tests
-[data_pipeline_design] 140 tests
-[sql_interviews]       59 tests
+[data_pipeline_design] 164 tests
+[sql_interviews]       67 tests
 [coding_interviews]    293 tests
 [common]               38 tests
 [system_design]        764 tests (pre-existing 82 fail + 56 err)
 
-TOTAL                  1,385 tests; 621 of the new-track tests are all green
+TOTAL                  1,417 tests; 653 of the new-track tests are all green
 ```
 
 ---
@@ -234,6 +240,8 @@ draw from:
 
 - `de_interview_canonical_questions.md` — 8 SQL, 8 pipeline, 6 modeling, 7 system design, 6 behavioral Q&As + STAR + pipeline-design frameworks
 - `em_interview_canonical_questions.md` — 245 EM questions broken into System Design (74), People Management (22), Technical (23), Coding (14), Behavioral (131)
+- `de_interview_loop_walkthrough.md` — **6-week, day-by-day study plan for a Meta E5 / Google L5 DE loop** with per-round prep, day-before checklist, during-loop reminders, post-loop debrief, and a self-assessment rubric
+- `company_specific_prep.md` — prep guidance for 7 target companies (Meta, Google, Stripe, Netflix, Airbnb, Databricks, Snowflake) mapping each to the tracks and lessons to prioritize
 
 ---
 
@@ -250,7 +258,7 @@ engineering work that this course builds on:
 ## Stats
 
 - **12 tracks** in 1 repository
-- **473 lessons** across 69 modules
-- **1,385 unit tests** (621 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
+- **487 lessons** across 70 modules
+- **1,417 unit tests** (621+32 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
 - **1,000+ files** of design docs, working code, fixtures, and tests
 - **Authored by Prem Vishnoi** · <https://medium.com/@premvishnoi>

@@ -1,12 +1,21 @@
 # Module 07 — Mock Interviews & Practice
 
-> **3 lessons · 3 videos · ~4.5 hours**
+> **7 lessons · 7 videos · ~10.5 hours**
 
-The capstone. Three full 30-minute mock interviews with
+The capstone. Seven full 30-minute mock interviews with
 transcripts, architecture diagrams, and post-interview
 analysis. The lessons are written as the candidate is talking —
 you should be able to read them aloud and feel like you're in
 the room.
+
+Lessons 28-30 are the original 3 mocks (high-volume events,
+document processing, CDC for banking) — solid for L4 / L5
+candidates. Lessons 31-34 are 4 advanced mocks (feature
+stores, multi-tenant analytics, data observability, real-time
+ad dedup) that target senior+ / L6 candidates and the
+harder "open-ended architecture" rounds at FAANG, ad-tech,
+and ML-platform companies. If you're interviewing for a Staff
+or Principal role, start at 31.
 
 Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
 
@@ -19,6 +28,10 @@ Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
 | 28 | [Design Netflix's Clickstream Pipeline](design/28_mock_netflix_clickstream.md) | High-volume event ingestion, real-time + batch. |
 | 29 | [Design a Document Processing Pipeline](design/29_mock_document_processing.md) | OCR, parsing, enrichment, search indexing. |
 | 30 | [Design a CDC Pipeline for a Banking System](design/30_mock_banking_cdc.md) | CDC, exactly-once, schema evolution, regulatory. |
+| 31 | [Design a Feature Store for an ML Platform](design/31_mock_feature_store.md) | Training/serving skew, point-in-time joins, feature versioning. |
+| 32 | [Design a Multi-Tenant SaaS Analytics Platform](design/32_mock_multi_tenant_analytics.md) | Row-level security, query routing, noisy neighbors, cost attribution. |
+| 33 | [Design a Data Observability / Monitoring Platform](design/33_mock_data_observability.md) | The 5 detection layers; alert fatigue; the on-call burden. |
+| 34 | [Design a Real-Time Ad Impression Dedup Pipeline](design/34_mock_realtime_streaming.md) | Dedup at scale, late events, exactly-once at 100K events/sec. |
 
 ---
 

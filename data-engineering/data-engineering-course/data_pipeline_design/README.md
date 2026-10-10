@@ -1,6 +1,6 @@
 # Data Pipeline Design (ETL) — A Practical Guide for Data Engineers
 
-> **30 lessons · 7 modules · 3 videos · ~14 hours of focused practice**
+> **31 lessons · 7 modules · 3 videos · ~15 hours of focused practice**
 >
 > **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
 >
@@ -48,10 +48,10 @@ senior data engineer".
 | [03](03_extraction/) | **Extraction** | 6 | Full vs incremental, CDC, API polling, JDBC, schema evolution, backpressure. |
 | [04](04_transformation/) | **Transformation** | 5 | dbt-style SQL, Python/Spark transforms, joins, data quality, SCD2. |
 | [05](05_loading/) | **Loading** | 6 | Bulk loading, streaming, upsert, partitioning, idempotency, lakehouse. |
-| [06](06_performance/) | **Performance & Fault Tolerance** | 3 | Orchestration, retry/DLQ, monitoring & SLA. |
+| [06](06_performance/) | **Performance & Fault Tolerance** | 4 | Orchestration, retry/DLQ, monitoring & SLA, data quality. |
 | [07](07_mock_interviews/) | **Mock Interviews** | 3 | Three full pipeline designs — Netflix clickstream, doc processing, banking CDC. |
 
-**Total: 30 lessons.**
+**Total: 31 lessons.**
 
 ---
 

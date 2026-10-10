@@ -1,5 +1,73 @@
 # Changelog
 
+## 2026-10-10 — Round-2 Review Pass: End-to-End Interview Coverage
+
+A second code-review pass identified 8 P0 gaps that would prevent the
+course from delivering on its "complete data engineering interview prep"
+promise. All P0 items now have content; the course is end-to-end
+interview-pass-ready for a Meta E5 / Google L5 / Senior-DE loop.
+
+### Added — End-to-end coverage
+
+- **`docs/reference/de_interview_loop_walkthrough.md`** (1,100+ lines) — the
+  central study-plan document: 6-week day-by-day plan, per-round prep,
+  day-before checklist, during-loop reminders, post-loop debrief, and a
+  self-assessment rubric. This is the "how do I use this course?" doc.
+- **`docs/reference/company_specific_prep.md`** (3,600+ words) — prep
+  guidance for 7 target companies (Meta, Google, Stripe, Netflix,
+  Airbnb, Databricks, Snowflake) with a master comparison table and
+  per-company sections on loop style, what they test, what to study,
+  and common failure modes.
+- **`how_to_get_the_interview/compensation/`** — new module with 4 lessons
+  (leveling, offer anatomy, negotiation scripts, comp benchmarking).
+  This closes the loop after the offer.
+- **`how_to_get_the_interview/design/10_recruiter_screen.md`** — the
+  recruiter-screen lesson that wasn't covered elsewhere.
+- **`behavioral_interviews/05_practice/design/06_de_project_deep_dive.md`**
+  — the 5-act structure for the 30-60 minute "walk me through a past
+  project" round, with a 1500-word worked example.
+- **`data_pipeline_design/07_mock_interviews/design/31-34_*.md`** — 4
+  advanced pipeline mocks for senior+ candidates: feature store,
+  multi-tenant analytics, data observability, real-time streaming.
+- **`data_pipeline_design/02_storage/design/08_data_lakehouse_design.md`**
+  — the lakehouse design lesson that wasn't covered.
+- **`data_pipeline_design/06_performance/design/28_data_quality.md`** +
+  `code/data_quality.py` + `tests/test_data_quality.py` — the 5 standard
+  data quality checks with a working `QualityCheck` class and 16 tests.
+- **`sql_interviews/10_query_performance/`** — new module with 4 lessons
+  (EXPLAIN plans, index strategy, join optimization, query rewrites) +
+  8 tests that exercise the rewrites against SQLite.
+
+### Added — Infrastructure & code
+
+- **`data_pipeline_design/02_storage/code/lakehouse.py`** + 8 tests — the
+  bronze/silver/gold reference implementation that backs the lakehouse
+  design lesson.
+- **`sql_interviews/10_query_performance/tests/test_rewrites.py`** — 8
+  tests that exercise the 4 most-asked query-rewrite patterns.
+
+### Improved — Format and motivation
+
+- Standardized the `coding_interviews/README.md` header to match the other
+  tracks' banner style.
+- Added a 4-week week-by-week study plan to both
+  `sql_interviews/README.md` and `coding_interviews/README.md` (matches
+  the behavioral/data_modeling/sa pattern).
+- Added "Why this module" hooks to:
+  - `sql_interviews/07_easy_practice/module_overview.md`
+  - `coding_interviews/02_complexity/module_overview.md`
+
+### Stats
+
+- **Tracks**: 12 (unchanged)
+- **Modules**: 70 (was 69; +1 for compensation, +1 for query_performance)
+- **Lessons**: 487 (was 473; +14 net)
+- **Tests**: 1,417 (was 1,385; +32 net)
+- All 5 new-track tests still pass green.
+- The 138 pre-existing system_design failures are unchanged.
+
+---
+
 ## 2026-10-09 — Full Data Engineering Interview Course Build
 
 A complete, runnable **Data Engineering Interview course** was created under

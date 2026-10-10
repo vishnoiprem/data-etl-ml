@@ -4,6 +4,23 @@
 >
 > **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
 
+## Why this module
+
+Easy problems are the *warmup round* of every SQL interview. At
+Meta, Google, Stripe, and Snowflake, the first 1-2 SQL questions
+in a 45-minute onsite are easy. They're not trying to stump you —
+they're setting the rhythm. If you fumble the easy one, you start
+the medium one with the interviewer's confidence in you already
+shaken, and the rest of the loop tilts downhill from there.
+
+The other reason easy problems matter: they're the *only* place in
+the loop where you can show your SQL is *clean*. Easy problems let
+you demonstrate correct column aliasing, consistent indentation,
+no `SELECT *`, and proper NULL handling — all the things a senior
+DE should do automatically. Candidates who can solve the hard
+problem but write `SELECT *` on the easy one get downleveled at
+L5+.
+
 The first of the three practice modules. Every problem here
 maps to a real LeetCode / StrataScratch / HackerRank question
 and (where possible) a canonical problem from the

@@ -1,6 +1,6 @@
 # Module 06 — Performance, Scalability & Fault Tolerance
 
-> **3 lessons · ~1.5 hours**
+> **4 lessons · ~2 hours**
 
 The "operations" module. Every senior interview ends with
 "how does this fail?" — this module is the answer. DAG
@@ -19,6 +19,7 @@ Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
 | 25 | [Orchestration and DAGs](design/25_orchestration_and_dags.md) | Airflow, Dagster, Prefect; the DAG as code. |
 | 26 | [Retry, Backoff, and Dead Letter Queues](design/26_retry_backoff_and_dlq.md) | Exponential backoff with jitter; DLQs for poison messages. |
 | 27 | [Monitoring: SLA, Quality, Alerting](design/27_monitoring_sla_quality_alerting.md) | SLA tracking, p95 latency, data quality metrics. |
+| 28 | [Data Quality: The Five Checks Every Pipeline Must Have](design/28_data_quality.md) | Row count, null rate, distribution drift, freshness, schema — with a Python `QualityCheck` class. |
 
 ---
 
