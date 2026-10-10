@@ -70,19 +70,46 @@ class MultiRegionRouter:
         self.failover_threshold = 3  # consecutive failures before failover
 
     def check(self, region: str, ok: bool) -> None:
-        """Update a region's health. Triggers failover if threshold reached."""
+        """Update a region's health. Triggers failover if threshold reached.
+
+        Note: this router does NOT auto-failback. When the active region
+        recovers from FAILED → PRIMARY (state restoration), traffic stays
+        on the replica until a manual decision (the Monday iteration
+        review, or a hysteresis-aware scheduler). The Phase 5 P4 case
+        study (engagement-7-region-failover.md §4) explains why
+        failback is riskier than staying on the replica.
+        """
         c = self.checks[region]
         if ok:
             c.last_ok_ts = time.monotonic()
             c.consecutive_failures = 0
-            # If this was the failed-active region, restore.
-            if region == self.active and c.state == RegionState.FAILED:
+            # If the original primary recovers, restore its state to
+            # PRIMARY. We do NOT flip self.active back here — that's the
+            # documented "no auto-failback" behavior. To fail back, the
+            # operator should call self.failback() explicitly.
+            if region == self.primary and c.state == RegionState.FAILED:
                 c.state = RegionState.PRIMARY
         else:
             c.consecutive_failures += 1
             if region == self.active and c.consecutive_failures >= self.failover_threshold:
                 # Failover!
                 self._do_failover(region)
+
+    def failback(self) -> None:
+        """Manually fail back to the primary. Called by the operator
+        after confirming the primary is healthy for a sustained period
+        (typically 7 days, per the Phase 5 P4 case study)."""
+        if self.active == self.primary:
+            return  # already on primary
+        if self.checks[self.primary].state != RegionState.PRIMARY:
+            raise RuntimeError(
+                f"primary region {self.primary!r} is not in PRIMARY state; "
+                f"current state: {self.checks[self.primary].state.name}"
+            )
+        prev_active = self.active
+        self.active = self.primary
+        # The replica drops back to REPLICA.
+        self.checks[prev_active].state = RegionState.REPLICA
 
     def _do_failover(self, from_region: str) -> None:
         """Switch active region. In production, this updates DNS via API."""

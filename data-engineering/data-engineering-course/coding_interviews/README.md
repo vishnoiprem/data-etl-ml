@@ -1,7 +1,7 @@
 # Coding Interviews — Full Curriculum
 
-A **fully working, runnable** Coding Interviews course covering **15 modules, 118 lessons, 28 videos**, with **103 working Python solutions and ~400+ unit tests**.
-
+> **15 modules · 118 lessons · 28 videos · ~50 hours**
+>
 > **Author:** Prem Vishnoi <prem.vishnoi@example.com>
 >
 > Inspired by the coding interview prep used at top engineering organizations; every problem is implemented in clean Python with a unittest suite so you can run the entire track on your laptop.
@@ -31,7 +31,20 @@ coding_interviews/
 
 ## How to use
 
-Each module contains:
+**4-week study plan** (assumes ~10-12 hours/week of focused practice):
+
+| Week | Focus | Modules | Hours |
+|---|---|---|---|
+| **1** | Foundations | M01 (Overview), M02 (Complexity), M03 (Patterns) | 8 |
+| **2** | Core data structures | M04 (Arrays), M05 (Hash Tables), M06 (Searching & Sorting) | 12 |
+| **3** | Strings, graphs, trees | M07, M08, M09 | 12 |
+| **4** | Advanced + mocks | M10–M15 (Stacks, Linked Lists, Heaps, Recursion, DP, 6 Mocks) | 14 |
+
+If you have less time, cut M11–M13 (linked lists / heaps / recursion are the lowest-yield modules for a Meta E5 loop) and spend the saved hours on more M14 DP + M15 mocks.
+
+If you have more time, redo every problem in M15 mocks until you can finish in 35 minutes.
+
+**Per-module structure:**
 - `module_overview.md` — list of problems with links to the code files
 - `code/` — one file per problem with a clean `solve_X(input) -> output` function
 - `tests/` — `unittest.TestCase` files with 3-5 tests per problem

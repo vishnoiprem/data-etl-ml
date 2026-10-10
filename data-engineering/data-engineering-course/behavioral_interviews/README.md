@@ -1,6 +1,6 @@
 # Behavioral Interviews — A Practical Guide for Engineers
 
-> **31 lessons · 19 videos · ~12 hours of focused practice**
+> **39 lessons · 19 videos · ~14 hours of focused practice**
 >
 > **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
 >
@@ -47,9 +47,9 @@ the framing is "be seen as a senior engineer" — see Module 01.
 | [02](02_theory/) | **Theory** | 7 | STAR/CAR/PAR, question taxonomy, signal vs noise, "so what" test, common pitfalls. |
 | [03](03_tactics/) | **Tactics** | 6 | The practical execution: story inventory + 5 story categories with worked templates. |
 | [04](04_mock_interviews_and_analyses/) | **Mock Interviews & Analyses** | 5 | A 60-second intro and 4 full mock interviews (Meta, Google, Netflix, EM). |
-| [05](05_practice/) | **Practice** | 5 | Story mining, quantifying impact, tightening delivery, the reverse interview, book list. |
+| [05](05_practice/) | **Practice** | 13 | Story mining, quantifying impact, tightening delivery, the reverse interview, 50-hour reading list, plus 8 lessons covering the 40-question bank and the verbatim 2026 Google + Meta behavioral questions. |
 
-**Total: 31 lessons.**
+**Total: 39 lessons.**
 
 ---
 
@@ -98,7 +98,7 @@ behavioral_interviews/
 ├── 02_theory/                      (7 lessons in design/)
 ├── 03_tactics/                     (6 lessons in design/)
 ├── 04_mock_interviews_and_analyses/ (5 lessons in design/)
-├── 05_practice/                    (5 lessons in design/)
+├── 05_practice/                    (13 lessons in design/)
 └── exercise.md                     # one cross-module exercise
 ```
 

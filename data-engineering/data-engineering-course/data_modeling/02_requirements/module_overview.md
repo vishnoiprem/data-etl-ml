@@ -21,14 +21,14 @@ subscription).
 
 | # | Lesson | What you'll learn |
 |---|---|---|
-| [05](design/05_why_requirements_first.md) | Why Business Requirements Come First | The cost of skipping requirements, in concrete time and points. |
-| [06](design/06_discovery_questions.md) | Discovery Questions: 5W+H | A bank of 50+ questions, grouped by category. |
-| [07](design/07_sample_ecommerce.md) | Sample: E-Commerce SaaS | A worked discovery session for an e-commerce warehouse. |
-| [08](design/08_sample_rideshare.md) | Sample: Ride-Sharing | A worked discovery session for a ride-sharing warehouse. |
-| [09](design/09_sample_subscription.md) | Sample: Subscription Product | A worked discovery session for a SaaS subscription. |
-| [10](design/10_requirements_to_entities.md) | Translating Requirements to Entities | How to go from "MAU per month" to "fact_user_activity + dim_users + dim_date." |
-| [11](design/11_requirements_doc_template.md) | The Requirements Document Template | The `RequirementsDoc` helper, line by line. |
-| [12](design/12_ambiguous_requirements.md) | When Requirements Are Ambiguous | The single most useful skill: making a defensible assumption, out loud. |
+| [05](design/05_introduction_to_requirements_gathering.md) | Introduction to Gathering Business Requirements | Why requirements come first; the cost of skipping them. |
+| [06](design/06_recognizing_the_core_business_problem.md) | Recognizing the Core Business Problem | The 5W+H framework and a 50+ discovery-question bank. |
+| [07](design/07_analyzing_metrics.md) | Analyzing Metrics | What metrics matter — DAU, MAU, conversion, retention, GMV, LTV. |
+| [08](design/08_analyzing_query_patterns.md) | Analyzing Query Patterns | What queries will run, their shapes, their frequencies. |
+| [09](design/09_defining_latency_requirements.md) | Defining Latency Requirements | Batch vs near-real-time vs real-time SLAs. |
+| [10](design/10_data_volume_and_scalability.md) | Data Volume & Scalability Considerations | Rows/day, rows/year, hot partitions, growth rate. |
+| [11](design/11_data_retention_policies.md) | Data Retention Policies & Historical Data Management | 7-year retention, GDPR, cold storage, archival. |
+| [12](design/12_example_business_requirements_gathering.md) | Example: Business Requirements Gathering | A single full worked example end-to-end. |
 
 ---
 

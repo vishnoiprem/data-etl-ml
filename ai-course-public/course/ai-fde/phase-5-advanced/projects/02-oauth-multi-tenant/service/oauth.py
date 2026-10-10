@@ -131,10 +131,19 @@ class TokenClaims:
 class OAuthProvider:
     """The OAuth provider. Issues + verifies JWTs."""
 
-    def __init__(self, *, key_dir: Optional[Path] = None, tenants: Optional[dict] = None) -> None:
+    def __init__(
+        self,
+        *,
+        key_dir: Optional[Path] = None,
+        tenants: Optional[dict] = None,
+        issuer: str = "pf-auth",
+        audience: str = "pf-drafter",
+    ) -> None:
         self.key_dir = key_dir or Path(".oauth_keys")
         self.priv, self.pub = _load_or_create_keypair(self.key_dir)
         self.tenants = tenants or _default_tenant_config()
+        self.issuer = issuer
+        self.audience = audience
 
     def issue(
         self,
@@ -155,16 +164,34 @@ class OAuthProvider:
             issued_at=now,
             expires_at=now + ttl_s,
         )
+        payload = claims.to_dict()
+        # iss + aud are required claims for multi-tenant safety. The
+        # verifier rejects any token that doesn't match self.issuer /
+        # self.audience — see verify() below.
+        payload["iss"] = self.issuer
+        payload["aud"] = self.audience
         jwt = _lazy_pyjwt()
-        return jwt.encode(claims.to_dict(), self.priv, algorithm="RS256")
+        return jwt.encode(payload, self.priv, algorithm="RS256")
 
     def verify(self, token: str) -> TokenClaims:
-        """Verify the token signature + claims. Raises on any failure."""
+        """Verify the token signature + claims. Raises on any failure.
+
+        Security-critical: we explicitly require `iss` and `aud` to match
+        the configured values, and we require the four claims the rest of
+        the service depends on (exp, iat, tenant_id, role). Without
+        these checks, a token issued for any other tenant (or any other
+        audience) would be accepted here — see the Phase 5 P2 lesson on
+        OAuth + multi-tenancy for the threat model.
+        """
         jwt = _lazy_pyjwt()
         try:
-            payload = jwt.decode(token, self.pub, algorithms=["RS256"])
+            payload = jwt.decode(
+                token, self.pub, algorithms=["RS256"],
+                issuer=self.issuer, audience=self.audience,
+                options={"require": ["exp", "iat", "tenant_id", "role", "iss", "aud"]},
+            )
         except Exception as e:
-            raise PermissionError(f"token verification failed: {type(e).__name__}")
+            raise PermissionError(f"token verification failed: {type(e).__name__}: {e}")
         return TokenClaims(
             tenant_id=payload["tenant_id"],
             user_id=payload["user_id"],

@@ -1,4 +1,4 @@
-"""Five working star schemas, one per canonical modeling question.
+"""Working star schemas, one per practice lesson in module 03.
 
 Each builder function takes a `QueryRunner` (a `common.QueryRunner`),
 creates the tables via the `common.schema.Table` helper, and inserts
@@ -7,11 +7,20 @@ function returns the list of table names it created.
 
 Schemas built:
 
-  1. `build_ecommerce_schema`  — Lesson 16 (e-commerce star)
-  2. `build_rideshare_schema`  — Lesson 17 (ride-sharing star)
-  3. `build_instagram_schema`  — Lesson 18 (Instagram star)
-  4. `build_support_schema`    — Lesson 19 (customer support star)
-  5. `build_spotify_schema`    — Lesson 20 (Spotify star)
+  1. `build_ecommerce_schema`        — Lesson 16 (e-commerce)
+  2. `build_rideshare_schema`        — Lesson 17 (ride-sharing)
+  3. `build_instagram_schema`        — Lesson 18 (Instagram — backs the
+                                        social-media practice; the
+                                        event-grain schema is the
+                                        same shape)
+  4. `build_support_schema`          — (legacy schema kept for the
+                                        working test suite; not in
+                                        the current practice lineup)
+  5. `build_spotify_schema`          — Lesson 20 (Spotify — backs the
+                                        video-streaming practice; the
+                                        streaming shape is the same)
+  6. `build_cloud_services_schema`   — Lesson 19 (cloud services)
+  7. `build_online_advertising_schema` — Lesson 15 (online advertising)
 
 Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
@@ -798,17 +807,283 @@ def build_spotify_schema(q: QueryRunner) -> List[str]:
     return [t.name for t in tables]
 
 
+# ---- 6. cloud services ---------------------------------------------------
+
+
+def build_cloud_services_schema(q: QueryRunner) -> List[str]:
+    """Cloud services platform star schema (Lesson 19).
+
+    Minimal implementation — enough to pass the test, not enough
+    to be production. The structure mirrors the lesson's design:
+    `fact_usage` with pre-computed `cost_usd`, a `dim_customer`
+    on SCD 2, and a `dim_service` / `dim_region` / `dim_date`
+    for the analytic dimensions.
+
+    Fact table:    fact_usage
+    Dimensions:    dim_customer (SCD 2), dim_service, dim_region,
+                   dim_usage_type, dim_date.
+    """
+    dim_customer = Table("dim_customer", [
+        Column("customer_key", "INTEGER", primary_key=True),
+        Column("customer_id", "INTEGER", nullable=False),
+        Column("name", "TEXT", nullable=False),
+        Column("plan", "TEXT"),
+        Column("country", "TEXT"),
+        Column("effective_date", "TEXT", nullable=False),
+        Column("expiry_date", "TEXT", nullable=False, default="'9999-12-31'"),
+        Column("is_current", "INTEGER", nullable=False, default="1"),
+    ])
+
+    dim_service = Table("dim_service", [
+        Column("service_key", "INTEGER", primary_key=True),
+        Column("service_id", "INTEGER", nullable=False),
+        Column("service_name", "TEXT", nullable=False),
+        Column("category", "TEXT"),
+        Column("billing_unit", "TEXT"),
+    ])
+
+    dim_region = Table("dim_region", [
+        Column("region_key", "INTEGER", primary_key=True),
+        Column("region_id", "INTEGER", nullable=False),
+        Column("region_name", "TEXT", nullable=False),
+        Column("geography", "TEXT"),
+    ])
+
+    dim_usage_type = Table("dim_usage_type", [
+        Column("usage_type_key", "INTEGER", primary_key=True),
+        Column("usage_type", "TEXT", nullable=False),
+    ])
+
+    dim_date = Table("dim_date", [
+        Column("date_key", "INTEGER", primary_key=True),
+        Column("date", "TEXT", nullable=False),
+        Column("month", "INTEGER"),
+        Column("year", "INTEGER"),
+    ])
+
+    fact_usage = Table("fact_usage", [
+        Column("usage_key", "INTEGER", primary_key=True),
+        Column("customer_key", "INTEGER", nullable=False,
+               references="dim_customer(customer_key)"),
+        Column("service_key", "INTEGER", nullable=False,
+               references="dim_service(service_key)"),
+        Column("region_key", "INTEGER", nullable=False,
+               references="dim_region(region_key)"),
+        Column("usage_type_key", "INTEGER", nullable=False,
+               references="dim_usage_type(usage_type_key)"),
+        Column("date_key", "INTEGER", nullable=False,
+               references="dim_date(date_key)"),
+        Column("usage_qty", "REAL", nullable=False),
+        Column("unit_price", "REAL", nullable=False),
+        Column("cost_usd", "REAL", nullable=False),
+    ])
+
+    tables = [
+        dim_customer, dim_service, dim_region, dim_usage_type,
+        dim_date, fact_usage,
+    ]
+    for t in tables:
+        q.execute(t.to_ddl())
+
+    q.executemany(
+        "INSERT INTO dim_customer VALUES (?,?,?,?,?,?,?,?)",
+        [
+            (1, 1101, "Acme Corp", "enterprise", "US",
+             "2023-01-01", "9999-12-31", 1),
+            (2, 1102, "Globex", "business", "UK",
+             "2023-01-01", "9999-12-31", 1),
+            (3, 1103, "Initech", "developer", "IN",
+             "2023-01-01", "9999-12-31", 1),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_service VALUES (?,?,?,?,?)",
+        [
+            (1, 2001, "EC2", "compute", "per_hour"),
+            (2, 2002, "S3", "storage", "per_gb_hour"),
+            (3, 2003, "CloudFront", "networking", "per_gb"),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_region VALUES (?,?,?,?)",
+        [
+            (1, 3001, "us-east-1", "US"),
+            (2, 3002, "eu-west-1", "EU"),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_usage_type VALUES (?,?)",
+        [
+            (1, "compute_hours"),
+            (2, "storage_gb_hours"),
+            (3, "network_egress_gb"),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_date VALUES (?,?,?,?)",
+        [
+            (20240601, "2024-06-01", 6, 2024),
+            (20240602, "2024-06-02", 6, 2024),
+            (20240603, "2024-06-03", 6, 2024),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO fact_usage VALUES (?,?,?,?,?,?,?,?,?)",
+        [
+            (1, 1, 1, 1, 1, 20240601, 100.0, 0.05, 5.0),
+            (2, 1, 2, 1, 2, 20240601, 500.0, 0.02, 10.0),
+            (3, 2, 3, 2, 3, 20240602, 200.0, 0.09, 18.0),
+        ],
+    )
+
+    return [t.name for t in tables]
+
+
+# ---- 7. online advertising -----------------------------------------------
+
+
+def build_online_advertising_schema(q: QueryRunner) -> List[str]:
+    """Online advertising platform star schema (Lesson 15).
+
+    Minimal implementation — enough to pass the test, not enough
+    to be production. One event-grain fact with 0/1 flag columns
+    for impressions / clicks / conversions, plus cost and revenue
+    measures, with `dim_advertiser` (SCD 2) and `dim_campaign`
+    (SCD 2) as the analytic dimensions.
+
+    Fact table:    fact_ad_events
+    Dimensions:    dim_advertiser (SCD 2), dim_campaign (SCD 2),
+                   dim_creative, dim_event_type, dim_date.
+    """
+    dim_advertiser = Table("dim_advertiser", [
+        Column("advertiser_key", "INTEGER", primary_key=True),
+        Column("advertiser_id", "INTEGER", nullable=False),
+        Column("advertiser_name", "TEXT", nullable=False),
+        Column("effective_date", "TEXT", nullable=False),
+        Column("expiry_date", "TEXT", nullable=False, default="'9999-12-31'"),
+        Column("is_current", "INTEGER", nullable=False, default="1"),
+    ])
+
+    dim_campaign = Table("dim_campaign", [
+        Column("campaign_key", "INTEGER", primary_key=True),
+        Column("campaign_id", "INTEGER", nullable=False),
+        Column("advertiser_key", "INTEGER", nullable=False,
+               references="dim_advertiser(advertiser_key)"),
+        Column("campaign_name", "TEXT", nullable=False),
+        Column("effective_date", "TEXT", nullable=False),
+        Column("expiry_date", "TEXT", nullable=False, default="'9999-12-31'"),
+        Column("is_current", "INTEGER", nullable=False, default="1"),
+    ])
+
+    dim_creative = Table("dim_creative", [
+        Column("creative_key", "INTEGER", primary_key=True),
+        Column("creative_id", "INTEGER", nullable=False),
+        Column("creative_name", "TEXT", nullable=False),
+        Column("format", "TEXT"),
+    ])
+
+    dim_event_type = Table("dim_event_type", [
+        Column("event_type_key", "INTEGER", primary_key=True),
+        Column("event_type", "TEXT", nullable=False),
+        Column("is_engagement", "INTEGER", default="0"),
+    ])
+
+    dim_date = Table("dim_date", [
+        Column("date_key", "INTEGER", primary_key=True),
+        Column("date", "TEXT", nullable=False),
+        Column("month", "INTEGER"),
+        Column("year", "INTEGER"),
+    ])
+
+    fact_ad_events = Table("fact_ad_events", [
+        Column("event_key", "INTEGER", primary_key=True),
+        Column("advertiser_key", "INTEGER", nullable=False,
+               references="dim_advertiser(advertiser_key)"),
+        Column("campaign_key", "INTEGER", nullable=False,
+               references="dim_campaign(campaign_key)"),
+        Column("creative_key", "INTEGER", nullable=False,
+               references="dim_creative(creative_key)"),
+        Column("event_type_key", "INTEGER", nullable=False,
+               references="dim_event_type(event_type_key)"),
+        Column("date_key", "INTEGER", nullable=False,
+               references="dim_date(date_key)"),
+        Column("impressions", "INTEGER", nullable=False, default="0"),
+        Column("clicks", "INTEGER", nullable=False, default="0"),
+        Column("conversions", "INTEGER", nullable=False, default="0"),
+        Column("cost_usd", "REAL", nullable=False, default="0"),
+        Column("revenue_usd", "REAL", nullable=False, default="0"),
+    ])
+
+    tables = [
+        dim_advertiser, dim_campaign, dim_creative, dim_event_type,
+        dim_date, fact_ad_events,
+    ]
+    for t in tables:
+        q.execute(t.to_ddl())
+
+    q.executemany(
+        "INSERT INTO dim_advertiser VALUES (?,?,?,?,?,?)",
+        [
+            (1, 4001, "Nike",
+             "2023-01-01", "9999-12-31", 1),
+            (2, 4002, "Coca-Cola",
+             "2023-01-01", "9999-12-31", 1),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_campaign VALUES (?,?,?,?,?,?,?)",
+        [
+            (1, 5001, 1, "Air Max Q2", "2023-01-01", "9999-12-31", 1),
+            (2, 5002, 2, "Summer Soda", "2023-01-01", "9999-12-31", 1),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_creative VALUES (?,?,?,?)",
+        [
+            (1, 6001, "Sneaker Hero", "image"),
+            (2, 6002, "Splash Banner", "display"),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_event_type VALUES (?,?,?)",
+        [
+            (1, "impression", 0),
+            (2, "click", 1),
+            (3, "conversion", 1),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO dim_date VALUES (?,?,?,?)",
+        [
+            (20240701, "2024-07-01", 7, 2024),
+            (20240702, "2024-07-02", 7, 2024),
+        ],
+    )
+    q.executemany(
+        "INSERT INTO fact_ad_events VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        [
+            (1, 1, 1, 1, 1, 20240701, 1, 0, 0, 0.50, 0.0),
+            (2, 1, 1, 1, 2, 20240701, 0, 1, 0, 0.0, 1.20),
+            (3, 2, 2, 2, 1, 20240702, 1, 0, 0, 0.30, 0.0),
+        ],
+    )
+
+    return [t.name for t in tables]
+
+
 # ---- demo ----------------------------------------------------------------
 
 
 if __name__ == "__main__":
-    print("Building 5 star schemas (one per canonical modeling question)...\n")
+    print("Building star schemas for module 03 practice lessons...\n")
     for name, fn in [
         ("ecommerce", build_ecommerce_schema),
         ("rideshare", build_rideshare_schema),
         ("instagram", build_instagram_schema),
         ("support", build_support_schema),
         ("spotify", build_spotify_schema),
+        ("cloud_services", build_cloud_services_schema),
+        ("online_advertising", build_online_advertising_schema),
     ]:
         with QueryRunner(":memory:") as q:
             tables = fn(q)
@@ -819,4 +1094,4 @@ if __name__ == "__main__":
                     rows = q.query_all(f"SELECT * FROM {tn} LIMIT 1")
                     print(f"   {tn} sample row: {rows[0]}")
         print()
-    print("All 5 schemas built and queryable.")
+    print("All schemas built and queryable.")

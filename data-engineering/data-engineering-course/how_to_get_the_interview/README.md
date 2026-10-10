@@ -1,6 +1,6 @@
 # How to Get the Interview — A Practical Guide for Data Engineers
 
-> **9 lessons · 9 videos · ~3 hours of focused prep**
+> **13 lessons (1 main module + 1 compensation sub-module) · 9 videos · ~5 hours of focused prep**
 >
 > **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
 >
@@ -44,7 +44,9 @@ experience.
 
 ---
 
-## The 1 module, 9 lessons
+## The 2 modules, 13 lessons
+
+### Module 01 — How to Get The Interview (9 lessons)
 
 | # | Lesson | Format | What you'll get out of it |
 |---|---|---|---|
@@ -58,7 +60,16 @@ experience.
 | [08](design/08_sourcing_jobs.md) | **Sourcing Jobs** | Workshop | Job boards, cold outbound to hiring managers, and the tracking spreadsheet that prevents 200 applications from going dark. |
 | [09](design/09_referrals.md) | **Referrals** | Workshop | The 3 types of referrals, the 30-60-90 day rule, 3 sample messages, and why a bad referral is worse than no referral. |
 
-**Total: 9 lessons, 1 artifact, 1 capstone exercise.**
+### Module 02 — Compensation, Leveling & Negotiation (4 lessons, sub-module)
+
+| # | Lesson | Format | What you'll get out of it |
+|---|---|---|---|
+| [10](compensation/01_de_leveling_guide.md) | **The DE Leveling Guide** | Lesson | How Meta E4/E5/E6, Google L4/L5/L6, Stripe IC1–IC5, Netflix, Airbnb, Databricks, and Snowflake stack-rank. The 5 signals of leveling. The down-leveling risk. |
+| [11](compensation/02_offer_anatomy.md) | **Offer Anatomy** | Lesson | The 5 components of a tech offer (base, RSU, signing, bonus, benefits), how each is taxed and vested, and 3 worked all-in TC breakdowns. |
+| [12](compensation/03_negotiation_scripts.md) | **Negotiation Scripts** | Workshop | The 3 levers, the anchor-high principle, the 5 reframes, and 5 worked transcripts (Meta E5, Google L5, Stripe Senior, Databricks Senior, Snowflake Senior). |
+| [13](compensation/04_comp_benchmarking.md) | **Comp Benchmarking** | Workshop | levels.fyi, Blind, internal networks. The base-vs-RSU-vs-signing framework. The 6/12/48-month TC worksheet. |
+
+**Total: 13 lessons, 1 artifact, 1 capstone exercise, 1 TC worksheet.**
 
 ---
 
@@ -78,6 +89,13 @@ tracking spreadsheet (Lesson 08), and send 3 cold-outreach messages
 **Week 3 — Refine and ship (2-3 hours).** Iterate on the artifacts
 based on feedback from 2 friends. Send the referrals. Apply. Track.
 
+**Module 02 — Compensation (the closing round).** When an offer
+comes in, drop into `compensation/`. Read Lesson 10 (leveling)
+to confirm you're being offered the right level, then Lessons
+11-13 in order before responding to the recruiter. The closing
+round is the round most candidates under-prep — and where 5-15%
+of TC is left on the table.
+
 By the end of week 3 you should have:
 - 1 master resume (1 page, untargeted)
 - 2 targeted resumes (each customized to a specific JD)
@@ -87,6 +105,8 @@ By the end of week 3 you should have:
 
 That's a full pipeline. The actual interview-prep work happens
 *after* this track — in the system design and behavioral tracks.
+The closing round (negotiating the offer) happens *with* this
+track — in the `compensation/` sub-module.
 
 ---
 
@@ -106,6 +126,12 @@ how_to_get_the_interview/
 │   ├── 07_how_to_transition_internally.md
 │   ├── 08_sourcing_jobs.md
 │   └── 09_referrals.md
+├── compensation/                      # ← Module 02: the closing round
+│   ├── module_overview.md
+│   ├── 01_de_leveling_guide.md
+│   ├── 02_offer_anatomy.md
+│   ├── 03_negotiation_scripts.md
+│   └── 04_comp_benchmarking.md
 ├── artifacts/
 │   └── sample_de_resume.md            # full 1-page DE resume, before/after
 └── exercise.md                        # capstone: produce your own targeted resume
