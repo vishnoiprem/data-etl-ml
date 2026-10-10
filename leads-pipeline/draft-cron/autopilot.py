@@ -907,42 +907,33 @@ def scrape_linkedin_jobs():
 
 
 def scrape_indeed_jobs():
-    """Indeed RSS feed (public, no auth, country-specific).
+    """Indeed job search via Bing (Indeed deprecated their public RSS).
 
-    Indeed publishes RSS feeds at /rss for each search query. We hit
-    the US + UK + SG feeds to maximize coverage of remote AI jobs.
+    Indeed now requires login for full job listings. We use Bing search
+    restricted to site:indeed.com to find current job postings, then
+    extract the company + role from the title. Most leads will be
+    URL-only (no email exposed).
     """
     leads = []
-    # (country TLD, query, geo)
-    feeds = [
-        ("com", "AI+engineer+remote", ""),
-        ("com", "machine+learning+engineer", ""),
-        ("com", "LLM+engineer", ""),
-        ("com", "data+platform+engineer", ""),
-        ("co.uk", "AI+engineer+remote", ""),
-        ("com.sg", "data+engineer", ""),
+    queries = [
+        "site:indeed.com (AI OR ML OR \"data engineer\" OR LLM OR \"machine learning\") engineer remote",
+        "site:indeed.com \"AI engineer\" \"$\" remote",
+        "site:indeed.com (Databricks OR Spark OR Kafka OR Snowflake) engineer",
     ]
-    for tld, q, geo in feeds:
-        url = (f"https://www.indeed.{tld}/rss?"
-               + urllib.parse.urlencode({"q": q.replace("+", " "), "l": geo or ""}))
+    for q in queries:
+        url = "https://www.bing.com/search?" + urllib.parse.urlencode(
+            {"q": q, "format": "rss", "count": "30"}
+        )
         code, xml = _curl(url, timeout=15)
         if code != 200 or not xml or "<rss" not in xml[:200].lower():
             continue
-        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:30]:
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:20]:
             title_m = re.search(r"<title>(.*?)</title>", item, re.S)
             link_m = re.search(r"<link>(.*?)</link>", item)
             desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
             if not (title_m and link_m):
                 continue
             title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
-            # Indeed titles look like "Company - Title - Location"
-            parts = [p.strip() for p in title.split(" - ")]
-            if len(parts) >= 2:
-                company = parts[0]
-                actual_title = " - ".join(parts[1:])
-            else:
-                company = "Indeed"
-                actual_title = title
             desc = re.sub(r"<[^>]+>", " ", desc_m.group(1)) if desc_m else ""
             desc = re.sub(r"\s+", " ", desc).strip()
             text = f"{title}\n{desc}"
@@ -950,12 +941,19 @@ def scrape_indeed_jobs():
                 continue
             if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
                 continue
+            link = link_m.group(1).strip()
+            if "indeed.com" not in link:
+                continue
+            # Title format: "Title - Company - Location" or "Title at Company"
+            parts = re.split(r"\s+(?:at|@|-)\s+", title)
+            company = parts[1] if len(parts) >= 2 else "Indeed lead"
+            actual_title = parts[0] if len(parts) >= 1 else title
             emails = _extract_real_emails(text)
             leads.append({
                 "company": company[:60],
                 "role": actual_title[:120],
-                "source": f"indeed.{tld}",
-                "source_url": link_m.group(1).strip(),
+                "source": "indeed (via bing)",
+                "source_url": link,
                 "contact_email": emails[0] if emails else None,
                 "extra_emails": emails[1:5],
                 "raw_excerpt": desc[:400] or title[:400],
@@ -965,21 +963,24 @@ def scrape_indeed_jobs():
 
 
 def scrape_monster_jobs():
-    """Monster.com RSS feeds by category (public, no auth).
+    """Monster.com via Bing search (Monster deprecated their public RSS).
 
-    Monster is mostly US/Canada. We hit the software + data science
-    categories. Most postings don't expose email, so we mark URL-only.
+    Same approach as Indeed — Bing search restricted to site:monster.com.
     """
     leads = []
-    feeds = [
-        "https://www.monster.com/rss/feed?cat=Software%20Engineering",
-        "https://www.monster.com/rss/feed?cat=Data%20Science%20%26%20Analytics",
+    queries = [
+        "site:monster.com (AI OR ML OR \"data engineer\" OR LLM) engineer",
+        "site:monster.com Databricks engineer",
+        "site:monster.com \"data platform\" engineer",
     ]
-    for url in feeds:
+    for q in queries:
+        url = "https://www.bing.com/search?" + urllib.parse.urlencode(
+            {"q": q, "format": "rss", "count": "25"}
+        )
         code, xml = _curl(url, timeout=15)
         if code != 200 or not xml or "<rss" not in xml[:200].lower():
             continue
-        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:30]:
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:15]:
             title_m = re.search(r"<title>(.*?)</title>", item, re.S)
             link_m = re.search(r"<link>(.*?)</link>", item)
             desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
@@ -993,20 +994,18 @@ def scrape_monster_jobs():
                 continue
             if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
                 continue
+            link = link_m.group(1).strip()
+            if "monster.com" not in link:
+                continue
+            parts = re.split(r"\s+(?:at|@|-)\s+", title)
+            company = parts[1] if len(parts) >= 2 else "Monster lead"
+            actual_title = parts[0] if len(parts) >= 1 else title
             emails = _extract_real_emails(text)
-            # Title format: "Title - Company - Location"
-            parts = [p.strip() for p in title.split(" - ")]
-            if len(parts) >= 2:
-                company = parts[1]
-                actual_title = parts[0]
-            else:
-                company = "Monster"
-                actual_title = title
             leads.append({
                 "company": company[:60],
                 "role": actual_title[:120],
-                "source": "monster",
-                "source_url": link_m.group(1).strip(),
+                "source": "monster (via bing)",
+                "source_url": link,
                 "contact_email": emails[0] if emails else None,
                 "extra_emails": emails[1:5],
                 "raw_excerpt": desc[:400] or title[:400],
@@ -1016,14 +1015,10 @@ def scrape_monster_jobs():
 
 
 def scrape_glassdoor_jobs():
-    """Glassdoor public job search via their JSON API.
+    """Glassdoor via Bing search (public job URLs only — no easy apply data).
 
-    Glassdoor requires a `_txId` + `partnerId` query param for their
-    public jobs API. We can get away with the public GraphQL endpoint
-    used by their search page; for now we hit Bing as a proxy since
-    direct scraping is heavy and Glassdoor's anti-bot is aggressive.
-
-    Best-effort: this is URL-only leads.
+    Glassdoor's anti-bot is very aggressive; this is a low-yield but
+    high-quality source for senior roles.
     """
     leads = []
     queries = [
