@@ -20,9 +20,9 @@ The signal in each report: **what the candidate would do differently.** That's t
 4. **What would the candidate do differently?** (the lesson, distilled)
 5. **What's the Phase 6 module that preps it?** (the cross-reference)
 
-## The 10 most useful companies to prep for
+## The 12 most useful companies to prep for
 
-Based on the reports in this module, the 10 most useful FDE loops to understand are:
+Based on the reports in this module, the 12 most useful FDE loops to understand are:
 
 1. **Palantir** — invented the FDE loop. If you can pass Palantir, you can pass any FDE loop. The 4-step framework (Clarify → Decompose → Design → Tradeoffs) is the spine. AI is prohibited; behavioral is embedded in every round.
 2. **OpenAI** — the take-home is "basically the job." The AI-enabled coding screen is the new norm. Customer-facing explanation is the differentiator.
@@ -33,7 +33,9 @@ Based on the reports in this module, the 10 most useful FDE loops to understand 
 7. **Meta** — the open-weight + on-device + safety variant. PyTorch + ONNX + ExecuTorch + Llama Serving. The signature differentiator: can you ship a Llama model to a customer's hardware with the safety eval set as the regression check?
 8. **Google** — the data-plane + Vertex AI + grounding variant. Vertex AI Agent Engine + BigQuery grounding + Vector Search + IAM + CMEK. The signature differentiator: can you ground an agent on an enterprise BigQuery data warehouse with PCI-DSS?
 9. **Microsoft** — the M365 + Azure OpenAI + Copilot Studio + enterprise variant. Copilot Studio + Azure OpenAI (PTU) + Graph API + M365 audit log + Entra ID. The signature differentiator: can you ship a Copilot that respects M365 permissions with EU data residency?
-10. **LangChain / Sierra AI / Rippling / startups** — take-home-first loops. Sierra's "interviewers run your code before the demo" is the unique differentiator. LangChain's "interview is the job" is the founding-FDE pattern. The 4-step framework + a project deep dive is enough.
+10. **Stripe** — the payments-infrastructure + AI-for-developers + financial-services variant. Stripe Connect + idempotency keys + ACID + circuit breaker + Stripe Radar. The signature differentiator: can you design a payment flow that never double-charges with the audit log as the contract?
+11. **Hugging Face** — the open-source + Hub + transformers + enterprise variant. transformers + PEFT/LoRA + Inference Endpoints + model card + license. The signature differentiator: can you fine-tune an open-weight model on customer data with the eval set as the spec?
+12. **LangChain / Sierra AI / Rippling / startups** — take-home-first loops. Sierra's "interviewers run your code before the demo" is the unique differentiator. LangChain's "interview is the job" is the founding-FDE pattern. The 4-step framework + a project deep dive is enough.
 
 **Read at least 3 reports before your loop.** General prep gets you past the resume screen. Company-specific prep gets you past the onsite.
 
@@ -67,6 +69,8 @@ Beyond the 5 most useful companies, the 6 most useful FDE signature rounds to un
 | `meta-fde-ai-engineer.md` | Meta | 5-6 rounds: recruiter + coding + Llama Deployment (signature) + customer sim + decomposition + HM/behavioral | "Open-weight + on-device + safety. PyTorch → ONNX → ExecuTorch + Llama Guard. The signature question: ship Llama-3-8B to a bank on 2×H100 with 50 ms latency and SOC2." |
 | `google-ai-engineer.md` | Google | 5-6 rounds: recruiter + coding + Vertex AI Agent Design (signature) + customer sim + BigQuery/data plane + HM/behavioral | "Data plane + Vertex AI + grounding. BigQuery slots + Vector Search + IAM/CMEK. The signature question: design a Vertex AI agent grounded on BigQuery with PCI-DSS." |
 | `microsoft-ai-engineer.md` | Microsoft | 5-6 rounds: recruiter + coding + Copilot/Azure OpenAI Design (signature) + customer sim + Azure data plane + HM/behavioral | "M365 + Azure OpenAI + Copilot Studio + enterprise. PTU + Graph API + M365 audit log + Entra ID. The signature question: design a Copilot for a bank's M365 tenant with EU residency and audit log." |
+| `stripe-fde-payments.md` | Stripe | 5-6 rounds: recruiter + coding + Payments System Design (signature) + customer sim + Stripe API deep dive + HM/behavioral | "Payments infrastructure + AI for fraud + financial services. Stripe Connect + idempotency keys + ACID + circuit breaker + Radar. The signature question: design a marketplace payment flow with split-payment + never-double-charge." |
+| `huggingface-fde-open-source.md` | Hugging Face | 5-6 rounds: recruiter + coding + Hub + Model Selection (signature) + customer sim + open-source deployment + HM/behavioral | "Open-source + Hub + transformers + enterprise. PEFT/LoRA + Inference Endpoints + model card + license. The signature question: fine-tune a fraud classifier with PEFT/LoRA + deploy on Inference Endpoints + no data leaves AWS." |
 
 **Add a new file per real report you find.** The pattern: copy this README's structure, fill in the 5 questions, link back to the Phase 6 module that preps each round.
 
@@ -86,7 +90,7 @@ Beyond the 5 most useful companies, the 6 most useful FDE signature rounds to un
 
 The 9 modules teach the framework. The 10th module shows you what the framework looks like in the wild. **Reading 3-5 real reports is the difference between "I prepped for FDE interviews" and "I prepped for OpenAI FDE interviews."**
 
-**The 11 FDE signature round → company matrix:**
+**The 13 FDE signature round → company matrix:**
 
 | Signature round | The company that tests it hardest | Cross-reference |
 |---|---|---|
@@ -101,7 +105,9 @@ The 9 modules teach the framework. The 10th module shows you what the framework 
 | **Open-weight + on-device Llama deployment** | Meta | `../company-experiences/meta-fde-ai-engineer.md` |
 | **Vertex AI agent grounded on BigQuery** | Google | `../company-experiences/google-ai-engineer.md` |
 | **Copilot grounded on M365 with audit log** | Microsoft | `../company-experiences/microsoft-ai-engineer.md` |
+| **Stripe Connect + idempotency + circuit breaker** | Stripe | `../company-experiences/stripe-fde-payments.md` |
+| **Hub + PEFT/LoRA + Inference Endpoints** | Hugging Face | `../company-experiences/huggingface-fde-open-source.md` |
 
-**Each company tests a different signature round.** A complete FDE prep covers all 11.
+**Each company tests a different signature round.** A complete FDE prep covers all 13.
 
 **General prep gets you past the resume screen. Company-specific prep gets you past the onsite.**

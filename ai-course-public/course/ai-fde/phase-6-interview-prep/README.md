@@ -37,7 +37,7 @@ The 8 rounds + 3 cross-cutting modules = 11 total.
 | 8 | **Generative AI interviews** | "How do LLMs work in production? Where do they fail?" | `generative-ai/` | The Phase 4 P3 SLM + the Phase 4 P4 sandbox |
 | 9 | **SWE coding** (classic LeetCode) | "Reverse a linked list / group anagrams / etc." | `swe-coding/` | The 8 SWE patterns + the 4 anti-patterns |
 | 10 | **Customer simulation** (highest-signal) | "Your deployment slipped 3 weeks. I am the customer. Tell me." | `customer-simulation/` | Engagement 8 (cost ceiling breach) + Engagement 2 (the pivot) |
-| 11 | **Real interview experiences** | "What did the loop actually look like at OpenAI / Palantir / AWS?" | `company-experiences/` | 10 real reports + the 11 signature round → company matrix |
+| 11 | **Real interview experiences** | "What did the loop actually look like at OpenAI / Palantir / AWS?" | `company-experiences/` | 12 real reports + the 13 signature round → company matrix |
 
 **The 11 modules map to 11 interview round types.** The 8 rounds are the standard; the 3 cross-cutting modules (9, 10, 11) are the modules that compound across all 8.
 
@@ -88,7 +88,7 @@ phase-6-interview-prep/
 ├── customer-simulation/                         ← Module 10: the highest-signal round
 │   └── README.md                                ← 5 scenarios, 12 Q&A, 5 anti-patterns
 ├── company-experiences/                         ← Module 11: real interview reports
-│   ├── README.md                                ← 10 reports + signature round matrix
+│   ├── README.md                                ← 12 reports + signature round matrix
 │   ├── openai-semantic-search.md
 │   ├── palantir-fde-decomposition.md
 │   ├── langchain-deployed-engineer.md
@@ -99,7 +99,9 @@ phase-6-interview-prep/
 │   ├── scale-ai-fde.md
 │   ├── meta-fde-ai-engineer.md
 │   ├── google-ai-engineer.md
-│   └── microsoft-ai-engineer.md
+│   ├── microsoft-ai-engineer.md
+│   ├── stripe-fde-payments.md
+│   └── huggingface-fde-open-source.md
 ├── swe-coding/                                  ← Module 9: classic SWE prep
 │   ├── README.md                                ← the 8 patterns
 │   ├── 01-arrays.md
