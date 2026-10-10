@@ -263,3 +263,4 @@ engineering work that this course builds on:
 - **50-hour reading list** parallel-tracking the course plans in `behavioral_interviews/05_practice/design/05_resources.md`
 - **1,000+ files** of design docs, working code, fixtures, and tests
 - **Authored by Prem Vishnoi** · <https://medium.com/@premvishnoi>
+- **Directory map:** see [DIRECTORY.md](DIRECTORY.md) for the one-page structure overview
