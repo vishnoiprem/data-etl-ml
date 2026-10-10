@@ -1,6 +1,6 @@
 # Palantir FDE — Decomposition + Learning (the canonical FDSE loop)
 
-> **Source:** Palantir FDE/FDSE interview guide, posted on an interview-prep platform, ~8 days before this writeup. Synthesized from 3 interview experiences and 23 questions. **Palantir is the company that invented the decomposition round; this is the loop to prep for if you want to do FDE work at any company with a Palantir lineage (Anthropic, OpenAI, AWS FDE, Rippling, Kepler, Contour).**
+> **Source:** Palantir FDE/FDSE interview guide, posted on an interview-prep platform, updated 8 days before this writeup. Synthesized from **3 interview experiences and 23 questions** by a Senior Technical Contributor with direct input from Palantir candidates. **Palantir is the company that invented the decomposition round; this is the loop to prep for if you want to do FDE work at any company with a Palantir lineage (Anthropic, OpenAI, AWS FDE, Rippling, Kepler, Contour).**
 
 ---
 
@@ -244,7 +244,7 @@ Based on this guide + the Phase 1-5 portfolio:
 
 | Question | The FDE answer |
 |---|---|
-| 1. "Why Palantir?" | "I've spent the last 6 months building a customer-facing AI service for PacificFreight (a 12-person cross-border logistics SMB), and the work that resonates most is the same work Palantir does on Gotham and Foundry: turning operational data into tools that field teams use daily. The operational challenge I want to own is multi-tenant data isolation + the eval-set-as-spec pattern at scale. Palantir's FDSE role is the only one I've seen that lets me own the engineering build end-to-end with a customer in the room." |
+| 1. "Why Palantir?" | "I've spent the last 6 months building a customer-facing AI service for PacificFreight (a 12-person cross-border logistics SMB), and the work that resonates most is the same work Palantir does on Gotham and Foundry: turning operational data into tools that field teams use daily. The operational challenge I want to own is multi-tenant data isolation + the eval-set-as-spec pattern at scale. Palantir's FDSE role is the only one I've seen that lets me own the engineering build end-to-end with a customer in the room." (Per the guide: "Name the product you'd want to build on, Gotham for government deployments or Foundry for commercial ones, and the kind of operational challenge you want to own. Expect the question again in the hiring manager round with follow-ups, so your reason needs to hold up under detail.") |
 | 2. "Design a system that lets multiple teams query a shared dataset without exposing the underlying raw data." | "4-step framework. Clarify: the user is a data analyst on a downstream team; the constraint is row-level access control + a query budget per team; the failure mode is a leak of PII; the timeline is MVP in 2 weeks. Decompose: shared dataset, query interface, ACL layer, audit log, per-team budget. Design: a SQL view layer over the warehouse with row-level security + a per-team rate limit (Redis token bucket) + an audit log (append-only). Tradeoffs: SQL view vs API gateway (we chose SQL for query power, accepted the per-team schema work); Postgres RLS vs application-layer ACL (we chose RLS for security correctness, accepted the migration cost). Data: warehouse tables + ACL table + audit log table. Cost: $200/month for 10 teams." |
 | 3. "Walk me through the architecture of an unfamiliar application." | "I'd read the README first (1 min), then map the directory structure (1 min), then trace the request flow from the entrypoint through the middleware to the data layer (5 min). I'd ask the interviewer what the most uncertain piece is — that's where I'd spend my time. I'd narrate my mental model out loud so the interviewer can correct it before I commit to a fix." |
 | 4. "Find and fix a double-counting bug in a HashMap." | "I wouldn't patch the first thing that looks wrong. I'd read the full function top to bottom, write down the expected output for 2-3 test cases, then trace the actual output. The bug is usually in the accumulator (add the same key twice, or initialize the count to 1 when it should be 0). I'd write a regression test that exercises the same input, run the test to confirm it fails, apply the fix, run the test to confirm it passes, and walk the interviewer through the before/after." |
@@ -291,3 +291,41 @@ Compensation combines base + equity + bonus. Packages vary by experience and loc
 Palantir invented the FDE loop. **If you can pass Palantir's loop, you can pass any FDE loop.** The 4 stages test the same 7 signals: decomposition, learning, end-user framing, clarifying instincts, mission alignment, user-centric thinking, systematic debugging. **The 3-round pool is the differentiator** — you need to prep all 5 formats without knowing which 3 you'll get. The 4-step framework (Clarify → Decompose → Design → Tradeoffs) is the structure; the end-user narrative is the content; the embedded behavioral is the surprise.
 
 **General FDE prep gets you past the resume screen. Palantir-specific prep gets you past the decomposition round.**
+
+---
+
+## 13. FDSE vs deployment strategist (the two Paltanir FDE-adjacent roles)
+
+Palantir hires under **two separate job families**, and the loops are not interchangeable:
+
+| Role | Title | What they own | Loop difference |
+|---|---|---|---|
+| **Forward Deployed Software Engineer (FDSE)** | The engineering build on Gotham (government) or Foundry (commercial) | The full engineering build — problem framing, data work, front-end, back-end, AI/ML layer | This is the loop described above. Decomposition + 2 from the pool + behavioral embedded |
+| **Deployment Strategist** | Sits closer to the customer's problem definition; less hands-on implementation | Translates ambiguous client needs into scoped work for the FDSEs to build | Pairs the decomposition round with a SQL-heavy technical round; shape varies by team and by recruitment channel |
+
+**The 2 things to know if you're applying to one and not the other:**
+
+1. **If you see "FDSE" in the title**, you're on the loop in this report. Plan for 60-min rounds in CodePair, the 3-of-5 pool, and AI prohibited throughout.
+2. **If you see "Deployment Strategist" in the title**, plan for the same decomposition round + a separate SQL fluency round (joins, aggregations, business-question SQL on a provided schema). The SQL round is the differentiator; the FDSE loop barely tests SQL.
+
+**The candidate's takeaway:** "Both center on the decomposition round, but the deployment strategist loop pairs it with a technical round built around SQL fluency, and its shape varies by team and by how you were recruited."
+
+**The Phase 6 prep:** the SQL module (if present) for the deployment-strategist loop. This report is for the FDSE loop.
+
+---
+
+## 14. Experience requirements (and the security-clearance nuance)
+
+Palantir hires FDEs **across experience levels**, from new graduates to senior engineers. The interview is the same; the bar is the same.
+
+| Experience level | Expected signals | Onsite prep |
+|---|---|---|
+| New graduate | Strong technical foundation; clear motivation for FDE work; can do the decomposition round with prompting | Same 5 onsite formats, weighted 35% on decomposition + 25% on behavioral |
+| Mid-level (3-7 years) | End-to-end ownership of past projects; can speak to metrics + trade-offs | Same 5 onsite formats, weighted 30% on decomposition + 20% on system design + 20% on re-engineering |
+| Senior (7+ years) | Cross-functional leadership; can defend a system design under pushback | Same 5 onsite formats, weighted 25% on system design + 25% on decomposition + 25% on behavioral |
+
+**The security-clearance nuance:** "Some government-facing forward deployed engineer roles require or sponsor a security clearance, while most commercial roles do not." If you see a Gotham (government) posting, the clearance requirement is a separate signal — start the clearance process early (it can take 6+ months).
+
+**The cross-functional background note:** "Palantir welcomes candidates from non-traditional backgrounds who can demonstrate strong technical ability." The bar is on the loop, not the resume.
+
+**The Phase 6 prep:** the same 4 weeks of full-time prep regardless of level. The portfolio (4 projects + 5 case studies) is the strongest signal you can bring for any level.
