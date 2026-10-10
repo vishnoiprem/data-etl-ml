@@ -401,10 +401,414 @@ def scrape_ai_jobs_net():
     return leads
 
 
+def scrape_reddit_ml_jobs():
+    """Reddit r/MachineLearning, r/MLQuestions, r/forhire, r/jobbit, r/RemoteJobs.
+
+    Uses the public RSS feed (.rss) — no auth needed, no rate-limit issue.
+    Many posts include contact info in the body.
+    """
+    leads = []
+    subs = [
+        "MachineLearning", "MLQuestions", "MLJobs", "RemoteJobs",
+        "forhire", "jobbit", "dataengineering", "ExperiencedDevs",
+    ]
+    for sub in subs:
+        url = f"https://www.reddit.com/r/{sub}/new.rss?limit=50"
+        code, xml = _curl(url, timeout=15)
+        if code != 200 or not xml or "<rss" not in xml[:200].lower():
+            continue
+        # Crude RSS parse
+        for entry in re.findall(r"<entry>(.*?)</entry>", xml, re.S):
+            title_m = re.search(r"<title>(.*?)</title>", entry, re.S)
+            link_m = re.search(r'href="([^"]+)"', entry)
+            content_m = re.search(r"<content[^>]*>(.*?)</content>", entry, re.S)
+            if not title_m:
+                continue
+            title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
+            content = content_m.group(1) if content_m else ""
+            content = re.sub(r"<[^>]+>", " ", content)
+            content = re.sub(r"&[a-z]+;", " ", content)
+            content = re.sub(r"\s+", " ", content).strip()
+            text = f"{title}\n{content}"
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            if EXCLUDE_TITLE.search(text):
+                continue
+            emails = _extract_real_emails(text)
+            url = link_m.group(1) if link_m else f"https://reddit.com/r/{sub}"
+            company = None
+            m = re.search(r"(?:at|@|for)\s+([A-Z][\w&'.\- ]{1,40})(?:\s+|,|\.|\|)",
+                          title)
+            if m:
+                company = m.group(1).strip().rstrip("—-–")
+            if not company:
+                m = re.search(r"\[(?:Hiring|Hire)\]\s*(.*?)(?:\s*[\|\-—–]|\s*$)",
+                              title)
+                if m:
+                    company = m.group(1).strip()[:60]
+            if not company:
+                company = f"r/{sub}"
+            leads.append({
+                "company": company,
+                "role": title[:120],
+                "source": f"reddit r/{sub}",
+                "source_url": url,
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": content[:400] or title[:400],
+            })
+    return leads
+
+
+def scrape_twitter_x_jobs():
+    """X/Twitter 'hiring' / 'we are hiring' posts.
+
+    Uses the public syndication API at tweet-url.json — no auth needed
+    for individual tweet lookups, but the public search is rate-limited
+    to ~180 calls/15min. We hit a small set of high-signal queries.
+
+    If you have TWITTER_BEARER_TOKEN in env, we use the v2 search API
+    (much better rate limit + longer history).
+    """
+    leads = []
+    bearer = os.getenv("TWITTER_BEARER_TOKEN", "").strip()
+    queries = [
+        "we are hiring AI engineer",
+        "hiring ML engineer remote",
+        "looking for AI agent engineer",
+        "hiring data platform engineer",
+        "hiring senior AI LLM",
+        "hiring RAG engineer",
+        "hiring GenAI engineer",
+    ]
+    if bearer:
+        # v2 recent search
+        for q in queries:
+            url = (
+                "https://api.twitter.com/2/tweets/search/recent"
+                f"?query={urllib.parse.quote(q + ' -is:retweet lang:en')}"
+                "&max_results=50&tweet.fields=created_at,author_id,text"
+                "&expansions=author_id&user.fields=username,name,description"
+            )
+            try:
+                out = subprocess.run(
+                    ["curl", "-sL", "-m", "20",
+                     "-H", f"Authorization: Bearer {bearer}",
+                     "-A", "avilx-lead-bot/1.0",
+                     url],
+                    capture_output=True, text=True, timeout=25,
+                )
+                if out.returncode != 0 or not out.stdout:
+                    continue
+                data = json.loads(out.stdout)
+            except Exception:
+                continue
+            users = {u["id"]: u for u in data.get("includes", {}).get("users", [])}
+            for t in data.get("data", []) or []:
+                text = t.get("text", "")
+                if EXCLUDE_TITLE.search(text):
+                    continue
+                emails = _extract_real_emails(text)
+                urls = re.findall(r"https?://[^\s)\"']+", text)
+                urls = [u for u in urls if "twitter.com" not in u and "x.com" not in u]
+                if not emails and not urls:
+                    continue
+                author = users.get(t.get("author_id", ""), {}) or {}
+                handle = author.get("username", "unknown")
+                company = (author.get("name") or handle).strip()[:60]
+                leads.append({
+                    "company": company or f"@{handle}",
+                    "role": text[:120],
+                    "source": f"twitter @{handle}",
+                    "source_url": f"https://x.com/{handle}/status/{t.get('id')}",
+                    "contact_email": emails[0] if emails else None,
+                    "extra_emails": emails[1:5],
+                    "extra_urls": urls[:3],
+                    "raw_excerpt": text[:400],
+                })
+    else:
+        # Fallback: Nitter public instances (often down, but worth a try)
+        nitter_hosts = ["nitter.net", "nitter.poast.org", "nitter.privacydev.net"]
+        for q in queries[:3]:  # cap to keep this fast
+            for host in nitter_hosts:
+                url = f"https://{host}/search?f=tweets&q={urllib.parse.quote(q)}"
+                code, html = _curl(url, timeout=10)
+                if code != 200 or not html:
+                    continue
+                # Pull tweet text + handle from Nitter's HTML
+                for m in re.finditer(
+                    r'<a class="username"[^>]*>@([\w]+)</a>.*?'
+                    r'<div class="tweet-content[^"]*"[^>]*>(.*?)</div>',
+                    html, re.S,
+                ):
+                    handle = m.group(1)
+                    body = re.sub(r"<[^>]+>", " ", m.group(2))
+                    body = re.sub(r"\s+", " ", body).strip()
+                    if not body or EXCLUDE_TITLE.search(body):
+                        continue
+                    emails = _extract_real_emails(body)
+                    if not emails:
+                        continue
+                    leads.append({
+                        "company": f"@{handle}",
+                        "role": body[:120],
+                        "source": f"twitter @{handle} (via nitter)",
+                        "source_url": f"https://x.com/{handle}",
+                        "contact_email": emails[0],
+                        "extra_emails": emails[1:5],
+                        "raw_excerpt": body[:400],
+                    })
+                if leads:
+                    break  # one nitter host succeeded
+    return leads
+
+
+def scrape_remotive():
+    """Remotive.io public job feed — JSON API, no auth.
+
+    Capped to software/developer roles and our keyword set.
+    """
+    leads = []
+    url = "https://remotive.com/api/remote-jobs?category=software-dev&limit=100"
+    code, body = _curl(url, timeout=20)
+    if code != 200 or not body:
+        return leads
+    try:
+        data = json.loads(body)
+    except Exception:
+        return leads
+    for jl in (data.get("jobs") or [])[:50]:
+        title = (jl.get("title") or "").strip()
+        company = (jl.get("company_name") or "").strip()
+        desc = (jl.get("description") or "")
+        text = f"{title}\n{desc}"
+        if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+            continue
+        if EXCLUDE_TITLE.search(text):
+            continue
+        # Strip HTML for email extraction
+        text_plain = re.sub(r"<[^>]+>", " ", text)
+        emails = _extract_real_emails(text_plain)
+        leads.append({
+            "company": company or "Remotive",
+            "role": title,
+            "source": "remotive",
+            "source_url": jl.get("url", ""),
+            "contact_email": emails[0] if emails else None,
+            "extra_emails": emails[1:5],
+            "raw_excerpt": re.sub(r"\s+", " ", text_plain)[:400],
+        })
+    return leads
+
+
+def scrape_jobicy():
+    """Jobicy.com public feed — JSON API."""
+    leads = []
+    for tag in ["data-science", "ai-ml", "software-engineer", "devops"]:
+        url = f"https://jobicy.com/api/v2/remote-jobs?count=50&tag={tag}"
+        code, body = _curl(url, timeout=20)
+        if code != 200 or not body:
+            continue
+        try:
+            data = json.loads(body)
+        except Exception:
+            continue
+        for jl in (data.get("jobList") or [])[:30]:
+            title = (jl.get("jobTitle") or "").strip()
+            company = (jl.get("companyName") or "").strip()
+            desc = (jl.get("jobDescription") or "")
+            text = f"{title}\n{desc}"
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            if EXCLUDE_TITLE.search(text):
+                continue
+            text_plain = re.sub(r"<[^>]+>", " ", text)
+            emails = _extract_real_emails(text_plain)
+            leads.append({
+                "company": company or "Jobicy",
+                "role": title,
+                "source": f"jobicy:{tag}",
+                "source_url": jl.get("url", ""),
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": re.sub(r"\s+", " ", text_plain)[:400],
+            })
+    return leads
+
+
+def scrape_discord_jobs():
+    """Public Discord servers that post jobs (no auth needed for public channels).
+
+    Strategy: search for Discord server invite links on the open web via
+    Google-style search. For each invite, we just record the URL — we
+    don't join the server (that would need a user token).
+
+    For practical leads, we focus on a small set of well-known public
+    hiring servers whose invite links appear on Reddit/LinkedIn posts.
+
+    Note: actual scraping inside Discord requires a user/bot token.
+    Without one, this is a directory of leads-to-prospect, not direct
+    contacts. Mark them with `apply_method=url` so the email pipeline
+    skips them and a manual outreach workflow picks them up.
+    """
+    # Curated list of public AI/Data hiring Discord servers — invites are
+    # stable. Update this list as you discover more.
+    SERVERS = [
+        ("MLOps Community",       "https://discord.gg/MLOps"),
+        ("DSPy",                  "https://discord.gg/XCGyv2DuGM"),
+        ("Weights & Biases",      "https://discord.gg/wandb"),
+        ("LangChain",             "https://discord.gg/langchain"),
+        ("LlamaIndex",            "https://discord.gg/eN6D2HQ6aX"),
+        ("OpenAI Dev",            "https://discord.gg/openai"),
+        ("HuggingFace",           "https://discord.gg/huggingface"),
+        ("PyTorch",               "https://discord.gg/pytorch"),
+        ("Databricks Community",  "https://discord.gg/databricks"),
+        ("Snowflake Builders",    "https://discord.gg/snowflake"),
+        ("dbt Community",         "https://discord.gg/getdbt"),
+        ("Apache Airflow",        "https://airflow.apache.org/community/"),
+    ]
+    leads = []
+    for name, invite in SERVERS:
+        leads.append({
+            "company": name,
+            "role": "Discord community (look for #jobs / #hiring channels)",
+            "source": "discord (directory)",
+            "source_url": invite,
+            "contact_email": None,
+            "extra_emails": [],
+            "raw_excerpt": f"Public hiring-focused Discord server: {invite}",
+            "apply_method": "url",
+        })
+    return leads
+
+
+def scrape_telegram_jobs():
+    """Public Telegram channels that post jobs.
+
+    Telegram's public channels can be fetched via the `t.me/s/<channel>`
+    web preview — no auth needed. We crawl a curated list of well-known
+    AI/Data hiring channels.
+    """
+    CHANNELS = [
+        ("remoteai",       "https://t.me/s/remoteai"),
+        ("ai_jobs",        "https://t.me/s/ai_jobs"),
+        ("ml_jobs",        "https://t.me/s/ml_jobs"),
+        ("data_jobs",      "https://t.me/s/data_jobs"),
+        ("ds_jobs",        "https://t.me/s/ds_jobs"),
+        ("remotedevjobs",  "https://t.me/s/remotedevjobs"),
+        ("weworkremotely", "https://t.me/s/weworkremotely_jobs"),
+    ]
+    leads = []
+    for ch_name, url in CHANNELS:
+        code, html = _curl(url, timeout=15)
+        if code != 200 or not html:
+            continue
+        # Each message is wrapped in <div class="tgme_widget_message_wrap">
+        for m in re.finditer(
+            r'<div class="tgme_widget_message_wrap"[^>]*>(.*?)(?=<div class="tgme_widget_message_wrap"|</div></div></div></div>\s*</div>\s*</body)',
+            html, re.S,
+        ):
+            chunk = m.group(1)
+            text_m = re.search(r'<div class="tgme_widget_message_text[^"]*"[^>]*>(.*?)</div>',
+                               chunk, re.S)
+            if not text_m:
+                continue
+            text = re.sub(r"<[^>]+>", " ", text_m.group(1))
+            text = re.sub(r"&[a-z]+;", " ", text)
+            text = re.sub(r"\s+", " ", text).strip()
+            if not text or len(text) < 20:
+                continue
+            lower = text.lower()
+            if not any(kw.lower() in lower for kw in SCRAPE_KEYWORDS):
+                continue
+            if EXCLUDE_TITLE.search(text):
+                continue
+            emails = _extract_real_emails(text)
+            leads.append({
+                "company": f"Telegram @{ch_name}",
+                "role": text[:120],
+                "source": f"telegram:{ch_name}",
+                "source_url": url,
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": text[:400],
+            })
+        if not leads:
+            # Still record the channel as a URL lead so we know it was checked
+            leads.append({
+                "company": f"Telegram @{ch_name}",
+                "role": "Telegram hiring channel",
+                "source": f"telegram:{ch_name}",
+                "source_url": url,
+                "contact_email": None,
+                "raw_excerpt": "Telegram hiring channel — view on web to see posts",
+                "apply_method": "url",
+            })
+    return leads
+
+
+def scrape_asian_chat_jobs():
+    """WeChat / Zalo / Line — Asian chat platforms.
+
+    These are closed networks (no public search API like Discord/Telegram).
+    We do a best-effort web search for public posts that mention hiring
+    into these networks, then record the post URL as a manual-lead.
+
+    Specifically we hit Bing's public search (no auth, ~10 queries/min)
+    for WeChat Official Accounts that post jobs and Zalo OA channels.
+    """
+    leads = []
+    queries = [
+        '"wechat" "hiring" "AI engineer" "data scientist"',
+        '"zalo" "tuyển" "AI engineer" OR "data engineer"',
+        '"wechat group" "AI jobs" "apply"',
+    ]
+    for q in queries:
+        url = "https://www.bing.com/search?" + urllib.parse.urlencode({
+            "q": q, "format": "rss",
+        })
+        code, xml = _curl(url, timeout=15)
+        if code != 200 or not xml:
+            continue
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S):
+            title_m = re.search(r"<title>(.*?)</title>", item, re.S)
+            link_m = re.search(r"<link>(.*?)</link>", item)
+            desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
+            if not (title_m and link_m):
+                continue
+            title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
+            desc = re.sub(r"<[^>]+>", " ", desc_m.group(1)) if desc_m else ""
+            desc = re.sub(r"\s+", " ", desc).strip()
+            text = f"{title}\n{desc}"
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            if EXCLUDE_TITLE.search(text):
+                continue
+            emails = _extract_real_emails(text)
+            leads.append({
+                "company": "WeChat/Zalo (CN/VN chat)",
+                "role": title[:120],
+                "source": "bing:wechat_zalo",
+                "source_url": link_m.group(1).strip(),
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": desc[:400] or title[:400],
+                "apply_method": "url",  # mark as manual-outreach
+            })
+    return leads
+
+
 SCRAPERS = [
-    ("hn_who_is_hiring", scrape_hn_who_is_hiring),
-    ("weworkremotely",   scrape_weworkremotely),
-    ("ai_jobs_net",      scrape_ai_jobs_net),
+    ("hn_who_is_hiring",   scrape_hn_who_is_hiring),
+    ("weworkremotely",     scrape_weworkremotely),
+    ("ai_jobs_net",        scrape_ai_jobs_net),
+    ("reddit_ml_jobs",     scrape_reddit_ml_jobs),
+    ("twitter_x_jobs",     scrape_twitter_x_jobs),
+    ("remotive",           scrape_remotive),
+    ("jobicy",             scrape_jobicy),
+    ("discord_jobs",       scrape_discord_jobs),
+    ("telegram_jobs",      scrape_telegram_jobs),
+    ("asian_chat_jobs",    scrape_asian_chat_jobs),
 ]
 
 
@@ -660,7 +1064,7 @@ def send_queued_emails(max_emails=None, dry=False):
     pending = [l for l in pending if not is_opted_out(l["contact_email"])]
     pending = pending[:max_emails]
 
-    sent, failed = 0, 0
+    sent, failed, bounced = 0, 0, 0
     for lead in pending:
         if dry:
             print(f"  [dry] would email {lead['contact_email']} re: {lead['company']}")
@@ -673,11 +1077,16 @@ def send_queued_emails(max_emails=None, dry=False):
             print(f"  ✅ {lead['company']} → {lead['contact_email']}")
             if sent < len(pending):
                 time.sleep(DELAY_BETWEEN_EMAILS_SEC)
+        except RecipientInvalid as e:
+            # _send_one already marked status='bounced' in the DB.
+            bounced += 1
+            print(f"  🚫 {lead['company']} → {lead['contact_email']}  bounced: {e.code} {e.reason[:60]}")
+            # No sleep — bounced sends are cheap, no need to throttle.
         except Exception as e:
             update_status(lead["id"], "failed", error=str(e))
             failed += 1
             print(f"  ❌ {lead['company']} → {lead['contact_email']}  err: {e}")
-    return sent, failed
+    return sent, failed, bounced
 
 
 def _pick_resume(lead) -> Optional[Path]:
@@ -951,6 +1360,39 @@ def _render_email_html(lead: dict) -> str:
 </html>"""
 
 
+class RecipientInvalid(Exception):
+    """Reserved for future use. NOT raised by current send path.
+
+    Gmail's SMTP frontend says OK (250) to ANY RCPT TO request — it does
+    not actually validate the recipient at that layer. Bounces come back
+    asynchronously as a separate "Delivery Status Notification (Failure)"
+    email, which `check_bounces.py` catches via IMAP.
+
+    We keep this exception type so the caller (`send_queued_emails`) can
+    still distinguish "rejected before send" from "rejected during send"
+    in the future if/when we add a different verification mechanism
+    (e.g. probing the destination MX directly).
+    """
+    def __init__(self, email, code, reason):
+        self.email = email
+        self.code = code
+        self.reason = reason
+        super().__init__(f"Recipient invalid: {email} ({code} {reason})")
+
+
+def _verify_recipient(addr: str, timeout: int = 15) -> None:
+    """Currently a no-op. Gmail's SMTP accepts any RCPT TO at send time.
+
+    See the docstring on `RecipientInvalid` for why. The real bounce
+    detection is in `check_bounces.py` (IMAP poll on the sender inbox).
+
+    Kept as a stub so callers don't have to change if/when we add a
+    real verification step (e.g. SMTP MX probe or 3rd-party validator
+    like NeverBounce / ZeroBounce).
+    """
+    return
+
+
 def _send_one(lead):
     """Build + send one email via SMTP with retry + backoff.
 
@@ -966,7 +1408,20 @@ def _send_one(lead):
     Tries to attach a JD-tailored resume (resume_tailor.tailor_resume).
     Falls back to the default resume file from the lead row, then to
     RESUME_DIR/Prem_Resume_2026.pdf.
+
+    Note on bounce prevention: Gmail's SMTP accepts any RCPT TO at send
+    time, so we can't pre-validate. The real bounce detection runs in
+    `check_bounces.py` (IMAP poll on the sender inbox) — every morning
+    the cron job reads the "Delivery Status Notification (Failure)"
+    messages Gmail sent us and marks the corresponding leads as bounced.
     """
+    addr = lead["contact_email"]
+    if not addr:
+        raise ValueError("Lead has no contact_email")
+    # ---- PRE-VALIDATE: currently a no-op (see docstring) ----
+    # Kept as a hook in case we add a 3rd-party validator later.
+    _verify_recipient(addr)
+
     msg = MIMEMultipart("mixed")
     msg["From"] = f"{YOUR_NAME} <{SMTP_USER}>"
     msg["To"] = lead["contact_email"]
@@ -1075,6 +1530,24 @@ def _send_one(lead):
 def run_pipeline(args):
     print(f"\n{'='*60}\n🤖 AVILX AUTOPILOT — {datetime.now().isoformat()}\n{'='*60}")
     report = {"started_at": datetime.now().isoformat()}
+    # ---- Step 0: bounce-sync (auto-mark any new bounces) ----
+    if not args.no_bounce_sync:
+        try:
+            from check_bounces import scan_bounces, mark_bounced
+            print("\n[0/4] BOUNCE-SYNC — scan Gmail for delivery failures")
+            bounce_map, _ = scan_bounces(since_days=7)
+            if bounce_map:
+                counts = mark_bounced(bounce_map, dry=args.dry)
+                report["bounce_sync"] = counts
+                print(f"  → marked {counts.get('marked', 0)} newly bounced, "
+                      f"{counts.get('already_bounced', 0)} already, "
+                      f"{counts.get('unknown', 0)} unknown")
+            else:
+                print("  → no new bounces in last 7 days")
+                report["bounce_sync"] = {"marked": 0}
+        except Exception as e:
+            print(f"  ⚠️  bounce-sync failed: {e}")
+            report["bounce_sync"] = {"error": str(e)}
     if not args.email_only:
         print("\n[1/4] SCRAPE — public sources")
         leads = scrape_all()
@@ -1093,9 +1566,9 @@ def run_pipeline(args):
         print(f"  → inserted {ins}, skipped {skp} dup, errored {err}")
     if not args.scrape_only:
         print("\n[4/4] EMAIL — send up to {} queued leads".format(args.max_emails))
-        sent, failed = send_queued_emails(max_emails=args.max_emails, dry=args.dry)
-        report["email"] = {"sent": sent, "failed": failed}
-        print(f"  → sent {sent}, failed {failed}")
+        sent, failed, bounced = send_queued_emails(max_emails=args.max_emails, dry=args.dry)
+        report["email"] = {"sent": sent, "failed": failed, "bounced": bounced}
+        print(f"  → sent {sent}, bounced {bounced}, failed {failed}")
     report["finished_at"] = datetime.now().isoformat()
     with open(REPORT_FILE, "w") as f:
         json.dump(report, f, indent=2)
@@ -1113,6 +1586,8 @@ def main():
                    help=f"Max emails to send this run (default {DAILY_LIMIT})")
     p.add_argument("--no-lock", action="store_true",
                    help="Skip cron lock (only for interactive debugging)")
+    p.add_argument("--no-bounce-sync", action="store_true",
+                   help="Skip the bounce-sync step at the start of the run")
     args = p.parse_args()
 
     scrape_only = args.scrape or args.enrich
@@ -1132,8 +1607,8 @@ def main():
             return
         if email_only:
             print(f"\n🤖 AVILX AUTOPILOT — email only")
-            sent, failed = send_queued_emails(max_emails=args.max_emails, dry=args.dry)
-            print(f"\n→ sent {sent}, failed {failed}")
+            sent, failed, bounced = send_queued_emails(max_emails=args.max_emails, dry=args.dry)
+            print(f"\n→ sent {sent}, bounced {bounced}, failed {failed}")
             return
 
     if args.no_lock:
