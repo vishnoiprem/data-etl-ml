@@ -1,0 +1,20 @@
+graph LR
+    vpc["VPC 10.0.0.0/16"]:::vpc -- DNS hostnames --> subnet["Public subnet 10.0.1.0/24"]:::subnet
+    subnet -- 1 RTB --> rtb["Route table"]:::rtb
+    igw["Internet Gateway"]:::igw --> rtb
+    rtb --> igw
+    subnet --> ec2["EC2 t3.micro (AL2023)"]:::ec2
+    role["IAM role (AmazonS3ReadOnlyAccess)"]:::role -- instance profile --> ec2
+    sg["Security Group (22 from CIDR)"]:::sg --> ec2
+    ec2 -- get_object --> bucket["S3 bucket (versioned, encrypted, lifecycle)"]:::bucket
+    bp["Bucket policy (allow role)"]:::bp --> bucket
+
+    classDef vpc fill:#dfe7fd,stroke:#336,stroke-width:1px
+    classDef subnet fill:#dfe7fd,stroke:#336,stroke-width:1px
+    classDef rtb fill:#fde2e2,stroke:#a33,stroke-width:1px
+    classDef igw fill:#e2fdef,stroke:#383,stroke-width:1px
+    classDef ec2 fill:#fdf5e2,stroke:#a83,stroke-width:1px
+    classDef role fill:#f0e2fd,stroke:#73a,stroke-width:1px
+    classDef sg fill:#eee,stroke:#333,stroke-width:1px
+    classDef bucket fill:#e2f3fd,stroke:#37a,stroke-width:1px
+    classDef bp fill:#e2f3fd,stroke:#37a,stroke-width:1px

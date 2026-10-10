@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor U as User
+    participant APIG as Gateway
+    participant LF as Lambda
+    participant B as Bedrock (cohere.command-text-v14)
+    participant CW as CloudWatch
+
+    U->>APIG: { "defect_text": "..." }
+    APIG->>LF: Invoke (AWS_PROXY)
+    LF->>B: InvokeModel (Cohere Command)
+    B-->>LF: { "generations": [{ "text": "..." }] }
+    LF-->>APIG: 200 { "summary": "..." }
+    APIG-->>U: 200 { "summary": "..." }
+
+    LF->>CW: structured log (request_id, latency_ms)
+    Note over CW: dashboard widgets: invocations, errors, throttles
+    Note over APIG: throttling 100 RPS, burst 200
+    Note over LF: IAM allow bedrock:InvokeModel on model ARN (not "*")

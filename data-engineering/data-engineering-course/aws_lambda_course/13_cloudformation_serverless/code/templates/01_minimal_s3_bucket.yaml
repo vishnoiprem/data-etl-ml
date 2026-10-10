@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  L62 standalone template — minimal S3 bucket with versioning,
+  default encryption, and a public access block. Deploy with:
+    aws cloudformation deploy \
+      --stack-name l62-sandbox \
+      --template-file 01_minimal_s3_bucket.yaml
+
+Resources:
+  MinimalBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: l62-minimal-bucket-example
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: lecture
+          Value: L62
+        - Key: course
+          Value: aws-lambda-serverless
+
+Outputs:
+  BucketName:
+    Value: !Ref MinimalBucket
+    Description: Name of the created bucket.
+  BucketArn:
+    Value: !GetAtt MinimalBucket.Arn
+    Description: ARN of the created bucket.
+  BucketDomainName:
+    Value: !GetAtt MinimalBucket.DomainName
+    Description: Regional domain name of the bucket.

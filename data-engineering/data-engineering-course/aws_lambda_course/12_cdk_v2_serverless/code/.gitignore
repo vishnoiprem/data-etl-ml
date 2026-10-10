@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# CDK synthesized output
+cdk.out/
+cdk.context.json.local
+
+# TypeScript build output
+*.js
+*.d.ts
+!jest.config.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test
+coverage/
+.nyc_output/
+
+# Asset zips CDK may leave behind locally
+*.zip

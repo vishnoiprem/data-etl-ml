@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  L64 standalone template — AWS Lambda function with code from a local
+  zip. This template assumes the L63 role and L62 bucket already exist
+  (or you will supply their ARNs as parameters).
+  Deploy with:
+    aws cloudformation package \
+      --template-file templates/03_lambda_function.yaml \
+      --s3-bucket <your-cfn-assets-bucket> \
+      --output-template-file /tmp/03_lambda_function.packaged.yaml
+    aws cloudformation deploy \
+      --stack-name l64-sandbox \
+      --template-file /tmp/03_lambda_function.packaged.yaml \
+      --capabilities CAPABILITY_IAM
+
+Parameters:
+  RoleArn:
+    Type: String
+    Description: ARN of an existing Lambda execution role.
+  BucketName:
+    Type: String
+    Description: S3 bucket the Lambda reads/writes.
+
+Resources:
+  GetObjectFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: l64-get-object
+      Runtime: python3.11
+      Handler: get_object.lambda_handler
+      Role: !Ref RoleArn
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+      Code:
+        S3Bucket: !Ref CodeAssetsBucket
+        S3Key: lambdas/get_object.zip
+
+  PutObjectFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: l64-put-object
+      Runtime: python3.11
+      Handler: put_object.lambda_handler
+      Role: !Ref RoleArn
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+      Code:
+        S3Bucket: !Ref CodeAssetsBucket
+        S3Key: lambdas/put_object.zip
+
+  CodeAssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "l64-code-assets-${AWS::AccountId}-${AWS::Region}"
+
+Outputs:
+  GetObjectFunctionArn:
+    Value: !GetAtt GetObjectFunction.Arn
+  PutObjectFunctionArn:
+    Value: !GetAtt PutObjectFunction.Arn
