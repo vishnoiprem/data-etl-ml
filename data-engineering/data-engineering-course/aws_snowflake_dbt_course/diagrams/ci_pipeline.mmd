@@ -1,0 +1,25 @@
+%% ci_pipeline.mmd
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+%% Lecture reference: L97 "Slim CI - Part 1", L98 "Slim CI - Part 2"
+
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub PR
+    participant CI as GitHub Actions
+    participant State as prod manifest.json
+    participant DBT as dbt
+    participant DevSchema as ephemeral dev schema
+
+    Dev->>GH: opens PR with model change
+    GH->>CI: trigger workflow
+    CI->>State: download prod/manifest.json
+    CI->>DBT: dbt deps
+    CI->>DBT: dbt parse (smoke test)
+    CI->>DBT: dbt list --select state:modified+ --state prod/
+    DBT-->>CI: 3 modified + 5 downstream
+    CI->>DBT: dbt build --select state:modified+ --defer --state prod/
+    DBT->>State: defer --state prod/ (use prod tables for unmodified models)
+    DBT->>DevSchema: build only modified models in ephemeral schema
+    DevSchema-->>DBT: build complete
+    CI->>Dev: green check (or red with logs)
+    Dev->>GH: merge PR after approval

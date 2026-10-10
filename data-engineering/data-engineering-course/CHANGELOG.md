@@ -1,5 +1,61 @@
 # Changelog
 
+## 2026-10-10 — dbt + Snowflake Analytics Engineering Cert Prep (Udemy course author source)
+
+New track: `aws_snowflake_dbt_course/`. The author-source companion
+for the Udemy course "dbt + Snowflake — Analytics Engineer
+Certification Prep" (19 sections, 131 lectures, 11h 57m). Project-
+based exam prep built on a realistic **Ethereum blockchain dataset**
+in Snowflake. Every lecture maps to an official dbt Analytics
+Engineer exam objective. All 76 pytest tests pass; the shared
+`dbt_project/` validates cleanly with `dbt parse` (no Snowflake
+account required for the smoke test).
+
+### Added — `aws_snowflake_dbt_course/`
+- `README.md`, `SYLLABUS.md` (L01–L131 map), `DIRECTORY.md`, `CHANGELOG.md`, `requirements.txt`, `conftest.py` (with `render_jinja()` mock dbt context)
+- 19 section folders, each with `README.md` + `lecture_scripts/`:
+  - `01_section/` Welcome, dbt init, sources, first model
+  - `02_section/` Transactions: fields, categorization, daily activity, stablecoins
+  - `03_section/` Object dependencies, staging shielding, materialization precedence, incremental + strategies
+  - `04_section/` Practice quiz — materializations
+  - `05_section/` DRY: project organization, CTEs, dbt_project.yml, macros (logging, run_query, if execute, return)
+  - `06_section/` dbt run, test, docs, seed, compile/ls/clean/build, clean DAGs
+  - `07_section/` dbt_project.yml configs: hierarchical, custom schemas, vars, alias
+  - `08_section/` Sources + dbt packages: codegen, dbt_utils, audit_helper, Git packages
+  - `09_section/` Git basics + branching/PRs/protected branches + merge conflicts
+  - `10_section/` Python models + execution constraints
+  - `11_section/` Grants: Snowflake behavior, dbt grants, post-hooks, project-level grants
+  - `12_section/` Practice quiz — developing dbt models
+  - `13_section/` Environments + contracts: schema with codegen, subtleties
+  - `14_section/` Versions: setup + latest view, deprecation dates + warnings
+  - `15_section/` Model access: project structure, fraud domain, groups + private models
+  - `16_section/` Debugging: dbt logs, debug flags, runtime/compilation/db errors
+  - `17_section/` State: manifest, run results, selectors, dbt retry
+  - `18_section/` Managing data pipelines: CI intro, first CI, defer, dbt clone, Slim CI, continuous deployment
+  - `19_section/` Tests (singular, generic, custom, unit, source, severity, selection, advanced), dbt docs, exposures, freshness, snapshots (timestamp + check), microbatch, --sample, final exam
+- 131 lecture scripts `L01_…md` … `L131_…md` in their respective `lecture_scripts/`
+- 19 quizzes in `quizzes/section_1.md` … `quizzes/section_19.md`
+- 4 assignments in `assignments/` (Ethereum ETL, incremental strategy, unit tests, CI pipeline)
+- 6 mermaid diagrams in `diagrams/` (project layout, run flow, materialization decision, incremental merge, CI pipeline, state selectors)
+- 12 per-section `code/` demos + their `test_*.py` (`stg_first_model`, `activity_incremental`, `log_macro_demo`, `dag_demo`, `fraud_score_demo`, `contracts_demo`, `versions_demo`, `state_selectors`, `dbt_ci_workflow`, `transactions_snapshot`, `generic_test_positive`)
+- 2 scripts: `scripts/run_all_tests.py` (discovers all 12 test files + runs `dbt parse` smoke test), `scripts/bootstrap.sh`
+- 1 PDF placeholder in `downloads/`
+
+### Added — `dbt_project/`
+- `dbt_project.yml` (materialization precedence: staging→view, marts→table), `profiles.yml` (mock target), `packages.yml` (codegen, dbt_utils, audit_helper), `selectors.yml` (result + state-based)
+- `models/staging/`: `_sources.yml` (Ethereum sources with freshness), `stg_ethereum__transactions.sql`, `stg_ethereum__blocks.sql`
+- `models/marts/`: `transactions.sql` (incremental merge), `activity.sql` (incremental + is_incremental guard), `stablecoin_activity.sql`, `fraud_score.py` (Python model), `dag_demo.sql`, plus split schema files `_grants.yml`, `_contracts.yml`, `_versions.yml`, `_access.yml` (one .yml per concern per dbt 1.12 rule)
+- `macros/`: `log_macro.sql`, `dry_refactor.sql`, `debug_helper.sql`
+- `seeds/`: `static_categories.csv`
+- `snapshots/`: `transactions_snapshot.sql` (timestamp strategy)
+- `tests/`: `generic/test_positive_value.sql`, `unit/test_fraud_score_unit.yml`
+
+### Verification
+- `dbt parse` exits 0 against the shared `dbt_project/`
+- `python3 scripts/run_all_tests.py` → 76 pytest tests, ALL PASS
+- Author sweep: every `.md` / `.sql` / `.py` / `.yml` contains `Author: Prem Vishnoi <pvishnoi@avilx.com>`; no `pvilx.com` typo in any actual source file
+- Updated parent `README.md` table at line 277 to add the new course row
+
 ## 2026-10-10 — Snowflake — The Complete Masterclass (Udemy course author source)
 
 New track: `aws_snowflake_course/`. The author-source companion for

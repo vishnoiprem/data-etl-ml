@@ -1,0 +1,42 @@
+# ============================================================================
+# selectors.yml — named selector presets.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# Run with `dbt run --select <selector>` or `--selector <name>`.
+# Each selector has `name` + `definition`. The `definition` is either
+# a string (e.g. "tag:marts") or a dict with `union` / `intersection`.
+#
+# Valid methods (dbt 1.12): fqn, tag, group, access, source, path,
+# file, package, config, test_name, test_type, resource_type, state,
+# exposure, metric, result, source_status, version, semantic_model,
+# saved_query, unit_test, selector.
+# ============================================================================
+
+selectors:
+  - name: marts
+    definition:
+      union:
+        - "tag:marts"
+        - "path:models/marts"
+
+  - name: all_with_staging
+    definition:
+      union:
+        - "path:models/staging"
+        - "path:models/marts"
+
+  - name: fraud
+    definition:
+      union:
+        - "tag:fraud"
+        - "fqn:models/marts/fraud*"
+
+  - name: ethereum
+    definition: "source:ethereum.*"
+
+  - name: ci_changed
+    definition: "state:modified+2"
+
+  - name: slim_ci
+    definition: "state:modified+"

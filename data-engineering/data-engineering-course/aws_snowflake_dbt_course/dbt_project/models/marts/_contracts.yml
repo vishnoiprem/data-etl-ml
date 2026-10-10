@@ -1,0 +1,24 @@
+# ============================================================================
+# models/marts/_contracts.yml — column-level tests for mart models.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# Lecture reference: L68-L70 "Environments + Contracts".
+#
+# In dbt 1.12, only one schema.yml file may declare each model. This
+# file owns column-level tests for models whose declarations live in
+# other .yml files. The per-section demo at
+# `13_section/code/contracts_demo.yml` shows a full single-file contract
+# example for `transactions_demo`.
+#
+# For a runnable contract on the production `transactions` model, copy
+# the contract from `13_section/code/contracts_demo.yml` into
+# `_access.yml` and remove the duplicate `name: transactions` entry
+# from this file.
+# ============================================================================
+
+version: 2
+
+# Empty by design — column tests for transactions / activity live in
+# 13_section/code/contracts_demo.yml (the per-section demo). Putting
+# a model entry here would conflict with _access.yml.

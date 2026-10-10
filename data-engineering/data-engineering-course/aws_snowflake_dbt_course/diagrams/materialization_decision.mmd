@@ -1,0 +1,27 @@
+%% materialization_decision.mmd
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+%% Lecture reference: L23 "Materialization precedence"
+
+graph TD
+    START([New model SQL]) --> Q1{Need to query<br/>repeatedly?}
+
+    Q1 -->|No| EPH[ephemeral<br/>CTE only, never written]
+    Q1 -->|Yes| Q2{Computation<br/>expensive?}
+
+    Q2 -->|No| VIEW[view<br/>recomputed on each query]
+    Q2 -->|Yes| Q3{Large + only<br/>new rows?}
+
+    Q3 -->|No| TABLE[table<br/>rebuilt every run]
+    Q3 -->|Yes| INC[incremental<br/>append/merge new rows only]
+
+    INC --> Q4{Unique key<br/>on every row?}
+    Q4 -->|Yes| MERGE[merge strategy]
+    Q4 -->|No| APPEND[append strategy]
+
+    style START fill:#e1f5ff
+    style EPH fill:#e8f5e9
+    style VIEW fill:#fff4e1
+    style TABLE fill:#fce4ec
+    style INC fill:#f3e5f5
+    style MERGE fill:#fff9c4
+    style APPEND fill:#fff9c4

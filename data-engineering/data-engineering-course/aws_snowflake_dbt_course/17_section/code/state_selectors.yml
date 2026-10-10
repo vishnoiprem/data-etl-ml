@@ -1,0 +1,30 @@
+# ============================================================================
+# 17_section / code / state_selectors.yml
+# ----------------------------------------------------------------------------
+# Demo state + result-based selectors.
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+# ============================================================================
+
+selectors:
+  - name: ci_modified
+    description: "Models modified since the last prod run + 2 layers downstream"
+    definition:
+      - method: state
+        value: modified
+      - method: downstream
+        value: 2
+
+  - name: failed_then_modified
+    description: "Models that errored last run AND were modified since prod"
+    definition:
+      - intersection:
+          - method: state
+            value: modified
+          - method: result
+            value: error
+
+  - name: tag_ethereum
+    description: "All models tagged ethereum"
+    definition:
+      - method: tag
+        value: ethereum

@@ -1,0 +1,55 @@
+# ============================================================================
+# models/marts/_versions.yml — model versions for the activity mart.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# Lecture reference: L71-L72 "Versions". Each version gets its own
+# relation (activity_v1, activity_v2) and a `latest_version` view
+# (activity_v2) that downstream models reference.
+#
+# In dbt 1.12, only one schema.yml file may own each model's
+# declaration. To avoid duplicating `activity` between _access.yml
+# (which owns the access + group + grants) and this file, we declare
+# the versioned entry here AND remove the `activity` entry from
+# _access.yml. The two files together describe the same `activity`
+# model.
+# ============================================================================
+
+version: 2
+
+models:
+  - name: activity
+    description: "Daily activity aggregated by category. Versioned."
+    latest_version: 2
+    versions:
+      - v: 2
+        config:
+          contract:
+            enforced: true
+        columns:
+          - name: activity_date
+            data_type: date
+            tests:
+              - not_null
+              - unique
+          - name: tx_category
+            data_type: varchar
+          - name: tx_count
+            data_type: number
+          - name: total_value_eth
+            data_type: float
+          - name: avg_tx_fee_eth
+            data_type: float
+      - v: 1
+        deprecation_date: 2026-12-31
+        columns:
+          - name: activity_date
+            data_type: date
+          - name: tx_category
+            data_type: varchar
+          - name: tx_count
+            data_type: number
+          - name: total_value_eth
+            data_type: float
+          - name: avg_tx_fee_eth
+            data_type: float

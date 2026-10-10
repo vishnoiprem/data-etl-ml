@@ -1,0 +1,26 @@
+%% dbt_run_flow.mmd
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+%% Lecture reference: L41 "dbt run: Model Selection & Execution Flags"
+
+sequenceDiagram
+    participant User
+    participant CLI as dbt CLI
+    participant Parser as dbt Parser
+    participant Renderer as dbt Renderer
+    participant Adapter as Snowflake Adapter
+    participant DB as Snowflake DB
+
+    User->>CLI: dbt run --select activity+
+    CLI->>Parser: parse dbt_project.yml + models/
+    Parser-->>CLI: AST (Abstract Syntax Tree)
+    CLI->>Parser: resolve refs/sources/macros
+    Parser->>Renderer: render Jinja -> compiled SQL
+    Renderer-->>CLI: compiled SQL per model
+    CLI->>Adapter: build DAG (topological order)
+    loop For each model in DAG
+        Adapter->>DB: CREATE OR REPLACE <relation>
+        Adapter->>DB: INSERT INTO <relation> SELECT ...
+        DB-->>Adapter: rows affected
+    end
+    Adapter-->>CLI: run_results.json
+    CLI-->>User: 4 models, 12.3s total

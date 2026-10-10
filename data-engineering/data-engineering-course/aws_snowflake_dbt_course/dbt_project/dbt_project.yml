@@ -1,0 +1,71 @@
+# ============================================================================
+# dbt_project.yml — shared runnable dbt project
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# This dbt project is built lecture-by-lecture across the 19 sections of
+# "dbt + Snowflake Analytics Engineering Cert Prep". Every section that
+# introduces a new model/macro/test/snapshot adds the file in place.
+#
+# Materialization precedence (lowest → highest priority):
+#   1. Project-wide defaults (here)
+#   2. Folder-level +model config
+#   3. Model-level {{ config(...) }} block
+# ============================================================================
+
+name: 'dbt_snowflake_dbt'
+version: '1.0.0'
+config-version: 2
+profile: 'dbt_snowflake_dbt'
+
+# Project-wide model defaults
+models:
+  dbt_snowflake_dbt:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts
+    +tags: ["ethereum"]
+    +meta:
+      owner: "analytics-engineering"
+
+# Project-wide vars
+vars:
+  dbt_snowflake_dbt:
+    ethereum_source_database: "RAW"
+    ethereum_raw_schema: "ETHEREUM"
+    stablecoin_addresses:
+      - "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+      - "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    start_date: "2024-01-01"
+    sample_size: 1000
+
+# Project-level seeds
+seeds:
+  dbt_snowflake_dbt:
+    +schema: seeds
+    +tags: ["static"]
+
+# Project-level snapshots
+snapshots:
+  dbt_snowflake_dbt:
+    +target_database: "DBT_SNOWFLAKE_DBT"
+    +target_schema: snapshots
+    +strategy: timestamp
+
+# Project-level tests
+tests:
+  dbt_snowflake_dbt:
+    +store_failures: true
+    +schema: test_failures
+
+# Clean target paths
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "logs"
+
+# Note: in dbt >=1.5, named selectors live in `selectors.yml` (not in
+# dbt_project.yml). See ./selectors.yml.

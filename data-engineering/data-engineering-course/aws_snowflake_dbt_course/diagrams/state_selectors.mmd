@@ -1,0 +1,26 @@
+%% state_selectors.mmd
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+%% Lecture reference: L85 "State Intro - Manifest and Run Results", L87 "State Selection - Result-based selectors"
+
+graph LR
+    subgraph State-based[State-based selectors - read manifest.json]
+        S_NEW[state:new] --> S_NEW_DEF[models added since prod]
+        S_MOD[state:modified] --> S_MOD_DEF[columns or config changed]
+        S_MOD2[state:modified+2] --> S_MOD2_DEF[changed + 2 layers downstream]
+    end
+
+    subgraph Result-based[Result-based selectors - read run_results.json]
+        R_ERR[result:error] --> R_ERR_DEF[models that errored in last run]
+        R_WARN[result:warn] --> R_WARN_DEF[models with warnings]
+        R_SKIP[result:skipped] --> R_SKIP_DEF[models that were skipped]
+        R_PASS[result:pass] --> R_PASS_DEF[models that succeeded]
+    end
+
+    subgraph Combined[Combined selectors]
+        C1[state:modified+ result:error+] --> C1_DEF[intersection: changed AND errored]
+        C2[state:modified+ result:error+]2[+1] --> C2_DEF[union: changed OR errored, plus 1 downstream]
+    end
+
+    style State-based fill:#e1f5ff
+    style Result-based fill:#fff4e1
+    style Combined fill:#f3e5f5

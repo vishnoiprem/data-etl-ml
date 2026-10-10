@@ -274,6 +274,7 @@ Udemy-published curricula:
 | AWS CDK v2 Crash Course | `aws_cdk_v2_course/` | 6 | 30 | (npm test) |
 | AWS CloudWatch Crash Course | `aws_cloudwatch_course/` | 7 | 35 | 23 |
 | **Snowflake — The Complete Masterclass** | `aws_snowflake_course/` | 20 | 187 | 127 |
+| **dbt + Snowflake Analytics Engineering Cert Prep** | `aws_snowflake_dbt_course/` | 19 | 131 | 76 |
 
 Each course has its own `README.md`, `SYLLABUS.md`, `DIRECTORY.md`,
 `CHANGELOG.md`, and `scripts/run_all_tests.py`.
