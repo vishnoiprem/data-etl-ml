@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** debugging a production agent at 3am is a 5-step playbook: reproduce (replay the audit log), isolate (which guardrail fired), diagnose (root cause), fix (the smallest change that resolves), verify (the regression check). The audit log is the artifact; the playbook is the discipline.
 
+## In 60 seconds
+
+> "5-step playbook: reproduce (replay the audit log), isolate (which guardrail fired), diagnose (root cause), fix (smallest change that resolves), verify (regression check). 3 artifacts: audit log (the timeline), per-request trace (the run), eval set (the regression check). **The postmortem is the artifact that turns a 3am incident into a permanent improvement.** The wrong choice is to skip the reproduce step (you fix the wrong thing). The wrong choice is to skip the postmortem (the next incident is a new surprise). The right choice is the playbook + the artifacts + the postmortem + the runbook."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5-step debugging playbook: reproduce, isolate, diagnose, fix, verify. The discipline is the same for every incident.

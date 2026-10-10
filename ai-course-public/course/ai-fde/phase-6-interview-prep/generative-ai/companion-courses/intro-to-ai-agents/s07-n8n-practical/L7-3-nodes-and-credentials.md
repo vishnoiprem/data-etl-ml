@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** n8n ships 1000+ pre-built nodes for the services your customer already uses. The FDE's job is to know which node maps to which service, and to never paste an API key into a node's parameters. The credential is the FDE's secret-keeping discipline.
 
+## In 60 seconds
+
+> "3 credential types. API key (paste once, encrypted, referenced by every node). OAuth (authorize once, refresh tokens auto-managed). Database (connection string, pooled per execution). The 4-rule redaction discipline: never paste in node parameters, never log, never commit to git, rotate on team change. n8n redacts by default; the FDE must not bypass. The wrong choice is to embed the API key in the HTTP Request node's headers. The right choice is the credential object + the 4-rule discipline."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 node categories: trigger nodes (start the workflow), data nodes (transform data), action nodes (call an API), logic nodes (branch, merge, loop). Each category has a specific role; the FDE picks the right category for the right job.

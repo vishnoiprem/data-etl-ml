@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a production agent is 7 ingredients composed inside 5 guardrails. The ingredients are necessary; the guardrails are sufficient. The candidate who can name all 7 ingredients and all 5 guardrails is the candidate who passes the centerpiece round.
 
+## In 60 seconds
+
+> "Seven ingredients. Model (the decision function, picked by the 4-axis rubric: capability, latency, cost, context). Tools (the action space, defined by name, description, input schema, output schema; the registry validates every call). Memory (three tiers: short-term in the prompt, long-term in a vector DB, episodic in summaries). Cost ceiling (three levels: per-run, per-tenant, per-process). System prompt (the contract with the model, five sections, rendered at startup, version-controlled). Parser (the action extractor, never crashes, returns structured errors the model reads as observations). Loop driver (the for-loop that bounds the run). **Five guardrails wrap the loop:** loop detector (catches confused iterations), schema validator (catches malformed tool calls, returns structured 403), cost ceiling (catches budget blowouts), idempotency (prevents double-writes on retries), audit log (the artifact the on-call reads at 3am). The whole agent is 200 lines. The FDE writes it once. The customer is the configuration: tool registry + system prompt + cost ceiling + memory backend."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 7 ingredients composed: model + tools + memory + cost ceiling + system prompt + parser + loop driver.

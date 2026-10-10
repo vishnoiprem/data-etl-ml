@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the first workflow is the proof that n8n works. Trigger (Webhook) → enrichment (HTTP Request) → output (Slack). Three nodes, three edges, one execution. The FDE who can ship this in 10 minutes is the FDE who can scope the next engagement in 10 days.
 
+## In 60 seconds
+
+> "4 steps. Install n8n. Create a workflow. Add 3 nodes (Webhook → HTTP → Slack). Test each node in isolation; test the workflow end-to-end. The 3-node starter is the proof; the 10-minute build is the muscle memory. I test as I build; the bug is caught at the right layer. The wrong choice is to build the entire workflow and test at the end. The right choice is the 3 + 4 + test-as-you-build + the 10-minute checklist."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3-node starter workflow: Webhook (trigger) → HTTP Request (enrich) → Slack (notify). Each node has a single responsibility; the JSON contract between them is the interface.

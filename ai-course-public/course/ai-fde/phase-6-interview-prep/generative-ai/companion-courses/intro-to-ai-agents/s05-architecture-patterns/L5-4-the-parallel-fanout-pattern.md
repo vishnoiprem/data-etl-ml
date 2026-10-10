@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the parallel fan-out / fan-in pattern runs N agents concurrently and merges the results. The right pattern when sub-tasks are independent and the latency budget is tight. The total latency is `max(sub_task_latency)`, not `sum(sub_task_latency)`.
 
+## In 60 seconds
+
+> "Parallel fan-out / fan-in for independent sub-tasks with a tight latency budget. Fan out: N sub-agents dispatched concurrently. Fan in: wait for all (or timeout), merge results. **Total latency is max(sub_task_latency), not sum.** For 3 sub-tasks of 5s each, sequential is 15s; parallel is 5s. The 3× latency reduction is the value. The 4 axes: independence, latency budget, merge strategy, error tolerance. The merge strategies: concatenate, vote, synthesize. The safety net: per-sub-agent timeout + circuit breaker. The wrong choice is parallel when sub-tasks are dependent (race conditions). The wrong choice is sequential when sub-tasks are independent (3-5× latency waste). The right choice is parallel when all 4 axes are positive."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 components of the parallel pattern: fan-out (dispatch N agents), fan-in (merge results), merge strategy (concatenate, vote, synthesize).

@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the AI Agent node is n8n's implementation of the 7-ingredient agent from Section 2. Drag it onto the canvas, configure the model + system prompt + tools + memory, and the agent is alive. The FDE who can configure an AI Agent node in 10 minutes is the FDE who can ship an SMB agent in a day.
 
+## In 60 seconds
+
+> "7 fields on the AI Agent node: model (OpenAI, Anthropic, Ollama), system message (5-section prompt), prompt (the input), tools (separate nodes), memory (window, Postgres, Redis), max iterations (loop detector), output parser (structured output). Each maps to a Section 2 ingredient. The tools are separate nodes; the agent decides which to call; n8n executes. The wrong choice is to build the agent in raw Python when n8n is the right tool. The right choice is the 7 fields + 3 model options + tools as nodes + the 5-section system prompt."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 7 fields of the AI Agent node: model, system message, prompt, tools, memory, max iterations, output parser. Each field maps to a Section 2 ingredient; the FDE configures all 7 to ship the agent.

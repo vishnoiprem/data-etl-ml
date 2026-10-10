@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the right agent is the simplest one that satisfies the 4-axis topology rubric. Pick reactive before proactive, single-purpose before general-purpose, reflex before deliberative, single-agent before hierarchy. Add complexity only when the rubric demands it.
 
+## In 60 seconds
+
+> "Four axes: tool count, plan depth, agent count, latency budget. Six canonical shapes: reactive one-shot (1 tool, 1 step, 1 agent, < 1s), single-purpose loop (1-3 tools, 2-5 steps, 1 agent, 1-10s), general-purpose loop (4-7 tools, 6-10 steps, 1 agent, 10-60s), plan-and-execute (4-10 tools, 6-10 steps, 1 agent with explicit plan), hierarchical (1 orchestrator + 2-3 sub-agents, parallel sub-tasks), multi-agent (3+ agents, peer-to-peer, rare). **Default to the simplest; escalate only when the rubric fails.** The escalation path: 1 → 2 → 3 → 4 → 5 → 6. The wrong choice is the most complex topology from the start (over-engineering, 5-10× cost). The wrong choice is the simplest for a complex task (under-engineering, 60% accuracy). The right choice is the simplest that satisfies the rubric."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4-axis topology rubric: tool count, plan depth, agent count, latency budget — and which axis dominates for which task.

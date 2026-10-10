@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** fine-tuning and distillation are the levers of last resort. The FDE escalates to them only when prompt engineering has been exhausted AND the cost ceiling is binding. The SLM at 10× cost reduction is the canonical example.
 
+## In 60 seconds
+
+> "Three conditions for fine-tuning. Prompt engineering exhausted at < 90% accuracy. Cost ceiling binding (the API model's monthly cost exceeds the customer's budget). Task distribution stable for 6+ months. **If any condition is missing, do not fine-tune — stay with prompting.** The recipe when all 3 are met: LoRA on Qwen2.5-1.5B with a 50MB adapter, training on the customer's filtered usage data (~800-1000 examples), ~30 min on a Mac. The eval-driven regression check: the SLM must hit 90% of the API model's quality on the held-out test set. The artifact is the model card: training data summary, eval results, intended use, limitations, rollback plan. The wrong choice is fine-tuning for the sake of it (5-10× cost without proportional gain). The wrong choice is staying with prompting when the cost ceiling is binding (the customer churns because the bill is too high). The right choice is the 3 conditions + the eval-driven gate + the model card."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 conditions for fine-tuning: (a) prompt engineering exhausted, (b) cost ceiling binding, (c) the task distribution is stable.
@@ -17,6 +23,16 @@ The 3 conditions for fine-tuning:
 1. **Prompt engineering exhausted.** The system prompt has been tuned; the few-shot examples have been curated; chain-of-thought has been added; the model still falls short of the target accuracy on the test set. If the model is at 90% accuracy with good prompting, do not fine-tune — fine-tuning costs $5K-$50K in GPU time + dataset curation, and the marginal gain is rarely worth it.
 2. **Cost ceiling binding.** The per-run cost exceeds the customer's budget. For a CS-drafter at $0.005/run with 150 runs/day, the monthly cost is $22.50 — well within a $100/month budget. If the customer has 10 teams (1500 runs/day), the monthly cost is $225 — still within a $500/month budget. If the customer has 100 teams (15000 runs/day), the monthly cost is $2250 — over budget. **Fine-tune only when the cost ceiling is binding.**
 3. **Task distribution is stable.** The fine-tuned model is trained on a specific distribution; if the distribution shifts (new tool, new domain, new customer), the fine-tuned model degrades. Fine-tune only when the task distribution is stable for at least 6 months. If the customer is in a fast-moving domain (new product launches every quarter), the fine-tune will be obsolete before it pays back.
+
+The 3-lever matrix: prompting vs. RAG vs. fine-tuning (the FDE's reference card):
+
+| Lever | When to pick | Cost | Latency | Quality gain | Maintenance |
+|-------|--------------|------|---------|--------------|-------------|
+| **Prompting + few-shot** | First resort; always start here | $0 marginal | Baseline | 0 → 70-90% accuracy | Edit the prompt |
+| **RAG (retrieval-augmented)** | Customer has private / changing data | +$0.001/run retrieval | +50-200ms p95 | +10-20% on knowledge questions | Refresh the index |
+| **Fine-tuning** | Cost ceiling binding; task stable 6+ months | $5K-$50K one-time + ongoing infra | -50% vs base (smaller model) | +5-15% on task-specific | Retrain on distribution shift |
+
+**The FDE's whiteboard line:** "Start with prompting. Add RAG when the customer has private data. Fine-tune only when both other levers are exhausted and the cost ceiling is binding." The wrong choice is fine-tuning when prompting would do (5-10× cost for marginal gain). The wrong choice is staying with prompting when the cost ceiling is binding (the customer churns because the bill is too high).
 
 The LoRA + Qwen2.5-1.5B pattern is the canonical FDE distillation recipe. LoRA (Low-Rank Adaptation) fine-tunes a small adapter (~50MB) on top of a frozen base model; the adapter captures the domain-specific behavior; the base model retains its general capabilities. Qwen2.5-1.5B is a small-but-capable model that runs on a Mac M-series with MPS acceleration. **The combination trains in ~30 minutes on a Mac and ships at 10× cost reduction and 90-95% of the API model's quality.**
 

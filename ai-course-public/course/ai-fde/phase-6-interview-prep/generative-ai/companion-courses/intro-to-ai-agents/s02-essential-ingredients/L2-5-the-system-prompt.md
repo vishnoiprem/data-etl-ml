@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the system prompt is the contract between the agent framework and the model. A bad system prompt is the difference between an agent that works and an agent that loops; the system prompt is the single highest-leverage string in the codebase.
 
+## In 60 seconds
+
+> "Five sections. Role: one sentence naming the agent's purpose. Tools: the full catalog rendered as a markdown list with args and return shape. Output format: the exact text format the model must emit (Thought/Action/Final Answer for ReAct, JSON in tool_calls for function-calling). Guardrails: the behavioral boundaries — what tools are forbidden, what errors should stop the run, what data must never appear in the output. Examples: one or two worked examples teaching the output format. **The system prompt is rendered at startup from the tool registry, frozen for the duration of the run, and version-controlled in the codebase with a changelog.** The wrong choice is to hand-edit the system prompt at runtime (drift between the prompt and the registry). The wrong choice is to skip the examples (model produces malformed output 10% of the time). The right choice is the five sections, rendered at startup, version-controlled, with contract tests."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The five sections every agent system prompt must contain: role, tools, output format, guardrails, examples.

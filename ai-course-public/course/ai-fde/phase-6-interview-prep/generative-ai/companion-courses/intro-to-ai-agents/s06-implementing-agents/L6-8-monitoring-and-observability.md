@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** monitoring is the FDE's 3am dashboard. The 4 metrics, the 3 logs, the 2 traces tell the on-call whether the agent is healthy. The dashboard is the artifact that turns a black box into a glass box.
 
+## In 60 seconds
+
+> "4 metrics. Cost (per-run p50/p95/p99, per-tenant per-day, per-process per-month). Latency (per-run p50/p95/p99, by-step, by-tool). Success rate (% of runs that finish). Error rate by category (parse, schema, cost, tool, model). 3 logs: audit (every step), error (every exception), cost (every LLM + tool call). 2 traces: per-request (the full run), per-step (one LLM + tool call). **The dashboard is the artifact the on-call reads at 3am; the alerts are the gate.** The wrong choice is to ship without monitoring (you can't debug what you can't see). The right choice is the 4 + 3 + 2 + alerts as the contract."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 metrics: cost (per-run p50/p95/p99), latency (per-run p50/p95/p99), success rate (% of runs that finish without error), error rate by category (parse, schema, cost, tool, model).

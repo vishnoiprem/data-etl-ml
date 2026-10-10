@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** an LLM call is reactive (you ask, it answers); an agent is proactive (it plans, acts, observes, iterates toward a goal). The shift from reactive to proactive is the entire reason agents exist as a distinct abstraction.
 
+## In 60 seconds
+
+> "The cleanest distinction is not 'with tools vs without tools' — it's **who initiates the next step**. In an LLM call, the user initiates every step. In an agent, the model initiates the next step based on the goal. Four differences: initiative, time horizon, state, side effects. The cost of agency: a proactive system needs guardrails that a reactive one doesn't — a cost ceiling, a loop detector, a schema validator. The wrong choice is to think of an agent as an LLM call with more steps. The right choice is to think of an agent as a goal-seeking loop, with the LLM as the decision function. **Agents are what you get when you give an LLM a goal and a budget.**"
+
+**The wrong choice is to read past this block.** The right choice is to recite the four differences (initiative, time horizon, state, side effects) before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The four differences between an LLM call and an agent: initiative, time horizon, state, and side effects.

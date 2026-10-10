@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a reactive agent is one-shot (LLM call + maybe one tool); a proactive agent is a loop (model drives iteration within a budget). The reactive agent is the search engine; the proactive agent is the employee. Pick the simplest one that solves the problem.
 
+## In 60 seconds
+
+> "Reactive = one-shot LLM call. Proactive = loop with budget. Reactive is fast (one step), stateless (no memory), safe (no side effects). Proactive is slow (10 steps), stateful (messages + memory), needs the 5 guardrails (loop detector, schema validator, cost ceiling, idempotency, audit log). **Default to reactive; escalate to proactive when the task is multi-step or the model needs to iterate; hybrid is the default production shape.** The hybrid is a proactive outer loop that calls a reactive inner agent as a tool. Most production CS-drafter agents are hybrid: the outer loop plans + iterates (3-5 steps), each inner step is a reactive one-shot. The wrong choice is to build a multi-agent system for a single-step task (over-engineering, 10× cost). The wrong choice is a single LLM call for a 10-tool multi-step task (the model can't iterate, fails 30% of the time). The right choice is the simplest topology that solves it."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The four operational differences between reactive and proactive agents: initiative, time horizon, state, side effects.

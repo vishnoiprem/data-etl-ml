@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the message broker is the FDE's response to scale. Synchronous HTTP works for 50 concurrent runs; SQS works for 1000; Kafka works for 100,000. The FDE picks the broker that matches the customer's scale + latency + durability requirements. The wrong choice is a broker that's too big (over-engineering) or too small (lost messages).
 
+## In 60 seconds
+
+> "4 patterns: synchronous (HTTP, <50 concurrent, no durability); queue (SQS, 100-10,000, durable, point-to-point); pub-sub (Kafka, 10,000+, durable, fan-out); event sourcing (Kafka + log, 10,000+, replay, audit). 3 brokers: SQS (managed, simple), Kafka (high-throughput, replay), Redis Streams (existing Redis, low-latency). The agent is a worker; the API enqueues; the agent processes; the result is returned via webhook. The wrong choice is Kafka for 100 concurrent (over-engineering). The wrong choice is synchronous for 1,000 concurrent (lost tasks). The right choice is the broker that matches the scale + durability + replay requirements."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 message broker patterns: synchronous (request/response, easy, no durability), queue (SQS, RabbitMQ, durable, point-to-point), pub-sub (Kafka, NATS, durable, fan-out), and event sourcing (Kafka, durable, replay). The FDE picks the pattern based on the workload shape.

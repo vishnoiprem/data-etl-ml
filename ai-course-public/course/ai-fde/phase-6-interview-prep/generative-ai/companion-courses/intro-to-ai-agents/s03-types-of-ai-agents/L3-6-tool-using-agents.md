@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** every agent uses tools, but the depth varies. The tool-using agent's job is to map intents to actions; the contract is the tool catalog; the failure mode is the wrong tool or the wrong args.
 
+## In 60 seconds
+
+> "Three risk levels. Read-only: look up, no side effects, the agent calls freely. Write-with-idempotency: create with a stable key, the agent can retry safely. Write-with-side-effects: send, move, delete, the agent must request human approval above a threshold (e.g., $100). **The dispatcher enforces the risk profile: approval, idempotency, cost ceiling.** The tool description is a prompt for the model, not a comment for the developer; a good description makes the model call the right tool 95% of the time, a bad description makes it call the wrong tool 30% of the time. The minimum viable tool set is 4-7 tools covering 80% of tasks. Beyond 7, accuracy drops sharply. The wrong choice is to ship 20 tools because the customer might need them. The right choice is 4-7 tools with risk-aware dispatch."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 levels of tool complexity: read-only (look up), write-with-idempotency (create with a key), write-with-side-effects (send email, move money).

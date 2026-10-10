@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the memory layer is what makes the agent multi-step instead of single-step. Without it, the agent forgets the first observation by the time it makes the 10th call; with it, the agent can pursue a goal across 100 steps and 1M tokens of context.
 
+## In 60 seconds
+
+> "Three tiers. Short-term: the messages list, bounded by the context window. Long-term: a vector DB, retrieved on demand via cosine similarity with dedup and recency bias. Episodic: structured summaries of past sessions, retrieved when the customer returns. The agent loop composes them: retrieve long-term + episodic at the start of the run, append retrieved context to the system prompt, refresh retrieval every 3 turns. **What the memory layer stores is what the model sees; the contract is enforced by what the retrieval returns.** The wrong choice is to put the entire vector DB in the prompt (cost blowout). The wrong choice is to retrieve nothing (agent can't pursue multi-step goals). The right choice is retrieval on demand, with the short-term window bounded and the retrieval relevant."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The three tiers of agent memory: short-term (in the prompt), long-term (in a vector DB), episodic (summarized past sessions).

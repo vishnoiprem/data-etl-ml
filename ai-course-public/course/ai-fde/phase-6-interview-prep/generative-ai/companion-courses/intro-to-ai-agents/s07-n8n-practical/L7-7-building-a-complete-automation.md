@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the complete automation is the synthesis of Sections 7.1-7.6. 6 nodes, 1 trigger, 3 tools, 1 AI agent, 2 outputs, 1 error workflow. The FDE who can ship this in a day is the FDE who can land the SMB engagement in a sprint. The canvas is the architecture; the execution log is the debugger; the error workflow is the 3am alert.
 
+## In 60 seconds
+
+> "6 nodes. Webhook → AI Agent (3 tools) → IF → HubSpot/Slack → Postgres. 3-hour build: 1 hour canvas, 1 hour system prompt, 1 hour test + error handling. 10-minute demo: 3 min build, 3 min test, 3 min Q&A, 1 min next steps. The 5 sample leads test the happy path + 4 edge cases. The runbook is the artifact that survives the FDE's exit. The wrong choice is to ship without testing or without an error workflow. The right choice is the 6 + 3 + 10 + 5 + runbook."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 6-node Northwind lead qualification workflow: Webhook → AI Agent (with 3 tools) → HubSpot → Slack → Postgres. The canvas is the architecture; each node has a single responsibility; the JSON contract is the interface.

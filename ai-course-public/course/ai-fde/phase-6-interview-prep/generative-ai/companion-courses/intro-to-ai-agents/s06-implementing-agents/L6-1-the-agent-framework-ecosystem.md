@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the framework choice is a config decision, not an architecture decision. LangChain for prototyping, LangGraph for stateful workflows, LlamaIndex for RAG-heavy agents, AutoGen for multi-agent conversations, CrewAI for role-based teams. The FDE picks the framework that matches the production pattern.
 
+## In 60 seconds
+
+> "Stdlib first, framework when needed. Ship the 200-line stdlib agent. Measure the production requirements: tool count, state complexity, RAG-vs-tool ratio, team-vs-single. Graduate to a framework when the requirements demand it. **The framework choice is a config decision, not an architecture decision.** LangChain for simple tool-using agents. LangGraph for stateful workflows with replanning and HITL. LlamaIndex for RAG-heavy. AutoGen for multi-agent conversations. CrewAI for role-based teams. The wrong choice is to pick LangChain before writing the stdlib agent (over-engineering, 5× complexity). The right choice is stdlib first, then graduate based on requirements."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5 major agent frameworks in 2026: LangChain, LangGraph, LlamaIndex, AutoGen, CrewAI — and what each is best at.
@@ -26,6 +32,19 @@ The 4-axis framework-selection rubric:
 2. **State management.** How much state does the agent hold? Minimal (just the messages) → LangChain. Moderate (shared state across sub-agents) → LangGraph. Heavy (episodic memory + long-term vector) → LangChain + custom memory backend.
 3. **RAG vs tool-use.** Is the agent RAG-heavy or tool-heavy? RAG-heavy → LlamaIndex. Tool-heavy → LangChain or LangGraph. Mixed → LangGraph.
 4. **Team vs single-agent.** Is it a multi-agent system? Single-agent → LangChain. Multi-agent with conversation → AutoGen. Multi-agent with hierarchy → LangGraph or CrewAI.
+
+The 5-framework matrix (the FDE's reference card):
+
+| Framework | Best for | Avoid when | State model | Multi-agent | Lock-in |
+|-----------|----------|------------|-------------|-------------|---------|
+| **LangChain** | Prototypes; tool-use; RAG pipelines | Complex stateful workflows | Messages | No | Medium |
+| **LangGraph** | Stateful workflows; replanning; HITL | Simple single-tool agents | StateGraph (typed) | Yes (sub-graphs) | High |
+| **LlamaIndex** | RAG-heavy agents (retrieval dominates) | Tool-heavy without retrieval | QueryEngine | No | Medium |
+| **AutoGen** | Multi-agent conversations; debate | Single-agent; production tool-use | Group chat | Yes (by design) | High |
+| **CrewAI** | Role-based teams; hierarchical workflows | Complex stateful; RAG-heavy | Crew / Task | Yes (by design) | Medium |
+| **stdlib + your own** | Production control; minimal deps | Rapid prototyping | Your choice | Your choice | None |
+
+**The FDE's whiteboard line:** "The architecture (7 ingredients, 5 guardrails) is invariant; the framework is the implementation. The wrong choice is to pick the framework before the architecture; the right choice is to ship the stdlib-only 200-line agent first, then graduate to a framework when the requirements demand it." The graduate triggers: tool count > 7, complex state, or team maintenance needed.
 
 The "stdlib-only for prototypes, framework for production" pattern is the FDE's primary design heuristic. The 200-line stdlib agent (from L6.2) is the prototype. The framework is the production implementation. The graduate triggers: (a) the agent has > 7 tools (the framework's tool registry is more robust), (b) the agent has complex state (the framework's memory backend is more robust), (c) the team needs to maintain the code (the framework's abstractions are more familiar).
 

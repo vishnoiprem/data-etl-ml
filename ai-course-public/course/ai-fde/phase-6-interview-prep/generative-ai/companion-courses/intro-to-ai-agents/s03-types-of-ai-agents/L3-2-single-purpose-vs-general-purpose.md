@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a single-purpose agent has one tool and one goal; a general-purpose agent has many tools and many goals. The right tool count depends on the task's complexity — over-tooling is 30% accuracy loss, under-tooling is a brittle agent that fails 50% of the time.
 
+## In 60 seconds
+
+> "Start with 4-5 tools covering 80% of tasks. Add a `clarify` tool for the long tail. The breakpoint is at ~7 tools: below, 95% selection accuracy; above, accuracy drops sharply. A 10-step agent with 5 tools is 60% end-to-end accurate; with 20 tools, 3%. **The minimum viable tool set is the difference between a production agent and a demo.** The wrong choice is to ship 20 tools because the customer might need them (70% accuracy, 3% end-to-end). The wrong choice is to ship 1 tool because it's simpler (brittle, fails on 50% of real tasks). The right choice is the 4-5-tool minimum viable set + a `clarify` fallback for the long tail."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4-axis tool-count rubric: task complexity, tool reuse, prompt budget, error rate — and which axis dominates for which agent.

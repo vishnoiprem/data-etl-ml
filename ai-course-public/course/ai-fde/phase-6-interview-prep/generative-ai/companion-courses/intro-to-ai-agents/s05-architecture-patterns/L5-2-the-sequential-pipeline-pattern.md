@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the sequential pipeline is agent A's output is agent B's input. For workflows with clear handoffs (research → summarize → translate), the pipeline is simpler than the orchestrator but more rigid. The FDE picks pipeline when the handoffs are deterministic and the data flow is unidirectional.
 
+## In 60 seconds
+
+> "Pipeline for ETL-shaped work: sequential, deterministic, unidirectional. Orchestrator for control-shaped work: dynamic, parallel, feedback-driven. **The pipeline is 3 properties: unidirectional data flow, deterministic handoffs, no shared state.** Use the pipeline for research → summarize → translate; for email → classify → route; for data fetch → report → render. Use the orchestrator for multi-role dispatch with replanning. The wrong choice is an orchestrator for a 3-step ETL (over-engineering, 3× cost). The wrong choice is a pipeline for a multi-role workflow (rigid, no error recovery). The right choice is pipeline for ETL, orchestrator for control. The pipeline is implemented as a list of callables; the orchestrator is a state machine with conditional branches."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 properties of the pipeline pattern: unidirectional data flow, deterministic handoffs, no shared state.

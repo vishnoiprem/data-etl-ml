@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the orchestrator + sub-agents is the FDE's default multi-agent pattern. The supervisor dispatches; the workers execute; the orchestrator synthesizes. Per-agent circuit breakers mean a Mei failure does not block Daniel.
 
+## In 60 seconds
+
+> "Orchestrator + sub-agents. The orchestrator decomposes, dispatches, synthesizes. Each sub-agent has its own system prompt, tool list, memory, cost ceiling, and circuit breaker. The orchestrator's breaker is the parent. Per-agent breakers mean a Mei failure does not block Daniel. **The shared state is the contract: orchestrator initializes, sub-agents update, orchestrator reads for synthesis.** The 3 escalation triggers: tool count > 7, role count > 1, tool selection accuracy < 85%. The wrong choice is a single agent with 15 tools (70% accuracy). The wrong choice is a multi-agent system without per-agent breakers (one failure cascades to all). The right choice is the orchestrator with 3 sub-agents, each with 4-5 tools and its own circuit breaker."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 components of the orchestrator pattern: orchestrator (the supervisor), sub-agents (the workers), shared state (the context).
@@ -11,6 +17,39 @@
 ## Concept
 
 The orchestrator pattern is the FDE's default multi-agent pattern. The orchestrator is a single agent that receives the goal, decomposes it into sub-tasks, dispatches each sub-task to a sub-agent, and synthesizes the results. The sub-agents are specialists: each has its own system prompt, tool list, memory, and cost ceiling. The orchestrator does not execute the sub-tasks itself; it manages the workflow.
+
+The orchestrator + sub-agents + breakers architecture (the FDE's whiteboard):
+
+```
+                    ┌─────────────────────────────────┐
+                    │     PARENT  CIRCUIT  BREAKER     │   if orchestrator fails →
+                    │  (orchestrator: trip = abort)    │     workflow aborts
+                    └────────────────┬────────────────┘
+                                     │
+                                     ▼
+   ┌──────────────────────────────────────────────────────────────────┐
+   │                       ORCHESTRATOR                               │
+   │   decompose(goal) → dispatch(mei, sub_goal) → synthesize(parts) │
+   │   system_prompt: "you are the supervisor; you name sub-agents"   │
+   │   tools: [dispatch, list_sub_agents, escalate]                   │
+   └──────┬────────────────────┬─────────────────────────┬────────────┘
+          │                    │                         │
+          ▼                    ▼                         ▼
+   ┌─────────────┐     ┌─────────────┐          ┌─────────────┐
+   │ MeiAgent    │     │ SarahAgent  │          │ DanielAgent │
+   │ (CS drafter)│     │ (ops summary)│         │ (cost+infra)│
+   │ breaker: own│     │ breaker: own│          │ breaker: own│
+   │ tools: 5    │     │ tools: 3    │          │ tools: 4    │
+   └──────┬──────┘     └──────┬──────┘          └──────┬──────┘
+          │                   │                        │
+          └───────────────────┴────────────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │   SHARED STATE   │   { goal, parts, errors, cost_so_far }
+                    │   (typed dict)   │   read by orchestrator for synthesis
+                    └──────────────────┘
+```
 
 The 3 components of the orchestrator pattern:
 

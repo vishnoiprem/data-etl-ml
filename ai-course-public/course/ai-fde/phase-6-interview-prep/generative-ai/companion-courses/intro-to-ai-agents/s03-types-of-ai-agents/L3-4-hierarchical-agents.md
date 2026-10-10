@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a hierarchical agent has an orchestrator (the manager) and sub-agents (the workers). The orchestrator delegates; the sub-agents execute. Use hierarchy when the task naturally decomposes into roles; avoid when one agent can do it all.
 
+## In 60 seconds
+
+> "Three signals. Role separation: the task decomposes into roles (CS drafter, ops, cost analyst) with different system prompts and tool lists. Parallelism: the sub-tasks are independent and can run concurrently. Context isolation: the sub-tasks require different context windows or memory backends. **When all three signals are present, use a hierarchy. When only one or two are present, use a single agent with multiple tools.** The orchestrator decomposes, dispatches, and synthesizes. Each sub-agent has its own system prompt, tool list, cost ceiling, and circuit breaker. The orchestrator's breaker is the parent. Per-agent breakers mean a Mei failure does not block Daniel. The wrong choice is a hierarchy for a single-role, single-step task (over-engineering, 5× cost). The wrong choice is a single agent for a 3-role, 3-parallel-task workflow (under-engineering, 1 agent with 15 tools has 70% accuracy). The right choice is hierarchy when the 3 signals are present."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The orchestrator-subagent topology: when the manager dispatches to workers, when the workers report back, when the manager synthesizes.

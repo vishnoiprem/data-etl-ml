@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the cost ceiling is what keeps a confused agent from spending the customer's monthly budget in a single run. It is the single most important guardrail in production; without it, the agent's first incident is a $10K OpenAI bill.
 
+## In 60 seconds
+
+> "Three levels. Per-run: $0.50 default, catches the immediate failure (loop, runaway retry). Per-tenant: $5/day default, catches the customer-level failure (traffic spike, prompt injection). Per-process: $1000/month default, catches the FDE-level failure (vendor price change, model upgrade). Every LLM call records its tokens; every tool call records its credit cost; the loop driver aborts when the ceiling is breached. **The cost is the metric the on-call reads at 3am, the CFO reads in the monthly review, the customer reads in the dashboard.** The wrong choice is to set only a per-run ceiling (a customer with 10K runs/day blows through the per-process ceiling). The wrong choice is to set no ceiling (a confused agent spends the customer's monthly budget in 6 hours). The right choice is all three levels, with the cost as a first-class metric."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The three levels of cost ceiling: per-run (USD), per-tenant (USD/day), per-process (USD/month) — and which dominates for which deployment.
@@ -11,6 +17,36 @@
 ## Concept
 
 A confused agent will spend the customer's entire monthly budget in a single run if the budget is unbounded. The default behavior of an agent that hits a malformed tool call, a broken API, or a logical loop is to retry until the budget is exhausted. **The cost ceiling is the only thing that prevents this.** It is not optional; it is the first guardrail the FDE writes; it is the first line of the runbook.
+
+The cost-ceiling loop (the FDE's whiteboard):
+
+```
+   ┌──────────────────────────────────────────────────────────┐
+   │                    AGENT LOOP                            │
+   │                                                          │
+   │   sense → decide → act → observe → (back to sense)      │
+   │                │                                        │
+   │                ▼                                        │
+   │          ┌──────────────┐                               │
+   │          │  CostTracker │  per_run_usd  per_tenant_usd  │
+   │          │              │  per_process_usd (rolling)     │
+   │          └──────┬───────┘                               │
+   │                 │                                       │
+   │                 ▼                                       │
+   │          ┌──────────────┐                               │
+   │          │ _check_      │  run_cost > max_run_usd?       │
+   │          │  ceiling()   │  tenant_cost > max_tenant_usd? │
+   │          │              │  process_cost > max_process?   │
+   │          └──────┬───────┘                               │
+   │                 │                                       │
+   │        ┌────────┴────────┐                              │
+   │        │                 │                              │
+   │        ▼                 ▼                              │
+   │    continue        RAISE CostCeilingBreached             │
+   │    loop            (loop driver aborts run,              │
+   │                    returns error envelope to user)       │
+   └──────────────────────────────────────────────────────────┘
+```
 
 The three levels of cost ceiling:
 

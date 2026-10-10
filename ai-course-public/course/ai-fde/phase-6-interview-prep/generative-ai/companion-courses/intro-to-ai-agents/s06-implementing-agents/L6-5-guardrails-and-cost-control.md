@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the 5 production guardrails wrap the loop; the 3-level cost ceiling is the first one. The cost is the first-class metric the on-call reads at 3am, the CFO reads in the monthly review, the customer reads in the dashboard.
 
+## In 60 seconds
+
+> "5 production guardrails. Loop detector (catches confused iterations on the same tool). Schema validator (catches malformed tool calls, returns structured 403). Cost ceiling (catches budget blowouts at 3 levels: per-run, per-tenant, per-process). Idempotency (prevents double-writes on retries via sha256(args) cache). Audit log (the artifact the on-call reads at 3am). **The cost ceiling is the most important; it is the first guardrail the FDE writes.** The cost is the first-class metric on the dashboard, the on-call alert, the CFO report. The wrong choice is to ship without a cost ceiling (a confused agent spends the customer's monthly budget in 6 hours). The right choice is all 5 guardrails + the 3-level cost ceiling + the cost as a score."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5 production guardrails: loop detector, schema validator, cost ceiling, idempotency, audit log. Each catches a different failure mode.

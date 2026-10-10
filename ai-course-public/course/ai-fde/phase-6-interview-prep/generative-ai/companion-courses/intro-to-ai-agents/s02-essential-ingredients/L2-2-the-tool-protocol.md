@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the tool-use protocol is the contract between the model's output and the agent's actions. Without it, every model call is a regex-parse of markdown; with it, the model emits a structured action the agent dispatches deterministically.
 
+## In 60 seconds
+
+> "The schema validator catches malformed tool calls before they reach the function. A model that emits a string where the schema expects a number gets a structured 403 with the violation list. The agent framework appends the violation to the messages list as an observation. The model reads the violation, corrects the args, and retries. The turn counter increments; the cost ceiling catches the loop. **The schema validator turns a Python TypeError into a recoverable model observation.** Without it, every malformed call is a crash; with it, every malformed call is a retry."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The two tool-use protocols in production: function-calling (OpenAI, June 2023) and ReAct (text-based, model-agnostic).

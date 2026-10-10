@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** n8n ships first-class vector store nodes for Qdrant, Pinecone, Postgres pgvector, Supabase, and Redis. The FDE's job is to pick the right vector store for the customer's data volume + data sensitivity, and to wire the load + query + retrieve nodes correctly. The "vector store as memory" pattern turns an n8n workflow into a RAG agent.
 
+## In 60 seconds
+
+> "5 vector stores: Qdrant for on-prem, Pinecone for managed, pgvector for existing Postgres, Supabase for new apps, Redis for small datasets. The RAG pattern is 3 nodes for indexing (load → embed → insert) + 2 nodes for query (retrieve → reason). 3 memory patterns: simple (single-shot), window buffer (multi-turn), summary (long conversations). The chunking strategy is part of the design; fixed-size is the baseline, semantic is for structured docs. The wrong choice is to use Pinecone for 10K vectors (overkill). The right choice is the right vector store + the right chunking + the right memory for the conversation."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5 vector store options in n8n: Qdrant (open-source, self-hosted), Pinecone (managed, fast), Postgres pgvector (use existing Postgres), Supabase (managed Postgres with pgvector), Redis (in-memory, fast for small datasets). The right choice is determined by the customer's data volume, sensitivity, and existing infrastructure.

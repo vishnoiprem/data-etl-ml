@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** n8n error handling is the same 4-category taxonomy from Section 6.9 — transient, permanent, model, tool — expressed as 4 n8n primitives: error workflow, retry, continue-on-fail, and IF/Switch. The FDE's job is to map the error category to the right n8n primitive. The wrong choice is to ignore errors; the right choice is the 4 categories × 4 primitives matrix.
 
+## In 60 seconds
+
+> "4 × 4 matrix. 4 error categories (transient, permanent, model, tool) × 4 n8n primitives (error workflow, retry, continue-on-fail, IF/Switch). Transient → retry on error (1s, 2s, 4s). Permanent → IF/Switch to escalate. Model → output parser + fallback model. Tool → continue-on-fail + fallback tool. The error workflow is the 3am alert; it fires on any failure, sends Slack to #oncall, writes to the audit log. The wrong choice is to ship without an error workflow (you don't know when things break). The right choice is the 4 × 4 matrix + the error workflow + per-node retry configs."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 n8n error primitives: error workflow (catch-all for any failure), retry on error (per-node retry with backoff), continue-on-fail (per-node graceful degradation), IF/Switch (branch on error category). The matrix of (4 error categories × 4 primitives) is the FDE's error-handling toolkit.

@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** agents are the next layer above LLMs the same way applications are the next layer above libraries — they turn a reactive capability into a proactive system that does work, not just answers questions.
 
+## In 60 seconds
+
+> "Four preconditions landed at once in 2022-2026: a general-purpose decision function (the LLM), a tool-use protocol (function calling + JSON schemas), a memory layer (vector + episodic stores cheap enough to run), and a cost ceiling the customer accepts (per-run $0.50, per-tenant/day $5, per-process/month $1K). Three forces drive adoption: capability (the LLM is good enough), cost (tokens are cheap enough), customer pull (the customer wants automation, not chatbots). The four failure modes that decide whether an agent deployment succeeds: loops, hallucinated tool calls, cost blowouts, silent data corruption. The wrong choice is to think 'the LLM is good enough, we don't need guardrails.' The right choice is to recognize that the agent is the loop + the guardrails, and the guardrails are the production-readiness signal."
+
+**The wrong choice is to read past this block.** The right choice is to recite the four preconditions and the four failure modes before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The four preconditions for agents to be practical in 2026: a general-purpose decision function, a tool-use protocol, a memory layer, and a cost ceiling the customer accepts.

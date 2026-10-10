@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the tool registry is the action space, the schema validator is the contract, the idempotency cache is the safety net. A bad tool implementation is the difference between a 95%-accurate agent and a 70%-accurate one.
 
+## In 60 seconds
+
+> "4 parts of a production tool: name, description (the most important), input schema, output description. 3 levels of validation: schema (shape — missing fields, wrong types), semantic (intent — amount > shipment value), policy (who can call — cs_mei cannot call refund.create for > $100). **Idempotency: write tools key on sha256(args); a retry produces the cached result, not a new side effect.** The model can safely retry on transient errors. The wrong choice is to skip the description (70% tool selection accuracy). The wrong choice is to skip the idempotency (double-refund on retry). The right choice is the 4 parts, the 3 levels, the idempotency, the policy file as the source of truth."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 parts of a production tool: name, description (the prompt), input schema, output schema. The description is the most important.

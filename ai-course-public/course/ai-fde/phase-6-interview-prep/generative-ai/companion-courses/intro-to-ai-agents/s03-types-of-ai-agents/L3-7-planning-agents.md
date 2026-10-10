@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a planning agent generates a plan first, executes it step-by-step, and replans when an observation contradicts the plan. The right planning depth is the minimum that achieves the target accuracy; over-planning is 3× cost waste.
 
+## In 60 seconds
+
+> "Three patterns. Plan-and-execute: 1 plan + N execute + 1 synthesize, 12 LLM calls for a 10-step task, 85% accurate. Plan-and-replan: same but replan on contradiction, 14 calls, 90% accurate. HTN: hierarchical plans, 17 calls, 92% accurate. **The default is plan-and-execute: 95% of plan-and-replan's accuracy at 85% of the cost.** The 3-axis rubric: task horizon, error cost, plan reversibility. For most FDE use cases (CS drafter, ops dashboard, cost analyzer), plan-and-execute is the sweet spot. Plan-and-replan for dynamic tasks (where observations often contradict). HTN for the rare cases where the task is fundamentally hierarchical (research projects, multi-document synthesis). The wrong choice is full ReAct for every multi-step task (3× cost, marginal accuracy gain). The wrong choice is reflex for a 10-step task (60% accuracy). The right choice is plan-and-execute as the default."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 planning patterns: plan-and-execute (1 plan + N execute + 1 synthesize), plan-and-replan (replan when contradiction), HTN (hierarchical task network — recursive sub-plans).

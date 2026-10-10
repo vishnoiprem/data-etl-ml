@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the agent infrastructure stack is 4 pillars (deployment, observability, message broker, security) across 6 layers (compute, storage, network, identity, observability, integration). The FDE who can draw this stack on a whiteboard in 5 minutes is the FDE who can own a production agent.
 
+## In 60 seconds
+
+> "4 pillars (deployment, observability, message broker, security) across 6 layers (compute, storage, network, identity, observability, integration). I ship the SLOs first (latency, uptime, error rate, cost, capacity), then the infra that meets them. The reference architecture: API Gateway → Load Balancer → Agent Pods → Postgres + Redis + Vector + Queue, with observability on the side. The wrong choice is to over-engineer for scale the customer doesn't have. The right choice is the SLOs first, then the infra, with the 4 × 6 matrix as the tool picker."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 pillars of agent infrastructure: deployment (where it runs), observability (how you know it's healthy), message broker (how it scales), security (how it's protected). The pillars are independent; the FDE picks the right tool for each.

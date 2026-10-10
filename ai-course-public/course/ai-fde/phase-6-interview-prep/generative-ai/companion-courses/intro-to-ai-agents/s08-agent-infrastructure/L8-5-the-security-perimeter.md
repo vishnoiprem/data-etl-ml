@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the security perimeter is the trust boundary. The agent runs inside; the customer and the public internet are outside. The 5 layers — API gateway, mTLS, secrets, audit log, identity — turn a working agent into a product the customer's CISO will approve. The FDE who can name all 5 layers is the FDE who can land the regulated-industry engagement.
 
+## In 60 seconds
+
+> "5 layers. API gateway (rate limit, auth, audit). mTLS (encrypt in transit). Secrets (Vault, rotation). Audit log (who did what when, 1 year retention). Identity (OAuth, JWT, mTLS). 3 compliance regimes: SOC 2, HIPAA, PCI. Zero trust: every request is authenticated, authorized, audited. The wrong choice is 'we trust our network' (perimeter-based security). The right choice is zero trust + the 5 layers + the compliance map + secret rotation every 30 days + the 5 most common errors."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5 security layers: API gateway (rate limit, auth, audit), mTLS (encrypt in transit), secrets management (Vault, AWS Secrets Manager), audit log (who did what when), and identity (OAuth, JWT, mTLS, OIDC). Each layer protects a different attack surface.
@@ -11,6 +17,40 @@
 ## Concept
 
 The security perimeter is the trust boundary between the agent (inside) and the world (outside). The FDE's job is to design the perimeter so that (1) only authorized callers can reach the agent, (2) the data is encrypted in transit and at rest, (3) the secrets are managed, rotated, and never logged, (4) every action is auditable, (5) the customer's compliance regime (SOC 2, HIPAA, PCI) is satisfied. **The wrong choice is to ship without a perimeter (the agent is a public API with no auth). The right choice is the 5 layers + zero trust + the compliance map.**
+
+The 5 security layers as a concentric-ring diagram (the FDE's whiteboard):
+
+```
+                              ┌─────────────────────────────────┐
+                              │  OUTSIDE  (untrusted callers)   │
+                              │  Browser / API client / webhook │
+                              └────────────────┬────────────────┘
+                                               │ HTTPS request
+              ╔════════════════════════════════╧════════════════════════╗
+   LAYER 1   ║  API GATEWAY                                            ║
+              ║  rate limit · authn (OAuth/JWT/mTLS) · authz · audit  ║
+              ╚════════════════════════════════╤════════════════════════╝
+                                               │ mTLS-encrypted
+              ┌────────────────────────────────┴────────────────────────┐
+   LAYER 2   │  SERVICE MESH (mTLS)                                   │
+              │  cert-manager · Linkerd/Istio · zero-trust             │
+              └────────────────┬───────────────────────────────────────┘
+                               │ authenticated request
+              ┌────────────────┴───────────────────────────────────────┐
+   LAYER 3   │  IDENTITY + AUTHZ                                      │
+              │  caller identity · tenant scope · per-tool policy     │
+              └────────────────┬───────────────────────────────────────┘
+                               │ authorized tool call
+              ┌────────────────┴───────────────────────────────────────┐
+   LAYER 4   │  SECRETS VAULT                                        │
+              │  Vault / AWS Secrets Manager · auto-rotate · no logs  │
+              └────────────────┬───────────────────────────────────────┘
+                               │ secret injected at call time
+              ┌────────────────┴───────────────────────────────────────┐
+   LAYER 5   │  AGENT (inside)                                        │
+              │  audit log (immutable, retained ≥ 1y) · redaction     │
+              └────────────────────────────────────────────────────────┘
+```
 
 The 5 security layers:
 

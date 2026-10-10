@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** every error in an agent falls into one of 4 categories: transient (retry), permanent (escalate), model (re-plan), tool (fallback). The recovery strategy is determined by the category. The wrong choice is to retry a permanent error; the right choice is to match the strategy to the category.
 
+## In 60 seconds
+
+> "4 categories. Transient (network timeout, retry with exponential backoff). Permanent (404, escalate to human). Model (hallucination, re-plan). Tool (exception, fallback to a different tool or model). **The recovery strategy is determined by the category.** Every error is returned to the model as a structured observation; the model decides what to do next. The wrong choice is to retry a permanent error (wastes the cost ceiling). The wrong choice is to silently swallow an error (the model doesn't know). The right choice is to match the strategy to the category + the structured observation pattern."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 error categories: transient (network timeout, retry), permanent (404 not found, escalate), model (hallucination, re-plan), tool (exception, fallback). Each has a different recovery strategy.

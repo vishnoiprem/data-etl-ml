@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the system prompt is the contract between the agent framework and the model. The 5 sections (role, tools, output format, guardrails, examples) are the structure; the FDE's job is to write each section well and version-control the whole.
 
+## In 60 seconds
+
+> "Five sections. Role: one sentence naming the agent's purpose. Tools: the full catalog rendered as a markdown list with args and return shape. Output format: the exact text format the model must emit. Guardrails: the behavioral boundaries — forbidden tools, error handling, PII redaction. Examples: one or two worked examples teaching the output format. **The system prompt is rendered at startup from the tool registry, frozen for the duration of the run, and version-controlled in the codebase with a changelog.** The contract tests run in CI; a prompt change that breaks a test is a breaking change. The wrong choice is to hand-edit the prompt at runtime (drift). The wrong choice is to skip the examples (model produces malformed output 10% of the time). The right choice is the 5 sections, rendered at startup, version-controlled, with contract tests."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5 sections of a production system prompt: role, tools, output format, guardrails, examples — and what each section is for.

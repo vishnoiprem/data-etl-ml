@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** cost management is the FDE's CFO conversation. The agent costs money; the customer wants to know how much, per-tenant, per-day, per-month, with alerts before the bill surprises them. The 3 levels (per-run, per-tenant per-day, per-process per-month) match the budget conversations the CFO has. The wrong choice is to ignore cost (the bill surprises the customer); the right choice is the 3 levels + budget alerts + FinOps discipline.
 
+## In 60 seconds
+
+> "3 levels. Per-run (every LLM + tool call metered), per-tenant per-day (the customer's daily bill), per-process per-month (the FDE's monthly bill). 4 levers: model selection, cost-aware routing, caching, batching. FinOps discipline: daily dashboard check, weekly trend review, monthly CFO presentation. The wrong choice is to ship without cost tracking (the bill surprises the customer). The right choice is the 3 levels + 4 levers + FinOps + 4 budget alerts + the 5 most common errors."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 levels of cost tracking: per-run (every LLM + tool call is metered), per-tenant per-day (the customer's daily bill), per-process per-month (the FDE's monthly bill). Each level answers a different question; the FDE needs all 3.
@@ -11,6 +17,44 @@
 ## Concept
 
 Cost management is the FDE's conversation with the CFO. The agent costs money: LLM API calls, infrastructure, observability, secrets management, security tools. The CFO wants to know: how much per customer? how much per month? what's the trend? what happens at 10× scale? **The wrong choice is to ship without cost tracking (the bill surprises the customer in month 2). The right choice is the 3 levels + budget alerts + FinOps discipline.**
+
+The per-tenant cost attribution flow (the FDE's whiteboard):
+
+```
+   ┌─────────────────────┐
+   │  Agent run starts   │   request_id, tenant_id, user_id
+   └──────────┬──────────┘
+              │
+              ▼
+   ┌─────────────────────┐
+   │  LLM call           │   model, input_tokens, output_tokens
+   │  + tool call        │   tool_name, cost_credits
+   └──────────┬──────────┘
+              │  CostTracker.record() (Section 2.4)
+              ▼
+   ┌─────────────────────┐
+   │  cost_events table  │   Postgres · per-run row
+   │  (request_id, USD)  │   retained 90 days
+   └──────────┬──────────┘
+              │  aggregate per tenant + day
+              ▼
+   ┌─────────────────────┐
+   │  Redis counter      │   tenant:{id}:cost:YYYY-MM-DD
+   │  (per-tenant per-d) │   TTL = 35 days
+   └──────────┬──────────┘
+              │  compare to budget
+              ▼
+   ┌─────────────────────┐
+   │  Budget alert       │   if day_cost > 0.8 × daily_budget:
+   │  (Prometheus rule)  │     Slack #ops, page on-call
+   └──────────┬──────────┘
+              │  roll up to monthly
+              ▼
+   ┌─────────────────────┐
+   │  FinOps dashboard   │   per-tenant per-day per-month
+   │  (Grafana)          │   cost trend, top-10 tenants, forecast
+   └─────────────────────┘
+```
 
 The 3 levels of cost tracking (from Section 2.4):
 

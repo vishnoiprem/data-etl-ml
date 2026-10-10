@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the parser is the contract between the model output and the tool dispatcher. A good parser turns a malformed output into a structured error the model can read; a bad parser crashes the loop on the first weird output and burns the cost ceiling.
 
+## In 60 seconds
+
+> "Three failure modes. Malformed format: the model emits something the parser cannot recognize. Valid format but missing fields: the schema validator catches it. Valid format but invalid values: the schema validator catches it. **The parser never crashes; the parser returns a structured error with the raw output and a hint; the model reads the observation, corrects, and retries; the loop continues; the cost ceiling catches the loop.** The wrong choice is to let the parser raise an exception (the loop aborts on the first weird output). The wrong choice is to return None (the loop has no way to recover). The right choice is the structured-error observation pattern: every parse failure is a typed tool result the model can read."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The three failure modes of parsing: malformed format, valid format but missing fields, valid format but invalid field values.

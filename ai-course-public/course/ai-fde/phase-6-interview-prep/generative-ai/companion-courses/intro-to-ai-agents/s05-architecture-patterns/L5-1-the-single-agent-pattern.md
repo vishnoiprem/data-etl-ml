@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the single-agent pattern is 1 decision function, 1 tool list, 1 loop. It is the foundation; every other architecture pattern composes it. The FDE default for 80% of use cases.
 
+## In 60 seconds
+
+> "Single agent is the FDE default — 1 model, 1 tool list, 1 memory, 1 cost ceiling, 1 loop. It handles 80% of use cases. The escalation triggers: tool count > 7 (sub-agents for context isolation), plan depth > 5 (explicit planning), role count > 1 (sub-agents for role separation), latency p95 > 60s (parallel sub-tasks), tool selection accuracy < 85% (sub-agents for fewer tools each). **The escalation is objective: measure the failure mode, pick the next pattern.** The single agent is composed in 200 lines as a class. The 7 ingredients are constructor args; the 5 guardrails are instance state. The wrong choice is to start with multi-agent (5-10× cost, 3× complexity). The right choice is single agent, measure, escalate."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 components of the single-agent pattern: model, tools, memory, cost ceiling — composed in 200 lines.
@@ -11,6 +17,35 @@
 ## Concept
 
 The single-agent pattern is the canonical 7-ingredient + 5-guardrail composition from L2.7. The pattern has four components: the model (the decision function), the tool list (the action space), the memory (the state across steps), and the cost ceiling (the budget). The loop driver ties them together; the 5 guardrails wrap the loop. **The single-agent pattern is the FDE default; every other architecture pattern composes it.**
+
+The 6 architecture patterns in Section 5 (the FDE's mental taxonomy):
+
+```
+   ┌──────────────────────────────────────────────────────────────┐
+   │                                                              │
+   │  L5.1                  L5.2                                 │
+   │  ┌─────────┐            ┌──────┐   ┌──────┐   ┌──────┐      │
+   │  │ Single  │   ──→      │  A   │ → │  B   │ → │  C   │      │
+   │  │ Agent   │            └──────┘   └──────┘   └──────┘      │
+   │  └─────────┘            L5.2 (sequential pipeline)           │
+   │       │                                                     │
+   │       │  tool count > 7 OR role count > 1                    │
+   │       ▼                                                     │
+   │  ┌──────────────────────────────────────────┐                │
+   │  │       L5.3  ORCHESTRATOR                 │                │
+   │  │   supervisor + sub-agents (Mei/Sarah/    │                │
+   │  │   Daniel), each with own circuit breaker │                │
+   │  └────────────────┬─────────────────────────┘                │
+   │                   │                                          │
+   │        ┌──────────┼─────────────┐                            │
+   │        ▼          ▼             ▼                            │
+   │   L5.4 Parallel   L5.5 HTN    L5.6 HITL                      │
+   │   fan-out /        (plan tree)  (human approval)              │
+   │   fan-in                                                         │
+   │                                                                  │
+   │  L5.1 is the foundation; L5.2-5.6 are the escalation patterns  │
+   └──────────────────────────────────────────────────────────────┘
+```
 
 The "single agent is enough until it isn't" heuristic is the FDE's primary design decision. The single agent is enough when:
 

@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the HTN pattern is for tasks where the plan is a tree, not a list. Recursive sub-plans for hierarchical tasks like "research a topic" (which decomposes into "search, read, summarize" each of which is itself a sub-plan). The right pattern when the task naturally decomposes into recursive structure.
 
+## In 60 seconds
+
+> "HTN for hierarchical tasks where the plan is a tree, not a list. Recursive sub-plans for tasks like multi-document research (research → search + read + summarize, where read → fetch + extract). **The 4 axes: recursion depth, plan dynamism, plan interpretability, plan generation cost.** Use HTN when recursion depth ≥ 2 and the plan needs to be human-readable (customer-facing explanations). Use PaE when the task is linear (book a flight, file a tax return). The wrong choice is HTN for a linear workflow (3× plan generation cost). The wrong choice is PaE for a hierarchical task (too rigid to capture the recursion). The right choice is HTN when the task is recursive and the plan needs to be interpretable."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 components of the HTN pattern: compound tasks (decomposable), primitive tasks (executable), methods (decomposition rules).

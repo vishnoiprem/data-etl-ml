@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** observability is the FDE's 3am dashboard. The 3 pillars (logs, metrics, traces) tell the on-call whether the agent is healthy. The right stack turns a black box into a glass box; the wrong stack leaves the on-call guessing. The FDE ships logs + metrics + traces from day 1; the dashboard is the artifact that turns data into a story.
 
+## In 60 seconds
+
+> "3 pillars (logs, metrics, traces) × 3 stack options (open-source, managed, cloud-native). OpenTelemetry is the standard; the FDE instruments once, picks the backend later. The 3am dashboard has 6 panels: cost per run, latency per run, success rate, errors by category, cost per tenant per day, total cost per month. The alerts are the gate (5-10 actionable alerts with runbooks). The wrong choice is to ship without observability (the 3am page is a black box). The right choice is the 3 × 3 + OTel + 6-panel dashboard + 5-10 alerts with runbooks."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 pillars of observability: logs (discrete events, "what happened"), metrics (aggregated numbers, "how much / how fast"), traces (the full request lifecycle, "where did the time go"). The 3 are not interchangeable; the FDE needs all 3.
@@ -11,6 +17,42 @@
 ## Concept
 
 Observability is the FDE's ability to answer "what is happening inside the agent right now." The 3 pillars — logs, metrics, traces — answer 3 different questions. **Logs answer "what happened." Metrics answer "how much / how fast." Traces answer "where did the time go." The FDE needs all 3; the wrong choice is to ship without observability (the 3am page is a black box).**
+
+The 3-pillar observability flow (the FDE's whiteboard):
+
+```
+                        AGENT
+   ┌──────────────────────────────────────────────────────────────┐
+   │                                                              │
+   │   sense ──→ decide ──→ act ──→ observe ──→ sense ──→ ...     │
+   │     │         │         │         │                          │
+   │     ▼         ▼         ▼         ▼                          │
+   │   span      span      span      span     (OpenTelemetry SDK) │
+   │     │         │         │         │                          │
+   └──┬──┴─────────┴─────────┴─────────┴─────────────────────────┬┘
+      │                                                            │
+      │  OTLP (gRPC)                                               │
+      ▼                                                            ▼
+   ┌──────────────────────────────────────────────────────────────┐
+   │                  OTel COLLECTOR                              │
+   │   ┌────────────┐  ┌────────────┐  ┌────────────┐             │
+   │   │   logs     │  │  metrics   │  │   traces   │             │
+   │   │ exporter   │  │ exporter   │  │ exporter   │             │
+   │   └─────┬──────┘  └─────┬──────┘  └─────┬──────┘             │
+   └─────────┼───────────────┼───────────────┼────────────────────┘
+             ▼               ▼               ▼
+        ┌─────────┐    ┌──────────┐    ┌──────────┐
+        │  Loki   │    │Prometheus│    │  Tempo   │
+        │ (logs)  │    │ (metrics)│    │ (traces) │
+        └────┬────┘    └────┬─────┘    └────┬─────┘
+             │              │               │
+             └──────────────┼───────────────┘
+                            ▼
+                    ┌──────────────┐
+                    │   Grafana    │
+                    │ 3am dashboard│
+                    └──────────────┘
+```
 
 The 3 pillars of observability:
 

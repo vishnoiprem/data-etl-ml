@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the platform decision is a tradeoff between 4 axes: team (engineering-first or not), scale (concurrent runs), latency (sub-second or not), cost (infrastructure vs developer time). n8n wins on team + cost; code wins on scale + latency. The FDE picks the platform that matches the customer's dominant axis.
 
+## In 60 seconds
+
+> "4 axes. Team (engineering-first or not). Scale (concurrent runs: <100 or >100). Latency (p95: sub-second or tolerant). Cost (developer time vs infrastructure). n8n wins on team + low scale + tolerant latency + developer-time-critical. Code wins on engineering-first + high scale + sub-second + infra-critical. 3 hybrid patterns cover the mixed cases: n8n orchestrates + Python hot path; Python agent + n8n integrations; code-first + n8n for the demo. The migration path is start with n8n (week 1), graduate to code (month 3), keep n8n for ops-facing workflows (forever). The wrong choice is over-engineering on day 1 or under-engineering on month 6. The right choice is the 4 axes + 3 hybrids + migration path."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4-axis platform rubric: team (engineering-first or not), scale (concurrent runs: <100 or >100), latency (p95: >1s or <1s), cost (developer time vs infrastructure). Each axis has a clear winner; the FDE picks the platform that wins on the dominant axis.
@@ -18,6 +24,17 @@ The 4 axes:
 2. **Scale.** How many concurrent runs does the customer need? n8n handles ~100 concurrent runs per instance; code handles 1000s. If the customer needs <100, n8n is fine; if the customer needs 1000+, code is required.
 4. **Latency.** What p95 latency does the customer need? n8n has a ~1s cold start; container code has a <100ms warm start. If the customer needs sub-second p95, code is required; if the customer can tolerate 1-5s, n8n is fine.
 5. **Cost.** What's the dominant cost? n8n is cheaper on developer time (1 day vs 1 sprint); code is cheaper on infrastructure at scale ($20/month VM vs $200/month n8n cloud). For SMB workloads, developer time dominates; for enterprise workloads, infrastructure dominates.
+
+The 4-axis rubric as a side-by-side comparison (the FDE's whiteboard reference card):
+
+| Axis | n8n wins when... | code wins when... | Tie / hybrid when... |
+|------|------------------|-------------------|----------------------|
+| **Team** | Ops-first (1 engineer, 5 ops) | Engineering-first (5+ eng, CI/CD) | Mixed team |
+| **Scale** | <100 concurrent runs per instance | 1000+ concurrent runs | 100-1000 concurrent |
+| **Latency** | p95 1-5s is acceptable | Sub-second p95 required | p95 0.5-1s tolerable |
+| **Cost** | Developer time is the bottleneck (SMB) | Infrastructure is the bottleneck (enterprise) | Both matter |
+
+**The FDE's whiteboard line:** "What axis dominates your customer?" If the customer can answer, the platform is decided. If the customer can't, the FDE asks the 4 questions and picks the platform that wins on 3 of 4.
 
 The 3 hybrid patterns:
 

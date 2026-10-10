@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the LLM is the only ingredient in the agent that is hard to replace; everything else is plumbing. Pick the model with the same rigor you pick a database — wrong choice is a 12-month rewrite, not a 5-minute swap.
 
+## In 60 seconds
+
+> "Four axes: capability, latency, cost, context window. Capability dominates when the task is hard and the customer cares about quality. Latency dominates when the agent is user-facing. Cost dominates at scale. Context dominates when the agent reads long documents. The 2026 default is gpt-5-mini for 80% of steps and gpt-5 for the 2 hard steps (planning + final answer). The model router is a 20-line function. The savings are 5-10× with no quality loss on the routine steps. The wrong choice is to use the expensive model for every step — 4-5× cost waste. The other wrong choice is to use the cheap model for the hard steps — 10-20% quality loss that compounds across the 10-step run."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The three properties that make the LLM the agent's decision function: generality, language-following, and tool-following.

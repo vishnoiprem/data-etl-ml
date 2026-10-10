@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** few-shot examples are the most reliable way to teach output format and behavior; chain-of-thought is the lever for multi-step reasoning. Together, they turn a generic LLM into a domain-specific agent without changing the model.
 
+## In 60 seconds
+
+> "Zero-shot for simple tasks where the output format is obvious. One-shot when the format has subtleties. Few-shot (2-5 examples) for complex tasks where the model needs to learn the boundary between cases. **Chain-of-thought scaffolds multi-step reasoning: the model emits a Thought line before each Action, citing the previous observation, explaining the choice, anticipating the next.** CoT reduces loops and surfaces errors. The few-shot examples are part of the contract — the test set is the source of truth, the examples are a subset, the model is the implementation. The wrong choice is zero-shot for a complex task (60% accuracy). The wrong choice is 20 examples (prompt bloat, diminishing returns). The right choice is 2-5 examples covering the main cases, with CoT scaffolding, version-controlled, with contract tests."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 few-shot patterns: zero-shot (no examples), one-shot (1 example), few-shot (2-5 examples) — and when each is appropriate.

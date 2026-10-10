@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the human-in-the-loop pattern is the safety net for irreversible side effects. The agent pauses for approval before sending an email, moving money, or deleting data. The right pattern when the cost of a wrong action exceeds the cost of a human review.
 
+## In 60 seconds
+
+> "Three levels. Pre-execution approval (pause before action): for high-stakes, irreversible, high-cost actions (move money > $100, delete user, send to > 100 recipients). Post-execution review (action proceeds, human reviews after): for medium-stakes actions (refund < $100, send email to 1 recipient). On demand (human can interrupt): for low-stakes, read-only actions. **The approval threshold is configurable: $100 for refunds, $0 for sends, 1000 for broadcasts.** The interrupt pattern lets the human intervene at any time. The audit log records every approval decision. The wrong choice is pre-execution approval for every action (humans become the bottleneck, agent is unusable). The wrong choice is no approval for high-stakes actions (the agent sends a $10K refund by mistake). The right choice is the threshold + the 3 levels + the audit log."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 levels of human-in-the-loop: approval before action (pre-execution), approval after action (post-execution review), approval on demand (the human can interrupt).

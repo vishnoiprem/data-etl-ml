@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the business case for an AI agent is hours saved × hourly cost × adoption rate × success rate, minus the agent's cost. The FDE's job is to compute the ROI, defend it to the CFO, and structure the engagement so the customer captures the value. The wrong choice is to pitch the LLM; the right choice is to pitch the ROI.
 
+## In 60 seconds
+
+> "ROI = (hours saved × hourly cost × volume × adoption × success rate) − agent cost. 3 personas: CFO (ROI), VP of Ops (adoption), CTO (security). 4 objections: hallucination (5 guardrails + 80% by design), prior failure (start with high-success use case), data sensitivity (on-prem + private model), cost of change (1-week pilot). 3 pricing models: per-run (variable), subscription (predictable), outcome (aligned). The wrong choice is to pitch the LLM. The right choice is the ROI + the personas + the objections + the engagement structure."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The ROI formula: (hours_saved_per_task × hourly_cost × task_volume × adoption_rate × success_rate) − (agent_cost). Each variable is measurable; the FDE names the source for each (e.g., "Mei currently spends 5 minutes per email; the agent does it in 30 seconds").
@@ -32,6 +38,16 @@ The 3 customer personas:
 1. **The CFO.** Asks "what's the ROI?" The FDE's pitch: hours saved × hourly cost × adoption rate × success rate − agent cost = net savings / agent cost = ROI multiple. The CFO cares about: payback period (months), ROI multiple (3x in year 1), risk (what if it doesn't work?).
 2. **The VP of Ops.** Asks "will my team use it?" The FDE's pitch: adoption rate is the leading indicator; we start with a pilot (1 use case, 1 team), measure adoption, then expand. The VP of Ops cares about: change management (how do we get the team to use it?), workflow integration (does it fit the existing process?), and the team's satisfaction.
 3. **The CTO.** Asks "is it secure?" The FDE's pitch: the security perimeter is 5 layers (L8.5); the data never leaves the customer's VPC; the audit log is queryable; the agent is SOC 2 / HIPAA / PCI compliant. The CTO cares about: data residency (where does the data live?), compliance (SOC 2 / HIPAA / PCI), vendor lock-in (can we leave?).
+
+The 3 personas × 3 pricing models matrix (the FDE's CFO-deck slide):
+
+| Persona | Asks | Per-run model | Subscription model | Outcome model |
+|---------|------|---------------|-------------------|---------------|
+| **CFO** | "What's the ROI?" | Pay-per-task, easy to attribute savings | Predictable monthly bill | Only pay for verified value — strongest CFO hook |
+| **VP of Ops** | "Will my team use it?" | Adoption drives cost; rewards team buy-in | Fixed cost; no per-use penalty | Team satisfaction is the outcome metric |
+| **CTO** | "Is it secure?" | Metered = auditable, less data exposure | Long-term commitment, more integration | Compliance audit is the outcome metric |
+
+**The FDE's whiteboard line:** "Match pricing to the dominant persona. The CFO's first question is ROI; pick the per-run or outcome model. The VP of Ops' first question is adoption; pick the subscription model (no per-use penalty for trying). The CTO's first question is security; pick whichever model lets you show the audit log + data residency. The wrong choice is to force a single pricing model on all 3 personas; the right choice is to lead with the model that answers the dominant persona's first question."
 
 The 4 objection handlers:
 

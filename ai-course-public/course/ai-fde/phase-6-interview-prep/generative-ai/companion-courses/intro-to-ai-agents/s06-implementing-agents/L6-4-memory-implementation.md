@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the 3-tier memory turns a stateless function into a stateful system. Short-term (in the prompt), long-term (in a vector DB), episodic (summarized past sessions). The implementation details that decide whether the agent remembers or forgets.
 
+## In 60 seconds
+
+> "3 tiers. Short-term: the messages list in the prompt, bounded by the context window. Long-term: a vector DB (Pinecone, Weaviate, Qdrant, pgvector) with cosine retrieval + dedup + recency bias. Episodic: structured summaries of past sessions. The compose-prompt function is the boundary: what the memory stores is what the model sees. **The cost-quality trade-off: K=5 facts, threshold=0.7, dedup at 0.9, recency weight 0.3 is the default.** Refresh long-term every 3 turns. The wrong choice is to put the entire vector DB in the prompt (cost blowout). The wrong choice is to retrieve nothing (agent can't pursue multi-step goals). The right choice is the 3 tiers with on-demand retrieval and mid-run refresh."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 memory tiers: short-term (in the prompt), long-term (in a vector DB), episodic (summarized past sessions) — and what each tier is for.

@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the minimum viable agent is 200 lines of stdlib Python. The 7 ingredients are constructor args; the 5 guardrails are instance state; the `run(goal)` method is the loop driver. The FDE writes it once and reuses it across customers.
 
+## In 60 seconds
+
+> "200 lines of stdlib Python. 7 ingredients as constructor args: model, tools, memory, cost ceiling, system prompt, parser, loop driver. 5 guardrails as instance state: loop detector, audit log, idempotency cache (in tool registry), schema validator (in tool registry), cost ceiling. The `run(goal)` method is the loop driver: compose prompt → for each turn → check cost ceiling → call model → parse → dispatch tool → detect loop → record observation. **The agent is the platform; the customer is the configuration.** Change the tool registry, the system prompt, the model, the cost ceiling — never the loop. The 5 production add-ons (structured errors, idempotency, audit log, circuit breaker, cost ceiling) are not optional. The wrong choice is to start with a framework (5× complexity, hidden bugs). The right choice is stdlib first, then graduate when the requirements demand it."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 200-line shipping agent: 7 ingredients as constructor args, 5 guardrails as instance state, `run(goal)` as the loop driver.

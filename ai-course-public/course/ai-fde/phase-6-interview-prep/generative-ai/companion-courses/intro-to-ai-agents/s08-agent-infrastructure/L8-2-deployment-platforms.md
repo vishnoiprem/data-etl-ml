@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the deployment platform is a tradeoff between 4 axes: scale, latency, engineering depth, on-prem requirement. Kubernetes wins on scale + engineering depth; serverless wins on cost + low engineering depth; VM wins on stateful + on-prem. The FDE picks the platform that matches the customer's dominant axis.
 
+## In 60 seconds
+
+> "3 platforms. Kubernetes (100s-1000s concurrent + engineering team + sub-second p95 + on-prem). Serverless (spiky + <100 concurrent + low engineering + tolerance for cold start). VM (stateful + on-prem + budget). 4 axes: scale, latency, team depth, on-prem. The agent is stateless; the state is in Postgres + Redis + S3; the 3am recovery is a single `kubectl rollout restart`. The 4 K8s patterns: Deployment (agent), StatefulSet (DBs), DaemonSet (observability), Job/CronJob (batch). The wrong choice is Kubernetes for 10 concurrent runs (over-engineering). The right choice is the platform that matches the dominant axis."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 deployment platforms in production detail: Kubernetes (EKS, GKE, AKS, self-hosted), serverless (Lambda, Cloud Run, ECS Fargate), dedicated VM (EC2, Compute Engine, on-prem). The right choice depends on the customer's scale + engineering depth + on-prem requirement.

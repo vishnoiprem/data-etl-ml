@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** an agent is a system that perceives its environment through sensors, makes decisions through a model, and takes actions through actuators to achieve a goal — the same definition as classical AI, now rebranded around LLMs.
 
+## In 60 seconds
+
+> "An agent is four parts: sensors, model, actuators, goal. The model is the LLM; the sensors and actuators are tool calls; the goal is the user's request. The 1990s textbook had the same definition. The 2026 version swaps the symbolic decision function for an LLM and the deterministic actuators for tool calls over HTTP. The wrong choice is to think of an 'AI agent' as something new; the right choice is to recognize that the framing is 70 years old and the only thing that changed is the decision function. **An agent is the loop: sense → decide → act → repeat, with a goal.**"
+
+**The wrong choice is to read past this block.** The right choice is to recite the four-part definition before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The classical AI definition of an agent (perception → decision → action) and why it survived 70 years.

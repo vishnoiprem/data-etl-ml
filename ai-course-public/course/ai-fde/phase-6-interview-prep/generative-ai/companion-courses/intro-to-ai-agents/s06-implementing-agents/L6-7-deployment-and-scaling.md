@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the deployment pattern is a tradeoff between cost, latency, and operational overhead. Serverless for spiky workloads; container for predictable traffic; dedicated VM for stateful agents with large memory backends. The FDE picks the pattern that matches the customer's traffic profile.
 
+## In 60 seconds
+
+> "3 deployment patterns. Serverless (Lambda) for spiky workloads, cold start ~1s, pay per invocation. Container (Docker + ECS / Cloud Run) for predictable traffic, cold start < 100ms, pay per CPU/memory. Dedicated VM (EC2) for stateful backends or on-prem, pay per hour, full control. 3 scaling levers: horizontal (more replicas), vertical (bigger model), cost-aware routing (cheap model for routine steps). **The agent is stateless; the state is in the database; the 3am recovery is a single command.** The wrong choice is serverless for a stateful vector DB (cold start + state loss). The right choice is the pattern that matches the traffic profile + the state requirements."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 3 deployment patterns: serverless (Lambda, Cloud Functions), container (Docker + ECS / Cloud Run), dedicated VM (EC2, Compute Engine). The cost-latency-operations tradeoff.

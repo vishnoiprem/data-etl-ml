@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a multi-agent system has multiple agents collaborating without a single orchestrator. The agents pass messages to each other; the system emerges from the peer-to-peer protocol. Pick this topology when the task is fundamentally collaborative, not decomposable.
 
+## In 60 seconds
+
+> "Hierarchy first. The orchestrator decomposes, dispatches, and synthesizes. Each sub-agent has its own system prompt, tool list, cost ceiling, and circuit breaker. Hierarchy is simpler, easier to debug, easier to test. Multi-agent is for the rare cases where the task is fundamentally collaborative and no single agent can decompose it: MoE (experts vote on the next token), debate-style agents (two agents argue, a judge decides), simulations (agents are market participants). **For 90% of FDE use cases — CS drafters, ops dashboards, cost analyzers, code generators — hierarchy is the right answer.** The wrong choice is multi-agent for a decomposable task (over-engineering, 5× cost, hard to debug). The wrong choice is a single agent for a fundamentally collaborative task (the agent cannot reason about its peers). The right choice is hierarchy when decomposable; multi-agent only when forced."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The collaboration pattern: peer-to-peer message passing, shared blackboard, or consensus protocol.

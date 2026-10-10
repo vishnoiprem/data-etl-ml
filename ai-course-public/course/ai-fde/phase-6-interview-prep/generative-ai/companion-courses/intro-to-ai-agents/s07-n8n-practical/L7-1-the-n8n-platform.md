@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** n8n is a node-based workflow editor where the canvas is the architecture. Every node is a function; every edge is a data flow; every execution is a run. The FDE who can read an n8n canvas like a circuit diagram is the FDE who can ship an SMB agent in a day instead of a sprint.
 
+## In 60 seconds
+
+> "5 primitives. Workflow (the canvas), node (a function), credential (a secret), execution (a run), trigger (the entry point). Every node reads `$json` and writes `$json`; the FDE references earlier nodes via `$node["NodeName"].json`. The canvas is the documentation; I spend 5 minutes naming nodes well. The wrong choice is to build spaghetti workflows with unlabeled nodes. The right choice is the 5 primitives + the JSON contract + the canvas as architecture. n8n is the right tool for non-engineering teams; the wrong tool for sub-second latency or 1000s of concurrent runs."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 5 n8n primitives: workflow (the canvas), node (a function), credential (an API key), execution (a run), trigger (what starts the workflow). Each maps to a concept from Sections 2 + 6.

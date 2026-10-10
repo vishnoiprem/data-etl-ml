@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** a reflex agent just acts (no planning); a deliberative agent plans-then-act; a reflective agent plan-act-observe-replan. The right level of planning is the minimum that achieves the target accuracy; over-planning is 3× cost waste.
 
+## In 60 seconds
+
+> "Three levels. Reflex: act based on current observation, no planning. Deliberative: plan once, execute step-by-step, no replanning. Reflective: plan, act, observe, replan. The default production shape is plan-and-execute: 1 plan + N execute + 1 synthesize. Plan-and-execute is 3× cheaper than fully reflective ReAct on well-bounded tasks and 95% as accurate. Use reflex for single-step; use deliberative (plan-and-execute) for 3-10 step tasks; use reflective (ReAct) only when the plan is likely to be invalidated. The wrong choice is full ReAct for every multi-step task (3× cost waste, marginal accuracy gain). The wrong choice is reflex for a 10-step task (60% accuracy). The right choice is plan-and-execute as the default; escalate to reflective when the task is dynamic."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The three levels of agent planning: reflex (0), deliberative (1 plan), reflective (replan on observation).
@@ -23,6 +29,16 @@ The 3-axis planning rubric:
 1. **Task horizon.** How many steps does the task typically take? Single-step tasks want reflex; 3-5 step tasks want deliberative; 5-10 step tasks want reflective.
 2. **Error cost.** How expensive is a wrong step? Low error cost (a wrong tool call that returns an error) wants reflex or deliberative; high error cost (a wrong tool call that moves money) wants reflective.
 3. **Plan reversibility.** Can the agent undo a wrong step? Reversible plans (a wrong file read can be re-read) want deliberative; irreversible plans (a sent email, a moved payment) want reflective.
+
+The 3-level planning rubric as a side-by-side comparison (the FDE's reference card):
+
+| Level | What it does | Cost (LLM calls) | Latency | When to pick | Canonical example |
+|-------|--------------|------------------|---------|--------------|-------------------|
+| **Reflex** | Observe → act, no plan, no memory | 1 per step | Lowest | Single-step; tool-use; classification | Function-calling LLM call |
+| **Deliberative** | Plan once → execute, no replan | 1 (plan) + N (steps) | Medium | Well-bounded 3-5 step tasks | Plan-and-execute (PaE) |
+| **Reflective** | Plan → step → observe → may replan | 1 + N + replans | Highest | Dynamic 5-10+ step; high error cost | ReAct (Reason + Act) |
+
+**The FDE's whiteboard line:** "Most production agents are **reflective on the outer loop** (replan when observation contradicts) and **reflex on the inner steps** (act without thinking about the next step). The plan-and-execute pattern is the canonical 2026 production shape — 3× cheaper than fully reflective, 95% as accurate on well-bounded tasks." The wrong choice is reflexive for a multi-step task (the agent loops or misses steps). The wrong choice is fully reflective for a simple task (3× the cost, no quality gain).
 
 The "plan-and-execute" pattern is the canonical 2026 production shape for multi-step agents. The agent generates a plan once (1 LLM call), executes the plan step-by-step (1 LLM call per step, but with the plan as context), and replans only when an observation contradicts the plan. **The plan-and-execute agent is 3× cheaper than the fully reflective ReAct agent on well-bounded tasks, and 95% as accurate.**
 

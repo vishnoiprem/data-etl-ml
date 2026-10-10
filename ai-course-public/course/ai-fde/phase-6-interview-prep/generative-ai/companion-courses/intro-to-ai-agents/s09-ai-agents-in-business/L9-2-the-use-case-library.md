@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** AI agents work best for tasks that are repetitive, language-heavy, tool-using, and have a clear success metric. The 12 use cases in the FDE's library cover 6 verticals; each has a known ROI, a known failure mode, and a known pattern. The FDE who can name the use case + the ROI + the failure mode is the FDE who can scope the engagement in 30 minutes.
 
+## In 60 seconds
+
+> "4 criteria: repetitive (>100/day), language-heavy (text or speech), tool-using (APIs or queries), measurable (objective success). 12 use cases across 6 verticals: CS (email drafting, ticket routing), sales (lead qualification, outreach), ops (report generation, anomaly detection), finance (invoice processing, expense categorization), legal (contract review, compliance), healthcare (clinical notes, prior auth). 6-axis rubric scores volume + language + tool-use + measurability + hallucination tolerance + compliance. Strong fit is 12-18; moderate 8-11; weak <8. The wrong choice is to pitch a weak-fit use case. The right choice is the rubric + the library + the recommendation."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 use case criteria: repetitive (the task happens > 100 times/day), language-heavy (the task is text or speech), tool-using (the task requires calling APIs or querying data), measurable (the success is verifiable). Each use case in the library meets all 4 criteria.

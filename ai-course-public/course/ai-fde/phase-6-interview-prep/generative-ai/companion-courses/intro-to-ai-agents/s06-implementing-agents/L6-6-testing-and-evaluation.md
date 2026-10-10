@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the eval set is the spec; the contract tests are the gate; the regression checks are the safety net; the A/B tests are the optimization lever. The FDE ships an eval set with every agent.
 
+## In 60 seconds
+
+> "4 testing layers. Contract tests (does the prompt produce the expected output). Unit tests (does each component work). Integration tests (does the agent work end-to-end). Regression tests (does the new version preserve the old). 4 RAGAS metrics: faithfulness, answer relevance, context precision, context recall. **The eval set is the spec; the agent is tuned to pass it.** The FDE runs the eval set weekly; identifies failure cases; analyzes; fixes; re-runs. The wrong choice is to ship without an eval set (no way to measure improvement). The right choice is the 4 layers + 4 metrics + weekly iteration."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 4 testing layers: contract tests (does the prompt produce the expected output), unit tests (does each component work), integration tests (does the agent work end-to-end), regression tests (does the new version preserve the old behavior).

@@ -2,6 +2,12 @@
 
 > **FDE framing in one line:** the customer pitch is the synthesis of the entire course. The FDE delivers the 10-minute pitch, names the 3 pricing models, and proposes the engagement structure. The wrong choice is to over-pitch (the customer walks away) or under-pitch (the FDE leaves money on the table). The right choice is the 10-minute pitch + the 3 pricing models + the engagement structure.
 
+## In 60 seconds
+
+> "10-minute pitch: 5 slides, 2 minutes each (FDE pattern, use case + ROI, demo, engagement, next steps). 3 pricing models: per-run (variable, lowest risk), subscription (predictable, budget-friendly), outcome (aligned with value, FDE incentive = customer incentive). 3-stage engagement: pilot ($5K, 1 week, 1 use case) → engagement ($20K, 4 weeks, 3 use cases) → contract ($20K/month, 6 months, 10 use cases). The wrong choice is a 30-minute pitch with no demo. The right choice is the 10 + 3 + 3 + the pre-flight checklist + the ask for the signature."
+
+**The wrong choice is to read past this block.** The right choice is to recite the 60-second script before you read any other content. The rest of the lecture is the receipt; this is the punchline.
+
 ## The 3 things you'll learn
 
 1. The 10-minute pitch structure: 5 slides, 2 minutes each. The 5 slides are: (1) the FDE pattern, (2) the use case + ROI, (3) the demo, (4) the engagement structure, (5) the next steps. The 10-minute pitch is the FDE's signature; the candidate who can deliver it in 10 minutes is the candidate who can close the deal.
@@ -322,6 +328,18 @@ This is the difference between a candidate who says "I can sell AI agents" and a
 1. **"How do you sell an AI agent?"** Answer: 10-minute pitch (5 slides, 2 minutes each). 3 pricing models (per-run, subscription, outcome). 3-stage engagement (pilot $5K → engagement $20K → contract $20K/month). The pre-flight checklist + the ask for the signature. The wrong choice is a 30-minute pitch with no demo. The right choice is the 10 + 3 + 3.
 2. **"What are the 3 pricing models?"** Answer: (1) per-run — variable, aligned with usage, lowest risk for the customer; (2) subscription — predictable, capped usage, budget-friendly; (3) outcome — aligned with value, FDE's incentive = customer's incentive, requires measurable outcomes. The FDE picks the model that matches the customer's dominant concern (value, budget, risk).
 3. **"What is the engagement structure?"** Answer: 3 stages. Pilot ($5K, 1 week, 1 use case) — validate the approach. Engagement ($20K, 4 weeks, 3 use cases) — ship + measure ROI. Contract ($20K/month, 6 months, 10 use cases) — scale. Each stage has a go/no-go gate; the customer can walk away after any stage. The risk is bounded; the FDE earns the right to scale.
+
+## Read next — beyond this course
+
+You have finished the conceptual content. The next step is the rest of the FDE program:
+
+- **`course/ai-fde/phase-2-core-build/`** — the 200-line shipping agent. The FDE writes the code that implements every pattern in Sections 2, 5, 6, 8. The 7 ingredients + 5 guardrails become runnable Python.
+- **`course/ai-fde/phase-3-deployment/`** — the production service. FastAPI + Postgres + Redis + Prometheus + LangGraph. The agent becomes a service the customer can call.
+- **`course/ai-fde/phase-4-capstone/`** — the 4 projects (MCP, multi-agent, SLM, data analyst) + the 5 case studies + the capstone presentation. The FDE ships the full delivery.
+- **`course/ai-fde/phase-5-engagement/`** — the engagement simulation. The FDE runs the 3-stage engagement from L9.3 against a mock customer; the FDE is graded on the deliverable, not the pitch.
+- **`course/ai-fde/phase-6-interview-prep/`** — the centerpiece-round rehearsal. The FDE does the live build, the system design, the postmortem, the commercial round — all graded against the rubric this course preps you for.
+
+**The wrong choice is to read this course and stop.** The right choice is to write the code, ship the engagement, run the postmortem, and move on to the next customer.
 
 ## The course is complete
 
