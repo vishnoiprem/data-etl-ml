@@ -29,6 +29,7 @@ styles: console → boto3 → CFN → CDK.
 |---|---|---|---|
 | L30 | Architecture (API Gateway, AWS Lambda, S3) | 1:01 | `lecture_scripts/L30_usecase2_architecture.md` |
 | L31 | S3, Lambda and API Gateway — Part 1 | 12:29 | `lecture_scripts/L31_s3_lambda_apigw_pt1.md` |
+| L31a | Enterprise Use Case using API Gateway, AWS Lambda and S3 — Part 3 | 9:43 | `lecture_scripts/L31a_usecase2_pt3.md` |
 | L32 | S3, Lambda and API Gateway with Query String Parameters — Part 2 | 9:43 | `lecture_scripts/L32_query_string_params_pt2.md` |
 | L33 | API Keys and Usage Plan — Theory | 4:10 | `lecture_scripts/L33_api_keys_theory.md` |
 | L34 | API Keys and Usage Plan — Hands On | 7:56 | `lecture_scripts/L34_api_keys_hands_on.md` |
@@ -40,6 +41,7 @@ styles: console → boto3 → CFN → CDK.
 |---|---|
 | `code/api_get_object/`     | Lambda that returns an S3 object + metadata; `moto`-backed test. |
 | `code/api_put_object/`     | Lambda that writes the request body to S3; `moto`-backed test. |
+| `code/api_pt3_handlers/`   | Unified GET + DELETE Lambda closing out Use Case 2; `moto`-backed test. |
 | `code/api_keys_setup/`     | Idempotent boto3 script: create API Key + Usage Plan + stage link. |
 | `code/event_payloads/`     | Sample API Gateway proxy event JSON for GET and POST. |
 
@@ -61,7 +63,9 @@ styles: console → boto3 → CFN → CDK.
 1. Watch L30 to understand the architecture.
 2. Read L31 — the long-form hands-on lecture — alongside the working
    code in `code/api_get_object/` and `code/api_put_object/`.
-3. L32 builds on L31 with query string parameters and mapping templates.
-4. L33–L34 add the API Key + Usage Plan on top of the same stack.
-5. L35 is optional: a 2026 roadmap for agentic AI architects on AWS.
-6. Take the quiz in `../../quizzes/section_8.md`.
+3. L31a closes out the build with a unified GET + DELETE handler,
+   the full request flow, CORS, and the 4xx/5xx error model.
+4. L32 builds on L31 with query string parameters and mapping templates.
+5. L33–L34 add the API Key + Usage Plan on top of the same stack.
+6. L35 is optional: a 2026 roadmap for agentic AI architects on AWS.
+7. Take the quiz in `../../quizzes/section_8.md`.

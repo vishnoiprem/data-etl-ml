@@ -119,6 +119,7 @@ This is the **authoritative lecture-to-file map**. The Udemy lecture order is pr
 |---|---|---|---|
 | L30 | Serverless Enterprise Use Case 2 — Architecture (API Gateway, AWS Lambda and S3) | 1:01 | `08_usecase2_apigw_lambda_s3/lecture_scripts/L30_usecase2_architecture.md` |
 | L31 | S3, Lambda and API Gateway — Part 1 | 12:29 | `08_usecase2_apigw_lambda_s3/lecture_scripts/L31_s3_lambda_apigw_pt1.md` |
+| L31a | Enterprise Use Case using API Gateway, AWS Lambda and S3 — Part 3 | 9:43 | `08_usecase2_apigw_lambda_s3/lecture_scripts/L31a_usecase2_pt3.md` |
 | L32 | S3, Lambda and API Gateway with Query String Parameters — Part 2 | 9:43 | `08_usecase2_apigw_lambda_s3/lecture_scripts/L32_query_string_params_pt2.md` |
 | L33 | API Keys and Usage Plan — Theory | 4:10 | `08_usecase2_apigw_lambda_s3/lecture_scripts/L33_api_keys_theory.md` |
 | L34 | API Keys and Usage Plan — Hands On | 7:56 | `08_usecase2_apigw_lambda_s3/lecture_scripts/L34_api_keys_hands_on.md` |

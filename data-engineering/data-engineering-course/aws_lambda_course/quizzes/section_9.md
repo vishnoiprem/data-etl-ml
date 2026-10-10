@@ -1,7 +1,7 @@
 # Section 9 Quiz — API Security: Lambda Authorizer & Cognito Authorizer
 
-> 10 questions. Answers are hidden in collapsible blocks; click to
-> reveal. Recommended time: 10 minutes.
+> 13 questions. Answers are hidden in collapsible blocks; click to
+> reveal. Recommended time: 12 minutes.
 
 ---
 
@@ -196,4 +196,76 @@ gives you free JWKS validation, scope enforcement, and zero Lambda
 invocations on the auth path. Reserve the Lambda Authorizer for
 non-OIDC tokens or for cases where you need to embed business
 context into the IAM policy at request time.
+</details>
+
+---
+
+### Q11
+
+You have a REST API with two resources, `/public/{proxy+}` and
+`/internal/{proxy+}`. The `/public/*` resource is wired to a
+Cognito User Pool Authorizer, the `/internal/*` resource is wired
+to a Lambda Authorizer. A single integration Lambda serves both
+routes. Which field on the proxy event should the handler inspect
+to decide *which* authorizer ran, and why is that field the right
+choice (vs. e.g. `path`)?
+
+<details>
+<summary>Answer</summary>
+
+Inspect `event["requestContext"]["resourcePath"]` — the **matched
+resource definition** (e.g. `/internal/{proxy+}` or `/public/{proxy+}`).
+This is set by API Gateway from the resource tree at request time
+and is unaffected by the URL the caller typed. `path` reflects the
+raw URL and is unreliable for routing decisions because path
+parameter values can be anything (e.g. `/internal/../public/...`).
+</details>
+
+---
+
+### Q12
+
+You attach a `COGNITO_USER_POOLS` authorizer to `GET /public/items`
+and call the method with a valid access token. The integration
+Lambda reads `event["requestContext"]["authorizer"]["claims"]["scope"]`
+and gets a single space-separated string like
+`"demo-pool/read:items demo-pool/write:items"`. Why is the value a
+single string and not a list, and how do you would split it back
+into a list in Python?
+
+<details>
+<summary>Answer</summary>
+
+API Gateway flattens **all** JWT claims into a `string → string`
+map before forwarding the event. Array / object claims are joined
+into a single string — for space-separated values like OAuth
+`scope`, you can split with `claim.split()`. (For comma-separated
+claims, split on `,`. The exact separator is part of the claim's
+specification.) If the claim is missing, the key is absent — it
+is *not* present with an empty string.
+</details>
+
+---
+
+### Q13
+
+You add an API Key + Usage Plan to the secured Use Case 2 API and
+enable `API Key Required = true` on `GET /public/{proxy+}`. A
+client sends a request with a perfectly valid Cognito access token
+but no `x-api-key` header. The client gets `403 Forbidden`. Which
+layer returned the 403 — Cognito, the Usage Plan, or the
+integration Lambda? Justify in one sentence.
+
+<details>
+<summary>Answer</summary>
+
+The **Usage Plan / API Key** check returned the 403. The order of
+operations is: authorizer first (token validates), then API Key
+(required but missing), then throttle/quota, then the integration.
+Because the token is valid the authorizer passes; because the key
+is missing the method-level `apiKeyRequired=true` check rejects
+the request before the integration is invoked. The Cognito
+authorizer would have returned 401 (not 403) if the token were the
+problem, and the integration is never reached when the key check
+fails.
 </details>

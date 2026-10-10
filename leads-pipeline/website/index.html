@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vishnoi Soft — Vietnam AI & Data Engineering Team</title>
+<meta name="description" content="Vietnam-based AI and data engineering team. 6-20 senior engineers delivering RAG, agents, MLOps, Snowflake, Databricks, and full-stack AI products for US/EU startups.">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  header { background: linear-gradient(135deg, #0a1929 0%, #1e3a5f 100%); color: #fff; padding: 80px 0 60px; }
+  header h1 { font-size: 48px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.02em; }
+  header p.lead { font-size: 22px; opacity: 0.9; max-width: 720px; }
+  .badges { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; }
+  section { padding: 80px 0; }
+  section h2 { font-size: 36px; margin-bottom: 32px; font-weight: 700; }
+  .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .service { background: #f8f9fb; border: 1px solid #e5e7eb; padding: 28px; border-radius: 12px; }
+  .service h3 { font-size: 20px; margin-bottom: 8px; color: #0a1929; }
+  .service .stack { font-family: ui-monospace, monospace; font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+  .service p { color: #4b5563; }
+  .stats { background: #0a1929; color: #fff; padding: 60px 0; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 32px; text-align: center; }
+  .stat-num { font-size: 48px; font-weight: 800; color: #4ade80; }
+  .stat-label { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+  .why { background: #f8f9fb; }
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 32px; }
+  .why-item { padding: 24px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; }
+  .why-item .icon { font-size: 32px; margin-bottom: 12px; }
+  .why-item h4 { font-size: 18px; margin-bottom: 8px; }
+  .why-item p { color: #6b7280; font-size: 15px; }
+  .cases { display: grid; gap: 20px; margin-top: 32px; }
+  .case { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px; }
+  .case .meta { display: flex; gap: 16px; font-size: 13px; color: #6b7280; margin-bottom: 12px; flex-wrap: wrap; }
+  .case .meta span { background: #f3f4f6; padding: 4px 10px; border-radius: 6px; }
+  .case h3 { font-size: 20px; margin-bottom: 8px; }
+  .case .result { color: #059669; font-weight: 600; margin-top: 12px; }
+  .contact { background: linear-gradient(135deg, #0a1929 0%, #1e3a5f 100%); color: #fff; text-align: center; }
+  .contact h2 { color: #fff; }
+  .contact p { font-size: 18px; opacity: 0.9; margin-bottom: 32px; }
+  .cta { display: inline-block; background: #4ade80; color: #0a1929; padding: 16px 32px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 18px; transition: transform 0.2s; }
+  .cta:hover { transform: translateY(-2px); }
+  .contact-details { margin-top: 40px; display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; font-size: 15px; opacity: 0.85; }
+  footer { text-align: center; padding: 32px 0; color: #6b7280; font-size: 14px; }
+  @media (max-width: 600px) {
+    header h1 { font-size: 32px; }
+    header p.lead { font-size: 18px; }
+    section h2 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>Vietnam AI & Data Engineering Team</h1>
+    <p class="lead">We staff remote engineering pods — 6-20 senior engineers delivering production AI, agents, RAG, MLOps, Snowflake, and Databricks systems for US & EU startups.</p>
+    <div class="badges">
+      <span class="badge">🌏 Remote — APAC delivery</span>
+      <span class="badge">⚡ 2-week ramp</span>
+      <span class="badge">💰 Vietnam rate, US quality</span>
+      <span class="badge">📜 Vietnam LLC + Payoneer</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>What we build</h2>
+    <div class="services">
+      <div class="service">
+        <h3>AI / LLM Engineering</h3>
+        <div class="stack">Python · LangChain · LlamaIndex · RAG · Agents · Evals</div>
+        <p>Production LLM features — RAG pipelines, agent systems, fine-tuning, eval harnesses. Ship to real users in weeks, not quarters.</p>
+      </div>
+      <div class="service">
+        <h3>MLOps & ML Platform</h3>
+        <div class="stack">MLflow · Kubeflow · SageMaker · Triton · CUDA · PyTorch</div>
+        <p>Training pipelines, model serving, monitoring, eval rigs. We treat the ML platform as a product — measured, observable, adopted.</p>
+      </div>
+      <div class="service">
+        <h3>Data Engineering</h3>
+        <div class="stack">Snowflake · Databricks · dbt · Airflow · Spark · Glue</div>
+        <p>Modern data stack from ingestion to BI. dbt models, ELT pipelines, reverse-ETL, observability — async-first delivery.</p>
+      </div>
+      <div class="service">
+        <h3>Full-Stack Product</h3>
+        <div class="stack">React · TypeScript · Python · FastAPI · Node · AWS</div>
+        <p>Ship the AI feature end-to-end — frontend, backend, infra. We've shipped 50+ production apps; we know what "done" looks like.</p>
+      </div>
+      <div class="service">
+        <h3>Data Analysis & BI</h3>
+        <div class="stack">SQL · Looker · Tableau · Power BI · Mode</div>
+        <p>Embedded analysts who build dashboards, define metrics, and answer business questions. 1-week ramp to first deliverable.</p>
+      </div>
+      <div class="service">
+        <h3>Data & Cloud Architecture</h3>
+        <div class="stack">AWS · Lake Formation · Redshift · S3 · Terraform</div>
+        <p>Architect-level design for data platforms and AI infra. Reference architectures, cost optimization, security review.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div><div class="stat-num">6-20</div><div class="stat-label">W-2 senior engineers</div></div>
+      <div><div class="stat-num">2 wk</div><div class="stat-label">avg. ramp to first commit</div></div>
+      <div><div class="stat-num">$40-70</div><div class="stat-label">/hr blended rate</div></div>
+      <div><div class="stat-num">12+</div><div class="stat-label">production RAG/agent systems</div></div>
+      <div><div class="stat-num">24/7</div><div class="stat-label">async delivery</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="why">
+  <div class="container">
+    <h2>Why Vietnam-based</h2>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="icon">💸</div>
+        <h4>60-80% of US rates</h4>
+        <p>Same quality, lower cost. Senior engineers at $40-70/hr vs $90-150/hr in the US. Pass the savings on or reinvest in your runway.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">🌏</div>
+        <h4>APAC timezone sweet spot</h4>
+        <p>Overlap with US Pacific mornings + EU afternoons + full APAC. Async-first delivery means work happens while you sleep.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">🎓</div>
+        <h4>Strong technical base</h4>
+        <p>Vietnam's top engineering grads are world-class. We hire senior, vet hard, and pay above market to keep them.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">📜</div>
+        <h4>Clean legal entity</h4>
+        <p>Vietnam LLC + Payoneer. USD/EUR invoicing. IP assignment contracts. NDAs. No tax surprises.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Recent work</h2>
+    <div class="cases">
+      <div class="case">
+        <div class="meta">
+          <span>RAG</span><span>LangChain</span><span>PostgreSQL</span><span>Series A healthtech</span>
+        </div>
+        <h3>Clinical Q&A assistant for 12,000+ providers</h3>
+        <p>Built a HIPAA-aware RAG system over 2M medical documents. Eval rig with 1,200 hand-labeled cases. Replaced a $400K/yr vendor.</p>
+        <div class="result">Result: 38% reduction in support tickets, 4.7/5 user satisfaction</div>
+      </div>
+      <div class="case">
+        <div class="meta">
+          <span>Agents</span><span>LangGraph</span><span>OpenAI</span><span>Series B fintech</span>
+        </div>
+        <h3>Multi-agent KYC review system</h3>
+        <p>5-agent pipeline for KYC document review. Reduced manual review from 18 minutes to 90 seconds per case.</p>
+        <div class="result">Result: 92% time savings, 99.1% accuracy vs 87% human baseline</div>
+      </div>
+      <div class="case">
+        <div class="meta">
+          <span>Data Eng</span><span>Snowflake</span><span>dbt</span><span>Fivetran</span><span>Series B SaaS</span>
+        </div>
+        <h3>Greenfield analytics platform in 5 weeks</h3>
+        <p>Snowflake + dbt + Fivetran + Hightouch stack. 47 dbt models, 12 source connectors, full reverse-ETL into HubSpot + Salesforce.</p>
+        <div class="result">Result: Self-serve analytics for 30+ internal stakeholders</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact">
+  <div class="container">
+    <h2>Need an engineer or a pod?</h2>
+    <p>Whoever in your network needs AI/data engineering capacity — I'd love to support. Drop me a line.</p>
+    <a href="mailto:hello@vishnoisoft.com?subject=Engineer placement inquiry" class="cta">Get in touch</a>
+    <div class="contact-details">
+      <span>📧 hello@vishnoisoft.com</span>
+      <span>🌐 vishnoisoft.com</span>
+      <span>📍 Ho Chi Minh City, Vietnam</span>
+      <span>🐦 @vishnoiprem</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Vishnoi Soft · Vietnam LLC · Built by engineers, for engineers</p>
+  </div>
+</footer>
+
+</body>
+</html>

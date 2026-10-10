@@ -1,6 +1,6 @@
 # Section 10 Quiz — Generative AI: AWS Bedrock (Cohere) End-to-End
 
-> 10 questions. Hidden answers in a collapsible block at the bottom of each question.
+> 11 questions. Hidden answers in a collapsible block at the bottom of each question.
 > Try to answer before opening the block.
 
 ---
@@ -141,4 +141,31 @@ rejected with 400 **before the Lambda is invoked**, so Bedrock is
 never called and never billed. The next-cheapest mitigation is
 **stage throttling** (10 RPS) which returns 429 without invoking
 the Lambda either.
+</details>
+
+---
+
+### Q11 — A plant-floor tablet is leaking `x-api-key` headers in browser DevTools and you suspect one has been scraped. The key in question is attached to the `defect-api-prod` Usage Plan. What is the correct response?
+
+<details>
+<summary>Answer</summary>
+
+**Rotate the key.** A leaked API key is equivalent to a leaked URL —
+there is no signing, no expiry, and no built-in revocation story.
+The procedure is:
+
+1. `create_api_key` with a new name (e.g. `tablet-line-3-v2`) and
+   leave the old one in place.
+2. `create_usage_plan_key` to attach the new key to **both** the
+   `defect-api-dev` and `defect-api-prod` plans.
+3. Roll the new key out to the tablet.
+4. Confirm the new key is in use (CloudWatch `AWS/ApiGateway` →
+   `Count`, dimension `ApiKey=<new-id>` shows traffic).
+5. Delete the old key.
+
+You do **not** rely on Bedrock IAM to catch this — the API Key
+protects the **API Gateway → caller** edge, not the Lambda → Bedrock
+edge. And you do **not** rely on the 10 RPS throttle to save you; a
+scraper can stay under the rate limit and still rack up a real
+Bedrock bill before anyone notices.
 </details>

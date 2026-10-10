@@ -44,7 +44,7 @@ lecture-to-file map in `SYLLABUS.md` is authoritative.
 | 2 | Lambda Automation Use Case — EC2 start/stop on EventBridge schedule | 4 | L16–L17 |
 | 3 | Lambda to create DynamoDB table + put items | 4 | L18 |
 | 4 | **Use Case 1:** S3 → Lambda → DynamoDB banking JSON pipeline | 6 | L23–L24 |
-| 5 | **Use Case 2:** API Gateway + Lambda + S3 CRUD (query string params) | 8 | L30–L32 |
+| 5 | **Use Case 2:** API Gateway + Lambda + S3 CRUD (query string params) | 8 | L30–L32, L31a |
 | 6 | API Gateway API Keys + Usage Plan | 8 | L33–L34 |
 | 7 | Lambda Authorizer (custom JWT validation) | 9 | L36–L37 |
 | 8 | Cognito User Pool Authorizer | 9 | L38–L39 |

@@ -1,7 +1,7 @@
 # Section 8 Quiz — Enterprise Use Case 2: API Gateway, Lambda, S3
 
-> **Source:** lectures L30–L35
-> **Pass bar:** 7 / 10
+> **Source:** lectures L30–L35, L31a
+> **Pass bar:** 8 / 12
 > Answers are hidden in collapsible blocks. Try the questions first, then
 > reveal only one at a time.
 
@@ -182,5 +182,49 @@ The only new ingredient is the model and the agent loop. Wrapping the
 existing API as a tool is the canonical 2026 pattern — and it works
 identically whether the agent runtime is Bedrock Agents, Strands, or a
 custom one.
+
+</details>
+
+---
+
+**11. What HTTP status code does API Gateway return when a Lambda
+backend throws an unhandled exception?**
+
+- A) `400 Bad Request`
+- B) `403 Forbidden`
+- C) `500 Internal Server Error`
+- D) `503 Service Unavailable`
+
+<details><summary>Show answer</summary>
+
+**C)** An unhandled Lambda exception is mapped to `500 Internal Server
+Error` by API Gateway. Lambda timeouts surface as `502 Bad Gateway` or
+`504 Gateway Timeout`, but ordinary exceptions become `500`. The full
+traceback lands in the Lambda's CloudWatch Logs log group — *not* in
+the API Gateway access log — which is why the L31a lecture insists you
+check the function log group first when a 5xx appears.
+
+</details>
+
+---
+
+**12. Where does the API Gateway access log go by default?**
+
+- A) It is off by default; once enabled, it goes to the CloudWatch
+  Logs log group `API-Gateway-Execution-Logs_<api-id>/<stage>`.
+- B) It is written to the Lambda's CloudWatch log group automatically.
+- C) It is streamed to S3 via a CloudTrail data event.
+- D) It is shown in the API Gateway dashboard "Logs" tab only.
+
+<details><summary>Show answer</summary>
+
+**A)** API Gateway access logging is **off** by default. To turn it on,
+open the stage in the console (or call `update_stage`), pick a CW Logs
+ARN, and enable access logging. The logs land in a log group named
+`API-Gateway-Execution-Logs_<api-id>/<stage>` — a *different* log
+group from the Lambda's. The Lambda's CloudWatch log group gets its
+own stream from the Lambda service. The two are intentionally separate
+so you can give API Gateway engineers IAM access to edge logs without
+giving them access to application logs.
 
 </details>
