@@ -64,7 +64,7 @@ Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam
 
 
 def log(action, company, target, status, error=""):
-    """Log an action to auto_log.csv."""
+    """Log an action to auto_log.csv AND Postgres (if available)."""
     file_exists = LOG_FILE.exists()
     with open(LOG_FILE, "a") as f:
         if not file_exists:
@@ -74,6 +74,14 @@ def log(action, company, target, status, error=""):
         target_safe = target.replace(",", ";")
         error_safe = error.replace(",", ";")
         f.write(f"{ts},{action_safe},{company},{target_safe},{status},{error_safe}\n")
+    # Mirror to Postgres send_log (best-effort)
+    try:
+        from db.lead_store import get_by_email, log_send as _pg_log
+        lead = get_by_email(target)
+        if lead:
+            _pg_log(lead["id"], target, "", status, error or None)
+    except Exception as e:
+        pass  # Don't fail send if DB is down
 
 
 def load_leads():
@@ -102,7 +110,7 @@ def personalize(body):
     return body.replace("{PERSONAL_SIG}", PERSONAL_SIG)
 
 
-def build_html_email(body_text, subject):
+def build_html_email(body_text, subject, tracking_id="avx-0000"):
     """Build a nicely designed HTML email from the plain-text cover letter body."""
     # Convert plain-text body to HTML paragraphs
     paragraphs_html = ""
@@ -231,7 +239,9 @@ def build_html_email(body_text, subject):
 
   <!-- Footer -->
   <tr><td style="background:#f8f9fb;padding:16px 40px;text-align:center;font-size:11px;color:#9ca3af;">
-    © 2026 {YOUR_COMPANY} · Vietnam LLC · Build with us. Globally.
+    © 2026 {YOUR_COMPANY} · Vietnam LLC · Build with us. Globally.<br>
+    <a href="mailto:{YOUR_EMAIL}?subject=unsubscribe" style="color:#9ca3af;text-decoration:underline;">Unsubscribe</a>
+    · Tracking ID: <span style="font-family:monospace;">{tracking_id}</span>
   </td></tr>
 </table>
 </td></tr>
@@ -240,7 +250,7 @@ def build_html_email(body_text, subject):
 </html>"""
 
 
-def send_email(to_email, subject, body_text, resume_file):
+def send_email(to_email, subject, body_text, resume_file, tracking_id="avx-0000"):
     """Send one email via Gmail/Outlook SMTP with both plain-text and HTML parts."""
     msg = MIMEMultipart("alternative")
     msg["From"] = f"{YOUR_NAME} <{GMAIL_ADDRESS}>"
@@ -253,7 +263,7 @@ def send_email(to_email, subject, body_text, resume_file):
     msg.attach(text_part)
 
     # Nicely designed HTML version
-    html_content = build_html_email(body_text, subject)
+    html_content = build_html_email(body_text, subject, tracking_id=tracking_id)
     html_part = MIMEText(html_content, "html", "utf-8")
     msg.attach(html_part)
 
@@ -309,15 +319,40 @@ def run_email_phase(leads, dry=False):
             continue
 
         try:
-            send_email(lead["contact_email"], subject, body, lead["resume_file"])
+            # Look up tracking_id from Postgres (if we have it)
+            tracking_id = "avx-0000"
+            try:
+                from db.lead_store import get_by_email
+                pg_lead = get_by_email(lead["contact_email"])
+                if pg_lead:
+                    tracking_id = pg_lead["tracking_id"]
+            except Exception:
+                pass
+            send_email(lead["contact_email"], subject, body, lead["resume_file"], tracking_id=tracking_id)
             lead["status"] = "sent_email"
             log("email", lead["company"], lead["contact_email"], "success")
+            # Mirror to Postgres — mark this lead as sent
+            try:
+                from db.lead_store import get_by_email, update_status as _pg_status
+                pg_lead = get_by_email(lead["contact_email"])
+                if pg_lead:
+                    _pg_status(pg_lead["id"], "sent_email")
+            except Exception:
+                pass
             print(f"   ✅ Sent")
             sent += 1
             if sent < 3:
                 time.sleep(DELAY_BETWEEN_EMAILS_SEC)
         except Exception as e:
             log("email", lead["company"], lead.get("contact_email", ""), "error", str(e))
+            # Mark failed in Postgres too
+            try:
+                from db.lead_store import get_by_email, update_status as _pg_status
+                pg_lead = get_by_email(lead.get("contact_email", ""))
+                if pg_lead:
+                    _pg_status(pg_lead["id"], "failed", error=str(e))
+            except Exception:
+                pass
             print(f"   ❌ Error: {e}")
 
     return sent
