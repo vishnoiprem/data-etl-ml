@@ -402,40 +402,58 @@ def scrape_ai_jobs_net():
 
 
 def scrape_reddit_ml_jobs():
-    """Reddit r/MachineLearning, r/MLQuestions, r/forhire, r/jobbit, r/RemoteJobs.
+    """Reddit r/forhire, r/jobbit, r/MachineLearning, r/RemoteJobs, etc.
 
-    Uses the public RSS feed (.rss) — no auth needed, no rate-limit issue.
-    Many posts include contact info in the body.
+    Reddit's .json / .rss endpoints are now blocked without auth. So we
+    hit Bing's public RSS search (no auth) for site:reddit.com queries
+    in the job-hire subs. Each result is a real post with a permalink
+    we can revisit.
     """
     leads = []
-    subs = [
-        "MachineLearning", "MLQuestions", "MLJobs", "RemoteJobs",
-        "forhire", "jobbit", "dataengineering", "ExperiencedDevs",
+    # Bing query: site:reddit.com restricted to hiring subs, with AI/ML keywords
+    queries = [
+        ('site:reddit.com/r/forhire (hiring OR "we are hiring") '
+         '(AI OR ML OR "data engineer" OR "LLM" OR "data scientist")'),
+        ('site:reddit.com/r/jobbit (hiring OR "we are hiring") '
+         '(AI OR ML OR "data engineer" OR "LLM" OR "data scientist")'),
+        ('site:reddit.com/r/MachineLearning (hiring OR "we are hiring") '
+         '(AI OR ML OR "data engineer" OR "LLM" OR "data scientist")'),
+        ('site:reddit.com/r/RemoteJobs (hiring OR "we are hiring") '
+         '(AI OR ML OR "data engineer" OR "LLM" OR "data scientist")'),
+        ('site:reddit.com/r/dataengineering (hiring OR "we are hiring")'),
     ]
-    for sub in subs:
-        url = f"https://www.reddit.com/r/{sub}/new.rss?limit=50"
+    for q in queries:
+        url = "https://www.bing.com/search?" + urllib.parse.urlencode(
+            {"q": q, "format": "rss", "count": "30"}
+        )
         code, xml = _curl(url, timeout=15)
         if code != 200 or not xml or "<rss" not in xml[:200].lower():
             continue
-        # Crude RSS parse
-        for entry in re.findall(r"<entry>(.*?)</entry>", xml, re.S):
-            title_m = re.search(r"<title>(.*?)</title>", entry, re.S)
-            link_m = re.search(r'href="([^"]+)"', entry)
-            content_m = re.search(r"<content[^>]*>(.*?)</content>", entry, re.S)
-            if not title_m:
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S):
+            title_m = re.search(r"<title>(.*?)</title>", item, re.S)
+            link_m = re.search(r"<link>(.*?)</link>", item)
+            desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
+            if not (title_m and link_m):
                 continue
             title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
-            content = content_m.group(1) if content_m else ""
-            content = re.sub(r"<[^>]+>", " ", content)
-            content = re.sub(r"&[a-z]+;", " ", content)
-            content = re.sub(r"\s+", " ", content).strip()
-            text = f"{title}\n{content}"
-            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
-                continue
+            desc = re.sub(r"<[^>]+>", " ", desc_m.group(1)) if desc_m else ""
+            desc = re.sub(r"&[a-z]+;", " ", desc)
+            desc = re.sub(r"\s+", " ", desc).strip()
+            text = f"{title}\n{desc}"
             if EXCLUDE_TITLE.search(text):
                 continue
+            # Must actually mention our keyword set
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            # Filter FAQ/meta posts
+            if re.search(r"\b(FAQ|meta|thread|announcement)\b", text, re.I):
+                continue
             emails = _extract_real_emails(text)
-            url = link_m.group(1) if link_m else f"https://reddit.com/r/{sub}"
+            # Reddit permalink sometimes is missing - construct a fallback
+            url_link = link_m.group(1).strip()
+            if "reddit.com" not in url_link:
+                continue
+            # Try to extract company from the title
             company = None
             m = re.search(r"(?:at|@|for)\s+([A-Z][\w&'.\- ]{1,40})(?:\s+|,|\.|\|)",
                           title)
@@ -447,15 +465,17 @@ def scrape_reddit_ml_jobs():
                 if m:
                     company = m.group(1).strip()[:60]
             if not company:
-                company = f"r/{sub}"
+                # Pull subreddit from URL
+                sm = re.search(r"reddit\.com/r/(\w+)/", url_link)
+                company = f"r/{sm.group(1)}" if sm else "reddit"
             leads.append({
                 "company": company,
                 "role": title[:120],
-                "source": f"reddit r/{sub}",
-                "source_url": url,
+                "source": f"reddit (via bing)",
+                "source_url": url_link,
                 "contact_email": emails[0] if emails else None,
                 "extra_emails": emails[1:5],
-                "raw_excerpt": content[:400] or title[:400],
+                "raw_excerpt": desc[:400] or title[:400],
             })
     return leads
 
