@@ -1,58 +1,58 @@
-# Section 11 Quiz — Role Plays (synthesis)
+# Section 11 Quiz — Role Plays & Capstone
 
 > 5 questions, multi-choice, single answer. The answer key is at the bottom.
 
 ---
 
-**Q1.** In Role Play 1 (trust misconfig), the learner is asked to diagnose an `AccessDeniedException` on `sts:AssumeRole`. What is the *first* thing the senior DE does?
+**Q1.** What is the primary use case for AWS Glue DataBrew?
 
-- A. Re-deploy the stack
-- B. Read the error message
-- C. Edit the role in the console
-- D. Open the S3 bucket policy
-
----
-
-**Q2.** In Role Play 2 (streaming falling behind), the manager asks "what's going on?" What is the *first* thing the senior DE says?
-
-- A. "I need 30 minutes to look at the CloudWatch metrics before I give you a plan"
-- B. "It's a capacity problem, I'll add more workers"
-- C. "The schema drifted, the producer team broke it"
-- D. "I'll fix it by EOD"
+- A. Real-time data ingestion
+- B. Visual data preparation (no-code transformations)
+- C. Streaming ETL
+- D. SQL-based analytics
 
 ---
 
-**Q3.** In Role Play 3 (pitching Data Quality), the manager is allergic to "shiny new tools." What is the *first* number the senior DE gives?
+**Q2.** In a DataBrew project, what is a *recipe*?
 
-- A. The cost: $40/month, 2 days of engineering time
-- B. The 3 rule types
-- C. The number of Glue Data Quality customers
-- D. The CloudWatch metric name
-
----
-
-**Q4.** In all 3 role plays, what is the common pattern the senior DE uses?
-
-- A. Diagnose off-line, then communicate a plan
-- B. Diagnose in the meeting, then ask for more time
-- C. Blame the producer team
-- D. Promise a fix without a plan
+- A. A versioned collection of data transformations
+- B. A SQL query
+- C. A Glue Job
+- D. A data source
 
 ---
 
-**Q5.** The 3 role plays all share one common communication pattern. Which is it?
+**Q3.** A DataBrew job runs successfully but writes 0 rows to the output. The recipe has 3 steps. The source file has 100 rows. What is the most likely cause?
 
-- A. Open with the answer, then back-fill the details
-- B. Use "we" instead of "I" for actions
-- C. End with a clear ask
-- D. Avoid numbers in the first 30 seconds
+- A. The recipe's filter step dropped all rows
+- B. The output S3 bucket is wrong
+- C. The IAM role is wrong
+- D. The DataBrew job is in the wrong region
+
+---
+
+**Q4.** Which DataBrew step would you use to replace nulls in the `country` column with `"UNKNOWN"`?
+
+- A. `FILL_NULLS` or `IMPUTE`
+- B. `DROP_NULL`
+- C. `REPLACE`
+- D. `MAP`
+
+---
+
+**Q5.** A DataBrew job's output is in CSV. The same job, with the same recipe, now produces JSON. What is the most likely cause?
+
+- A. The job's output format setting was changed
+- B. The recipe was changed
+- C. The source data changed
+- D. The IAM role was changed
 
 ---
 
 # Answer Key
 
-1. **B** — Read the error message. The error message tells you whether it's a trust problem or an identity problem. The senior move is to read, not to act.
-2. **A** — Ask for 30 minutes. The senior move is to *not* diagnose in the meeting. Acknowledge the urgency, ask for a follow-up, then come back with a plan.
-3. **A** — The cost. Managers want a number. The 3 DQ rule types and the CloudWatch metric name are technical details; the cost is what the manager can budget against.
-4. **A** — Diagnose off-line, then communicate a plan. The opposite of diagnosing in the meeting (which signals you're unprepared) and the opposite of promising without a plan (which signals overconfidence).
-5. **C** — End with a clear ask. "I need sign-off on the worker bump" / "I need a 2-hour SLA on schema notifications" / "I need 2 days this sprint and $50/month." Senior DEs always close with the ask.
+1. **B** — Visual data prep. DataBrew is the no-code sibling of Glue Jobs. Same data catalog, same sources, but the transformations are visual (point-and-click) and the output is a recipe (versioned).
+2. **A** — Versioned transformations. A recipe is a sequence of steps; it can be versioned, published, and re-run.
+3. **A** — Filter dropped all rows. The most common cause: a `FILTER` step with a condition that doesn't match any rows (e.g., `country = "USA"` when the source is `US`).
+4. **A** — `FILL_NULLS`. DataBrew has a `FILL_NULLS` step (or `IMPUTE` for more advanced imputation).
+5. **A** — Output format setting was changed. The recipe doesn't control the output format; the DataBrew Job's output configuration does.

@@ -5,8 +5,8 @@ Description: >
     - Source S3 bucket (city_temperature.csv uploaded separately)
     - Target S3 bucket (Parquet output from the Glue Job)
     - IAM role (GlueJobRole) with the AWS Glue service trust policy
-    - Glue Job (Python shell, Glue version 4.0) that aggregates by country
-      and writes Parquet partitions by year/month
+    - Glue Job (Spark / glueetl, Glue version 4.0) that aggregates by country,
+      year, and month and writes Parquet partitions by year/month
 
 Parameters:
   SourceBucketName:

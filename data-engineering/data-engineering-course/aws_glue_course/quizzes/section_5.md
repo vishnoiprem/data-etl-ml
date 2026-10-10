@@ -4,55 +4,55 @@
 
 ---
 
-**Q1.** In a CloudFormation template, which section declares a value the user can override at stack-create time?
+**Q1.** What is the primary purpose of the AWS Glue Data Catalog?
 
-- A. Resources
-- B. Parameters
-- C. Mappings
-- D. Outputs
-
----
-
-**Q2.** You reference a parameter in a Resources section: `BucketName: !Ref SourceBucketName`. What does `!Ref` return?
-
-- A. The bucket's ARN
-- B. The bucket's name (the parameter's value)
-- C. The bucket's region
-- D. The bucket's IAM role
+- A. To store the actual data
+- B. To store metadata (schema, location, partitions) about the data
+- C. To run SQL queries
+- D. To encrypt data at rest
 
 ---
 
-**Q3.** You write a CloudFormation template that creates a Glue Job. The stack goes CREATE_FAILED at the Glue Job. The Glue Job's IAM role is created successfully. What is the most likely cause?
+**Q2.** A Glue Crawler runs against an S3 bucket with 3 different file types: CSV, JSON, and Parquet. How many tables does the crawler create by default?
 
-- A. The IAM role is not attached to the Glue Job
-- B. The Glue Job's `Role` property uses `!GetAtt GlueJobRole.Arn` but the role is not yet propagated
-- C. The IAM role's trust policy is missing `glue.amazonaws.com`
-- D. The S3 bucket does not exist yet
-
----
-
-**Q4.** Which CloudFormation intrinsic function would you use to inject a string from a parameter into a script URL like `s3://bucket/scripts/glue_job.py`?
-
-- A. `!Ref`
-- B. `!Sub`
-- C. `!Join`
-- D. `!GetAtt`
+- A. 1 (it merges all file types into a single table)
+- B. 3 (one per file type, partitioned by file extension)
+- C. 0 (the crawler errors on heterogeneous data)
+- D. It depends on whether a classifier is configured
 
 ---
 
-**Q5.** You update a CloudFormation stack that contains an S3 bucket. You change the `BucketName` property to a new (globally unique) name. What happens?
+**Q3.** A Glue Job's `--source-bucket` argument is set to `my-bucket`. The job's script reads `s3://my-bucket/input/`. The job fails with `Unable to parse S3 path`. What is the most likely cause?
 
-- A. The bucket is replaced (the old one is deleted, the new one is created)
-- B. The bucket's name is updated in place
-- C. CloudFormation returns an error because bucket names are immutable
-- D. The stack update is rejected
+- A. The bucket does not exist
+- B. The script is not using the argument correctly
+- C. The IAM role is missing `s3:ListBucket`
+- D. The Glue version is too old
+
+---
+
+**Q4.** A Glue Workflow has 3 Glue Jobs in sequence: Job A triggers Job B, Job B triggers Job C. Job A runs and succeeds. Job B does *not* run. What is the most likely cause?
+
+- A. Job B's IAM role is wrong
+- B. The Trigger from Job A to Job B is not configured (or is configured to fail)
+- C. Job A's output is not in the expected location
+- D. The Workflow is paused
+
+---
+
+**Q5.** A Glue Job's source is a 100-GB CSV file in S3. The job reads it, aggregates, and writes 200 MB of Parquet. The job takes 4 hours. What is the single most effective change to reduce runtime?
+
+- A. Increase `NumberOfWorkers` from 2 to 10
+- B. Convert the source CSV to Parquet
+- C. Add a Glue Crawler
+- D. Enable versioning on the bucket
 
 ---
 
 # Answer Key
 
-1. **B** — Parameters. Parameters are the user-overridable inputs to a stack.
-2. **B** — The parameter's value. `!Ref` on a parameter returns the parameter's value; `!Ref` on a resource returns the resource's logical ID (or its `Name` if the resource has one).
-3. **C** — Trust policy. Same root cause as the role-play: the IAM role's trust policy must allow `glue.amazonaws.com` to assume it. If the role is created but the Glue Job cannot assume it, the stack fails at the Glue Job resource.
-4. **B** — `!Sub`. `!Sub "s3://${BucketName}/scripts/glue_job.py"` substitutes the `BucketName` parameter (or resource) into the string. `!Join` would also work but is more verbose.
-5. **C** — CloudFormation returns an error because S3 bucket names are immutable. The bucket must be deleted and re-created. (The standard workaround is to use a separate stack for the bucket so the rest of the stack can be updated.)
+1. **B** — Metadata. The Glue Data Catalog is the central metadata store for AWS analytics services (Athena, EMR, Redshift Spectrum, Glue Jobs).
+2. **D** — Depends on the classifier. By default, Glue uses built-in classifiers (CSV, JSON, Parquet, etc.) and creates a table per detected file type. A custom classifier can change this.
+3. **B** — Script argument. The `--source-bucket` argument is passed to the script as a Job argument. The script must read `sys.argv` to extract it. If the script hardcodes a different path, it errors.
+4. **B** — Trigger not configured. Workflows chain jobs via Triggers. If the A→B trigger is missing or in a "failed" state, B doesn't run.
+5. **B** — Convert CSV to Parquet. CSV is row-based and not splittable in S3; Parquet is columnar and splittable. A 100-GB CSV takes 4 hours; the same data in Parquet typically takes 20-30 minutes.

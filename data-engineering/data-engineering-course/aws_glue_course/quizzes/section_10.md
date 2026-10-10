@@ -1,58 +1,58 @@
-# Section 10 Quiz — DataBrew
+# Section 10 Quiz — Glue DataBrew
 
 > 5 questions, multi-choice, single answer. The answer key is at the bottom.
 
 ---
 
-**Q1.** What is the primary use case for AWS Glue DataBrew?
+**Q1.** What is the difference between a Glue Data Quality *rule* and a *ruleset*?
 
-- A. Real-time data ingestion
-- B. Visual data preparation (no-code transformations)
-- C. Streaming ETL
-- D. SQL-based analytics
-
----
-
-**Q2.** In a DataBrew project, what is a *recipe*?
-
-- A. A versioned collection of data transformations
-- B. A SQL query
-- C. A Glue Job
-- D. A data source
+- A. A rule is a single check; a ruleset is a named collection of rules
+- B. A rule is for one column; a ruleset is for the whole table
+- C. A rule is in Python; a ruleset is in SQL
+- D. There is no difference
 
 ---
 
-**Q3.** A DataBrew job runs successfully but writes 0 rows to the output. The recipe has 3 steps. The source file has 100 rows. What is the most likely cause?
+**Q2.** A Glue Data Quality rule `ColumnLength "country" between 2 and 3` fails. What is the most likely cause?
 
-- A. The recipe's filter step dropped all rows
-- B. The output S3 bucket is wrong
-- C. The IAM role is wrong
-- D. The DataBrew job is in the wrong region
-
----
-
-**Q4.** Which DataBrew step would you use to replace nulls in the `country` column with `"UNKNOWN"`?
-
-- A. `FILL_NULLS` or `IMPUTE`
-- B. `DROP_NULL`
-- C. `REPLACE`
-- D. `MAP`
+- A. The column has values longer than 3 characters (e.g., "USA", "UK")
+- B. The column has null values
+- C. The column is the wrong type
+- D. The rule syntax is wrong
 
 ---
 
-**Q5.** A DataBrew job's output is in CSV. The same job, with the same recipe, now produces JSON. What is the most likely cause?
+**Q3.** A Glue Data Quality rule fails and the Glue Job writes 0 records to the target. What is the default behavior?
 
-- A. The job's output format setting was changed
-- B. The recipe was changed
-- C. The source data changed
-- D. The IAM role was changed
+- A. The job continues and writes 0 records
+- B. The job fails entirely
+- C. The job writes the records and flags the failure in CloudWatch
+- D. The behavior depends on the `Action` parameter
+
+---
+
+**Q4.** You want to be alerted when a Glue Data Quality rule fails. What is the standard pattern?
+
+- A. CloudWatch metric → CloudWatch alarm → SNS topic → email
+- B. Lambda + SES
+- C. EventBridge + Lambda
+- D. Direct SNS publish from the Glue Job
+
+---
+
+**Q5.** A Glue Data Quality rule `IsComplete "user_id"` is set up. The rule fails. Which of the following is the most likely cause?
+
+- A. The `user_id` column has null values
+- B. The `user_id` column has duplicate values
+- C. The `user_id` column has the wrong type
+- D. The rule is misconfigured
 
 ---
 
 # Answer Key
 
-1. **B** — Visual data prep. DataBrew is the no-code sibling of Glue Jobs. Same data catalog, same sources, but the transformations are visual (point-and-click) and the output is a recipe (versioned).
-2. **A** — Versioned transformations. A recipe is a sequence of steps; it can be versioned, published, and re-run.
-3. **A** — Filter dropped all rows. The most common cause: a `FILTER` step with a condition that doesn't match any rows (e.g., `country = "USA"` when the source is `US`).
-4. **A** — `FILL_NULLS`. DataBrew has a `FILL_NULLS` step (or `IMPUTE` for more advanced imputation).
-5. **A** — Output format setting was changed. The recipe doesn't control the output format; the DataBrew Job's output configuration does.
+1. **A** — Rule = single check; ruleset = named collection. A ruleset is the artifact you attach to a Glue Job (e.g., `DQRuleset: "completeness-user-id"`).
+2. **A** — Values longer than 3 characters. "USA" is 3 characters (passes), "UK" is 2 (passes), but "United States" is 13 (fails). The fix is to use the 2- or 3-letter country code (ISO 3166-1 alpha-2/alpha-3).
+3. **D** — Depends on the `Action` parameter. The default is `"primary"` (fail the job). `"secondary"` lets the job continue and writes the records. `"publish"` writes to a separate metrics stream.
+4. **A** — CloudWatch metric → alarm → SNS. Glue Data Quality publishes metrics to CloudWatch (`glue.dataset.metrics.RuleEvaluationStatus`); a CloudWatch alarm fires on `1` (failed); SNS delivers to email/Slack/PagerDuty.
+5. **A** — Null values. `IsComplete` checks for non-null values. If the column has nulls, the rule fails.

@@ -4,55 +4,55 @@
 
 ---
 
-**Q1.** What is the difference between a Glue Data Quality *rule* and a *ruleset*?
+**Q1.** Which AWS service is the most common source of a Glue Streaming ETL job?
 
-- A. A rule is a single check; a ruleset is a named collection of rules
-- B. A rule is for one column; a ruleset is for the whole table
-- C. A rule is in Python; a ruleset is in SQL
-- D. There is no difference
-
----
-
-**Q2.** A Glue Data Quality rule `ColumnLength "country" between 2 and 3` fails. What is the most likely cause?
-
-- A. The column has values longer than 3 characters (e.g., "USA", "UK")
-- B. The column has null values
-- C. The column is the wrong type
-- D. The rule syntax is wrong
+- A. S3 PUT events
+- B. Kinesis Data Streams
+- C. Amazon MSK (Kafka)
+- D. Both B and C
 
 ---
 
-**Q3.** A Glue Data Quality rule fails and the Glue Job writes 0 records to the target. What is the default behavior?
+**Q2.** A Glue Streaming job reads from a Kinesis stream with 10 shards. The job is configured with `NumberOfWorkers=5`. What is the effective parallelism?
 
-- A. The job continues and writes 0 records
-- B. The job fails entirely
-- C. The job writes the records and flags the failure in CloudWatch
-- D. The behavior depends on the `Action` parameter
-
----
-
-**Q4.** You want to be alerted when a Glue Data Quality rule fails. What is the standard pattern?
-
-- A. CloudWatch metric → CloudWatch alarm → SNS topic → email
-- B. Lambda + SES
-- C. EventBridge + Lambda
-- D. Direct SNS publish from the Glue Job
+- A. 5 (limited by the workers)
+- B. 10 (limited by the shards)
+- C. 50 (5 workers × 10 shards)
+- D. 1 (Kinesis shards cannot be parallelized)
 
 ---
 
-**Q5.** A Glue Data Quality rule `IsComplete "user_id"` is set up. The rule fails. Which of the following is the most likely cause?
+**Q3.** A Glue Streaming job's `batchProcessingTimeInMs` p99 is 4 minutes, up from 30 seconds 2 weeks ago. The `numRecordsProcessedPerBatch` is also up 3x. What is the most likely cause?
 
-- A. The `user_id` column has null values
-- B. The `user_id` column has duplicate values
-- C. The `user_id` column has the wrong type
-- D. The rule is misconfigured
+- A. The job is failing
+- B. Upstream traffic increase — the job is keeping up but processing more data
+- C. Worker count is too low
+- D. Kinesis is throttling
+
+---
+
+**Q4.** A Glue Streaming job uses a Python Shell job to generate synthetic data and write it to Kinesis. The job runs once and exits. What is the most likely issue?
+
+- A. The Python Shell job is not configured to run on a schedule
+- B. Python Shell jobs cannot write to Kinesis
+- C. The IAM role is wrong
+- D. The script is buggy
+
+---
+
+**Q5.** A Glue Streaming job reads from Kinesis, transforms, and writes to S3. The S3 output is missing some recent records. What is the most likely cause?
+
+- A. The job is not checkpointing
+- B. The S3 bucket policy is wrong
+- C. The IAM role is wrong
+- D. The Glue version is too old
 
 ---
 
 # Answer Key
 
-1. **A** — Rule = single check; ruleset = named collection. A ruleset is the artifact you attach to a Glue Job (e.g., `DQRuleset: "completeness-user-id"`).
-2. **A** — Values longer than 3 characters. "USA" is 3 characters (passes), "UK" is 2 (passes), but "United States" is 13 (fails). The fix is to use the 2- or 3-letter country code (ISO 3166-1 alpha-2/alpha-3).
-3. **D** — Depends on the `Action` parameter. The default is `"primary"` (fail the job). `"secondary"` lets the job continue and writes the records. `"publish"` writes to a separate metrics stream.
-4. **A** — CloudWatch metric → alarm → SNS. Glue Data Quality publishes metrics to CloudWatch (`glue.dataset.metrics.RuleEvaluationStatus`); a CloudWatch alarm fires on `1` (failed); SNS delivers to email/Slack/PagerDuty.
-5. **A** — Null values. `IsComplete` checks for non-null values. If the column has nulls, the rule fails.
+1. **D** — Both B and C. Glue Streaming supports Kinesis Data Streams and Kafka (including MSK) as sources. (Direct S3 PUT events are processed differently — typically via EventBridge → Glue Job, not a streaming ETL job.)
+2. **B** — 10. The parallelism is the minimum of workers and shards. With 10 shards and 5 workers, each worker processes 2 shards. To increase parallelism beyond 10, you must re-shard the Kinesis stream.
+3. **B** — Upstream traffic increase. If both metrics are up proportionally, the job is processing more data per batch; the question is whether the rate of *drain* is keeping up. If `batchProcessingTimeInMs` is also up 3x, the job is keeping up. If it's up 12x, the job is falling behind.
+4. **A** — Schedule. Python Shell jobs can write to Kinesis, but a one-shot job exits. To generate a *stream* of data, the job must run on a schedule (e.g., every 1 minute via EventBridge schedule or Glue Trigger).
+5. **A** — Not checkpointing. Glue Streaming uses checkpoints (stored in S3 or DynamoDB) to track which records have been processed. Without checkpointing, a job restart re-reads from the beginning, but in-flight records are lost.

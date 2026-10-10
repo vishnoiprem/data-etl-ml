@@ -1,58 +1,58 @@
-# Section 6 Quiz — Glue Pipeline Lab
+# Section 6 Quiz — First Glue Pipeline Lab
 
 > 5 questions, multi-choice, single answer. The answer key is at the bottom.
 
 ---
 
-**Q1.** A CloudFormation stack deploys a Glue Job, an IAM role, and 2 S3 buckets. The stack goes CREATE_FAILED. The event log shows the IAM role failed to create with `EntityAlreadyExists: Role with name GlueJobRole already exists`. What is the most likely cause?
+**Q1.** In a CloudFormation template, which section declares a value the user can override at stack-create time?
 
-- A. The role was created in a different account
-- B. A previous deployment left the role behind (stack was deleted but the role was retained)
-- C. CloudFormation bug
-- D. The role name is too long
-
----
-
-**Q2.** You deploy the pipeline stack and the Glue Job runs successfully. You then go to the target S3 bucket. The expected Parquet output is missing. What is the first thing you check?
-
-- A. The job run history in Glue
-- B. The CloudFormation stack events
-- C. The S3 bucket policy
-- D. The IAM role's identity policy
+- A. Resources
+- B. Parameters
+- C. Mappings
+- D. Outputs
 
 ---
 
-**Q3.** The Glue Job's script reads `s3://source-bucket/input/`. The script writes to `s3://target-bucket/output/`. The job fails with `AccessDenied` on the read. The IAM role's identity policy grants `s3:GetObject` on `arn:aws:s3:::source-bucket/*` and `s3:ListBucket` on `arn:aws:s3:::source-bucket`. What is missing?
+**Q2.** You reference a parameter in a Resources section: `BucketName: !Ref SourceBucketName`. What does `!Ref` return?
 
-- A. Nothing — the policy is complete
-- B. The policy must also grant `s3:ListBucket` on the source bucket
-- C. The policy must also grant `s3:GetObject` on the target bucket
-- D. The IAM role is missing the `AWSGlueServiceRole` managed policy
-
----
-
-**Q4.** The Glue Job's script uses `sys.argv` to read `--source-bucket` and `--target-bucket`. The job runs but reads from a hardcoded `s3://wrong-bucket/`. What is the most likely cause?
-
-- A. The arguments are not configured in the Job's `DefaultArguments`
-- B. The script is buggy
-- C. The IAM role is wrong
-- D. The Glue version is too old
+- A. The bucket's ARN
+- B. The bucket's name (the parameter's value)
+- C. The bucket's region
+- D. The bucket's IAM role
 
 ---
 
-**Q5.** You want to inspect the logs of a Glue Job run. Where do you go?
+**Q3.** You write a CloudFormation template that creates a Glue Job. The stack goes CREATE_FAILED at the Glue Job. The Glue Job's IAM role is created successfully. What is the most likely cause?
 
-- A. CloudWatch Logs, in the log group `/aws-glue/jobs/logs-v2/`
-- B. S3, in the `spark-logs/` prefix
-- C. The Glue console, in the Job run history → "Logs" tab
-- D. All of the above
+- A. The IAM role is not attached to the Glue Job
+- B. The Glue Job's `Role` property uses `!GetAtt GlueJobRole.Arn` but the role is not yet propagated
+- C. The IAM role's trust policy is missing `glue.amazonaws.com`
+- D. The S3 bucket does not exist yet
+
+---
+
+**Q4.** Which CloudFormation intrinsic function would you use to inject a string from a parameter into a script URL like `s3://bucket/scripts/glue_job.py`?
+
+- A. `!Ref`
+- B. `!Sub`
+- C. `!Join`
+- D. `!GetAtt`
+
+---
+
+**Q5.** You update a CloudFormation stack that contains an S3 bucket. You change the `BucketName` property to a new (globally unique) name. What happens?
+
+- A. The bucket is replaced (the old one is deleted, the new one is created)
+- B. The bucket's name is updated in place
+- C. CloudFormation returns an error because bucket names are immutable
+- D. The stack update is rejected
 
 ---
 
 # Answer Key
 
-1. **B** — Retained role. The role was not deleted when a previous stack was deleted. CloudFormation does not delete IAM roles by default (to prevent accidental lockout). Delete the role manually or use `Retain` + `Delete` policy.
-2. **A** — Job run history. The first check is always: did the job actually run? Did it succeed? Did it write to the right place? The job run history in Glue shows the start/end time, error message (if any), and DPU seconds consumed.
-3. **A** — Nothing. The policy is complete. (If the answer is wrong, the diagnosis is that the trust policy is missing — but the question is about the identity policy, which is fine.)
-4. **B** — Script bug. The arguments are probably configured correctly in the Job; the script is just not reading them. Common bug: the script's `if arg.startswith(...)` checks look for `--source-bucket` but the Job passes `--source_bucket` (typo or version difference).
-5. **D** — All of the above. Glue Jobs write logs to CloudWatch Logs (driver output), S3 (`spark-logs/` for the Spark UI), and the Glue console aggregates both.
+1. **B** — Parameters. Parameters are the user-overridable inputs to a stack.
+2. **B** — The parameter's value. `!Ref` on a parameter returns the parameter's value; `!Ref` on a resource returns the resource's logical ID (or its `Name` if the resource has one).
+3. **C** — Trust policy. Same root cause as the role-play: the IAM role's trust policy must allow `glue.amazonaws.com` to assume it. If the role is created but the Glue Job cannot assume it, the stack fails at the Glue Job resource.
+4. **B** — `!Sub`. `!Sub "s3://${BucketName}/scripts/glue_job.py"` substitutes the `BucketName` parameter (or resource) into the string. `!Join` would also work but is more verbose.
+5. **C** — CloudFormation returns an error because S3 bucket names are immutable. The bucket must be deleted and re-created. (The standard workaround is to use a separate stack for the bucket so the rest of the stack can be updated.)

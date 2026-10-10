@@ -4,58 +4,67 @@
 >
 > **Source title:** *AWS Glue - The Complete Masterclass*
 > **Subtitle:** Master building complete AWS Glue ETL Pipelines, Glue Data Quality, Glue Data Brew along with other AWS resources
-> **Instructor:** pvishnoi
-> **Format:** 11 sections, 78 lectures, 4h 11m total
-> **Includes:** 3 role plays, 4 downloadable resources, assignments, quiz per section
+> **Instructor:** pvishnoi (Prem Vishnoi)
+> **Format:** 11 sections, 81 lectures, 4h 11m total
+> **Includes:** 3 role plays, 4 downloadable resources, 6 assignments, 11 quizzes
 
 This is the **author's source material** for the Udemy course. The repo
 ships the full course as markdown so it can be version-controlled, diffed
 in PRs, and rebuilt into slides / video / audio at any time.
 
-## Course content map
+## What you'll learn (the 8 outcomes)
 
-| Section | Folder | Lectures | What it covers |
-|---|---|---|---|
-| 1. Introduction | `01_introduction/` | 1-6 | Course overview, glue pipeline resources preview, IAM/KMS/SNS/Glue Catalog at 30,000 ft |
-| 2. IAM, KMS, SNS | `02_iam_kms_sns/` | 7-12 | Authentication vs authorization, IAM users/groups/roles/policies, KMS encryption keys, SNS pub/sub |
-| 3. S3 + CLI | `03_s3_cli/` | 13-21 | S3 101, AWS CLI 101, CLI config, CloudFormation 101, hands-on S3 bucket creation + upload |
-| 4. Glue Catalog + Crawler + Job | `04_glue_catalog_crawler/` | 22-37 | Glue Catalog, Crawler, Classifier, 5 crawlers hands-on, Glue Job, Trigger, Workflow |
-| 5. CloudFormation Templates | `05_glue_cfn_templates/` | 38-44 | CFN 101, 3 CFN template walkthroughs, upload to S3 |
-| 6. Glue Pipeline Lab | `06_glue_pipeline_lab/` | 45-54 | Deploy stack via CFN, debug, analyze Glue Job script, verify output |
-| 7. Glue Pipeline Debug | `07_glue_pipeline_debug/` | 55-62 | Fix script retrieval, launch error, glue argument, resource policy, identity policy, workflow |
-| 8. Glue Streaming | `08_glue_streaming/` | 63-71 | Streaming pipeline, generator job, loading job, transforming job, run all 3 |
-| 9. Glue Data Quality | `09_glue_data_quality/` | 72-79 | DQ 101, rule set, Glue Job with DQ, CloudWatch metrics, alerts |
-| 10. DataBrew | `10_databrew/` | 80-85 | DataBrew 101, profile data, project, recipe, job |
-| 11. Role Plays | `11_role_plays/` | 3 scenarios | Diagnose trust misconfig / streaming job falling behind / pitch DQ to manager |
+1. Understanding of AWS Glue Data Catalog and creating AWS Glue Database, Glue Tables and Crawlers.
+2. Using AWS Glue Studio, creating the ETL pipeline along with scheduled triggers, conditional triggers and glue workflow.
+3. KMS, IAM Role, SNS, S3 and other associated AWS resources associated with Glue. Understanding and creation of all the resources.
+4. Understanding of AWS Glue Data Quality and creating the associated Glue ETL pipeline.
+5. Understanding AWS Glue Data Brew, creating the recipe, project and job to curate the dataset.
+6. Understanding the AWS Glue streaming, creating the stream using the Python shell job and load the stream using the Spark streaming.
+7. Different ways AWS Glue job can fail and debugging the failure and fix.
+8. Creating the AWS resources for AWS Glue Pipeline using the AWS console and cloudformation.
 
-(The exact mapping to Udemy's 78 lectures is in `SYLLABUS.md`.)
+## Course content (11 sections, 81 lectures, 4h 11m)
+
+| # | Section | Lectures | Min | Folder |
+|---|---|---|---|---|
+| 1 | Introduction | L01–L03 | 12 | `01_introduction/` |
+| 2 | Glue Resources Setup Part 1 — IAM, KMS, SNS | L04–L11 | 21 | `02_iam_kms_sns/` |
+| 3 | Glue Resources Setup Part 2 — S3, AWS CLI, CloudFormation, CloudWatch | L12–L16 | 16 | `03_s3_cli_cloudformation/` |
+| 4 | Creating Bucket And Uploading Data For the Course | L17–L20 | 6 | `04_s3_buckets_data/` |
+| 5 | Glue Resources SetUp Part 3 — Glue Catalog, Crawler | L21–L35 | 58 | `05_glue_catalog_crawler/` |
+| 6 | CloudFormation Templates | L36–L42 | 15 | `06_cloudformation_templates/` |
+| 7 | First AWS Glue Pipeline Creation | L43–L48 | 25 | `07_first_glue_pipeline/` |
+| 8 | AWS Glue Job Debugging | L49–L57 | 27 | `08_glue_job_debug/` |
+| 9 | Glue Streaming Job | L58–L67 | 28 | `09_glue_streaming/` |
+| 10 | Glue Data Quality | L68–L75 | 21 | `10_glue_data_quality/` |
+| 11 | Glue Data Brew | L76–L81 | 22 | `11_glue_databrew/` |
+
+The 3 role plays are L57 in Section 8, plus 2 referenced in `assignments/`.
 
 ## Asset map
 
-| Asset | Path | Format |
-|---|---|---|
-| Course README (this file) | `aws_glue_course/README.md` | markdown |
-| Lecture-to-file map | `aws_glue_course/SYLLABUS.md` | markdown |
-| 78 lecture scripts | `aws_glue_course/0X_*/lecture_scripts/L*.md` | markdown |
-| 11 section quizzes | `aws_glue_course/quizzes/section_X.md` | markdown (Q + answer + explanation) |
-| 6 assignment prompts | `aws_glue_course/assignments/*.md` | markdown (objective + steps + deliverable) |
-| 4 downloadable resources | `aws_glue_course/downloads/*.csv / *.json / *.yaml / *.py` | runnable |
-| 3 role plays | `aws_glue_course/11_role_plays/*.md` | persona + script + success criteria |
+| Asset | Path |
+|---|---|
+| Course README (this file) | `aws_glue_course/README.md` |
+| Lecture-to-file map | `aws_glue_course/SYLLABUS.md` |
+| 81 lecture scripts | `aws_glue_course/0X_*/lecture_scripts/L*.md` |
+| 11 section quizzes | `aws_glue_course/quizzes/section_X.md` |
+| 6 assignment prompts | `aws_glue_course/assignments/*.md` |
+| 4 downloadable resources | `aws_glue_course/downloads/*.csv / *.json / *.yaml / *.py` |
+| 3 role plays | `08_glue_job_debug/lecture_scripts/L57_*.md` + 2 in `assignments/` |
 
 ## Downloadable resources (the 4)
 
-1. **`downloads/city_temperature.csv`** — sample data for the Glue Job lab (Section 6). City, country, date, avg_temperature, avg_temperature_uncertainty columns, ~500 rows.
-2. **`downloads/glue_service_trust_policy.json`** — the trust policy you attach to the `GlueJobRole` IAM role so Glue can assume it. Pairs with Section 2 lecture on IAM roles.
-3. **`downloads/glue_pipeline_stack.yaml`** — full CloudFormation template that provisions source S3 + target S3 + Glue Job + IAM role in one stack. Pairs with Section 6 lecture.
-4. **`downloads/glue_job_aggregate_cities.py`** — the Python Glue script that aggregates `city_temperature.csv` by country and writes Parquet to the target bucket. Pairs with Section 6.
+1. **`downloads/city_temperature.csv`** — 480 rows × 10 cols, 20 cities × 2 years. Sample data for the Glue Job lab in Section 7.
+2. **`downloads/glue_service_trust_policy.json`** — the IAM trust policy you attach to the `GlueJobRole` so `glue.amazonaws.com` can assume it. Pairs with Section 2 lecture L11.
+3. **`downloads/glue_pipeline_stack.yaml`** — full CloudFormation template: source S3, target S3, `GlueJobRole`, and a Spark (glueetl) Glue Job. Pairs with Section 7.
+4. **`downloads/glue_job_aggregate_cities.py`** — the PySpark Glue script that aggregates `city_temperature.csv` by (country, year, month) and writes partitioned Parquet. Pairs with Section 7.
 
 ## Role plays (the 3)
 
-1. **"Diagnose Glue Job Failure: Role/Trust Misconfig (Glue Can't Assume Role)"** — you (DE) + a junior DevOps engineer. Glue Job fails with `AccessDenied`. Walk through trust policy + identity policy together.
-2. **"Glue Streaming Job is Falling Behind"** — you (DE) + a manager. Streaming job's batch latency p99 has degraded from 30s to 4 min. Diagnose, propose fix, get sign-off.
-3. **"Pitch Glue Data Quality to a Skeptic Manager"** — you (DE) + a manager who's worried about rule-set maintenance. Pitch the DQ + CloudWatch + alerting stack.
-
-All 3 scripts are in `11_role_plays/`.
+1. **L57 — "Diagnose Glue Job Failure: Role/Trust Misconfig (Glue Can't Assume Role)"** in `08_glue_job_debug/lecture_scripts/L57_role_play_trust_misconfig.md`. You (DE) + a junior DevOps engineer. Glue Job fails with `AccessDeniedException`. Walk through trust policy + identity policy together.
+2. **Assignment 04 — "Glue Streaming Job is Falling Behind"** in `assignments/04_streaming.md`. You (DE) + a manager. Diagnose the 4-minute p99 vs 30-second baseline. Mitigate vs remediate.
+3. **Assignment 05 — "Pitch Glue Data Quality to a Skeptic Manager"** in `assignments/05_data_quality.md`. You (DE) + a manager. Scope the pitch to a pilot with measurable success.
 
 ## How to use this repo
 

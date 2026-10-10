@@ -4,55 +4,55 @@
 
 ---
 
-**Q1.** What is the primary purpose of the AWS Glue Data Catalog?
+**Q1.** Which S3 bucket setting, when enabled, prevents a public bucket policy from making objects publicly readable?
 
-- A. To store the actual data
-- B. To store metadata (schema, location, partitions) about the data
-- C. To run SQL queries
-- D. To encrypt data at rest
-
----
-
-**Q2.** A Glue Crawler runs against an S3 bucket with 3 different file types: CSV, JSON, and Parquet. How many tables does the crawler create by default?
-
-- A. 1 (it merges all file types into a single table)
-- B. 3 (one per file type, partitioned by file extension)
-- C. 0 (the crawler errors on heterogeneous data)
-- D. It depends on whether a classifier is configured
+- A. Versioning
+- B. Server-side encryption
+- C. Block public access
+- D. Object lock
 
 ---
 
-**Q3.** A Glue Job's `--source-bucket` argument is set to `my-bucket`. The job's script reads `s3://my-bucket/input/`. The job fails with `Unable to parse S3 path`. What is the most likely cause?
+**Q2.** You upload `city_temperature.csv` (25 KB) to S3. You then run a Glue Crawler on the bucket. The crawler creates a table in the Glue Data Catalog. The table's schema has 0 columns. What is the most likely cause?
 
-- A. The bucket does not exist
-- B. The script is not using the argument correctly
-- C. The IAM role is missing `s3:ListBucket`
-- D. The Glue version is too old
-
----
-
-**Q4.** A Glue Workflow has 3 Glue Jobs in sequence: Job A triggers Job B, Job B triggers Job C. Job A runs and succeeds. Job B does *not* run. What is the most likely cause?
-
-- A. Job B's IAM role is wrong
-- B. The Trigger from Job A to Job B is not configured (or is configured to fail)
-- C. Job A's output is not in the expected location
-- D. The Workflow is paused
+- A. The Glue Crawler IAM role is missing `s3:GetObject`
+- B. The CSV file's first row is a header and the crawler didn't infer the schema
+- C. The CSV file uses commas, but the crawler expects tabs
+- D. The Glue Data Catalog is in a different region
 
 ---
 
-**Q5.** A Glue Job's source is a 100-GB CSV file in S3. The job reads it, aggregates, and writes 200 MB of Parquet. The job takes 4 hours. What is the single most effective change to reduce runtime?
+**Q3.** Which S3 event notification target is the most common trigger for a Glue Job?
 
-- A. Increase `NumberOfWorkers` from 2 to 10
-- B. Convert the source CSV to Parquet
-- C. Add a Glue Crawler
-- D. Enable versioning on the bucket
+- A. SQS queue
+- B. SNS topic
+- C. EventBridge (via S3 event)
+- D. Lambda function
+
+---
+
+**Q4.** You delete a file in an S3 bucket that has versioning enabled. What happens?
+
+- A. The file is permanently deleted
+- B. A delete marker is created; the file's previous version is preserved
+- C. The bucket is emptied
+- D. CloudFormation rolls back
+
+---
+
+**Q5.** You upload `city_temperature.csv` to `s3://my-bucket/input/`. The Glue Crawler crawls `s3://my-bucket/`. The crawler creates a table named `input` with the schema. You then upload another file to `s3://my-bucket/input/2026/`. The crawler re-runs. How many tables are in the catalog now?
+
+- A. 1 (the table is updated in place)
+- B. 2 (`input` and `input_2026`)
+- C. 2 (`input` and `2026`)
+- D. 0 (the crawler errors because the schema might have changed)
 
 ---
 
 # Answer Key
 
-1. **B** — Metadata. The Glue Data Catalog is the central metadata store for AWS analytics services (Athena, EMR, Redshift Spectrum, Glue Jobs).
-2. **D** — Depends on the classifier. By default, Glue uses built-in classifiers (CSV, JSON, Parquet, etc.) and creates a table per detected file type. A custom classifier can change this.
-3. **B** — Script argument. The `--source-bucket` argument is passed to the script as a Job argument. The script must read `sys.argv` to extract it. If the script hardcodes a different path, it errors.
-4. **B** — Trigger not configured. Workflows chain jobs via Triggers. If the A→B trigger is missing or in a "failed" state, B doesn't run.
-5. **B** — Convert CSV to Parquet. CSV is row-based and not splittable in S3; Parquet is columnar and splittable. A 100-GB CSV takes 4 hours; the same data in Parquet typically takes 20-30 minutes.
+1. **C** — Block public access. This is the safety net that overrides bucket policies and ACLs. AWS recommends it on for all buckets.
+2. **B** — Header inference. The Glue Crawler by default treats the first row as a header and uses it to infer column names. If the file has *no* header (or the row is misformatted), the schema is empty.
+3. **C** — EventBridge. The modern pattern: S3 → EventBridge → Glue Trigger → Glue Job. The older S3-to-Lambda pattern still works but is being deprecated.
+4. **B** — Delete marker. Versioned delete is a soft delete; the previous version is recoverable.
+5. **A** — 1 table. The Glue Crawler treats the entire bucket as a single table when there's a common prefix; the table schema is updated to include the new file's columns if any are added.

@@ -4,55 +4,55 @@
 
 ---
 
-**Q1.** Which AWS service is the most common source of a Glue Streaming ETL job?
+**Q1.** A Glue Job fails with `Error retrieving the script: s3:GetObject access denied`. The job's IAM role has `s3:GetObject` on the source bucket. The script is in the source bucket. What is the most likely cause?
 
-- A. S3 PUT events
-- B. Kinesis Data Streams
-- C. Amazon MSK (Kafka)
-- D. Both B and C
-
----
-
-**Q2.** A Glue Streaming job reads from a Kinesis stream with 10 shards. The job is configured with `NumberOfWorkers=5`. What is the effective parallelism?
-
-- A. 5 (limited by the workers)
-- B. 10 (limited by the shards)
-- C. 50 (5 workers × 10 shards)
-- D. 1 (Kinesis shards cannot be parallelized)
+- A. The IAM role's identity policy is wrong
+- B. The bucket policy on the source bucket denies `s3:GetObject` from the role's principal
+- C. The script does not exist
+- D. The KMS key policy is wrong
 
 ---
 
-**Q3.** A Glue Streaming job's `batchProcessingTimeInMs` p99 is 4 minutes, up from 30 seconds 2 weeks ago. The `numRecordsProcessedPerBatch` is also up 3x. What is the most likely cause?
+**Q2.** A Glue Job fails with `Launch error: resource limits exceeded`. You have 1 concurrent job run allowed (the default). What is the most likely cause?
 
-- A. The job is failing
-- B. Upstream traffic increase — the job is keeping up but processing more data
-- C. Worker count is too low
-- D. Kinesis is throttling
+- A. A previous job run is still in the STARTING or RUNNING state
+- B. The IAM role is wrong
+- C. The script is too large
+- D. The S3 bucket does not exist
 
 ---
 
-**Q4.** A Glue Streaming job uses a Python Shell job to generate synthetic data and write it to Kinesis. The job runs once and exits. What is the most likely issue?
+**Q3.** A Glue Job fails with `Argument error: --source-bucket is required`. The script reads `arg.startswith("--source-bucket=")`. The Job's `DefaultArguments` includes `--source_bucket my-bucket`. What is the most likely cause?
 
-- A. The Python Shell job is not configured to run on a schedule
-- B. Python Shell jobs cannot write to Kinesis
+- A. The script is wrong
+- B. The argument key uses underscore (`--source_bucket`) but the script expects a dash (`--source-bucket`)
+- C. The argument value is missing
+- D. The IAM role is wrong
+
+---
+
+**Q4.** A Glue Job succeeds but writes 0 rows to the target. The script reads from `s3://source-bucket/input/` and writes to `s3://target-bucket/output/`. The job run log shows the read step returned 1,000 rows. What is the most likely cause?
+
+- A. The read returned 1,000 rows but the filter dropped all of them
+- B. The write step failed silently
 - C. The IAM role is wrong
-- D. The script is buggy
+- D. The S3 bucket does not exist
 
 ---
 
-**Q5.** A Glue Streaming job reads from Kinesis, transforms, and writes to S3. The S3 output is missing some recent records. What is the most likely cause?
+**Q5.** A Glue Workflow runs Job A, then Job B, then Job C. Job A succeeds. Job B fails. Job C does *not* run. Why?
 
-- A. The job is not checkpointing
-- B. The S3 bucket policy is wrong
-- C. The IAM role is wrong
-- D. The Glue version is too old
+- A. Job C's IAM role is wrong
+- B. The Workflow's default behavior on failure is to stop (unless the Trigger is configured to continue)
+- C. Job C is not in the workflow
+- D. The Workflow is paused
 
 ---
 
 # Answer Key
 
-1. **D** — Both B and C. Glue Streaming supports Kinesis Data Streams and Kafka (including MSK) as sources. (Direct S3 PUT events are processed differently — typically via EventBridge → Glue Job, not a streaming ETL job.)
-2. **B** — 10. The parallelism is the minimum of workers and shards. With 10 shards and 5 workers, each worker processes 2 shards. To increase parallelism beyond 10, you must re-shard the Kinesis stream.
-3. **B** — Upstream traffic increase. If both metrics are up proportionally, the job is processing more data per batch; the question is whether the rate of *drain* is keeping up. If `batchProcessingTimeInMs` is also up 3x, the job is keeping up. If it's up 12x, the job is falling behind.
-4. **A** — Schedule. Python Shell jobs can write to Kinesis, but a one-shot job exits. To generate a *stream* of data, the job must run on a schedule (e.g., every 1 minute via EventBridge schedule or Glue Trigger).
-5. **A** — Not checkpointing. Glue Streaming uses checkpoints (stored in S3 or DynamoDB) to track which records have been processed. Without checkpointing, a job restart re-reads from the beginning, but in-flight records are lost.
+1. **B** — Bucket policy. S3 evaluates *both* the IAM identity policy and the bucket policy. If the bucket policy denies access (e.g., to a specific VPC endpoint or source IP), the request fails even if the identity policy allows it.
+2. **A** — Concurrency limit. The default Glue concurrent job run limit per account is 1. A second job run will fail with `Launch error: resource limits exceeded` until the first run completes.
+3. **B** — Underscore vs dash. AWS Glue uses dashes in default arguments (`--source-bucket`), but custom arguments can use underscores. The mismatch is a common typo.
+4. **A** — Filter. The most common cause: a `filter` or `where` clause in the script that drops all rows. Check the script's filter logic; in the lab, it's often `filter(F.col("country").isin(["US"]))` when the CSV has different country codes.
+5. **B** — Default stop-on-failure. Workflow Triggers default to "skip on failure" (not "continue"). To make C run after B fails, configure the B→C Trigger with `Trigger.Conditions.OnDemand` or `Continue`.

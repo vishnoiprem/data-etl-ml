@@ -1,58 +1,58 @@
-# Section 7 Quiz — Glue Pipeline Debug
+# Section 7 Quiz — Glue Job Debug
 
 > 5 questions, multi-choice, single answer. The answer key is at the bottom.
 
 ---
 
-**Q1.** A Glue Job fails with `Error retrieving the script: s3:GetObject access denied`. The job's IAM role has `s3:GetObject` on the source bucket. The script is in the source bucket. What is the most likely cause?
+**Q1.** A CloudFormation stack deploys a Glue Job, an IAM role, and 2 S3 buckets. The stack goes CREATE_FAILED. The event log shows the IAM role failed to create with `EntityAlreadyExists: Role with name GlueJobRole already exists`. What is the most likely cause?
 
-- A. The IAM role's identity policy is wrong
-- B. The bucket policy on the source bucket denies `s3:GetObject` from the role's principal
-- C. The script does not exist
-- D. The KMS key policy is wrong
-
----
-
-**Q2.** A Glue Job fails with `Launch error: resource limits exceeded`. You have 1 concurrent job run allowed (the default). What is the most likely cause?
-
-- A. A previous job run is still in the STARTING or RUNNING state
-- B. The IAM role is wrong
-- C. The script is too large
-- D. The S3 bucket does not exist
+- A. The role was created in a different account
+- B. A previous deployment left the role behind (stack was deleted but the role was retained)
+- C. CloudFormation bug
+- D. The role name is too long
 
 ---
 
-**Q3.** A Glue Job fails with `Argument error: --source-bucket is required`. The script reads `arg.startswith("--source-bucket=")`. The Job's `DefaultArguments` includes `--source_bucket my-bucket`. What is the most likely cause?
+**Q2.** You deploy the pipeline stack and the Glue Job runs successfully. You then go to the target S3 bucket. The expected Parquet output is missing. What is the first thing you check?
 
-- A. The script is wrong
-- B. The argument key uses underscore (`--source_bucket`) but the script expects a dash (`--source-bucket`)
-- C. The argument value is missing
-- D. The IAM role is wrong
+- A. The job run history in Glue
+- B. The CloudFormation stack events
+- C. The S3 bucket policy
+- D. The IAM role's identity policy
 
 ---
 
-**Q4.** A Glue Job succeeds but writes 0 rows to the target. The script reads from `s3://source-bucket/input/` and writes to `s3://target-bucket/output/`. The job run log shows the read step returned 1,000 rows. What is the most likely cause?
+**Q3.** The Glue Job's script reads `s3://source-bucket/input/`. The script writes to `s3://target-bucket/output/`. The job fails with `AccessDenied` on the read. The IAM role's identity policy grants `s3:GetObject` on `arn:aws:s3:::source-bucket/*` and `s3:ListBucket` on `arn:aws:s3:::source-bucket`. What is missing?
 
-- A. The read returned 1,000 rows but the filter dropped all of them
-- B. The write step failed silently
+- A. Nothing — the policy is complete
+- B. The policy must also grant `s3:ListBucket` on the source bucket
+- C. The policy must also grant `s3:GetObject` on the target bucket
+- D. The IAM role is missing the `AWSGlueServiceRole` managed policy
+
+---
+
+**Q4.** The Glue Job's script uses `sys.argv` to read `--source-bucket` and `--target-bucket`. The job runs but reads from a hardcoded `s3://wrong-bucket/`. What is the most likely cause?
+
+- A. The arguments are not configured in the Job's `DefaultArguments`
+- B. The script is buggy
 - C. The IAM role is wrong
-- D. The S3 bucket does not exist
+- D. The Glue version is too old
 
 ---
 
-**Q5.** A Glue Workflow runs Job A, then Job B, then Job C. Job A succeeds. Job B fails. Job C does *not* run. Why?
+**Q5.** You want to inspect the logs of a Glue Job run. Where do you go?
 
-- A. Job C's IAM role is wrong
-- B. The Workflow's default behavior on failure is to stop (unless the Trigger is configured to continue)
-- C. Job C is not in the workflow
-- D. The Workflow is paused
+- A. CloudWatch Logs, in the log group `/aws-glue/jobs/logs-v2/`
+- B. S3, in the `spark-logs/` prefix
+- C. The Glue console, in the Job run history → "Logs" tab
+- D. All of the above
 
 ---
 
 # Answer Key
 
-1. **B** — Bucket policy. S3 evaluates *both* the IAM identity policy and the bucket policy. If the bucket policy denies access (e.g., to a specific VPC endpoint or source IP), the request fails even if the identity policy allows it.
-2. **A** — Concurrency limit. The default Glue concurrent job run limit per account is 1. A second job run will fail with `Launch error: resource limits exceeded` until the first run completes.
-3. **B** — Underscore vs dash. AWS Glue uses dashes in default arguments (`--source-bucket`), but custom arguments can use underscores. The mismatch is a common typo.
-4. **A** — Filter. The most common cause: a `filter` or `where` clause in the script that drops all rows. Check the script's filter logic; in the lab, it's often `filter(F.col("country").isin(["US"]))` when the CSV has different country codes.
-5. **B** — Default stop-on-failure. Workflow Triggers default to "skip on failure" (not "continue"). To make C run after B fails, configure the B→C Trigger with `Trigger.Conditions.OnDemand` or `Continue`.
+1. **B** — Retained role. The role was not deleted when a previous stack was deleted. CloudFormation does not delete IAM roles by default (to prevent accidental lockout). Delete the role manually or use `Retain` + `Delete` policy.
+2. **A** — Job run history. The first check is always: did the job actually run? Did it succeed? Did it write to the right place? The job run history in Glue shows the start/end time, error message (if any), and DPU seconds consumed.
+3. **A** — Nothing. The policy is complete. (If the answer is wrong, the diagnosis is that the trust policy is missing — but the question is about the identity policy, which is fine.)
+4. **B** — Script bug. The arguments are probably configured correctly in the Job; the script is just not reading them. Common bug: the script's `if arg.startswith(...)` checks look for `--source-bucket` but the Job passes `--source_bucket` (typo or version difference).
+5. **D** — All of the above. Glue Jobs write logs to CloudWatch Logs (driver output), S3 (`spark-logs/` for the Spark UI), and the Glue console aggregates both.
