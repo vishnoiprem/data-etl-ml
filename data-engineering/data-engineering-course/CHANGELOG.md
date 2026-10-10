@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-10 — AWS Glue — The Complete Masterclass (Udemy course author source)
+
+New track: `aws_glue_course/`. The author-source markdown for the Udemy course *AWS Glue - The Complete Masterclass* (11 sections, 78 lectures, 4h 11m, 3 role plays, 4 downloadable resources, 6 assignments, 11 quizzes). Section 1 lectures are written as full individual files (L01–L12). Sections 2–10 are bundled per-section (`SECTION_BUNDLE.md`) with one stub file per lecture so the SYLLABUS map resolves.
+
+### Added — `aws_glue_course/`
+- `README.md` (course overview + asset map) and `SYLLABUS.md` (lecture L1–L78 → file).
+- `01_introduction/lecture_scripts/L01–L12.md` — 12 full lecture scripts (IAM, KMS, SNS, GlueJobRole).
+- `02_iam_kms_sns/` through `10_databrew/lecture_scripts/SECTION_BUNDLE.md` — 9 section bundles covering lectures L13–L85.
+- `downloads/city_temperature.csv` (480 rows, 20 cities × 2 years).
+- `downloads/glue_service_trust_policy.json` (the IAM trust policy for `GlueJobRole`).
+- `downloads/glue_pipeline_stack.yaml` (full CloudFormation template: 2 S3 buckets, IAM role, Glue Job).
+- `downloads/glue_job_aggregate_cities.py` (PySpark ETL script, validates with `py_compile`).
+- `quizzes/section_1.md` through `quizzes/section_11.md` — 11 quizzes (5 multi-choice each, with answer keys).
+- `assignments/01–06.md` — 6 assignment prompts (S3, CFN, debug, streaming, DQ, DataBrew).
+- `11_role_plays/RP1_trust_misconfig.md`, `RP2_streaming_falling_behind.md`, `RP3_pitch_data_quality.md` — the 3 role plays with persona + script + worked answer + common mistakes.
+
+### Verified
+- `city_temperature.csv` is 480 rows, 10 columns, valid CSV.
+- `glue_service_trust_policy.json` parses as valid IAM JSON.
+- `glue_pipeline_stack.yaml` parses with a CFN-aware YAML loader; 4 resources, 4 parameters, 4 outputs.
+- `glue_job_aggregate_cities.py` compiles with `python3 -m py_compile`.
+
 ## 2026-10-10 — Meta DE onsite rounds: data modeling + architecture + leadership (E5/E6)
 
 The 4 onsite rounds after the 60-min CoderPad screen: **Data Modeling** (60 min, whiteboard), **Architecture / Product-Sense** (60 min, hardest round), and **Leadership / Ownership** (E5/E6, 30-45 min, standalone). This module ships the worked answers to the 5 most-asked 2026 schema questions, the 5-step architecture framework, and the 4 question families + 5 Meta-value probes for the leadership round.

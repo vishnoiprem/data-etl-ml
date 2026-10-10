@@ -19,6 +19,7 @@ in any order once you know the foundations.
 | 9 | **EM Introduction** | `em_introduction/` | 1 | Engineering-management intro for IC -> EM transition. |
 | 10 | **How to Get the Interview** | `how_to_get_the_interview/` | 1 | Resume, LinkedIn, referrals, compensation negotiation. |
 | 11 | **Project Retrospective** | `project_retrospective/` | 1 | 6 lessons on "tell me about a project you shipped" answers. |
+| 12 | **AWS Glue Masterclass** | `aws_glue_course/` | 11 | 78 lecture scripts (4h 11m), 4 downloadable resources, 11 quizzes, 6 assignments, 3 role plays. |
 
 ## Shared infrastructure (read-only, used by the tracks)
 
