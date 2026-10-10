@@ -16,7 +16,7 @@
 
 | Company | Loop length | Heaviest round | Key differentiator | Top 3 tracks to prioritize |
 |---|---|---|---|---|
-| **Meta (Facebook)** | **3-5 weeks, 5+5+4+1** (2026) | **60-min CoderPad: 5 SQL + 5 Python** | Dedicated data-modeling round; bar-raiser; 5 Core Values (Ownership) | `sql_interviews/11_meta_screen/`, `data_modeling/`, `behavioral_interviews/` |
+| **Meta (Facebook)** | **3-5 weeks, 5+5+4+1** (2026) | **60-min CoderPad: 5 SQL + 5 Python** | Dedicated data-modeling round; bar-raiser; 5 Core Values (Ownership) | `sql_interviews/11_meta_screen/`, `sql_interviews/12_meta_onsite_rounds/`, `behavioral_interviews/` |
 | **Google** | **6-12 weeks, 7 stages** (2026) | Data System Design (45 min) | Hiring Committee (post-loop); Googleyness = 30% of eval | `coding_interviews`, `system_design`, `behavioral_interviews` |
 | **Stripe** | 4–5 rounds, ~3 weeks | Coding + API/system design | Customer-first culture; written take-home; "engineers who care about correctness" | `coding_interviews`, `system_design`, `data_modeling` |
 | **Netflix** | 4–5 rounds, ~3 weeks | System design (discussion, not whiteboard) | "Highly effective" calibration; culture deck; senior+ roles only | `behavioral_interviews`, `system_design`, `coding_interviews` |
@@ -89,12 +89,27 @@
   (`design/05_sessionization_pattern.md`), gaps-and-islands
   (Problem 5 in `02_sql_problems.md`), and top-N-after-filter
   (Problem 3).
-- **Data modeling prep** — `data_modeling/03_high_level_diagrams/`
-  for the 5 working star schemas; `data_modeling/04_dimension_design/`
-  for SCD 1/2/3; `data_modeling/07_mock_interviews/` for 6 full
-  mock interviews. The Meta 2026 guide explicitly lists
-  Instagram Reels / cross-platform user behavior / ads auction
-  as the 3 most-asked modeling questions; all 3 are in this track.
+- **Data modeling prep** — `sql_interviews/12_meta_onsite_rounds/`
+  for the 5 most-asked 2026 questions with worked solutions
+  (Reels, cross-platform, Ads Auction, ride-share, metric drop) and
+  the SQL schema that backs them; also
+  `data_modeling/03_high_level_diagrams/` for the 5 working star
+  schemas; `data_modeling/04_dimension_design/` for SCD 1/2/3;
+  `data_modeling/07_mock_interviews/` for 6 full mock interviews.
+  The Meta 2026 guide explicitly lists Instagram Reels / cross-platform
+  user behavior / ads auction as the 3 most-asked modeling questions;
+  all 3 are in this module.
+- **Architecture / product-sense prep** —
+  `sql_interviews/12_meta_onsite_rounds/design/02_architecture_round.md`
+  for the 5-step framework (product goal → metrics → schema → ETL SQL
+  → cost model) with the WA Business worked example. The
+  `notebooks/05_meta_system_design_walkthrough.ipynb` in Module 11
+  has the live execution.
+- **Leadership (E5/E6) prep** —
+  `sql_interviews/12_meta_onsite_rounds/design/03_leadership_round.md`
+  for the 4 question families, 5 Meta-Value probes, and E5-vs-E6
+  signal differences. Pairs with the broader
+  `behavioral_interviews/05_practice/` track.
 - **Product sense prep** — `behavioral_interviews/05_practice/design/12_product_sense_investigation.md`
   for the 7-step hypothesis-tree framework; the sessionization
   notebook (`notebooks/04_sessionization.ipynb`) for the

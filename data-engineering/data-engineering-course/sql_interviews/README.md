@@ -1,6 +1,6 @@
 # SQL Interviews
 
-> **11 modules · 108 lessons · 6 videos · ~34 hours**
+> **12 modules · 113 lessons · 6 videos · ~36 hours**
 >
 > **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
 
@@ -26,6 +26,7 @@ sql_interviews/
 ├── 09_hard_practice/         14 lessons + 14 passing tests
 ├── 10_query_performance/     4 lessons, EXPLAIN, indexes, joins, rewrites
 ├── 11_meta_screen/           6 lessons + 5 Jupyter notebooks, 2026 Meta DE CoderPad (60-min: 5 SQL + 5 Python + 6 onsite SQL)
+├── 12_meta_onsite_rounds/    5 lessons + 1 Jupyter notebook, the 4 onsite rounds: data modeling, architecture, leadership (E5/E6)
 └── exercise.md               capstone: 5 interview-style questions
 ```
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-10-10 — Meta DE onsite rounds: data modeling + architecture + leadership (E5/E6)
+
+The 4 onsite rounds after the 60-min CoderPad screen: **Data Modeling** (60 min, whiteboard), **Architecture / Product-Sense** (60 min, hardest round), and **Leadership / Ownership** (E5/E6, 30-45 min, standalone). This module ships the worked answers to the 5 most-asked 2026 schema questions, the 5-step architecture framework, and the 4 question families + 5 Meta-value probes for the leadership round.
+
+Sources: [Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer), [Aced 2026](https://www.aced.io/guides/meta-data-engineer-interview), [Tryexponent 2026](https://www.tryexponent.com/guides/meta-data-engineer-interview), [Glassdoor 2026](https://www.glassdoor.com/Interview/Meta-Data-Engineer-Interview-Questions-EI_IE40772.0,4_KO5,18.htm), [HelloInterview E6 2026](https://www.hellointerview.com/guides/meta/e6).
+
+### Added — `sql_interviews/12_meta_onsite_rounds/`
+
+- **`module_overview.md`** — the 4-5 onsite rounds, the 3 content areas covered here
+- **`design/01_data_modeling_round.md`** — the 5-step framework, the 5 most-asked 2026 questions (verbatim), what "good" looks like, common failure modes
+- **`design/02_architecture_round.md`** — the 5-step framework (product → metrics → schema → ETL → cost), 3 worked examples (WA Business, Reels, Ads Auction), the killer follow-ups
+- **`design/03_leadership_round.md`** — the 4 question families, 5 Meta-Value probes, E5 vs E6 signal differences, the 3 follow-ups that catch candidates off-guard
+- **`design/04_concrete_solutions.md`** — full worked solutions to all 5 most-asked schema questions (Reels, cross-platform, Ads Auction, ride-share, metric drop)
+- **`design/05_companies_to_research.md`** — which Meta org (Reels / UA / Ads / Marketplace / RL) each question comes from, what to read, the killer follow-up
+- **`code/meta_onsite_schemas.sql`** — 5 schemas, runnable against SQLite
+- **`tests/test_onsite_schemas.py`** — 9 tests
+- **`notebooks/01_onsite_schemas.ipynb`** — 5 schemas in 5 cells, each with the canonical query
+
+### Tests
+
+- `sql_interviews/12_meta_onsite_rounds/`: 9 new tests, all green
+- Total repo: 1,470 tests (was 1,461)
+
 ## 2026-10-10 — Meta DE screen module: 5 SQL + 5 Python + 6 onsite SQL + 5 Jupyter notebooks
 
 The 2026 Meta DE CoderPad is **60 minutes: 5 SQL + 5 Python** (the
