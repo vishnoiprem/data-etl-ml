@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  AWS Glue ETL pipeline stack for the AWS Glue - The Complete Masterclass
+  course. Provisions:
+    - Source S3 bucket (city_temperature.csv uploaded separately)
+    - Target S3 bucket (Parquet output from the Glue Job)
+    - IAM role (GlueJobRole) with the AWS Glue service trust policy
+    - Glue Job (Python shell, Glue version 4.0) that aggregates by country
+      and writes Parquet partitions by year/month
+
+Parameters:
+  SourceBucketName:
+    Type: String
+    Default: awsglueudemycourse-datasoup-gluejob2-source
+    Description: S3 bucket where the Glue Job reads city_temperature.csv from.
+  TargetBucketName:
+    Type: String
+    Default: awsglueudemycourse-datasoup-gluejob1-target
+    Description: S3 bucket where the Glue Job writes Parquet output.
+  GlueScriptS3Key:
+    Type: String
+    Default: scripts/glue_job_aggregate_cities.py
+    Description: S3 key (in the same bucket as the script) of the Glue Job script.
+  GlueJobName:
+    Type: String
+    Default: GlueJob2-Country-Aggregate
+    AllowedPattern: "^[A-Za-z0-9_-]+$"
+    Description: Name of the Glue Job. Must match [A-Za-z0-9_-]+.
+
+Resources:
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref SourceBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+
+  TargetBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref TargetBucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+
+  GlueJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: GlueJobRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: GlueJobS3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ReadSource
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${SourceBucketName}"
+                  - !Sub "arn:aws:s3:::${SourceBucketName}/*"
+              - Sid: WriteTarget
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${TargetBucketName}"
+                  - !Sub "arn:aws:s3:::${TargetBucketName}/*"
+              - Sid: ReadScript
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:aws:s3:::${SourceBucketName}/${GlueScriptS3Key}"
+              - Sid: WriteLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  GlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Ref GlueJobName
+      Role: !GetAtt GlueJobRole.Arn
+      GlueVersion: "4.0"
+      MaxRetries: 1
+      Timeout: 60
+      WorkerType: G.025X
+      NumberOfWorkers: 2
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${SourceBucketName}/${GlueScriptS3Key}"
+        PythonVersion: "3"
+      DefaultArguments:
+        --job-language: python
+        --source-bucket: !Ref SourceBucketName
+        --target-bucket: !Ref TargetBucketName
+        --source-key: input/city_temperature.csv
+        --enable-metrics: ""
+        --enable-continuous-cloudwatch-log: "true"
+        --enable-spark-ui: "true"
+        --spark-event-logs-path: !Sub "s3://${TargetBucketName}/spark-logs/"
+
+Outputs:
+  SourceBucketName:
+    Value: !Ref SourceBucketName
+    Export:
+      Name: GlueCourseSourceBucket
+  TargetBucketName:
+    Value: !Ref TargetBucketName
+    Export:
+      Name: GlueCourseTargetBucket
+  GlueJobName:
+    Value: !Ref GlueJob
+    Export:
+      Name: GlueCourseJobName
+  GlueJobRoleArn:
+    Value: !GetAtt GlueJobRole.Arn
+    Export:
+      Name: GlueCourseJobRoleArn

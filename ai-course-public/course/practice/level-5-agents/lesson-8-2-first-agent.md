@@ -16,7 +16,7 @@
 
 ## 🧠 Concept (5 min)
 
-Building an agent from scratch means **implementing the ReAct loop yourself**. The components: (1) **System prompt** -- defines the available tools, the output format (`Thought / Action / Observation`), and the rules. (2) **Tool registry** -- dict of tool name -> (description, function). (3) **Parser** -- extracts `Thought: ...` and `Action: tool_name(args)` from the model output. (4) **Executor** -- runs the tool, captures the result. (5) **Loop** -- keep going until `Final Answer:` appears or max turns hit. **Failure modes**: model outputs malformed action (parse error), model loops on the same action (need a repetition detector), model picks a tool that doesn't exist (return an error message and let it retry). **The model choice matters**: GPT-4o and Claude Sonnet are the most reliable for ReAct. Smaller models often fail at the format.
+A ReAct agent is a loop over five components: **(1) system prompt** — declares the tool catalog and the `Thought / Action / Observation` format the model must emit; **(2) tool registry** — name → (description, args, function); **(3) parser** — extracts `Action: tool_name(args)` and `Final Answer: …` from model output; **(4) executor** — runs the tool and feeds the observation back into the prompt; **(5) loop driver** — bounded by `MAX_TURNS` and a repetition detector. **Failure surfaces the parser must absorb:** the model returns a tool that isn't registered, the parser sees a malformed action, or the model calls the same action N times in a row. Each has a typed response (registry error / parse error / loop-abort) that the model can branch on. **Model selection matters:** the ReAct format is an instruction-following task; GPT-5-class and Claude Sonnet 4.5-class models hold the format reliably; sub-100B SLMs degrade fast.
 
 ---
 
@@ -24,7 +24,7 @@ Building an agent from scratch means **implementing the ReAct loop yourself**. T
 
 ### Spec
 
-Build a working ReAct agent: (1) define 3 tools (calculator, web_search_mock, get_current_time), (2) build a system prompt that teaches the format, (3) implement the ReAct loop, (4) handle errors, (5) limit to 10 turns. Use a mock LLM. Demo: 'What is 25 * 17?' (1 turn) and 'What is the time in Tokyo?' (needs lookup).
+Implement a working ReAct agent: (1) define three tools (`calculator` with AST-bounded eval, `web_search_mock`, `get_current_time` with IANA zoneinfo), (2) render the system prompt from the tool catalog, (3) drive the loop with a parser and a 10-turn cap, (4) handle unknown-tool and parse-error paths as typed observations the model can branch on, (5) trip a repetition detector at 3 identical actions. Mock the LLM. Demo: `'What is 25 * 17?'` (1 tool call) and `'What is the time in Tokyo?'` (1 tool call → final answer).
 
 ### Acceptance Criteria
 

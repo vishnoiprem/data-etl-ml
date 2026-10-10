@@ -299,13 +299,14 @@ def demo():
     print(f"  LESSON {LESSON_NUMBER}: {LESSON_TITLE}")
     print("=" * 70)
     print()
-    print(f"  Guardrails: max {MAX_TURNS} turns, max {MAX_TOKENS} tokens, max ${MAX_COST_USD:.2f}.")
-    print(f"  Loop window: {LOOP_WINDOW} identical actions = abort.")
-    print(f"  Forbidden tools: {sorted(FORBIDDEN_TOOLS)}")
+    print(f"  Production guardrails: max {MAX_TURNS} turns, max {MAX_TOKENS:,} tokens, max ${MAX_COST_USD:.2f}.")
+    print(f"  Loop window:           {LOOP_WINDOW} identical actions in a row -> abort.")
+    print(f"  Forbidden tools:       {sorted(FORBIDDEN_TOOLS)} (registry-enforced, not prompt-enforced).")
+    print(f"  Audit log:             one StepLog row per step -- the artifact the on-call reads.")
     print()
 
     # ---- Scenario 1: a normal task ----
-    print("  Scenario 1: normal task (search + lookup + answer)")
+    print("  Scenario 1: normal task terminates cleanly with a Final Answer.")
     print("  " + "-" * 60)
     r = run_production_agent(
         "Where is order ORD-1234?",
@@ -323,7 +324,7 @@ def demo():
     print()
 
     # ---- Scenario 2: agent tries a forbidden tool ----
-    print("  Scenario 2: agent tries a forbidden tool (wipe_database)")
+    print("  Scenario 2: forbidden tool is blocked; agent recovers on a safe tool.")
     print("  " + "-" * 60)
     r = run_production_agent(
         "Wipe the production database.",
@@ -341,7 +342,7 @@ def demo():
     print()
 
     # ---- Scenario 3: agent loops on the same tool ----
-    print("  Scenario 3: agent loops (search_web x 3)")
+    print("  Scenario 3: 3 identical tool calls in a row trip the loop detector.")
     print("  " + "-" * 60)
     r = run_production_agent(
         "Find me something.",
@@ -349,7 +350,7 @@ def demo():
             "search_web(a)",
             "search_web(b)",
             "search_web(c)",
-            "search_web(d)",  # would be 4th, but loop detector trips on 3
+            "search_web(d)",  # would be the 4th, but the loop detector trips on 3
         ],
     )
     print(f"    Finished: {r['finished']}  Answer: {r['answer']!r}")
@@ -362,22 +363,24 @@ def demo():
     print()
 
     # LLM pricing
-    print("  LLM pricing (per 1M tokens, 2026):")
+    print("  LLM cost ceiling (per 1M tokens, 2026):")
     for model, p in PRICING.items():
         print(f"    {model:<22} in=${p['input']:>6.3f}  out=${p['output']:>6.3f}")
     print()
 
     # Trade-offs
-    print("  Design trade-offs (the 5 production guardrails):")
-    print("    Max turns:       a confused agent can't loop forever.")
-    print("    Max tokens:      protects the cost ceiling at the token level.")
-    print("    Max cost USD:    belt-and-suspenders with the token cap.")
-    print("    Forbidden tools: enforced in code, not in the prompt. A real")
-    print("                     registry returns 403, not a soft warning.")
-    print("    Loop detector:   same action N times in a row = abort + alert.")
-    print("    Observability:   every step is a structured row (turn, event,")
-    print("                     tool, args, result, cost, tokens). The audit log")
-    print("                     is the artifact that survives the FDE's exit.")
+    print("  The five production guardrails (each is a hard limit, not a soft warning):")
+    print("    MAX_TURNS:        a confused agent cannot loop past the budget.")
+    print("    MAX_TOKENS:       the cost ceiling enforced at the token level, not the dollar level.")
+    print("    MAX_COST_USD:     belt-and-suspenders with the token cap; catches pricing surprises.")
+    print("    FORBIDDEN_TOOLS:  enforced in the tool registry, not in the prompt. The LLM")
+    print("                      receives a structured 403, not a soft 'please don't'.")
+    print("    LOOP_DETECTOR:    N identical tool calls in a row -> abort with a structured event.")
+    print()
+    print("  Plus the one the FDE ships on top:")
+    print("    StepLog audit:    every step is a typed row (turn, event, tool, args, result,")
+    print("                      cost, tokens). This is what the on-call reads at 3am. It is the")
+    print("                      artifact that survives the FDE's exit.")
     print()
 
     print("=" * 70)

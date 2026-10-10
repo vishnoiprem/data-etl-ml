@@ -16,7 +16,7 @@
 
 ## 🧠 Concept (5 min)
 
-Agents need **memory across sessions**. Three types: (1) **Short-term** -- current conversation (in the prompt). (2) **Long-term** -- facts about the user ('user prefers Python', 'user is in Berlin'). Stored in a vector DB, retrieved at query time. (3) **Episodic** -- past interactions ('last week user asked about X'). Stored as summaries. **Implementation patterns**: (1) **Manual** -- you write the memory update logic (after each turn, summarize and store). (2) **Mem0** -- open-source memory layer, automatically extracts and retrieves memories. (3) **Letta** (formerly MemGPT) -- open-source agent framework with built-in memory tiers. **Architect decision**: what to store? Store preferences, key facts, and summaries. Don't store transient info ('user said hi'). Don't store PII without consent.
+Memory is what separates a stateless LLM call from an agent that knows the user. **Three tiers, by latency and scope:** **(1) Short-term** — the current conversation; lives in the prompt window, trimmed to `SHORT_TERM_WINDOW` messages. **(2) Long-term** — durable facts about the user (language, location, role, preferences); stored in a vector index, retrieved at query time by cosine similarity, deduped at `cos > 0.9`. **(3) Episodic** — append-only summaries of past sessions; rolled at session boundary, retrieved by recency. **The extract-store-retrieve loop is the unit of work:** on each turn, retrieve top-K facts, generate the response, extract new facts, dedup-and-store. **Architect decisions:** *what to store* (durable facts only — drop transient greetings and chit-chat), *when to drop* (a confidence floor; below it, the fact does not enter the store), and *what is in scope* (PII requires explicit consent; the model card documents the data scope). **Implementation paths:** manual (you write the extract logic), Mem0 (open-source memory layer with auto-extract), or Letta (open-source agent framework with built-in tiers). All three implement the same loop; the choice is about how much of the lifecycle you want to own.
 
 ---
 
@@ -24,7 +24,7 @@ Agents need **memory across sessions**. Three types: (1) **Short-term** -- curre
 
 ### Spec
 
-Build an agent with persistent memory: (1) on each turn, extract 1-3 facts about the user, (2) store in a vector DB (in-memory dict for demo), (3) at query time, retrieve the top-3 relevant facts and include in the prompt. Use a mock LLM and mock embeddings. Demo: have a 5-turn conversation, watch the memory grow.
+Implement the extract-store-retrieve loop end-to-end: (1) on each turn, extract 1–3 durable facts from the user message with a confidence score, (2) write through a dedup gate (cosine > 0.9 collapses near-duplicates) to an in-memory vector index, (3) at the next turn, retrieve top-3 facts by cosine similarity and prepend them to the prompt. (4) Append the conversation to a short-term window of bounded size. (5) At session boundary, roll a one-line summary into the episodic store. Mock the LLM and the embedder. Demo: a 5-turn conversation; show the long-term store grow on turns 1–3 and visibly drive retrieval on turns 4–5.
 
 ### Acceptance Criteria
 

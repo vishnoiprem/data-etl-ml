@@ -339,7 +339,7 @@ def demo():
     print()
 
     # 1. Successful calls
-    print("  Successful calls:")
+    print("  Happy path (3 tools, schema + envelope contract):")
     cases = [
         ("search_web",    {"query": "Qwen 2.5 release", "top_k": 2}),
         ("get_user",      {"user_id": "USR-12345"}),
@@ -352,23 +352,23 @@ def demo():
 
     # 2. Idempotent writes
     print()
-    print("  Idempotent writes (same call twice -> same key):")
+    print("  Idempotency: same (to, subject, body) triple -> same key, second call is a dedup hit.")
     r1 = call_tool("send_email", {"to": "mei@pf.co", "subject": "Hi", "body": "Test"})
     r2 = call_tool("send_email", {"to": "mei@pf.co", "subject": "Hi", "body": "Test"})
     print(f"    1st: {r1}")
-    print(f"    2nd: {r2}  (should reuse idempotency key)")
+    print(f"    2nd: {r2}")
     assert r1["ok"] and r2["ok"]
     assert r1["data"]["idempotency_key"] == r2["data"]["idempotency_key"], "dedup broken"
 
     # 3. Validation failures
     print()
-    print("  Validation failures (good errors, not stack traces):")
+    print("  Validation: schema violations return structured errors, not stack traces.")
     bad_cases = [
-        ("get_user",     {"user_id": "bad-format"}),                # regex
+        ("get_user",     {"user_id": "bad-format"}),
         ("send_email",   {"to": "not-an-email", "subject": "x", "body": "y"}),
         ("create_ticket",{"title": "", "body": "ok", "priority": "weird"}),
         ("unknown_tool", {"anything": 1}),
-        ("search_web",   {"query": "ok", "top_k": 999}),             # out of range
+        ("search_web",   {"query": "ok", "top_k": 999}),
     ]
     for name, args in bad_cases:
         r = call_tool(name, args)
@@ -378,7 +378,7 @@ def demo():
 
     # 4. The catalog the LLM sees
     print()
-    print("  Tool catalog (first 12 lines, the prompt the LLM reads):")
+    print("  Tool catalog (first 12 lines -- this is the prompt the LLM reads):")
     catalog = render_tool_catalog_for_llm()
     for line in catalog.splitlines()[:12]:
         print(f"    {line}")
@@ -386,23 +386,23 @@ def demo():
     print()
 
     # 5. Cost model
-    print("  Cost model (per tool, in 'credits' for the rate limiter):")
+    print("  Risk-weighted credit cost (drives the per-user rate limiter):")
     for name, c in TOOL_COST_CREDITS.items():
         print(f"    {name:<14} {c:>3} credit(s)")
     print()
 
     # 6. Pricing for the underlying LLM
-    print("  LLM pricing (per 1M tokens, 2026):")
+    print("  LLM cost ceiling (per 1M tokens, 2026):")
     for model, p in PRICING.items():
         print(f"    {model:<22} in=${p['input']:>6.3f}  out=${p['output']:>6.3f}")
     print()
 
     # 7. Trade-offs
-    print("  Design trade-offs:")
-    print("    Schema-strict: catches LLM mistakes early, costs 30 lines of code.")
-    print("    Idempotency:    retries are safe; cost is a hash + a dict.")
-    print("    Envelopes:      LLM can branch on ok/err without parsing strings.")
-    print("    Credit pricing: a refund is 10x a search; the rate limiter reflects risk.")
+    print("  Design properties:")
+    print("    Schema-strict:  arg validation catches LLM mistakes at the boundary, not mid-pipeline.")
+    print("    Idempotent:     sha256 over canonical args gives retries that are safe by construction.")
+    print("    Envelope-first: {ok, data} | {ok: false, error: {code, message}} -- the LLM branches on shape.")
+    print("    Credit-priced:  a refund is 10x a search; the rate limiter reflects blast radius.")
     print()
 
     print("=" * 70)

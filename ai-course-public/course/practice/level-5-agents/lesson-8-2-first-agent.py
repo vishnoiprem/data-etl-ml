@@ -255,7 +255,9 @@ def demo():
     print(f"  LESSON {LESSON_NUMBER}: {LESSON_TITLE}")
     print("=" * 70)
     print()
-    print("  ReAct agent: 3 tools, parser, repetition detector, 10-turn cap.")
+    print("  ReAct loop: Thought -> Action -> Observation, bounded by 10 turns.")
+    print("  Tools: calculator (AST-bounded eval), web_search_mock, IANA time.")
+    print("  Failure surfaces exercised: unknown tool, malformed output, 3-action loop.")
     print()
     for q in ["What is 25 * 17?", "What is the time in Tokyo?"]:
         print(f"  Q: {q}")
@@ -271,13 +273,14 @@ def demo():
         print(f"  ({result['turns']} turn(s))")
         print()
 
-    print("  Cost model (per 1M tokens, 2026):")
+    print("  Cost ceiling (per 1M tokens, 2026):")
     for model, p in PRICING.items():
         print(f"    {model:<22} in=${p['input']:>6.3f}  out=${p['output']:>6.3f}")
     print()
-    print("  Trade-offs (mock vs real API):")
-    print("    Mock:  Fast, free, deterministic. Use for design + tests.")
-    print("    Real:  Real quality, real cost, real errors. Use for validation.")
+    print("  Operational note:")
+    print("    The mock LLM is a deterministic stand-in for the design loop.")
+    print("    In production, the parser contract and the repetition detector")
+    print("    are the parts that survive the substitution to a real API.")
     print()
     print("=" * 70)
 

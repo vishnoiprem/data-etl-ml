@@ -290,26 +290,24 @@ def demo():
     print(f"  LESSON {LESSON_NUMBER}: {LESSON_TITLE}")
     print("=" * 70)
     print()
-    print("  Customer support graph: classify -> branch -> (human approval) -> END.")
+    print("  Stateful customer-support graph. Six nodes, two conditional edges,")
+    print(f"  one interrupt point at refund > ${HUMAN_APPROVAL_THRESHOLD_USD:.0f}.")
+    print(f"  State is a single dataclass; `state.path` is the audit log.")
     print()
 
     cases = [
-        # Case 1: small refund (under threshold) -- auto-approved
-        ("Small refund (under $100)",
+        ("Case 1: refund under threshold (auto-approves)",
          SupportState(request_id="REQ-1", user_message="I want a refund for ORD-1234."),
          None),
-        # Case 2: large refund (over threshold) -- needs human approval, we approve
-        ("Large refund (over $100, human-approved)",
+        ("Case 2: refund over threshold (interrupts, human approves)",
          SupportState(request_id="REQ-2",
                       user_message="I want a refund for ORD-5678. My bill was $250.",
                       refund_amount_usd=250.00),
          {"approved": True, "approver": "alice@support.co"}),
-        # Case 3: complaint -- escalate to human
-        ("Complaint (escalate)",
+        ("Case 3: complaint (escalates to human)",
          SupportState(request_id="REQ-3", user_message="This is unacceptable! I am furious!"),
          None),
-        # Case 4: question -- answer with RAG
-        ("Question (RAG answer)",
+        ("Case 4: question (RAG answers, terminates)",
          SupportState(request_id="REQ-4", user_message="How long does shipping take?"),
          None),
     ]
@@ -329,7 +327,7 @@ def demo():
         print()
 
     # LangGraph equivalent (for reference; not executed)
-    print("  LangGraph equivalent of the same workflow (sketch):")
+    print("  LangGraph equivalent (same control flow, expressed declaratively):")
     print("    from langgraph.graph import StateGraph, END")
     print("    g = StateGraph(SupportState)")
     print("    g.add_node('classify', node_classify)")
@@ -346,22 +344,23 @@ def demo():
     print("    g.add_conditional_edges('ask_order_id', route_after_ask_order_id, {")
     print("        'request_human_approval': 'request_human_approval', END: END})")
     print("    g.add_edge('request_human_approval', 'process_refund')")
-    print("    app = g.compile(interrupt_before=['process_refund'])  # human approval")
+    print("    app = g.compile(interrupt_before=['process_refund'])  # human-in-the-loop")
     print()
 
     # Cost model
-    print("  LLM pricing (per 1M tokens, 2026):")
+    print("  LLM cost ceiling (per 1M tokens, 2026):")
     for model, p in PRICING.items():
         print(f"    {model:<22} in=${p['input']:>6.3f}  out=${p['output']:>6.3f}")
     print()
 
     # Trade-offs
-    print("  Design trade-offs:")
-    print(f"    Human-approval threshold: ${HUMAN_APPROVAL_THRESHOLD_USD:.0f}.")
-    print("    Below: agent acts alone. Above: graph pauses for a human.")
-    print("    Cycles: MAX_NODE_VISITS guards against infinite loops in retry paths.")
-    print("    State: a single TypedDict (or dataclass) flows through every node.")
-    print("    Observability: `state.path` is the audit log of every node visit.")
+    print("  Design properties:")
+    print(f"    Interrupt:       refund > ${HUMAN_APPROVAL_THRESHOLD_USD:.0f} pauses the graph; below, the agent acts.")
+    print("    Cycle defense:    MAX_NODE_VISITS bounds retries -- no node can run more than 3x.")
+    print("    State shape:     one dataclass flows through every node; no hidden message bus.")
+    print("    Observability:   state.path is the per-run audit trail; first-class artifact.")
+    print("    Declarative:     LangGraph equivalents are listed above; the hand-rolled graph")
+    print("                    and the StateGraph express the same control flow.")
     print()
 
     print("=" * 70)

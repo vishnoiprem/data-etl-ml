@@ -299,7 +299,9 @@ def demo():
     print(f"  LESSON {LESSON_NUMBER}: {LESSON_TITLE}")
     print("=" * 70)
     print()
-    print("  3-tier memory: short-term (in-prompt) + long-term (vector) + episodic (summary).")
+    print("  Three memory tiers, one extract-store-retrieve loop per turn.")
+    print("  Short-term -> in-prompt window.  Long-term -> cosine>0.9 deduped vector.")
+    print("  Episodic   -> append-only summary, rolled at session boundary.")
     print()
 
     store = MemoryStore(user_id="USR-DEMO")
@@ -314,7 +316,7 @@ def demo():
     # After the conversation, summarize it as an episode
     summary = "User introduced themselves as a Python dev in Berlin working on ML/RAG for a SaaS startup; vegetarian, prefers coffee."
     store.add_episode(summary, turn_count=len(CONVERSATION))
-    print(f"  Episodic memory updated with a summary of the conversation.")
+    print(f"  Episode rolled: {summary[:80]}...")
     print()
 
     # Inspect the final state
@@ -328,26 +330,31 @@ def demo():
         print(f"      - {e.summary}")
     print()
 
-    # Test retrieval on a fresh query
-    print("  Fresh query: 'I need help with TypeScript'")
+    # Test retrieval on a fresh query -- demonstrates the cold-start problem
+    print("  Negative test: fresh query 'I need help with TypeScript'")
     used = store.query_long_term("TypeScript")
     print(f"    Retrieved: {[m.text for m in used] or '(no match)'}")
-    print(f"    (Note: 'typescript' wasn't in the conversation, so the query returns 0 matches.)")
+    print(f"    Reading:    'typescript' is absent from the bag-of-words vocab, so the")
+    print(f"                query vector is all zeros and cosine is 0 everywhere.")
+    print(f"                A real embedder (text-embedding-3-small, bge-small) would")
+    print(f"                match on the semantic neighborhood; the mock doesn't.")
     print()
 
     # Cost model
-    print("  LLM pricing (per 1M tokens, 2026):")
+    print("  LLM cost ceiling (per 1M tokens, 2026):")
     for model, p in PRICING.items():
         print(f"    {model:<22} in=${p['input']:>6.3f}  out=${p['output']:>6.3f}")
     print()
 
     # Trade-offs
-    print("  Design trade-offs:")
-    print("    What to store:  durable facts (lang, location) > transient (greetings).")
-    print("    Dedup:          cosine > 0.9 collapses near-duplicates.")
-    print("    Confidence:     drop low-confidence extractions; don't pollute the store.")
-    print("    Vector DB:      in-memory dict for demo; pgvector/Qdrant/Weaviate in prod.")
-    print("    Privacy:        never store PII without consent; the model card must say so.")
+    print("  Design properties:")
+    print("    Store signal:   durable facts (language, location) qualify; greetings don't.")
+    print("    Dedup:          cosine > 0.9 collapses near-duplicates before they hit the index.")
+    print("    Confidence:     MIN_CONFIDENCE drops low-quality extractions; the store is a")
+    print("                    positive cache, not a log.")
+    print("    Vector store:   in-memory dict for the demo; pgvector / Qdrant / Weaviate in prod.")
+    print("    Privacy:        PII stays out of the store without explicit consent; the model")
+    print("                    card documents the data scope.")
     print()
 
     print("=" * 70)

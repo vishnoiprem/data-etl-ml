@@ -16,7 +16,7 @@
 
 ## 🧠 Concept (5 min)
 
-Tools are the **API the LLM sees**. Bad tool design = bad agent. **Anatomy of a great tool**: (1) **Name** -- verb_noun format (`search_web`, `get_user`, `send_email`). Action-oriented. (2) **Description** -- 1-3 sentences explaining what it does, when to use it, what it returns. The LLM reads this to decide. (3) **Args schema** -- typed arguments with descriptions. (4) **Return type** -- structured (JSON) is best. (5) **Error handling** -- return a string error message, not raise (let the LLM retry or pick another tool). (6) **Idempotency** -- safe to retry. (7) **Latency** -- fast (<5s preferred). **Anti-patterns**: tools with too many args (>5), tools with vague descriptions, tools that raise exceptions, tools that return unstructured text. **Architect rule**: write the tool description last, after you've used the tool manually a few times.
+A tool is the surface the model treats as an API. The seven properties of a production tool, in priority order: **(1) name** — `verb_noun` (`search_web`, `get_user`, `send_email`); action-oriented, no ambiguity; **(2) description** — 1–3 sentences; the LLM uses it to decide when to call, so it must name the trigger condition, not the implementation; **(3) typed args** — JSON-Schema or an equivalent, with required-vs-optional explicit; **(4) structured return** — `{ok, data}` or `{ok: false, error: {code, message}}`; the model branches on shape; **(5) errors as values** — return a typed envelope, never raise; the model retries on the envelope; **(6) idempotency** — every write tool keys on a stable hash of the canonical args; a retry produces the same side effect or none; **(7) cost-weighted** — the rate limiter reflects blast radius (`send_email` is 10× a `search_web`). **Anti-patterns**: tools with >5 args, vague descriptions, raw exceptions leaking out, free-text returns, missing idempotency on writes. **Architect rule:** write the description last, after using the tool manually 3–5 times.
 
 ---
 
@@ -24,7 +24,7 @@ Tools are the **API the LLM sees**. Bad tool design = bad agent. **Anatomy of a 
 
 ### Spec
 
-Build 5 production-ready tools: (1) `search_web(query, top_k)`, (2) `get_user(user_id)`, (3) `send_email(to, subject, body)`, (4) `create_ticket(title, body)`, (5) `lookup_order(order_id)`. Each has a name, description, typed args, and error handling. Mock the implementations.
+Build five production-ready tools: (1) `search_web(query, top_k)` (read, idempotent, credit=1), (2) `get_user(user_id)` (read, regex-validated, credit=1), (3) `send_email(to, subject, body)` (write, sha256-idempotent, credit=10), (4) `create_ticket(title, body, priority)` (write, sha256-idempotent, credit=3), (5) `lookup_order(order_id)` (read, regex-validated, credit=1). Each tool ships a typed args schema, a structured envelope return, and a credit cost. Mock the implementations.
 
 ### Acceptance Criteria
 
