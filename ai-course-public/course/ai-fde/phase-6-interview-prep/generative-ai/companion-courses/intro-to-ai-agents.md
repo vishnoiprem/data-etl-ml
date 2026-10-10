@@ -36,7 +36,7 @@ The course has 9 sections, 54 lectures, 2h 11m. Here's what each section teaches
 
 **The Phase 1-5 module that preps it:** Phase 1 (foundations) + Phase 4 (`course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/`).
 
-**The company-experience report that tests it:** all 6 reports. Every FDE customer simulation tests "did you build an agent?" or "did you use an agent?" at some point.
+**The company-experience report that tests it:** all 12 company reports. Every FDE customer simulation tests "did you build an agent?" or "did you use an agent?" at some point.
 
 ---
 
@@ -102,7 +102,7 @@ The course has 9 sections, 54 lectures, 2h 11m. Here's what each section teaches
 
 **The Phase 1-5 module that preps it:** Phase 3 (`course/ai-fde/phase-3-deployment/`) — the eval-driven iteration pattern.
 
-**The company-experience report that tests it:** all 6 reports. The "manufacture labels" answer in customer-simulation Q9 is exactly this: build an eval set as the first step.
+**The company-experience report that tests it:** all 12 company reports. The "manufacture labels" answer in customer-simulation Q9 is exactly this: build an eval set as the first step.
 
 ---
 
@@ -216,7 +216,7 @@ The course has 9 sections, 54 lectures, 2h 11m. Here's what each section teaches
 
 **The Phase 1-5 module that preps it:** Phase 2 (the service architecture) + Phase 3 (the deployment + runbook) + Phase 4 (the 4 project deployments).
 
-**The company-experience report that tests it:** all 6 reports. Every FDE company tests deployment readiness as a phase-2 signal.
+**The company-experience report that tests it:** all 12 company reports. Every FDE company tests deployment readiness as a phase-2 signal.
 
 ---
 

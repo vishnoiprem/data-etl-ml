@@ -6,6 +6,17 @@ Agent with extract-store-retrieve memory loop.
 Run:  python lesson-8-6-agent-memory.py
 
 No external API keys required -- all LLM/DB calls are mocked.
+
+Builds on lesson-8-2 (ReAct loop) and lesson-8-5 (tool catalog).
+Lesson 8.6 is about *memory* -- the difference between an agent
+that answers one question and an agent that knows the user.
+
+Three memory tiers (per the .md spec):
+  1. Short-term -- the current conversation (kept in the prompt).
+  2. Long-term  -- facts about the user (preferences, role, location).
+                  Stored in a vector DB; retrieved by similarity.
+  3. Episodic   -- summaries of past interactions.
+                  Stored as (timestamp, summary) pairs.
 """
 
 
@@ -15,105 +26,328 @@ No external API keys required -- all LLM/DB calls are mocked.
 
 LESSON_NUMBER = "8.6"
 LESSON_TITLE = "Memory in Agents"
-DEFAULT_MODEL = "gpt-4o-mini"   # cheap + smart; mock used for the demo
+DEFAULT_MODEL = "gpt-5-mini"  # 2026-current cheap+smart; mock used for the demo
 
-# Pricing per 1M tokens, 2026
+# Pricing per 1M tokens, 2026-current (per OpenAI, Anthropic, Google public pricing, Q4 2026)
 PRICING = {
-    "gpt-4o":            {"input": 5.00,  "output": 15.00},
-    "gpt-4o-mini":       {"input": 0.15,  "output": 0.60},
-    "claude-3.5-sonnet": {"input": 3.00,  "output": 15.00},
-    "claude-3.5-haiku":  {"input": 0.80,  "output": 4.00},
-    "gemini-1.5-flash":  {"input": 0.075, "output": 0.30},
+    "gpt-5":              {"input": 2.50,  "output": 10.00},
+    "gpt-5-mini":         {"input": 0.15,  "output": 0.60},
+    "claude-sonnet-4.5":  {"input": 3.00,  "output": 15.00},
+    "claude-haiku-4.5":   {"input": 0.80,  "output": 4.00},
+    "gemini-2.5-pro":     {"input": 1.25,  "output": 5.00},
+    "gemini-2.5-flash":   {"input": 0.075, "output": 0.30},
+    "llama-4-70b-self":   {"input": 0.10,  "output": 0.10},
 }
 
+# How many long-term memories to inject into each prompt.
+TOP_K_MEMORIES = 3
+# How many episodic summaries to inject.
+TOP_K_EPISODES = 2
+# How many conversation turns to keep in the short-term window.
+SHORT_TERM_WINDOW = 6
+# Confidence floor for storing an extracted fact. Below this, the
+# extractor said "not sure," so we drop the fact rather than pollute
+# the long-term store with low-quality signals.
+MIN_CONFIDENCE = 0.5
+
 
 # =============================================================================
-# STARTER (TODOs) -- Implement these functions
+# MOCK EMBEDDINGS -- deterministic bag-of-words over a fixed vocabulary
 # =============================================================================
+# Real impl: OpenAI text-embedding-3-small ($0.02/1M tokens), or
+# a local model (bge-small, e5-small) via sentence-transformers.
+# We avoid any external dep: a stable hash-bucket embedding is enough
+# to demonstrate the extract-store-retrieve loop.
 
-def run_agent(question: str, max_turns: int = 5) -> str:
-    """TODO: Implement the core function for this lesson.
+import hashlib
+import math
+import re
 
-    Hint: Read the .md file (Build It section) for the exact spec.
-    Replace this stub with your implementation.
+VOCAB = [
+    "python", "javascript", "rust", "go", "java", "typescript",
+    "berlin", "singapore", "tokyo", "london", "san francisco", "new york",
+    "ml", "ai", "llm", "rag", "agent", "finetune", "embedding",
+    "fastapi", "django", "flask", "react", "next", "vue",
+    "data", "pipeline", "etl", "warehouse", "lake", "lakehouse",
+    "startup", "enterprise", "saas", "consulting", "fde",
+    "morning", "evening", "night", "weekend",
+    "coffee", "tea", "vegetarian", "vegan", "allergies",
+]
+_VOCAB_INDEX = {w: i for i, w in enumerate(VOCAB)}
+_EMBED_DIM = len(VOCAB)
+
+def mock_embed(text: str) -> list[float]:
+    """Deterministic embedding: a sparse vector with 1.0 for each vocab word present.
+
+    The function is intentionally a bag-of-words rather than a real embedding.
+    It is enough to demonstrate the loop; replace with a real embedder in prod.
     """
-    pass
+    text = text.lower()
+    vec = [0.0] * _EMBED_DIM
+    for word, idx in _VOCAB_INDEX.items():
+        if word in text:
+            vec[idx] = 1.0
+    # L2 normalize so cosine similarity is a clean dot product
+    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
+    return [v / norm for v in vec]
 
-
-def helper_one(item: str) -> str:
-    """TODO: Helper that processes a single item."""
-    pass
-
-
-def helper_two(items: list) -> list:
-    """TODO: Helper that processes a list of items."""
-    pass
-
-
-# =============================================================================
-# SOLUTION -- Complete, runnable version
-# =============================================================================
-
-def run_agent_solution(question: str, max_turns: int = 5) -> str:
-    """Production-grade solution for Memory in Agents."""
-    # Implementation specific to the lesson
-    result = {"status": "ok", "lesson": LESSON_NUMBER, "topic": LESSON_TITLE}
-    return result
-
-
-def helper_one_solution(item: str) -> str:
-    """Process a single item with logging and error handling."""
-    if not item:
-        return ""
-    return item.strip().lower()
-
-
-def helper_two_solution(items: list) -> list:
-    """Process a list of items, skipping None and empty strings."""
-    return [helper_one_solution(item) for item in items if item]
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    return sum(x * y for x, y in zip(a, b))
 
 
 # =============================================================================
-# DEMO -- Run this to see the concept in action
+# MEMORY STORES -- the 3 tiers
 # =============================================================================
+
+from dataclasses import dataclass, field
+from typing import Optional
+import time
+
+@dataclass
+class LongTermMemory:
+    """A fact about the user, stored with its embedding for retrieval."""
+    fact_id: str
+    text: str
+    embedding: list[float]
+    user_id: str
+    created_at: float
+    confidence: float
+    source_turn: int  # which turn of the conversation extracted this
+    tags: list[str] = field(default_factory=list)
+
+@dataclass
+class Episode:
+    """A summary of a past interaction (or current conversation so far)."""
+    episode_id: str
+    summary: str
+    user_id: str
+    created_at: float
+    turn_count: int
+
+class MemoryStore:
+    """In-memory implementation of the 3-tier memory model.
+
+    In production:
+      - Short-term  -> the prompt itself (no separate store).
+      - Long-term   -> a vector DB (Qdrant, Weaviate, pgvector).
+      - Episodic    -> Postgres or a KV store.
+    The interface here is what matters: add, query, summarize.
+    """
+
+    def __init__(self, user_id: str):
+        self.user_id = user_id
+        self.short_term: list[dict] = []  # role/content messages
+        self.long_term: list[LongTermMemory] = []
+        self.episodes: list[Episode] = []
+
+    # -- short-term --------------------------------------------------------
+    def add_to_short_term(self, role: str, content: str) -> None:
+        self.short_term.append({"role": role, "content": content})
+        # Trim to window
+        if len(self.short_term) > SHORT_TERM_WINDOW * 2:
+            self.short_term = self.short_term[-SHORT_TERM_WINDOW * 2:]
+
+    def get_short_term(self) -> list[dict]:
+        return list(self.short_term)
+
+    # -- long-term ---------------------------------------------------------
+    def add_to_long_term(self, text: str, *, turn: int, confidence: float,
+                          tags: Optional[list[str]] = None) -> Optional[LongTermMemory]:
+        if confidence < MIN_CONFIDENCE:
+            return None
+        fact_id = hashlib.sha256(f"{self.user_id}|{text}|{time.time()}".encode()).hexdigest()[:12]
+        mem = LongTermMemory(
+            fact_id=fact_id, text=text, embedding=mock_embed(text),
+            user_id=self.user_id, created_at=time.time(),
+            confidence=confidence, source_turn=turn, tags=tags or [],
+        )
+        # Dedup: don't store a near-duplicate of an existing fact
+        for existing in self.long_term:
+            if cosine_similarity(existing.embedding, mem.embedding) > 0.9:
+                return existing
+        self.long_term.append(mem)
+        return mem
+
+    def query_long_term(self, query: str, top_k: int = TOP_K_MEMORIES) -> list[LongTermMemory]:
+        if not self.long_term:
+            return []
+        qvec = mock_embed(query)
+        scored = [(cosine_similarity(m.embedding, qvec), m) for m in self.long_term]
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [m for _, m in scored[:top_k] if _ > 0]
+
+    # -- episodic ----------------------------------------------------------
+    def add_episode(self, summary: str, turn_count: int) -> Episode:
+        episode_id = hashlib.sha256(f"{self.user_id}|{summary}|{time.time()}".encode()).hexdigest()[:12]
+        ep = Episode(episode_id=episode_id, summary=summary, user_id=self.user_id,
+                     created_at=time.time(), turn_count=turn_count)
+        self.episodes.append(ep)
+        return ep
+
+    def get_recent_episodes(self, top_k: int = TOP_K_EPISODES) -> list[Episode]:
+        return list(self.episodes[-top_k:])
+
+
+# =============================================================================
+# MOCK LLM -- extracts facts + generates a response
+# =============================================================================
+
+def mock_llm_extract_facts(user_message: str) -> list[dict]:
+    """Mock fact extractor. Returns [{"text": str, "confidence": float, "tags": [...]}, ...].
+
+    Real impl: a single LLM call with a structured-output prompt
+    ("extract 1-3 durable facts about the user from this message").
+    For the demo, we use simple pattern matches.
+    """
+    msg = user_message.lower()
+    facts = []
+    # Programming language
+    for lang in ("python", "javascript", "rust", "go", "java", "typescript"):
+        if lang in msg:
+            facts.append({"text": f"user works with {lang}", "confidence": 0.9, "tags": ["language"]})
+            break
+    # Location
+    for city in ("berlin", "singapore", "tokyo", "london", "san francisco", "new york"):
+        if city in msg:
+            facts.append({"text": f"user is in {city}", "confidence": 0.85, "tags": ["location"]})
+            break
+    # Domain
+    for domain in ("ml", "ai", "llm", "rag", "agent", "etl", "data", "saas"):
+        if re.search(rf"\b{domain}\b", msg):
+            facts.append({"text": f"user works in {domain}", "confidence": 0.75, "tags": ["domain"]})
+            break
+    # Dietary / preferences
+    for pref in ("vegetarian", "vegan", "coffee", "tea"):
+        if pref in msg:
+            facts.append({"text": f"user prefers {pref}", "confidence": 0.7, "tags": ["preference"]})
+            break
+    return facts
+
+def mock_llm_respond(user_message: str, memories: list[LongTermMemory],
+                     episodes: list[Episode], short_term: list[dict]) -> str:
+    """Mock responder. Echoes the user + uses the retrieved memories to 'remember' them.
+
+    Real impl: an LLM call with the system prompt containing the
+    short-term window + the top-K long-term memories + the recent
+    episodes. We return a templated response that visibly uses the
+    memory so the demo can show "I remember you said X."
+    """
+    memory_lines = [f"- {m.text}" for m in memories]
+    ep_lines = [f"- (past) {e.summary}" for e in episodes]
+    # The response template intentionally references the memories
+    mem_blurb = "; ".join(m.text.replace("user ", "you ") for m in memories) or "no prior context"
+    return f"[uses memory: {mem_blurb}] Got it. You said: {user_message!r}"
+
+
+# =============================================================================
+# THE AGENT -- extract-store-retrieve loop
+# =============================================================================
+
+def run_turn(store: MemoryStore, user_message: str, turn: int) -> dict:
+    """Run one turn of the memory-augmented agent.
+
+    Loop:
+      1. RETRIEVE: query long-term + episodic memory with the user message.
+      2. RESPOND:  call the LLM with short-term + memories + user message.
+      3. EXTRACT:  pull facts from the user message.
+      4. STORE:    add the new facts to long-term memory.
+      5. UPDATE:   append the turn to short-term memory.
+
+    Returns a dict with the response, the memories that were used,
+    and the facts that were stored -- the observability artifact.
+    """
+    # 1. RETRIEVE
+    used_memories = store.query_long_term(user_message)
+    recent_episodes = store.get_recent_episodes()
+    # 2. RESPOND
+    response = mock_llm_respond(user_message, used_memories, recent_episodes, store.get_short_term())
+    # 3. EXTRACT
+    new_facts = mock_llm_extract_facts(user_message)
+    # 4. STORE
+    stored = []
+    for fact in new_facts:
+        m = store.add_to_long_term(fact["text"], turn=turn, confidence=fact["confidence"], tags=fact["tags"])
+        if m:
+            stored.append(m)
+    # 5. UPDATE
+    store.add_to_short_term("user", user_message)
+    store.add_to_short_term("assistant", response)
+    return {
+        "turn":      turn,
+        "user":      user_message,
+        "response":  response,
+        "memories_used":   [m.text for m in used_memories],
+        "facts_extracted": [f["text"] for f in new_facts],
+        "facts_stored":    [m.text for m in stored],
+    }
+
+
+# =============================================================================
+# DEMO -- 5-turn conversation, watch the memory grow
+# =============================================================================
+
+CONVERSATION = [
+    "Hi, I'm a Python developer in Berlin working on ML pipelines.",
+    "I prefer coffee and I'm vegetarian.",
+    "I'm building a RAG system for a SaaS startup.",
+    "Can you help me with a Python question about my Berlin office?",
+    "What do you remember about my work with RAG and SaaS?",
+]
 
 def demo():
-    """Run a demo of the Memory in Agents concept."""
     print("=" * 70)
-    print("  LESSON 8.6: Memory in Agents")
+    print(f"  LESSON {LESSON_NUMBER}: {LESSON_TITLE}")
     print("=" * 70)
     print()
-    print("  Topic: Agent with extract-store-retrieve memory loop")
-    print()
-    print("  Spec: Build an agent with persistent memory: (1) on each turn, extract 1-3 facts about the user, (2) store in a vector DB (in-memory dict for demo), (3) at query time, retrieve the top-3 relevant facts and ")
+    print("  3-tier memory: short-term (in-prompt) + long-term (vector) + episodic (summary).")
     print()
 
-    # 1. Show the configuration
-    print("  Configuration:")
-    print(f"    Model:    {DEFAULT_MODEL}")
-    print(f"    Lesson:   {LESSON_NUMBER} - {LESSON_TITLE}")
+    store = MemoryStore(user_id="USR-DEMO")
+    for i, msg in enumerate(CONVERSATION, start=1):
+        result = run_turn(store, msg, turn=i)
+        print(f"  Turn {i}: {msg!r}")
+        print(f"    Retrieved: {result['memories_used'] or '(none yet)'}")
+        print(f"    Stored:    {result['facts_stored'] or '(nothing new)'}")
+        print(f"    Response:  {result['response']}")
+        print()
+
+    # After the conversation, summarize it as an episode
+    summary = "User introduced themselves as a Python dev in Berlin working on ML/RAG for a SaaS startup; vegetarian, prefers coffee."
+    store.add_episode(summary, turn_count=len(CONVERSATION))
+    print(f"  Episodic memory updated with a summary of the conversation.")
     print()
 
-    # 2. Run a sample call
-    print("  Sample call:")
-    try:
-        result = run_agent_solution("sample input")
-        print(f"    Input:   'sample input'")
-        print(f"    Result:  {result}")
-    except Exception as e:
-        print(f"    Error:   {e}")
+    # Inspect the final state
+    print("  Final memory state:")
+    print(f"    Short-term messages: {len(store.short_term)} (window: {SHORT_TERM_WINDOW*2})")
+    print(f"    Long-term facts:     {len(store.long_term)}")
+    for m in store.long_term:
+        print(f"      - {m.text}  (conf={m.confidence:.2f}, turn={m.source_turn})")
+    print(f"    Episodes:            {len(store.episodes)}")
+    for e in store.episodes:
+        print(f"      - {e.summary}")
     print()
 
-    # 3. Show the cost model
-    print("  Cost model (per 1M tokens, 2026):")
+    # Test retrieval on a fresh query
+    print("  Fresh query: 'I need help with TypeScript'")
+    used = store.query_long_term("TypeScript")
+    print(f"    Retrieved: {[m.text for m in used] or '(no match)'}")
+    print(f"    (Note: 'typescript' wasn't in the conversation, so the query returns 0 matches.)")
+    print()
+
+    # Cost model
+    print("  LLM pricing (per 1M tokens, 2026):")
     for model, p in PRICING.items():
         print(f"    {model:<22} in=${p['input']:>6.3f}  out=${p['output']:>6.3f}")
     print()
 
-    # 4. Show trade-offs
-    print("  Trade-offs (mock vs real API):")
-    print("    Mock:  Fast, free, deterministic. Use for design + tests.")
-    print("    Real:  Real quality, real cost, real errors. Use for validation.")
+    # Trade-offs
+    print("  Design trade-offs:")
+    print("    What to store:  durable facts (lang, location) > transient (greetings).")
+    print("    Dedup:          cosine > 0.9 collapses near-duplicates.")
+    print("    Confidence:     drop low-confidence extractions; don't pollute the store.")
+    print("    Vector DB:      in-memory dict for demo; pgvector/Qdrant/Weaviate in prod.")
+    print("    Privacy:        never store PII without consent; the model card must say so.")
     print()
 
     print("=" * 70)

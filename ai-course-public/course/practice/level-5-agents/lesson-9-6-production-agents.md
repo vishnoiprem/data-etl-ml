@@ -112,6 +112,24 @@ The same `.py` file has the complete solution after the `# === SOLUTION ===` div
 
 ---
 
+## 🏗️ FDE Production Hardening (the patterns beyond this lab)
+
+The lab above covers the 5 guardrails every prototype needs. A **Forward Deployed Engineer** adds 5 more on top — the patterns that make the agent survive the customer's first quarter in production:
+
+1. **The cost ceiling as a score, not a number.** Tie `MAX_COST_USD` to the customer's LLM line item in their monthly budget, not to a per-task limit. Mei's $0.50/week is `MAX_COST_USD` divided by the expected throughput. The dashboard shows "agent spend / LLM budget" as a single ratio; the circuit breaker trips at 80% to give the customer 20% headroom.
+
+2. **The circuit breaker, not just a max-turns counter.** A confused agent that hits `MAX_TURNS` is a *symptom*. The breaker watches the failure rate across many concurrent runs: if > 5% of runs in the last 5 minutes hit `MAX_TURNS` or the loop detector, the breaker opens and the agent returns a fallback response ("I'm having trouble; a human will follow up") instead of spending the whole budget on retries.
+
+3. **Per-tenant rate limits, not a global one.** The `MAX_COST_USD` should be per `user_id`, not per process. A noisy customer who triggers 5 loops in a minute shouldn't be able to spend another customer's budget. Production: a token bucket per `(user_id, tool_name)` pair; the policy file (lesson 9.1) is the manifest.
+
+4. **The audit log is the artifact.** Every `StepLog` row in the lab demo is a real row in `usage.jsonl` in production. The customer reads it on a Monday morning to see what their agent did over the weekend. The FDE hands the customer a Grafana dashboard pointed at this log on day 1, not day 30.
+
+5. **The "FDE has left" test.** Before exiting, the FDE asks 5 questions of the customer's team: (1) "Show me the last agent run that hit `MAX_TURNS`." (2) "Show me the last guardrail block." (3) "What happens when the cost ceiling is breached at 3am?" (4) "Who gets paged when the breaker opens?" (5) "Show me the eval set the agent must pass before each deploy." 5/5 must be answerable from the dashboard + runbook without the FDE.
+
+**The pattern:** the lab teaches the 5 in-process guardrails. The FDE adds the 5 cross-process guardrails (cost ceiling as score, circuit breaker, per-tenant limits, audit log, "FDE has left" test). The 5 + 5 = the 10 things every production agent needs.
+
+---
+
 ## 🌙 Reflect (10 min)
 
 Answer these in your own notes (or a comment at the bottom of the `.py` file):
@@ -139,3 +157,7 @@ Answer these in your own notes (or a comment at the bottom of the `.py` file):
 - [Codebook § 5.0](../../workbooks/ai-engineer-codebook.md) — the chapter for this level
 - [Paired codebook exercises](../../workbooks/exercises/) — extend what you learned here
 - [Capstone starter](../../capstone-starters/) — relevant starter code
+
+### Reference implementation
+
+- [`../../hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py`](../../hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py) — production-grade multi-agent with approval checkpoints, per-run timeouts, and the full execution trace pattern that backs the observability section above. The HITL checkpoint in the reviewer agent is the same pattern as `interrupt_before=[...]` in LangGraph.

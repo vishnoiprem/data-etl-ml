@@ -139,3 +139,7 @@ Answer these in your own notes (or a comment at the bottom of the `.py` file):
 - [Codebook § 5.0](../../workbooks/ai-engineer-codebook.md) — the chapter for this level
 - [Paired codebook exercises](../../workbooks/exercises/) — extend what you learned here
 - [Capstone starter](../../capstone-starters/) — relevant starter code
+
+### Reference implementation
+
+- [`../../hardcode/level-5-agentic-workflows/09-react-agent-tools.py`](../../hardcode/level-5-agentic-workflows/09-react-agent-tools.py) — the production-grade ReAct agent: 5+ tools, error recovery, stuck detector, iteration budget, cost + time tracking, structured logging. Use it as the "what does shipping-ready look like" reference for the demo in this lesson.

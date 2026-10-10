@@ -15,15 +15,17 @@ No external API keys required -- all LLM/DB calls are mocked.
 
 LESSON_NUMBER = "9.2"
 LESSON_TITLE = "CrewAI"
-DEFAULT_MODEL = "gpt-4o-mini"   # cheap + smart; mock used for the demo
+DEFAULT_MODEL = "gpt-5-mini"  # 2026-current cheap+smart; mock used for the demo   # cheap + smart; mock used for the demo
 
 # Pricing per 1M tokens, 2026
 PRICING = {
-    "gpt-4o":            {"input": 5.00,  "output": 15.00},
-    "gpt-4o-mini":       {"input": 0.15,  "output": 0.60},
-    "claude-3.5-sonnet": {"input": 3.00,  "output": 15.00},
-    "claude-3.5-haiku":  {"input": 0.80,  "output": 4.00},
-    "gemini-1.5-flash":  {"input": 0.075, "output": 0.30},
+    "gpt-5":              {"input": 2.50,  "output": 10.00},
+    "gpt-5-mini":         {"input": 0.15,  "output": 0.60},
+    "claude-sonnet-4.5":  {"input": 3.00,  "output": 15.00},
+    "claude-haiku-4.5":   {"input": 0.80,  "output": 4.00},
+    "gemini-2.5-pro":     {"input": 1.25,  "output": 5.00},
+    "gemini-2.5-flash":   {"input": 0.075, "output": 0.30},
+    "llama-4-70b-self":   {"input": 0.10,  "output": 0.10},
 }
 
 

@@ -139,3 +139,7 @@ Answer these in your own notes (or a comment at the bottom of the `.py` file):
 - [Codebook § 5.0](../../workbooks/ai-engineer-codebook.md) — the chapter for this level
 - [Paired codebook exercises](../../workbooks/exercises/) — extend what you learned here
 - [Capstone starter](../../capstone-starters/) — relevant starter code
+
+### Reference implementation
+
+- [`../../hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py`](../../hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py) — the production-grade multi-agent orchestrator: researcher / writer / reviewer over an asyncio message bus, human-in-the-loop approval checkpoints, per-run timeouts, full execution trace. Use it as the "what does shipping-ready multi-agent look like" reference for the graph in this lesson.
