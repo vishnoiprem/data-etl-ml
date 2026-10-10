@@ -4,55 +4,59 @@
 
 ---
 
-**Q1.** A Glue Job fails with `Error retrieving the script: s3:GetObject access denied`. The job's IAM role has `s3:GetObject` on the source bucket. The script is in the source bucket. What is the most likely cause?
+**Q1.** Which of the following are supported streaming sources for an AWS Glue Spark Streaming Job?
 
-- A. The IAM role's identity policy is wrong
-- B. The bucket policy on the source bucket denies `s3:GetObject` from the role's principal
-- C. The script does not exist
-- D. The KMS key policy is wrong
-
----
-
-**Q2.** A Glue Job fails with `Launch error: resource limits exceeded`. You have 1 concurrent job run allowed (the default). What is the most likely cause?
-
-- A. A previous job run is still in the STARTING or RUNNING state
-- B. The IAM role is wrong
-- C. The script is too large
-- D. The S3 bucket does not exist
+- A. Amazon Kinesis Data Streams only
+- B. Amazon S3 PUT events (S3 Event Notifications)
+- C. Amazon MSK (managed Apache Kafka) only
+- D. Both Kinesis Data Streams and Amazon MSK (incl. self-managed Kafka)
 
 ---
 
-**Q3.** A Glue Job fails with `Argument error: --source-bucket is required`. The script reads `arg.startswith("--source-bucket=")`. The Job's `DefaultArguments` includes `--source_bucket my-bucket`. What is the most likely cause?
+**Q2.** Your Kinesis Data Stream has **10 shards** and your Glue Streaming Job is configured with **`NumberOfWorkers = 5`**. What is the effective parallelism, and how do you increase it?
 
-- A. The script is wrong
-- B. The argument key uses underscore (`--source_bucket`) but the script expects a dash (`--source-bucket`)
-- C. The argument value is missing
-- D. The IAM role is wrong
-
----
-
-**Q4.** A Glue Job succeeds but writes 0 rows to the target. The script reads from `s3://source-bucket/input/` and writes to `s3://target-bucket/output/`. The job run log shows the read step returned 1,000 rows. What is the most likely cause?
-
-- A. The read returned 1,000 rows but the filter dropped all of them
-- B. The write step failed silently
-- C. The IAM role is wrong
-- D. The S3 bucket does not exist
+- A. Parallelism is 5 (limited by workers). Resize the Job to more workers.
+- B. Parallelism is 10 (limited by shards). To increase parallelism, re-shard (split) the stream.
+- C. Parallelism is 50 (workers × shards). To increase it, add more workers.
+- D. Parallelism is 15 (workers + shards). To increase it, add a DPU.
 
 ---
 
-**Q5.** A Glue Workflow runs Job A, then Job B, then Job C. Job A succeeds. Job B fails. Job C does *not* run. Why?
+**Q3.** You monitor the Job's **p99 `batchProcessingTimeInMs`** in CloudWatch. Last week it averaged ~30 seconds; this week it averages **4 minutes (~8x higher)**. At the same time, **`numRecordsProcessedPerBatch` is only ~3x higher** than last week. What does this most likely indicate?
 
-- A. Job C's IAM role is wrong
-- B. The Workflow's default behavior on failure is to stop (unless the Trigger is configured to continue)
-- C. Job C is not in the workflow
-- D. The Workflow is paused
+- A. The Job is keeping up — more upstream traffic, same per-record cost.
+- B. The Job is falling behind — per-record latency has degraded ~3x and the Job will soon backpressure the stream.
+- C. The Kinesis shard limit was reached; the Job is throwing `ProvisionedThroughputExceededException`.
+- D. S3 write throughput is the bottleneck; switch the output format from Parquet to JSON.
+
+---
+
+**Q4.** You built a **Python Shell Job** (`glue_python_shell`) that synthesizes records and uses the Kinesis `PutRecord` API to push them into the stream. When you test the Job, it runs once, exits successfully, and the downstream Spark Streaming Glue Job stops receiving new data shortly after. What is the fix?
+
+- A. Set the Job's `--job-language` to `scala` so it stays resident.
+- B. Increase the Python Shell Job's `Max Capacity` (DPUs) so it doesn't terminate.
+- C. Schedule the Python Shell Job to run on a recurring basis (e.g. an EventBridge schedule every 1 minute, or a Glue Trigger) so records are continuously produced.
+- D. Move the generator logic into the Spark Streaming Job itself using `foreachBatch`.
+
+---
+
+**Q5.** After a planned restart of the Spark Streaming Glue Job, you notice that the most recent **~2 minutes of records are missing** from the Parquet output in S3, and on the next start the Job appears to re-read older Kinesis records. Which property is most likely misconfigured?
+
+- A. `NumberOfWorkers` — set too low, so the Job cannot keep up.
+- B. The S3 output path's partitioning (`partitionBy`) — records were written to a date prefix the consumer isn't reading.
+- C. The streaming Job's `checkpointLocation` (or `jobBookmarkOn`) / checkpoint table — without checkpoints the Job can't resume from the last committed sequence number.
+- D. The Kinesis stream's retention period — set to 24 hours instead of 7 days.
 
 ---
 
 # Answer Key
 
-1. **B** — Bucket policy. S3 evaluates *both* the IAM identity policy and the bucket policy. If the bucket policy denies access (e.g., to a specific VPC endpoint or source IP), the request fails even if the identity policy allows it.
-2. **A** — Concurrency limit. The default Glue concurrent job run limit per account is 1. A second job run will fail with `Launch error: resource limits exceeded` until the first run completes.
-3. **B** — Underscore vs dash. AWS Glue uses dashes in default arguments (`--source-bucket`), but custom arguments can use underscores. The mismatch is a common typo.
-4. **A** — Filter. The most common cause: a `filter` or `where` clause in the script that drops all rows. Check the script's filter logic; in the lab, it's often `filter(F.col("country").isin(["US"]))` when the CSV has different country codes.
-5. **B** — Default stop-on-failure. Workflow Triggers default to "skip on failure" (not "continue"). To make C run after B fails, configure the B→C Trigger with `Trigger.Conditions.OnDemand` or `Continue`.
+1. **D** — Both Kinesis Data Streams and Amazon MSK (including self-managed Kafka) are supported streaming sources for Glue Spark Streaming Jobs. S3 PUT events are *not* a streaming source — they're a trigger pattern that fires on object creation, not a continuous record stream.
+
+2. **B** — Parallelism is `min(NumberOfWorkers, Kinesis shards)` = `min(5, 10)` = **10**. The Kinesis shard count is the upper bound; a worker can consume multiple shards but a shard cannot be split across workers. To increase parallelism you must **re-shard (split) the stream** — adding more workers beyond the shard count gives no benefit until the stream also grows.
+
+3. **A** — The Job is keeping up. `batchProcessingTimeInMs` is a p99 latency metric, and `numRecordsProcessedPerBatch` is up ~3x while per-batch time is up ~8x — both grew roughly in proportion, meaning per-record latency is roughly unchanged and the Job is simply processing more records per micro-batch. The textbook rule of thumb: if both metrics grow by the same factor (e.g. both ~3x), the Job is healthy.
+
+4. **C** — A Python Shell Job runs to completion and then exits — it is **not a long-running process**. Once it terminates, no more synthetic records are written to Kinesis and the stream effectively "stops." The fix is to schedule the generator on a recurring cadence (EventBridge schedule every 1 minute, or a Glue Trigger) so it keeps producing records while the Spark Streaming Job consumes them.
+
+5. **C** — Without **checkpoints** (stored in S3 or DynamoDB), the streaming Job cannot remember its last-committed Kinesis sequence number. On restart it re-seeks from the stream's beginning (or from `TRIM_HORIZON`) and any records that were in-flight in the previous micro-batch are lost — that's exactly the symptom described (recent ~2 minutes missing, older records re-read). The misconfigured property is the **`checkpointLocation`** / checkpoint table / `jobBookmarkOn` setting.

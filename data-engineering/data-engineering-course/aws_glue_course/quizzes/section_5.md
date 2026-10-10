@@ -4,55 +4,59 @@
 
 ---
 
-**Q1.** What is the primary purpose of the AWS Glue Data Catalog?
+**Q1.** In a CloudFormation template, where do you define user-overridable inputs that can be passed in at stack-create time (e.g., `EnvironmentName`, `BucketName`)? What does `!Ref MyParameter` return inside the `Resources` section?
 
-- A. To store the actual data
-- B. To store metadata (schema, location, partitions) about the data
-- C. To run SQL queries
-- D. To encrypt data at rest
-
----
-
-**Q2.** A Glue Crawler runs against an S3 bucket with 3 different file types: CSV, JSON, and Parquet. How many tables does the crawler create by default?
-
-- A. 1 (it merges all file types into a single table)
-- B. 3 (one per file type, partitioned by file extension)
-- C. 0 (the crawler errors on heterogeneous data)
-- D. It depends on whether a classifier is configured
+- A. In the `Mappings` section; `!Ref` returns the parameter's default value
+- B. In the `Parameters` section; `!Ref` returns the value supplied at stack creation (or the default)
+- C. In the `Outputs` section; `!Ref` returns the exported value
+- D. In the `Metadata` section; `!Ref` returns the resource's logical ID
 
 ---
 
-**Q3.** A Glue Job's `--source-bucket` argument is set to `my-bucket`. The job's script reads `s3://my-bucket/input/`. The job fails with `Unable to parse S3 path`. What is the most likely cause?
+**Q2.** A CloudFormation stack fails to create a Glue Job with the error: `Role ... is not authorized to assume the role / cannot be assumed by AWS Glue`. What is the **most common** cause of this failure?
 
-- A. The bucket does not exist
-- B. The script is not using the argument correctly
-- C. The IAM role is missing `s3:ListBucket`
-- D. The Glue version is too old
-
----
-
-**Q4.** A Glue Workflow has 3 Glue Jobs in sequence: Job A triggers Job B, Job B triggers Job C. Job A runs and succeeds. Job B does *not* run. What is the most likely cause?
-
-- A. Job B's IAM role is wrong
-- B. The Trigger from Job A to Job B is not configured (or is configured to fail)
-- C. Job A's output is not in the expected location
-- D. The Workflow is paused
+- A. The IAM role is missing the `AWSGlueServiceRole` managed policy
+- B. The role's `AssumeRolePolicyDocument` does **not** list `glue.amazonaws.com` as a principal (or lists the wrong service, e.g., `ec2.amazonaws.com`)
+- C. The role's `Path` is set to `/service-role/`
+- D. The role's `MaxSessionDuration` is too short
 
 ---
 
-**Q5.** A Glue Job's source is a 100-GB CSV file in S3. The job reads it, aggregates, and writes 200 MB of Parquet. The job takes 4 hours. What is the single most effective change to reduce runtime?
+**Q3.** In a CFN template you need to embed a Glue Job's bucket name into a script argument string, like `--source-bucket my-glue-bucket-2024`. The bucket name is created in the same template as a resource. Which intrinsic function is the cleanest way to build this string?
 
-- A. Increase `NumberOfWorkers` from 2 to 10
-- B. Convert the source CSV to Parquet
-- C. Add a Glue Crawler
-- D. Enable versioning on the bucket
+- A. `!Ref` alone, because it always returns the full string
+- B. `!Sub`, which substitutes `${MyBucket}` placeholders inside a template string
+- C. `!Join`, which is the only way to concatenate strings in CFN
+- D. `!GetAtt`, because it returns the bucket's name attribute
+
+---
+
+**Q4.** A team updates their stack and changes the `BucketName` property of an `AWS::S3::Bucket` resource from `glue-bucket-prod` to `glue-bucket-prod-v2`. CloudFormation returns an error on update. Why, and what is the standard workaround?
+
+- A. S3 bucket names must be globally unique across all AWS accounts, so the new name is rejected
+- B. CloudFormation cannot update `AWS::S3::Bucket` resources at all and always requires replacement
+- C. S3 bucket names are **immutable** in CloudFormation; changing `BucketName` returns an error. The standard workaround is to put the bucket in a **separate stack** so the rest of the resources can be updated
+- D. S3 bucket names can only contain lowercase letters, so `v2` is rejected
+
+---
+
+**Q5.** You run `aws cloudformation deploy` for a stack containing an `AWS::IAM::Role` and an `AWS::Glue::Job` that references that role. CloudFormation reports `CREATE_COMPLETE` for the role but `CREATE_FAILED` for the Glue Job with a transient IAM/consistency error. You immediately retry the stack update and it succeeds. What is the most likely explanation?
+
+- A. CloudFormation does not wait for IAM resources to propagate before creating the Glue Job, and the role was not yet visible to Glue at the moment the Job was created
+- B. The Glue Job's script had a syntax error
+- C. The role's trust policy was malformed
+- D. S3 buckets in the same stack were still being created
 
 ---
 
 # Answer Key
 
-1. **B** — Metadata. The Glue Data Catalog is the central metadata store for AWS analytics services (Athena, EMR, Redshift Spectrum, Glue Jobs).
-2. **D** — Depends on the classifier. By default, Glue uses built-in classifiers (CSV, JSON, Parquet, etc.) and creates a table per detected file type. A custom classifier can change this.
-3. **B** — Script argument. The `--source-bucket` argument is passed to the script as a Job argument. The script must read `sys.argv` to extract it. If the script hardcodes a different path, it errors.
-4. **B** — Trigger not configured. Workflows chain jobs via Triggers. If the A→B trigger is missing or in a "failed" state, B doesn't run.
-5. **B** — Convert CSV to Parquet. CSV is row-based and not splittable in S3; Parquet is columnar and splittable. A 100-GB CSV takes 4 hours; the same data in Parquet typically takes 20-30 minutes.
+1. **B** — `Parameters` section; `!Ref` returns the supplied value. Per the AWS CloudFormation docs, the `Parameters` section declares inputs you can pass at stack creation (or accept defaults for), and `!Ref` on a parameter returns the value the user supplied (or the `Default`). `Mappings` are static lookup tables (not user input), `Outputs` are values exported *after* creation, and `Metadata` is arbitrary template metadata. See: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+
+2. **B** — Wrong trust policy. For a Glue Job to assume a role, the role's `AssumeRolePolicyDocument` must list `glue.amazonaws.com` as a `Principal` with the `sts:AssumeRole` action. A common misconfiguration is pointing the trust at `ec2.amazonaws.com` (which is for EC2 instance profiles) or omitting the trust policy entirely. The `AWSGlueServiceRole` managed policy (option A) grants Glue service permissions but does not control *who* can assume the role — that is the trust policy. See: https://docs.aws.amazon.com/glue/latest/dg/create-an-iam-role.html
+
+3. **B** — `!Sub` for string interpolation. `!Sub "string with ${ResourceName}"` substitutes references inline, which is ideal for building script argument strings. `!Ref` (A) returns the logical ID or value but is not a string-interpolation helper; `!Join` (C) works for concatenation but is more verbose; `!GetAtt` (D) returns an attribute (e.g., `Arn`) of a resource, not its name unless the attribute happens to be `BucketName`. See: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-sub.html
+
+4. **C** — S3 bucket names are immutable in CloudFormation. Per the AWS docs, you cannot update the `BucketName` property of an existing `AWS::S3::Bucket` — CloudFormation returns an error because S3 bucket names cannot be changed after creation. The standard pattern is to put the bucket in its own dedicated stack (or use a generated name) so that updates to the application stack don't trip on this immutability. Option A is wrong because uniqueness is checked at bucket creation, not at update; option B is wrong because most S3 properties *are* updatable. See: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html
+
+5. **A** — IAM eventual consistency / propagation delay. CloudFormation typically waits for resources to reach a steady state, but IAM role propagation to AWS Glue is eventually consistent. On the first attempt the role may not yet be visible to the Glue service when the Job's `Role` reference is resolved; on the retry, propagation has completed and the Job creates successfully. Options B and C would fail deterministically on every retry, and D is unrelated — buckets and IAM roles are independent resources. See: https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html

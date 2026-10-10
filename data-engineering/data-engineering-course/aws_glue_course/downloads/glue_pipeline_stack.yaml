@@ -114,21 +114,25 @@ Resources:
     Type: AWS::Glue::Job
     Properties:
       Name: !Ref GlueJobName
+      Description: "Aggregates city_temperature.csv by (country, year, month) → Parquet. Section 7 lab of the AWS Glue masterclass."
       Role: !GetAtt GlueJobRole.Arn
       GlueVersion: "4.0"
       MaxRetries: 1
       Timeout: 60
       WorkerType: G.025X
       NumberOfWorkers: 2
+      Tags:
+        Project: aws-glue-masterclass
+        Module: section-7-lab
       Command:
         Name: glueetl
         ScriptLocation: !Sub "s3://${SourceBucketName}/${GlueScriptS3Key}"
         PythonVersion: "3"
       DefaultArguments:
         --job-language: python
-        --source-bucket: !Ref SourceBucketName
-        --target-bucket: !Ref TargetBucketName
-        --source-key: input/city_temperature.csv
+        --source_bucket: !Ref SourceBucketName
+        --target_bucket: !Ref TargetBucketName
+        --source_key: input/city_temperature.csv
         --enable-metrics: ""
         --enable-continuous-cloudwatch-log: "true"
         --enable-spark-ui: "true"

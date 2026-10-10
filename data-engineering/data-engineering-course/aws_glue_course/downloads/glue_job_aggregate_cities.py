@@ -1,14 +1,17 @@
 """Glue Job 2 — Aggregate city_temperature.csv by country and write Parquet.
 
-Part of the AWS Glue - The Complete Masterclass course (Section 6 lab).
-Reads a CSV from the source S3 bucket, computes the average temperature
-per (country, year, month), and writes partitioned Parquet to the
-target S3 bucket.
+Part of the AWS Glue - The Complete Masterclass course (Section 7 lab —
+First AWS Glue Pipeline). Reads a CSV from the source S3 bucket, computes
+average / min / max / distinct-city counts per (country, year, month),
+and writes partitioned Parquet to the target S3 bucket.
 
-The job is invoked by AWS Glue with the following --job arguments:
-  --source-bucket   source S3 bucket (e.g. awsglueudemycourse-datasoup-gluejob2-source)
-  --target-bucket   target S3 bucket (e.g. awsglueudemycourse-datasoup-gluejob1-target)
-  --source-key      key within the source bucket (default: input/city_temperature.csv)
+The job is invoked by AWS Glue with the following --job arguments (passed
+as `--key value` pairs in `sys.argv` and read via `getResolvedOptions`,
+the canonical Glue 4.0 helper):
+
+  --source_bucket   source S3 bucket (e.g. awsglueudemycourse-datasoup-gluejob2-source)
+  --target_bucket   target S3 bucket (e.g. awsglueudemycourse-datasoup-gluejob1-target)
+  --source_key      key within the source bucket (default: input/city_temperature.csv)
 
 The script is Glue-version 4.0 (Spark 3.3, Python 3.10).
 """
@@ -17,6 +20,7 @@ import sys
 from awsglue.transforms import *
 from awsglue.context import GlueContext
 from awsglue.job import Job
+from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
@@ -36,20 +40,30 @@ glue_context = GlueContext(sc)
 spark = glue_context.spark_session
 job = Job(glue_context)
 
-SOURCE_BUCKET = ""
-TARGET_BUCKET = ""
-SOURCE_KEY = "input/city_temperature.csv"
+# ---------------------------------------------------------------------
+# Job arguments — canonical Glue 4.0 pattern via getResolvedOptions.
+# Arg names use underscores (Glue job-arg convention) and must match the
+# `DefaultArguments` keys in glue_pipeline_stack.yaml.
+# ---------------------------------------------------------------------
 
-for arg in sys.argv:
-    if arg.startswith("--source-bucket="):
-        SOURCE_BUCKET = arg.split("=", 1)[1]
-    elif arg.startswith("--target-bucket="):
-        TARGET_BUCKET = arg.split("=", 1)[1]
-    elif arg.startswith("--source-key="):
-        SOURCE_KEY = arg.split("=", 1)[1]
+DEFAULT_SOURCE_KEY = "input/city_temperature.csv"
+try:
+    args = getResolvedOptions(
+        sys.argv,
+        ["source_bucket", "target_bucket", "source_key"],
+    )
+    SOURCE_BUCKET = args["source_bucket"]
+    TARGET_BUCKET = args["target_bucket"]
+    SOURCE_KEY = args.get("source_key", DEFAULT_SOURCE_KEY)
+except Exception as exc:  # missing required arg
+    raise SystemExit(
+        f"missing required job argument: {exc}. "
+        "Expected: --source_bucket <bucket> --target_bucket <bucket> "
+        "[--source_key <key>]"
+    ) from exc
 
-assert SOURCE_BUCKET, "missing --source-bucket argument"
-assert TARGET_BUCKET, "missing --target-bucket argument"
+assert SOURCE_BUCKET, "SOURCE_BUCKET resolved to empty string"
+assert TARGET_BUCKET, "TARGET_BUCKET resolved to empty string"
 
 job.init(sys.argv[0], {"source_bucket": SOURCE_BUCKET, "target_bucket": TARGET_BUCKET})
 

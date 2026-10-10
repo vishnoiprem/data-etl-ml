@@ -53,6 +53,6 @@
 
 1. **B** — A managed Spark cluster. AWS Glue is serverless on top of Spark.
 2. **D** — OLAP cube refresh. The 3 categories are batch, streaming, and data quality.
-3. **D** — 4.0. (Glue 3.0 = Spark 2.4 + Python 3.7; Glue 4.0 = Spark 3.3 + Python 3.10.)
+3. **D** — 4.0. (Glue 2.0 = Spark 2.4 + Python 3.7; Glue 3.0 = Spark 3.1 + Python 3.7; Glue 4.0 = Spark 3.3 + Python 3.10.)
 4. **B** — The Glue Job Python script. The 4 are city_temperature.csv, the IAM trust policy, the CloudFormation template, and the Glue script.
 5. **D** — ML training pipeline. The 3 are batch, streaming, and data quality.

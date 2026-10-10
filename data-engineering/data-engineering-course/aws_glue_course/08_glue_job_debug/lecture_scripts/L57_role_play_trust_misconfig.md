@@ -40,7 +40,7 @@ The fix: attach the right trust policy. There are 3 common mistakes:
 2. The trust policy lists `ec2.amazonaws.com` (typo, copy-pasted from a different lab).
 3. The trust policy uses the wrong account ID (cross-account confusion).
 
-> **Prem:** "The CloudFormation template I gave you in `downloads/glue_pipeline_stack.yaml` has the right trust policy inline. Let me show you." [Read lines 87-94 of the YAML — the `AssumeRolePolicyDocument` block under `GlueJobRole`.]
+> **Prem:** "The CloudFormation template I gave you in `downloads/glue_pipeline_stack.yaml` has the right trust policy inline. Let me show you." [Read lines 67-73 of the YAML — the `AssumeRolePolicyDocument` block under `GlueJobRole`.]
 
 ## Fix (2 minutes)
 
@@ -50,7 +50,7 @@ Three options, ordered by preference:
 2. **Attach the standalone trust policy from `downloads/glue_service_trust_policy.json`.** Good — minimal blast radius.
 3. **Hand-edit in the console.** Acceptable for this lab only — drifts from IaC in production.
 
-> **Prem:** "The fastest fix that doesn't drift is option 2: `aws iam update-assume-role-policy --role-name GlueJobRole --policy-document file://glue_service_trust_policy.json`. But the *right* fix is to update the CFN template, run `cfn update-stack`, and never hand-edit a role in prod again."
+> **Prem:** "The fastest fix that doesn't drift is option 2: `aws iam update-assume-role-policy --role-name GlueJobRole --policy-document file://glue_service_trust_policy.json`. But the *right* fix is to update the CFN template, run `aws cloudformation update-stack --stack-name <name> --template-body file://glue_pipeline_stack.yaml`, and never hand-edit a role in prod again."
 
 ## Verification (1 minute)
 
@@ -80,7 +80,7 @@ Re-run the job from the console. Expected: the job starts, runs the Python shell
 ## Common mistakes learners make in this role play
 
 - **Jumping to S3 bucket policies** before reading the error. The error says `AssumeRole` — that's the trust policy. Stop and look there first.
-- **Editing the role in the console** and forgetting to update the CFN template. Next `cfn update-stack` clobbers their fix.
+- **Editing the role in the console** and forgetting to update the CFN template. Next `aws cloudformation update-stack` clobbers their fix.
 - **Not reading the error message at all** and googling "Glue AccessDenied". The first 3 Google results are about S3, not trust policies.
 
 ## The remaining 2 role plays
