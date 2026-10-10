@@ -4,7 +4,7 @@
 
 ## In 60 seconds
 
-The course covers, in order: **definition** (S1) → **7 ingredients + 5 guardrails** (S2) → **6 agent types** (S3) → **prompting + teaching** (S4) → **5 architecture patterns** (S5) → **10-step implementation guide** (S6) → **8-lecture n8n platform** (S7) → **6-lecture agent infrastructure** (S8) → **3-lecture commercial toolkit** (S9). Five named taxonomies a candidate must recite: **7 ingredients, 5 guardrails, 3-tier cost ceiling, 4 RAGAS metrics, 4 error categories.** The synthesis lecture of the whole course is **L2-7** — it wraps the 7 ingredients + 5 guardrails in one 200-line shipping agent. If you only read two lectures, read L2-7 and L9-1.
+The course covers, in order: **definition** (S1) → **7 ingredients + 5 guardrails** (S2) → **6 agent types** (S3) → **prompting + teaching** (S4) → **5 architecture patterns** (S5) → **10-step implementation guide** (S6) → **8-lecture n8n platform** (S7) → **6-lecture agent infrastructure** (S8) → **3-lecture commercial toolkit** (S9) → **1-lecture trading-workflow application** (S10, growing). Five named taxonomies a candidate must recite: **7 ingredients, 5 guardrails, 3-tier cost ceiling, 4 RAGAS metrics, 4 error categories.** The synthesis lecture of the whole course is **L2-7** — it wraps the 7 ingredients + 5 guardrails in one 200-line shipping agent. If you only read two lectures, read L2-7 and L9-1.
 
 > **This is a 54-lecture FDE-study synthesis of the source course "Intro to AI Agents and Agentic AI" (9 sections, 54 lectures, 2h 11m).** Each lecture is a written study guide: same topic, same scope, same depth as a 1-3 min video, but expanded to ~3K words of transcript-equivalent prose so the FDE candidate can read it as a study document rather than watch a video. **The source-course lecture titles are not in this repository;** the lecture filenames here are descriptive and the content is synthesized from the section-level summaries in `../intro-to-ai-agents.md` plus the Phase 1-5 FDE patterns. **Replace the lecture titles with the source's exact titles when you have them.**
 
@@ -27,7 +27,8 @@ The 296-line `../intro-to-ai-agents.md` is a *cross-reference cheat sheet* — i
 | 7. Practical example — Build an agentic automation with n8n | 8 | 21 min | `s07-n8n-practical/` | **L7-7** — the 6-node complete automation |
 | 8. AI agent infrastructure | 6 | 12 min | `s08-agent-infrastructure/` | **L8-4** — observability + 3am dashboard |
 | 9. AI agents in business | 3 | 10 min | `s09-ai-agents-in-business/` | **L9-1** — the ROI formula + CFO pitch |
-| **Total** | **54** | **131 min ≈ 2h 11m** | — | The 9 above = 80/20 of the course |
+| 10. AI agents for trading workflows | 1 (growing) | 22 min | `s10-ai-in-trading/` | **L10-1** — the 5 workflows + 5 guardrails |
+| **Total** | **55** | **153 min** | — | The 10 above = 80/20 of the course |
 
 ## Lecture file naming
 
@@ -78,7 +79,7 @@ Example: `L1-1-what-is-an-agent.md`, `L7-4-n8n-first-workflow.md`. Each file is 
 
 ## Build status
 
-**Complete: 54 / 54 lectures written.** All 9 sections have a `README.md` and the full lecture set:
+**Complete: 55 / 55 lectures written across 10 sections.** All 10 sections have a `README.md` and the full lecture set:
 
 | Section | Lectures | Status |
 |---|---|---|
@@ -91,8 +92,9 @@ Example: `L1-1-what-is-an-agent.md`, `L7-4-n8n-first-workflow.md`. Each file is 
 | 7. n8n practical | 8 (L7-1 to L7-8) | done |
 | 8. Agent infrastructure | 6 (L8-1 to L8-6) | done |
 | 9. AI agents in business | 3 (L9-1 to L9-3) | done |
-| **Total** | **54 lectures + 9 section READMEs = 63 .md files** | **complete** |
+| 10. AI agents for trading workflows | 1 (L10-1) — growing | seeded |
+| **Total** | **55 lectures + 10 section READMEs = 65 .md files** | **complete (S1-9) + growing (S10)** |
 
-Total: ~200K words across 63 files. Each lecture is 3-4K words, structured as: FDE framing → 3 things you'll learn → concept → pattern → code → production addendum → cross-references → 3 interview questions → read next.
+Total: ~205K words across 65 files. Each lecture is 3-4K words, structured as: FDE framing → 3 things you'll learn → concept → pattern → code → production addendum → cross-references → 3 interview questions → read next.
 
-**The synthesis is closed.** Use the directory as a self-paced FDE study guide. Replace the lecture titles with the source's exact titles when the source lecture list is available.
+**S1-9 are closed.** **S10 is a growing section** — start with L10-1 (the 5 trading workflows + 5 guardrails), then add L10-2 (options/derivatives workflows), L10-3 (multi-strategy portfolio workflows), etc. Use the directory as a self-paced FDE study guide. Replace the lecture titles with the source's exact titles when the source lecture list is available.
