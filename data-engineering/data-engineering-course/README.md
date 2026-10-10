@@ -1,7 +1,7 @@
 # Data Engineering Interview Course
 
 A complete, code-first curriculum for **data engineering, software engineering,
-and product-management interviews**. **12 tracks · 495 lessons · 1,441 tests**.
+and product-management interviews**. **12 tracks · 501 lessons · 1,461 tests**.
 Every system in the code-heavy tracks is a real, runnable service or pipeline
 you can execute on your laptop.
 
@@ -258,8 +258,8 @@ engineering work that this course builds on:
 ## Stats
 
 - **12 tracks** in 1 repository
-- **495 lessons** across 70 modules
-- **1,441 unit tests** (677 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
+- **501 lessons** across 71 modules
+- **1,461 unit tests** (677 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
 - **50-hour reading list** parallel-tracking the course plans in `behavioral_interviews/05_practice/design/05_resources.md`
 - **1,000+ files** of design docs, working code, fixtures, and tests
 - **Authored by Prem Vishnoi** · <https://medium.com/@premvishnoi>

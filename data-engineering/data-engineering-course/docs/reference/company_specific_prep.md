@@ -16,8 +16,8 @@
 
 | Company | Loop length | Heaviest round | Key differentiator | Top 3 tracks to prioritize |
 |---|---|---|---|---|
-| **Meta (Facebook)** | 5–6 rounds, ~3 weeks | SQL + Coding (phone & onsite) | Bar-raiser round; "move fast" NLQ-style system design | `sql_interviews`, `coding_interviews`, `behavioral_interviews` |
-| **Google** | 5–6 rounds, ~4 weeks | Coding (×2 onsite) | Structured LPs (Googleyness, Leadership, RKK); GCA pattern | `coding_interviews`, `system_design`, `behavioral_interviews` |
+| **Meta (Facebook)** | **3-5 weeks, 5+5+4+1** (2026) | **60-min CoderPad: 5 SQL + 5 Python** | Dedicated data-modeling round; bar-raiser; 5 Core Values (Ownership) | `sql_interviews/11_meta_screen/`, `data_modeling/`, `behavioral_interviews/` |
+| **Google** | **6-12 weeks, 7 stages** (2026) | Data System Design (45 min) | Hiring Committee (post-loop); Googleyness = 30% of eval | `coding_interviews`, `system_design`, `behavioral_interviews` |
 | **Stripe** | 4–5 rounds, ~3 weeks | Coding + API/system design | Customer-first culture; written take-home; "engineers who care about correctness" | `coding_interviews`, `system_design`, `data_modeling` |
 | **Netflix** | 4–5 rounds, ~3 weeks | System design (discussion, not whiteboard) | "Highly effective" calibration; culture deck; senior+ roles only | `behavioral_interviews`, `system_design`, `coding_interviews` |
 | **Airbnb** | 4–5 rounds, ~3 weeks | Coding + System design with product lens | "Belong anywhere" customer-centric; product/cross-functional round | `coding_interviews`, `system_design`, `behavioral_interviews` |
@@ -26,6 +26,168 @@
 
 > Loop length is end-to-end (recruiter screen to offer); expect 1 week
 > of prep between each round for senior+ roles.
+>
+> **2026 update.** The Meta + Google rows above reflect the most recent
+> 2026 guides. Meta's loop is now 3-5 weeks end-to-end with a 60-min
+> CoderPad screen that is *5 SQL + 5 Python* (pass bar 3/5 in each
+> half) and a **dedicated data-modeling round** that's their
+> signature differentiator. Google's loop is 6-12 weeks with a
+> **Hiring Committee** stage after the loop; the candidate never
+> meets the committee. See the per-company deep-dive sections below
+> and the `sql_interviews/11_meta_screen/` module for the worked
+> Meta screen problems.
+
+---
+
+## Meta Data Engineer (2026 deep-dive)
+
+> **Sources** (latest to oldest): [Aced.io (2026)](https://www.aced.io/guides/meta-data-engineer-interview) ·
+> [DataDriven.io (Sept 2026)](https://datadriven.io/companies/meta/interview) ·
+> [Interview101.com (2026)](https://www.interview101.com/interviews/meta/data-engineer) ·
+> [Tryexponent.com (2026)](https://www.tryexponent.com/guides/meta-data-engineer-interview) ·
+> [Glassdoor (Meta 2026)](https://www.glassdoor.com/Interview/Meta-Data-Engineer-Interview-Questions-EI_IE40772.0,4_KO5,18.htm) ·
+> [IGotAnOffer (May 2026)](https://igotanoffer.com/blogs/product-manager/behavioral-interview-questions-tech-companies)
+
+### The loop (3-5 weeks)
+
+| Stage | Duration | Format | Pass signal |
+|---|---|---|---|
+| Recruiter screen | 30 min, phone | Non-technical: "How much data? What tools? Why Meta?" | Move to phone screen |
+| **Technical screen** | **60 min, CoderPad** | **5 SQL + 5 Python** (~25 min each half) | **3 of 5 in each half** |
+| Onsite: SQL/coding | 60 min | Funnel/cohort/time-series + Python on social event data | Pass |
+| Onsite: **data modeling** | 60 min | **Dedicated round — Meta's #1 differentiator** | Pass |
+| Onsite: product sense / full-stack | 60 min | Product goal → metric → schema → ETL SQL | Pass |
+| Onsite: Ownership | 30 min | Meta Core Values (Move Fast, Be Bold, Be Open, Build Social Value, Focus on Long-Term Impact) | Pass |
+| Team match | 1-2 weeks | Manager calls | Offer |
+
+### What makes Meta's loop different from Google's
+
+1. **No DSA in the Python screen.** Meta's Python is pandas / dict /
+   string handling on million-row data. Iterative loops on a
+   DataFrame are *rejected*. If you have only prepared
+   FizzBuzz / parens-with-wildcards, you will fail the 2026 screen.
+2. **Dedicated data-modeling round.** Google embeds modeling in
+   1/3 of interviews; Meta has a *full 60-min dedicated round*.
+   The star schema + SCD + bridge tables + partitioning signals
+   are the differentiator.
+3. **No system-design round as a separate slot.** Scale
+   trade-offs (partitioning, bucketing, indexing) are pushed
+   *inside* the data-modeling and SQL rounds. The "design a
+   pipeline at Meta scale" example is an *architecture probe*,
+   not a dedicated round.
+4. **Product sense is the opening 10 min of every onsite
+   technical round.** Not its own round. But the candidate
+   who fails to *frame* their SQL/modeling in product
+   terms scores 2/4.
+
+### What to study (per the canonical Meta sources)
+
+- **SQL screen prep** — `sql_interviews/11_meta_screen/`. The
+  5+5 problems in `code/meta_screen_sql.sql` and
+  `code/meta_screen_python.py` are calibrated to the 2026
+  format. The signature patterns are sessionization
+  (`design/05_sessionization_pattern.md`), gaps-and-islands
+  (Problem 5 in `02_sql_problems.md`), and top-N-after-filter
+  (Problem 3).
+- **Data modeling prep** — `data_modeling/03_high_level_diagrams/`
+  for the 5 working star schemas; `data_modeling/04_dimension_design/`
+  for SCD 1/2/3; `data_modeling/07_mock_interviews/` for 6 full
+  mock interviews. The Meta 2026 guide explicitly lists
+  Instagram Reels / cross-platform user behavior / ads auction
+  as the 3 most-asked modeling questions; all 3 are in this track.
+- **Product sense prep** — `behavioral_interviews/05_practice/design/12_product_sense_investigation.md`
+  for the 7-step hypothesis-tree framework; the sessionization
+  notebook (`notebooks/04_sessionization.ipynb`) for the
+  30-min gap pattern that shows up in every product-sense
+  investigation.
+- **Ownership (behavioral) prep** —
+  `behavioral_interviews/05_practice/design/40_questions_taxonomy.md`
+  for the 40-question map; `behavioral_interviews/04_mock_interviews_and_analyses/`
+  for the 4 full mock interviews (Meta E5 / Google L6 / Netflix Principal / EM M5).
+- **Comp & leveling** — `how_to_get_the_interview/compensation/`
+  for the negotiation scripts. IC5 (the L5 target) is ~$311K
+  base per levels.fyi 2026.
+
+### Failure modes specific to Meta
+
+1. **Treating the Python screen as DSA.** 80% of fail reports
+   cite "I prepared FizzBuzz; the screen was pandas on social
+   event data." Don't be the 80%.
+2. **No sessionization pattern.** The 30-min-gap is asked in
+   *every* Meta DE loop. If you don't have it cold, you fail.
+3. **Skipping the data-modeling round prep.** The dedicated
+   round is Meta's differentiator; the candidate who has
+   only practiced SQL fails here.
+4. **Forgetting the Meta Core Values.** The Ownership round
+   is the tiebreaker per the 2026 guide. Generic answers
+   "cost offers" — see the 5 Core Values worked examples
+   in `behavioral_interviews/05_practice/`.
+
+---
+
+## Google Data Engineer (2026 deep-dive)
+
+> **Sources** (latest to oldest): [Datavidhya (May 2026)](https://datavidhya.com/blog/google-data-engineering-interview-guide/) ·
+> [Interview101 (2026)](https://www.interview101.com/interviews/google/data-engineer) ·
+> [Preper (2026)](https://preper.app/guides/google-behavioral-interview-prep) ·
+> [HelloInterview (2026)](https://www.hellointerview.com/guides/google/l5)
+
+### The loop (6-12 weeks)
+
+7 stages with a **Hiring Committee (HC)** in the middle. The
+candidate never meets the HC — they read the 4 packets the
+interviewers wrote. This means the most important artifact
+the candidate produces isn't their live performance; it's
+*the 4 packets the interviewers wrote about them*.
+
+| Stage | Duration | Format |
+|---|---|---|
+| Recruiter screen | 30 min, phone | |
+| Phone screen 1 | 45 min | SQL + light coding |
+| Phone screen 2 (optional, senior+) | 45 min | Borderline or senior candidates |
+| Onsite 1: Algorithm coding | 45 min | Medium LeetCode |
+| Onsite 2: Data System Design | 45 min | YouTube watch time, search analytics, ad targeting |
+| Onsite 3: SQL & Data Modeling | 45 min | BigQuery nested/repeated, SCD, partition/cluster |
+| Onsite 4: Googleyness & Leadership | 45 min | **30% of overall eval** |
+| Hiring Committee | 2-4 weeks | (Internal — you don't meet them) |
+| Team matching | 1-4 weeks | After the loop |
+| Offer & comp | 1 week | Comp committee |
+
+### What to study
+
+- **Algorithm coding** — `coding_interviews/04_arrays/`,
+  `05_hash_tables/`, `06_searching_sorting/`, `08_graphs/`,
+  `09_trees/`. Medium LeetCode. **Note:** the DE loop has
+  *one* algorithm round, not two. The other onsite rounds
+  are DE-specific.
+- **Data system design** — `system_design/00_overview/` +
+  the 18 concept lessons in `system_design/99_appendix/`.
+  The 2026 Google DE guide lists YouTube watch time, search
+  analytics, and ad targeting as the 3 most-asked prompts.
+  Each of these maps to a system_design module:
+  - YouTube/Netflix → `system_design/06_youtube/`
+  - Search analytics → `system_design/02_typeahead/`
+  - Ad targeting → `system_design/04_instagram/` or
+    `system_design/05_twitter/`
+- **SQL & data modeling** — `sql_interviews/10_query_performance/`
+  for the 4 query-rewrite lessons; `data_modeling/` for the
+  modeling half. BigQuery nested/repeated is in
+  `sql_interviews/10_query_performance/design/03_query_rewrites.md`.
+- **Googleyness** — `behavioral_interviews/05_practice/design/14_being_wrong_humble_pivot.md`
+  for the #1 Googleyness signal (Datavidhya 2026 verbatim);
+  `13_unclear_requirements_scoping.md` for the most-asked
+  Google DE behavioral Q.
+
+### L5 comp (2026, Datavidhya)
+
+- Base: $195K-$240K
+- Yr-1 RSU: $130K-$250K
+- Yr-1 TC: $365K-$550K
+- Negotiation leverage: competing Meta/Apple offers
+  (per Datavidhya 2026).
+
+See `how_to_get_the_interview/compensation/04_comp_benchmarking.md`
+for the full negotiation scripts.
 
 ---
 
