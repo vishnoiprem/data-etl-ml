@@ -35,6 +35,10 @@ CREATE INDEX IF NOT EXISTS leads_status_idx ON leads(status);
 CREATE INDEX IF NOT EXISTS leads_email_idx ON leads(contact_email);
 CREATE INDEX IF NOT EXISTS leads_company_idx ON leads(company);
 CREATE INDEX IF NOT EXISTS leads_tracking_idx ON leads(tracking_id);
+-- Case-insensitive email lookup for opt-outs / get_by_email
+CREATE INDEX IF NOT EXISTS leads_contact_email_lower_idx
+    ON leads (LOWER(contact_email))
+    WHERE contact_email IS NOT NULL;
 
 -- Send log: every email attempt
 CREATE TABLE IF NOT EXISTS send_log (
@@ -66,6 +70,9 @@ CREATE TABLE IF NOT EXISTS opt_outs (
     opted_out_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Case-insensitive opt-out lookups
+CREATE INDEX IF NOT EXISTS opt_outs_email_lower_idx ON opt_outs (LOWER(email));
+
 -- updated_at trigger
 CREATE OR REPLACE FUNCTION set_updated_at() RETURNS TRIGGER AS $$
 BEGIN
@@ -95,7 +102,7 @@ CREATE TABLE IF NOT EXISTS linkedin_dms (
     status          TEXT NOT NULL DEFAULT 'sent',    -- sent | replied | intro | meeting | won | lost | bounced
     sent_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     replied_at      TIMESTAMPTZ,
-    last_touch_at   TIMESTAMPTZ,
+    last_touch_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     touch_count     INTEGER NOT NULL DEFAULT 1,     -- 1 = initial DM, 2+ = follow-ups
     notes           TEXT,
     lead_id         INTEGER REFERENCES leads(id) ON DELETE SET NULL,  -- if they became a real lead

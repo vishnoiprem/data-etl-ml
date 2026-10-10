@@ -25,6 +25,7 @@ from typing import Optional, List, Dict, Any
 try:
     import psycopg2
     import psycopg2.extras
+    from psycopg2 import errors as psycopg2_errors
     HAVE_PG = True
 except ImportError:
     HAVE_PG = False
@@ -89,29 +90,39 @@ def opt_out(email: str):
 
 
 def find_duplicate(company: str, contact_email: str, role: str = None) -> Optional[Dict]:
-    """Return existing lead dict if we already have this (or same email)."""
+    """Return existing lead dict if we already have this lead.
+
+    Order (most specific → least):
+      1. (company, role)        — same role posted twice (most common dup)
+      2. (company, email)       — same recruiter, same company, different role
+      3. NEVER by email alone   — a recruiter changing jobs should NOT
+                                  be treated as a duplicate of their old lead.
+
+    Email-alone dedup was the original behavior and it was dangerous: any
+    recruiter who moved companies would be falsely deduplicated and never
+    re-contacted at their new address. We do not do that anymore.
+    """
+    if not company:
+        return None
     with get_cursor() as cur:
-        # First by exact (company, email)
-        cur.execute(
-            "SELECT * FROM leads WHERE LOWER(company) = LOWER(%s) AND LOWER(contact_email) = LOWER(%s)",
-            (company, contact_email),
-        )
-        row = cur.fetchone()
-        if row:
-            return dict(row)
-        # Then by email alone (same recruiter at different role)
-        cur.execute(
-            "SELECT * FROM leads WHERE LOWER(contact_email) = LOWER(%s) ORDER BY id DESC LIMIT 1",
-            (contact_email,),
-        )
-        row = cur.fetchone()
-        if row:
-            return dict(row)
-        # Then by (company, role) — different email at same company for same role
+        # 1) Same company + same role (most common)
         if role:
             cur.execute(
-                "SELECT * FROM leads WHERE LOWER(company) = LOWER(%s) AND LOWER(role) = LOWER(%s) ORDER BY id DESC LIMIT 1",
+                "SELECT * FROM leads "
+                "WHERE LOWER(company) = LOWER(%s) AND LOWER(role) = LOWER(%s) "
+                "ORDER BY id DESC LIMIT 1",
                 (company, role),
+            )
+            row = cur.fetchone()
+            if row:
+                return dict(row)
+        # 2) Same company + same email (recruiter stayed, role changed)
+        if contact_email:
+            cur.execute(
+                "SELECT * FROM leads "
+                "WHERE LOWER(company) = LOWER(%s) AND LOWER(contact_email) = LOWER(%s) "
+                "ORDER BY id DESC LIMIT 1",
+                (company, contact_email),
             )
             row = cur.fetchone()
             if row:
@@ -119,46 +130,90 @@ def find_duplicate(company: str, contact_email: str, role: str = None) -> Option
         return None
 
 
-def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
-    """Insert a new lead. Returns lead ID. Raises on dup."""
-    tracking_id = _make_tracking_id(lead.get("company", "lead"))
+def find_by_email_any_company(email: str) -> Optional[Dict]:
+    """Optional escape hatch: look up by email across companies.
+
+    Use this ONLY when you intend to actually email that person (e.g. a
+    follow-up sequence). Do NOT use as a dedup key.
+    """
     with get_cursor() as cur:
-        cur.execute("""
-            INSERT INTO leads (
-                tracking_id, company, role, contact_email, contact_phone,
-                stack, rate, resume_file, source_url, source,
-                cover_letter_subject, cover_letter_body, jd_text, status
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            RETURNING id
-        """, (
-            tracking_id,
-            lead.get("company", "Unknown"),
-            lead.get("role", "Role TBD"),
-            lead.get("contact_email"),
-            lead.get("contact_phone"),
-            lead.get("stack", ""),
-            lead.get("rate", "Not listed"),
-            lead.get("resume_file", "Prem_Resume_2026.pdf"),
-            lead.get("source_url", ""),
-            source,
-            lead.get("cover_letter_subject", ""),
-            lead.get("cover_letter_body", ""),
-            lead.get("jd_text", ""),
-            "pending",
-        ))
-        lead_id = cur.fetchone()["id"]
-        # Also store phone if present
-        phone = (lead.get("contact_phone") or "").strip()
-        if phone:
+        cur.execute(
+            "SELECT * FROM leads WHERE LOWER(contact_email) = LOWER(%s) "
+            "ORDER BY id DESC LIMIT 1",
+            (email,),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
+    """Insert a new lead. Returns lead ID.
+
+    Catches UniqueViolation gracefully: if a parallel insert beat us to the
+    unique (company, email) row, we look up the existing row and return its
+    id instead of bubbling an opaque `duplicate key value` error.
+    """
+    tracking_id = _make_tracking_id(lead.get("company", "lead"))
+    company = lead.get("company", "Unknown")
+    role = lead.get("role", "Role TBD")
+    email = lead.get("contact_email")
+
+    # First pass: just the leads table insert
+    try:
+        with get_cursor() as cur:
             cur.execute("""
-                INSERT INTO phones (phone, company, contact_email, lead_id)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (phone) DO UPDATE SET
-                    company = EXCLUDED.company,
-                    contact_email = EXCLUDED.contact_email,
-                    lead_id = EXCLUDED.lead_id
-            """, (phone, lead.get("company"), lead.get("contact_email"), lead_id))
-        return lead_id
+                INSERT INTO leads (
+                    tracking_id, company, role, contact_email, contact_phone,
+                    stack, rate, resume_file, source_url, source,
+                    cover_letter_subject, cover_letter_body, jd_text, status
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                RETURNING id
+            """, (
+                tracking_id,
+                company,
+                role,
+                email,
+                lead.get("contact_phone"),
+                lead.get("stack", ""),
+                lead.get("rate", "Not listed"),
+                lead.get("resume_file", "Prem_Resume_2026.pdf"),
+                lead.get("source_url", ""),
+                source,
+                lead.get("cover_letter_subject", ""),
+                lead.get("cover_letter_body", ""),
+                lead.get("jd_text", ""),
+                "pending",
+            ))
+            lead_id = cur.fetchone()["id"]
+    except psycopg2_errors.UniqueViolation:
+        # Lost the race — find the winner and return that id
+        existing = find_duplicate(company, email or "", role)
+        if existing:
+            return existing["id"]
+        # Couldn't find it (very rare): re-raise so caller sees the error
+        raise
+
+    # Second pass: phone table (independent, won't lose the lead if it fails)
+    phone = (lead.get("contact_phone") or "").strip()
+    if phone:
+        try:
+            with get_cursor() as cur:
+                cur.execute("""
+                    INSERT INTO phones (phone, company, contact_email, lead_id)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (phone) DO UPDATE SET
+                        company = EXCLUDED.company,
+                        contact_email = EXCLUDED.contact_email,
+                        lead_id = EXCLUDED.lead_id
+                """, (phone, company, email, lead_id))
+        except psycopg2_errors.IntegrityError:
+            # Phone is best-effort metadata; racing with another lead is OK.
+            pass
+        except Exception as e:
+            # Surface programming / connection errors loudly so we notice
+            import sys
+            print(f"  ⚠️  phone insert failed for lead {lead_id}: {e}", file=sys.stderr)
+    return lead_id
 
 
 def update_status(lead_id: int, status: str, error: str = None):
@@ -186,12 +241,17 @@ def log_send(lead_id: int, to_email: str, subject: str, status: str, error: str 
 
 
 def get_pending_leads() -> List[Dict]:
-    """Return all leads with status=pending and not opted out."""
+    """Return all leads with status=pending and not opted out.
+
+    Excludes `bounced` addresses too — once a recipient server has told us
+    the address is dead, re-sending just spams the dead-letter office.
+    """
     with get_cursor() as cur:
         cur.execute("""
             SELECT l.* FROM leads l
             WHERE l.status = 'pending'
               AND LOWER(l.contact_email) NOT IN (SELECT email FROM opt_outs)
+              AND l.status != 'bounced'
             ORDER BY l.id ASC
         """)
         return [dict(r) for r in cur.fetchall()]
@@ -359,31 +419,6 @@ def list_pending_followups() -> list:
             ORDER BY sent_at
         """)
         return [dict(r) for r in cur.fetchall()]
-
-
-def cli():
-    """Tiny CLI: `python3 -m db.lead_store status`."""
-    import sys
-    cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
-    if cmd == "status":
-        s = stats()
-        print("📊 Avilx leads DB")
-        print(f"   By status: {s['by_status']}")
-        print(f"   Sent (24h): {s['sent_last_24h']}")
-        print(f"   Opt-outs:  {s['opt_outs']}")
-        print(f"   Companies: {s['unique_companies']}")
-    elif cmd == "init":
-        with get_cursor(dict_rows=False) as cur:
-            with open(os.path.join(os.path.dirname(__file__), "schema.sql")) as f:
-                cur.execute(f.read())
-        print("✅ Schema applied")
-    elif cmd == "test":
-        try:
-            with get_cursor() as cur:
-                cur.execute("SELECT 1 AS ok")
-                print("✅ Connected:", cur.fetchone())
-        except Exception as e:
-            print(f"❌ Connection failed: {e}")
 
 
 if __name__ == "__main__":

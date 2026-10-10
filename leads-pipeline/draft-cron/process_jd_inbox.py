@@ -57,7 +57,17 @@ Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam
 
 EMAIL_RE = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b')
 URL_RE = re.compile(r'https?://[^\s\)\]\"\'<>]+')
-DOLLAR_RE = re.compile(r'[\$£€¥]\s?\d{2,3}[Kk]?[\s\-–]?[\$£€¥]?\s?\d{0,3}[Kk]?|\bSGD\s?\d{2,3}[Kk]?\b|\bUSD\s?\d{2,3}[Kk]?\b', re.IGNORECASE)
+DOLLAR_RE = re.compile(
+    r'(?:[\$£€¥]|SGD|USD|S\$|S\$|AU\$|CA\$|HK\$|NT\$)\s?'
+    r'\d{1,3}(?:[,\s]\d{3})*'
+    r'(?:\s*[Kk]\b|\s*[Mm]\b)?'
+    r'(?:\s*[\-–]\s*'
+    r'(?:[\$£€¥]|SGD|USD|S\$)?\s?'
+    r'\d{1,3}(?:[,\s]\d{3})*'
+    r'(?:\s*[Kk]\b|\s*[Mm]\b)?)?'
+    r'(?:\s*/\s*(?:hour|year|month|hr|yr|mo))?',
+    re.IGNORECASE,
+)
 # Phone: international or local, with common separators
 PHONE_RE = re.compile(
     r'(?:\+?\d{1,3}[\s\-\.]?)?'                # country code
