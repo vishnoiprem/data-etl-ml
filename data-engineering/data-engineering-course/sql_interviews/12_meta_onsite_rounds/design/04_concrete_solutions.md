@@ -89,8 +89,9 @@ One row per (unified_user_id, event_id, event_ts).
   - `platform_chain` = e.g., "IG→WA→FB" — the "user used all 3 today" metric
 
 ### Scale story
-- 3B users × 100 events/day × 500B = 500B events/day
-- 500B × 200B = 100TB/day raw
+- 3B users × 100 events/user/day = 300B events/day
+- 300B events × 200 bytes/event = 60TB/day raw
+- Parquet + ZSTD → ~6TB/day
 - Hot partition: `(event_date, platform)` — keeps hot days small
 - Pre-aggregate to 1-day buckets in the mart
 

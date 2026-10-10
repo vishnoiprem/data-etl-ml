@@ -21,9 +21,9 @@ posts and look like you've been there.
 - **Surface:** Reels feed ranking, watch-time, retention
 - **Most-asked question:** "Design a star schema to track Instagram Reels performance metrics across different recommendation algorithms." ([Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer))
 - **What to read:**
-  - [Instagram Engineering blog on Reels ranking](https://engineering.fb.com/category/instagram/)
-  - The 2023 paper "Making Instagram Reels" — search for the keyword
+  - [Meta Engineering blog — Instagram category](https://engineering.fb.com/category/instagram/) (filter by "data" tag for the data-warehouse posts)
   - Internal: "Reels Data Warehouse" wiki (ask your recruiter for the link)
+  - Recent talks at [Re-Engineering the Code @ Scale](https://atscaleconference.com/) (search for the latest year)
 - **The killer follow-up:** "How would you handle the slowly changing dimension of algorithm parameters?" (this is the SCD2 probe — see `04_concrete_solutions.md` Q1)
 
 ### 2. Cross-platform user behavior — UA / Identity org
@@ -32,8 +32,9 @@ posts and look like you've been there.
 - **Surface:** the unified-user-id graph, FB/IG/WA cross-platform analytics
 - **Most-asked question:** "Meta wants to build a unified data model for cross-platform user behavior analysis (FB, IG, WA)." ([Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer))
 - **What to read:**
-  - The 2021 paper "Identity-Resolving at Meta Scale"
-  - Internal: "UA Data Warehouse" wiki
+  - [Meta Engineering blog — Data Infrastructure](https://engineering.fb.com/category/data-infrastructure/) (filter for "identity" and "warehouse")
+  - Internal: "UA Data Warehouse" wiki (ask your recruiter)
+  - The annual [VLDB](https://vldb.org/) / [SIGMOD](https://sigmod.org/) proceedings — Meta publishes 5-10 data-infra papers per year
 - **The killer follow-up:** "How do you de-dupe a user_id that appears on 2 platforms?" (the bridge-table probe — see `04_concrete_solutions.md` Q2)
 
 ### 3. Ads Auction — Ads / Monetization org
@@ -42,8 +43,8 @@ posts and look like you've been there.
 - **Surface:** real-time bid optimization, historical campaign performance
 - **Most-asked question:** "Design an event-driven data model for Meta's advertising auction system that supports real-time bid optimization and historical campaign performance analysis." ([Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer))
 - **What to read:**
-  - The 2022 paper "Meta's Ads Auction at Scale"
-  - Internal: "Auction Insights" wiki
+  - [Meta Engineering blog — Ads category](https://engineering.fb.com/category/ads/)
+  - Internal: "Auction Insights" wiki (ask your recruiter)
 - **The killer follow-up:** "How do you support both point-in-time and current-state queries?" (the time-travel probe — see `04_concrete_solutions.md` Q3)
 
 ### 4. Ride-sharing (proxy for Move / Marketplace) — Marketplace org
@@ -62,8 +63,8 @@ posts and look like you've been there.
 - **Surface:** metric definition, root-cause analysis, segment-level decomposition
 - **Most-asked question:** "An Instagram metric is dropping. Walk through your root-cause analysis, the data model that would support it, and the follow-up." ([Aced 2026](https://www.aced.io/guides/meta-data-engineer-interview))
 - **What to read:**
-  - The 2023 paper "Causality at Meta" (search for "Meta causality")
-  - Internal: "PA Investigation Playbook" wiki
+  - [Meta Research — Causal Inference publications](https://research.facebook.com/publications/?category=causal-inference) (filter for the most recent 2 years)
+  - Internal: "PA Investigation Playbook" wiki (ask your recruiter)
 - **The killer follow-up:** "How do you know your counterfactual is the right one?" (the causal-inference probe — see `04_concrete_solutions.md` Q5)
 
 ## How to use this map

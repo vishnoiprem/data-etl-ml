@@ -35,7 +35,7 @@ def top_5_pages_by_upward_trend(impressions_df):
              .groupby(['page_id', 'day'], as_index=False)['impressions']
              .sum())
 
-    def slope(group):
+    def slope(group, **kwargs):
         if len(group) < 5:
             return np.nan
         x = np.arange(len(group))

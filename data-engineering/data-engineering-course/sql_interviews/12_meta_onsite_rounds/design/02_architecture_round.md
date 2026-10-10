@@ -2,7 +2,7 @@
 
 > **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
 >
-> **Source:** [Interview101 (2026)](https://www.interview101.com/interviews/meta/data-engineer), [DataDriven (2026)](https://www.tryexponent.com/guides/meta-data-engineer-interview), [PracHub (2026)](https://prachub.com/interview-guide/meta-data-engineer-interview-guide)
+> **Source:** [Interview101 (2026)](https://www.interview101.com/interviews/meta/data-engineer), [Tryexponent (2026)](https://www.tryexponent.com/guides/meta-data-engineer-interview), [PracHub (2026)](https://prachub.com/interview-guide/meta-data-engineer-interview-guide)
 
 ## Round format
 
@@ -53,7 +53,7 @@ WHERE  DATE(sent_ts) >= DATE('now', '-30 days')
 GROUP BY sender_id, DATE(sent_ts);
 ```
 
-**Step 4: cost** — $1/mo per 1M events ingested (storage $0.023, compute $0.01, egress $0.90).
+**Step 4: cost** — give a per-1M-events projection with named numbers (S3 $23/TB-mo, EMR $0.05/vCPU-hr, egress $0.09/GB). The exact dollar figure is less important than the *order of magnitude* and the ability to name the bottleneck at 10x. See Module 11's `notebooks/05_meta_system_design_walkthrough.ipynb` for a fully worked example.
 
 **Step 5: failure modes**
 - Late events: idempotency key = (business_id, day) → INSERT OR REPLACE

@@ -37,7 +37,7 @@ product-sense round, and the leadership-flavor of the behavior round.
 The module ships 3 things:
 
 1. A reusable ER-diagram-as-text convention for whiteboard practice.
-2. Sample schemas for the 3 most-asked product surfaces: Reels, WA Business, Ads Auction.
-3. 3 Jupyter notebooks that exercise the schemas against the ride-share / Meta schema fixture.
+2. Sample schemas for the 5 most-asked product surfaces: Reels, cross-platform user behavior, Ads Auction, ride-share, metric drop.
+3. 1 Jupyter notebook that exercises the schemas against the ride-share / Meta schema fixture.
 
-Test count: 6 new tests across 3 files.
+Test count: 9 new tests in 1 file (`tests/test_onsite_schemas.py`).

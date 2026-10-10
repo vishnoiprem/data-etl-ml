@@ -48,7 +48,7 @@ Translated into the framework:
 - **SCD Type 2** for `dim_algorithm_version` (algorithm parameters change weekly; you must keep history).
 - **SCD Type 1** for `dim_user` PII fields (just overwrite; no history).
 - **Bridge tables** for many-to-many: `reel_hashtag_bridge`, `reel_audio_bridge`.
-- **Partition key** is `event_date`, **sort key** is `(user_id, event_ts)`.
+- **Partition key** is `event_date`, **sort key** is `(algorithm_version_id, user_id, event_ts)` — the algo version is the *filter dimension* for backfill queries, so it goes first.
 - **10x story:** at 1B Reels/day, 5KB/row = 5TB/day raw. Parquet + ZSTD cuts that to 0.5TB/day. Roll up to 1-hour buckets in the mart.
 
 ## The 4 things Meta probes
@@ -80,5 +80,5 @@ Worked solutions to #4-6 are in `code/meta_modeling_solutions.md`.
 ## What to study next
 
 - **`02_architecture_round.md`** — the system-design flavor of the product-sense round. The schema you design here will be loaded by the ETL you design there.
-- **`code/meta_onsite_schemas.sql`** — the 3 worked schemas (Reels, WA Business, Ads Auction) executable against SQLite.
+- **`code/meta_onsite_schemas.sql`** — the 5 worked schemas (Reels, cross-platform user behavior, Ads Auction, ride-share, metric drop) executable against SQLite.
 - **Module 4 in `data_modeling/`** — `04_high_level_diagrams` for the dimensional-modeling reference.
