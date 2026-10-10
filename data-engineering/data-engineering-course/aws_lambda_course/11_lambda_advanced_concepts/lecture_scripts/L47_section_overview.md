@@ -1,6 +1,6 @@
 ---
 title: L47 — AWS Lambda Advanced Concepts — Section Overview
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 0:29
 ---

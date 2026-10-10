@@ -8,7 +8,7 @@ prereqs: ["L24"]
 
 # L25 — Subscription Filters 101 — Real-Time Log Fan-out
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Logs Insights + Subscriptions
 > **Duration:** 12:00
 

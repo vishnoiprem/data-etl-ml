@@ -1,6 +1,6 @@
 # AWS Lambda Authorizer — Python dependencies
 #
-# Author: Prem Vishnoi <prem.vishnoi@example.com>
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
 #
 # Versions follow the parent course (aws_lambda_course) to keep both
 # environments compatible.

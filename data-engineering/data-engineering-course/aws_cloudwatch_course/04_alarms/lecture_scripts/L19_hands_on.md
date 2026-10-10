@@ -8,7 +8,7 @@ prereqs: ["L18"]
 
 # L19 — Hands-on: build `put_metric_alarm.py` + 5 moto tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — CloudWatch Alarms
 > **Duration:** 10:00
 

@@ -1,6 +1,6 @@
 # Module 01: Overview
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Welcome to the Coding Interviews track. This module sets the stage: what to expect in a coding interview, how to choose a language, three warm-up problems to get you coding immediately, and a bonus on AI-assisted rounds.
 

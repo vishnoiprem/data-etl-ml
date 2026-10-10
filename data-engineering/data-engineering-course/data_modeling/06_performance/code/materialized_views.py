@@ -20,7 +20,7 @@ The two patterns covered:
 The benchmarks compare query latency against the raw
 fact table.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

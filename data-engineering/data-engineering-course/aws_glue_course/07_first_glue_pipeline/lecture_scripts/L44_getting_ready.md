@@ -1,6 +1,6 @@
 # L44 — Getting Ready For Glue Pipeline Creation
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 07
 > **Duration target:** see `SYLLABUS.md`
 

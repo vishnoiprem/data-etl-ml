@@ -8,7 +8,7 @@ prereqs: ["L30"]
 
 # L31 — Cost Optimization — log retention, metric filters, anomaly bands
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Real-World Patterns
 > **Duration:** 10:00
 

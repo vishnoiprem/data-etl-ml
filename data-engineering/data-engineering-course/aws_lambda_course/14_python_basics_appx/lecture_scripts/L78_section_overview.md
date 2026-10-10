@@ -1,6 +1,6 @@
 # L78 — Python Basics — Section Overview
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 14 — Python Basics Appendix
 > **Duration target:** 0:56
 

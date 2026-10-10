@@ -8,7 +8,7 @@ prereqs: ["L19"]
 
 # L20 — Wiring AppSync → SFN → EventBridge
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — AppSync + Step Functions + EventBridge
 > **Duration:** 12:00
 

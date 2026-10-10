@@ -1,6 +1,6 @@
 # Module 05: Hash Tables
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Hash tables give you O(1) average lookup — the most powerful tool in your kit.
 

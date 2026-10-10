@@ -1,6 +1,6 @@
 # launch_instance.py
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 03 (Creating an EC2 Instance)
 > **Demo for:** L18 — Section Recap
 

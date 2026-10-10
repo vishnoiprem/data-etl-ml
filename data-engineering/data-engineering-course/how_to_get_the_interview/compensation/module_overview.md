@@ -127,4 +127,4 @@ The author writes about comp negotiation at
 
 ---
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

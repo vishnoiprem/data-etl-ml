@@ -1,6 +1,6 @@
 # L61 — AWS CloudFormation — Serverless Architecture (API Gateway, AWS Lambda, S3)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 2:16
 > **Lecture ID:** L61

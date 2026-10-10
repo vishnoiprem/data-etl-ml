@@ -1,6 +1,6 @@
 ---
 title: L46 — Generative AI: End-to-End Demo
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 10
 duration: 1:13
 ---

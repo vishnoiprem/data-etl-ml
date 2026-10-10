@@ -1,6 +1,6 @@
 # L38 — Securing APIs using AWS Cognito Authorizer — Theory
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 2:42
 > **Lecture ID:** L38

@@ -9,7 +9,7 @@ prereqs:
 
 # L22 — Lambda Triggers — Pre/Post Authentication, Pre Token Generation
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 18:00
 

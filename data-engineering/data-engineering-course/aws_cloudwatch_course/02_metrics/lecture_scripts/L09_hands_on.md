@@ -8,7 +8,7 @@ prereqs: ["L08"]
 
 # L09 — Hands-on: build `put_metric_data.py` + 5 moto tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — CloudWatch Metrics
 > **Duration:** 10:00
 

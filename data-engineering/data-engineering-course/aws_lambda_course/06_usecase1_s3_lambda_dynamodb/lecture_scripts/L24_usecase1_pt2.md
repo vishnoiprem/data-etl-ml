@@ -1,6 +1,6 @@
 # L24 — Enterprise Use Case using S3, AWS Lambda and DynamoDB — Part 2
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 06 — Enterprise Use Case 1
 > **Duration:** 8:27
 > **Prereqs:** L23 (architecture, data model, IAM role, S3 event notification)

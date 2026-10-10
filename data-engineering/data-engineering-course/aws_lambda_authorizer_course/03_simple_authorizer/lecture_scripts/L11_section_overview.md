@@ -8,7 +8,7 @@ prereqs: ["L10"]
 
 # L11 — Section Overview — TOKEN Authorizer Event Shape
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Simple Token-Based Lambda Authorizer
 > **Duration:** 6:00
 

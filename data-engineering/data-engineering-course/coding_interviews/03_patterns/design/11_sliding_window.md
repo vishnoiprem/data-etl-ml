@@ -1,6 +1,6 @@
 # 11 — Sliding Window
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Use when you need a contiguous subarray / substring of dynamic length that satisfies a constraint (sum, distinct count, etc.).
 

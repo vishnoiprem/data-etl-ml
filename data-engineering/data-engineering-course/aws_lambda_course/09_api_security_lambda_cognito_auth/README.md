@@ -1,6 +1,6 @@
 # Section 9 — API Security: Lambda Authorizer & Cognito Authorizer
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Lectures:** L36–L39 (44 min total)
 > **Working artifacts:** 3 code subdirectories under `code/`

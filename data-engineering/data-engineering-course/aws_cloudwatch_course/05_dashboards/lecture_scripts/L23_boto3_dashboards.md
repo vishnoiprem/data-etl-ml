@@ -8,7 +8,7 @@ prereqs: ["L22"]
 
 # L23 — `put_dashboard` + `get_dashboard` with boto3
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — CloudWatch Dashboards
 > **Duration:** 12:00
 

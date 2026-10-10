@@ -2,7 +2,7 @@
 
 > **9 lessons · 0 videos · ~1.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The syntax you must know cold. After M02 you should be able to
 read any of the canonical interview queries and recognize every

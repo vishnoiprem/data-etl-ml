@@ -8,7 +8,7 @@ prereqs: ["L04"]
 
 # L05 — The CDK Construct Tree
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — App, Stack, Construct
 > **Duration:** 11:00
 

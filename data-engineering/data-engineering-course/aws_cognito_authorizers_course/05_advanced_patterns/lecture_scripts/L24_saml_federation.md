@@ -9,7 +9,7 @@ prereqs:
 
 # L24 — SAML 2.0 Federation with Corporate IdPs
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 18:00
 

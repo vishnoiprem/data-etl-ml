@@ -9,7 +9,7 @@ prereqs:
 
 # L10 — Hands-on: Create a User Pool with boto3 + moto
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — Cognito User Pools
 > **Duration:** 15:00
 

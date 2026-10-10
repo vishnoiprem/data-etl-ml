@@ -8,7 +8,7 @@ prereqs: ["L09"]
 
 # L10 — `cdk deploy` + `cdk destroy` + Stack Outputs
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — App, Stack, Construct
 > **Duration:** 10:00
 

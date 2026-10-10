@@ -1,6 +1,6 @@
 # Capstone — 5 Interview-Style SQL Questions
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 Five end-to-end interview questions to time yourself on. The
 goal is to write each query in 15 minutes or less, run it

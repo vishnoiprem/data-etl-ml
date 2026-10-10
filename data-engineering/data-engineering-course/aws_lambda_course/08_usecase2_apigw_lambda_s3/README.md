@@ -1,6 +1,6 @@
 # Section 8 — Enterprise Use Case 2: API Gateway, AWS Lambda, S3
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L30–L35
 > **Total duration:** ~46 min
 > **Use case:** A simple, fully serverless CRUD API that stores and retrieves

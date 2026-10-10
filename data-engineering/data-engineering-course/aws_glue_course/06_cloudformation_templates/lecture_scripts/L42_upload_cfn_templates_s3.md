@@ -1,6 +1,6 @@
 # L42 — Upload CFN Templates to S3
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 06
 > **Duration target:** see `SYLLABUS.md`
 

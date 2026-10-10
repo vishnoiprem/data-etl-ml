@@ -1,6 +1,6 @@
 # Section 5 — Glue Resources SetUp Part 3: Glue Catalog, Crawler (L21–L35, 58 min)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > This is the section bundle. Each lecture is also published as its own file in this directory.
 

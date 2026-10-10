@@ -2,7 +2,7 @@
 -- Minimal seed data for the capstone exercise. One file
 -- covers all 5 capstone questions (with overlapping
 -- tables).
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 CREATE TABLE Customers (
     id      INTEGER PRIMARY KEY,

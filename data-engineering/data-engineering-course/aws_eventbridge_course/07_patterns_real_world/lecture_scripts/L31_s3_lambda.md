@@ -11,7 +11,7 @@ downloads: []
 
 # L31 — S3 → EventBridge → Lambda
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Patterns + Real-World
 > **Duration:** 11:15
 

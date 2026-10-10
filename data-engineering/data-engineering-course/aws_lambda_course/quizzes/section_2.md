@@ -1,6 +1,6 @@
 # Quiz — Section 2: AWS Lambda Basic Concepts (Part 1)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — AWS Lambda Basic Concepts (Part 1) (L03–L08)
 > **Questions:** 10 multiple-choice
 > **Pass bar:** 7 / 10

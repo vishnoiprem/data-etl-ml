@@ -1,6 +1,6 @@
 # SYLLABUS — AWS CloudWatch Crash Course — Beginner to Advanced
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **7 sections**, **35 lectures** (L01–L35), **~6h** total. 5 working `boto3 + moto` demos, 7 quizzes, 1 graded assignment, 3 Mermaid diagrams.
 > **Source:** Udemy-published curriculum "AWS CloudWatch Crash Course" (October 2026 edition).
 

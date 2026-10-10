@@ -8,7 +8,7 @@ prereqs: ["L04"]
 
 # L05 — Metrics 101 — Namespaces, Metric Names, Dimensions
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — CloudWatch Metrics
 > **Duration:** 10:00
 

@@ -8,7 +8,7 @@ prereqs: ["L25"]
 
 # L26 — Filter Pattern Syntax — exact, json, space-delimited tokens
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Logs Insights + Subscriptions
 > **Duration:** 10:00
 

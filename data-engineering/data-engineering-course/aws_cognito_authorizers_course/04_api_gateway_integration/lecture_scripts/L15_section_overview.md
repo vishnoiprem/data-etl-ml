@@ -12,7 +12,7 @@ prereqs:
 
 # L15 — Section Overview & Auth Methods Recap
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — API Gateway + Cognito Authorizer
 > **Duration:** 12:00
 

@@ -1,6 +1,6 @@
 # Module 09: Trees
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 9 tree problems covering traversal, BST validation, construction, and path sums.
 

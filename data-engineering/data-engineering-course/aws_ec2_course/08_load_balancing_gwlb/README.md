@@ -1,6 +1,6 @@
 # Section 8 — Gateway Load Balancer + Course Wrap-up
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 08 of 08
 > **Lectures:** L36 – L38 (3 lectures, ~34 minutes total)
 > **Working artifact:** `code/gwlb_create/gwlb_create.py` + 3 pytest tests

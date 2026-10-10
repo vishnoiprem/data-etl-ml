@@ -1,6 +1,6 @@
 # SYLLABUS — AWS Glue: The Complete Masterclass
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** 11 sections, 81 lectures, 4h 11m total. 3 role plays (L57 in Section 8 + 2 in `assignments/`). 4 downloadable resources. 11 quizzes. 6 assignments.
 
 This is the **authoritative lecture-to-file map**. The Udemy-published numbering (3+8+5+4+15+7+6+9+10+8+6 = 81) is mapped to local L-IDs L1–L81 below.

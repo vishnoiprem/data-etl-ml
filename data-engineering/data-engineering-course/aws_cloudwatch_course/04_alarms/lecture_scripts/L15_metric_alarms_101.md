@@ -8,7 +8,7 @@ prereqs: ["L14"]
 
 # L15 — Metric Alarms 101 — OK / ALARM / INSUFFICIENT_DATA
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — CloudWatch Alarms
 > **Duration:** 10:00
 

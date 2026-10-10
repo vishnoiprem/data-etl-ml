@@ -1,6 +1,6 @@
 # `create_log_group` — CloudWatch Logs demo
 
-> Companion to L12/L14. Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Companion to L12/L14. Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 ## What it does
 

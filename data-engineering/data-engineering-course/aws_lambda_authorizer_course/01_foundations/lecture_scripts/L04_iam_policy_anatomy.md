@@ -8,7 +8,7 @@ prereqs: ["L03"]
 
 # L04 — Anatomy of an IAM Policy Document
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 8:00
 

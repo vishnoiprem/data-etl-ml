@@ -5,7 +5,7 @@
 > *charge state machine*, and the *payout
 > reconciliation* problem.
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -362,4 +362,4 @@ One row per (currency, day). Joins to
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

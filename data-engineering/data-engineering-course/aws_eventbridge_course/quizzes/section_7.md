@@ -1,6 +1,6 @@
 # Section 7 Quiz — Patterns + Real-World
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > 12 questions, multi-choice, single answer. Answers are hidden in
 > collapsible blocks; expand only after you've attempted the question.
 

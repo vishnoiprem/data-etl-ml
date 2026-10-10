@@ -13,7 +13,7 @@ working SQLite:
 Each function returns the list of tables it created,
 so the tests can inspect them.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

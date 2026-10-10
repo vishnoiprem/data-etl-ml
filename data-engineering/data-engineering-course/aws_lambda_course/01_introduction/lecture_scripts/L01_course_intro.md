@@ -10,7 +10,7 @@ downloads:
 
 # L01 — Must Watch — Course Introduction and Download Content Slides
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Introduction
 > **Duration:** 4:09
 

@@ -1,6 +1,6 @@
 # Section 3 — Python Basics Refresher (L09–L10)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** L09 (Part 1, 8:00) + L10 (Part 2, 15:11) — 23 min total
 
 This section is a focused, two-lecture Python refresher for students who are

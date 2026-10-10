@@ -1,6 +1,6 @@
 # Assignment 1 — Build a Complete Lambda Authorizer Stack
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Time estimate:** 6–8 hours
 > **Difficulty:** Intermediate
 > **Builds on:** Sections 2 (JWT basics), 3 (TOKEN authorizer), 4 (REQUEST authorizer + cache)

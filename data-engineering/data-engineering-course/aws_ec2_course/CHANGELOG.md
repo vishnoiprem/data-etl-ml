@@ -12,4 +12,4 @@ adheres to [Semantic Versioning](https://semver.org/).
   diagrams, 8 quizzes (8–12 questions each), 1 optional assignment.
 - Every code sample runs offline with `pytest` + `moto` — no AWS
   account required for the unit tests.
-- Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;.
+- Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;.

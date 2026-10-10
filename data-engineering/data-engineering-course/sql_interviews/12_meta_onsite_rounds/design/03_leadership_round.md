@@ -1,6 +1,6 @@
 # Lesson 3 — The Leadership / Ownership Round (E5/E6, 30-45 min)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Source:** [Aced 2026](https://www.aced.io/guides/meta-data-engineer-interview), [Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer), [HelloInterview E6](https://www.hellointerview.com/guides/meta/e6)
 

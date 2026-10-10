@@ -1,6 +1,6 @@
 # `subscription_filter` — CloudWatch subscription filter demo
 
-> Companion to L25/L29. Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Companion to L25/L29. Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 ## What it does
 

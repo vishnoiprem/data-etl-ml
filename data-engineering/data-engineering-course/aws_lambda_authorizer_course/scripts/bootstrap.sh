@@ -2,7 +2,7 @@
 # bootstrap.sh — set up a fresh Python environment for the AWS Lambda
 # Authorizer course.
 #
-# Author: Prem Vishnoi <prem.vishnoi@example.com>
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
 #
 # This script is POSIX-compatible (uses only bash builtins, no GNU-only
 # flags) and is safe to re-run. On every invocation it will:

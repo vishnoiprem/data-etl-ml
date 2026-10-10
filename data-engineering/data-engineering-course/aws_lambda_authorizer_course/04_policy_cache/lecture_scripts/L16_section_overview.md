@@ -8,7 +8,7 @@ prereqs: ["L15"]
 
 # L16 — Section Overview — Why a Request Authorizer
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Request-Parameter Authorizer & Policy Caching
 > **Duration:** 6:00
 

@@ -5,7 +5,7 @@ and product-management interviews**. **12 tracks · 506 lessons · 1,470 tests**
 Every system in the code-heavy tracks is a real, runnable service or pipeline
 you can execute on your laptop.
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 >
 > **Companion reading:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 >

@@ -10,7 +10,7 @@ downloads:
 
 # L18 — SQS + SNS Targets: Queue with Policy, Pub/Sub Fanout
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Targets
 > **Duration:** 10:55
 

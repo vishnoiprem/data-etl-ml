@@ -22,7 +22,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / dates in YYYY-MM-DD.
 
 ### Conventions
 
-- Author of every commit: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+- Author of every commit: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 - Lecture files: `<section>/lecture_scripts/L##_topic.md`
 - Code files: `<section>/code/<topic>/<file>.py`
 - Every lecture follows the structure: **Prereqs → Key terms → Lecture →

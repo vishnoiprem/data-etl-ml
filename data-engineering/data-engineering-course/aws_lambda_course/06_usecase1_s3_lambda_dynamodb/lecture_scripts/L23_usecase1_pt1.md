@@ -1,6 +1,6 @@
 # L23 — Enterprise Use Case using S3, AWS Lambda and DynamoDB — Part 1
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 06 — Enterprise Use Case 1
 > **Duration:** 11:24
 > **Prereqs:** L01–L22 (Introduction, Lambda basics, Python refresher, Lambda

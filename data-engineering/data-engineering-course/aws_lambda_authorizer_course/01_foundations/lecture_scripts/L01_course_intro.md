@@ -10,7 +10,7 @@ downloads:
 
 # L01 — Course Intro — Why API Security Matters
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 6:00
 

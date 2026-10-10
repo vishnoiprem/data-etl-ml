@@ -1,6 +1,6 @@
 ---
 title: L51 — Lambda — VPC Networking Configuration
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 5:44
 ---

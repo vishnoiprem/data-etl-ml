@@ -7,7 +7,7 @@ have in between? Module 02 grounds the abstract pipeline patterns
 from Module 01 in concrete storage primitives: the source on the
 left, the sink on the right, and the abstractions that connect them.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

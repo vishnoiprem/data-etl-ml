@@ -1,6 +1,6 @@
 # L24 — AWS Glue Table 101 (creating a table in the catalog)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 05
 > **Duration target:** see `SYLLABUS.md`
 

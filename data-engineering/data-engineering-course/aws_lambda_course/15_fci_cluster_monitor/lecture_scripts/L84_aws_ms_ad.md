@@ -9,7 +9,7 @@ prereqs:
 
 # L84 — AWS Managed Microsoft AD 101
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 15
 > **Duration:** 8:00
 > **Prereqs:** L82–L83

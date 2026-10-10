@@ -8,7 +8,7 @@ prereqs: ["L26"]
 
 # L27 — Cross-Region Stacks
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 6 — Real-World Patterns
 > **Duration:** 12:00
 

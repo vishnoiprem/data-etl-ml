@@ -1,6 +1,6 @@
 # Section 2 Quiz — EC2 Fundamentals (L04–L08)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Pass bar:** 7 / 10
 > **Time limit:** 15 minutes
 > **Format:** 10 multiple-choice and short-answer questions

@@ -8,7 +8,7 @@ prereqs: ["L10"]
 
 # L11 — Log Events, Timestamps, Ingestion, Storage Costs
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 3 — CloudWatch Logs
 > **Duration:** 12:00
 

@@ -1,6 +1,6 @@
 # Section 4 — EC2 Pricing (L19–L22)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 04
 > **Lectures:** L19–L22
 > **Working artifact:** `code/pricing_calc.py` (pure-Python, no boto3)

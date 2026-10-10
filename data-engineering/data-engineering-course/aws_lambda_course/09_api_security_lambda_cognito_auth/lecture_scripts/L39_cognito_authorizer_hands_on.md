@@ -1,6 +1,6 @@
 # L39 — Securing APIs using AWS Cognito Authorizer — Hands On
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 14:11
 > **Lecture ID:** L39

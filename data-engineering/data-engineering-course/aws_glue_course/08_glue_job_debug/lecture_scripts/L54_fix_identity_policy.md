@@ -1,6 +1,6 @@
 # L54 — Fix Identity Policy Error — Error Reading The Key
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 08
 > **Duration target:** see `SYLLABUS.md`
 

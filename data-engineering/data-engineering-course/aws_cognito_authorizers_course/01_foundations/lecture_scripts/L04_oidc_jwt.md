@@ -9,7 +9,7 @@ prereqs:
 
 # L04 — OpenID Connect (OIDC) & JWTs
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 15:00
 

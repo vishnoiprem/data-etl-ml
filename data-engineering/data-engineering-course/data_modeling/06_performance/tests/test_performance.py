@@ -4,7 +4,7 @@ These tests assert *correctness* of the indexed / partitioned
 / pre-aggregated queries. They do *not* assert timing — the
 benchmark numbers in the demos are for inspection.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 import sys

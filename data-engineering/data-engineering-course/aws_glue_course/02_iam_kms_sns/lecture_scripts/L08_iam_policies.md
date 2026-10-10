@@ -1,6 +1,6 @@
 # L08 — IAM 101 — Policies
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 02
 > **Duration target:** see `SYLLABUS.md`
 

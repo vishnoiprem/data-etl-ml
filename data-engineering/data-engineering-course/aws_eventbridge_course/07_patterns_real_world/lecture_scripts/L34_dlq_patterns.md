@@ -11,7 +11,7 @@ downloads: []
 
 # L34 — Dead-Letter Queue Patterns
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Patterns + Real-World
 > **Duration:** 12:00
 

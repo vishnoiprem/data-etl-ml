@@ -8,7 +8,7 @@ prereqs: ["L23"]
 
 # L24 — Hands-on: build `create_dashboard.py` + 4 moto tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — CloudWatch Dashboards
 > **Duration:** 10:00
 

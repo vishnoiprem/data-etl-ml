@@ -1,7 +1,7 @@
 """
 region_az_demo.py — list enabled AWS regions and the AZs in the current region.
 
-> Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Author: Prem Vishnoi <pvishnoi@avilx.com>
 > Section: 02 (EC2 Fundamentals)
 > Companion lecture: L06, L08
 

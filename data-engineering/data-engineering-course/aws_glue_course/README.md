@@ -1,6 +1,6 @@
 # AWS Glue — The Complete Masterclass
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Source title:** *AWS Glue - The Complete Masterclass*
 > **Subtitle:** Master building complete AWS Glue ETL Pipelines, Glue Data Quality, Glue Data Brew along with other AWS resources
@@ -76,4 +76,4 @@ The 3 role plays are L57 in Section 8, plus 2 referenced in `assignments/`.
 
 - **Title:** AWS Glue - The Complete Masterclass
 - **Instructor:** pvishnoi (Prem Vishnoi)
-- **Contact:** prem.vishnoi@example.com
+- **Contact:** pvishnoi@avilx.com

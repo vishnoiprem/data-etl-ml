@@ -1,6 +1,6 @@
 # Module 02: Time & Space Complexity
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Big-O is the language of coding interviews. This module covers the four lessons you need to be fluent.
 

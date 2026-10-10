@@ -21,7 +21,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / dates in YYYY-MM-DD.
 - 3 PDF placeholders under `downloads/`
 
 ### Conventions
-- Author of every commit: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+- Author of every commit: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 - Lecture files: `<section>/lecture_scripts/L##_topic.md`
 - Code files: `<section>/code/<demo>/<script>.py` and `test_<script>.py`
 - Every lecture follows the structure: **Prereqs → Key terms → Lecture →

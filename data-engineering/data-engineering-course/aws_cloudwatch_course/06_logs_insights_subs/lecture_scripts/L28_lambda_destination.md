@@ -8,7 +8,7 @@ prereqs: ["L27"]
 
 # L28 — Lambda as Subscription Destination
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Logs Insights + Subscriptions
 > **Duration:** 12:00
 

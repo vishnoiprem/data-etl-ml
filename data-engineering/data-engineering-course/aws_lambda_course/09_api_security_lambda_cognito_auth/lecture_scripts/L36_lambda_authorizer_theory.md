@@ -1,6 +1,6 @@
 # L36 — Securing APIs using AWS Lambda Authorizer — Theory
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 3:30
 > **Lecture ID:** L36

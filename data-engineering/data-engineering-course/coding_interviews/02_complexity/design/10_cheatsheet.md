@@ -1,6 +1,6 @@
 # 10 — The Complexity Cheatsheet
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 A reference table for the patterns in this course.
 

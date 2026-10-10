@@ -13,7 +13,7 @@ setup(
     version="1.0.0",
     description="A complete, runnable System Design course with 71 lessons across 11 modules.",
     author="Prem Vishnoi",
-    author_email="prem.vishnoi@example.com",
+    author_email="pvishnoi@avilx.com",
     url="https://medium.com/@premvishnoi",
     packages=find_packages(
         include=[

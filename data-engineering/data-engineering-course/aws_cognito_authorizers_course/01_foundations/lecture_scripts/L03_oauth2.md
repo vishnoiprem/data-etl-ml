@@ -9,7 +9,7 @@ prereqs:
 
 # L03 — OAuth 2.0 — Roles, Flows & Tokens
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 15:00
 

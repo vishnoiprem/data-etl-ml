@@ -1,6 +1,6 @@
 # JWT Validation Cheat Sheet (one page, 2026 edition)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Source:** RFC 7519 (JWT) + AWS Cognito documentation, current as of October 2026.
 > **Format:** printable one-pager. The "real" deliverable is a PDF generated from this markdown by `pandoc`.
 

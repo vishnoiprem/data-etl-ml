@@ -1,6 +1,6 @@
 # Section 6 — Pipes + Archives + Replay (L25–L29)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 This section covers the three features that turn EventBridge from
 "pub/sub + cron" into a **complete** event-driven platform:

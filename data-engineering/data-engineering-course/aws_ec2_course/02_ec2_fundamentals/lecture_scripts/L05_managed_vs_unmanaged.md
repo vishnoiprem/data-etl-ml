@@ -1,6 +1,6 @@
 # L05 — Managed vs Unmanaged Services (and where EC2 fits)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 02
 > **Duration target:** 8:00
 > **Lecture ID:** L05

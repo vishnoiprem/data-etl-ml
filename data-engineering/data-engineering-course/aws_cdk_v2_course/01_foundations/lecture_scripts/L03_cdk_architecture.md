@@ -8,7 +8,7 @@ prereqs: ["L02"]
 
 # L03 — CDK v2 Architecture — `aws-cdk-lib`, `constructs`, the CLI
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 13:00
 

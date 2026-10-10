@@ -1,6 +1,6 @@
 # Section 2 — EC2 Fundamentals
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Lectures:** L04–L08
 > **Duration:** ~47 min lecture + 1 working demo
 

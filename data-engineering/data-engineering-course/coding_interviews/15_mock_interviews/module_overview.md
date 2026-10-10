@@ -1,6 +1,6 @@
 # Module 15: Mock Interviews
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Six full mock-interview formats. Each lesson has a design/ file (the interview prompt, suggested talking points, and grading rubric) and a code/ file (a clean, working solution).
 

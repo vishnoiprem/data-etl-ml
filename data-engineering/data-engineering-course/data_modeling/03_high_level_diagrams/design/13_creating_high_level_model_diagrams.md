@@ -424,4 +424,4 @@ seen, your diagram muscle is built. Move to Lesson 14.
 > different conversations with the interviewer, and I
 > pick the one that matches the prompt."
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

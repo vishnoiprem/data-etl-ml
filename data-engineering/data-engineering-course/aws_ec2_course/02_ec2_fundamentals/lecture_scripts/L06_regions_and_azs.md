@@ -1,6 +1,6 @@
 # L06 — Regions and Availability Zones
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 02
 > **Duration target:** 12:00
 > **Lecture ID:** L06

@@ -1,6 +1,6 @@
 -- sql_interviews/09_hard_practice/code/schema.sql
 -- Schema and seed data for the M09 (Hard) practice module.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 -- ============================================================
 -- Problem 85: Median Finder per Group

@@ -1,6 +1,6 @@
 # L79 — Python Basics – 1: PyCharm, Print Function, Variables, Format, User Input
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 14 — Python Basics Appendix
 > **Duration target:** 9:11
 

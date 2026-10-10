@@ -8,7 +8,7 @@ prereqs: []
 
 # L01 — Course Introduction & What You'll Build
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 5:00
 

@@ -11,7 +11,7 @@ downloads:
 
 # L28 — Replay — the Killer Feature
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Pipes + Archives + Replay
 > **Duration:** 8:30
 

@@ -8,7 +8,7 @@ prereqs: ["L03"]
 
 # L04 — Installing and Bootstrapping CDK
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 12:00
 

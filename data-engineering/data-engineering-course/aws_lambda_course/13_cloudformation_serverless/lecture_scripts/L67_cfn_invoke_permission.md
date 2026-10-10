@@ -1,6 +1,6 @@
 # L67 — AWS CloudFormation — Lambda Invoke Permission
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 4:29
 > **Lecture ID:** L67

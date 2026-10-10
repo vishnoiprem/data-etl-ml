@@ -9,7 +9,7 @@ prereqs:
 
 # L25 — OIDC Federation & Course Wrap-up
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 18:00
 
@@ -232,7 +232,7 @@ section 5. Same for sections 1–4.
 ### Thank you
 
 Thanks for taking **AWS Cognito Authorizers — Crash Course**. If you
-have feedback, find me at prem.vishnoi@example.com — I read every
+have feedback, find me at pvishnoi@avilx.com — I read every
 email.
 
 Good luck, and may your tokens always verify on the first try.

@@ -1,6 +1,6 @@
 ---
 title: L75 — AWS CDK — Create IAM Role using AWS CDK v2
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 12
 duration: 6:56
 ---
@@ -9,7 +9,7 @@ duration: 6:56
 
 > **Section:** 12 — AWS CDK v2
 > **Duration target:** 6:56
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Prereqs
 

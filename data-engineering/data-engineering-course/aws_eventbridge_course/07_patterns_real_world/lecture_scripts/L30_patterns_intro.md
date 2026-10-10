@@ -12,7 +12,7 @@ downloads: []
 
 # L30 — The 10 Most Common EventBridge Patterns
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Patterns + Real-World
 > **Duration:** 9:30
 

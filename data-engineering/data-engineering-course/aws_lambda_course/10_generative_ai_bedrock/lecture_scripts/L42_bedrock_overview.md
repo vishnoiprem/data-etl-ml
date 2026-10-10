@@ -1,6 +1,6 @@
 ---
 title: L42 — Generative AI: AWS Bedrock Overview
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 10
 duration: 2:24
 ---

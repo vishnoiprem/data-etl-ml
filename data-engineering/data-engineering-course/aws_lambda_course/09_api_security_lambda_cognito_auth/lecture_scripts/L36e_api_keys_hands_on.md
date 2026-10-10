@@ -1,6 +1,6 @@
 # L36e — API Keys and Usage Plan — Hands On (security lens)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 8:00
 > **Lecture ID:** L36e

@@ -1,6 +1,6 @@
 # L63 — AWS CloudFormation — Lambda Execution Role
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 6:09
 > **Lecture ID:** L63

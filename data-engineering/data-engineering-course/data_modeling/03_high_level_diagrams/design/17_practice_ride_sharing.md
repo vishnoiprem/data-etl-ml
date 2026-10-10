@@ -313,4 +313,4 @@ add a 6th schema for the GPS event stream and write
 > not denormalized onto `fact_trips` because there are
 > hundreds of pings per trip."
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

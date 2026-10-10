@@ -1,6 +1,6 @@
 # Section 4 — AppSync + Step Functions + EventBridge (L16–L20)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L16–L20 | **Duration:** ~60 min | **Quizzes:** `quizzes/section_4.md`
 > **Working artifact:** `code/app-sync-sfn/` — AppSync + SFN + Lambda.
 

@@ -8,7 +8,7 @@ prereqs: ["L11"]
 
 # L12 — `create_log_group` + `put_log_events` + `filter_log_events`
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 3 — CloudWatch Logs
 > **Duration:** 18:00
 

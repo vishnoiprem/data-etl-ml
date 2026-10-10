@@ -1,6 +1,6 @@
 # CloudWatch Widget JSON Cheat Sheet
 
-> Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 Dashboards are described by a single JSON document. The body is a list of
 top-level widgets. Each widget is `{ "type": ..., "x": ..., "y": ...,

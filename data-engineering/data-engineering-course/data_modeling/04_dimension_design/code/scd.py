@@ -23,7 +23,7 @@ The SCD convention we use here:
   * ``expiry_date`` is set to ``'9999-12-31'`` for the
     current row.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

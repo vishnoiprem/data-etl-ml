@@ -403,4 +403,4 @@ Schema? If any is missing, the pipeline is one bad row away
 from producing wrong data — and the downstream won't know
 for weeks.
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

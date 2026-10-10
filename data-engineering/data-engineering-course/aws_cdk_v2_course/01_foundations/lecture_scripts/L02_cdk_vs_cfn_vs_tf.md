@@ -8,7 +8,7 @@ prereqs: ["L01"]
 
 # L02 — CDK vs CloudFormation vs Terraform
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 13:00
 

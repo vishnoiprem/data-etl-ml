@@ -3,13 +3,13 @@ id: L26
 title: "API Gateway — Resources, Methods and Integration Types"
 section: 7
 duration: "5:45"
-author: "Prem Vishnoi <prem.vishnoi@example.com>"
+author: "Prem Vishnoi <pvishnoi@avilx.com>"
 udemy_id: 26
 ---
 
 # L26 — API Gateway — Resources, Methods and Integration Types
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7 — API Gateway Overview
 > **Lecture duration target:** 5:45
 

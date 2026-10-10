@@ -8,7 +8,7 @@ prereqs: ["L32"]
 
 # L33 — Observability for Serverless (Lambda + API Gateway + DynamoDB)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Real-World Patterns
 > **Duration:** 8:00
 

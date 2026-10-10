@@ -1,6 +1,6 @@
 ---
 title: L43 — Generative AI: AWS Lambda Prerequisites
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 10
 duration: 5:50
 ---

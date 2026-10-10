@@ -1,6 +1,6 @@
 # Section 5 — EventBridge Scheduler (L21–L24)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 This section covers **EventBridge Scheduler**, the service that
 replaces the legacy CloudWatch Events schedule API. By the end of

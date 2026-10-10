@@ -11,7 +11,7 @@ downloads:
 
 # L23 — One-Off Schedules, Time Zones, and Flexible Time Windows
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — EventBridge Scheduler
 > **Duration:** 7:30
 

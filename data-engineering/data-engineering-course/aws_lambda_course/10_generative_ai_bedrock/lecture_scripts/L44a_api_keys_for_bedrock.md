@@ -1,6 +1,6 @@
 ---
 title: L44a — API Keys and Usage Plan for the Bedrock API
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 10
 duration: 12:00
 prereqs: [L44, L33, L34]

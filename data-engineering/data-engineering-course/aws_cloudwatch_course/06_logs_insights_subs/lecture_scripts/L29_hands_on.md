@@ -8,7 +8,7 @@ prereqs: ["L28"]
 
 # L29 — Hands-on: build `subscription_filter.py` + 4 moto tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Logs Insights + Subscriptions
 > **Duration:** 14:00
 

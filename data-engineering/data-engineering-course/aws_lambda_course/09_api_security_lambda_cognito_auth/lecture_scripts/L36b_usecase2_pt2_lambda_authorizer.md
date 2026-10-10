@@ -1,6 +1,6 @@
 # L36b — Use Case 2 — Part 2: Add Lambda Authorizer to the API
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 10:00
 > **Lecture ID:** L36b

@@ -1,6 +1,6 @@
 ---
 title: L55 — Lambda Monitoring — CloudWatch Logs
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 2:17
 ---

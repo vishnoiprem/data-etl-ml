@@ -1,6 +1,6 @@
 # Course directory map
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 A one-page map of the 12 tracks + 4 shared dirs in this course.
 Read top-to-bottom for the recommended study order; read per-track

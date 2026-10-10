@@ -1,6 +1,6 @@
 # Section 1 — Foundations (L01–L04)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** 4 (~32 min)
 > **Working code:** none (conceptual section)
 

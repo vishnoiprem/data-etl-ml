@@ -1,6 +1,6 @@
 # Module 14: Dynamic Programming
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 10 problems covering the core DP patterns: 1-D, 2-D, grid, LCS, edit distance, and interval DP.
 

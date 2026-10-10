@@ -3,13 +3,13 @@ id: L29
 title: "API Gateway — Private APIs and Private Integration"
 section: 7
 duration: "7:04"
-author: "Prem Vishnoi <prem.vishnoi@example.com>"
+author: "Prem Vishnoi <pvishnoi@avilx.com>"
 udemy_id: 29
 ---
 
 # L29 — API Gateway — Private APIs and Private Integration
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7 — API Gateway Overview
 > **Lecture duration target:** 7:04
 

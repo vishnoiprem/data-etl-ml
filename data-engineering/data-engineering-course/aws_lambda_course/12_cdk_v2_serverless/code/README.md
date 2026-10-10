@@ -1,6 +1,6 @@
 # code/ — AWS CDK v2 Serverless Use Case 2
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Companion to:** section 12 (L71–L77)
 > **Architecture:** API Gateway + 2 Lambdas + S3, all declared in
 > AWS CDK v2 (TypeScript).

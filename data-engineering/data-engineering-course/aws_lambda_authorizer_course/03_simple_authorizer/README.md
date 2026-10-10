@@ -1,6 +1,6 @@
 # Section 3 — Simple Token-Based Lambda Authorizer (L11–L15)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** 5 (~84 min)
 > **Working code:** `code/token_authorizer.py` + `test_token_authorizer.py` (6 moto-free tests)
 

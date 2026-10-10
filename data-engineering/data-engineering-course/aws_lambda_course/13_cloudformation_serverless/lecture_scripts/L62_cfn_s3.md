@@ -1,6 +1,6 @@
 # L62 — AWS CloudFormation — S3 Bucket
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 6:25
 > **Lecture ID:** L62

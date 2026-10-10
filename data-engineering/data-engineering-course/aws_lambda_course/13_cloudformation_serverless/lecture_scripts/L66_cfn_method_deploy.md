@@ -1,6 +1,6 @@
 # L66 — AWS CloudFormation — API Method and API Deployment
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 14:35
 > **Lecture ID:** L66

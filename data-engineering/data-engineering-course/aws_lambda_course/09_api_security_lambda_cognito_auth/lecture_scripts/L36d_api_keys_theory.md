@@ -1,6 +1,6 @@
 # L36d — API Keys and Usage Plan — Theory (security lens)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 4:00
 > **Lecture ID:** L36d

@@ -9,7 +9,7 @@ prereqs:
 
 # L02 — Course Pre-Requisites
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Introduction
 > **Duration:** 2:19
 

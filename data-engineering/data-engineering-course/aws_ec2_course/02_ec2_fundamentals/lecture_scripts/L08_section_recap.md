@@ -1,6 +1,6 @@
 # L08 — Section Recap + `region_az_demo.py`
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 02
 > **Duration target:** 5:00
 > **Lecture ID:** L08

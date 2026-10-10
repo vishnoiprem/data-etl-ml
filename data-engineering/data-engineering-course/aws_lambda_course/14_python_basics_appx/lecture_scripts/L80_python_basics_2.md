@@ -1,6 +1,6 @@
 # L80 — Python Basics – 2: Data Types Intro, For Loops and Data Type – Dictionary
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 14 — Python Basics Appendix
 > **Duration target:** 13:03
 

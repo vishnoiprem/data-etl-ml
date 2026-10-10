@@ -339,4 +339,4 @@ table. The schema doesn't change between them.
 > SCD 2 for creator analytics; `dim_posts` is SCD 1
 > because posts are immutable after creation."
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

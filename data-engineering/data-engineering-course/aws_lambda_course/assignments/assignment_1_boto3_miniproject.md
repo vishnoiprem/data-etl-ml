@@ -3,7 +3,7 @@
 > **Section:** 4 (Lambda with S3, EC2, DynamoDB)
 > **Estimated time:** 4 hours
 > **Deliverable:** `mini_project.py` + `test_mini_project.py` (using `moto`)
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

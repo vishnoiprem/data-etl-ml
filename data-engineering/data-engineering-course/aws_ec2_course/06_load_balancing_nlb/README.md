@@ -1,6 +1,6 @@
 # Section 6 — Load Balancing Intro + NLB (L27–L30)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Format:** 4 lectures, 1 working boto3 + moto demo (`nlb_create.py` + 4 tests)
 > **Total runtime:** ~44 minutes of lecture + ~10 minutes of hands-on
 > **Working artifact:** `code/nlb_create/nlb_create.py` (NLB + target group + listener)

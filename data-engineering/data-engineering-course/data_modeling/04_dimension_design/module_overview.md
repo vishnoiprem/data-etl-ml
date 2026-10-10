@@ -2,7 +2,7 @@
 
 > **3 lessons · 0 videos · ~1.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 A dimension is the *context* for a fact. The fact tells you what
 happened; the dim tells you who, what, where, when, how. The
@@ -49,4 +49,4 @@ exactly how SCD 1/2/3 work in practice.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

@@ -1,6 +1,6 @@
 # Section 4 Quiz — EC2 Pricing
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Pass bar:** 7 / 10
 
 Ten multiple-choice questions. Pick exactly one answer per question. The pass bar is 7 correct answers.

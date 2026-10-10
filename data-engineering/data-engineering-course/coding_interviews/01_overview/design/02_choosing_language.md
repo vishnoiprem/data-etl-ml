@@ -1,6 +1,6 @@
 # 02 — Choosing the Right Language
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Most candidates pick one of Python, Java, C++, or JavaScript. The right answer is "the one you can write bug-free the fastest", but here's a short guide.
 

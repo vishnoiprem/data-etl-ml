@@ -8,7 +8,7 @@ prereqs: ["L13"]
 
 # L14 — Returning Claims via the `context` Map
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Simple Token-Based Lambda Authorizer
 > **Duration:** 14:00
 

@@ -1,6 +1,6 @@
 # 18 — Tree DFS
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Depth-First Search visits a tree by going as deep as possible before backtracking. Three flavors: preorder, inorder, postorder.
 

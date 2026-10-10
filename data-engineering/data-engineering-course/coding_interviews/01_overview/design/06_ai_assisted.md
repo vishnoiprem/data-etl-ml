@@ -1,6 +1,6 @@
 # 06 — Bonus: AI-Assisted Coding Round at Meta
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 A growing number of companies (Meta most visibly) are now running coding rounds where you can use an AI assistant. The format looks like:
 

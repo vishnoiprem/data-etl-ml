@@ -1,6 +1,6 @@
 ---
 title: L73 — Implementing Serverless Use Case 2 using AWS CDK v2
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 12
 duration: 0:39
 ---
@@ -9,7 +9,7 @@ duration: 0:39
 
 > **Section:** 12 — AWS CDK v2
 > **Duration target:** 0:39
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Prereqs
 

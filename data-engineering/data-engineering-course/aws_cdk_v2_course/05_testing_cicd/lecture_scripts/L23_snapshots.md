@@ -8,7 +8,7 @@ prereqs: ["L22"]
 
 # L23 — Jest Snapshot Tests with CDK
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Testing, Snapshots, Assertions, CI/CD
 > **Duration:** 11:00
 

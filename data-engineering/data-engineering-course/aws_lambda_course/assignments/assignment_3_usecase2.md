@@ -3,7 +3,7 @@
 > **Section:** 8 (Use Case 2) + 7 (API Gateway) + 9 (Cognito Authorizer)
 > **Estimated time:** 8 hours
 > **Deliverable:** A working REST API in front of a Lambda + S3 backend, protected by Cognito, throttled, and fronted by a WAF rate-based rule.
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

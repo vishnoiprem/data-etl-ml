@@ -8,7 +8,7 @@ prereqs: ["L08"]
 
 # L09 — Escape Hatches and `Stack.of(scope)`
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — App, Stack, Construct
 > **Duration:** 10:00
 

@@ -1,6 +1,6 @@
 # Section 11 — AWS Lambda Advanced Concepts
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** L47–L59
 > **Duration:** ~60 minutes
 > **Hands-on artifacts:** VPC-deployed Lambda, CloudWatch dashboard, CloudWatch Insights query, Version+Alias demo

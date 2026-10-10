@@ -8,7 +8,7 @@ prereqs: ["L20"]
 
 # L21 — Section Overview — Beyond REST APIs
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 4:00
 

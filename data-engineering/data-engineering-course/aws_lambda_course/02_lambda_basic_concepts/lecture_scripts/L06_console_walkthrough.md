@@ -9,7 +9,7 @@ prereqs:
 
 # L06 — Lambda Console Walkthrough
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — AWS Lambda Basic Concepts (Part 1)
 > **Duration:** 10:38
 

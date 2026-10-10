@@ -10,7 +10,7 @@ downloads:
 
 # L17 — Lambda Targets: Async Invocation, Retries, EventBridge as Event Source Mapping
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Targets
 > **Duration:** 10:20
 

@@ -1,6 +1,6 @@
 # Section 4 — AWS Lambda with S3, EC2, DynamoDB (L11–L18, 76 min)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 Section 4 is the first **hands-on coding** section of the course. Sections
 2 and 3 gave you the Lambda mental model and a Python refresher. This

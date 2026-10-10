@@ -407,7 +407,7 @@ build.
 
 ### Author
 
-All work authored by **Prem Vishnoi <prem.vishnoi@example.com>** —
+All work authored by **Prem Vishnoi <pvishnoi@avilx.com>** —
 no AI attribution in any commit metadata.
 
 ---

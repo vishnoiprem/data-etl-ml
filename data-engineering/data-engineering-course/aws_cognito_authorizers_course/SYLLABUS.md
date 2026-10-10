@@ -1,6 +1,6 @@
 # SYLLABUS — AWS Cognito Authorizers — Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **5 sections**, **25 lectures** (L01–L25), **~5h 30m** total. 2 working boto3 + moto demos, 2 mermaid diagrams, 5 quizzes, 1 graded assignment, 2 downloadable resources.
 > **Source:** Udemy-published curriculum "AWS Cognito Authorizers — Crash Course" (October 2026 edition).
 

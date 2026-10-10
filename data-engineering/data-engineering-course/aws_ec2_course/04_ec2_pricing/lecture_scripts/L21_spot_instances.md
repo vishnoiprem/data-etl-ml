@@ -1,6 +1,6 @@
 # L21 — Spot Instances
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 04
 > **Duration target:** 10:00
 > **Lecture ID:** L21

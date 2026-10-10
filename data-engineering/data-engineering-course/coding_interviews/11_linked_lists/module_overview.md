@@ -1,6 +1,6 @@
 # Module 11: Linked Lists
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 6 problems covering the most common linked-list operations.
 

@@ -9,7 +9,7 @@ prereqs:
 
 # L22 — Lambda Limits — Timeout
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — AWS Lambda Basic Concepts (Part 2)
 > **Duration:** 4:06
 

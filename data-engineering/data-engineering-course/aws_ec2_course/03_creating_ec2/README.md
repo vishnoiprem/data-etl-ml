@@ -1,6 +1,6 @@
 # Section 3 — Creating an EC2 Instance (L09–L18)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Total duration:** ~94 minutes across 10 lectures
 > **Working artifact:** `code/launch_instance/launch_instance.py` + 6 moto tests
 > **Quiz:** `../../quizzes/section_3.md` (12 questions, pass bar 8 / 12)

@@ -1,6 +1,6 @@
 ---
 title: L76 — AWS CDK — Create Lambda using AWS CDK v2
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 12
 duration: 8:57
 ---
@@ -9,7 +9,7 @@ duration: 8:57
 
 > **Section:** 12 — AWS CDK v2
 > **Duration target:** 8:57
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Prereqs
 

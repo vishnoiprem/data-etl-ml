@@ -1,6 +1,6 @@
 # L14 — Advanced Settings
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 03
 > **Duration target:** 8:00
 > **Lecture ID:** L14

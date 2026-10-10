@@ -4,7 +4,7 @@
 > Read it aloud. Note the *search-event grain* trap
 > and the *geo-hierarchy dimension*.
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -345,4 +345,4 @@ and the fact is already partitioned by date.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

@@ -1,6 +1,6 @@
 # Assets — Architecture Diagrams
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 This directory contains the Mermaid source files for every architecture
 diagram in the AWS Lambda course. The PNG/SVG renderings are produced on

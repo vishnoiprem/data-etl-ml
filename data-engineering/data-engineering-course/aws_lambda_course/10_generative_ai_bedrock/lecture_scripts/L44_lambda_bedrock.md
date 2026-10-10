@@ -1,6 +1,6 @@
 ---
 title: L44 — Write AWS Lambda Function to access Bedrock
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 10
 duration: 20:36
 ---

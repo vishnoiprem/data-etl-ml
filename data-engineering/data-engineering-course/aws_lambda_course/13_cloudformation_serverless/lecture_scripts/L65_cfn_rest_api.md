@@ -1,6 +1,6 @@
 # L65 — AWS CloudFormation — REST API and API Resources
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 7:17
 > **Lecture ID:** L65

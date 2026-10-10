@@ -8,7 +8,7 @@ prereqs: ["L14"]
 
 # L15 — End-to-End Serverless Stack
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Building with CDK
 > **Duration:** 12:00
 

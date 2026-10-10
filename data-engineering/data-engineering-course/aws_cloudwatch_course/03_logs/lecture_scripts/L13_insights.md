@@ -8,7 +8,7 @@ prereqs: ["L12"]
 
 # L13 — CloudWatch Logs Insights — query language primer
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 3 — CloudWatch Logs
 > **Duration:** 10:00
 

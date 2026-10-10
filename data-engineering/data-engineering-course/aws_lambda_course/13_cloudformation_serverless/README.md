@@ -1,6 +1,6 @@
 # Section 13 — AWS CloudFormation (Infrastructure as Code)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13 (L60–L70, 73 min)
 > **Use case:** Re-implement **Enterprise Use Case 2** (API Gateway + Lambda + S3 CRUD)
 > as a single CloudFormation stack so the whole architecture is repeatable,

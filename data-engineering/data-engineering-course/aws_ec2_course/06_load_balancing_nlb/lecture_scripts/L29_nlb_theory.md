@@ -1,6 +1,6 @@
 # L29 — Network Load Balancer (NLB)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 06
 > **Duration target:** 12:00
 > **Lecture ID:** L29

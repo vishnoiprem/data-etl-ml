@@ -8,7 +8,7 @@ prereqs: ["L20"]
 
 # L21 — Widget Types — Metric, Logs Table, Insights, Text, Stacked
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — CloudWatch Dashboards
 > **Duration:** 13:00
 

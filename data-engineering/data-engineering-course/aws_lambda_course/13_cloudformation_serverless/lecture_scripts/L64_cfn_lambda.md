@@ -1,6 +1,6 @@
 # L64 — AWS CloudFormation — AWS Lambda
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 14:02
 > **Lecture ID:** L64

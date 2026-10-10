@@ -1,6 +1,6 @@
 # Lesson 2 — The Architecture / Product-Sense Round (60-min)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Source:** [Interview101 (2026)](https://www.interview101.com/interviews/meta/data-engineer), [Tryexponent (2026)](https://www.tryexponent.com/guides/meta-data-engineer-interview), [PracHub (2026)](https://prachub.com/interview-guide/meta-data-engineer-interview-guide)
 

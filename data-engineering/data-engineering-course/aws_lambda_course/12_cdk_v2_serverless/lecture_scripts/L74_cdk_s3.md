@@ -1,6 +1,6 @@
 ---
 title: L74 — AWS CDK — Create S3 bucket using AWS CDK v2
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 12
 duration: 11:22
 ---
@@ -9,7 +9,7 @@ duration: 11:22
 
 > **Section:** 12 — AWS CDK v2
 > **Duration target:** 11:22
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Prereqs
 

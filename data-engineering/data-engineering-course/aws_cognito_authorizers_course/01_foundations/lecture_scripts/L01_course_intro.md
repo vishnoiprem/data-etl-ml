@@ -8,7 +8,7 @@ prereqs: []
 
 # L01 — Course Introduction & Why Cognito
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 8:00
 

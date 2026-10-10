@@ -3,7 +3,7 @@
 > **Section:** 9 (API Security — Lambda Authorizer & Cognito Authorizer)
 > **Estimated time:** 4 hours
 > **Deliverable:** Use Case 2 API from assignment 3, re-protected by a Lambda Authorizer that you can flip between `TOKEN` and `REQUEST` modes without code changes outside the handler itself.
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

@@ -9,7 +9,7 @@ prereqs:
 
 # L23 — Custom Message & Email/SMS Sender Triggers
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 14:00
 

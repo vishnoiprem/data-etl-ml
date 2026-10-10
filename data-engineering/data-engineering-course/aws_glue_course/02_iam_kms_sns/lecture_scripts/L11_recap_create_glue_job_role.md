@@ -1,6 +1,6 @@
 # L11 — Recap + Create GlueJobRole
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — IAM / KMS / SNS
 > **Duration target:** 1:13 (recap) + 3:00 (lab) = ~4:00
 

@@ -8,7 +8,7 @@ prereqs: ["L02"]
 
 # L03 — CloudWatch Service Overview, Pricing & Free Tier
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 8:00
 

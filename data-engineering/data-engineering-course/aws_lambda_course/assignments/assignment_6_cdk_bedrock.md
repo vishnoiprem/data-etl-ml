@@ -3,7 +3,7 @@
 > **Section:** 12 (CDK v2) + 10 (Generative AI Bedrock)
 > **Estimated time:** 8 hours
 > **Deliverable:** A CDK v2 stack (Python or TypeScript — your choice) that deploys the Bedrock Lambda from section 10 and exposes it behind an API Gateway endpoint.
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

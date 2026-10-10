@@ -8,7 +8,7 @@ prereqs: ["L19"]
 
 # L20 — Dashboards 101 — Body JSON, Widget Coordinate System
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — CloudWatch Dashboards
 > **Duration:** 10:00
 

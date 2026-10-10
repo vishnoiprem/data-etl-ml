@@ -8,7 +8,7 @@ prereqs: ["L05"]
 
 # L06 — Standard vs. High-Resolution Metrics, Storage Resolution
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — CloudWatch Metrics
 > **Duration:** 12:00
 

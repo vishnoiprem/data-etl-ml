@@ -1,6 +1,6 @@
 # L45 — Deploying Glue Pipeline Stack Using CloudFormation
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 07
 > **Duration target:** see `SYLLABUS.md`
 

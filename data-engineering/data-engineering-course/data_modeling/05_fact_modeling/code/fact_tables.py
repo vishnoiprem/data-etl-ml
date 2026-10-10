@@ -13,7 +13,7 @@ shape. The Kimball taxonomy gives us four types:
 Each builder function in this module creates a working
 SQLite example of one type, with sample data.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

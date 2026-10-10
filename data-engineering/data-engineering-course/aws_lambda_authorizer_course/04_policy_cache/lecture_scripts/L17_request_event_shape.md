@@ -8,7 +8,7 @@ prereqs: ["L16"]
 
 # L17 — The API Gateway REQUEST Event
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Request-Parameter Authorizer & Policy Caching
 > **Duration:** 18:00
 

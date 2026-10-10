@@ -1,6 +1,6 @@
 # L07 — EC2 Instance Types (families, sizes, use cases)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 02
 > **Duration target:** 12:00
 > **Lecture ID:** L07

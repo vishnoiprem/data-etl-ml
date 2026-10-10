@@ -8,7 +8,7 @@ prereqs: ["L21"]
 
 # L22 — Cross-Region / Cross-Account Dashboards
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — CloudWatch Dashboards
 > **Duration:** 10:00
 

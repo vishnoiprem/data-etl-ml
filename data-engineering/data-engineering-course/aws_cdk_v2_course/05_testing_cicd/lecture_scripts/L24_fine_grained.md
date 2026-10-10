@@ -8,7 +8,7 @@ prereqs: ["L23"]
 
 # L24 — Fine-Grained Assertions
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Testing, Snapshots, Assertions, CI/CD
 > **Duration:** 12:00
 

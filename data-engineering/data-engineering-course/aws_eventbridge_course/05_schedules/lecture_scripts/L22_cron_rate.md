@@ -11,7 +11,7 @@ downloads:
 
 # L22 — Cron and Rate Expressions — the Scheduling Syntax
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — EventBridge Scheduler
 > **Duration:** 8:00
 

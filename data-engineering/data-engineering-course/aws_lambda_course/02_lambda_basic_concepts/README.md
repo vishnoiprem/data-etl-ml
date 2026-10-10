@@ -1,6 +1,6 @@
 # Section 2 — AWS Lambda Basic Concepts (Part 1)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** L03–L08
 > **Duration:** ~26 min
 

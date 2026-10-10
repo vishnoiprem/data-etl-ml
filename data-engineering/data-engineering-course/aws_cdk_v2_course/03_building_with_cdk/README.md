@@ -1,6 +1,6 @@
 # Section 3 — Building with CDK (L11–L15)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L11–L15 | **Duration:** ~60 min | **Quizzes:** `quizzes/section_3.md`
 > **Working artifact:** `code/lambda-api/` — Lambda + API Gateway + S3 + IAM.
 

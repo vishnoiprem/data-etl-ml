@@ -1,6 +1,6 @@
 """test_launch_instance.py — 6 moto-based tests for launch_instance.py.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 Section: 03, L18 demo.
 
 Run from this directory:

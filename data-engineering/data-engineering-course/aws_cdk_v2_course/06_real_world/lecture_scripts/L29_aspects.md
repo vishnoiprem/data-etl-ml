@@ -8,7 +8,7 @@ prereqs: ["L28"]
 
 # L29 — CDK Aspects — Organization-Wide Compliance Tags
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 6 — Real-World Patterns
 > **Duration:** 12:00
 

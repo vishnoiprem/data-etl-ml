@@ -8,7 +8,7 @@ prereqs: ["L11"]
 
 # L12 — Building a Lambda Function
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Building with CDK
 > **Duration:** 12:00
 

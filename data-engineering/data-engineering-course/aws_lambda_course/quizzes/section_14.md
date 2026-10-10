@@ -1,6 +1,6 @@
 # Quiz — Section 14: Python Basics Appendix (L78–L81)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 14 — Python Basics Appendix
 > **Total questions:** 10
 > **Passing score:** 8 / 10

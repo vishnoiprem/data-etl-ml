@@ -1,6 +1,6 @@
 # Section 6 — Real-World Patterns (L26–L30)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L26–L30 | **Duration:** ~60 min | **Quizzes:** `quizzes/section_6.md`
 > **Working artifact:** see `assignments/assignment_1_multi_stack.md`.
 

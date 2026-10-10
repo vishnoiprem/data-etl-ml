@@ -8,7 +8,7 @@ prereqs: ["L12"]
 
 # L13 — Building the Allow Policy
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Simple Token-Based Lambda Authorizer
 > **Duration:** 16:00
 

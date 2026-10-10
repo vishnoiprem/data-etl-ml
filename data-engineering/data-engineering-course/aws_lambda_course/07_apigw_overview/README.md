@@ -1,6 +1,6 @@
 # Section 7 — API Gateway Overview
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7
 > **Lectures:** L25–L29
 > **Total duration:** ~30 min

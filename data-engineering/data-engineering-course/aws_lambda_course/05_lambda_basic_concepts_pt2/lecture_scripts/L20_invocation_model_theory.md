@@ -9,7 +9,7 @@ prereqs:
 
 # L20 — AWS Lambda Invocation Model — Theory
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — AWS Lambda Basic Concepts (Part 2)
 > **Duration:** 3:33
 

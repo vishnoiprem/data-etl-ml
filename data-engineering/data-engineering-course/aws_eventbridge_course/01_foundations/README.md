@@ -1,6 +1,6 @@
 # Section 1 — Foundations
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** L01–L04
 > **Duration:** ~24 min
 

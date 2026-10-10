@@ -2,7 +2,7 @@
 
 > **3 lessons · 0 videos · ~30 minutes**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The shortest module. Before you write a single query, set the
 stage: where SQL came from, how to recognize and answer the kind

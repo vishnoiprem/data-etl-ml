@@ -1,6 +1,6 @@
 ---
 title: L49 — Lambda — Reserved and Provisioned Concurrency
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 5:32
 ---

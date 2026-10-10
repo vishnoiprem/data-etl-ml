@@ -8,7 +8,7 @@ prereqs: ["L06"]
 
 # L07 — Standard Claims — iss, sub, aud, exp, nbf, iat, jti
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — JWT Basics
 > **Duration:** 16:00
 

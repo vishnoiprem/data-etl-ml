@@ -8,7 +8,7 @@ prereqs: ["L07"]
 
 # L08 — `put_metric_data` + `get_metric_data` with boto3
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — CloudWatch Metrics
 > **Duration:** 18:00
 

@@ -1,6 +1,6 @@
 # L14 — AWS CLI 101 + Configuring with IAM User Credentials
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 03
 > **Duration target:** see `SYLLABUS.md`
 

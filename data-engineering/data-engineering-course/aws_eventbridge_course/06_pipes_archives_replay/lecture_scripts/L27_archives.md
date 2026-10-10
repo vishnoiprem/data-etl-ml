@@ -12,7 +12,7 @@ downloads:
 
 # L27 — Archives — the Event Backup
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Pipes + Archives + Replay
 > **Duration:** 7:00
 

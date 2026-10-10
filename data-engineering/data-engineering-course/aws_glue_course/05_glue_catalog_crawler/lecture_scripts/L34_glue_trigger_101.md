@@ -1,6 +1,6 @@
 # L34 — AWS Glue Trigger 101 (Scheduled, Conditional, On-Demand, EventBridge)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 05
 > **Duration target:** see `SYLLABUS.md`
 

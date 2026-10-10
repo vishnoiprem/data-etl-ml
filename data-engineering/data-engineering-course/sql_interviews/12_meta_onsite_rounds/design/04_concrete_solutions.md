@@ -1,6 +1,6 @@
 # Lesson 4 — Concrete Solutions to the 5 Most-Asked Schema Questions
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Source:** [Aced 2026](https://www.aced.io/guides/meta-data-engineer-interview), [Interview101 2026](https://www.interview101.com/interviews/meta/data-engineer)
 

@@ -3,13 +3,13 @@ id: L28
 title: "API Gateway — Authentication and Authorization Methods"
 section: 7
 duration: "6:48"
-author: "Prem Vishnoi <prem.vishnoi@example.com>"
+author: "Prem Vishnoi <pvishnoi@avilx.com>"
 udemy_id: 28
 ---
 
 # L28 — API Gateway — Authentication and Authorization Methods
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7 — API Gateway Overview
 > **Lecture duration target:** 6:48
 

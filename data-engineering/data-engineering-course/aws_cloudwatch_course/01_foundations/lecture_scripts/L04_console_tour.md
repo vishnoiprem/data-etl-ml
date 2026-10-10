@@ -8,7 +8,7 @@ prereqs: ["L03"]
 
 # L04 — Console Tour — Metrics, Logs, Alarms, Dashboards
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 5:00
 

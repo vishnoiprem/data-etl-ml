@@ -8,7 +8,7 @@ prereqs: ["L24"]
 
 # L25 — When NOT to Use a Lambda Authorizer — Design Trade-offs
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 16:00
 

@@ -10,7 +10,7 @@ downloads:
 
 # L13 — Prefix Matching, Wildcards, Arrays
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Rules + Event Patterns
 > **Duration:** 11:00
 

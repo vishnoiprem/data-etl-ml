@@ -2,7 +2,7 @@
 
 > **Section:** 7 — Real-World Patterns
 > **Estimated time:** 6–8 hours
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ## Goal
 

@@ -1,6 +1,6 @@
 # Assignment 1 — Multi-Stack CDK Application
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 6 — Real-World Patterns
 > **Time budget:** 4–6 hours
 > **Deliverable:** a working `multi-stack-app/` TypeScript CDK project
@@ -93,7 +93,7 @@ npm install
 npm test
 ```
 
-Email a link or the zip to **prem.vishnoi@example.com**.
+Email a link or the zip to **pvishnoi@avilx.com**.
 
 ## Further reading
 

@@ -1,6 +1,6 @@
 # `create_dashboard` — CloudWatch Dashboards demo
 
-> Companion to L23/L24. Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Companion to L23/L24. Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 ## What it does
 

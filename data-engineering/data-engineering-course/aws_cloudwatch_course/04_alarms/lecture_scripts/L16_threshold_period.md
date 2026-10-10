@@ -8,7 +8,7 @@ prereqs: ["L15"]
 
 # L16 — Threshold types, Period, Evaluation Periods, Datapoints-to-Alarm
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — CloudWatch Alarms
 > **Duration:** 12:00
 

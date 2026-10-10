@@ -1,6 +1,6 @@
 # snapshot_ami_demo
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 05 — Managing EC2
 > **Companion to:** L26 (Section Recap).
 

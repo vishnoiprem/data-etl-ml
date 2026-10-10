@@ -1,6 +1,6 @@
 # Section 1 — Foundations (L01–L04)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L01–L04 | **Duration:** ~50 min | **Quizzes:** `quizzes/section_1.md`
 
 Section 1 is the conceptual on-ramp. If you've never written

@@ -2,7 +2,7 @@
 
 > **4 lessons · 1 video · ~30 min**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The data modeling interview is one of the four major rounds in a data
 engineering loop. It is also the round that *most* candidates
@@ -56,4 +56,4 @@ three written-up problems you can do on your own.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

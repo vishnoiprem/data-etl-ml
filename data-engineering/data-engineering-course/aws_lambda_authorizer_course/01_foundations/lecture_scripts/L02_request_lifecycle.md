@@ -8,7 +8,7 @@ prereqs: ["L01"]
 
 # L02 — Where the Lambda Authorizer Fits in the Request Lifecycle
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 8:00
 

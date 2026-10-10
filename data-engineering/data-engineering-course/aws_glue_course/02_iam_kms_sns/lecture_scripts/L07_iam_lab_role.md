@@ -1,6 +1,6 @@
 # L07 — IAM Lab — Setting Up IAM Role
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 02
 > **Duration target:** see `SYLLABUS.md`
 

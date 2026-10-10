@@ -1,6 +1,6 @@
 # Section 14 — Python Basics Appendix (L78–L81, ~32 min)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Format:** 4 lectures, ~32 minutes total. Deeper-dive Python tutorial aimed
 > at absolute beginners with no prior coding experience.
 > **Position:** APPENDIX — placed at the end of the course per the Udemy layout.
@@ -96,6 +96,6 @@ this section and start at L79.**
 
 ## License & attribution
 
-Authored by **Prem Vishnoi <prem.vishnoi@example.com>** based on the
+Authored by **Prem Vishnoi <pvishnoi@avilx.com>** based on the
 published Udemy curriculum. Code samples are MIT-licensed.
 See `../../LICENSE` for the full text.

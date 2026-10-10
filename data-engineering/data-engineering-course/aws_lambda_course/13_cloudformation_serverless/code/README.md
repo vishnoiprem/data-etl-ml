@@ -1,6 +1,6 @@
 # Section 13 — working code
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Companion to:** `../lecture_scripts/` (L60–L70)
 
 This directory contains every CloudFormation template and the

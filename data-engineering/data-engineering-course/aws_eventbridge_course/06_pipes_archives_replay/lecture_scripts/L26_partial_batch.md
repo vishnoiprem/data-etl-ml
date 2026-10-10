@@ -11,7 +11,7 @@ downloads:
 
 # L26 — Partial Batch Response — Failure Isolation for SQS, Kinesis, and DynamoDB
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Pipes + Archives + Replay
 > **Duration:** 8:00
 

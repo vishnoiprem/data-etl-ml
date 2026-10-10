@@ -9,7 +9,7 @@ prereqs:
 
 # L07 — Sign-up, Sign-in & Custom Attributes
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — Cognito User Pools
 > **Duration:** 14:00
 

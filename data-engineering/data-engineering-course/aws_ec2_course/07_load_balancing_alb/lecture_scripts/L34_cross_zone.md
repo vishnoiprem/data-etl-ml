@@ -1,6 +1,6 @@
 # L34 — Cross-Zone Load Balancing
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 07
 > **Duration target:** 8:00
 > **Lecture ID:** L34

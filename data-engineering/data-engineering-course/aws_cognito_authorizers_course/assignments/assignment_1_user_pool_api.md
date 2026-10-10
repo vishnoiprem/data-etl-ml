@@ -3,7 +3,7 @@
 > **Sections:** 2 (User Pools) + 4 (API Gateway + Cognito Authorizer)
 > **Estimated time:** 4 hours
 > **Deliverable:** a working end-to-end stack: `02_user_pools/code/create_user_pool.py` + a new `04_api_gateway_integration/code/e2e_protected_api.py` and matching `moto` tests.
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

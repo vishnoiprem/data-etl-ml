@@ -1,6 +1,6 @@
 # L35 — ALB Failure Simulation + `alb_create.py` + tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 07
 > **Duration target:** 12:00
 > **Lecture ID:** L35

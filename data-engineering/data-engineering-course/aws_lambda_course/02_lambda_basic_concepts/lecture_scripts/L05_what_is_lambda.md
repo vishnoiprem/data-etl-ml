@@ -8,7 +8,7 @@ prereqs:
 
 # L05 — What is AWS Lambda and Use Cases
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — AWS Lambda Basic Concepts (Part 1)
 > **Duration:** 5:25
 

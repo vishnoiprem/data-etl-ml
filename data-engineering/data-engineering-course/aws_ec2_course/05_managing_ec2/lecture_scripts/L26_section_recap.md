@@ -1,6 +1,6 @@
 # L26 — Section Recap + `snapshot_ami_demo.py`
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 05
 > **Duration target:** 8:00
 > **Lecture ID:** L26

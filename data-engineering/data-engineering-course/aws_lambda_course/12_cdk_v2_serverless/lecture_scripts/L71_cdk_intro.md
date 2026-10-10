@@ -1,6 +1,6 @@
 ---
 title: L71 — (Optional) Introduction to AWS Cloud Development Kit (CDK)
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 12
 duration: 7:23
 ---
@@ -9,7 +9,7 @@ duration: 7:23
 
 > **Section:** 12 — AWS CDK v2
 > **Duration target:** 7:23
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Prereqs
 

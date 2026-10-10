@@ -1,6 +1,6 @@
 # Section 7 Quiz — API Gateway Overview
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7 — L25 through L29
 > **10 questions.** Answers are in collapsible blocks immediately after
 > each question. Click "Show answer" to reveal.

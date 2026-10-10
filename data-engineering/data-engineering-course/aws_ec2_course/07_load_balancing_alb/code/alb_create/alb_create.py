@@ -2,7 +2,7 @@
 alb_create.py — create an Application Load Balancer with a target group,
 a default listener, and two rules.
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Application Load Balancer
 
 The script exposes a single function ``create_alb_and_rules`` that takes

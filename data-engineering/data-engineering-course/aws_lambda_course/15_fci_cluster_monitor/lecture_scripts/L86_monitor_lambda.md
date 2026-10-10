@@ -9,7 +9,7 @@ prereqs:
 
 # L86 — The Monitor Lambda — check storage + grow volume
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 15
 > **Duration:** 15:00
 > **Prereqs:** L82–L85

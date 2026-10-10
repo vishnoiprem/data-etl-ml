@@ -1,6 +1,6 @@
 # SYLLABUS — AWS EC2 + Load Balancing Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** 8 sections, 38 lectures, 6 working code demos
 > (boto3 + moto), 5 mermaid diagrams, 8 quizzes, 1 assignment, 1 download.
 > **Source:** Udemy-published curriculum "AWS EC2 Crash Course + Load

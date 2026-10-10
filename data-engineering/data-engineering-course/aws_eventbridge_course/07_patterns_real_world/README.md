@@ -1,6 +1,6 @@
 # Section 7 — Patterns + Real-World
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7
 > **Lectures:** L30–L36
 > **Total duration:** ~75 min

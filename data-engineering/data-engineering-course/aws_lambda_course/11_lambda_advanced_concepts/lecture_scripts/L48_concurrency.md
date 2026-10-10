@@ -1,6 +1,6 @@
 ---
 title: L48 — Lambda Execution and Concurrency
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 8:24
 ---

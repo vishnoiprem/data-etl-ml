@@ -1,6 +1,6 @@
 # Section 5 — Testing, Snapshots, Assertions, CI/CD (L21–L25)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L21–L25 | **Duration:** ~55 min | **Quizzes:** `quizzes/section_5.md`
 > **Working demo:** `code/snapshot-demo/` — Jest snapshot test for `hello-cdk`.
 

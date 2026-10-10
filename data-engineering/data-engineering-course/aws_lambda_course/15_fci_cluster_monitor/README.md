@@ -1,6 +1,6 @@
 # Section 15 — Enterprise Use Case 3: FCI Cluster Monitor (AWS MS AD, FSx, Lambda, SNS, CloudWatch, EventBridge)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 15
 > **Lectures:** L82–L87
 > **Total runtime:** ~51 min

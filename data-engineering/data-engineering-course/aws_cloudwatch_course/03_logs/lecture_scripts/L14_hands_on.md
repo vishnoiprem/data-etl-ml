@@ -8,7 +8,7 @@ prereqs: ["L13"]
 
 # L14 — Hands-on: build `create_log_group.py` + 5 moto tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 3 — CloudWatch Logs
 > **Duration:** 8:00
 

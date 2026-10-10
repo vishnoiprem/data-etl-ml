@@ -2,7 +2,7 @@
 
 > **3 lessons · 0 videos · ~1 hour**
 >
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 You drew the star schema. You picked the fact type. You defined
 the SCDs. Now: will the queries actually run?
@@ -77,4 +77,4 @@ configuration, not a design choice.
 
 ---
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

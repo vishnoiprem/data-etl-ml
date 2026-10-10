@@ -1,6 +1,6 @@
 # L03 — Who This Course Is For
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 01
 > **Duration target:** 4:00
 > **Lecture ID:** L03

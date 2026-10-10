@@ -1,6 +1,6 @@
 # L37 — GWLB Hands-On + `gwlb_create.py` + tests
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 08
 > **Duration target:** 12:00
 > **Lecture ID:** L37

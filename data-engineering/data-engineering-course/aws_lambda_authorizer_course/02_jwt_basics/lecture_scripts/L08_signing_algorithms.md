@@ -8,7 +8,7 @@ prereqs: ["L07"]
 
 # L08 — Signing Algorithms — HS256 (HMAC) vs RS256 (RSA)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — JWT Basics
 > **Duration:** 16:00
 

@@ -1,6 +1,6 @@
 # L04 — VMs, Hosts, and Hypervisors
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 02
 > **Duration target:** 10:00
 > **Lecture ID:** L04

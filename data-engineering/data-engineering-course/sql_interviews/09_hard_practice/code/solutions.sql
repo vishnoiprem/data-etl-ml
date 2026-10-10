@@ -1,6 +1,6 @@
 -- sql_interviews/09_hard_practice/code/solutions.sql
 -- Solutions to the 14 M09 (Hard) practice problems.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 -- Problem 85: Median Finder per Group
 -- Per department, the median salary. SQLite has no

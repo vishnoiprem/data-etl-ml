@@ -1,6 +1,6 @@
 # L60 — Optional — AWS CloudFormation Basics
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 2:29
 > **Lecture ID:** L60

@@ -1,6 +1,6 @@
 # L30 — NLB Hands-On + `nlb_create.py` + tests
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 06
 > **Duration target:** 10:00
 > **Lecture ID:** L30

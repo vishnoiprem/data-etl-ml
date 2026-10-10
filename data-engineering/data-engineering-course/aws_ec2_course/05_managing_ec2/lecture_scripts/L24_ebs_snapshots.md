@@ -1,6 +1,6 @@
 # L24 — EBS Snapshots
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 05
 > **Duration target:** 12:00
 > **Lecture ID:** L24

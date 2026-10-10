@@ -1,6 +1,6 @@
 # `put_metric_alarm` — CloudWatch Alarms demo
 
-> Companion to L17/L19. Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Companion to L17/L19. Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 ## What it does
 

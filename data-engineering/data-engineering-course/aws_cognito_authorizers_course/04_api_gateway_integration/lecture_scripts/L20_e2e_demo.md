@@ -9,7 +9,7 @@ prereqs:
 
 # L20 — End-to-End Demo — Secure a REST API End-to-End
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — API Gateway + Cognito Authorizer
 > **Duration:** 18:00
 

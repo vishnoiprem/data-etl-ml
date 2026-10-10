@@ -21,7 +21,7 @@ The benchmarks are *not* asserted on timing — the
 asserts are on the *correctness* of the results. The
 timing prints are for inspection.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

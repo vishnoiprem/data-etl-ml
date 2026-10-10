@@ -1,6 +1,6 @@
 # AWS Lambda, Python (Boto3) & Serverless — Beginner to Advanced
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **16 sections, 88 lectures (L01–L81 + L31a, L36a–L36e, L44a, L82–L87), ~10h 30m total** (Udemy-published 2026 edition).
 > **Based on:** "AWS Lambda, Python(Boto3) & Serverless- Beginner to Advanced" Udemy course.
 
@@ -127,6 +127,6 @@ EventBridge, AWS Bedrock (Cohere foundational model), AWS CloudFormation.
 
 ## License & attribution
 
-Course material authored by **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Course material authored by **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 based on the published Udemy curriculum. Code samples are MIT-licensed.
 See `../../LICENSE` for the full text.

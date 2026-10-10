@@ -3,7 +3,7 @@
 > **Section:** 6 (Enterprise Use Case 1)
 > **Estimated time:** 6 hours
 > **Deliverable:** Working end-to-end stack + `README.md` with deploy / invoke / cleanup steps
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

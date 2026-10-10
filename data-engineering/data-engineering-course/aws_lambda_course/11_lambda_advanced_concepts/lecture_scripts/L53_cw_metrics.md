@@ -1,6 +1,6 @@
 ---
 title: L53 — Lambda Monitoring — CloudWatch Metrics
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 5:55
 ---

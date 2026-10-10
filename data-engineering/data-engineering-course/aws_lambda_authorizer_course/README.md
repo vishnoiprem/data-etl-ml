@@ -1,6 +1,6 @@
 # AWS Lambda Authorizer — Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **5 sections, 25 lectures (L01–L25), ~6h 00m total** (companion to the published Udemy course).
 > **Based on:** "AWS Lambda Authorizer — Crash Course" (October 2026 edition).
 
@@ -112,6 +112,6 @@ AWS SAM (optional), OpenID Connect (Auth0 / Okta).
 
 ## License & attribution
 
-Course material authored by **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Course material authored by **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 based on the published Udemy curriculum. Code samples are MIT-licensed.
 See `../../LICENSE` for the full text.

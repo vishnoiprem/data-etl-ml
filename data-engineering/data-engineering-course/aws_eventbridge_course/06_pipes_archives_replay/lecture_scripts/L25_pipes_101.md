@@ -12,7 +12,7 @@ downloads:
 
 # L25 — Pipes 101 — Source, Filter, Enrichment, Target
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Pipes + Archives + Replay
 > **Duration:** 8:30
 

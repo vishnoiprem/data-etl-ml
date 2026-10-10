@@ -8,7 +8,7 @@ prereqs: ["L06"]
 
 # L07 — `cdk init` — The TypeScript Project Template
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — App, Stack, Construct
 > **Duration:** 10:00
 

@@ -341,4 +341,4 @@ Rerun `EXPLAIN ANALYZE`. Confirm the new plan is faster
 *and* doing less work. That's the rewrite loop — and it's
 the answer to "rewrite this query to make it faster."
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

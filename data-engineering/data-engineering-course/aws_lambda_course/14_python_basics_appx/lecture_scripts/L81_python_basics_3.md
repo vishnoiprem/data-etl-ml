@@ -1,6 +1,6 @@
 # L81 — Python Basics – 3: Data Type – List and Functions
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 14 — Python Basics Appendix
 > **Duration target:** 8:58
 

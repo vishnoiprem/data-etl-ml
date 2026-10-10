@@ -1,6 +1,6 @@
 # Section 12 — AWS CDK v2 — Quiz
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 12 — AWS CDK v2 (Infrastructure as Code)
 > **Lectures covered:** L71–L77
 > **Pass bar:** 7 / 10

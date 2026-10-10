@@ -1,6 +1,6 @@
 # L23 — AWS Glue Database 101 (creating a database by hand)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 05
 > **Duration target:** see `SYLLABUS.md`
 

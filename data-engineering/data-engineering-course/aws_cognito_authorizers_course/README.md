@@ -1,6 +1,6 @@
 # AWS Cognito Authorizers — Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **5 sections, 25 lectures (L01–L25), ~5h 30m total** (Udemy-published 2026 edition).
 > **Source:** Companion repo to the "AWS Cognito Authorizers — Crash Course" curriculum.
 
@@ -110,6 +110,6 @@ custom SMS MFA).
 
 ## License & attribution
 
-Course material authored by **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Course material authored by **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 based on the published Udemy curriculum. Code samples are MIT-licensed.
 See `../../LICENSE` for the full text.

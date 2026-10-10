@@ -8,7 +8,7 @@ prereqs: ["L33"]
 
 # L34 — Observability for Containers (ECS / EKS)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Real-World Patterns
 > **Duration:** 5:00
 

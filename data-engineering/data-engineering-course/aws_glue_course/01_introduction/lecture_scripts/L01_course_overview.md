@@ -1,6 +1,6 @@
 # L01 — Course Overview
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Introduction
 > **Duration target:** 4:00 (12-min Section 1 total)
 

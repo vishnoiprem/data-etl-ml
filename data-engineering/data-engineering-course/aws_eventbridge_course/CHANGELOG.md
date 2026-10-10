@@ -8,4 +8,4 @@
   diagrams, 7 quizzes (8–12 questions each), 1 optional assignment.
 - Every code sample runs offline with `pytest` + `moto` — no AWS
   account required for the unit tests.
-- Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;.
+- Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;.

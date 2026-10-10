@@ -1,6 +1,6 @@
 # Section 12 — AWS CDK v2 (Infrastructure as Code)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 12 of `aws_lambda_course/`
 > **Lectures:** L71–L77 (7 lectures, ~45 minutes)
 > **Working artifact:** `code/` — a complete AWS CDK v2 TypeScript project that
@@ -87,5 +87,5 @@ See `code/README.md` for the full walkthrough.
 
 ## License & attribution
 
-Course material authored by **Prem Vishnoi <prem.vishnoi@example.com>**. Code
+Course material authored by **Prem Vishnoi <pvishnoi@avilx.com>**. Code
 samples are MIT-licensed.

@@ -1,6 +1,6 @@
 # Section 4 — Request-Parameter Authorizer & Policy Caching (L16–L20)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** 5 (~88 min)
 > **Working code:** `code/param_authorizer.py` + `test_param_authorizer.py` (4+ moto-free tests)
 

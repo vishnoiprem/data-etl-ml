@@ -14,7 +14,7 @@ prereqs:
 
 # L11 — Section Overview & Identity Pool Mental Model
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 3 — Cognito Identity Pools
 > **Duration:** 10:00
 

@@ -11,7 +11,7 @@ downloads: []
 
 # L32 — CloudWatch Alarm → EventBridge → SNS (with SSM Runbook)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Patterns + Real-World
 > **Duration:** 10:45
 

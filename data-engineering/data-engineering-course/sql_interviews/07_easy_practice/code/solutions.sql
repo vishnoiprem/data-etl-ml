@@ -1,6 +1,6 @@
 -- sql_interviews/07_easy_practice/code/solutions.sql
 -- Solutions to the 14 M07 (Easy) practice problems.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 --
 -- Each solution is named with a comment so the test file can
 -- extract it with a regex and run it as a standalone query.

@@ -1,6 +1,6 @@
 # L57 — Role Play: Diagnose Glue Job Failure (Role/Trust Misconfig)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 8 — AWS Glue Job Debugging
 > **Duration target:** 8-10 minutes
 

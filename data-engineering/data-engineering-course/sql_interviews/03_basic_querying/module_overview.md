@@ -2,7 +2,7 @@
 
 > **8 lessons · 0 videos · ~1.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The everyday SQL: filters that go beyond `=`, string
 manipulation, date arithmetic, conditional logic with `CASE`,

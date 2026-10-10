@@ -1,7 +1,7 @@
 """
 test_alb_create.py — pytest tests for ``alb_create.create_alb_and_rules``.
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Application Load Balancer
 
 Four tests, all backed by ``moto>=5`` via ``@mock_aws``. The fixture

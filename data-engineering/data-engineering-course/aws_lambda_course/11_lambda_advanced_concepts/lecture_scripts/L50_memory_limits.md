@@ -1,6 +1,6 @@
 ---
 title: L50 — Lambda Limits — Memory
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 4:22
 ---

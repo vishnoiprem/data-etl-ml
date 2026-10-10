@@ -1,6 +1,6 @@
 # DIRECTORY — Full file index
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 This file lists every artifact in the AWS EC2 + Load Balancing
 Crash Course. Use `find` if you want a live listing.

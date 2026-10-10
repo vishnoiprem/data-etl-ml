@@ -7,7 +7,7 @@ where the business logic lives. dbt-style SQL transforms, Python /
 Spark transforms, joins and window functions, data quality, and
 slowly changing dimensions.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

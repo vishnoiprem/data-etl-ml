@@ -1,6 +1,6 @@
 ---
 title: L59 — Lambda — Environment Variables
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 4:42
 ---

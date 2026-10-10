@@ -14,7 +14,7 @@ prereqs:
 
 # L21 — Section Overview & Custom Auth Challenge Flow
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 12:00
 

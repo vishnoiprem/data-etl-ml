@@ -1,6 +1,6 @@
 # L01 — Course Overview
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 01
 > **Duration target:** 5:00
 > **Lecture ID:** L01

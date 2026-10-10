@@ -1,6 +1,6 @@
 """gwlb_create.py — Create an AWS Gateway Load Balancer (GWLB) with boto3.
 
-> Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Author: Prem Vishnoi <pvishnoi@avilx.com>
 > Section: 08 — Gateway Load Balancer + Course Wrap-up
 > Lecture: L37 — GWLB Hands-On
 

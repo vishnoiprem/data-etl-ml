@@ -1,6 +1,6 @@
 # `gwlb_create` — Gateway Load Balancer (boto3 demo)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 08 — Gateway Load Balancer + Course Wrap-up
 > **Lecture:** L37 — GWLB Hands-On
 > **Services:** `elbv2` (Gateway Load Balancer API), `ec2` (VPC/subnets)

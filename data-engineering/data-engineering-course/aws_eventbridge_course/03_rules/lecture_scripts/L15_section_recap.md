@@ -10,7 +10,7 @@ downloads:
 
 # L15 — Section 3 Recap + `put_rule.py` Walk-Through
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Rules + Event Patterns
 > **Duration:** 9:50
 

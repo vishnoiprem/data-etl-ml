@@ -8,7 +8,7 @@ prereqs: ["L10"]
 
 # L11 — L2 Constructs for Lambda, API Gateway, S3, IAM
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Building with CDK
 > **Duration:** 12:00
 

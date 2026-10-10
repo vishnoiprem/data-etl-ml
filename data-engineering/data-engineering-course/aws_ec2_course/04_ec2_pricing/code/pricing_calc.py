@@ -6,7 +6,7 @@ plus discount models for Reserved Instances, Savings Plans, and Spot.
 This module is deliberately offline. It does NOT call the AWS Pricing API.
 See ``code/README.md`` for instructions on extending it.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

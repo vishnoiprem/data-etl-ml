@@ -1,6 +1,6 @@
 # `code/` — pricing_calc
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 This directory contains `pricing_calc.py`, a stdlib-only EC2 pricing calculator that illustrates the discount structure of the five EC2 pricing models covered in Section 4.
 

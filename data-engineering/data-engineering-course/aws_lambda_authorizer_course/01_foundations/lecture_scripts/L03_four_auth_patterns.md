@@ -8,7 +8,7 @@ prereqs: ["L02"]
 
 # L03 — The Four Auth Patterns in API Gateway
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Foundations
 > **Duration:** 10:00
 

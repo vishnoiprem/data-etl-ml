@@ -8,7 +8,7 @@ prereqs: ["L05"]
 
 # L06 — JWT Structure — Header, Payload, Signature (base64url)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — JWT Basics
 > **Duration:** 14:00
 

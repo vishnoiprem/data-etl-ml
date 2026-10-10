@@ -10,7 +10,7 @@ downloads: []
 
 # L36 — Course Wrap-Up + What to Read Next
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Patterns + Real-World
 > **Duration:** 8:45
 
@@ -168,7 +168,7 @@ every message.
 That is the course. Thank you for spending thirty-six lectures
 with me. Go build something.
 
-— Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+— Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ## Hands-on
 

@@ -1,6 +1,6 @@
 # 12 — Two Pointers
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Two indices march through the array, usually from opposite ends or both from the front.
 

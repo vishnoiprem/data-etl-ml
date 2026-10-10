@@ -14,7 +14,7 @@ The implementation is intentionally simple — no parallel
 execution, no retries, no SLA tracking. Those are added
 in production orchestrators and in the rest of this module.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

@@ -7,7 +7,7 @@ six patterns every loader implements: bulk loading, streaming,
 upsert, partitioning, idempotency, and the lakehouse-specific
 patterns that come up at every senior interview.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

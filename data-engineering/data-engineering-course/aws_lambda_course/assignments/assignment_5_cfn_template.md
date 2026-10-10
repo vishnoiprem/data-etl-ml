@@ -3,7 +3,7 @@
 > **Section:** 13 (CloudFormation) — but **do not open** any of the L60–L70 lecture files until after you submit your first draft.
 > **Estimated time:** 6 hours
 > **Deliverable:** A single `template.yaml` that provisions a VPC, public subnet, EC2 instance, IAM role, security group, and S3 bucket with a bucket policy. Plus `parameters.md` and `outputs.md` tables.
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Learning objectives
 

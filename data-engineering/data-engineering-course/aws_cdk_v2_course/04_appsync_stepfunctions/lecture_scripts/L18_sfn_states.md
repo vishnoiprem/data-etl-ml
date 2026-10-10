@@ -8,7 +8,7 @@ prereqs: ["L17"]
 
 # L18 — Step Functions State Machines in CDK
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — AppSync + Step Functions + EventBridge
 > **Duration:** 12:00
 

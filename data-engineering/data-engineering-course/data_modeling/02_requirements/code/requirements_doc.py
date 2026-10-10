@@ -9,7 +9,7 @@ rubric explicitly scores this step.
 This module also exposes `render()` so the doc can be printed,
 embedded in a README, or pasted into a Confluence page.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

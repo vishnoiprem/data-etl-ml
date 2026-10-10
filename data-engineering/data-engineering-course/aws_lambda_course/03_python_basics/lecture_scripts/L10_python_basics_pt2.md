@@ -8,7 +8,7 @@ prereqs:
 
 # L10 — Python Basics Refresher — Part 2
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Python Basics Refresher
 > **Duration:** 15:11
 

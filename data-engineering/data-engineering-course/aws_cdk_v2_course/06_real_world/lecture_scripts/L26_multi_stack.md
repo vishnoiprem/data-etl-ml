@@ -8,7 +8,7 @@ prereqs: ["L25"]
 
 # L26 — Multi-Stack Applications
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 6 — Real-World Patterns
 > **Duration:** 12:00
 

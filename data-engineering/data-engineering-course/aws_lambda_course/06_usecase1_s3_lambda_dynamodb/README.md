@@ -1,6 +1,6 @@
 # Section 6 — Enterprise Use Case 1: S3, AWS Lambda, DynamoDB
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 06
 > **Lectures:** L23–L24
 > **Total runtime:** 20 min (11:24 + 8:27)

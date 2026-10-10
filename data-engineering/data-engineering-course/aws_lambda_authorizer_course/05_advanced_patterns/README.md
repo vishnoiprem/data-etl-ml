@@ -1,6 +1,6 @@
 # Section 5 — Advanced Patterns (L21–L25)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** 5 (~68 min)
 > **Working code:** none (conceptual section)
 

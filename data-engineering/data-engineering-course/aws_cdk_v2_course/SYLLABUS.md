@@ -1,6 +1,6 @@
 # SYLLABUS — AWS CDK v2 — Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **6 sections, 30 lectures (L01–L30), ~6h total**. 3 working TypeScript CDK projects. 6 quizzes. 1 graded assignment.
 
 This is the **authoritative lecture-to-file map**. Section folders are

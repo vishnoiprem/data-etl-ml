@@ -2,7 +2,7 @@
 
 > **8 lessons · 0 videos · ~3 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The data modeling interview is, at its core, a requirements-gathering
 exercise disguised as a schema-design exercise. The candidate who
@@ -55,4 +55,4 @@ discovery questions for practice, etc.).
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

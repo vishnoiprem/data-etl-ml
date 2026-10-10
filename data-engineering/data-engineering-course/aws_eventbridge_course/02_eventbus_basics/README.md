@@ -1,6 +1,6 @@
 # Section 2 — EventBus Basics
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** L05–L09
 > **Duration:** ~33 min
 

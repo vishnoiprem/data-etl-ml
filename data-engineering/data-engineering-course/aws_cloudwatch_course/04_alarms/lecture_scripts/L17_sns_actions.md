@@ -8,7 +8,7 @@ prereqs: ["L16"]
 
 # L17 — SNS as Alarm Action — wiring the on-call pager
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — CloudWatch Alarms
 > **Duration:** 10:00
 

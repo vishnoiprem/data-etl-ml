@@ -1,6 +1,6 @@
 # Section 3 — Rules + Event Patterns (L10–L15)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Working artifact:** `code/put_rule.py` + `code/test_put_rule.py` (6 moto tests)
 > **Quiz:** [`../quizzes/section_3.md`](../quizzes/section_3.md)
 

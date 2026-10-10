@@ -8,7 +8,7 @@ prereqs: ["L17"]
 
 # L18 — IdentitySource, Multi-Identity-Source & ReauthorizeEvery
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Request-Parameter Authorizer & Policy Caching
 > **Duration:** 20:00
 

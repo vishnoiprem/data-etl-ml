@@ -1,6 +1,6 @@
 # Downloads — AWS CDK v2 Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 This folder holds the 4 downloadable resources referenced from the
 lecture scripts. PDF and ZIP placeholders live here; in a real

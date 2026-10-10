@@ -1,6 +1,6 @@
 # SYLLABUS — AWS Lambda, Python (Boto3) & Serverless — Beginner to Advanced
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **16 sections**, **88 lectures** (L01–L81 + L31a, L36a–L36e, L44a, L82–L87), **~10h 30m** total. 4 hands-on enterprise use cases (banking, serverless CRUD, Bedrock GenAI, FCI cluster monitor). 16 quizzes (one per section). 7 assignments. 4 downloadable resources.
 > **Source:** Udemy-published curriculum "AWS Lambda, Python(Boto3) & Serverless- Beginner to Advanced" (October 2026 edition).
 

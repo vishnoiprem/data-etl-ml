@@ -39,7 +39,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / dates in YYYY-MM-DD.
 - 102 pytest tests pass across 9 sections with `python scripts/run_all_tests.py`.
 
 ### Conventions
-- Author of every commit: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+- Author of every commit: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 - Lecture files: `<section>/lecture_scripts/L##_topic.md`
 - Code files: `<section>/code/<topic>/<file>.py` (or `.ts` for CDK)
 - Every lecture follows the structure: **Prereqs → Key terms → Lecture →
@@ -51,7 +51,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / dates in YYYY-MM-DD.
 - Free tier-eligible; no paid third-party SaaS dependencies
 
 ### Conventions
-- Author of every commit: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+- Author of every commit: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 - Lecture files: `<section>/lecture_scripts/L##_topic.md`
 - Code files: `<section>/code/<topic>/<file>.py` (or `.ts` for CDK)
 - Every lecture follows the structure: **Prereqs → Key terms → Lecture →

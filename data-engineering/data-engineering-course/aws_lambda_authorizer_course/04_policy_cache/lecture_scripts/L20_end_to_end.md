@@ -8,7 +8,7 @@ prereqs: ["L19"]
 
 # L20 — End-to-End: REQUEST Authorizer with Policy Cache
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Request-Parameter Authorizer & Policy Caching
 > **Duration:** 20:00
 

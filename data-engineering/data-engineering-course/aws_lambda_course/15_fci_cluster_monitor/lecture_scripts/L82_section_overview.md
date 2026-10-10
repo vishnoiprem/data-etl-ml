@@ -9,7 +9,7 @@ prereqs:
 
 # L82 — Section Overview — FCI Cluster Monitor
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 15
 > **Duration:** 0:30
 > **Prereqs:** L01–L81

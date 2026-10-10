@@ -8,7 +8,7 @@ prereqs: ["L34"]
 
 # L35 — Course Wrap-up & Where to Go Next
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Real-World Patterns
 > **Duration:** 5:00
 
@@ -91,6 +91,6 @@ alerts).
 
 Thanks for taking the **AWS CloudWatch Crash Course**. If you
 have questions or feedback, open an issue on the repo or email me at
-**prem.vishnoi@example.com**.
+**pvishnoi@avilx.com**.
 
 Happy monitoring.

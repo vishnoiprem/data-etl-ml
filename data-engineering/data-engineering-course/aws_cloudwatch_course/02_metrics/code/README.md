@@ -1,7 +1,7 @@
 # `put_metric_data` — CloudWatch Metrics demo
 
 > Companion to L08 / L09 of the AWS CloudWatch Crash Course.
-> Author: Prem Vishnoi <prem.vishnoi@example.com>
+> Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 ## What it does
 

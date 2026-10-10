@@ -1,6 +1,6 @@
 # L48 — Going Through the Log And Verifying Job Output
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 07
 > **Duration target:** see `SYLLABUS.md`
 

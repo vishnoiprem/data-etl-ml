@@ -1,6 +1,6 @@
 # L68 — AWS CloudFormation — End to End Demo
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 1:10
 > **Lecture ID:** L68

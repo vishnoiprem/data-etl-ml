@@ -1,6 +1,6 @@
 # `nlb_create/` — Network Load Balancer setup
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 (L27–L30)
 > **What it does:** Creates a target group, an internet-facing NLB,
 > and a TCP/80 listener that forwards to the target group. Optionally

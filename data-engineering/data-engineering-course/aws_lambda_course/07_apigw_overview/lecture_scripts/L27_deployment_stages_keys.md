@@ -3,13 +3,13 @@ id: L27
 title: "API Gateway — Deployment, API Stages, API Keys and Usage Plans"
 section: 7
 duration: "3:24"
-author: "Prem Vishnoi <prem.vishnoi@example.com>"
+author: "Prem Vishnoi <pvishnoi@avilx.com>"
 udemy_id: 27
 ---
 
 # L27 — API Gateway — Deployment, API Stages, API Keys and Usage Plans
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7 — API Gateway Overview
 > **Lecture duration target:** 3:24
 

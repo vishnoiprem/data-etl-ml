@@ -8,7 +8,7 @@ prereqs: ["L01"]
 
 # L02 — The Three Pillars of Observability
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 1 — Foundations
 > **Duration:** 12:00
 

@@ -1,6 +1,6 @@
 # SYLLABUS — AWS Lambda Authorizer Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **5 sections**, **25 lectures** (L01–L25), **~6h 00m** total. 5 quizzes (one per section). 3 working demos with 15+ offline tests. 1 graded assignment. 2 diagrams.
 > **Source:** Udemy-published curriculum "AWS Lambda Authorizer — Crash Course" (October 2026 edition).
 

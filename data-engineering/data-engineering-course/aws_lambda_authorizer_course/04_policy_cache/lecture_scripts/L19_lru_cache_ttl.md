@@ -8,7 +8,7 @@ prereqs: ["L18"]
 
 # L19 — Building an LRU Cache with TTL
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Request-Parameter Authorizer & Policy Caching
 > **Duration:** 24:00
 

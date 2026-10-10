@@ -8,7 +8,7 @@ prereqs: ["L31"]
 
 # L32 — Alarms at Scale — naming, tags, multi-account
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Real-World Patterns
 > **Duration:** 10:00
 

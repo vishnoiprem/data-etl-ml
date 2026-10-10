@@ -1,6 +1,6 @@
 # L53 — Fix Resource Policy Error — Error Reading From Source Bucket
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 08
 > **Duration target:** see `SYLLABUS.md`
 

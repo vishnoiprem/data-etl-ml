@@ -1,6 +1,6 @@
 # L09 — KMS 101 + KMS Lab — Setting Up KMS Key
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 02
 > **Duration target:** see `SYLLABUS.md`
 

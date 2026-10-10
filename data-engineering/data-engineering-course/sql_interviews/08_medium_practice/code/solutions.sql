@@ -1,6 +1,6 @@
 -- sql_interviews/08_medium_practice/code/solutions.sql
 -- Solutions to the 31 M08 (Medium) practice problems.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 --
 -- Convention: every problem starts with `-- Problem N: <name>`
 -- and is followed by exactly one SQL statement (possibly a

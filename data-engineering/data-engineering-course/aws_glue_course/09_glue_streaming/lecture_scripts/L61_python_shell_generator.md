@@ -1,6 +1,6 @@
 # L61 — Lab — Creating Python Shell Glue Job For Stream Generation
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 09
 > **Duration target:** see `SYLLABUS.md`
 

@@ -8,7 +8,7 @@ prereqs: ["L09"]
 
 # L10 — Verifying a JWT in Pure Python (pyjwt)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — JWT Basics
 > **Duration:** 20:00
 

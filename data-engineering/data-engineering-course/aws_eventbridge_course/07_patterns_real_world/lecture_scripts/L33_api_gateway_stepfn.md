@@ -11,7 +11,7 @@ downloads: []
 
 # L33 — API Gateway → EventBridge → Step Functions
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Patterns + Real-World
 > **Duration:** 10:20
 

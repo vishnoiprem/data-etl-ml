@@ -3,13 +3,13 @@ id: L25
 title: "API Gateway — Overview, API Types, API Endpoint Types"
 section: 7
 duration: "7:08"
-author: "Prem Vishnoi <prem.vishnoi@example.com>"
+author: "Prem Vishnoi <pvishnoi@avilx.com>"
 udemy_id: 25
 ---
 
 # L25 — API Gateway — Overview, API Types, API Endpoint Types
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 7 — API Gateway Overview
 > **Lecture duration target:** 7:08
 

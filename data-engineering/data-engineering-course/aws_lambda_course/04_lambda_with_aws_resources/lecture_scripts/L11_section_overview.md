@@ -7,7 +7,7 @@ prereqs: []
 
 # L11 — Section 4 Overview
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — AWS Lambda with S3, EC2, DynamoDB
 > **Duration target:** 1:18
 

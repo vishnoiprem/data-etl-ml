@@ -8,7 +8,7 @@ prereqs: ["L23"]
 
 # L24 — OIDC Integration — Auth0, Okta, Cognito as the IdP
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 16:00
 

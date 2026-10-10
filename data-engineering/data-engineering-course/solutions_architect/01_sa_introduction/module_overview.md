@@ -2,7 +2,7 @@
 
 > **8 lessons · 6 videos · ~3 hours of reading + 1-2 hours of self-assessment**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 The on-ramp to the Solutions Architect role as a career. In 8
 lessons, you get the entire mental model: what an SA actually

@@ -1,6 +1,6 @@
 ---
 title: L52 — Lambda — VPC Networking Configuration Hands On
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 5:34
 ---

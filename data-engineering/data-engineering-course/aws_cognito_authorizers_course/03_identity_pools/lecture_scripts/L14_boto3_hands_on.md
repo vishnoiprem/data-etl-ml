@@ -9,7 +9,7 @@ prereqs:
 
 # L14 — Hands-on: Identity Pool with boto3 + moto
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 3 — Cognito Identity Pools
 > **Duration:** 30:00
 

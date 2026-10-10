@@ -1,6 +1,6 @@
 # L30 — Crawler Lab — Third Glue Crawler Creation
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 05
 > **Duration target:** see `SYLLABUS.md`
 

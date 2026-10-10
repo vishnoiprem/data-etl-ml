@@ -1,6 +1,6 @@
 # L20 — On-Demand, Reserved Instances, and Savings Plans
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 04
 > **Duration target:** 12:00
 > **Lecture ID:** L20

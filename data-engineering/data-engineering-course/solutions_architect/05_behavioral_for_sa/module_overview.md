@@ -2,7 +2,7 @@
 
 > **11 lessons · 8 videos · ~6-8 hours of reading + 4-6 hours of story mining + 2-3 hours of mock practice**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 The behavioral round for SA interviews, calibrated for the
 *customer-facing* signals that SA interviewers watch for.

@@ -13,7 +13,7 @@ downloads:
 
 # L24 — Section 5 Recap + Walk-Through of `schedule_cron.py`
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 — EventBridge Scheduler
 > **Duration:** 8:00
 

@@ -1,6 +1,6 @@
 # Section 5 — Managing EC2 (L23–L26)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 5 of 8
 > **Duration:** ~44 min total (L23: 12, L24: 12, L25: 12, L26: 8)
 > **Working artifact:** `code/snapshot_ami_demo/snapshot_ami_demo.py` + 4 pytest tests

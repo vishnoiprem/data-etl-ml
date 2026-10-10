@@ -1,6 +1,6 @@
 # L70 — AWS CloudFormation — End to End with Metadata and Parameters Section
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 4:34
 > **Lecture ID:** L70

@@ -1,6 +1,6 @@
 # region_az_demo
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 02 (EC2 Fundamentals)
 > **Companion lecture:** L06, L08
 

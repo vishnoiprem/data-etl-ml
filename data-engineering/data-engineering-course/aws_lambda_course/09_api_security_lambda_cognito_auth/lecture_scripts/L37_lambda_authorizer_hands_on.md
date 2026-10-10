@@ -1,6 +1,6 @@
 # L37 — Securing APIs using AWS Lambda Authorizer — Hands On
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 09
 > **Duration target:** 23:46
 > **Lecture ID:** L37

@@ -8,7 +8,7 @@ JDBC connectors, schema evolution, and backpressure. By the end
 you'll be able to talk about extraction for an hour without
 repeating yourself.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

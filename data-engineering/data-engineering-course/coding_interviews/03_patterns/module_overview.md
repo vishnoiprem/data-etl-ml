@@ -1,6 +1,6 @@
 # Module 03: Coding Patterns
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 These are the eight patterns that cover ~80% of coding interview questions. Master them.
 

@@ -8,7 +8,7 @@ minutes.
 In production this is a Prometheus / DataDog / CloudWatch
 metric; the interface is the same.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

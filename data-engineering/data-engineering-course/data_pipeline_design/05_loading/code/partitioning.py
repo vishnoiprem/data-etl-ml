@@ -19,7 +19,7 @@ Each partitioner has the same interface:
 The writer is a thin wrapper over ``bulk_loader`` that creates
 per-partition tables and inserts accordingly.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

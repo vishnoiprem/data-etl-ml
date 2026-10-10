@@ -1,6 +1,6 @@
 # L31a — Enterprise Use Case using API Gateway, AWS Lambda and S3 — Part 3
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 8 (Enterprise Use Case 2)
 > **Duration target:** 9:43
 > **Slot:** between L31 (Part 1) and L32 (Part 2). The published curriculum

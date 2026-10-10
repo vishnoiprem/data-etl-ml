@@ -1,6 +1,6 @@
 """Snapshot an EBS volume and register the result as a new AMI.
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 05 — Managing EC2
 > **Companion to:** L24 (EBS Snapshots) + L25 (Custom AMIs) + L26 (recap).
 

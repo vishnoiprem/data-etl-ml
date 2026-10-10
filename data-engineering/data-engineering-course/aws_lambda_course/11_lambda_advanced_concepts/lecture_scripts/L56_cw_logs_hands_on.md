@@ -1,6 +1,6 @@
 ---
 title: L56 — Lambda Monitoring — CloudWatch Logs — Hands On
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 11
 duration: 5:27
 ---

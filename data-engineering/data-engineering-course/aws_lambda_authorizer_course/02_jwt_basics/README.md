@@ -1,6 +1,6 @@
 # Section 2 — JWT Basics (L05–L10)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Lectures:** 6 (~88 min)
 > **Working code:** `code/jwt_verify.py` + `test_jwt_verify.py` (5 moto-free tests)
 

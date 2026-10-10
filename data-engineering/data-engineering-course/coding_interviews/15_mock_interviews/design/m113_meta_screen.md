@@ -1,6 +1,6 @@
 # Mock 113 — E4/E5 Meta Screen (2 problems in 45 min)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Format
 

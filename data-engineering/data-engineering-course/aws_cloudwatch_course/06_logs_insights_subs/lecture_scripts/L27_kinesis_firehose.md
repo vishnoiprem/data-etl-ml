@@ -8,7 +8,7 @@ prereqs: ["L26"]
 
 # L27 — Kinesis Data Streams + Firehose as Destinations
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 — Logs Insights + Subscriptions
 > **Duration:** 12:00
 

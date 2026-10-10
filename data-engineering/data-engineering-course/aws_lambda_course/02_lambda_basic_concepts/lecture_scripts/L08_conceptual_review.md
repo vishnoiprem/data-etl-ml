@@ -12,7 +12,7 @@ prereqs:
 
 # L08 — AWS Lambda — Conceptual Understanding Review
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — AWS Lambda Basic Concepts (Part 1)
 > **Duration:** — (self-paced)
 

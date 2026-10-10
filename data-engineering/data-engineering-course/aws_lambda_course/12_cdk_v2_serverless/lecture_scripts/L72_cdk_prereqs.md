@@ -1,6 +1,6 @@
 ---
 title: L72 — AWS CDK v2 — Pre-requisites
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 12
 duration: 9:27
 ---
@@ -9,7 +9,7 @@ duration: 9:27
 
 > **Section:** 12 — AWS CDK v2
 > **Duration target:** 9:27
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Prereqs
 

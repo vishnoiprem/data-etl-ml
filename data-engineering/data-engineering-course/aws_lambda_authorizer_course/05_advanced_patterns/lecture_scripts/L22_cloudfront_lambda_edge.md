@@ -8,7 +8,7 @@ prereqs: ["L21"]
 
 # L22 — CloudFront Lambda@Edge — Viewer-Request Authentication
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 18:00
 

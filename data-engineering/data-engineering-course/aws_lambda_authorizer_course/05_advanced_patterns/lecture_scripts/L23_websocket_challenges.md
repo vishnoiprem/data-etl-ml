@@ -8,7 +8,7 @@ prereqs: ["L22"]
 
 # L23 — Custom Auth Challenges for WebSocket APIs
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 5 — Advanced Patterns
 > **Duration:** 14:00
 

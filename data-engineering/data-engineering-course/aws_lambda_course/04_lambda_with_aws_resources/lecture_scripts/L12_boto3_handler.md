@@ -7,7 +7,7 @@ prereqs: [L06, L07, L09]
 
 # L12 — AWS Lambda Basics: Boto3, Client vs Resource, and the Handler Contract
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — AWS Lambda with S3, EC2, DynamoDB
 > **Duration target:** 9:06
 

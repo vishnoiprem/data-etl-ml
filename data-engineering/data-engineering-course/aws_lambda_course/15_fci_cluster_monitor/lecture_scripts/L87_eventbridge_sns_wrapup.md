@@ -9,7 +9,7 @@ prereqs:
 
 # L87 — EventBridge Schedule, SNS Topic, End-to-End Test, Course Wrap-up
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 15
 > **Duration:** 12:00
 > **Prereqs:** L82–L86

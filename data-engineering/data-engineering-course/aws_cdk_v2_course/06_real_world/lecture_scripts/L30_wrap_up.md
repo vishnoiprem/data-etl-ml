@@ -8,7 +8,7 @@ prereqs: ["L29"]
 
 # L30 — Course Wrap-Up — CDK vs CFN in 2026
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 6 — Real-World Patterns
 > **Duration:** 12:00
 
@@ -94,4 +94,4 @@ or "all tests passed" summary.
 **That's the end. Thanks for taking the course — now go build
 something.**
 
-— *Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+— *Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

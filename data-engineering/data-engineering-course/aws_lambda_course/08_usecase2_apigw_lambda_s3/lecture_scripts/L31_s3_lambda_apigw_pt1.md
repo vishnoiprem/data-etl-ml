@@ -1,6 +1,6 @@
 # L31 — S3, Lambda and API Gateway — Part 1
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 8 (Enterprise Use Case 2)
 > **Duration target:** 12:29
 

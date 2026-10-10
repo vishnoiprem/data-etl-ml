@@ -325,4 +325,4 @@ then include. Add the index. Rerun `EXPLAIN ANALYZE`. Watch
 the operator change from `Seq Scan` to `Index Scan` or
 `Index Only Scan`. That's the win.
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

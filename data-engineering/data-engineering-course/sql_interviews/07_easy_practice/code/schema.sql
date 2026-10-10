@@ -1,6 +1,6 @@
 -- sql_interviews/07_easy_practice/code/schema.sql
 -- Schema and seed data for the M07 (Easy) practice module.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 --
 -- This file is the single source of truth for the M07 schema.
 -- The test file runs the contents of this file before each

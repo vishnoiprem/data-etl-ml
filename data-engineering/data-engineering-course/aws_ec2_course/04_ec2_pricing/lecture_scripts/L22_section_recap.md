@@ -1,6 +1,6 @@
 # L22 — Section Recap + `pricing_calc.py` Walkthrough
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 04
 > **Duration target:** 8:00
 > **Lecture ID:** L22

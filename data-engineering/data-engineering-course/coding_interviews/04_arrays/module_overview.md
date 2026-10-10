@@ -1,6 +1,6 @@
 # Module 04: Arrays
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 12 problems covering the workhorse data structure of coding interviews.
 

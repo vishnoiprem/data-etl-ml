@@ -1,6 +1,6 @@
 # Section 6 Quiz — Load Balancing Intro + NLB
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 6 (L27–L30)
 > **Pass bar:** **7 / 10**
 > **Time limit:** 15 minutes

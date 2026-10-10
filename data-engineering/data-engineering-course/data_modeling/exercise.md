@@ -4,7 +4,7 @@
 > 2 hours. Produce a working SQLite schema, a SQL
 > query, and a 1-page narrative.
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -273,4 +273,4 @@ embedded SQL. Aim for ~5 pages. The rubric is the
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

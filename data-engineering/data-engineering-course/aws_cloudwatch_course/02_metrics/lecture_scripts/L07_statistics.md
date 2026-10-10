@@ -8,7 +8,7 @@ prereqs: ["L06"]
 
 # L07 — Statistics: Average, Sum, Min, Max, p99, Percentile
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — CloudWatch Metrics
 > **Duration:** 10:00
 

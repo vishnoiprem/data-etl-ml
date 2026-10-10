@@ -9,7 +9,7 @@ prereqs:
 
 # L09 — Hosted UI, OAuth 2.0 Flows & App Client Settings
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — Cognito User Pools
 > **Duration:** 15:00
 

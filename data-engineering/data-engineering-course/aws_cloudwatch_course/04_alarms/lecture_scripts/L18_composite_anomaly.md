@@ -8,7 +8,7 @@ prereqs: ["L17"]
 
 # L18 — Composite Alarms & Anomaly Detection Alarms
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 4 — CloudWatch Alarms
 > **Duration:** 13:00
 

@@ -1,6 +1,6 @@
 # alb_create — Section 7 working demo
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 7 — Application Load Balancer
 > **Lecture:** L35
 

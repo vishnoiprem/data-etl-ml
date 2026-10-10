@@ -1,6 +1,6 @@
 # Section 13 Quiz — AWS CloudFormation (L60–L70)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** 10 multiple-choice / short-answer questions. Click
 > "Show answer" to reveal the answer and a one-line explanation.
 

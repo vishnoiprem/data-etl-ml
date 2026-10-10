@@ -2,7 +2,7 @@
 
 > **15 modules · 118 lessons · 28 videos · ~50 hours**
 >
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 >
 > Inspired by the coding interview prep used at top engineering organizations; every problem is implemented in clean Python with a unittest suite so you can run the entire track on your laptop.
 

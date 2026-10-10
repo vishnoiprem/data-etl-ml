@@ -1,6 +1,6 @@
 ---
 title: L41 — Generative AI Use Case and Architecture
-author: Prem Vishnoi <prem.vishnoi@example.com>
+author: Prem Vishnoi <pvishnoi@avilx.com>
 section: 10
 duration: 4:01
 ---

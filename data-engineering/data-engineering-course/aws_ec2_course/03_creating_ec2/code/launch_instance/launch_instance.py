@@ -1,6 +1,6 @@
 """launch_instance.py — boto3 script that launches an EC2 instance.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 Section: 03 (Creating an EC2 Instance), demo for L18.
 
 Usage (against real AWS):

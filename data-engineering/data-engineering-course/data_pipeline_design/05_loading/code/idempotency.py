@@ -12,7 +12,7 @@ Both are designed to be replaced with production equivalents
 (Redis for the cache; a load_log table in the warehouse for
 the load function).
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

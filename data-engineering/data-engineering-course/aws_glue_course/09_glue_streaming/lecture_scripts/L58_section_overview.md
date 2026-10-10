@@ -1,6 +1,6 @@
 # L58 — Section Overview
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 09
 > **Duration target:** see `SYLLABUS.md`
 

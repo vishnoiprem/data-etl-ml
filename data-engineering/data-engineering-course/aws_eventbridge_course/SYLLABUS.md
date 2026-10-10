@@ -1,6 +1,6 @@
 # SYLLABUS — AWS EventBridge Crash Course
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** 7 sections, 36 lectures, 5 working boto3 + moto code
 > demos, 4 mermaid diagrams, 7 quizzes, 1 download.
 

@@ -1,6 +1,6 @@
 # Section 5 — AWS Lambda Basic Concepts (Part 2): Invocation Model & Limits (L19–L22, 15 min)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 Section 5 is the **theoretical bridge** between the Lambda foundation in
 Section 2, the hands-on boto3 work in Section 4, and the enterprise

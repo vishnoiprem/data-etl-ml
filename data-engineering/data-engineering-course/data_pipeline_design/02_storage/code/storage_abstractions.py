@@ -22,7 +22,7 @@ Delta, Snowflake, BigQuery. The lesson is that every one of
 those can be modeled as ``read() -> Iterator[dict]`` or
 ``write(rows: list[dict]) -> None``.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

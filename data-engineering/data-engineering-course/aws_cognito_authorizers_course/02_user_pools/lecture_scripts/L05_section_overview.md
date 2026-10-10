@@ -12,7 +12,7 @@ prereqs:
 
 # L05 — Section Overview & Cognito in the AWS Security Ecosystem
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 2 — Cognito User Pools
 > **Duration:** 8:00
 

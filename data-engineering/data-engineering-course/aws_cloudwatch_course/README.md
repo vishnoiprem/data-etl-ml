@@ -1,6 +1,6 @@
 # AWS CloudWatch Crash Course — Beginner to Advanced
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** **7 sections, 35 lectures (L01–L35), ~6h total** — Udemy-published 2026 edition.
 > **Companion repo:** Local companion to the published AWS CloudWatch Crash Course.
 
@@ -99,5 +99,5 @@ boto3, moto.
 
 ## License & attribution
 
-Course material authored by **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**.
+Course material authored by **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**.
 Code samples are MIT-licensed. See `../../LICENSE` for the full text.

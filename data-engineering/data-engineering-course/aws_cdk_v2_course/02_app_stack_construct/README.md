@@ -1,6 +1,6 @@
 # Section 2 — App, Stack, Construct (L05–L10)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **L-IDs:** L05–L10 | **Duration:** ~65 min | **Quizzes:** `quizzes/section_2.md`
 > **Working artifact:** `code/hello-cdk/` — minimal S3 bucket stack.
 

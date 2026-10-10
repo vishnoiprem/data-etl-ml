@@ -1,6 +1,6 @@
 # L32 — ALB Hands-On: Create the Load Balancer
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Section:** 07
 > **Duration target:** 10:00
 > **Lecture ID:** L32

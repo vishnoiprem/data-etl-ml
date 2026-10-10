@@ -1,6 +1,6 @@
 # L69 — AWS CloudFormation — End to End with Parameters Section
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 13
 > **Duration target:** 8:55
 > **Lecture ID:** L69

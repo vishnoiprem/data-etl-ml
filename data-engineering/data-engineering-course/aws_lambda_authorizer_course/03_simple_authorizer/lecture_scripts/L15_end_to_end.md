@@ -8,7 +8,7 @@ prereqs: ["L14"]
 
 # L15 — End-to-End: TOKEN Authorizer with HS256 JWT
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — Simple Token-Based Lambda Authorizer
 > **Duration:** 34:00
 

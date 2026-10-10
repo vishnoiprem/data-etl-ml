@@ -10,7 +10,7 @@ downloads:
 
 # L19 — Dead-Letter Queues + Retry Policies
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 4 — Targets
 > **Duration:** 11:10
 

@@ -1,6 +1,6 @@
 # Section 10 — Generative AI: AWS Bedrock (Cohere) End-to-End (L40–L46, 40 min)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Format:** 7 lectures, 1 hands-on enterprise use case, 1 quiz
 > **Industry:** Manufacturing
 

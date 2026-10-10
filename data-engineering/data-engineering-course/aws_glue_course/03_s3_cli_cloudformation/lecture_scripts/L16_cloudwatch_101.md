@@ -1,6 +1,6 @@
 # L16 — CloudWatch 101 (for Glue Job monitoring)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 3 — S3 / CLI / CloudFormation / CloudWatch
 > **Duration target:** 3:30
 

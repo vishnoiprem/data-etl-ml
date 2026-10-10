@@ -1,6 +1,6 @@
 # L02 — What You'll Learn
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 1 — Introduction
 > **Duration target:** 4:00
 

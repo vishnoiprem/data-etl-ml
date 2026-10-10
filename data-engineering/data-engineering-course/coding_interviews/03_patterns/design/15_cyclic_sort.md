@@ -1,6 +1,6 @@
 # 15 — Cyclic Sort
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Used when the input is the numbers `1..n` (or `0..n-1`) and you need to place each in its correct index.
 

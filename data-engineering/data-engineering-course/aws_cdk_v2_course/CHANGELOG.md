@@ -33,7 +33,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/) / dates in YYYY-MM-DD.
 - **`downloads/README.md`** — placeholder for 4 PDF/zip resources.
 
 ### Conventions
-- Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+- Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 - Lecture files: `<section>/lecture_scripts/L##_topic.md`
 - Code: `<section>/code/<project>/{bin,lib,test,package.json,tsconfig.json,cdk.json}`
 - Tests: Jest with `aws-cdk-lib/assertions` and `Template.fromStack`

@@ -8,7 +8,7 @@ prereqs: ["L04"]
 
 # L05 — Section Overview — Why JWTs
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 > **Section:** 2 — JWT Basics
 > **Duration:** 4:00
 

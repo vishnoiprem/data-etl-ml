@@ -1,6 +1,6 @@
 # Section 7 — Application Load Balancer (ALB)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 > **Lectures:** L31–L35
 > **Working artifact:** `code/alb_create/alb_create.py` + 4 moto tests
 > **Quiz:** `quizzes/section_7.md` (pass bar **7 / 10**)
