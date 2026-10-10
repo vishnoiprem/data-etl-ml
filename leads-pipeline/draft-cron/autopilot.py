@@ -835,12 +835,10 @@ def scrape_linkedin_jobs():
     at most 1 request per source per run.
     """
     leads = []
+    # Only 2 queries — LinkedIn is slow + rate-limited
     queries = [
-        ("AI engineer", "remote"),
-        ("ML engineer", "remote"),
-        ("LLM engineer", ""),
-        ("GenAI engineer", "remote"),
-        ("data platform engineer", ""),
+        ("AI engineer remote", "remote"),
+        ("machine learning engineer remote", "remote"),
     ]
     for q, geo in queries:
         # LinkedIn's guest job search endpoint
@@ -863,10 +861,10 @@ def scrape_linkedin_jobs():
             headers["Cookie"] = f"li_at={li_at}"
         try:
             out = subprocess.run(
-                ["curl", "-sL", "-m", "15"] +
+                ["curl", "-sL", "-m", "8"] +  # 8s per query (LinkedIn is slow)
                 sum([["-H", f"{k}: {v}"] for k, v in headers.items()], []) +
                 [url],
-                capture_output=True, text=True, timeout=20,
+                capture_output=True, text=True, timeout=12,
             )
             if out.returncode != 0 or not out.stdout:
                 continue
@@ -1087,15 +1085,38 @@ SCRAPERS = [
 
 
 def scrape_all():
-    """Run every scraper, return de-duped list keyed on (company, role)."""
+    """Run every scraper in parallel, return de-duped list keyed on (company, role).
+
+    Each scraper runs in its own thread with a 60s hard timeout. The total
+    wall-clock is bounded by the slowest scraper instead of the sum of all
+    of them. Set AVILX_SCRAPE_PARALLEL=0 to fall back to sequential.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    use_parallel = os.getenv("AVILX_SCRAPE_PARALLEL", "1") == "1"
+    timeout = int(os.getenv("AVILX_SCRAPE_TIMEOUT", "60"))
     all_leads = []
-    for name, fn in SCRAPERS:
-        try:
-            found = fn()
-            print(f"  scrape.{name}: {len(found)} candidates")
-            all_leads.extend(found)
-        except Exception as e:
-            print(f"  scrape.{name} error: {e}")
+    print(f"  running {len(SCRAPERS)} scrapers "
+          f"({'parallel' if use_parallel else 'sequential'}, "
+          f"timeout={timeout}s each)")
+    if use_parallel:
+        with ThreadPoolExecutor(max_workers=len(SCRAPERS)) as pool:
+            futures = {pool.submit(fn): name for name, fn in SCRAPERS}
+            for fut in as_completed(futures, timeout=timeout + 30):
+                name = futures[fut]
+                try:
+                    found = fut.result(timeout=timeout)
+                    print(f"  scrape.{name}: {len(found)} candidates")
+                    all_leads.extend(found)
+                except Exception as e:
+                    print(f"  scrape.{name} error: {type(e).__name__}: {str(e)[:80]}")
+    else:
+        for name, fn in SCRAPERS:
+            try:
+                found = fn()
+                print(f"  scrape.{name}: {len(found)} candidates")
+                all_leads.extend(found)
+            except Exception as e:
+                print(f"  scrape.{name} error: {e}")
     # Dedup in-process
     seen = set()
     deduped = []
