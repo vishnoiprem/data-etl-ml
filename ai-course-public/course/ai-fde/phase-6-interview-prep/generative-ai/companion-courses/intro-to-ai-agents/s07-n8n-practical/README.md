@@ -2,6 +2,18 @@
 
 > **Section 7 in one line:** n8n is the FDE's low-code agentic platform. The 7 ingredients + the 5 guardrails from Sections 2 + 6 apply; the implementation is visual instead of code. The candidate who can ship a non-engineering team's first agent in n8n is the candidate who can land the SMB engagement.
 
+## In 60 seconds
+
+The 5 named primitives of n8n you must recite:
+
+1. **Workflow** — a DAG of nodes; the artifact you ship.
+2. **Node** — a single step (trigger, data, action, logic).
+3. **Credential** — the API key / OAuth / DB cred (stored in n8n's vault, never in code).
+4. **Execution** — one run of a workflow; logged for replay + debugging.
+5. **Trigger** — webhook, schedule, or event that starts the workflow.
+
+The 4-axis rubric for "n8n vs code": **team capability, customization, time-to-first-workflow, lock-in.** n8n wins for non-engineers, <2-week time-to-value, simple integrations. Code wins for 5+ tools, custom eval, complex reasoning. **If you only read one lecture, read L7-7** (the 6-node complete automation — the end-to-end artifact).
+
 ## The 8 lectures in this section
 
 | # | Lecture | Topic | Read time | Interview signal |

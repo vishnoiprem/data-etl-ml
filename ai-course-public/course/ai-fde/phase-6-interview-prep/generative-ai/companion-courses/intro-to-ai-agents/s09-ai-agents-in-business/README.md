@@ -2,6 +2,18 @@
 
 > **Section 9 in one line:** the agent is a product; the product is a business. The 3 lectures in this section cover the FDE's commercial toolkit: the ROI conversation (Section 9.1), the use case library (Section 9.2), and the FDE's customer-facing pitch (Section 9.3). The FDE who can name the ROI, name the use cases, and deliver the pitch is the FDE who can land the engagement.
 
+## In 60 seconds
+
+The 3 formulas + 3 personas + 3 pricing models you must recite for the commercial round:
+
+1. **ROI formula:** (hours saved × hourly cost × volume × adoption × success rate) − agent cost. AtlasMart: $8.4M → $2.75M = $5.65M annual savings.
+2. **3 personas:** CFO (asks "what's the ROI?"), VP of Ops (asks "will my team use it?"), CTO (asks "is it secure?").
+3. **3 pricing models:** per-run (variable, customer-aligned), subscription (predictable, FDE-aligned), outcome (only pay for value).
+4. **3-stage engagement:** pilot ($5K, 1 week, 1 use case) → engagement ($20K, 4 weeks, 3 use cases) → contract ($20K/month, 6 months, 10 use cases).
+5. **The pitch:** 5 slides × 2 min. Current cost → future cost → savings → risk mitigation → next steps. Sign the SOW.
+
+**The wrong choice is to pitch the LLM. The right choice is the ROI + the personas + the pitch.** The 60-second interview script for the commercial round lives in L9-1.
+
 ## The 3 lectures in this section
 
 | # | Lecture | Topic | Read time | Interview signal |

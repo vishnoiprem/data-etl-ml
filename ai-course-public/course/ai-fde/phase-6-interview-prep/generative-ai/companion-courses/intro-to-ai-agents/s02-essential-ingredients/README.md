@@ -2,6 +2,18 @@
 
 > **The seven lectures in this section decompose the four preconditions from L1.3 into their engineering parts and add the two practical layers (system prompt, parser) the four preconditions don't cover.** This is the section the FDE candidate must internalize — every centerpiece-round architecture question is "how do you build the agent" and the answer is "the seven ingredients, with the five guardrails wrapped around them."
 
+## In 60 seconds
+
+The five named taxonomies you must recite from this section:
+
+1. **7 ingredients:** model, tools, memory, cost ceiling, system prompt, parser, loop driver.
+2. **5 guardrails:** loop detector, schema validator, cost ceiling, idempotency, audit log.
+3. **3-tier cost ceiling:** per-run ($0.50 default), per-tenant per-day ($5), per-process per-month ($1,000).
+4. **4 RAGAS metrics:** faithfulness, answer relevance, context precision, context recall.
+5. **3 memory tiers:** short-term (in prompt), long-term (vector DB), episodic (summarized past sessions).
+
+The synthesis lecture is **L2-7** — it wraps all 7 ingredients + all 5 guardrails in one 200-line shipping agent. **If you only read one lecture in this section, read L2-7.** It is the closest thing to a complete answer in the whole course.
+
 ## The 7 lectures in this section
 
 | # | File | Topic | Read time | Interview signal |

@@ -2,6 +2,18 @@
 
 > **Source:** "Intro to AI Agents and Agentic AI" — 9 sections, 54 lectures, 2h 11m total. **This is the shortest, most-focused companion course in Phase 6:** a 2-hour primer that covers the agent fundamentals (ReAct, ReWoo, multi-agent, n8n workflow) in a way that pairs naturally with Ed Donner's 8-week deep-dive. **Best for candidates who want a fast ramp-up to the agent terminology before tackling Ed's Week 8 capstone or the Phase 4 multi-agent project.**
 
+## In 60 seconds
+
+The five named taxonomies a candidate must recite after reading this primer:
+
+1. **7 ingredients:** model, tools, memory, cost ceiling, system prompt, parser, loop driver.
+2. **5 guardrails:** loop detector, schema validator, cost ceiling, idempotency, audit log.
+3. **3-tier cost ceiling:** per-run ($0.50), per-tenant per-day ($5), per-process per-month ($1,000).
+4. **4 RAGAS metrics:** faithfulness, answer relevance, context precision, context recall.
+5. **5 architecture patterns:** single agent, sequential pipeline, orchestrator, parallel fan-out / fan-in, HTN + HITL.
+
+The "if you only read two lectures in the 54-lecture expansion" pointers: **L2-7** (the 200-line shipping agent that wraps all 7 ingredients + 5 guardrails) and **L9-1** (the ROI formula + CFO pitch). The full `intro-to-ai-agents/` directory (54 lectures, 9 sections) is the read-it-as-a-doc expansion of this cheat sheet.
+
 ---
 
 ## Why this course is the right primer

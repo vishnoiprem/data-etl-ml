@@ -2,6 +2,17 @@
 
 > **Section 8 in one line:** the agent doesn't run in a vacuum; it runs on infrastructure. The 6 lectures in this section cover the 4 pillars of agent infrastructure: deployment platforms (Kubernetes, serverless, dedicated), observability (logs, metrics, traces), message brokers (queue, pub-sub, event bus), and the security perimeter. The FDE who can debug a 3am page across all 4 pillars is the FDE who can own a production agent.
 
+## In 60 seconds
+
+The 4-pillar infrastructure stack you must recite:
+
+1. **Deployment** — Kubernetes (production), Lambda (bursty), VM (legacy). Stateless agent, stateful data.
+2. **Observability** — logs + metrics + traces. OpenTelemetry. The 6-panel 3am dashboard: cost, latency, success rate, errors-by-category, queue depth, ceiling usage.
+3. **Message broker** — synchronous (<50 concurrent), SQS (100-10K), Kafka (10K+ with replay), Redis Streams (existing Redis). The agent is a worker.
+4. **Security** — 5 layers: API gateway, mTLS, secrets, audit log, identity. SOC 2 / HIPAA / PCI compliance maps.
+
+The 3-level cost ceiling (recap): per-run, per-tenant per-day, per-process per-month. **If you only read one lecture, read L8-4** (the observability + 3am dashboard — the on-call survival kit).
+
 ## The 6 lectures in this section
 
 | # | Lecture | Topic | Read time | Interview signal |

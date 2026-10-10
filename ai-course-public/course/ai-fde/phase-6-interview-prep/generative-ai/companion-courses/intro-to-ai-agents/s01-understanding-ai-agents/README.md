@@ -2,6 +2,16 @@
 
 > **The three lectures in this section answer the question "what is an agent, and why is it different from an LLM call?"** This is the most-asked warm-up question in agent interviews. If you can't answer it in 60 seconds with a concrete example, you fail the screening round. The 3 lectures here are the FDE candidate's preparation for that question.
 
+## In 60 seconds
+
+The three things you must recite in this section:
+
+1. **Definition:** an agent is *perceive → decide → act toward a goal* — the classical AI definition, now rebranded around LLMs.
+2. **LLM vs agent:** LLM calls are *reactive* (user drives every step); agents are *proactive* (the model owns the iteration within a budget).
+3. **Why now:** the LLM is the first general-purpose decision function — every other piece of the agent (the loop, the tools, the memory, the guardrails) is the same as it was in 1995; only the decision function changed.
+
+The 3-question interview signal: "Define an AI agent." → "What's the difference between an LLM call and an agent?" → "Why are agents the next layer above LLMs?" **If you only read one lecture, read L1-1 — it sets the voice for the whole course.**
+
 ## The 3 lectures in this section
 
 | # | File | Topic | Read time | Interview signal |

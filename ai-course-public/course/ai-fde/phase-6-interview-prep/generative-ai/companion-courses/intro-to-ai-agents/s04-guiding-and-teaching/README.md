@@ -2,6 +2,16 @@
 
 > **The three lectures in this section answer the question "how do you teach the agent what to do?"** The 7 ingredients from Section 2 + the topologies from Section 3 give the FDE the shape of the agent; Section 4 gives the FDE the content. The system prompt, the few-shot examples, and the chain-of-thought scaffolding are the levers that turn a generic LLM into a domain-specific agent.
 
+## In 60 seconds
+
+The three ideas you must recite from this section:
+
+1. **6 prompting patterns:** zero-shot, few-shot, chain-of-thought, ReAct, system-prompt-as-spec, structured-output.
+2. **Fine-tune vs prompt:** prompt first, fine-tune when the prompt is stable + the cost ceiling is exceeded + you have ≥1,000 labeled examples. **The right choice for 80% of FDE use cases is *don't fine-tune*.**
+3. **3-loop iteration cadence:** daily (eval set), weekly (postmortem), monthly (re-train). The eval set is the spec; the cost model is the test.
+
+**If you only read one lecture, read L4-1** — the 6 prompting patterns are the candidate's most-tested vocabulary in the screening round.
+
 ## The 3 lectures in this section
 
 | # | File | Topic | Read time | Interview signal |

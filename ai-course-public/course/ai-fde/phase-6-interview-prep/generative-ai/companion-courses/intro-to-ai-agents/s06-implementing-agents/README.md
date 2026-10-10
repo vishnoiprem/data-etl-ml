@@ -2,6 +2,18 @@
 
 > **The ten lectures in this section dive into the implementation: which framework to pick, how to write the production-grade agent, how to test it, how to deploy it, how to monitor it, and how to debug it.** The 7 ingredients from Section 2, the topologies from Section 3, the levers from Section 4, and the 6 patterns from Section 5 give the FDE the theory; Section 6 gives the FDE the practice.
 
+## In 60 seconds
+
+The 5 named artifacts the FDE candidate must be able to name in the implementation interview:
+
+1. **The framework choice** — 4 axes (lock-in, learning curve, ecosystem, type safety). The right answer is stdlib + your own orchestrator for production; LangGraph for prototypes; n8n for non-engineers.
+2. **The minimum viable agent** — model + tool registry + parser + loop driver + 1 guardrail. ~150 lines.
+3. **The 5 guardrails** — loop detector, schema validator, cost ceiling, idempotency, audit log. (Recap from S2.)
+4. **The 4 testing layers** — unit (each tool), integration (the loop), eval (the RAGAS metrics), end-to-end (the customer journey).
+5. **The 3 failure modes** — model hallucination, tool timeout, cost ceiling breach. Each has a named recovery strategy.
+
+**If you only read one lecture, read L6-5** (the 5 guardrails) — it is the production-readiness signal in 60 seconds.
+
 ## The 10 lectures in this section
 
 | # | File | Topic | Read time | Interview signal |

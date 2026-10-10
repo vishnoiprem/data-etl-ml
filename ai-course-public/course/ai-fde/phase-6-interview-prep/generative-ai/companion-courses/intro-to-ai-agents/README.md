@@ -1,5 +1,11 @@
 # Intro to AI Agents and Agentic AI — 54-lecture FDE synthesis
 
+> **In 2026, the centerpiece round at most AI-native companies is a 60-minute live-build of a guarded multi-agent system with a cost ceiling, a runbook, and an eval set.** This course is the 54-lecture study path that takes the FDE candidate from *"I know LLMs"* to *"I can ship that system on Monday."* Read it once before the interview. Re-read L2-7 (the synthesis) the morning of.
+
+## In 60 seconds
+
+The course covers, in order: **definition** (S1) → **7 ingredients + 5 guardrails** (S2) → **6 agent types** (S3) → **prompting + teaching** (S4) → **5 architecture patterns** (S5) → **10-step implementation guide** (S6) → **8-lecture n8n platform** (S7) → **6-lecture agent infrastructure** (S8) → **3-lecture commercial toolkit** (S9). Five named taxonomies a candidate must recite: **7 ingredients, 5 guardrails, 3-tier cost ceiling, 4 RAGAS metrics, 4 error categories.** The synthesis lecture of the whole course is **L2-7** — it wraps the 7 ingredients + 5 guardrails in one 200-line shipping agent. If you only read two lectures, read L2-7 and L9-1.
+
 > **This is a 54-lecture FDE-study synthesis of the source course "Intro to AI Agents and Agentic AI" (9 sections, 54 lectures, 2h 11m).** Each lecture is a written study guide: same topic, same scope, same depth as a 1-3 min video, but expanded to ~3K words of transcript-equivalent prose so the FDE candidate can read it as a study document rather than watch a video. **The source-course lecture titles are not in this repository;** the lecture filenames here are descriptive and the content is synthesized from the section-level summaries in `../intro-to-ai-agents.md` plus the Phase 1-5 FDE patterns. **Replace the lecture titles with the source's exact titles when you have them.**
 
 ---
@@ -10,18 +16,18 @@ The 296-line `../intro-to-ai-agents.md` is a *cross-reference cheat sheet* — i
 
 ## How the 54 lectures map to the 9 sections
 
-| Section | Lectures | Time | Directory |
-|---|---|---|---|
-| 1. Understanding AI agents | 3 | 9 min | `s01-understanding-ai-agents/` |
-| 2. Essential ingredients for building AI agents | 7 | 16 min | `s02-essential-ingredients/` |
-| 3. Types of AI agents: from simple to complex structures | 8 | 15 min | `s03-types-of-ai-agents/` |
-| 4. Guiding and teaching AI agents | 3 | 8 min | `s04-guiding-and-teaching/` |
-| 5. AI agent architecture patterns | 6 | 16 min | `s05-architecture-patterns/` |
-| 6. Implementing AI agents in practice | 10 | 24 min | `s06-implementing-agents/` |
-| 7. Practical example — Build an agentic automation with n8n | 8 | 21 min | `s07-n8n-practical/` |
-| 8. AI agent infrastructure | 6 | 12 min | `s08-agent-infrastructure/` |
-| 9. AI agents in business | 3 | 10 min | `s09-ai-agents-in-business/` |
-| **Total** | **54** | **131 min ≈ 2h 11m** | — |
+| Section | Lectures | Time | Directory | "If you only read one" |
+|---|---|---|---|---|
+| 1. Understanding AI agents | 3 | 9 min | `s01-understanding-ai-agents/` | **L1-1** — sets the voice |
+| 2. Essential ingredients for building AI agents | 7 | 16 min | `s02-essential-ingredients/` | **L2-7** — the synthesis (200-line shipping agent) |
+| 3. Types of AI agents: from simple to complex structures | 8 | 15 min | `s03-types-of-ai-agents/` | **L3-4** — hierarchical + per-agent circuit breaker |
+| 4. Guiding and teaching AI agents | 3 | 8 min | `s04-guiding-and-teaching/` | **L4-1** — the 6 prompting patterns |
+| 5. AI agent architecture patterns | 6 | 16 min | `s05-architecture-patterns/` | **L5-3** — orchestrator pattern |
+| 6. Implementing AI agents in practice | 10 | 24 min | `s06-implementing-agents/` | **L6-5** — the 5 guardrails |
+| 7. Practical example — Build an agentic automation with n8n | 8 | 21 min | `s07-n8n-practical/` | **L7-7** — the 6-node complete automation |
+| 8. AI agent infrastructure | 6 | 12 min | `s08-agent-infrastructure/` | **L8-4** — observability + 3am dashboard |
+| 9. AI agents in business | 3 | 10 min | `s09-ai-agents-in-business/` | **L9-1** — the ROI formula + CFO pitch |
+| **Total** | **54** | **131 min ≈ 2h 11m** | — | The 9 above = 80/20 of the course |
 
 ## Lecture file naming
 

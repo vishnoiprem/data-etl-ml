@@ -2,6 +2,17 @@
 
 > **The eight lectures in this section decompose agents by topology: how the 7 ingredients from Section 2 compose into different agent shapes.** The 7 ingredients are invariant; the topology is the variable. The FDE candidate who can pick the right topology for the right task is the candidate who ships the right agent the first time.
 
+## In 60 seconds
+
+The four agent types you must be able to *name and pick between*:
+
+1. **Reactive** — no state; one tool call, one response. Use for trivial lookups.
+2. **Deliberative** — planning + replanning. Use for multi-step problems.
+3. **Hierarchical** — orchestrator + sub-agents. **The FDE default for 90% of use cases.**
+4. **Multi-agent** — peer-to-peer collaboration. Use only when the task cannot be decomposed.
+
+The "right choice" heuristic: **hierarchy when the task decomposes; multi-agent only when forced (MoE, debate, simulation).** The "per-agent circuit breaker" is the FDE pattern that makes hierarchy production-safe — Mei's failure does not block Daniel. **If you only read one lecture, read L3-4** (hierarchical + per-agent circuit breaker).
+
 ## The 8 lectures in this section
 
 | # | File | Topic | Read time | Interview signal |

@@ -2,6 +2,18 @@
 
 > **The six lectures in this section decompose agents by architecture: how the 7 ingredients from Section 2, the topologies from Section 3, and the levers from Section 4 compose into 6 canonical architecture patterns.** The patterns are: single agent, sequential pipeline, orchestrator + sub-agents, parallel fan-out / fan-in, hierarchical task network, and human-in-the-loop. The FDE candidate who can name all 6 and explain when to use each is the candidate who can architect a production agent system.
 
+## In 60 seconds
+
+The 5 named patterns you must recite (one lecture per pattern + the synthesis):
+
+1. **Single agent** — one LLM, one tool set, one memory. Use for <5 tools, single role.
+2. **Sequential pipeline** — fixed DAG; each step's output is the next step's input.
+3. **Orchestrator** — runtime dispatch; the LLM picks the sub-agent per case. **The FDE default for multi-step.**
+4. **Parallel fan-out / fan-in** — independent sub-tasks run concurrently; results merged.
+5. **HTN + HITL** — hierarchical task networks for complex decomposition; human-in-the-loop for high-stakes outputs.
+
+The decision heuristic: **start with single agent; graduate to orchestrator when 3+ stakeholder audiences need different contexts; add HITL when stakes exceed $1K per output.** **If you only read one lecture, read L5-3** (the orchestrator).
+
 ## The 6 lectures in this section
 
 | # | File | Topic | Read time | Interview signal |
