@@ -1,0 +1,38 @@
+%% Diagram: Snowflake 3-layer architecture
+%% Source lecture: Snowflake Complete Masterclass - Section 3 (Architecture)
+%% Description:  Three independently-scalable layers: Cloud Services (brain),
+%%               Compute (virtual warehouses), and Storage (columnar micro-partitions
+%%               on S3 / Azure Blob / GCS).  Each layer can be sized & paid for
+%%               independently.
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+```mermaid
+graph TD
+    subgraph CS["☁️ Cloud Services (the brain)"]
+        META["Metadata Manager<br/>(tables, schemas, users)"]
+        OPT["Query Optimizer"]
+        SEC["Security & Access Control<br/>(RBAC, masking, row-access)"]
+        TXN["Transaction Manager<br/>(ACID across warehouses)"]
+    end
+
+    subgraph CMP["⚙️ Compute (virtual warehouses)"]
+        W1["XS warehouse<br/>(section 2 demo)"]
+        W2["M warehouse<br/>(ELT workloads)"]
+        W3["Multi-cluster warehouse<br/>(concurrency)"]
+    end
+
+    subgraph STG["💾 Storage (columnar micro-partitions)"]
+        S3["S3 / Azure Blob / GCS<br/>(same buckets used by all warehouses)"]
+    end
+
+    USER[SQL client / driver] --> CS
+    CS  --> W1
+    CS  --> W2
+    CS  --> W3
+    W1  <--> S3
+    W2  <--> S3
+    W3  <--> S3
+
+    style CS  fill:#E0F2FE,stroke:#0369A1
+    style CMP fill:#FEF3C7,stroke:#B45309
+    style STG fill:#DCFCE7,stroke:#166534
+```

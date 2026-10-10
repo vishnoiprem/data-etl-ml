@@ -1,5 +1,62 @@
 # Changelog
 
+## 2026-10-10 — Snowflake — The Complete Masterclass (Udemy course author source)
+
+New track: `aws_snowflake_course/`. The author-source companion for
+the Udemy course "Snowflake — The Complete Masterclass" (20
+sections, 187 lectures, 23 idempotent SQL demos, 12 Python test
+suites with **127 tests passing**, 6 mermaid diagrams, 23 quizzes,
+4 hands-on assignments). All Python tests mock the Snowflake
+connector and pass without a live account; the SQL is real Snowflake
+syntax runnable against the free trial.
+
+### Added — `aws_snowflake_course/`
+- `README.md`, `SYLLABUS.md` (L01–L187 map), `DIRECTORY.md`, `CHANGELOG.md`, `requirements.txt`
+- 20 section folders, each with `README.md` + `lecture_scripts/`:
+  - `01_introduction/` (4 lectures)
+  - `02_getting_started/` (10 lectures + `setup_warehouse.sql` + 11 tests)
+  - `03_snowflake_architecture/` (9 lectures + `editions_pricing.sql` + 8 tests)
+  - `04_loading_data/` (9 lectures + `load_csv.sql` + 8 tests)
+  - `05_copy_options/` (8 lectures + `copy_options.sql` + tests)
+  - `06_unstructured_data/` (9 lectures + `parse_json.sql` + `flatten_array.sql` + 12 tests)
+  - `07_performance_optimization/` (9 lectures + `clustering.sql` + tests)
+  - `08_loading_from_aws/` (7 lectures + `aws_storage_integration.sql` + 10 tests)
+  - `09_loading_from_azure/` (7 lectures + `azure_integration.sql` + tests)
+  - `10_loading_from_gcp/` (6 lectures + `gcs_integration.sql` + tests)
+  - `11_snowpipe/` (7 lectures + `snowpipe_setup.sql` + 10 tests)
+  - `12_cortex_ai_ml/` (14 lectures + `cortex_ai_demo.sql` + 9 tests)
+  - `13_snowpipe_azure/` (4 lectures)
+  - `14_time_travel/` (6 lectures + `time_travel_demo.sql` + `undrop.sql` + 10 tests)
+  - `15_fail_safe/` (2 lectures)
+  - `16_types_of_tables/` (4 lectures + `table_types.sql` + tests)
+  - `17_zero_copy_cloning/` (6 lectures + `clone_database.sql` + 8 tests)
+  - `18_data_sharing/` (11 lectures + `create_share.sql` + 9 tests)
+  - `19_data_sampling/` (3 lectures + `sampling.sql` + 7 tests)
+  - `20_extra_topics/` (52 lectures: Tasks, Streams, MVs, Masking, Roles, BI Tools, Best Practices + 25 tests)
+- 23 quizzes (`quizzes/section_1.md` … `section_19.md` + `section_20a.md` … `section_20d.md`, 8–12 questions each)
+- 6 mermaid diagrams in `diagrams/` (snowflake_architecture, warehouse_scaling, storage_integration_flow, snowpipe_architecture, cortex_ai_stack, data_sharing_topology)
+- 4 hands-on assignments (`assignments/assignment_1_end_to_end_etl.md`, `assignment_2_cortex_ai_app.md`, `assignment_3_cdc_pipeline.md`, `assignment_4_secure_data_share.md`)
+- 2 scripts (`scripts/run_all_tests.py`, `scripts/bootstrap.sh`)
+
+### Verified
+- `python3 scripts/run_all_tests.py` reports `ALL PASS` — 127 tests
+  across 12 test files (0.25s runtime, no AWS/Snowflake account needed).
+
+---
+
+## 2026-10-10 — 5 more AWS crash courses
+
+New tracks (siblings to `aws_glue_course/`, `aws_lambda_course/`, `aws_ec2_course/`):
+- `aws_eventbridge_course/` (7 sections, 36 lectures, 5 boto3 + moto demos, 38 tests)
+- `aws_cognito_authorizers_course/` (5 sections, 25 lectures, 2 demos, 11 tests)
+- `aws_lambda_authorizer_course/` (5 sections, 25 lectures, 3 demos, 23 tests)
+- `aws_cdk_v2_course/` (6 sections, 30 lectures, 3 TypeScript CDK projects, npm-tested)
+- `aws_cloudwatch_course/` (7 sections, 35 lectures, 5 boto3 + moto demos, 23 tests)
+
+All 95 boto3 + moto tests pass (`python -m pytest aws_eventbridge_course aws_cognito_authorizers_course aws_lambda_authorizer_course aws_cloudwatch_course -q`).
+
+---
+
 ## 2026-10-10 — AWS EC2 + Load Balancing Crash Course (Udemy course author source)
 
 New track: `aws_ec2_course/`. The author-source companion for the

@@ -1,7 +1,8 @@
 # Data Engineering Interview Course
 
 A complete, code-first curriculum for **data engineering, software engineering,
-and product-management interviews**. **12 tracks · 506 lessons · 1,470 tests**.
+and product-management interviews**. **12 tracks · 506 lessons · 1,470 tests**
++ **9 sibling AWS/Snowflake crash courses · 1,021 lectures · 1,200+ tests**.
 Every system in the code-heavy tracks is a real, runnable service or pipeline
 you can execute on your laptop.
 
@@ -255,9 +256,9 @@ engineering work that this course builds on:
 
 ---
 
-## AWS companion courses (sibling tracks)
+## AWS + Snowflake companion courses (sibling tracks)
 
-Three sibling tracks sit at the repository root and follow the same
+Nine sibling tracks sit at the repository root and follow the same
 "lecture-script + working code + moto tests" pattern. They are
 independent of the interview course above and stand on their own as
 Udemy-published curricula:
@@ -267,6 +268,12 @@ Udemy-published curricula:
 | AWS Glue — The Complete Masterclass | `aws_glue_course/` | 11 | 78 | (PySpark ETL demos) |
 | AWS Lambda + Python (Boto3) + Serverless | `aws_lambda_course/` | 16 | 88 | 102 |
 | AWS EC2 + Load Balancing Crash Course | `aws_ec2_course/` | 8 | 38 | 30 |
+| AWS EventBridge Crash Course | `aws_eventbridge_course/` | 7 | 36 | 38 |
+| AWS Cognito Authorizers Crash Course | `aws_cognito_authorizers_course/` | 5 | 25 | 11 |
+| AWS Lambda Authorizer Crash Course | `aws_lambda_authorizer_course/` | 5 | 25 | 23 |
+| AWS CDK v2 Crash Course | `aws_cdk_v2_course/` | 6 | 30 | (npm test) |
+| AWS CloudWatch Crash Course | `aws_cloudwatch_course/` | 7 | 35 | 23 |
+| **Snowflake — The Complete Masterclass** | `aws_snowflake_course/` | 20 | 187 | 127 |
 
 Each course has its own `README.md`, `SYLLABUS.md`, `DIRECTORY.md`,
 `CHANGELOG.md`, and `scripts/run_all_tests.py`.
