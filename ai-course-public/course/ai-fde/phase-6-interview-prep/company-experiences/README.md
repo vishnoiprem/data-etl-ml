@@ -40,6 +40,7 @@ Based on the reports in this module, the 5 most useful FDE loops to understand a
 |---|---|---|---|
 | `openai-semantic-search.md` | OpenAI | 1-week take-home + 1-hr case-study + AI-enabled LeetCode | "Don't over-index on hard LeetCode. Practice explaining technical choices in plain English, especially customer-facing." |
 | `palantir-fde-decomposition.md` | Palantir | 4 stages: recruiter + technical screen + 3-of-5 onsite (decomposition, learning, coding, re-engineering, system design) + hiring manager | "Practice decomposition out loud. AI is prohibited. Behavioral is embedded in every round." |
+| `langchain-deployed-engineer.md` | LangChain | 3 stages: recruiter + 20-min product presentation + build-an-agent take-home with a Slack channel | "The interview is the job. Use every resource they give you (Academy, docs, Slack). Cover ALL product benefits. Be receptive to feedback without ego." |
 
 **Add a new file per real report you find.** The pattern: copy this README's structure, fill in the 5 questions, link back to the Phase 6 module that preps each round.
 
