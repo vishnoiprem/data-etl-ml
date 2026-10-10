@@ -67,3 +67,26 @@ Example: `L1-1-what-is-an-agent.md`, `L7-4-n8n-first-workflow.md`. Each file is 
 **The 2h 11m source course teaches the agent vocabulary. This 54-lecture synthesis teaches the FDE study path through that vocabulary.** The candidate who reads all 54 lectures + runs all 12 practice code files + completes the 4 Phase 4 projects + answers the 3 questions per lecture out loud will be ready for the centerpiece round at any AI company that uses agents.
 
 **Read the section README first. Then the lecture. Then the code. Then the question. Then the next lecture.** That's the FDE-study path.
+
+---
+
+## Build status
+
+**Complete: 54 / 54 lectures written.** All 9 sections have a `README.md` and the full lecture set:
+
+| Section | Lectures | Status |
+|---|---|---|
+| 1. Understanding AI agents | 3 (L1-1 to L1-3) | done |
+| 2. Essential ingredients | 7 (L2-1 to L2-7) | done |
+| 3. Types of AI agents | 8 (L3-1 to L3-8) | done |
+| 4. Guiding and teaching | 3 (L4-1 to L4-3) | done |
+| 5. Architecture patterns | 6 (L5-1 to L5-6) | done |
+| 6. Implementing agents | 10 (L6-1 to L6-10) | done |
+| 7. n8n practical | 8 (L7-1 to L7-8) | done |
+| 8. Agent infrastructure | 6 (L8-1 to L8-6) | done |
+| 9. AI agents in business | 3 (L9-1 to L9-3) | done |
+| **Total** | **54 lectures + 9 section READMEs = 63 .md files** | **complete** |
+
+Total: ~200K words across 63 files. Each lecture is 3-4K words, structured as: FDE framing → 3 things you'll learn → concept → pattern → code → production addendum → cross-references → 3 interview questions → read next.
+
+**The synthesis is closed.** Use the directory as a self-paced FDE study guide. Replace the lecture titles with the source's exact titles when the source lecture list is available.

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avilx — Global Build · Deploy · Engineers (AI · Data · ML · Cloud · Databricks · 7+ clouds)</title>
+<meta name="description" content="Avilx is your global Build · Deploy · Engineers partner for AI, Data, ML, Cloud, and e-commerce. Ha Noi HQ, delivery to China + APAC + US + EU. 7+ clouds: AWS, Azure, GCP, Tencent, Alibaba. Databricks Champion team. Senior-only vetted engineers. USD/EUR/CNY invoicing.">
+<meta property="og:title" content="Avilx — Global Build · Deploy · Engineers">
+<meta property="og:description" content="AI · Data · ML · Cloud · e-commerce. 7+ clouds. Databricks Champion team. Senior-only. Global delivery.">
+<meta property="og:type" content="website">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;line-height:1.6;color:#0a1929;background:#ffffff;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  .container{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:50;background:rgba(10,25,41,0.95);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid rgba(74,222,128,0.15)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.02em;display:flex;align-items:center;gap:10px}
+  .logo-mark{display:inline-block;width:28px;height:28px;background:linear-gradient(135deg,#4ade80 0%,#22c55e 100%);border-radius:6px;position:relative}
+  .logo-mark::after{content:"";position:absolute;inset:6px;background:#0a1929;border-radius:2px}
+  .nav-links{display:flex;align-items:center;gap:32px;font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)}
+  .nav-links a{transition:color .2s}
+  .nav-links a:hover{color:#4ade80}
+  .nav-cta{background:#4ade80;color:#0a1929;padding:8px 18px;border-radius:8px;font-weight:700;font-size:14px;transition:transform .2s}
+  .nav-cta:hover{transform:translateY(-1px)}
+  @media (max-width:768px){.nav-links .nav-hide-mobile{display:none}}
+
+  /* HERO */
+  .hero{position:relative;background:linear-gradient(135deg,#0a1929 0%,#1e3a5f 50%,#0a1929 100%);color:#fff;padding:96px 0 80px;overflow:hidden}
+  .hero::before{content:"";position:absolute;top:-50%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(74,222,128,0.15) 0%,transparent 70%);pointer-events:none}
+  .hero::after{content:"";position:absolute;bottom:-30%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(59,130,246,0.10) 0%,transparent 70%);pointer-events:none}
+  .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:center}
+  @media (max-width:900px){.hero-grid{grid-template-columns:1fr;gap:40px}}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:#4ade80;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:0.05em;margin-bottom:24px}
+  .hero-eyebrow .pulse{width:6px;height:6px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .hero h1{font-size:56px;font-weight:800;line-height:1.05;letter-spacing:-0.03em;margin-bottom:24px}
+  .hero h1 .accent{background:linear-gradient(135deg,#4ade80 0%,#22c55e 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+  .hero p.lead{font-size:20px;line-height:1.55;opacity:0.88;margin-bottom:32px;max-width:620px}
+  .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:40px}
+  .btn-primary{display:inline-flex;align-items:center;gap:8px;background:#4ade80;color:#0a1929;padding:16px 28px;border-radius:10px;font-weight:700;font-size:16px;transition:all .2s;box-shadow:0 8px 24px rgba(74,222,128,0.25)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(74,222,128,0.35)}
+  .btn-secondary{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:16px 28px;border-radius:10px;font-weight:600;font-size:16px;transition:all .2s}
+  .btn-secondary:hover{background:rgba(255,255,255,0.15)}
+  .hero-trust{display:flex;align-items:center;gap:24px;flex-wrap:wrap;font-size:13px;opacity:0.7}
+  .hero-trust strong{color:#4ade80;font-weight:700}
+
+  /* Hero card / stats panel */
+  .hero-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:32px;backdrop-filter:blur(20px)}
+  .hero-card h3{font-size:13px;font-weight:600;color:#4ade80;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px}
+  .stat-row{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .stat-row:last-child{border-bottom:0}
+  .stat-num{font-size:32px;font-weight:800;color:#fff;line-height:1}
+  .stat-label{font-size:12px;opacity:0.65;margin-top:4px}
+
+  /* MARQUEE / LOGOS strip */
+  .marquee{padding:32px 0;background:#0a1929;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05)}
+  .marquee-label{text-align:center;font-size:11px;letter-spacing:0.15em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:16px}
+  .marquee-row{display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:32px;color:rgba(255,255,255,0.55);font-size:18px;font-weight:700}
+  .marquee-row span{opacity:0.7;transition:opacity .2s}
+  .marquee-row span:hover{opacity:1}
+
+  /* SECTION */
+  section{padding:96px 0}
+  section.tight{padding:64px 0}
+  .section-head{text-align:center;max-width:760px;margin:0 auto 56px}
+  .section-eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:0.15em;color:#4ade80;text-transform:uppercase;margin-bottom:14px}
+  .section-head h2{font-size:44px;font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-bottom:16px}
+  .section-head p{font-size:18px;color:#4b5563}
+
+  /* THREE PILLARS */
+  .pillars{background:#f8f9fb}
+  .pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  @media (max-width:900px){.pillar-grid{grid-template-columns:1fr}}
+  .pillar{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:36px;transition:all .3s;position:relative;overflow:hidden}
+  .pillar::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4ade80 0%,#22c55e 100%);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+  .pillar:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,0.08);border-color:#4ade80}
+  .pillar:hover::before{transform:scaleX(1)}
+  .pillar-num{font-size:11px;font-weight:700;letter-spacing:0.15em;color:#4ade80;margin-bottom:12px}
+  .pillar h3{font-size:24px;font-weight:800;margin-bottom:12px;letter-spacing:-0.01em}
+  .pillar .stack{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:12px;color:#6b7280;background:#f3f4f6;padding:8px 12px;border-radius:6px;margin-bottom:16px;display:inline-block}
+  .pillar p{color:#4b5563;margin-bottom:16px}
+  .pillar ul{list-style:none;font-size:14px;color:#1a1a1a}
+  .pillar ul li{padding:6px 0 6px 24px;position:relative}
+  .pillar ul li::before{content:"→";position:absolute;left:0;color:#4ade80;font-weight:700}
+
+  /* CASE STUDIES */
+  .cases{background:#fff}
+  .case-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+  @media (max-width:768px){.case-grid{grid-template-columns:1fr}}
+  .case{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:32px;transition:all .3s;position:relative}
+  .case:hover{box-shadow:0 12px 32px rgba(0,0,0,0.06);border-color:#4ade80}
+  .case-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .case-tag{background:#f3f4f6;color:#4b5563;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:500}
+  .case-tag.green{background:#dcfce7;color:#166534}
+  .case h3{font-size:20px;font-weight:700;margin-bottom:12px;letter-spacing:-0.01em}
+  .case p{color:#4b5563;font-size:15px;margin-bottom:16px}
+  .case-result{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:14px;font-weight:600;color:#166534}
+
+  /* GLOBAL STRIP */
+  .global-strip{background:linear-gradient(135deg,#0a1929 0%,#1e3a5f 100%);color:#fff;padding:64px 0}
+  .global-inner{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+  @media (max-width:900px){.global-inner{grid-template-columns:1fr;gap:32px}}
+  .global-inner h2{font-size:36px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px;line-height:1.2}
+  .global-inner h2 .accent{color:#4ade80}
+  .global-inner p{font-size:16px;opacity:0.85;margin-bottom:24px}
+  .global-features{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;font-size:14px}
+  .global-features li{padding:8px 0;list-style:none;display:flex;align-items:start;gap:8px}
+  .global-features li::before{content:"✓";color:#4ade80;font-weight:700;flex-shrink:0}
+  .clouds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:24px}
+  @media (max-width:600px){.clouds-grid{grid-template-columns:repeat(3,1fr)}}
+  .cloud-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);padding:10px 12px;border-radius:8px;text-align:center;font-size:12px;font-weight:600;color:#fff}
+
+  /* COMPARISON */
+  .compare{background:#f8f9fb}
+  .compare-table{max-width:900px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden}
+  .compare-row{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;font-size:14px}
+  .compare-row .cell{padding:16px 20px;border-bottom:1px solid #f3f4f6}
+  .compare-row.head{background:#0a1929;color:#fff;font-weight:700;font-size:13px;letter-spacing:0.05em;text-transform:uppercase}
+  .compare-row.head .cell{border-bottom:0;padding:18px 20px}
+  .compare-row .cell:first-child{font-weight:600;color:#1a1a1a}
+  .compare-row .cell.avilx{background:#f0fdf4;font-weight:600;color:#166534;position:relative}
+  .compare-row .cell.avilx::before{content:"★";position:absolute;top:8px;right:8px;color:#4ade80;font-size:12px}
+  .compare-row:last-child .cell{border-bottom:0}
+
+  /* CTA */
+  .cta-section{background:linear-gradient(135deg,#0a1929 0%,#1e3a5f 100%);color:#fff;padding:96px 0;text-align:center;position:relative;overflow:hidden}
+  .cta-section::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(74,222,128,0.18) 0%,transparent 60%);pointer-events:none}
+  .cta-section h2{font-size:48px;font-weight:800;letter-spacing:-0.02em;margin-bottom:16px;position:relative}
+  .cta-section p{font-size:18px;opacity:0.9;margin-bottom:40px;max-width:600px;margin-left:auto;margin-right:auto;position:relative}
+  .cta-channels{position:relative;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:32px}
+  .cta-channel{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);padding:14px 22px;border-radius:10px;font-size:15px;font-weight:600;transition:all .2s}
+  .cta-channel:hover{background:rgba(255,255,255,0.15);transform:translateY(-2px)}
+  .cta-foot{position:relative;font-size:14px;opacity:0.6}
+
+  /* FOOTER */
+  footer{background:#0a1929;color:rgba(255,255,255,0.5);padding:48px 0;font-size:13px;text-align:center}
+  footer .foot-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}
+  footer a:hover{color:#4ade80}
+
+  /* RESPONSIVE */
+  @media (max-width:600px){
+    .hero{padding:64px 0 48px}
+    .hero h1{font-size:36px}
+    .hero p.lead{font-size:16px}
+    .section-head h2{font-size:32px}
+    .cta-section h2{font-size:32px}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="logo"><span class="logo-mark"></span>Avilx</a>
+    <div class="nav-links">
+      <a href="#services" class="nav-hide-mobile">Services</a>
+      <a href="#cases" class="nav-hide-mobile">Work</a>
+      <a href="#global" class="nav-hide-mobile">Global</a>
+      <a href="#compare" class="nav-hide-mobile">Why Avilx</a>
+      <a href="mailto:hello@avilx.com" class="nav-cta">Get in touch</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="pulse"></span>Available now · 12 senior engineers ready</div>
+      <h1>Global <span class="accent">Build · Deploy · Engineers</span> for AI, Data, ML, Cloud & e-commerce</h1>
+      <p class="lead">Vietnam-headquartered senior engineering partner. We ship production AI, data platforms, ML, and cloud systems across <strong>7+ clouds</strong> (AWS, Azure, GCP, Tencent, Alibaba, Huawei, Oracle) for clients in <strong>China, APAC, US, and EU</strong>. Senior-only, vetted, no recruiters. <strong>Databricks</strong> Champion team.</p>
+      <div class="hero-ctas">
+        <a href="mailto:hello@avilx.com?subject=Avilx%20scoping%20call" class="btn-primary">Book a 30-min scoping call →</a>
+        <a href="#services" class="btn-secondary">See what we ship</a>
+      </div>
+      <div class="hero-trust">
+        <span><strong>15+ yrs</strong> senior experience</span>
+        <span>·</span>
+        <span><strong>7+ clouds</strong></span>
+        <span>·</span>
+        <span><strong>2-week</strong> ramp</span>
+        <span>·</span>
+        <span>Senior-only · 8+ yrs</span>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h3>By the numbers</h3>
+      <div class="stat-row">
+        <div>
+          <div class="stat-num">15+</div>
+          <div class="stat-label">years senior experience</div>
+        </div>
+        <div style="text-align:right">
+          <div class="stat-num" style="color:#4ade80">7+</div>
+          <div class="stat-label">clouds covered</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div>
+          <div class="stat-num">12</div>
+          <div class="stat-label">senior engineers available</div>
+        </div>
+        <div style="text-align:right">
+          <div class="stat-num" style="color:#4ade80">2 wk</div>
+          <div class="stat-label">avg. time to first commit</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div>
+          <div class="stat-num">$40-70</div>
+          <div class="stat-label">/hr blended pod rate</div>
+        </div>
+        <div style="text-align:right">
+          <div class="stat-num" style="color:#4ade80">$120-180</div>
+          <div class="stat-label">/hr principal architect</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div>
+          <div class="stat-num">4</div>
+          <div class="stat-label">regions · China / APAC / US / EU</div>
+        </div>
+        <div style="text-align:right">
+          <div class="stat-num" style="color:#4ade80">3</div>
+          <div class="stat-label">currencies: USD / EUR / CNY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE / TRUSTED STACK -->
+<div class="marquee">
+  <div class="container">
+    <div class="marquee-label">Senior-only experience across the global stack</div>
+    <div class="marquee-row">
+      <span>AWS</span>
+      <span>Azure</span>
+      <span>GCP</span>
+      <span>Tencent Cloud</span>
+      <span>Alibaba Cloud</span>
+      <span>Huawei Cloud</span>
+      <span>Databricks</span>
+      <span>Snowflake</span>
+      <span>LangChain</span>
+      <span>LangGraph</span>
+      <span>Kafka</span>
+      <span>dbt</span>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICES / THREE PILLARS -->
+<section id="services" class="pillars">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">What we do</div>
+      <h2>Three things, one partner</h2>
+      <p>Most agencies pick one — body shops, consultancies, or recruiting. Avilx does all three under one contract, one PM, one invoice. You choose the model that fits.</p>
+    </div>
+    <div class="pillar-grid">
+      <div class="pillar">
+        <div class="pillar-num">01 · BUILD</div>
+        <h3>Production AI, Data, ML & Apps</h3>
+        <div class="stack">Python · LangChain · LangGraph · Databricks · dbt · Spark · Kafka · React</div>
+        <p>End-to-end delivery. You own the repo, the docs, the runbooks. We hand over clean and exit.</p>
+        <ul>
+          <li>AI / LLM / RAG / Agents (LangChain, LangGraph, CrewAI, evals)</li>
+          <li>Databricks Lakehouse (Champion team) + Snowflake + dbt</li>
+          <li>Streaming & CDC (Kafka, Debezium, sub-minute SLA)</li>
+          <li>Full-stack apps (React, Next.js, FastAPI, Node)</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02 · DEPLOY</div>
+        <h3>Multi-cloud, regulated, China-ready</h3>
+        <div class="stack">AWS · Azure · GCP · Tencent · Alibaba · Huawei · Terraform</div>
+        <p>Run what we build. 7+ clouds incl. China clouds. SOC 2, HIPAA, MLPS 2.0 patterns.</p>
+        <ul>
+          <li>AWS + Azure + GCP + Alibaba + Tencent + Huawei + Oracle</li>
+          <li>China data residency (MLPS 2.0, ICP support)</li>
+          <li>IaC (Terraform, Pulumi, ROS, TCADP)</li>
+          <li>Security & compliance (SOC 2, HIPAA, GDPR)</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03 · ENGINEERS</div>
+        <h3>Senior-only, vetted, global</h3>
+        <div class="stack">8+ yrs · Databricks Champion · async-first</div>
+        <p>No recruiters, no juniors. Pod, staff aug, or principal/architect seats.</p>
+        <ul>
+          <li>Senior individual contributors (8+ yrs, $50-100/hr)</li>
+          <li>Staff engineers (12+ yrs, $90-130/hr)</li>
+          <li>Principal architects (15+ yrs, $120-180/hr)</li>
+          <li>Pods of 2-6 ($40-70/hr blended) for project work</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="cases" class="cases">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Recent work</div>
+      <h2>Shipped in production</h2>
+      <p>Real outcomes from real engagements. Anonymized where NDAs require.</p>
+    </div>
+    <div class="case-grid">
+      <div class="case">
+        <div class="case-meta">
+          <span class="case-tag green">Banking</span>
+          <span class="case-tag">Databricks</span>
+          <span class="case-tag">Kafka</span>
+          <span class="case-tag">Iceberg</span>
+        </div>
+        <h3>Real-time CDC lakehouse at a top-10 US bank</h3>
+        <p>14-week build with 2 architects + 4 engineers. Sub-minute replication, 99.95% pipeline reliability over 6 months post-launch.</p>
+        <div class="case-result">✓ Live in production · top-10 US bank</div>
+      </div>
+      <div class="case">
+        <div class="case-meta">
+          <span class="case-tag green">E-commerce</span>
+          <span class="case-tag">Next.js</span>
+          <span class="case-tag">Stripe</span>
+          <span class="case-tag">Alipay</span>
+        </div>
+        <h3>Headless commerce rebuild, 14 countries</h3>
+        <p>Next.js + Salesforce Commerce Cloud + Stripe + Algolia. Alipay + WeChat Pay for CN. 5-week build, mobile-first.</p>
+        <div class="case-result">✓ +28% mobile conversion · $8M GMV run rate</div>
+      </div>
+      <div class="case">
+        <div class="case-meta">
+          <span class="case-tag green">RAG / AI</span>
+          <span class="case-tag">LangChain</span>
+          <span class="case-tag">PostgreSQL</span>
+          <span class="case-tag">HIPAA</span>
+        </div>
+        <h3>Clinical Q&A assistant for 12,000+ providers</h3>
+        <p>HIPAA-aware RAG over 2M medical documents. Eval rig with 1,200 hand-labeled cases. Replaced a $400K/yr vendor.</p>
+        <div class="case-result">✓ 38% fewer support tickets · 4.7/5 user rating</div>
+      </div>
+      <div class="case">
+        <div class="case-meta">
+          <span class="case-tag green">Marketplace</span>
+          <span class="case-tag">Databricks</span>
+          <span class="case-tag">Braze</span>
+          <span class="case-tag">Aliyun</span>
+        </div>
+        <h3>SEA marketplace personalization on Alibaba Cloud</h3>
+        <p>Databricks lakehouse + CDP + lifecycle automation. 4 engineers, 10 weeks. Single customer view across 5 countries.</p>
+        <div class="case-result">✓ +19% repeat purchase · 12% AOV lift</div>
+      </div>
+      <div class="case">
+        <div class="case-meta">
+          <span class="case-tag green">Fintech / Agents</span>
+          <span class="case-tag">LangGraph</span>
+          <span class="case-tag">OpenAI</span>
+          <span class="case-tag">Multi-agent</span>
+        </div>
+        <h3>Multi-agent KYC review system</h3>
+        <p>5-agent pipeline with human-in-the-loop. Cut manual review from 18 min to 90 sec per case. Series B fintech.</p>
+        <div class="case-result">✓ 99.1% accuracy vs 87% human baseline</div>
+      </div>
+      <div class="case">
+        <div class="case-meta">
+          <span class="case-tag green">Data / SaaS</span>
+          <span class="case-tag">Snowflake</span>
+          <span class="case-tag">dbt</span>
+          <span class="case-tag">Fivetran</span>
+        </div>
+        <h3>Greenfield analytics platform in 5 weeks</h3>
+        <p>Snowflake + dbt + Fivetran + Hightouch. 47 dbt models, 12 source connectors, full reverse-ETL into HubSpot + Salesforce.</p>
+        <div class="case-result">✓ Self-serve analytics for 30+ stakeholders</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GLOBAL DELIVERY -->
+<section id="global" class="global-strip">
+  <div class="container global-inner">
+    <div>
+      <h2>Built in Vietnam. <span class="accent">Delivered globally.</span></h2>
+      <p>Ha Noi HQ, with a vetted network across Vietnam, India, Philippines, Thailand, Indonesia, and China. We cover every timezone your team works in — and most of the clouds you need.</p>
+      <ul class="global-features">
+        <li>China data residency (Alibaba + Tencent production)</li>
+        <li>APAC timezone native (HCMC/Ha Noi UTC+7)</li>
+        <li>US/EU morning overlap windows</li>
+        <li>ICP filing &amp; MLPS 2.0 support via partners</li>
+        <li>CNY, USD, EUR invoicing</li>
+        <li>Mandarin-friendly engineers available</li>
+      </ul>
+    </div>
+    <div>
+      <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;opacity:0.6;margin-bottom:14px;font-weight:700">7+ clouds covered</div>
+      <div class="clouds-grid">
+        <div class="cloud-chip">AWS</div>
+        <div class="cloud-chip">Azure</div>
+        <div class="cloud-chip">GCP</div>
+        <div class="cloud-chip">Tencent Cloud</div>
+        <div class="cloud-chip">Alibaba Cloud</div>
+        <div class="cloud-chip">Huawei Cloud</div>
+        <div class="cloud-chip">Oracle</div>
+        <div class="cloud-chip">IBM</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="compare" class="compare">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-eyebrow">Why Avilx</div>
+      <h2>The math works in your favor</h2>
+      <p>Same caliber of engineer, 60-80% of US rate, plus 7+ clouds and China delivery most shops can't do.</p>
+    </div>
+    <div class="compare-table">
+      <div class="compare-row head">
+        <div class="cell">What you care about</div>
+        <div class="cell">US/EU in-house</div>
+        <div class="cell">Big-4 outsourcing</div>
+        <div class="cell">Avilx</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">Senior engineer density</div>
+        <div class="cell">Variable</div>
+        <div class="cell">Junior-heavy</div>
+        <div class="cell avilx">100% senior, vetted</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">Blended pod rate</div>
+        <div class="cell">$90-150/hr</div>
+        <div class="cell">$50-90/hr</div>
+        <div class="cell avilx">$40-70/hr</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">Principal architect</div>
+        <div class="cell">$200+/hr</div>
+        <div class="cell">$120-180/hr</div>
+        <div class="cell avilx">$120-180/hr</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">Cloud coverage</div>
+        <div class="cell">1-2</div>
+        <div class="cell">1-2</div>
+        <div class="cell avilx">7+ incl. Alibaba + Tencent</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">China data residency</div>
+        <div class="cell">No</div>
+        <div class="cell">Rare</div>
+        <div class="cell avilx">Yes (production)</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">Databricks depth</div>
+        <div class="cell">1-2 certs</div>
+        <div class="cell">Mixed</div>
+        <div class="cell avilx">Champion team</div>
+      </div>
+      <div class="compare-row">
+        <div class="cell">Code ownership</div>
+        <div class="cell">Yours</div>
+        <div class="cell">Messy</div>
+        <div class="cell avilx">Yours, always</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Need an engineer, a pod, or a global delivery partner?</h2>
+    <p>Whoever in your network needs AI / data / cloud / e-commerce capacity — I'd love to support. Free 30-min scoping call, no pitch deck.</p>
+    <div class="cta-channels">
+      <a href="mailto:hello@avilx.com?subject=Avilx%20scoping%20call" class="cta-channel">📧 hello@avilx.com</a>
+      <a href="tel:+6592716405" class="cta-channel">📱 +6592716405</a>
+      <a href="https://wa.me/6592716405" class="cta-channel">💬 WhatsApp me</a>
+      <a href="https://x.com/vishnoiprem" class="cta-channel">🐦 @vishnoiprem</a>
+    </div>
+    <p class="cta-foot">📍 Ha Noi, Vietnam · Vietnam LLC · USD / EUR / CNY / SGD invoicing · Global delivery to China, APAC, US &amp; EU</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-links">
+      <a href="mailto:hello@avilx.com">hello@avilx.com</a>
+      <a href="https://avilx.com">avilx.com</a>
+      <a href="capability-statement.md">Capability statement</a>
+      <a href="avilx-one-pager.md">One-pager</a>
+      <a href="outreach-templates/email-templates.md">Email templates</a>
+    </div>
+    <div>© 2026 Avilx · Vietnam LLC · Build with us. Globally.</div>
+  </div>
+</footer>
+
+</body>
+</html>

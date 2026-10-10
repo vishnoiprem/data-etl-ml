@@ -3,19 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vishnoi Soft — Vietnam AI & Data Engineering Team</title>
-<meta name="description" content="Vietnam-based AI and data engineering team. 6-20 senior engineers delivering RAG, agents, MLOps, Snowflake, Databricks, and full-stack AI products for US/EU startups.">
+<title>Avilx — Global Build · Deploy · Engineers (AI · Data · ML · Cloud · Databricks · AWS · Azure · Tencent · Alibaba)</title>
+<meta name="description" content="Avilx — Vietnam-based Build · Deploy · Engineers partner. Senior-only, vetted engineering pods shipping AI, data, ML, cloud, and e-commerce systems for global clients. 7+ clouds: AWS, Azure, GCP, Tencent, Alibaba, Huawei, Oracle. Databricks Champion team. China + APAC + US + EU delivery.">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; }
   .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
   header { background: linear-gradient(135deg, #0a1929 0%, #1e3a5f 100%); color: #fff; padding: 80px 0 60px; }
   header h1 { font-size: 48px; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.02em; }
-  header p.lead { font-size: 22px; opacity: 0.9; max-width: 720px; }
+  header h1 .accent { color: #4ade80; }
+  header p.lead { font-size: 22px; opacity: 0.9; max-width: 760px; }
   .badges { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
   .badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 500; }
+  .badge.primary { background: #4ade80; color: #0a1929; border-color: #4ade80; }
   section { padding: 80px 0; }
-  section h2 { font-size: 36px; margin-bottom: 32px; font-weight: 700; }
+  section h2 { font-size: 36px; margin-bottom: 16px; font-weight: 700; }
+  section .section-lead { font-size: 18px; color: #4b5563; max-width: 720px; margin-bottom: 40px; }
+  .three-up { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+  .pillar { background: #f8f9fb; border: 1px solid #e5e7eb; padding: 32px; border-radius: 12px; position: relative; }
+  .pillar .num { font-size: 14px; font-weight: 700; color: #4ade80; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .pillar h3 { font-size: 24px; margin-bottom: 12px; color: #0a1929; }
+  .pillar .stack { font-family: ui-monospace, monospace; font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+  .pillar p { color: #4b5563; }
   .services { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
   .service { background: #f8f9fb; border: 1px solid #e5e7eb; padding: 28px; border-radius: 12px; }
   .service h3 { font-size: 20px; margin-bottom: 8px; color: #0a1929; }
@@ -23,7 +32,7 @@
   .service p { color: #4b5563; }
   .stats { background: #0a1929; color: #fff; padding: 60px 0; }
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 32px; text-align: center; }
-  .stat-num { font-size: 48px; font-weight: 800; color: #4ade80; }
+  .stat-num { font-size: 44px; font-weight: 800; color: #4ade80; }
   .stat-label { font-size: 14px; opacity: 0.8; margin-top: 4px; }
   .why { background: #f8f9fb; }
   .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 32px; }
@@ -37,17 +46,24 @@
   .case .meta span { background: #f3f4f6; padding: 4px 10px; border-radius: 6px; }
   .case h3 { font-size: 20px; margin-bottom: 8px; }
   .case .result { color: #059669; font-weight: 600; margin-top: 12px; }
+  .clouds { background: #fff; }
+  .clouds-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 32px; }
+  .cloud { background: #f8f9fb; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; text-align: center; font-weight: 600; color: #0a1929; font-size: 15px; }
   .contact { background: linear-gradient(135deg, #0a1929 0%, #1e3a5f 100%); color: #fff; text-align: center; }
   .contact h2 { color: #fff; }
   .contact p { font-size: 18px; opacity: 0.9; margin-bottom: 32px; }
   .cta { display: inline-block; background: #4ade80; color: #0a1929; padding: 16px 32px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 18px; transition: transform 0.2s; }
   .cta:hover { transform: translateY(-2px); }
-  .contact-details { margin-top: 40px; display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; font-size: 15px; opacity: 0.85; }
-  footer { text-align: center; padding: 32px 0; color: #6b7280; font-size: 14px; }
+  .cta.secondary { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); margin-left: 12px; }
+  .contact-channels { margin-top: 40px; display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; font-size: 15px; opacity: 0.9; }
+  .contact-channels a { color: #fff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; transition: background 0.2s; }
+  .contact-channels a:hover { background: rgba(255,255,255,0.1); }
+  footer { text-align: center; padding: 32px 0; color: #6b7280; font-size: 14px; background: #f8f9fb; }
   @media (max-width: 600px) {
     header h1 { font-size: 32px; }
     header p.lead { font-size: 18px; }
     section h2 { font-size: 28px; }
+    .cta.secondary { margin-left: 0; margin-top: 12px; }
   }
 </style>
 </head>
@@ -55,16 +71,46 @@
 
 <header>
   <div class="container">
-    <h1>Vietnam AI & Data Engineering Team</h1>
-    <p class="lead">We staff remote engineering pods — 6-20 senior engineers delivering production AI, agents, RAG, MLOps, Snowflake, and Databricks systems for US & EU startups.</p>
+    <h1>Avilx — <span class="accent">Global Build · Deploy · Engineers</span></h1>
+    <p class="lead">Vietnam-headquartered, globally delivered. AI · Data · ML · Cloud systems across <strong>AWS · Azure · GCP · Tencent · Alibaba · Huawei · Oracle</strong> for clients in China, APAC, US, EU. Senior-only, vetted, no recruiters. <strong>Databricks</strong> Champion team.</p>
     <div class="badges">
-      <span class="badge">🌏 Remote — APAC delivery</span>
+      <span class="badge primary">🌐 Global delivery — China + APAC + US + EU</span>
+      <span class="badge">🤖 AI · LLM · RAG · Agents</span>
+      <span class="badge">📊 Data · ML · Lakehouse · Databricks</span>
+      <span class="badge">🛒 E-commerce · retail · marketplace</span>
+      <span class="badge">☁️ 7+ clouds (AWS · Azure · Tencent · Alibaba · GCP · Huawei · Oracle)</span>
+      <span class="badge">🏦 Banking · fintech · HIPAA regulated</span>
       <span class="badge">⚡ 2-week ramp</span>
-      <span class="badge">💰 Vietnam rate, US quality</span>
-      <span class="badge">📜 Vietnam LLC + Payoneer</span>
     </div>
   </div>
 </header>
+
+<section>
+  <div class="container">
+    <h2>Three things, one partner</h2>
+    <p class="section-lead">Most agencies pick one — body shops, consultancies, or recruiting. Avilx does all three under one contract, one PM, one invoice. You choose the model that fits.</p>
+    <div class="three-up">
+      <div class="pillar">
+        <div class="num">01 · BUILD</div>
+        <h3>We ship the system</h3>
+        <div class="stack">Data · AI · ML · Apps</div>
+        <p>End-to-end delivery of data platforms, AI/LLM/RAG systems, ML pipelines, and full-stack applications. You own the repo, the docs, the runbooks. We hand over clean and exit.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">02 · DEPLOY</div>
+        <h3>We run what we build</h3>
+        <div class="stack">IaC · Security · Ops · Cost</div>
+        <p>Cloud architecture, infrastructure-as-code, security & compliance, observability, cost optimization across 7+ clouds. SOC 2 readiness, HIPAA-aware, regulated-environment work.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">03 · ENGINEERS</div>
+        <h3>We supply senior people</h3>
+        <div class="stack">8+ yrs · vetted · async-first</div>
+        <p>Senior individual contributors and pods. Senior-only, vetted (not recruiters), 8+ years experience minimum. Pod, staff aug, or principal/architect seats.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section>
   <div class="container">
@@ -72,7 +118,7 @@
     <div class="services">
       <div class="service">
         <h3>AI / LLM Engineering</h3>
-        <div class="stack">Python · LangChain · LlamaIndex · RAG · Agents · Evals</div>
+        <div class="stack">Python · LangChain · LangGraph · LlamaIndex · RAG · Agents · Evals</div>
         <p>Production LLM features — RAG pipelines, agent systems, fine-tuning, eval harnesses. Ship to real users in weeks, not quarters.</p>
       </div>
       <div class="service">
@@ -81,24 +127,34 @@
         <p>Training pipelines, model serving, monitoring, eval rigs. We treat the ML platform as a product — measured, observable, adopted.</p>
       </div>
       <div class="service">
-        <h3>Data Engineering</h3>
-        <div class="stack">Snowflake · Databricks · dbt · Airflow · Spark · Glue</div>
-        <p>Modern data stack from ingestion to BI. dbt models, ELT pipelines, reverse-ETL, observability — async-first delivery.</p>
+        <h3>Data Engineering &amp; Lakehouse</h3>
+        <div class="stack">Databricks · Snowflake · dbt · Airflow · Spark · Kafka · Iceberg · Delta</div>
+        <p>Modern data stack from ingestion to BI. <strong>Databricks Champion team</strong> — dbt models, ELT pipelines, reverse-ETL, observability. Async-first delivery, regulated-environment experience, US/EU/China/SEA.</p>
+      </div>
+      <div class="service">
+        <h3>ML &amp; ML Platform</h3>
+        <div class="stack">MLflow · Kubeflow · SageMaker · Databricks ML · Triton · PyTorch</div>
+        <p>Training pipelines, model serving, monitoring, eval rigs. We treat the ML platform as a product — measured, observable, adopted. Production deployments on AWS, Azure, Databricks, and Alibaba PAI.</p>
+      </div>
+      <div class="service">
+        <h3>Streaming &amp; CDC</h3>
+        <div class="stack">Kafka · Debezium · Kinesis · Pub/Sub · Striim</div>
+        <p>Real-time replication, event-driven architectures, CDC pipelines into lakehouses. Sub-minute SLAs in production at a top-10 US bank.</p>
+      </div>
+      <div class="service">
+        <h3>Multi-Cloud Architecture</h3>
+        <div class="stack">AWS · Azure · GCP · Tencent · Alibaba · Huawei</div>
+        <p>Architect-level design across 7+ clouds. China data residency (Alibaba/Tencent), APAC latency (Singapore/HK/Tokyo), US/EU production. Reference architectures, cost optimization, security review, hybrid cloud.</p>
       </div>
       <div class="service">
         <h3>Full-Stack Product</h3>
-        <div class="stack">React · TypeScript · Python · FastAPI · Node · AWS</div>
-        <p>Ship the AI feature end-to-end — frontend, backend, infra. We've shipped 50+ production apps; we know what "done" looks like.</p>
+        <div class="stack">React · TypeScript · Python · FastAPI · Node · AWS · Alibaba</div>
+        <p>Ship the AI feature end-to-end — frontend, backend, infra. 50+ production apps shipped across AWS, Azure, Alibaba, and Tencent; we know what "done" looks like in each region.</p>
       </div>
       <div class="service">
-        <h3>Data Analysis & BI</h3>
-        <div class="stack">SQL · Looker · Tableau · Power BI · Mode</div>
-        <p>Embedded analysts who build dashboards, define metrics, and answer business questions. 1-week ramp to first deliverable.</p>
-      </div>
-      <div class="service">
-        <h3>Data & Cloud Architecture</h3>
-        <div class="stack">AWS · Lake Formation · Redshift · S3 · Terraform</div>
-        <p>Architect-level design for data platforms and AI infra. Reference architectures, cost optimization, security review.</p>
+        <h3>E-commerce &amp; Retail</h3>
+        <div class="stack">Shopify · Salesforce Commerce · custom React/Next.js · payment gateways · CDN · search</div>
+        <p>D2C stores, marketplaces, B2B commerce, cross-border. Conversion-focused storefronts, payment integration (Stripe · Adyen · Alipay · WeChat Pay), fulfillment automation, CDP/CRM wiring. Built for APAC + global reach.</p>
       </div>
     </div>
   </div>
@@ -107,38 +163,71 @@
 <section class="stats">
   <div class="container">
     <div class="stats-grid">
-      <div><div class="stat-num">6-20</div><div class="stat-label">W-2 senior engineers</div></div>
+      <div><div class="stat-num">6-20</div><div class="stat-label">senior engineers</div></div>
+      <div><div class="stat-num">15+</div><div class="stat-label">yrs senior experience</div></div>
+      <div><div class="stat-num">7+</div><div class="stat-label">clouds covered</div></div>
       <div><div class="stat-num">2 wk</div><div class="stat-label">avg. ramp to first commit</div></div>
-      <div><div class="stat-num">$40-70</div><div class="stat-label">/hr blended rate</div></div>
-      <div><div class="stat-num">12+</div><div class="stat-label">production RAG/agent systems</div></div>
-      <div><div class="stat-num">24/7</div><div class="stat-label">async delivery</div></div>
+      <div><div class="stat-num">$40-70</div><div class="stat-label">/hr blended pod rate</div></div>
+      <div><div class="stat-num">$120-180</div><div class="stat-label">/hr principal/architect</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="clouds">
+  <div class="container">
+    <h2>7+ clouds, one team</h2>
+    <p class="section-lead">Most Western AI/data pods only know AWS. Avilx is APAC-native — we work across the full cloud stack including Alibaba and Tencent for the region.</p>
+    <div class="clouds-grid">
+      <div class="cloud">AWS</div>
+      <div class="cloud">Azure</div>
+      <div class="cloud">GCP</div>
+      <div class="cloud">Tencent Cloud</div>
+      <div class="cloud">Alibaba Cloud</div>
+      <div class="cloud">Huawei Cloud</div>
+      <div class="cloud">Oracle</div>
+      <div class="cloud">IBM</div>
     </div>
   </div>
 </section>
 
 <section class="why">
   <div class="container">
-    <h2>Why Vietnam-based</h2>
+    <h2>Why Avilx</h2>
     <div class="why-grid">
       <div class="why-item">
+        <div class="icon">🎯</div>
+        <h4>Senior-only, vetted</h4>
+        <p>8+ years experience minimum. Technical phone screen + take-home before you see a resume. No recruiters, no bench warmers, no juniors wearing senior hats.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">☁️</div>
+        <h4>7+ clouds, China + APAC + global</h4>
+        <p>AWS, Azure, GCP, plus <strong>Tencent Cloud · Alibaba Cloud · Huawei Cloud</strong>. We hold real production experience in China data-residency environments — rare in Western shops and a fit for clients serving mainland China + APAC.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">🤖</div>
+        <h4>AI-first, Databricks-strong</h4>
+        <p>AI/LLM/RAG/agents is core, not a side offering. <strong>Databricks Champion team</strong> for lakehouse + ML platform. Snowflake, dbt, Kafka, Iceberg production-ready across all 7+ clouds.</p>
+      </div>
+      <div class="why-item">
+        <div class="icon">🏦</div>
+        <h4>Regulated experience</h4>
+        <p>Top-10 US bank (real-time CDC lakehouse), fintech (KYC agents), HIPAA-aware healthtech. NDA + IP + code escrow standard.</p>
+      </div>
+      <div class="why-item">
         <div class="icon">💸</div>
-        <h4>60-80% of US rates</h4>
-        <p>Same quality, lower cost. Senior engineers at $40-70/hr vs $90-150/hr in the US. Pass the savings on or reinvest in your runway.</p>
+        <h4>Vietnam rate, US quality</h4>
+        <p>Senior engineers at $40-70/hr blended (vs $90-150/hr in the US). Principal at $120-180/hr (vs $200+/hr). Pass the savings or reinvest in runway.</p>
       </div>
       <div class="why-item">
         <div class="icon">🌏</div>
         <h4>APAC timezone sweet spot</h4>
-        <p>Overlap with US Pacific mornings + EU afternoons + full APAC. Async-first delivery means work happens while you sleep.</p>
-      </div>
-      <div class="why-item">
-        <div class="icon">🎓</div>
-        <h4>Strong technical base</h4>
-        <p>Vietnam's top engineering grads are world-class. We hire senior, vet hard, and pay above market to keep them.</p>
+        <p>Vietnam (UTC+7) overlaps US Pacific mornings, EU afternoons, full APAC. Async-first delivery means work happens while you sleep.</p>
       </div>
       <div class="why-item">
         <div class="icon">📜</div>
         <h4>Clean legal entity</h4>
-        <p>Vietnam LLC + Payoneer. USD/EUR invoicing. IP assignment contracts. NDAs. No tax surprises.</p>
+        <p>Vietnam LLC. USD/EUR invoicing via Payoneer/Wise/wire. IP assignment contracts. NDAs. No tax surprises. You own the code, always.</p>
       </div>
     </div>
   </div>
@@ -150,18 +239,42 @@
     <div class="cases">
       <div class="case">
         <div class="meta">
-          <span>RAG</span><span>LangChain</span><span>PostgreSQL</span><span>Series A healthtech</span>
+          <span>Banking</span><span>Databricks</span><span>Kafka</span><span>Iceberg</span><span>Top-10 US bank</span>
+        </div>
+        <h3>Real-time CDC lakehouse</h3>
+        <p>14-week build. 2 architects + 4 engineers. Sub-minute replication SLA, 99.95% pipeline reliability over 6 months post-launch.</p>
+        <div class="result">Result: Live in production at a top-10 US bank</div>
+      </div>
+      <div class="case">
+        <div class="meta">
+          <span>RAG</span><span>LangChain</span><span>PostgreSQL</span><span>HIPAA</span><span>Series A healthtech</span>
         </div>
         <h3>Clinical Q&A assistant for 12,000+ providers</h3>
-        <p>Built a HIPAA-aware RAG system over 2M medical documents. Eval rig with 1,200 hand-labeled cases. Replaced a $400K/yr vendor.</p>
+        <p>HIPAA-aware RAG system over 2M medical documents. Eval rig with 1,200 hand-labeled cases. Replaced a $400K/yr vendor.</p>
         <div class="result">Result: 38% reduction in support tickets, 4.7/5 user satisfaction</div>
+      </div>
+      <div class="case">
+        <div class="meta">
+          <span>E-commerce</span><span>Next.js</span><span>Stripe</span><span>Salesforce</span><span>Series C D2C</span>
+        </div>
+        <h3>Headless commerce platform rebuild</h3>
+        <p>Next.js + Salesforce Commerce Cloud + Stripe + Algolia search. Mobile-first, 14-country support, Alipay + WeChat Pay integrated. 5-week build, 2 full-stack + 1 platform engineer.</p>
+        <div class="result">Result: +28% mobile conversion, 99.95% uptime, $8M GMV run rate</div>
+      </div>
+      <div class="case">
+        <div class="meta">
+          <span>Marketplace</span><span>Databricks</span><span>React</span><span>Aliyun</span><span>Cross-border SEA</span>
+        </div>
+        <h3>SEA marketplace data + personalization</h3>
+        <p>Databricks lakehouse on Alibaba Cloud for SEA marketplace. Real-time recommendations, CDP wiring, Klaviyo + Braze integration. 4 engineers, 10 weeks.</p>
+        <div class="result">Result: +19% repeat purchase rate, 12% lift in AOV via personalization</div>
       </div>
       <div class="case">
         <div class="meta">
           <span>Agents</span><span>LangGraph</span><span>OpenAI</span><span>Series B fintech</span>
         </div>
         <h3>Multi-agent KYC review system</h3>
-        <p>5-agent pipeline for KYC document review. Reduced manual review from 18 minutes to 90 seconds per case.</p>
+        <p>5-agent pipeline for KYC document review. Human-in-the-loop fallback. Reduced manual review from 18 minutes to 90 seconds per case.</p>
         <div class="result">Result: 92% time savings, 99.1% accuracy vs 87% human baseline</div>
       </div>
       <div class="case">
@@ -178,21 +291,23 @@
 
 <section class="contact">
   <div class="container">
-    <h2>Need an engineer or a pod?</h2>
-    <p>Whoever in your network needs AI/data engineering capacity — I'd love to support. Drop me a line.</p>
-    <a href="mailto:hello@vishnoisoft.com?subject=Engineer placement inquiry" class="cta">Get in touch</a>
-    <div class="contact-details">
-      <span>📧 hello@vishnoisoft.com</span>
-      <span>🌐 vishnoisoft.com</span>
-      <span>📍 Ho Chi Minh City, Vietnam</span>
-      <span>🐦 @vishnoiprem</span>
+    <h2>Need an engineer, a pod, or a partner?</h2>
+    <p>Whoever in your network needs AI/data/cloud capacity — I'd love to support. Free 30-min scoping call, no pitch deck.</p>
+    <a href="mailto:hello@avilx.com?subject=Avilx%20scoping%20call" class="cta">Book a scoping call</a>
+    <a href="capability-statement.md" class="cta secondary">Download capability statement</a>
+    <div class="contact-channels">
+      <a href="mailto:hello@avilx.com">📧 hello@avilx.com</a>
+      <a href="tel:+6592716405">📱 +6592716405</a>
+      <a href="https://wa.me/6592716405">💬 WhatsApp me</a>
+      <a href="https://x.com/vishnoiprem">🐦 @vishnoiprem</a>
     </div>
+    <p style="margin-top: 32px; font-size: 14px; opacity: 0.7;">📍 Ha Noi, Vietnam · Global delivery to China + APAC + US + EU · Vietnam LLC · USD/EUR/CNY invoicing</p>
   </div>
 </section>
 
 <footer>
   <div class="container">
-    <p>© 2026 Vishnoi Soft · Vietnam LLC · Built by engineers, for engineers</p>
+    <p>© 2026 Avilx · Vietnam LLC · Build with us.</p>
   </div>
 </footer>
 
