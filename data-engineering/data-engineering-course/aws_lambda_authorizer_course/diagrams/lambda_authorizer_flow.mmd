@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant C as Client
+    participant GW as API Gateway
+    participant A as Authorizer Lambda
+    participant B as Backend Lambda
+
+    C->>GW: HTTPS request<br/>Authorization: Bearer eyJ…
+    GW->>GW: TLS termination<br/>Route resolution
+
+    Note over GW: Method has Lambda Authorizer attached
+
+    GW->>A: invoke(event)<br/>{type: "TOKEN",<br/> authorizationToken,<br/> methodArn}
+    activate A
+    A->>A: validate token (iss, aud, exp, sig)
+    A-->>GW: {principalId, policyDocument, context}
+    deactivate A
+
+    alt Effect: Allow
+        GW->>B: invoke(integration)<br/>+ X-Amzn-Apigateway-Authorizer-* headers<br/>+ event.requestContext.authorizer
+        activate B
+        B-->>GW: 200 / 4xx / 5xx
+        deactivate B
+        GW-->>C: HTTP response
+    else Effect: Deny
+        GW-->>C: 403 Forbidden
+    end
+
+    Note over A,GW: For ReauthorizeEvery > 0, the Allow policy<br/>is cached per (methodArn) so subsequent<br/>requests within the TTL skip A entirely.

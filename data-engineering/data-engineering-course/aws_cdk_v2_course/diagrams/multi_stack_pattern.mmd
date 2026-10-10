@@ -1,0 +1,37 @@
+%%{init: {"flowchart": {"htmlLabels": true, "curve": "linear"}}}%%
+flowchart LR
+    subgraph Dev["Stage: dev"]
+        DevNet["NetworkStack-dev<br/>VPC, subnets, IGW"]
+        DevApp["AppStack-dev<br/>Lambda, API Gateway"]
+    end
+
+    subgraph Prod["Stage: prod"]
+        ProdNet["NetworkStack-prod<br/>VPC, subnets, IGW"]
+        ProdApp["AppStack-prod<br/>Lambda, API Gateway"]
+    end
+
+    subgraph Shared["Shared VPC construct (passed by ref)"]
+        VpcDev["ec2.Vpc (dev)"]
+        VpcProd["ec2.Vpc (prod)"]
+    end
+
+    DevNet -.creates.-> VpcDev
+    DevApp -.consumes.-> VpcDev
+    ProdNet -.creates.-> VpcProd
+    ProdApp -.consumes.-> VpcProd
+
+    DevNet -.exports.-> OutDev["CfnOutput: VpcId (dev)"]
+    OutDev -.imported by.-> DevApp
+
+    ProdNet -.exports.-> OutProd["CfnOutput: VpcId (prod)"]
+    OutProd -.imported by.-> ProdApp
+
+    classDef net fill:#dae8fc,stroke:#6c8ebf;
+    classDef app fill:#d5e8d4,stroke:#82b366;
+    classDef out fill:#fff2cc,stroke:#d6b656;
+    classDef vpc fill:#ffe6cc,stroke:#d79b00;
+
+    class DevNet,ProdNet net;
+    class DevApp,ProdApp app;
+    class OutDev,OutProd out;
+    class VpcDev,VpcProd vpc;

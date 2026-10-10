@@ -1,0 +1,22 @@
+%% Diagram: EventBridge Pipes - Source -> Filter -> Enrichment -> Target
+%% Source lecture: AWS EventBridge Crash Course - Lecture: "EventBridge Pipes"
+%% Description:  Shows the four stages of an EventBridge Pipe with the source,
+%%               optional filter, optional enrichment, and target. In this
+%%               example an SQS queue is the source, a JSON event pattern acts
+%%               as the filter, a Lambda function enriches the payload, and
+%%               the result is written to an S3 bucket.
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+```mermaid
+graph LR
+    SRC[Stage 1: Source<br/>SQS Queue<br/>order-events]
+    F[Stage 2: Filter<br/>event pattern<br/>optional]
+    ENR[Stage 3: Enrichment<br/>Lambda<br/>addCustomerProfile<br/>optional]
+    TGT[Stage 4: Target<br/>S3 Bucket<br/>enriched-orders/]
+    OUT[(Enriched Event<br/>delivered to target)]
+
+    SRC --> F
+    F -->|match| ENR
+    F -->|drop| DROP[X Filtered Out]
+    ENR --> TGT
+    TGT --> OUT
+```

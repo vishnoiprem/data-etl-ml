@@ -1,0 +1,29 @@
+%% Diagram: Anatomy of an Amazon EventBridge Event
+%% Source lecture: AWS EventBridge Crash Course - Lecture: "Event Anatomy & Envelope"
+%% Description:  Shows the standard JSON event envelope fields (version, id, source,
+%%               detail-type, time, resources, region, account) plus a sample
+%%               "Order Placed" custom event payload in the detail field.
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+```mermaid
+graph TD
+    E[EventBridge Event Envelope<br/>JSON]
+    V["version: '0'"]
+    ID["id: 'uuid'"]
+    SRC["source: 'com.acme.orders'"]
+    DT["detail-type: 'Order Placed'"]
+    T["time: '2026-10-10T12:00:00Z'"]
+    RES["resources: ['order/123']"]
+    REG["region: 'us-east-1'"]
+    ACC["account: '111122223333'"]
+    D["detail: { orderId: 123, amount: 49.99, currency: 'USD' }"]
+
+    E --> V
+    E --> ID
+    E --> SRC
+    E --> DT
+    E --> T
+    E --> RES
+    E --> REG
+    E --> ACC
+    E --> D
+```

@@ -1,0 +1,23 @@
+# AWS CDK v2 — Crash Course — "requirements"
+#
+# IMPORTANT: AWS CDK v2 is JavaScript/TypeScript and is installed via npm,
+# not pip. The lines below are listed for parity with the other courses
+# in this repo (so `cat requirements.txt` always works), but the actual
+# install is per-project:
+#
+#     cd 02_app_stack_construct/code/hello-cdk
+#     npm install aws-cdk-lib@latest constructs@latest
+#
+# If you want a system-wide CDK CLI:
+#
+#     npm install -g aws-cdk
+#
+# Lines below are documentation-only and intentionally not pip-installable.
+
+aws-cdk-lib>=2.140.0        # npm: aws-cdk-lib
+constructs>=10.3.0          # npm: constructs
+@types/node>=20.0.0         # npm: @types/node
+typescript>=5.3.0           # npm: typescript
+jest>=29.7.0                # npm: jest
+ts-jest>=29.1.0             # npm: ts-jest
+@types/jest>=29.5.0         # npm: @types/jest

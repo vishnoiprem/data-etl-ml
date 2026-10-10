@@ -1,0 +1,4 @@
+# Code demo requirements — section 2
+pyjwt>=2.8.0
+cryptography>=42.0
+pytest>=8.0

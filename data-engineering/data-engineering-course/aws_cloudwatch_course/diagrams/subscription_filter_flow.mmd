@@ -1,0 +1,23 @@
+%% CloudWatch Logs subscription filter flow
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+sequenceDiagram
+    autonumber
+    participant App as Application<br/>(EC2 / Lambda / ECS)
+    participant CW as CloudWatch Logs<br/>Log Group
+    participant SF as Subscription Filter<br/>(filter pattern)
+    participant KDS as Kinesis Data Stream
+    participant KDF as Kinesis Data Firehose<br/>(optional)
+    participant Con as Consumer<br/>(Lambda / OpenSearch / S3)
+
+    App->>CW: PutLogEvents
+    Note over CW: 2 destinations max per<br/>log group
+
+    CW->>SF: Match each event against pattern
+    alt pattern matches
+        SF->>KDS: PutRecord
+        KDS-->>KDF: (optional) buffer / transform / batch
+        KDF->>Con: PutObject (S3) / Index (OpenSearch)
+        Con->>Con: process, enrich, alert, archive
+    else no match
+        SF-->>CW: drop / skip
+    end

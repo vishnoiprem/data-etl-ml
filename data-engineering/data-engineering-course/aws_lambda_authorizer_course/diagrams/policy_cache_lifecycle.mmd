@@ -1,0 +1,39 @@
+flowchart TD
+    Start([Request arrives<br/>at API Gateway]) --> BuildKey{Build cache key<br/>from IdentitySource}
+    BuildKey -->|user=alice, token=xyz| Lookup{API Gateway cache<br/>has policy for this key?}
+
+    Lookup -->|No — cache miss| Invoke[Invoke Authorizer Lambda]
+    Lookup -->|Yes — cache hit<br/>AND TTL > 0| UseCached[Reuse cached<br/>Allow / Deny policy]
+
+    Invoke --> Verify[Verify token<br/>iss, aud, exp, sig]
+    Verify -->|Valid| Allow[Return Allow policy<br/>for methodArn]
+    Verify -->|Invalid| Deny[Return Deny policy<br/>for methodArn]
+
+    Allow --> Store[API Gateway stores<br/>policy in cache<br/>for ReauthorizeEvery]
+    Deny --> Store
+
+    Store --> Forward[Forward to<br/>integration Lambda]
+    UseCached --> Forward
+
+    Forward --> End([Response returned<br/>to client])
+
+    %% Second request (within TTL)
+    subgraph Subsequent_Request [Subsequent request, same cache key, within TTL]
+        Start2([Request arrives]) --> Lookup2{Cache hit?}
+        Lookup2 -->|Yes| UseCached2[Reuse cached policy<br/>Authorizer is NOT invoked]
+        UseCached2 --> Forward2[Forward to integration]
+    end
+
+    %% Third request (after TTL)
+    subgraph Expired_Request [Request after ReauthorizeEvery elapsed]
+        Start3([Request arrives]) --> Lookup3{Cache hit?}
+        Lookup3 -->|TTL expired| Invoke2[Invoke Authorizer Lambda<br/>fresh validation]
+        Invoke2 --> Forward3[Forward to integration]
+    end
+
+    classDef cacheHit fill:#d4edda,stroke:#155724
+    classDef cacheMiss fill:#f8d7da,stroke:#721c24
+    classDef cached fill:#d1ecf1,stroke:#0c5460
+    class UseCached,UseCached2 cacheHit
+    class Invoke,Invoke2 cacheMiss
+    class Store,Lookup2,Lookup3 cached

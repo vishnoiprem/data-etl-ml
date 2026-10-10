@@ -1,0 +1,46 @@
+%% CloudWatch service anatomy
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+graph TD
+    CW[Amazon CloudWatch] --> Metrics
+    CW --> Logs
+    CW --> Alarms
+    CW --> Dashboards
+    CW --> Events["Events (EventBridge)"]
+    CW --> Insights["Logs Insights"]
+    CW --> Synthetics
+    CW --> RUM["Real-User Monitoring (RUM)"]
+
+    Metrics --> M1["Namespaces<br/>(AWS/EC2, AWS/Lambda, ...)"]
+    Metrics --> M2["Dimensions<br/>(key=value pairs)"]
+    Metrics --> M3["Statistics<br/>(avg, p99, sum, min, max)"]
+    Metrics --> M4["Standard 1-min vs<br/>High-Resolution 1-sec"]
+
+    Logs --> L1["Log Groups"]
+    Logs --> L2["Log Streams"]
+    Logs --> L3["Retention<br/>(Never, 1d, 7d, 30d, ...)"]
+    Logs --> L4["Metric Filters"]
+    Logs --> L5["Subscription Filters"]
+
+    Alarms --> A1["Metric Alarms<br/>(threshold, m-of-n)"]
+    Alarms --> A2["Composite Alarms<br/>(AND/OR over other alarms)"]
+    Alarms --> A3["Anomaly Detection<br/>(ML band)"]
+    Alarms --> A4["Actions: SNS / ASG / Lambda / EC2"]
+
+    Dashboards --> D1["Widget grid (24 cols)"]
+    Dashboards --> D2["Types: metric / log / text / number"]
+    Dashboards --> D3["Cross-region / cross-account"]
+
+    Events --> E1["Scheduled rules<br/>(cron, rate)"]
+    Events --> E2["Event pattern rules<br/>(e.g. EC2 state change)"]
+
+    Insights --> I1["fields / filter / stats / parse"]
+    Insights --> I2["bin(5m), percentile, diff()"]
+
+    Synthetics --> S1["Canaries<br/>(heartbeat URLs)"]
+    RUM --> R1["Web & mobile<br/>performance telemetry"]
+
+    classDef root fill:#ff9900,stroke:#232f3e,color:#fff,font-weight:bold
+    classDef branch fill:#232f3e,stroke:#ff9900,color:#fff
+    classDef leaf fill:#f0f0f0,stroke:#232f3e,color:#232f3e
+    class CW root
+    class Metrics,Logs,Alarms,Dashboards,Events,Insights,Synthetics,RUM branch

@@ -1,0 +1,26 @@
+%% Diagram: EventBridge Archive & Replay - Sequence Flow
+%% Source lecture: AWS EventBridge Crash Course - Lecture: "Archives & Replay"
+%% Description:  Sequence diagram showing how events flow from a source to the
+%%               default event bus, are continuously captured by an Archive,
+%%               and later replayed by an Operator over a time range into a
+%%               new target (e.g., a Lambda function for reprocessing).
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+```mermaid
+sequenceDiagram
+    participant SRC as Event Source
+    participant BUS as Default Event Bus
+    participant ARCH as EventBridge Archive
+    participant OP as Operator
+    participant REPLAY as Replay
+    participant TGT as Target<br/>Lambda
+
+    Note over BUS,ARCH: All matching events are continuously archived
+    SRC->>BUS: 1. Publish event (Order Placed)
+    BUS-->>ARCH: 2. Archive ingests event
+
+    Note over OP,REPLAY: Later, operator initiates a replay
+    OP->>REPLAY: 3. StartReplay(start=09:00, end=10:00)
+    REPLAY->>TGT: 4. Re-deliver archived events
+    TGT-->>REPLAY: ack
+    REPLAY-->>OP: Replay complete
+```

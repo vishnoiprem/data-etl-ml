@@ -1,0 +1,28 @@
+%% Diagram: Event Source -> Event Bus -> Rule (event pattern) -> Target
+%% Source lecture: AWS EventBridge Crash Course - Lecture: "Rules, Event Patterns & Targets"
+%% Description:  A single "Order Placed" event is emitted to the default event bus
+%%               and filtered by two rules with different event patterns, fanning
+%%               out to a Lambda function and an SQS queue (with SNS/Step Functions
+%%               shown as additional target options).
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+```mermaid
+graph LR
+    SRC[Event Source<br/>EC2 / S3 / Schedule / Custom App]
+    EB[Default Event Bus<br/>aws events]
+    EVT[Event<br/>source = com.acme.orders<br/>detail-type = Order Placed]
+    R1[Rule 1<br/>detail-type = Order Placed]
+    R2[Rule 2<br/>detail.total > 100]
+    T1[Target: Lambda<br/>processOrder]
+    T2[Target: SQS<br/>high-value-orders]
+    OPT1[Target: SNS Topic]
+    OPT2[Target: Step Functions]
+
+    SRC --> EB
+    EB --> EVT
+    EVT --> R1
+    EVT --> R2
+    R1 --> T1
+    R1 --> OPT1
+    R2 --> T2
+    R2 --> OPT2
+```

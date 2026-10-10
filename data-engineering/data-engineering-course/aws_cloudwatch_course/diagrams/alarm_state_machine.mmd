@@ -1,0 +1,35 @@
+%% CloudWatch alarm state machine
+%% Author: Prem Vishnoi <prem.vishnoi@example.com>
+stateDiagram-v2
+    [*] --> INSUFFICIENT_DATA : alarm created
+    INSUFFICIENT_DATA --> OK : first valid<br/>datapoint below threshold
+    INSUFFICIENT_DATA --> ALARM : first valid<br/>datapoint at/above threshold
+    INSUFFICIENT_DATA --> INSUFFICIENT_DATA : no datapoints<br/>(period elapsed)
+
+    OK --> ALARM : m-of-n datapoints<br/>breach threshold
+    ALARM --> OK : m-of-n datapoints<br/>back below threshold
+
+    OK --> INSUFFICIENT_DATA : datapoint(s) missing<br/>(treat as missing)
+    ALARM --> INSUFFICIENT_DATA : datapoint(s) missing
+    INSUFFICIENT_DATA --> INSUFFICIENT_DATA : extended outage
+
+    ALARM --> OK : manual reset (set-state)
+    OK --> ALARM : manual reset (set-state)
+
+    note right of OK
+        Metric is healthy.
+        No actions fire.
+    end note
+
+    note right of ALARM
+        Threshold breach.
+        AlarmActions fire
+        (SNS, ASG, Lambda).
+    end note
+
+    note right of INSUFFICIENT_DATA
+        No datapoints OR
+        not enough datapoints
+        to evaluate the
+        m-of-n rule.
+    end note
