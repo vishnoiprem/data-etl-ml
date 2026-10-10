@@ -21,7 +21,9 @@ A senior FDE portfolio (PacificFreight drafter, MCP tools, multi-agent, SLM, mul
 
 ---
 
-## The 8 interview rounds (and the Phase 6 module that preps each)
+## The 11 modules (file layout)
+
+The 8 rounds + 3 cross-cutting modules = 11 total.
 
 | # | Round | What they test | Phase 6 module | Phase 1-5 artifact that backs it up |
 |---|---|---|---|---|
@@ -33,8 +35,11 @@ A senior FDE portfolio (PacificFreight drafter, MCP tools, multi-agent, SLM, mul
 | 6 | **Take-home assignment** | 4-8 hour build + 1-hour presentation | `take-home/` | The Phase 4 P1 MCP server (the pattern) |
 | 7 | **System design** | "Design a read-heavy system / event-driven / async / etc." | `system-design/` | The Phase 4 + Phase 5 architecture docs |
 | 8 | **Generative AI interviews** | "How do LLMs work in production? Where do they fail?" | `generative-ai/` | The Phase 4 P3 SLM + the Phase 4 P4 sandbox |
+| 9 | **SWE coding** (classic LeetCode) | "Reverse a linked list / group anagrams / etc." | `swe-coding/` | The 8 SWE patterns + the 4 anti-patterns |
+| 10 | **Customer simulation** (highest-signal) | "Your deployment slipped 3 weeks. I am the customer. Tell me." | `customer-simulation/` | Engagement 8 (cost ceiling breach) + Engagement 2 (the pivot) |
+| 11 | **Real interview experiences** | "What did the loop actually look like at OpenAI / Palantir / AWS?" | `company-experiences/` | 8 real reports + the 8 signature round → company matrix |
 
-**SWE coding** (the 9th module) is bundled with `practical-coding/` — same prep, different framing.
+**The 11 modules map to 11 interview round types.** The 8 rounds are the standard; the 3 cross-cutting modules (9, 10, 11) are the modules that compound across all 8.
 
 ---
 
@@ -51,7 +56,7 @@ phase-6-interview-prep/
 │   ├── 03-design.md                             ← API contracts, data model, scale
 │   └── 04-tradeoffs.md                         ← 3+ tradeoffs, not 1
 ├── behavioral/                                  ← Module 4: customer-facing questions
-│   ├── README.md                                ← the 3 question types
+│   ├── README.md                                ← the 3 question types + STAR format
 │   ├── 01-customer-interaction.md              ← "tell me about a difficult customer"
 │   ├── 02-disagreement.md                      ← "tell me about a time you disagreed"
 │   ├── 03-ambiguity.md                         ← "tell me about a time the spec was unclear"
@@ -64,7 +69,7 @@ phase-6-interview-prep/
 │   ├── 01-prototype.md                          ← OpenAI-style semantic search
 │   ├── 02-pipeline.md                           ← Labelbox-style RLHF pipeline
 │   └── 03-presentation.md                       ← how to present the take-home
-├── system-design/                               ← Module 7: the 8 patterns
+├── system-design/                               ← Module 7: the 9 patterns
 │   ├── README.md                                ← the 4-step system design framework
 │   ├── 01-read-heavy.md                         ← Phase 5 P4 read replica
 │   ├── 02-event-driven.md                       ← Phase 4 webhook + Phase 5 Redis pub/sub
@@ -80,6 +85,18 @@ phase-6-interview-prep/
 │   ├── 01-build-new-project.md                  ← greenfield AI-assisted build
 │   ├── 02-extend-codebase.md                    ← add a feature to a new codebase
 │   └── 03-debug.md                              ← find the bug in 30 min
+├── customer-simulation/                         ← Module 10: the highest-signal round
+│   └── README.md                                ← 5 scenarios, 12 Q&A, 5 anti-patterns
+├── company-experiences/                         ← Module 11: real interview reports
+│   ├── README.md                                ← 8 reports + signature round matrix
+│   ├── openai-semantic-search.md
+│   ├── palantir-fde-decomposition.md
+│   ├── langchain-deployed-engineer.md
+│   ├── anthropic-fde-customer-simulation.md
+│   ├── aws-fde-customer-simulation.md
+│   ├── sierra-ai-agent-engineer.md
+│   ├── databricks-ai-fde.md
+│   └── scale-ai-fde.md
 ├── swe-coding/                                  ← Module 9: classic SWE prep
 │   ├── README.md                                ← the 8 patterns
 │   ├── 01-arrays.md
@@ -93,7 +110,11 @@ phase-6-interview-prep/
     ├── 01-llm-fundamentals.md                   ← transformer, attention, decoding
     ├── 02-rag-patterns.md                       ← Phase 2 RAG + Phase 4 P3 SLM
     ├── 03-production-deployment.md              ← Phase 5 P1-4
-    └── 04-eval-and-safety.md                    ← Phase 4 eval set + Phase 5 P3 sandbox
+    ├── 04-eval-and-safety.md                    ← Phase 4 eval set + Phase 5 P3 sandbox
+    └── companion-courses/                       ← Phase 6 GenAI depth courses
+        ├── README.md
+        ├── ed-donner-ai-engineer-core-track.md
+        └── intro-to-ai-agents.md
 ```
 
 ---
