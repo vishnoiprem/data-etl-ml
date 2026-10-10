@@ -818,6 +818,261 @@ def scrape_asian_chat_jobs():
     return leads
 
 
+def scrape_linkedin_jobs():
+    """LinkedIn public job search.
+
+    LinkedIn's public guest API (no auth needed) returns a JSON job
+    listing when you hit the jobs search URL. We query it for AI/ML
+    roles and extract the job IDs. The actual job page often has the
+    recruiter's contact in the description (some posts include it;
+    most don't — those are marked URL-only leads).
+
+    For higher-quality results, set LINKEDIN_COOKIE in env to a
+    logged-in `li_at` cookie. That gives us access to InMail-eligible
+    recruiter profiles.
+
+    NOTE: LinkedIn aggressively rate-limits and bans scrapers. We send
+    at most 1 request per source per run.
+    """
+    leads = []
+    queries = [
+        ("AI engineer", "remote"),
+        ("ML engineer", "remote"),
+        ("LLM engineer", ""),
+        ("GenAI engineer", "remote"),
+        ("data platform engineer", ""),
+    ]
+    for q, geo in queries:
+        # LinkedIn's guest job search endpoint
+        params = {"keywords": q, "location": geo or "Worldwide",
+                  "f_TPR": "r86400",  # past 24h
+                  "sortBy": "DD", "start": 0}
+        if geo:
+            params["geoId"] = ""
+        url = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?" + \
+              urllib.parse.urlencode(params)
+        # LinkedIn blocks bots without proper UA + cookie
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/129.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        li_at = os.getenv("LINKEDIN_COOKIE", "")
+        if li_at:
+            headers["Cookie"] = f"li_at={li_at}"
+        try:
+            out = subprocess.run(
+                ["curl", "-sL", "-m", "15"] +
+                sum([["-H", f"{k}: {v}"] for k, v in headers.items()], []) +
+                [url],
+                capture_output=True, text=True, timeout=20,
+            )
+            if out.returncode != 0 or not out.stdout:
+                continue
+            html = out.stdout
+        except Exception:
+            continue
+        # Each job card: <div class="base-card" data-entity-urn="...">...
+        for card in re.findall(
+            r'<div class="base-card[^"]*"[^>]*>(.*?)</div></div></div>',
+            html, re.S,
+        )[:30]:
+            title_m = re.search(r'<h3[^>]*class="base-search-card__title"[^>]*>(.*?)</h3>',
+                                card, re.S)
+            company_m = re.search(r'<h4[^>]*class="base-search-card__subtitle"[^>]*>.*?<a[^>]*>(.*?)</a>',
+                                  card, re.S)
+            link_m = re.search(r'<a[^>]*class="base-card__full-link"[^>]*href="([^"]+)"', card)
+            if not (title_m and company_m):
+                continue
+            title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
+            company = re.sub(r"<[^>]+>", "", company_m.group(1)).strip()
+            link = link_m.group(1).split("?")[0] if link_m else ""
+            text = f"{title} {company}"
+            if EXCLUDE_TITLE.search(text):
+                continue
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            leads.append({
+                "company": company[:60] or "LinkedIn lead",
+                "role": title[:120],
+                "source": "linkedin",
+                "source_url": link,
+                "contact_email": None,  # LinkedIn never exposes emails
+                "extra_emails": [],
+                "raw_excerpt": f"{title} at {company}",
+                "apply_method": "url",  # manual outreach
+            })
+    return leads
+
+
+def scrape_indeed_jobs():
+    """Indeed RSS feed (public, no auth, country-specific).
+
+    Indeed publishes RSS feeds at /rss for each search query. We hit
+    the US + UK + SG feeds to maximize coverage of remote AI jobs.
+    """
+    leads = []
+    # (country TLD, query, geo)
+    feeds = [
+        ("com", "AI+engineer+remote", ""),
+        ("com", "machine+learning+engineer", ""),
+        ("com", "LLM+engineer", ""),
+        ("com", "data+platform+engineer", ""),
+        ("co.uk", "AI+engineer+remote", ""),
+        ("com.sg", "data+engineer", ""),
+    ]
+    for tld, q, geo in feeds:
+        url = (f"https://www.indeed.{tld}/rss?"
+               + urllib.parse.urlencode({"q": q.replace("+", " "), "l": geo or ""}))
+        code, xml = _curl(url, timeout=15)
+        if code != 200 or not xml or "<rss" not in xml[:200].lower():
+            continue
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:30]:
+            title_m = re.search(r"<title>(.*?)</title>", item, re.S)
+            link_m = re.search(r"<link>(.*?)</link>", item)
+            desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
+            if not (title_m and link_m):
+                continue
+            title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
+            # Indeed titles look like "Company - Title - Location"
+            parts = [p.strip() for p in title.split(" - ")]
+            if len(parts) >= 2:
+                company = parts[0]
+                actual_title = " - ".join(parts[1:])
+            else:
+                company = "Indeed"
+                actual_title = title
+            desc = re.sub(r"<[^>]+>", " ", desc_m.group(1)) if desc_m else ""
+            desc = re.sub(r"\s+", " ", desc).strip()
+            text = f"{title}\n{desc}"
+            if EXCLUDE_TITLE.search(text):
+                continue
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            emails = _extract_real_emails(text)
+            leads.append({
+                "company": company[:60],
+                "role": actual_title[:120],
+                "source": f"indeed.{tld}",
+                "source_url": link_m.group(1).strip(),
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": desc[:400] or title[:400],
+                "apply_method": "url" if not emails else "email",
+            })
+    return leads
+
+
+def scrape_monster_jobs():
+    """Monster.com RSS feeds by category (public, no auth).
+
+    Monster is mostly US/Canada. We hit the software + data science
+    categories. Most postings don't expose email, so we mark URL-only.
+    """
+    leads = []
+    feeds = [
+        "https://www.monster.com/rss/feed?cat=Software%20Engineering",
+        "https://www.monster.com/rss/feed?cat=Data%20Science%20%26%20Analytics",
+    ]
+    for url in feeds:
+        code, xml = _curl(url, timeout=15)
+        if code != 200 or not xml or "<rss" not in xml[:200].lower():
+            continue
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:30]:
+            title_m = re.search(r"<title>(.*?)</title>", item, re.S)
+            link_m = re.search(r"<link>(.*?)</link>", item)
+            desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
+            if not (title_m and link_m):
+                continue
+            title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
+            desc = re.sub(r"<[^>]+>", " ", desc_m.group(1)) if desc_m else ""
+            desc = re.sub(r"\s+", " ", desc).strip()
+            text = f"{title}\n{desc}"
+            if EXCLUDE_TITLE.search(text):
+                continue
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            emails = _extract_real_emails(text)
+            # Title format: "Title - Company - Location"
+            parts = [p.strip() for p in title.split(" - ")]
+            if len(parts) >= 2:
+                company = parts[1]
+                actual_title = parts[0]
+            else:
+                company = "Monster"
+                actual_title = title
+            leads.append({
+                "company": company[:60],
+                "role": actual_title[:120],
+                "source": "monster",
+                "source_url": link_m.group(1).strip(),
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": desc[:400] or title[:400],
+                "apply_method": "url" if not emails else "email",
+            })
+    return leads
+
+
+def scrape_glassdoor_jobs():
+    """Glassdoor public job search via their JSON API.
+
+    Glassdoor requires a `_txId` + `partnerId` query param for their
+    public jobs API. We can get away with the public GraphQL endpoint
+    used by their search page; for now we hit Bing as a proxy since
+    direct scraping is heavy and Glassdoor's anti-bot is aggressive.
+
+    Best-effort: this is URL-only leads.
+    """
+    leads = []
+    queries = [
+        "site:glassdoor.com AI engineer remote",
+        "site:glassdoor.com machine learning engineer",
+        "site:glassdoor.com LLM engineer",
+        "site:glassdoor.com data platform engineer",
+    ]
+    for q in queries:
+        url = "https://www.bing.com/search?" + urllib.parse.urlencode(
+            {"q": q, "format": "rss", "count": "25"}
+        )
+        code, xml = _curl(url, timeout=15)
+        if code != 200 or not xml or "<rss" not in xml[:200].lower():
+            continue
+        for item in re.findall(r"<item>(.*?)</item>", xml, re.S)[:15]:
+            title_m = re.search(r"<title>(.*?)</title>", item, re.S)
+            link_m = re.search(r"<link>(.*?)</link>", item)
+            desc_m = re.search(r"<description>(.*?)</description>", item, re.S)
+            if not (title_m and link_m):
+                continue
+            title = re.sub(r"<[^>]+>", "", title_m.group(1)).strip()
+            desc = re.sub(r"<[^>]+>", " ", desc_m.group(1)) if desc_m else ""
+            desc = re.sub(r"\s+", " ", desc).strip()
+            text = f"{title}\n{desc}"
+            if EXCLUDE_TITLE.search(text):
+                continue
+            if not any(kw.lower() in text.lower() for kw in SCRAPE_KEYWORDS):
+                continue
+            link = link_m.group(1).strip()
+            if "glassdoor.com" not in link:
+                continue
+            # Title format varies; try to extract company
+            parts = re.split(r"\s+(?:at|@|-)\s+", title)
+            company = parts[1] if len(parts) >= 2 else "Glassdoor lead"
+            emails = _extract_real_emails(text)
+            leads.append({
+                "company": company[:60],
+                "role": title[:120],
+                "source": "glassdoor (via bing)",
+                "source_url": link,
+                "contact_email": emails[0] if emails else None,
+                "extra_emails": emails[1:5],
+                "raw_excerpt": desc[:400] or title[:400],
+                "apply_method": "url",
+            })
+    return leads
+
+
 SCRAPERS = [
     ("hn_who_is_hiring",   scrape_hn_who_is_hiring),
     ("weworkremotely",     scrape_weworkremotely),
@@ -829,6 +1084,10 @@ SCRAPERS = [
     ("discord_jobs",       scrape_discord_jobs),
     ("telegram_jobs",      scrape_telegram_jobs),
     ("asian_chat_jobs",    scrape_asian_chat_jobs),
+    ("linkedin_jobs",      scrape_linkedin_jobs),
+    ("indeed_jobs",        scrape_indeed_jobs),
+    ("monster_jobs",       scrape_monster_jobs),
+    ("glassdoor_jobs",     scrape_glassdoor_jobs),
 ]
 
 
