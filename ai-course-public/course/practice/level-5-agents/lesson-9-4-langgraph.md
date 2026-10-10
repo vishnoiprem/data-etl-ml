@@ -16,7 +16,7 @@
 
 ## 🧠 Concept (5 min)
 
-LangGraph is the **stateful graph framework** from LangChain. The mental model: you build a directed graph where each node is a function (LLM call, tool, condition) and edges define the flow. You can have **cycles** (re-try, re-plan), **branches** (if/else), **human-in-the-loop** (interrupt + resume), and **persistent state** (checkpointing). The state is a TypedDict that flows through the graph. **Architect trade-off**: LangGraph is more powerful than CrewAI/AutoGen for complex flows (approval workflows, multi-stage pipelines with state) but more code. Use for: production agentic systems, approval workflows, anything with state.
+LangGraph is the stateful graph abstraction from LangChain. **Mental model:** a directed graph where nodes are functions (LLM call, tool, condition) and edges are routing rules. The four primitives that distinguish it from a ReAct loop: **(1) cycles** — explicit retry/re-plan paths; **(2) branches** — conditional edges that pick the next node from a function of state; **(3) interrupts** — `interrupt_before=[...]` pauses the graph and resumes on a human decision, the canonical human-in-the-loop pattern; **(4) persistent state** — a single TypedDict (or dataclass) flows through every node, checkpointed at each step. **Trade-off vs CrewAI / AutoGen:** LangGraph is more verbose than the role-delegation frameworks, but the explicitness buys you approval workflows, multi-stage pipelines with state, and observable execution traces. Use for production agentic systems where the cost of an uncontrolled action exceeds the cost of writing the graph.
 
 ---
 
@@ -24,7 +24,7 @@ LangGraph is the **stateful graph framework** from LangChain. The mental model: 
 
 ### Spec
 
-Build a LangGraph customer support workflow: (1) classify the request, (2) if 'refund' -> ask for order ID, (3) if 'complaint' -> escalate to human, (4) if 'question' -> answer with RAG, (5) human approval for refunds >$100. Mock all the LLM calls. Demo: walk through 3 different request types.
+Build a customer-support graph: (1) `classify` the request into {refund, complaint, question}; (2) if `refund` → `ask_order_id` to extract an `ORD-XXXX`; (3) if `complaint` → `escalate_to_human`; (4) if `question` → `answer_question` with a canned RAG response; (5) `request_human_approval` interrupts the graph when `refund_amount_usd > $100`; below the threshold, auto-approve. State is a single `SupportState` dataclass; `state.path` is the audit log. Mock every LLM call. Demo: four request types (refund-under, refund-over, complaint, question) showing the conditional edges and the interrupt point firing on the large refund.
 
 ### Acceptance Criteria
 

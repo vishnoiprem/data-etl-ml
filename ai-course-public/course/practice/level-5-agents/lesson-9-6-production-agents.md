@@ -16,7 +16,7 @@
 
 ## 🧠 Concept (5 min)
 
-Production agents need **five things** beyond the prototype: (1) **Observability** -- log every thought, action, observation, token. Use LangSmith, Helicone, or OpenLLMetry. (2) **Cost control** -- max budget per task, max turns, max tokens. Kill the agent if it overruns. (3) **Safety** -- guardrails before and after every action. Use NeMo Guardrails, Guardrails AI, or custom. (4) **Determinism** -- same input, similar output. Use temperature=0, fixed seeds, structured outputs. (5) **Error recovery** -- if a tool fails, retry with backoff; if a loop is detected, break out and ask the user. **Architect rule**: never ship an agent without a max turn count and a max token budget. Agents can loop forever and rack up costs.
+A prototype agent that runs in a notebook is not a production agent. The five properties a shipping agent must satisfy, each enforced in code rather than prompted: **(1) observability** — every step is a structured log row (turn, event, tool, args, result, cost, tokens); the audit log is the artifact the on-call reads at 3am. LangSmith, Helicone, and OpenLLMetry are the standard instrumentations. **(2) cost control** — hard caps on turns, tokens, and USD per run; the agent aborts on the first breach, not on the average. **(3) safety** — forbidden tools are blocked at the registry, returning a structured 403, not a soft prompt-level "please don't." NeMo Guardrails, Guardrails AI, or a custom policy file. **(4) determinism** — temperature=0, fixed seeds, structured outputs, where the task allows. **(5) error recovery** — retries with exponential backoff for transient failures; a loop detector that aborts on N identical tool calls in a row and surfaces the question to the user. **Architect rule:** no agent ships without `MAX_TURNS` and `MAX_COST_USD`. The default behavior of a confused agent is to spend the entire budget; the guardrails are the only thing that prevents that.
 
 ---
 
@@ -24,7 +24,7 @@ Production agents need **five things** beyond the prototype: (1) **Observability
 
 ### Spec
 
-Build a production agent with safety: (1) max 10 turns, max 50K tokens, (2) guardrails that block harmful actions (mocked: a list of forbidden tool calls), (3) cost tracker, (4) observability (log every step), (5) loop detection (if same action 3x, break). Mock the LLM and tools. Demo: a normal task + a task that tries to call a forbidden tool.
+Build a production-grade agent with the five guardrails wired in: (1) `MAX_TURNS=10`, `MAX_TOKENS=50_000`, `MAX_COST_USD=$0.50` — enforced at the orchestrator, not the LLM; (2) `FORBIDDEN_TOOLS = {delete_user, wipe_database, send_to_all_customers, export_pii}` — registry-enforced, returns a structured `403`; (3) a `CostTracker` that meters input/output tokens and the running USD total; (4) a `StepLog` audit row per step, emitted as a dataclass; (5) a loop detector that aborts when the same tool fires 3 times in a row. Mock the LLM and the tools. Demo: three scenarios — (a) normal task terminates cleanly, (b) a forbidden tool is blocked and the agent recovers on a safe tool, (c) the loop detector trips on 3 identical tool calls.
 
 ### Acceptance Criteria
 
