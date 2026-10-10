@@ -1,0 +1,4 @@
+{"iteration": 1, "thought": "I'll search the web for context.", "action_name": null, "action_args": {}, "observation": "", "duration_ms": 0.06413459777832031, "cost_usd": 0.0, "kind": "thought"}
+{"iteration": 2, "thought": "Running a quick calc.", "action_name": null, "action_args": {}, "observation": "", "duration_ms": 0.13494491577148438, "cost_usd": 0.0, "kind": "thought"}
+{"iteration": 3, "thought": "", "action_name": null, "action_args": {}, "observation": "", "duration_ms": 0.007867813110351562, "cost_usd": 0.0, "kind": "thought"}
+{"iteration": 3, "thought": "", "action_name": null, "action_args": {}, "observation": "", "duration_ms": 0.007867813110351562, "cost_usd": 0.0, "kind": "final"}
