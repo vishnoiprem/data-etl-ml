@@ -20,6 +20,18 @@ The signal in each report: **what the candidate would do differently.** That's t
 4. **What would the candidate do differently?** (the lesson, distilled)
 5. **What's the Phase 6 module that preps it?** (the cross-reference)
 
+## The 5 most useful companies to prep for
+
+Based on the reports in this module, the 5 most useful FDE loops to understand are:
+
+1. **Palantir** — invented the FDE loop. If you can pass Palantir, you can pass any FDE loop. The 4-step framework (Clarify → Decompose → Design → Tradeoffs) is the spine.
+2. **OpenAI** — the take-home is "basically the job." The AI-enabled coding screen is the new norm. Customer-facing explanation is the differentiator.
+3. **Anthropic** — GenAI depth + project deep dive. The 4-step framework + a Phase 1-5 case study as the "real customer" example.
+4. **AWS FDE** — 5-6 rounds including a customer simulation. The customer-simulation round is the differentiator; bring a PacificFreight narrative.
+5. **LangChain / Rippling / startups** — shorter loops, founding-FDE roles. The 4-step framework + a project deep dive is enough.
+
+**Read at least 3 reports before your loop.** General prep gets you past the resume screen. Company-specific prep gets you past the onsite.
+
 ---
 
 ## The company-specific reports (1 file per report)
@@ -27,6 +39,7 @@ The signal in each report: **what the candidate would do differently.** That's t
 | File | Company | Loop | Lesson |
 |---|---|---|---|
 | `openai-semantic-search.md` | OpenAI | 1-week take-home + 1-hr case-study + AI-enabled LeetCode | "Don't over-index on hard LeetCode. Practice explaining technical choices in plain English, especially customer-facing." |
+| `palantir-fde-decomposition.md` | Palantir | 4 stages: recruiter + technical screen + 3-of-5 onsite (decomposition, learning, coding, re-engineering, system design) + hiring manager | "Practice decomposition out loud. AI is prohibited. Behavioral is embedded in every round." |
 
 **Add a new file per real report you find.** The pattern: copy this README's structure, fill in the 5 questions, link back to the Phase 6 module that preps each round.
 
