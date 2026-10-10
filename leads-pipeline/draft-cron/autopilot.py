@@ -1550,8 +1550,11 @@ def _send_one(lead):
 def run_pipeline(args):
     print(f"\n{'='*60}\n🤖 AVILX AUTOPILOT — {datetime.now().isoformat()}\n{'='*60}")
     report = {"started_at": datetime.now().isoformat()}
+    # Derive run mode (default = full pipeline)
+    args.scrape_only = bool(getattr(args, "scrape_only", False) or args.scrape or args.enrich)
+    args.email_only  = bool(getattr(args, "email_only",  False) or args.email)
     # ---- Step 0: bounce-sync (auto-mark any new bounces) ----
-    if not args.no_bounce_sync:
+    if not getattr(args, "no_bounce_sync", False):
         try:
             from check_bounces import scan_bounces, mark_bounced
             print("\n[0/4] BOUNCE-SYNC — scan Gmail for delivery failures")
