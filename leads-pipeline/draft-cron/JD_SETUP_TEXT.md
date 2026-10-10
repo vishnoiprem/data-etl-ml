@@ -156,7 +156,26 @@ prilvesh@wearehackerone.com
 ➡️ 3 years’ experience working cross-functionally in a fast-paced for fintech/payment platforms, product-led or technology-driven environment.
 
 📩 Feel free to drop an email to loan.nguyentuyet@manpower.com.vn if you're confident in being a potential candidate for this role! I will reach to whoever fits with this, pls. 
+🤖💼 Exciting Opportunity: Head of Data Platform - leading the data engineering function at a fast-growing fintech. You’ll turn complex data into clear business decisions, strengthen how teams use analytics, and build a high-performing team that helps us serve customers better and grow responsibly.
+🙆‍♂️ Vietnamese and Vietkieu Talents (not open for Expat at this stage)
+🌏 Working Model: Onsite, D1.HCM.
+🗣️ English: Fluent
+🧍‍♀️🧍Number of headcount/position: 01
 
+🔎Required qualifications:
+➡️ >12 years’ significant working knowledge and experience of modern data best practices in data governance, data quality, metadata, lineage and privacy, data engineering and BI, across lakehouse, data mesh, streaming and hybrid-cloud architectures.
+➡️ Good experience in data-related technologies – especially cloud, analytics and advanced analytics (Snowflake, Databricks, AWS/Azure/GCP) – and experience managing related vendor/OEM relationships and build-vs-buy decisions.
+➡️ A track record of influencing senior stakeholders and turning analysis into business action.
+➡️ Strong command of SQL and experience with modern BI and analytics tools.
+➡️ Experience designing metrics, dashboards, analytical frameworks, and data-quality processes.
+➡️ Sound understanding of statistical methods, experimentation, and performance measurement.
+➡️ Ability to connect analytics to business outcomes and explain complex topics clearly.
+➡️ 3 years’ experience working cross-functionally in a fast-paced for fintech/payment platforms, product-led or technology-driven environment.
+
+📩 Feel free to drop an email to loan.nguyentuyet@manpower.com.vn if you're confident in being a potential candidate for this role! I will reach to whoever fits with this, pls. 
+
+🙏Thank you for being interested in this job post. Also apologies since i cant accept all of the connection request due to limited connection on Linkedin so feel free to follow me to stay updated with my incoming hot jobs. Really appreciate your support and looking forward to our next collaborations.
+Cheers!
 🙏Thank you for being interested in this job post. Also apologies since i cant accept all of the connection request due to limited connection on Linkedin so feel free to follow me to stay updated with my incoming hot jobs. Really appreciate your support and looking forward to our next collaborations.
 Cheers!
 --- END PASTE ---
