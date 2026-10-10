@@ -227,13 +227,15 @@ def _extract_id(text: str) -> Optional[str]:
 
     Same heuristic as Phase 1: pick the last PF ID, since the most recent
     is usually the one the CS person should act on. Tolerates whitespace
-    (e.g. "PF - 1003" or "PF  -  1003").
+    (e.g. "PF - 1003" or "PF  -  1003"). Uses the whitespace-tolerant
+    regex _PF_ID_RE, not _PF_ID_CLEAN_RE — the clean regex would miss
+    "PF - 1003" entirely.
     """
-    matches = _PF_ID_CLEAN_RE.findall(text.upper())
+    matches = _PF_ID_RE.findall(text.upper())
     if not matches:
         return None
-    # The match already includes the "PF-" prefix; normalize whitespace.
-    return re.sub(r"\s+", "", matches[-1])
+    # Each match is just the digits; reconstruct the canonical PF-NNNN form.
+    return f"PF-{matches[-1]}"
 
 
 def _find_shipment(shipments: list[dict], shipment_id: str) -> dict | None:

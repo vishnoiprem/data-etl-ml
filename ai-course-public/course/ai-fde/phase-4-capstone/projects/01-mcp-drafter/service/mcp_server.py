@@ -276,9 +276,14 @@ class MCPServer:
     only stateful piece; in production this is Redis).
     """
     def __init__(self, policies_path: Path | None = None) -> None:
+        import threading
         self.policies = _load_policies(policies_path)
         # Per-user per-minute token buckets. Key is "{user_id}:{tool_name}".
         self._buckets: dict[tuple[str, str], tuple[float, float]] = {}
+        # Lock that guards _budget_ok + _charge. The two must be atomic
+        # so a user can't fire 10 concurrent calls and bypass the budget
+        # by racing the check against the write.
+        self._lock = threading.Lock()
         # Use Phase 3's bucket if available; otherwise the inline one.
         if HAVE_PHASE3:
             self._rl = _circuit.TokenBucketRateLimiter(
@@ -312,10 +317,11 @@ class MCPServer:
                 ok=False, tool=tool_name, status_code=403,
                 error=f"role {role!r} is not authorized to call {tool_name!r}",
             )
-        # 3. Is the per-user rate limit OK?
+        # 3. Is the per-user rate limit OK? Atomic check-and-charge so
+        # concurrent calls can't blow through the per-minute ceiling.
         rate_cfg = self.policies.get("rate_limits", {}).get(tool_name, {})
         cost = int(rate_cfg.get("cost_credits", 1))
-        if not self._budget_ok(user_id, cost):
+        if not self._check_and_charge(user_id, cost):
             return ToolResult(
                 ok=False, tool=tool_name, status_code=429,
                 error=f"rate limit exceeded for {tool_name!r} (cost {cost} credits)",
@@ -338,8 +344,6 @@ class MCPServer:
                               error=f"tool raised: {type(e).__name__}: {e}",
                               cost_credits=cost,
                               latency_ms=int((time.monotonic() - t0) * 1000))
-        # 6. Charge the credits.
-        self._charge(user_id, cost)
         return ToolResult(
             ok=out.get("ok", False),
             tool=tool_name,
@@ -374,6 +378,18 @@ class MCPServer:
         if now - last_ts > 60.0:
             used = 0.0
         self._buckets[key] = (now, used + cost)
+
+    def _check_and_charge(self, user_id: str, cost: int) -> bool:
+        """Atomic check + charge. Returns True if the budget allowed the
+        call (and the credits have been debited); False if not (no charge).
+        Without the lock, concurrent calls can each see used+cost <= budget
+        and all pass, blowing through the per-minute ceiling.
+        """
+        with self._lock:
+            if not self._budget_ok(user_id, cost):
+                return False
+            self._charge(user_id, cost)
+            return True
 
 
 # ===========================================================================
