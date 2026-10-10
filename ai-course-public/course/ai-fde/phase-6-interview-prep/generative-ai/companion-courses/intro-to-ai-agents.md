@@ -1,6 +1,8 @@
 # Intro to AI Agents and Agentic AI — The 2-hour foundations primer
 
 > **Source:** "Intro to AI Agents and Agentic AI" — 9 sections, 54 lectures, 2h 11m total. **This is the shortest, most-focused companion course in Phase 6:** a 2-hour primer that covers the agent fundamentals (ReAct, ReWoo, multi-agent, n8n workflow) in a way that pairs naturally with Ed Donner's 8-week deep-dive. **Best for candidates who want a fast ramp-up to the agent terminology before tackling Ed's Week 8 capstone or the Phase 4 multi-agent project.**
+>
+> **Section 10 (growing):** AI agents for trading workflows. Added in October 2026 as a 1-lecture seed; will grow to cover options/derivatives, multi-strategy, and prop-firm-specific workflows. See `intro-to-ai-agents/s10-ai-in-trading/`.
 
 ## In 60 seconds
 
@@ -12,7 +14,7 @@ The five named taxonomies a candidate must recite after reading this primer:
 4. **4 RAGAS metrics:** faithfulness, answer relevance, context precision, context recall.
 5. **5 architecture patterns:** single agent, sequential pipeline, orchestrator, parallel fan-out / fan-in, HTN + HITL.
 
-The "if you only read two lectures in the 54-lecture expansion" pointers: **L2-7** (the 200-line shipping agent that wraps all 7 ingredients + 5 guardrails) and **L9-1** (the ROI formula + CFO pitch). The full `intro-to-ai-agents/` directory (54 lectures, 9 sections) is the read-it-as-a-doc expansion of this cheat sheet.
+The "if you only read two lectures in the 54-lecture expansion" pointers: **L2-7** (the 200-line shipping agent that wraps all 7 ingredients + 5 guardrails) and **L9-1** (the ROI formula + CFO pitch). The full `intro-to-ai-agents/` directory (55 lectures across 10 sections — S1-9 complete, S10 seeded) is the read-it-as-a-doc expansion of this cheat sheet.
 
 ---
 
