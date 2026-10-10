@@ -24,13 +24,26 @@ The signal in each report: **what the candidate would do differently.** That's t
 
 Based on the reports in this module, the 5 most useful FDE loops to understand are:
 
-1. **Palantir** — invented the FDE loop. If you can pass Palantir, you can pass any FDE loop. The 4-step framework (Clarify → Decompose → Design → Tradeoffs) is the spine.
+1. **Palantir** — invented the FDE loop. If you can pass Palantir, you can pass any FDE loop. The 4-step framework (Clarify → Decompose → Design → Tradeoffs) is the spine. AI is prohibited; behavioral is embedded in every round.
 2. **OpenAI** — the take-home is "basically the job." The AI-enabled coding screen is the new norm. Customer-facing explanation is the differentiator.
-3. **Anthropic** — GenAI depth + project deep dive. The 4-step framework + a Phase 1-5 case study as the "real customer" example.
-4. **AWS FDE** — 5-6 rounds including a customer simulation. The customer-simulation round is the differentiator; bring a PacificFreight narrative.
-5. **LangChain / Rippling / startups** — shorter loops, founding-FDE roles. The 4-step framework + a project deep dive is enough.
+3. **Anthropic** — the customer simulation is the highest-signal round. Constitutional AI + Responsible Scaling Policy are testable depth signals. Reference checks happen during the cycle.
+4. **AWS FDE** — 6 rounds with a dedicated customer scenario round. The Well-Architected Framework (6 pillars) is the AWS-specific depth signal. Defend the simplest design that meets constraints.
+5. **LangChain / Sierra AI / Rippling / startups** — take-home-first loops. Sierra's "interviewers run your code before the demo" is the unique differentiator. LangChain's "interview is the job" is the founding-FDE pattern. The 4-step framework + a project deep dive is enough.
 
 **Read at least 3 reports before your loop.** General prep gets you past the resume screen. Company-specific prep gets you past the onsite.
+
+## The 6 most useful FDE signature rounds to prep for
+
+Beyond the 5 most useful companies, the 6 most useful FDE signature rounds to understand are:
+
+1. **Decomposition (Palantir)** — the signature round. The 4-step framework is the spine. Practice out loud.
+2. **Take-home demo walkthrough (Sierra AI / LangChain)** — the centerpiece. The eval set is the differentiator.
+3. **Customer simulation (AWS FDE / Anthropic)** — the highest-signal round at AWS FDE. Calm under pressure + no overpromising + trade-off explanation.
+4. **Constitutional AI / safety depth (Anthropic)** — the disqualifier round. Read the Constitutional AI paper + the Responsible Scaling Policy.
+5. **AI-enabled coding screen (OpenAI)** — the new norm. Plan, prompt, and verify — not just the final answer.
+6. **Well-Architected Framework system design (AWS FDE)** — the 6 pillars (security / reliability / cost / performance / operational excellence / sustainability) are the testable depth signal.
+
+**Each report in this directory maps to one or more of these signature rounds.** A complete FDE prep covers all 6.
 
 ---
 
@@ -41,6 +54,9 @@ Based on the reports in this module, the 5 most useful FDE loops to understand a
 | `openai-semantic-search.md` | OpenAI | 1-week take-home + 1-hr case-study + AI-enabled LeetCode | "Don't over-index on hard LeetCode. Practice explaining technical choices in plain English, especially customer-facing." |
 | `palantir-fde-decomposition.md` | Palantir | 4 stages: recruiter + technical screen + 3-of-5 onsite (decomposition, learning, coding, re-engineering, system design) + hiring manager | "Practice decomposition out loud. AI is prohibited. Behavioral is embedded in every round." |
 | `langchain-deployed-engineer.md` | LangChain | 3 stages: recruiter + 20-min product presentation + build-an-agent take-home with a Slack channel | "The interview is the job. Use every resource they give you (Academy, docs, Slack). Cover ALL product benefits. Be receptive to feedback without ego." |
+| `anthropic-fde-customer-simulation.md` | Anthropic | 5 stages: recruiter + tech screen + **customer simulation** (signature) + take-home + system design + HM | "Customer simulation is the highest-signal round. Read Constitutional AI + Responsible Scaling Policy. Reference checks happen during the cycle." |
+| `aws-fde-customer-simulation.md` | AWS FDE | 6 rounds: recruiter + phone screen + take-home + coding + system design + **customer scenario** (signature) | "Customer scenario filters the most candidates. Read the Well-Architected Framework (6 pillars). Defend the simplest design that meets constraints." |
+| `sierra-ai-agent-engineer.md` | Sierra AI | 5 stages: recruiter + **1-week take-home** (centerpiece) + demo walkthrough + customer simulation + HM | "Interviewers run your code before the demo. Demo in 5-10 min, then defend the choices. Eval set is the differentiator." |
 
 **Add a new file per real report you find.** The pattern: copy this README's structure, fill in the 5 questions, link back to the Phase 6 module that preps each round.
 
