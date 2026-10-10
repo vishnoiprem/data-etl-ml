@@ -5,7 +5,7 @@
 -- included in Snowflake's Fail-Safe.  TEMPORARY tables die at session end.
 --
 -- Lecture reference: "Permanent, Transient, Temporary" (Section 16, L01)
--- Author: Prem Vishnoi <pvilx.com> / Prem Vishnoi <pvishnoi@avilx.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 -- ============================================================================
 
 USE DATABASE SNOWFLAKE_DEMO;
