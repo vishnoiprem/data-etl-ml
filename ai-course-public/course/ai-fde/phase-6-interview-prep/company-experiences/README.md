@@ -20,15 +20,17 @@ The signal in each report: **what the candidate would do differently.** That's t
 4. **What would the candidate do differently?** (the lesson, distilled)
 5. **What's the Phase 6 module that preps it?** (the cross-reference)
 
-## The 5 most useful companies to prep for
+## The 7 most useful companies to prep for
 
-Based on the reports in this module, the 5 most useful FDE loops to understand are:
+Based on the reports in this module, the 7 most useful FDE loops to understand are:
 
 1. **Palantir** — invented the FDE loop. If you can pass Palantir, you can pass any FDE loop. The 4-step framework (Clarify → Decompose → Design → Tradeoffs) is the spine. AI is prohibited; behavioral is embedded in every round.
 2. **OpenAI** — the take-home is "basically the job." The AI-enabled coding screen is the new norm. Customer-facing explanation is the differentiator.
 3. **Anthropic** — the customer simulation is the highest-signal round. Constitutional AI + Responsible Scaling Policy are testable depth signals. Reference checks happen during the cycle.
 4. **AWS FDE** — 6 rounds with a dedicated customer scenario round. The Well-Architected Framework (6 pillars) is the AWS-specific depth signal. Defend the simplest design that meets constraints.
-5. **LangChain / Sierra AI / Rippling / startups** — take-home-first loops. Sierra's "interviewers run your code before the demo" is the unique differentiator. LangChain's "interview is the job" is the founding-FDE pattern. The 4-step framework + a project deep dive is enough.
+5. **Databricks** — the data-platform FDE loop. Spark + SQL + Delta Lake + Unity Catalog + RAG-over-enterprise-data + MLflow. The signature differentiator: can you do RAG over an enterprise data lake?
+6. **Scale AI** — the AI-data-infrastructure FDE loop. Messy data unification + eval frameworks + RLHF pipelines + government/defense/enterprise stakeholders. 3 variants (GenAI, Enterprise, Defense).
+7. **LangChain / Sierra AI / Rippling / startups** — take-home-first loops. Sierra's "interviewers run your code before the demo" is the unique differentiator. LangChain's "interview is the job" is the founding-FDE pattern. The 4-step framework + a project deep dive is enough.
 
 **Read at least 3 reports before your loop.** General prep gets you past the resume screen. Company-specific prep gets you past the onsite.
 
@@ -57,6 +59,8 @@ Beyond the 5 most useful companies, the 6 most useful FDE signature rounds to un
 | `anthropic-fde-customer-simulation.md` | Anthropic | 5 stages: recruiter + tech screen + **customer simulation** (signature) + take-home + system design + HM | "Customer simulation is the highest-signal round. Read Constitutional AI + Responsible Scaling Policy. Reference checks happen during the cycle." |
 | `aws-fde-customer-simulation.md` | AWS FDE | 6 rounds: recruiter + phone screen + take-home + coding + system design + **customer scenario** (signature) | "Customer scenario filters the most candidates. Read the Well-Architected Framework (6 pillars). Defend the simplest design that meets constraints." |
 | `sierra-ai-agent-engineer.md` | Sierra AI | 5 stages: recruiter + **1-week take-home** (centerpiece) + demo walkthrough + customer simulation + HM | "Interviewers run your code before the demo. Demo in 5-10 min, then defend the choices. Eval set is the differentiator." |
+| `databricks-ai-fde.md` | Databricks | 5-6 rounds: recruiter + HM screen + Spark/SQL coding + RAG-over-data-lake system design + decomposition (signature) + data-team customer sim | "The customer is a data team. Practice Spark + Delta Lake + Unity Catalog + MLflow. RAG over enterprise data is the signature question." |
+| `scale-ai-fde.md` | Scale AI | 4-6 rounds: recruiter + technical screen + eval-harness take-home + RLHF system design + decomposition (signature) + government/defense customer sim | "3 variants (GenAI, Enterprise, Defense). Messy data unification + eval frameworks + RLHF. The customer is a program manager, not a CTO." |
 
 **Add a new file per real report you find.** The pattern: copy this README's structure, fill in the 5 questions, link back to the Phase 6 module that preps each round.
 
@@ -75,5 +79,20 @@ Beyond the 5 most useful companies, the 6 most useful FDE signature rounds to un
 ## The thesis
 
 The 9 modules teach the framework. The 10th module shows you what the framework looks like in the wild. **Reading 3-5 real reports is the difference between "I prepped for FDE interviews" and "I prepped for OpenAI FDE interviews."**
+
+**The 8 FDE signature round → company matrix:**
+
+| Signature round | The company that tests it hardest | Cross-reference |
+|---|---|---|
+| **Decomposition (90-day scoping)** | Palantir + Databricks + Scale AI (all three) | `../decomposition/README.md` |
+| **Customer simulation** | Anthropic + AWS FDE (dedicated round) | `../customer-simulation/README.md` |
+| **Constitutional AI / safety depth** | Anthropic (disqualifier round) | `../company-experiences/anthropic-fde-customer-simulation.md` |
+| **Well-Architected Framework system design** | AWS FDE | `../company-experiences/aws-fde-customer-simulation.md` |
+| **Take-home demo walkthrough** | Sierra AI + LangChain (take-home-first loops) | `../take-home/01-prototype.md` |
+| **AI-enabled coding screen** | OpenAI (new norm) | `../practical-coding/README.md` |
+| **RAG over enterprise data lake** | Databricks | `../company-experiences/databricks-ai-fde.md` |
+| **Eval framework + RLHF pipeline** | Scale AI | `../company-experiences/scale-ai-fde.md` |
+
+**Each company tests a different signature round.** A complete FDE prep covers all 8.
 
 **General prep gets you past the resume screen. Company-specific prep gets you past the onsite.**
