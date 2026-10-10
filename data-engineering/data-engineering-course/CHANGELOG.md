@@ -1,5 +1,62 @@
 # Changelog
 
+## 2026-10-10 — Meta DE screen module: 5 SQL + 5 Python + 6 onsite SQL + 5 Jupyter notebooks
+
+The 2026 Meta DE CoderPad is **60 minutes: 5 SQL + 5 Python** (the
+same screen). The Python half is **pandas / dict / string
+handling**, NOT DSA. The onsite SQL round is product-flavored
+open-ended ("calculate what % of Messenger users who were active
+yesterday made a video call"). The system-design whiteboard
+round uses a 5-step framework: product goal → metrics → schema →
+ETL SQL → cost model.
+
+This module ships the worked solutions, the SQLite schema, the
+test suite, the 5 Jupyter notebooks, plus a replacement for the
+wrong-shape `m113_meta_screen.py` mock (which was 2018-era DSA
+content).
+
+### Added — `sql_interviews/11_meta_screen/`
+
+- **`module_overview.md`** — the 60-min CoderPad format, pass bar (3/5 each half), how it maps to the rest of the loop
+- **`design/01_loop_structure.md`** — the 60-min CoderPad format, the 4 onsite rounds, the 3-5 week timeline
+- **`design/02_sql_problems.md`** — 5 SQL problems (retention, hour-1 peak, top-N, sessionize, gaps-and-islands) with worked solutions + 4 things each tests
+- **`design/03_python_problems.md`** — 5 Python problems (upward trend, second-highest salary, CSV parsing, sliding-window user count, tumbling window) with worked solutions
+- **`design/04_onsite_flavoured_sql.md`** — 6 deeper SQL problems (Messenger video %, first-country retention, WhatsApp cohort, top ad-sets, hour engagement, auction time-travel)
+- **`design/05_sessionization_pattern.md`** — the 30-min-gap pattern deep-dive (LAG + cumulative-sum flag for session_id)
+- **`design/06_company_specific.md`** — full Meta DE 2026 walkthrough: 4 onsite rounds, sample questions, Core Values mapping
+- **`code/meta_schema.sql`** — 9 tables: instagram_post, instagram_story_events, facebook_post, engagement_event, whatsapp_message, messenger_event, messenger_call, ad_event, ad_auction_event
+- **`code/meta_screen_sql.sql`** — 5 problems, canonical solutions
+- **`code/meta_screen_python.py`** — 5 functions: `top_5_pages_by_upward_trend`, `second_highest_per_department`, `summarize_by_page`, `users_with_3plus_calls`, `tumbling_window_counts`
+- **`code/meta_onsite_sql.sql`** — 6 problems
+- **`tests/test_meta_screen_sql.py`** — 5 tests
+- **`tests/test_meta_screen_python.py`** — 5 tests
+- **`tests/test_meta_onsite_sql.py`** — 6 tests
+- **`notebooks/01_meta_screen_sql.ipynb`** — 5 SQL problems
+- **`notebooks/02_meta_screen_python.ipynb`** — 5 Python problems
+- **`notebooks/03_meta_onsite_sql.ipynb`** — 6 onsite SQL problems
+- **`notebooks/04_sessionization.ipynb`** — 30-min gap pattern
+- **`notebooks/05_meta_system_design_walkthrough.ipynb`** — 5-step framework with worked example (WA Business dashboard)
+
+### Added — `coding_interviews/15_mock_interviews/code/m119_meta_screen_v2.py`
+
+The wrong-shape m113 (2018-era FizzBuzz + valid parens with
+wildcards) is replaced by m119, calibrated to the 2026 format:
+3 problems in pandas / dict / string handling. The other 2 of the
+5+5 format live in `sql_interviews/11_meta_screen/code/meta_screen_python.py`.
+
+### Updated — `docs/reference/company_specific_prep.md`
+
+Master table now has 2026 Meta + Google DE columns. Two new
+deep-dive sections:
+
+- **Meta Data Engineer (2026 deep-dive)** — 7 sourced links (Aced, DataDriven, Interview101, Tryexponent, Datavidhya, Glassdoor, IGotAnOffer), latest-to-oldest
+- **Google Data Engineer (2026 deep-dive)** — 4 sourced links (DataDriven, Interview101, IGotAnOffer, HelloInterview), latest-to-oldest
+
+### Tests
+
+- `sql_interviews/11_meta_screen/`: 16 new tests, all green
+- Total repo: 1,461 tests (was 1,441)
+
 ## 2026-10-10 — Behavioral: 8 new lessons + 50-hour reading list (Google + Meta DE 2026)
 
 The 40-question Data Engineer behavioral bank (the second batch from
