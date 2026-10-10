@@ -55,6 +55,8 @@ jobs:
           - ai-engineering/01-enterprise-rag-platform/requirements.txt
           - ai-engineering/03-multi-agent-platform/requirements.txt
           - ai-engineering/05-distributed-inference/requirements.txt
+          - ai-engineering/16-graph-rag/requirements.txt
+          - ai-engineering/16-graph-rag/requirements-dev.txt
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

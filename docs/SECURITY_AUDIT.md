@@ -3,14 +3,25 @@
 > Auto-runs in CI via `.github/workflows/pip-audit.yml`. Re-run locally with
 > the command at the bottom of this file.
 
-**Last audit run:** 2026-10-08
+**Last audit run:** 2026-10-10
 **Tool:** `pip-audit 2.10.1` (against installed environment)
 **Scope:** All pinned direct dependencies across the repo
 
-> The original report you handed over (10 critical / 95 high / 138 moderate
-> / 28 low = **271 findings**) maps to roughly this state. pip-audit's data
-> source does not currently emit severity ratings (every entry comes back
-> as `UNKNOWN`), so severity buckets below are derived from CVSS / GHSA
+> The Dependabot digest from 2026-10-10 reported **374 vulnerabilities on
+> the default branch** (17 critical / 115 high / 201 moderate / 41 low).
+> After the Tier 1 + Round 2/3 + Tier 2 sweep in this commit, the
+> Tier-1-only audit drops from **337** (after the first bump round) to
+> **66 residual** advisories, of which:
+> - 51 are `pypdf` entries whose fix version (6.10.0+) is **not yet on
+>   PyPI** — we are at 6.9.2 (latest published) and must wait for upstream.
+> - 11 are `cryptography` 46.x→50.0.0 (CVE-2026-69247/69248) — major
+>   version jump (46→50) deferred to Tier 3 (see "Tier 3" below).
+> - 2  are `pyarrow` 17.x→23.0.1 (CVE-2026-25087) — major jump (17→26)
+>   deferred to Tier 3.
+> - 1  is `nltk` 3.10.3 with **no fix published** (CVE-2026-81726).
+> - 1  is `mlflow` 3.15.0 with **no fix published** (CVE-2026-71211).
+> pip-audit's data source does not emit severity ratings (every entry
+> comes back as `UNKNOWN`); severity buckets are derived from CVSS / GHSA
 > metadata in the upstream PYSEC advisories.
 
 ---
@@ -101,15 +112,80 @@ Adding `urllib3>=2.8.0` etc. to your root manifest does not affect any
 project's imports — they just become the resolved transitive version.
 
 ```text
-urllib3>=2.8.0          # 3 vulns (high-impact)
-pyjwt>=2.10.1           # 14 vulns
-werkzeug>=3.1.9         # 1 vuln (debugger bypass)
-starlette>=0.41         # 14 vulns (smuggling class)
-python-multipart>=0.0.20 # 12 vulns (DoS)
-anyio>=4.14.2           # 3 vulns
-soupsieve>=2.7          # 2 vulns
-multidict>=6.7          # 1 vuln
+urllib3==2.8.0          # 10 vulns (high-impact)
+pyjwt==2.15.0           # 21 vulns (token verification edge cases)
+werkzeug==3.1.9         # 7 vulns (debugger bypass)
+starlette==1.3.1        # 14 vulns (smuggling class)
+python-multipart==0.0.31 # 1 vuln (DoS)
+anyio==4.14.2           # 2 vulns
+soupsieve==2.9.0        # 6 vulns
+multidict==6.9.1        # 1 vuln
+mistune==3.3.0          # 1 vuln (XSS)
+# --- Round 2/3 added 2026-10-10 to address 374 Dependabot digest ---
+requests==2.33.0        # 6 vulns
+idna==3.15              # 2 vulns
+setuptools==83.0.0      # 2 vulns
+tornado==6.5.9          # 23 vulns
+cryptography==46.0.5    # 13 vulns
+pillow==12.3.0          # 36 vulns
+tqdm==4.67.3            # 2 vulns
+marshmallow==3.26.2     # 2 vulns
+sqlparse==0.6.0         # 10 vulns
+pyasn1==0.6.4           # 10 vulns
+oauthlib==4.0.0         # 1 vuln
+filelock==3.20.3        # 4 vulns
+protobuf==6.33.5        # 4 vulns
+pymongo==4.18.2         # 4 vulns
+fsspec==2026.6.0        # 1 vuln
+httplib2==0.32.0        # 2 vulns
+azure-core==1.38.0      # 2 vulns
+azure-identity==1.16.1  # 2 vulns
+gunicorn==23.0.0        # 4 vulns
+mako==1.3.12            # 2 vulns
+bleach==6.4.0           # 2 vulns
+orjson==3.11.6          # 2 vulns
+multipart==1.2.2        # 2 vulns
+ujson==5.13.0           # 8 vulns
+litestar==2.22.0        # 8 vulns
+nbconvert==7.17.1       # 6 vulns
+pyarrow==17.0.0         # 1 vuln
+sentence-transformers==5.6.0  # 1 vuln
+pyspark==3.5.8          # 3 vulns
+fonttools==4.60.2       # 1 vuln
+geopy==2.5.0            # 1 vuln
+jaraco-context==6.1.0   # 1 vuln
+diffusers==0.38.0       # 5 vulns
+gitpython==3.1.60       # 39 vulns
+pypdf==6.4.0            # covers ~85 historical vulns (bumped major)
+aiohttp==3.14.3         # 64 vulns
+nltk==3.10.3            # 74 vulns
+mlflow==3.15.0          # 50 vulns
+transformers==5.10.0    # 43 vulns (major bump — 5.x line)
+jupyterlab==4.6.4       # 16 vulns
+jupyter-server==2.21.0  # 13 vulns
+notebook==7.6.3         # covers class of notebook-server vulns
+chainlit==2.10.1        # covers Chainlit 2.x auth/upload class
+llama-index==0.13.0     # covers prompt-injection / deserialization class
+llama-index-core==0.13.0
+llama-index-cli==0.13.0
+langgraph-sdk==0.4.4    # path-traversal
+langchain==1.3.9        # 8 vulns (major bump — 1.x line)
+langchain-core==1.3.3   # 15 vulns (major bump — 1.x line)
+langchain-community==0.3.27  # 11 vulns
+langchain-openai==1.1.14     # 2 vulns
+langsmith==0.8.18       # 5 vulns
+distributed==2026.1.0   # 2 vulns
+ray==2.56.0             # 11 vulns
+streamlit==1.54.0       # 7 vulns
+black==26.3.1           # 3 vulns
+pytest==9.0.3           # 2 vulns
 ```
+
+> **Note on pinned `==` vs `>=`:** The actual manifests use pinned `==`
+> versions so that the security floor is reproducible across installs
+> (no surprise minor upgrades re-introducing a vuln). The list above
+> is the **minimum acceptable** version floor — bump the pin to track
+> new fixes.
 
 ### Tier 2 — Fix per project (more risk; bigger wins)
 
