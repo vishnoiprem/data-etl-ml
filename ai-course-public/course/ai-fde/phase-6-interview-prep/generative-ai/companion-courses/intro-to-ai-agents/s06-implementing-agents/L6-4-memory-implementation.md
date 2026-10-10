@@ -180,9 +180,9 @@ This is the difference between a candidate who says "the agent has memory" and a
 ## Cross-references
 
 - **Practice code**: `course/practice/level-5-agents/lesson-8-6-agent-memory.py` — the full 3-tier memory with cosine retrieval.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/11-agent-memory.py` — production-grade memory with pgvector + Redis.
-- **Phase 2 module**: `course/ai-fde/phase-2-applications/05-retrieval-v2.md` — the hybrid retrieval (BM25 + dense + RRF) backing the long-term memory.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the shared state object as the cross-agent memory.
+- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py` — production-grade memory with pgvector + Redis.
+- **Phase 2 module**: `course/ai-fde/phase-2-core-build/service/retrieval_v2.py` — the hybrid retrieval (BM25 + dense + RRF) backing the long-term memory.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the shared state object as the cross-agent memory.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — memory as a system design pattern.
 
 ## The 3 questions this lecture preps you for

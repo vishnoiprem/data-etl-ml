@@ -107,8 +107,8 @@ This is the difference between a candidate who says "I built an agent" and a can
 
 - **Practice code**: `course/practice/level-5-agents/lesson-8-2-first-agent.py` — the proactive ReAct agent.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-9-6-production-agents.py` — the hybrid production agent.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/02-the-fde-loop.md` — the proactive loop driver.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator as the proactive outer loop; each sub-agent is reactive inner.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the proactive loop driver.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator as the proactive outer loop; each sub-agent is reactive inner.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — reactive vs proactive as a system design pattern.
 
 ## The 3 questions this lecture preps you for

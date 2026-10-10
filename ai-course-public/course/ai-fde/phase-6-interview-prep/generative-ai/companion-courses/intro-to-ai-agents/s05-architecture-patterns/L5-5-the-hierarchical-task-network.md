@@ -195,10 +195,10 @@ This is the difference between a candidate who says "I planned the task" and a c
 
 ## Cross-references
 
-- **Practice code**: `course/hardcode/level-5-agentic-workflows/13-htn-agent.py` — the production HTN pattern.
+- **Practice code**: `course/hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py` — the production HTN pattern.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-9-4-langgraph.py` — the LangGraph StateGraph with hierarchical nodes.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/02-the-fde-loop.md` — the planning loop.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator uses HTN-like decomposition for complex cases.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the planning loop.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator uses HTN-like decomposition for complex cases.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — HTN as a system design pattern.
 
 ## The 3 questions this lecture preps you for

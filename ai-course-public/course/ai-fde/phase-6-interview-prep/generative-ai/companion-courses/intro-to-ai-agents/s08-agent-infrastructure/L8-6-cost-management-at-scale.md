@@ -316,11 +316,11 @@ This is the difference between a candidate who says "we track cost" and a candid
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/service/cost.py` — the cost tracker.
-- **Reference implementation**: `course/hardcode/level-8-infrastructure/06-cost.md` — the canonical cost management setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/19-cost-management.md` — cost management as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/` — the SLM is the cost lever.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/11-infrastructure.md` — cost management as a system design topic.
+- **Practice code**: `course/ai-fde/phase-2-core-build/service/circuit.py` — the cost tracker.
+- **Reference implementation**: `course/hardcode/level-6-production-systems/14-multi-region-llm-gateway.py` — the canonical cost management setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — cost management as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/` — the SLM is the cost lever.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — cost management as a system design topic.
 
 ## The 3 questions this lecture preps you for
 

@@ -352,11 +352,11 @@ This is the difference between a candidate who says "I built an agent in n8n" an
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/n8n/03-ai-agent.json` — the AI Agent node example.
-- **Reference implementation**: `course/hardcode/level-7-n8n/03-ai-agent.md` — the canonical AI Agent setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/15-low-code-platforms.md` — n8n as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server's tool definitions parallel the n8n tool nodes.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/10-low-code-platforms.md` — n8n as a system design choice.
+- **Practice code**: `course/ai-fde/phase-2-core-build/n8n/03-ai-agent.json` — the AI Agent node example.
+- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/09-react-agent-tools.py` — the canonical AI Agent setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — n8n as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server's tool definitions parallel the n8n tool nodes.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — n8n as a system design choice.
 
 ## The 3 questions this lecture preps you for
 

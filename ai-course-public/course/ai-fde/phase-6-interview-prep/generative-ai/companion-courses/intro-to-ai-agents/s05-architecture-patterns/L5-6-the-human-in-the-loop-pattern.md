@@ -192,9 +192,9 @@ This is the difference between a candidate who says "we have human review" and a
 ## Cross-references
 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-4-langgraph.py` — the LangGraph interrupt pattern with HUMAN_APPROVAL_THRESHOLD_USD=100.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/16-hitl-agent.py` — the production HITL with approval store + audit log.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/09-human-in-the-loop.md` — the HITL as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP tool policy file as the approval configuration.
+- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py` — the production HITL with approval store + audit log.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the HITL as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP tool policy file as the approval configuration.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — HITL as a system design pattern.
 
 ## The 3 questions this lecture preps you for

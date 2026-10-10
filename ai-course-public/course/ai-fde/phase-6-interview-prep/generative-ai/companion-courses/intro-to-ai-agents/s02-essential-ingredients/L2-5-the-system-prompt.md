@@ -141,10 +141,10 @@ This 60-second pitch is the difference between a candidate who says "I wrote a p
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-3-prompt-engineering/lesson-3-2-system-prompts.py` — the 5-section system prompt template.
+- **Practice code**: `course/practice/level-2-prompt-engineering/lesson-3-5-system-prompts.py` — the 5-section system prompt template.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-8-2-first-agent.py::render_system_prompt()` — the runtime rendering.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/03-the-system-prompt.md` — the system prompt as a first-class artifact.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — per-agent system prompts as the orchestrator's expression.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the system prompt as a first-class artifact.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — per-agent system prompts as the orchestrator's expression.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — the system prompt as a system design pattern.
 
 ## The 3 questions this lecture preps you for

@@ -3,6 +3,9 @@ venv/
 .venv/
 .env
 
+# IDE
+.idea/
+
 # Large ML files
 *.pth
 *.safetensors

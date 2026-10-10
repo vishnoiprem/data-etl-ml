@@ -209,9 +209,9 @@ This is the difference between a candidate who says "we have guardrails" and a c
 ## Cross-references
 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-6-production-agents.py` — the full 5-guardrail shipping agent.
-- **Reference implementation**: `course/practice/level-6-production/lesson-11-3-cost-tracking.py` — the production cost tracker.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/06-cost-ceiling.md` — the cost ceiling as a first-class pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/` — the SLM as the cost-ceiling enabler.
+- **Reference implementation**: `course/practice/level-6-production/lesson-11-6-cost-optimization.py` — the production cost tracker.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the cost ceiling as a first-class pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/` — the SLM as the cost-ceiling enabler.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — guardrails as a system design pattern.
 
 ## The 3 questions this lecture preps you for

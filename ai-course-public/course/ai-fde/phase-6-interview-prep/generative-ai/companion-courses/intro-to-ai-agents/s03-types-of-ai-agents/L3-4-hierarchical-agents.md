@@ -136,9 +136,9 @@ This is the difference between a candidate who says "I built a multi-agent syste
 ## Cross-references
 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-4-langgraph.py` — the LangGraph StateGraph with orchestrator + sub-agents.
-- **Reference implementation**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/service/agents.py` — the production 3-sub-agent hierarchy.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/07-orchestrator-pattern.md` — the orchestrator pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the canonical hierarchical agent.
+- **Reference implementation**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/service/agents.py` — the production 3-sub-agent hierarchy.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the orchestrator pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the canonical hierarchical agent.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — hierarchy as a system design pattern.
 
 ## The 3 questions this lecture preps you for

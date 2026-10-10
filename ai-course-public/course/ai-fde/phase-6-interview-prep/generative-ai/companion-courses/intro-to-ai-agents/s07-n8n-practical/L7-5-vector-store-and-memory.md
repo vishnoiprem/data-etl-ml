@@ -325,11 +325,11 @@ This is the difference between a candidate who says "I added RAG" and a candidat
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/n8n/04-rag-pipeline.json` — the RAG workflow example.
-- **Reference implementation**: `course/hardcode/level-7-n8n/04-vector-store.md` — the canonical RAG setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/15-low-code-platforms.md` — n8n as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server could use a vector store for tool discovery.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/10-low-code-platforms.md` — vector store as a system design choice.
+- **Practice code**: `course/ai-fde/phase-2-core-build/n8n/04-rag-pipeline.json` — the RAG workflow example.
+- **Reference implementation**: `course/hardcode/level-4-rag-pipelines/07-hybrid-search-rag.py` — the canonical RAG setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — n8n as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server could use a vector store for tool discovery.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — vector store as a system design choice.
 
 ## The 3 questions this lecture preps you for
 

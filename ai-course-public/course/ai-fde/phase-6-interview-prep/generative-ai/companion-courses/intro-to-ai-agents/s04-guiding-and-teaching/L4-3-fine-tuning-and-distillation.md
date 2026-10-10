@@ -196,10 +196,10 @@ This is the difference between a candidate who says "I fine-tuned a model" and a
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-6-production/lesson-11-4-fine-tuning.py` — the LoRA training loop.
-- **Reference implementation**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/train.py` — the production fine-tuning pipeline.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/08-the-slm-pattern.md` — the SLM as a first-class pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/` — the canonical FDE distillation recipe.
+- **Practice code**: `course/practice/level-6-production/lesson-10-3-lora-qlora.py` — the LoRA training loop.
+- **Reference implementation**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/train.py` — the production fine-tuning pipeline.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the SLM as a first-class pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/` — the canonical FDE distillation recipe.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — distillation as a system design pattern.
 
 ## The 3 questions this lecture preps you for

@@ -145,8 +145,8 @@ This is the difference between a candidate who says "I used LangChain" and a can
 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-4-langgraph.py` — the LangGraph StateGraph with 6 nodes.
 - **Reference implementation**: `course/hardcode/level-5-agentic-workflows/09-react-agent-tools.py` — the stdlib production agent.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/10-framework-choice.md` — the framework as a config decision.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the production orchestrator uses LangGraph patterns.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the framework as a config decision.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the production orchestrator uses LangGraph patterns.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — framework choice as a system design decision.
 
 ## The 3 questions this lecture preps you for

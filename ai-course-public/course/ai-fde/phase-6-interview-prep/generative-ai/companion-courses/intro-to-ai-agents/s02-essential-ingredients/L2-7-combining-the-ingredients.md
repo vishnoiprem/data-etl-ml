@@ -269,7 +269,7 @@ This 60-second pitch is the difference between a candidate who says "I built an 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-6-production-agents.py` — the full shipping agent with all 5 guardrails.
 - **Reference implementation**: `course/hardcode/level-5-agentic-workflows/09-react-agent-tools.py` — production-grade ReAct with 5+ tools, error recovery, stuck detector, iteration budget, cost + time tracking, structured logging.
 - **Phase 1 module**: `course/ai-fde/phase-1-foundations/` — the 7 ingredients and 5 guardrails as FDE patterns.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — three sub-agents each composed of 7 ingredients + 5 guardrails.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — three sub-agents each composed of 7 ingredients + 5 guardrails.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — the centerpiece system design pattern.
 
 ## The 3 questions this lecture preps you for

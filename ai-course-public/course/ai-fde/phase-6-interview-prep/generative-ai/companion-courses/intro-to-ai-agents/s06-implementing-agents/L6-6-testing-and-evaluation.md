@@ -196,10 +196,10 @@ This is the difference between a candidate who says "we test the agent" and a ca
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-6-production/lesson-11-2-eval.py` — the RAGAS metrics implementation.
-- **Reference implementation**: `course/ai-fde/phase-2-applications/service/eval.py` — the production eval set + RAGAS metrics.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/11-testing-and-eval.md` — the testing as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/slm/eval.py` — the SLM eval against the PacificFreight eval set.
+- **Practice code**: `course/practice/level-6-production/lesson-12-4-debugging.py` — the RAGAS metrics implementation.
+- **Reference implementation**: `course/ai-fde/phase-2-core-build/service/eval.py` — the production eval set + RAGAS metrics.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the testing as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/slm/eval.py` — the SLM eval against the PacificFreight eval set.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — testing as a system design pattern.
 
 ## The 3 questions this lecture preps you for

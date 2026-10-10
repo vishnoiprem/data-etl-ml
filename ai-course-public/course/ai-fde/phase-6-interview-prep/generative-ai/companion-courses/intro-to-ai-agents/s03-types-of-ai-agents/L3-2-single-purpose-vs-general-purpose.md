@@ -137,8 +137,8 @@ This is the difference between a candidate who says "I have N tools" and a candi
 
 - **Practice code**: `course/practice/level-5-agents/lesson-8-5-tool-design.py` — the 5 production tools.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-9-6-production-agents.py` — the 5-tool minimum viable set + clarify.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/05-tool-design.md` — the tool design rubric.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the 4 MCP tools as the minimum viable set.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the tool design rubric.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the 4 MCP tools as the minimum viable set.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — tool count as a system design decision.
 
 ## The 3 questions this lecture preps you for

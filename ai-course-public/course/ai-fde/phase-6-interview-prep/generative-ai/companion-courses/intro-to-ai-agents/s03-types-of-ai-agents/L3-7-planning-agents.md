@@ -166,9 +166,9 @@ This is the difference between a candidate who says "I use ReAct" and a candidat
 ## Cross-references
 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-4-langgraph.py` — the plan-and-execute pattern with conditional replan.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/12-planning-agent.py` — the production PaE with replan.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/02-the-fde-loop.md` — the planning loop.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator as a plan-and-execute agent; each sub-agent as plan-and-replan.
+- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py` — the production PaE with replan.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the planning loop.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator as a plan-and-execute agent; each sub-agent as plan-and-replan.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — planning as a system design pattern.
 
 ## The 3 questions this lecture preps you for

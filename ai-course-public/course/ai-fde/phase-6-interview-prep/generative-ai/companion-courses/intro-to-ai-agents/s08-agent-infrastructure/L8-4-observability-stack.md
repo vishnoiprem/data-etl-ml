@@ -336,11 +336,11 @@ This is the difference between a candidate who says "we have logs" and a candida
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/service/telemetry.py` — the production telemetry.
-- **Reference implementation**: `course/hardcode/level-8-infrastructure/04-observability.md` — the canonical observability setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/13-monitoring.md` — monitoring as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — multi-agent requires per-agent observability.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/11-infrastructure.md` — observability as a system design topic.
+- **Practice code**: `course/ai-fde/phase-2-core-build/service/telemetry.py` — the production telemetry.
+- **Reference implementation**: `course/hardcode/level-8-evaluation-testing/11-llm-as-judge-eval.py` — the canonical observability setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — monitoring as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — multi-agent requires per-agent observability.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — observability as a system design topic.
 
 ## The 3 questions this lecture preps you for
 

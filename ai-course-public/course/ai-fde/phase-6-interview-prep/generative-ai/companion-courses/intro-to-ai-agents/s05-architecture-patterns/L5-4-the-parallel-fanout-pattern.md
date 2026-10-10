@@ -196,10 +196,10 @@ This is the difference between a candidate who says "I made it faster" and a can
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-5-agents/lesson-9-3-parallel.py` — the parallel fan-out / fan-in pattern.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/15-parallel-agent.py` — the production parallel pattern with timeout + circuit breaker.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/07-orchestrator-pattern.md` — parallelism as a sub-pattern of the orchestrator.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator uses parallel for independent sub-tasks.
+- **Practice code**: `course/practice/level-5-agents/lesson-9-3-autogen.py` — the parallel fan-out / fan-in pattern.
+- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py` — the production parallel pattern with timeout + circuit breaker.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — parallelism as a sub-pattern of the orchestrator.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator uses parallel for independent sub-tasks.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — parallel as a system design pattern.
 
 ## The 3 questions this lecture preps you for

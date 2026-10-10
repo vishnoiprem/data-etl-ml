@@ -167,8 +167,8 @@ This 60-second pitch is the difference between a candidate who says "we parse th
 
 - **Practice code**: `course/practice/level-5-agents/lesson-8-2-first-agent.py::parse_step()` — the production parser.
 - **Reference implementation**: `course/hardcode/level-5-agentic-workflows/09-react-agent-tools.py::parse_action()` — the production-grade parser with 5+ error modes.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/04-error-handling.md` — structured errors as the FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server as a parser-fronted dispatcher.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — structured errors as the FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server as a parser-fronted dispatcher.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — the parser as a system design component.
 
 ## The 3 questions this lecture preps you for

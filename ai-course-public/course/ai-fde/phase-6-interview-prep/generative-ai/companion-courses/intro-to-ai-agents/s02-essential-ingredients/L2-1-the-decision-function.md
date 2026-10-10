@@ -101,10 +101,10 @@ This 60-second pitch is the difference between a candidate who says "I used GPT-
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-3-prompt-engineering/lesson-4-2-model-selection.py` — the 4-axis rubric as a callable function.
+- **Practice code**: `course/practice/level-2-prompt-engineering/lesson-3-1-craft-framework.py` — the 4-axis rubric as a callable function.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-9-6-production-agents.py::pick_model()` — the per-step router.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/01-the-fde-pattern.md` — the model as a swappable component.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/` — when the SLM replaces the API model.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the model as a swappable component.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/` — when the SLM replaces the API model.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — the model selection rubric in the centerpiece round.
 
 ## The 3 questions this lecture preps you for

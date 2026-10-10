@@ -148,10 +148,10 @@ This is the difference between a candidate who says "I built a multi-agent syste
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-5-agents/lesson-9-5-multi-agent.py` — the multi-agent patterns.
-- **Reference implementation**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the production hierarchy (NOT multi-agent) with 3 sub-agents.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/07-orchestrator-pattern.md` — hierarchy as the FDE default.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the canonical hierarchy reference.
+- **Practice code**: `course/practice/level-5-agents/lesson-9-5-agent-comms.py` — the multi-agent patterns.
+- **Reference implementation**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the production hierarchy (NOT multi-agent) with 3 sub-agents.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — hierarchy as the FDE default.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the canonical hierarchy reference.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — multi-agent as a system design pattern.
 
 ## The 3 questions this lecture preps you for

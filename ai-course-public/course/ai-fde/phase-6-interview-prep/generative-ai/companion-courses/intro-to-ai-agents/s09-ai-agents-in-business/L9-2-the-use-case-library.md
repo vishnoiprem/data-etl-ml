@@ -391,10 +391,10 @@ This is the difference between a candidate who says "AI agents can do many thing
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/use-cases/` — the use case library.
-- **Reference implementation**: `course/hardcode/level-9-business/02-use-cases.md` — the canonical use case catalog.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/21-use-cases.md` — use cases as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/case-studies/engagement-1-pf-drafter.md` — the PacificFreight use case.
+- **Practice code**: `course/ai-fde/phase-2-core-build/use-cases/` — the use case library.
+- **Reference implementation**: `course/hardcode/level-2-ai-workflows/03-email-triage-pipeline.py` — the canonical use case catalog.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — use cases as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/case-studies/engagement-1-pf-drafter.md` — the PacificFreight use case.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/company-experiences/` — use cases in interviews.
 
 ## The 3 questions this lecture preps you for

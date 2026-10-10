@@ -160,10 +160,10 @@ This is the difference between a candidate who says "I prompted the model" and a
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-3-prompt-engineering/lesson-3-4-few-shot.py` — the few-shot selector and CoT scaffolding.
+- **Practice code**: `course/practice/level-2-prompt-engineering/lesson-3-2-few-shot.py` — the few-shot selector and CoT scaffolding.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-8-2-first-agent.py` — the production ReAct agent with 2-3 examples and CoT.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/03-the-system-prompt.md` — the system prompt + examples as a single artifact.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — per-agent examples as the orchestrator's expression.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the system prompt + examples as a single artifact.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — per-agent examples as the orchestrator's expression.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — prompt engineering as a system design pattern.
 
 ## The 3 questions this lecture preps you for

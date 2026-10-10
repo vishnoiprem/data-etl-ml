@@ -145,8 +145,8 @@ This 60-second pitch is the difference between a candidate who says "we handle e
 
 - **Practice code**: `course/practice/level-5-agents/lesson-8-5-tool-design.py` — the 5 production tools with `validate_args()`.
 - **Reference implementation**: `course/hardcode/level-5-agentic-workflows/09-react-agent-tools.py` — the production-grade tool registry with 5+ tools and structured error recovery.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/04-error-handling.md` — structured errors as the FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server as a tool registry with a policy file.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — structured errors as the FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server as a tool registry with a policy file.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — the tool registry as a first-class system design pattern.
 
 ## The 3 questions this lecture preps you for

@@ -126,10 +126,10 @@ This 60-second pitch is the difference between a candidate who says "we track co
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-6-production/lesson-11-3-cost-tracking.py` — the three-level cost tracker.
+- **Practice code**: `course/practice/level-6-production/lesson-11-6-cost-optimization.py` — the three-level cost tracker.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-9-6-production-agents.py::CostTracker` — the per-run tracker with circuit-breaker integration.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/06-cost-ceiling.md` — the cost ceiling as a first-class FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/` — the SLM as the cost-ceiling enabler (10-50× cost reduction).
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the cost ceiling as a first-class FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/` — the SLM as the cost-ceiling enabler (10-50× cost reduction).
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — the cost ceiling in the centerpiece system design.
 
 ## The 3 questions this lecture preps you for

@@ -274,11 +274,11 @@ This is the difference between a candidate who says "I configured the API key" a
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/n8n/02-credentials.json` — the credential inventory template.
-- **Reference implementation**: `course/hardcode/level-7-n8n/02-credentials.md` — the canonical credential setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/16-secrets-management.md` — secrets as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server's policy file parallels the n8n credential.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/10-low-code-platforms.md` — credentials as a system design concern.
+- **Practice code**: `course/ai-fde/phase-2-core-build/n8n/02-credentials.json` — the credential inventory template.
+- **Reference implementation**: `course/hardcode/level-6-production-systems/13-autoscaling-llm-service.py` — the canonical credential setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — secrets as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server's policy file parallels the n8n credential.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — credentials as a system design concern.
 
 ## The 3 questions this lecture preps you for
 

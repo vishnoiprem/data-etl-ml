@@ -22,7 +22,7 @@ The 3 levers for guiding an agent are: (1) the system prompt (5 sections, render
 
 ## The Phase 1-5 cross-reference
 
-This section maps to **Phase 1 (Foundations) + Phase 4 (Capstone — SLM project)** of the FDE curriculum. The system prompt in L4.1 is implemented in `course/practice/level-3-prompt-engineering/lesson-3-2-system-prompts.py`. The few-shot examples in L4.2 are implemented in `course/practice/level-3-prompt-engineering/lesson-3-4-few-shot.py`. The fine-tuning and distillation in L4.3 is implemented in `course/practice/level-6-production/lesson-11-4-fine-tuning.py` and the capstone `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/`.
+This section maps to **Phase 1 (Foundations) + Phase 4 (Capstone — SLM project)** of the FDE curriculum. The system prompt in L4.1 is implemented in `course/practice/level-2-prompt-engineering/lesson-3-5-system-prompts.py`. The few-shot examples in L4.2 are implemented in `course/practice/level-2-prompt-engineering/lesson-3-2-few-shot.py`. The fine-tuning and distillation in L4.3 is implemented in `course/practice/level-6-production/lesson-10-3-lora-qlora.py` and the capstone `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/`.
 
 ## What this section preps you for
 

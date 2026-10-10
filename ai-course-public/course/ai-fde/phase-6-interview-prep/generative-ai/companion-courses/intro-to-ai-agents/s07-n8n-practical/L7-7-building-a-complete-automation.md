@@ -385,11 +385,11 @@ This is the difference between a candidate who says "I built an n8n workflow" an
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/n8n/06-northwind-workflow.json` — the full workflow export.
-- **Reference implementation**: `course/hardcode/level-7-n8n/06-complete-automation.md` — the canonical end-to-end build.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/15-low-code-platforms.md` — n8n as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server parallels the n8n tool nodes.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/10-low-code-platforms.md` — n8n as a system design choice.
+- **Practice code**: `course/ai-fde/phase-2-core-build/n8n/06-northwind-workflow.json` — the full workflow export.
+- **Reference implementation**: `course/hardcode/level-2-ai-workflows/03-email-triage-pipeline.py` — the canonical end-to-end build.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — n8n as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server parallels the n8n tool nodes.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — n8n as a system design choice.
 
 ## The 3 questions this lecture preps you for
 

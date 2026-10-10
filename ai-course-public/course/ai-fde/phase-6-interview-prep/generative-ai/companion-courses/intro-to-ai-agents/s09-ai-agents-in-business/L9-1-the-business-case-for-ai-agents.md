@@ -290,10 +290,10 @@ This is the difference between a candidate who says "AI agents save money" and a
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/business-case.md` — the ROI template.
-- **Reference implementation**: `course/hardcode/level-9-business/01-roi.md` — the canonical ROI calculation.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/20-business-case.md` — the business case as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/case-studies/engagement-1-pf-drafter.md` — the PacificFreight case study.
+- **Practice code**: `course/ai-fde/phase-2-core-build/consulting/02-prd-and-solution-design.md` — the ROI template.
+- **Reference implementation**: `course/hardcode/level-9-failure-handling/17-circuit-breaker-llm.py` — the canonical ROI calculation.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the business case as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/case-studies/engagement-1-pf-drafter.md` — the PacificFreight case study.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/company-experiences/` — the business case in interviews.
 
 ## The 3 questions this lecture preps you for

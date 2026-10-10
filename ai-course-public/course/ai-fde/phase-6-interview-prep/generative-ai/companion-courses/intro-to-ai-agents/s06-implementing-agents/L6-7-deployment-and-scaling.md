@@ -180,10 +180,10 @@ This is the difference between a candidate who says "I deployed the agent" and a
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/07-deployment.md` — the deployment patterns.
-- **Reference implementation**: `course/ai-fde/phase-2-applications/service/` — the PacificFreight production deployment.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/12-deployment.md` — the deployment as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/03-distilled-slm/` — the SLM as the deployment-flexibility lever.
+- **Practice code**: `course/ai-fde/phase-2-core-build/service/app.py` — the deployment patterns.
+- **Reference implementation**: `course/ai-fde/phase-2-core-build/service/` — the PacificFreight production deployment.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the deployment as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/03-distilled-slm/` — the SLM as the deployment-flexibility lever.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — deployment as a system design pattern.
 
 ## The 3 questions this lecture preps you for

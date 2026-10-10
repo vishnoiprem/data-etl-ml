@@ -152,8 +152,8 @@ This is the difference between a candidate who says "the agent has tools" and a 
 
 - **Practice code**: `course/practice/level-5-agents/lesson-8-5-tool-design.py` — the 5 production tools.
 - **Reference implementation**: `course/practice/level-5-agents/lesson-9-6-production-agents.py` — the risk-aware dispatcher.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/05-tool-design.md` — the tool design rubric.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the 4 MCP tools with policy file.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the tool design rubric.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the 4 MCP tools with policy file.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — tool design as a system design pattern.
 
 ## The 3 questions this lecture preps you for

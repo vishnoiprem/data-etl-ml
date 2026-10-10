@@ -214,10 +214,10 @@ This is the difference between a candidate who says "I debug agents" and a candi
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-1-foundations/14-debugging.md` — the debugging playbook.
-- **Reference implementation**: `course/ai-fde/phase-2-applications/runbook.md` — the production runbook.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/14-debugging.md` — debugging as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/case-studies/engagement-3-postmortem.md` — the canonical postmortem case study.
+- **Practice code**: `course/ai-fde/phase-1-foundations/README.md` — the debugging playbook.
+- **Reference implementation**: `course/ai-fde/phase-3-deployment/consulting/runbook.md` — the production runbook.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — debugging as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/case-studies/engagement-3-postmortem.md` — the canonical postmortem case study.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/company-experiences/anthropic-fde-customer-simulation.md` — the customer-simulation round is the 3am scenario in costume.
 
 ## The 3 questions this lecture preps you for

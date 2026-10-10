@@ -238,10 +238,10 @@ This is the difference between a candidate who says "we have logs" and a candida
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/service/telemetry.py` — the production telemetry.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/17-monitoring.py` — the production monitoring setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/13-monitoring.md` — monitoring as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator's monitoring setup.
+- **Practice code**: `course/ai-fde/phase-2-core-build/service/telemetry.py` — the production telemetry.
+- **Reference implementation**: `course/hardcode/level-8-evaluation-testing/11-llm-as-judge-eval.py` — the production monitoring setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — monitoring as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator's monitoring setup.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — monitoring as a system design pattern.
 
 ## The 3 questions this lecture preps you for

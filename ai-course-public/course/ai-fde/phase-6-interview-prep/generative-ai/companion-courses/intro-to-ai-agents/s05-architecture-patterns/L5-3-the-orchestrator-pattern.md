@@ -169,9 +169,9 @@ This is the difference between a candidate who says "I built a multi-agent syste
 ## Cross-references
 
 - **Practice code**: `course/practice/level-5-agents/lesson-9-4-langgraph.py` — the LangGraph orchestrator with 6 nodes and conditional edges.
-- **Reference implementation**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the production PacificFreight orchestrator.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/07-orchestrator-pattern.md` — the orchestrator as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the canonical orchestrator reference.
+- **Reference implementation**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the production PacificFreight orchestrator.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the orchestrator as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the canonical orchestrator reference.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — orchestrator as a system design pattern.
 
 ## The 3 questions this lecture preps you for

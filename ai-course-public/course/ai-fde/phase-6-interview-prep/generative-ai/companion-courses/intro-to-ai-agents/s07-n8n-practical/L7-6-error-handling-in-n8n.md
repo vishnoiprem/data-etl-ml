@@ -384,11 +384,11 @@ This is the difference between a candidate who says "I added error handling" and
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/n8n/05-error-workflow.json` — the error workflow template.
-- **Reference implementation**: `course/hardcode/level-7-n8n/05-error-handling.md` — the canonical error handling setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/04-error-handling.md` — error handling as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server's error handling parallels the n8n error workflow.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/10-low-code-platforms.md` — error handling as a system design concern.
+- **Practice code**: `course/ai-fde/phase-2-core-build/n8n/05-error-workflow.json` — the error workflow template.
+- **Reference implementation**: `course/hardcode/level-9-failure-handling/17-circuit-breaker-llm.py` — the canonical error handling setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — error handling as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server's error handling parallels the n8n error workflow.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — error handling as a system design concern.
 
 ## The 3 questions this lecture preps you for
 

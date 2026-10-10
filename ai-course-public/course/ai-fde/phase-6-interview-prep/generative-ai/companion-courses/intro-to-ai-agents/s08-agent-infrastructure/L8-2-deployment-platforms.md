@@ -361,11 +361,11 @@ This is the difference between a candidate who says "I deployed the agent" and a
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/k8s/` — the K8s manifests.
-- **Reference implementation**: `course/hardcode/level-8-infrastructure/02-deployment.md` — the canonical deployment patterns.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/12-deployment.md` — deployment as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — multi-agent requires per-agent deployment.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/11-infrastructure.md` — deployment as a system design topic.
+- **Practice code**: `course/ai-fde/phase-2-core-build/k8s/` — the K8s manifests.
+- **Reference implementation**: `course/hardcode/level-6-production-systems/13-autoscaling-llm-service.py` — the canonical deployment patterns.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — deployment as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — multi-agent requires per-agent deployment.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — deployment as a system design topic.
 
 ## The 3 questions this lecture preps you for
 

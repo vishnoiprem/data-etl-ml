@@ -338,11 +338,11 @@ This is the difference between a candidate who says "we have auth" and a candida
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/security/` — the security reference.
-- **Reference implementation**: `course/hardcode/level-8-infrastructure/05-security.md` — the canonical security setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/16-secrets-management.md` — secrets as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — MCP server security parallels the agent security.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/11-infrastructure.md` — security as a system design topic.
+- **Practice code**: `course/ai-fde/phase-2-core-build/security/` — the security reference.
+- **Reference implementation**: `course/hardcode/level-9-failure-handling/18-hallucination-detector.py` — the canonical security setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — secrets as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — MCP server security parallels the agent security.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — security as a system design topic.
 
 ## The 3 questions this lecture preps you for
 

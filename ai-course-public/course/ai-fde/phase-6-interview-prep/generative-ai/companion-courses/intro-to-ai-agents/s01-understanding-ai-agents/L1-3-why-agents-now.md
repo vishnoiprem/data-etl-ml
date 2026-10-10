@@ -64,7 +64,7 @@ def is_agent_ready(stack: dict) -> dict:
         "cost_acceptable":    stack.get("per_run_cost_usd", 1.0) < 0.10,  # 4
     }
 
-# PacificFreight Phase 3 (per phase-2-applications/)
+# PacificFreight Phase 3 (per phase-2-core-build/)
 pf_stack = {
     "llm":              "gpt-5-mini",
     "tool_registry":    TOOLS,           # 4 tools

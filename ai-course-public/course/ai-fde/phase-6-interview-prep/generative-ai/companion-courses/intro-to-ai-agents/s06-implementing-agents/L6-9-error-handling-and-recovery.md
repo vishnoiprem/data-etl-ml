@@ -202,10 +202,10 @@ This is the difference between a candidate who says "we handle errors" and a can
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-1-foundations/04-error-handling.md` — the error taxonomy.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/18-error-handling.py` — the production error handling.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/04-error-handling.md` — error handling as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/01-mcp-drafter/` — the MCP server's error handling.
+- **Practice code**: `course/ai-fde/phase-1-foundations/README.md` — the error taxonomy.
+- **Reference implementation**: `course/hardcode/level-9-failure-handling/17-circuit-breaker-llm.py` — the production error handling.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — error handling as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/01-mcp-drafter/` — the MCP server's error handling.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — error handling as a system design pattern.
 
 ## The 3 questions this lecture preps you for

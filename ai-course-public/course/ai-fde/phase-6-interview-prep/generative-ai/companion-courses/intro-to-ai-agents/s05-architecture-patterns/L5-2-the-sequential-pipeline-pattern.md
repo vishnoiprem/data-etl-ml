@@ -146,10 +146,10 @@ This is the difference between a candidate who says "I chained some agents" and 
 
 ## Cross-references
 
-- **Practice code**: `course/practice/level-5-agents/lesson-9-2-pipeline.py` — the sequential pipeline pattern.
-- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/14-pipeline-agent.py` — the production pipeline with error handling.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/02-the-fde-loop.md` — the pipeline as a control-flow primitive.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator is the more flexible pattern when the pipeline is too rigid.
+- **Practice code**: `course/practice/level-5-agents/lesson-9-2-crewai.py` — the sequential pipeline pattern.
+- **Reference implementation**: `course/hardcode/level-5-agentic-workflows/10-multi-agent-orchestrator.py` — the production pipeline with error handling.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — the pipeline as a control-flow primitive.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — the orchestrator is the more flexible pattern when the pipeline is too rigid.
 - **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — pipeline as a system design pattern.
 
 ## The 3 questions this lecture preps you for

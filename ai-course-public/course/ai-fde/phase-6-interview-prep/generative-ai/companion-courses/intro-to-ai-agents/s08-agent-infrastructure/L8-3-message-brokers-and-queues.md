@@ -314,11 +314,11 @@ This is the difference between a candidate who says "I added a queue" and a cand
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/infra/broker.py` — the SQS worker implementation.
-- **Reference implementation**: `course/hardcode/level-8-infrastructure/03-broker.md` — the canonical broker setup.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/18-message-brokers.md` — message brokers as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/projects/02-multi-agent-dispatcher/` — multi-agent uses queues for fan-out.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/11-infrastructure.md` — message brokers as a system design topic.
+- **Practice code**: `course/ai-fde/phase-2-core-build/service/circuit.py` — the SQS worker implementation.
+- **Reference implementation**: `course/hardcode/level-7-real-time-pipelines/15-kafka-ai-consumer.py` — the canonical broker setup.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — message brokers as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/` — multi-agent uses queues for fan-out.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — message brokers as a system design topic.
 
 ## The 3 questions this lecture preps you for
 

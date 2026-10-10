@@ -295,11 +295,11 @@ This is the difference between a candidate who says "we use n8n" or "we use code
 
 ## Cross-references
 
-- **Practice code**: `course/ai-fde/phase-2-applications/n8n/platform-decision.md` — the platform rubric.
-- **Reference implementation**: `course/hardcode/level-7-n8n/08-platform-decision.md` — the canonical decision framework.
-- **Phase 1 module**: `course/ai-fde/phase-1-foundations/15-low-code-platforms.md` — n8n as an FDE pattern.
-- **Phase 4 project**: `course/ai-fde/phase-3-capstone/` — Phase 4 uses both Python (Projects 1-3) and adds n8n for ops-facing workflows.
-- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/10-low-code-platforms.md` — n8n as a system design choice.
+- **Practice code**: `course/ai-fde/phase-2-core-build/README.md` — the platform rubric.
+- **Reference implementation**: `course/hardcode/level-6-production-systems/13-autoscaling-llm-service.py` — the canonical decision framework.
+- **Phase 1 module**: `course/ai-fde/phase-1-foundations/README.md` — n8n as an FDE pattern.
+- **Phase 4 project**: `course/ai-fde/phase-4-capstone/` — Phase 4 uses both Python (Projects 1-3) and adds n8n for ops-facing workflows.
+- **Interview prep**: `course/ai-fde/phase-6-interview-prep/system-design/09-agentic-ai.md` — n8n as a system design choice.
 
 ## The 3 questions this lecture preps you for
 
