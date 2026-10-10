@@ -1,6 +1,6 @@
 # Data Pipeline Design (ETL) — A Practical Guide for Data Engineers
 
-> **31 lessons · 7 modules · 3 videos · ~15 hours of focused practice**
+> **36 lessons · 7 modules · 3 videos · ~17 hours of focused practice**
 >
 > **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
 >
@@ -51,7 +51,7 @@ senior data engineer".
 | [06](06_performance/) | **Performance & Fault Tolerance** | 4 | Orchestration, retry/DLQ, monitoring & SLA, data quality. |
 | [07](07_mock_interviews/) | **Mock Interviews** | 3 | Three full pipeline designs — Netflix clickstream, doc processing, banking CDC. |
 
-**Total: 31 lessons.**
+**Total: 36 lessons** (5 added in the Round-2 review: data lakehouse, data quality, and 3 advanced pipeline mocks).
 
 ---
 

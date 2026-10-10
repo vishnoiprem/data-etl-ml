@@ -1,5 +1,93 @@
 # Changelog
 
+## 2026-10-10 — Behavioral: 8 new lessons + 50-hour reading list (Google + Meta DE 2026)
+
+The 40-question Data Engineer behavioral bank (the second batch from
+the per-company question DB) and the 2026 Google + Meta DE guides
+(Datavidhya May 2026, Interview101 2026, Aced 2026, DataDriven
+Sept 2026, Tryexponent 2026) revealed 8 gaps in the behavioral
+track. All 8 are now covered with worked examples, plus a 50-hour
+course-wide reading list parallel-tracking the per-track plans.
+
+### Added — Behavioral lessons (8)
+
+- **`07_decision_by_instinct.md`** — non-STAR "Tell me about a
+  decision you made based on your instincts." 3-layer framework
+  (data you had / data you didn't / heuristic you used).
+- **`08_difficult_team_members.md`** — trap question "What types
+  of team members do you find difficult." Reframe: type of
+  *situation* not type of *person*. The "I was the problem"
+  ownership beat.
+- **`09_complex_program_stakeholders.md`** — "Tell me about a
+  relevant complex program you've managed." 5-component program
+  framework (stakeholders / decision matrix / slip / escalation /
+  outcome). Program ≠ project.
+- **`10_data_product_pride.md`** — "What product that you led are
+  you most proud of." DE-flavored; project → product verb swap.
+- **`11_influence_without_authority.md`** — "How do you
+  influence without authority." 4 mechanisms (expertise /
+  reciprocity / coalition / legitimacy).
+- **`12_product_sense_investigation.md`** — "PM at a food delivery
+  app, conversion dropped — how do you investigate?" The bridge
+  between behavioral and SQL/modeling. 7-step hypothesis tree.
+- **`13_unclear_requirements_scoping.md`** — **verbatim from the
+  Datavidhya 2026 Google DE guide**: "Tell me about a time you
+  worked on a project with unclear requirements. How did you
+  scope it?" 5-move scoping playbook.
+- **`14_being_wrong_humble_pivot.md`** — **verbatim from the
+  Datavidhya 2026 Google DE guide**: "Tell me about a time you
+  were wrong. What changed your mind?" The #1 Googleyness hire
+  signal per both Datavidhya and Interview101.
+
+### Added — Behavioral index
+
+- **`40_questions_taxonomy.md`** — all 40 bank questions mapped to
+  lessons + worked-example scenario + company verbatim match.
+  Includes both 2026 loop structures (Meta 3-5 weeks, Google
+  6-12 weeks) with sources cited **latest-to-oldest** (Aced,
+  DataDriven, Interview101, Tryexponent, Datavidhya, Glassdoor,
+  IGotAnOffer).
+
+### Added — Reading list
+
+- **`05_resources.md` rewritten** — from a behavioral-only 8-book
+  list to a course-wide 50-hour reading schedule (22 books + 14
+  articles/papers + 14 case studies across 8 topic areas). Every
+  reading is cross-referenced to a specific lesson in the course.
+  222 → 554 lines, ~1,000 → ~2,900 words.
+
+### Refreshed
+
+- `README.md` — totals updated to **495 lessons / 1,441 tests**.
+  Added 50-hour reading list callout.
+- `behavioral_interviews/README.md` — 31 → **39 lessons**,
+  Module 05 expanded from 5 to 13 lessons.
+- `data_pipeline_design/README.md` — 31 → **36 lessons**,
+  noting the 5 lessons added in the Round-2 review (lakehouse,
+  data quality, 3 advanced mocks).
+
+### Stats
+
+- **Behavioral**: 31 → **39 lessons** (+8 net)
+- **Course-wide**: 487 → **495 lessons** (+8 net)
+- **0 new tests** (prose-only track)
+- **All 1,441 tests still pass; no regression** on data_modeling /
+  data_pipeline_design / sql_interviews / coding_interviews / common
+- 9 new files (`07`-`14` + index) + 1 file rewritten (`05_resources.md`)
+
+### Sources (latest-to-oldest, per user request)
+
+1. **Aced.io (2026)** — Meta DE loop, Ownership questions, pass-bar 3/5.
+2. **DataDriven.io (Sept 2026)** — Meta architecture examples.
+3. **Interview101.com (2026)** — Meta 5+5 SQL+Python, Google pivot.
+4. **Datavidhya (May 2026)** — Google loop with HC, Googleyness pillars, L5 comp.
+5. **Tryexponent.com (2026)** — Meta product sense + ownership.
+6. **Glassdoor (Meta 2026)** — 5-round loop reports.
+7. **IGotAnOffer (May 2026)** — Meta behavioral round structure.
+8. **(2024-2025)** — older source coverage already in `02_theory/` and `03_tactics/`.
+
+---
+
 ## 2026-10-10 — Data Modeling Spec Remap
 
 The `data_modeling/` track was rewritten to match the official

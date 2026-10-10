@@ -1,7 +1,7 @@
 # Data Engineering Interview Course
 
 A complete, code-first curriculum for **data engineering, software engineering,
-and product-management interviews**. **12 tracks · 473 lessons · 1,385 tests**.
+and product-management interviews**. **12 tracks · 495 lessons · 1,441 tests**.
 Every system in the code-heavy tracks is a real, runnable service or pipeline
 you can execute on your laptop.
 
@@ -20,7 +20,7 @@ you can execute on your laptop.
 | # | Track | Modules | Lessons | Type | Tests |
 |---|---|---|---|---|---|
 | 01 | **System Design** | 11 | 71 | Code + design | 764 |
-| 02 | **Behavioral Interviews** | 5 | 32 | Prose only | — |
+| 02 | **Behavioral Interviews** | 5 | 39 | Prose only | — |
 | 03 | **How to Get the Interview** | 2 | 13 | Prose + 1 resume artifact | — |
 | 04 | **EM Introduction** | 1 | 6 | Prose only | — |
 | 05 | **People Management** | 5 | 21 | Prose only | — |
@@ -31,7 +31,7 @@ you can execute on your laptop.
 | 10 | **SQL Interviews** | 10 | 102 | SQL + tests | 67 |
 | 11 | **Coding Interviews** | 15 | 118 | Python + tests | 293 |
 | 12 | **Common library** | — | — | infra | 38 |
-| | **Total** | **70** | **487** | | **1,417** |
+| | **Total** | **70** | **495** | | **1,441** |
 
 The two new modules added in the most recent review pass:
 - **Track 03 / Module 02** — *Compensation, Leveling & Negotiation* (4 lessons) closes the loop after the offer
@@ -62,7 +62,7 @@ data-engineering-course/
 │   ├── notebooks/
 │   └── README.md                   # system_design track index
 │
-├── behavioral_interviews/          # Track 02: 5 modules, 31 lessons
+├── behavioral_interviews/          # Track 02: 5 modules, 39 lessons
 │   ├── 01_fast_track/              # 8 lessons
 │   ├── 02_theory/                  # 7 lessons
 │   ├── 03_tactics/                 # 6 lessons
@@ -258,7 +258,8 @@ engineering work that this course builds on:
 ## Stats
 
 - **12 tracks** in 1 repository
-- **487 lessons** across 70 modules
+- **495 lessons** across 70 modules
 - **1,441 unit tests** (677 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
+- **50-hour reading list** parallel-tracking the course plans in `behavioral_interviews/05_practice/design/05_resources.md`
 - **1,000+ files** of design docs, working code, fixtures, and tests
 - **Authored by Prem Vishnoi** · <https://medium.com/@premvishnoi>
