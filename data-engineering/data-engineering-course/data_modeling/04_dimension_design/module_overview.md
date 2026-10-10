@@ -21,9 +21,9 @@ This module covers the three big dimension patterns: SCD Types
 
 | # | Lesson | What you'll learn |
 |---|---|---|
-| [21](design/21_scd_types.md) | Slowly Changing Dimensions: SCD Type 1, 2, 3 | The three SCD types, when to use each, and the SCD 2 temporal join. |
-| [22](design/22_conformed_role_playing.md) | Conformed and Role-Playing Dimensions | The two patterns for sharing dims across facts. |
-| [23](design/23_junk_degenerate.md) | Junk and Degenerate Dimensions | The two "exception" dims that don't quite fit the standard pattern. |
+| [21](design/21_dimension_table_design.md) | Dimension Table Design | The anatomy of a dim: PK, NK, attributes, SCD flag, audit columns, and the wide-and-denormalized rule. |
+| [22](design/22_slowly_changing_dimensions.md) | Slowly Changing Dimensions (SCDs) | SCD Type 1, 2, 3 deep dive; the temporal join. |
+| [23](design/23_advanced_dimension_design_techniques.md) | Advanced Dimension Design Techniques | Conformed, role-playing, junk, degenerate, plus multi-valued dims and the bridge-table pattern. |
 
 ---
 

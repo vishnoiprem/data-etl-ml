@@ -1,22 +1,48 @@
-# Lesson 20 — Designing a Star Schema for Spotify (music streams)
+# Lesson 20 — Practice: Video Streaming Service
 
 > **What you'll learn:** the streaming star, with the
-> song/artist/album hierarchy, a device-type dim, and skip
-> rate as a measure. By the end of this lesson you'll be able
-> to draw a streaming-media warehouse for Spotify, Netflix,
-> YouTube, or any "play" event product.
+> content/creator/series hierarchy, a device-type dim, and
+> watch-time as the headline measure. By the end of this
+> lesson you'll be able to draw a video-streaming
+> warehouse for YouTube, Netflix, Disney+, Twitch, or any
+> "play" event product.
+
+---
+
+## Why this lesson
+
+Video streaming is the prompt you get at Netflix, YouTube,
+Disney+, HBO Max, Twitch, and any company that serves
+long-form video to consumer devices. The schema looks
+like Spotify on the surface — there's a play event, a
+content hierarchy, a device type, a skip-or-completion
+signal — but the *framing* is different: instead of
+asking "skip rate by genre," you're asking "completion
+rate by content by device by recommender," and instead
+of "release-decade" you're asking "content freshness"
+(how recently was this released). The trick is the
+*content/creator/series hierarchy* (video replaces
+song/artist/album) and the *recommender* dimension —
+Netflix's home page and YouTube's sidebar are
+recommenders, and the analyst needs to know which one
+served the video. This lesson teaches the streaming
+star with that broader content+recommender framing.
 
 ---
 
 ## The prompt
 
-> "Design a data warehouse for Spotify so the analytics team
-> can answer questions about song skip rate, listening time
-> by genre, and release-decade performance."
+> "Design a data warehouse for a video streaming service
+> (think YouTube / Netflix / Disney+) so the analytics
+> team can answer questions about watch time, completion
+> rate, content performance, and recommender
+> effectiveness."
 
-This is the fifth canonical question. The trick is the
-*song/artist/album hierarchy* — three related dimensions that
-have to be modeled carefully.
+This is the canonical streaming question. The trick is
+the *content/creator/series hierarchy* — three related
+dimensions that have to be modeled carefully — and the
+*recommender dim* that records which surface served
+the video (home, search, "because you watched," etc.).
 
 ---
 
@@ -203,7 +229,9 @@ applies — denormalize `release_decade` onto the fact.
 
 The full DDL is in
 [`code/star_schemas.py`](../code/star_schemas.py) as
-`build_spotify_schema(q)`. Run the demo:
+`build_spotify_schema(q)` (the function backs the
+video-streaming lesson; the schema is the same
+streaming shape). Run the demo:
 
 ```bash
 python3 data_modeling/03_high_level_diagrams/code/star_schemas.py
@@ -273,14 +301,55 @@ ORDER BY skip_rate DESC;
 
 Open
 [`code/star_schemas.py`](../code/star_schemas.py) and read
-`build_spotify_schema`. Then:
+`build_spotify_schema` (the function backs the
+video-streaming lesson). Then:
 
-1. State the grain out loud: "one row per stream."
-2. Identify which dimensions are denormalized onto the
-   fact (artist_key, album_key) and explain why.
+1. State the grain out loud: "one row per watch
+   session" (or per stream — the schema is the same
+   shape).
+2. Identify which dimensions are denormalized onto
+   the fact (creator_key, series_key) and explain
+   why — every dashboard joins all three content
+   levels, so denormalizing the FKs avoids a 3-hop
+   join.
 3. Run the test and verify the 10 sample streams
    aggregate to 2 decades of skip data.
 
+For the video-streaming framing, the questions the
+analytics team asks are:
+
+- **Watch time:** "average watch minutes per
+  session per device per content type."
+- **Completion rate:** "% of session that reaches
+  95% of the video, by content length and
+  recommender surface."
+- **Content performance:** "top creators by total
+  watch hours, top series by completion rate."
+- **Recommender effectiveness:** "which surface
+  (home, search, 'because you watched') produces
+  the highest completion rate."
+
+The recommender surface becomes a `dim_recommender`
+in the production schema — the same star, with one
+more dim.
+
 ---
+
+## In the interview, you would say...
+
+> "Video streaming is one event-grain fact, with the
+> content/creator/series hierarchy denormalized onto
+> the fact (creator_key, series_key) for query speed
+> — every dashboard joins all three, so a 3-hop join
+> would be too slow. The headline measure is
+> `ms_played` (or `seconds_watched`); the headline
+> ratio is completion rate, computed as
+> `SUM(was_completed) / COUNT(*)`. `dim_users` is SCD
+> 2 (subscription tier — free vs premium — drives
+> completion rate). The recommender surface
+> (home, search, "because you watched") is its own
+> dim; a `dim_recommender` with 5–10 rows makes
+> 'which surface drives the best completion' a
+> one-line query."
 
 *Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*

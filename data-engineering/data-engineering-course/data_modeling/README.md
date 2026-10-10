@@ -27,7 +27,7 @@ clarify the business, pick a grain, choose fact vs dimension, decide how
 things change over time. The seven modules drill each move, then layer
 the optimization concerns on top.
 
-**Working code.** The 5 star-schema lessons in Module 03 are real,
+**Working code.** The 7 star-schema lessons in Module 03 are real,
 runnable SQLite schemas with sample data, not pseudo-DDL. The
 dimension, fact, and performance lessons all have code that runs and
 tests that pass.

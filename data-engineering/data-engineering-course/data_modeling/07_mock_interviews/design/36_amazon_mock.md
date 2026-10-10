@@ -1,4 +1,4 @@
-# Lesson 33 — Mock Interview: Amazon Marketplace Schema
+# Lesson 36 — Design a Data Warehouse Schema for Amazon
 
 > **Format:** mock interview transcript (~30 minutes).
 > Read it aloud. Note the *grain choices for the four

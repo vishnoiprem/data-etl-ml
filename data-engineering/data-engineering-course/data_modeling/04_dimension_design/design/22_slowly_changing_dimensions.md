@@ -1,10 +1,8 @@
-# Lesson 21 — Slowly Changing Dimensions: SCD Type 1, 2, 3
+# Slowly Changing Dimensions (SCDs)
 
-> **What you'll learn:** the three Slowly Changing Dimension
-> types — when to use each, the tradeoffs, and the SCD 2
-> temporal join that lets you reconstruct history. By the end
-> of this lesson you'll be able to pick the right SCD type
-> for any dimension attribute and defend your choice.
+## Why this lesson
+
+This is the most-asked dimension topic in the data modeling interview. A dim is *slowly changing* if its attributes change over time but the changes are rare compared to the fact events: a user changes country every 3 years, a product gets re-categorized every quarter, a city's rate card changes every year. The schema has to *decide* what to do with each change — overwrite, expire-and-insert, or add a previous column. Each decision has a query implication. Without an SCD strategy, your historical facts will silently re-attribute to current values, and your cohort analysis will be wrong. This lesson is the deep dive on SCD Type 1, 2, and 3 — the three types that cover 99% of interview scenarios.
 
 ---
 
@@ -18,10 +16,10 @@ changes once a year. The changes are infrequent enough that
 we don't need to capture them in the fact table — but we
 *do* need to handle them in the dim.
 
-The Kimball taxonomy gives us three SCD types, named for
-the historical depth they preserve. There's also a Type 4
-(history table) and a Type 6 (hybrid), but the three
-covered here are 99% of what you'll see in interviews.
+The Kimball taxonomy gives us three SCD types, named for the
+historical depth they preserve. There's also a Type 4
+(history table) and a Type 6 (hybrid), but the three covered
+here are 99% of what you'll see in interviews.
 
 ---
 
@@ -293,8 +291,22 @@ write down:
    dims.
 
 If you can do this in 10 minutes, you understand the
-SCD 2 pattern. Move to Lesson 22.
+SCD 2 pattern. Move to Lesson 21 (the foundational lesson
+on dimension table design).
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+## In the interview, you would say...
+
+> "Default to **SCD Type 2** for any dimension attribute that
+> changes and that the analytics team needs to attribute
+> historically — country, plan, category, status. Add
+> `effective_date`, `expiry_date`, `is_current`, and a surrogate
+> key. Use the temporal join
+> (`effective_date <= event_date < expiry_date`) to reconstruct
+> history. Type 1 only for typos and corrections; Type 3 almost
+> never."
+
+---
+
+*Author: Prem Vishnoi <prem.vishnoi@example.com>*

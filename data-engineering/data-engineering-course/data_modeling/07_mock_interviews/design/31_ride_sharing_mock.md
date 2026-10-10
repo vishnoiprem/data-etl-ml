@@ -1,4 +1,4 @@
-# Lesson 32 — Mock Interview: Ride-Sharing Schema
+# Lesson 31 — Design a Data Warehouse Schema for a Ride-Sharing Service
 
 > **Format:** mock interview transcript (~30 minutes).
 > Read it aloud. Note the use of *role-playing

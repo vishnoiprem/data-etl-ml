@@ -26,7 +26,7 @@ you can execute on your laptop.
 | 05 | **People Management** | 5 | 21 | Prose only | — |
 | 06 | **Project Retrospective** | 1 | 6 | Prose only | — |
 | 07 | **Solutions Architect** | 6 | 47 | Prose + 8 mermaid diagrams | — |
-| 08 | **Data Modeling** | 7 | 36 | Code + design | 91 |
+| 08 | **Data Modeling** | 7 | 36 | Code + design | 115 |
 | 09 | **Data Pipeline Design (ETL)** | 7 | 35 | Code + design | 164 |
 | 10 | **SQL Interviews** | 10 | 102 | SQL + tests | 67 |
 | 11 | **Coding Interviews** | 15 | 118 | Python + tests | 293 |
@@ -207,14 +207,14 @@ cd system_design && python3 scripts/run_tests.py
 Expected output:
 
 ```
-[data_modeling]        91 tests
+[data_modeling]        115 tests
 [data_pipeline_design] 164 tests
 [sql_interviews]       67 tests
 [coding_interviews]    293 tests
 [common]               38 tests
 [system_design]        764 tests (pre-existing 82 fail + 56 err)
 
-TOTAL                  1,417 tests; 653 of the new-track tests are all green
+TOTAL                  1,441 tests; 677 of the new-track tests are all green
 ```
 
 ---
@@ -226,7 +226,7 @@ TOTAL                  1,417 tests; 653 of the new-track tests are all green
 - **How to Get the Interview** → `how_to_get_the_interview/README.md` — resume, referrals, sourcing
 - **Engineering Management** → `em_introduction/README.md` + `people_management/README.md` + `project_retrospective/README.md`
 - **Solutions Architect** → `solutions_architect/README.md` — 6 modules, 47 lessons, 8 mermaid diagrams
-- **Data Modeling** → `data_modeling/README.md` — 5 real runnable SQLite star schemas
+- **Data Modeling** → `data_modeling/README.md` — 7 real runnable SQLite star schemas + 6 full mock-interview solutions
 - **Data Pipeline Design** → `data_pipeline_design/README.md` — 3 full mock-interview pipeline solutions
 - **SQL Interviews** → `sql_interviews/README.md` — 59 graded SQL problems
 - **Coding Interviews** → `coding_interviews/README.md` — 103 coding problems across 12 modules
@@ -259,6 +259,6 @@ engineering work that this course builds on:
 
 - **12 tracks** in 1 repository
 - **487 lessons** across 70 modules
-- **1,417 unit tests** (621+32 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
+- **1,441 unit tests** (677 of the new-track tests pass; the 138 pre-existing system_design failures are documented in `CHANGELOG.md`)
 - **1,000+ files** of design docs, working code, fixtures, and tests
 - **Authored by Prem Vishnoi** · <https://medium.com/@premvishnoi>

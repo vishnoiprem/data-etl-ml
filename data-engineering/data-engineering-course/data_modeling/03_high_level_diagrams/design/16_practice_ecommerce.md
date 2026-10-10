@@ -1,10 +1,28 @@
-# Lesson 16 — Designing a Star Schema for E-Commerce (5-table star)
+# Lesson 16 — Practice: E-commerce Platform
 
 > **What you'll learn:** the canonical 5-table star for an
 > e-commerce warehouse — the one every interviewer at Meta,
 > Shopify, Stripe, and Amazon expects you to draw. By the end of
 > this lesson you'll have built the schema, run the demo, and
 > known every table and column by heart.
+
+---
+
+## Why this lesson
+
+E-commerce is the most common data-modeling prompt in
+interviews at consumer-internet companies (Meta, Shopify,
+Stripe, Amazon, Wayfair, Instacart) and a frequent prompt at
+B2B SaaS companies too. The reason it shows up so often is
+that *every* e-commerce warehouse has the same shape: a fact
+at the order-line-item grain, surrounded by a customer
+dim, a product dim, an order dim, and a date dim. The
+prompt is open-ended on purpose — the interviewer is
+checking whether you know the canonical shape, whether you
+can defend the grain choice, and whether you can name the
+SCD strategy. This lesson walks you through the canonical
+5-table star, the grain decision, the SCD 2 tradeoffs, and
+the three queries every interviewer will ask.
 
 ---
 
@@ -311,5 +329,19 @@ python3 -m unittest data_modeling/03_high_level_diagrams/tests/test_schemas.py
 All 24 tests should pass.
 
 ---
+
+## In the interview, you would say...
+
+> "E-commerce is the canonical 5-table star: one fact at
+> the order-line-item grain — not order grain, because
+> line-item grain answers 'most popular product' — with
+> `dim_customers` and `dim_products` as SCD 2 (segment
+> and price change over time), `dim_orders` as SCD 1
+> (status and payment method are static), and the
+> conformed `dim_date`. Star, not snowflake: reads are
+> hot, writes are cold, dims are small. The headline
+> measure is `net_amount`; the headline ratio is
+> net revenue per customer, computed by joining
+> `fact_order_items` to `dim_customers` and `dim_date`."
 
 *Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*

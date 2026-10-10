@@ -1,8 +1,8 @@
-# Lesson 06 — Discovery Questions: Who, What, When, Where, Why, How
+# Recognizing the Core Business Problem
 
-> **What you'll learn:** a bank of 50+ discovery questions grouped by
-> category. By the end of this lesson you'll know which 5–8 to ask
-> for any given prompt.
+## Why this lesson
+
+Before you can model the data, you have to recognize *what business problem the interviewer is actually asking you to solve*. A fitness app prompt, a marketplace prompt, and a SaaS subscription prompt all look superficially similar ("design a data warehouse"), but the underlying problem is different in each: engagement over time vs two-sided liquidity vs recurring revenue. Senior candidates don't jump to entities — they pause, listen, and identify the core problem. This lesson gives you a 50+ question discovery bank and the 5W+H framework, so you can recognize the core problem in *any* prompt and pick the 5–8 questions that surface it.
 
 ---
 
@@ -28,6 +28,9 @@ The full bank is in
 [`code/discovery_questions.py`](../code/discovery_questions.py) — 50+
 questions across 9 categories. The skill is not knowing all 50; the
 skill is knowing which 5–8 to ask for the prompt in front of you.
+Asking the right questions is how you *recognize the core business
+problem* — the answer to the "what problem are we actually solving?"
+question underneath the prompt.
 
 ---
 
@@ -43,13 +46,15 @@ You will never have time to ask all 50. The rule of thumb:
 - **Fill the rest with the categories the prompt most implies.**
 
 For example, for a healthcare prompt, fill the rest with "Where"
-(PII / HIPAA constraints). For a real-time bidding prompt, fill the
-rest with "When" (latency, freshness) and "Edge cases" (out-of-order
+(PII / HIPAA constraints). For a real-time bidding prompt, fill
+the rest with "When" (latency, freshness) and "Edge cases" (out-of-order
 events).
 
 ---
 
-## Worked example — selecting questions for a fitness app
+## Recognizing the core problem — two worked examples
+
+### Worked example — fitness app: the core problem is "engagement over time"
 
 > "Design a data warehouse for a fitness app so the analytics team
 > can report on monthly engagement."
@@ -77,9 +82,12 @@ That's 7 questions, including the meta-grain question. The
 candidate has covered all 5 Ws and "How," plus a category specific
 to the prompt (Historical, for the SCD choice).
 
----
+**Recognized core problem:** *measuring and comparing engagement
+across cohorts over time.* That single sentence drives every
+later design decision (periodic snapshot fact, SCD 2 on users,
+date dim as the headline grouping).
 
-## Worked example — selecting questions for an OLTP hospital system
+### Worked example — hospital patient records: the core problem is "identity over time under regulation"
 
 > "Design a schema for a hospital patient records system."
 
@@ -104,6 +112,12 @@ The candidate's 5–8 questions (note the change in emphasis):
 Notice: the **What** is the system of record (not engagement), the
 **Where** is regulatory, and the **Edge** is identity resolution.
 The categories the candidate emphasizes change with the prompt.
+
+**Recognized core problem:** *maintaining a single patient
+identity across encounters and time, under regulatory constraint,
+with full history of clinical events.* The fitness-app and
+hospital prompts share vocabulary ("design a schema") but the core
+problem is different. Recognizing the difference is the skill.
 
 ---
 
@@ -133,10 +147,22 @@ Pick any of the canonical modeling questions from
 Without looking at the worked example, write 5–8 discovery questions
 for it. Time yourself: 5 minutes.
 
-Then look at the worked example (in the next three lessons) and
+Then look at the worked example (in the next lessons) and
 compare. Did you cover all 5 Ws? Did you ask the meta-grain
-question? Did you avoid the anti-patterns?
+question? Did you avoid the anti-patterns? Could you state the
+core business problem in one sentence?
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+## In the interview, you would say...
+
+> "I recognize the core business problem here as *[one-sentence
+> restatement]*. To validate that read, I'm going to ask 5–8
+> specific discovery questions across the 5W+H categories, with
+> extra weight on the buckets the prompt implies. The questions
+> are how I confirm my read of the problem before I commit to a
+> schema."
+
+---
+
+*Author: Prem Vishnoi <prem.vishnoi@example.com>*

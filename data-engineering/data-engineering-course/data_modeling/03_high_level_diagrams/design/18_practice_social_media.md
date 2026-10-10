@@ -1,17 +1,40 @@
-# Lesson 18 — Designing a Star Schema for Instagram
+# Lesson 18 — Practice: Social Media Analytics
 
-> **What you'll learn:** the event-grain fact for an Instagram-
-> style product (post events: view, like, comment, share, save)
+> **What you'll learn:** the event-grain fact for a social-
+> media product (post events: view, like, comment, share, save)
 > and the trick of using *two* user keys on the fact to capture
-> the actor-vs-author relationship.
+> the actor-vs-author relationship, with the framing of
+> engagement analytics, virality tracking, and feed-ranking
+> analysis.
+
+---
+
+## Why this lesson
+
+Social media is the prompt you get at Meta (Instagram,
+Facebook), Twitter/X, LinkedIn, TikTok, Pinterest, and
+Snap. The schema looks like ride-sharing on the surface —
+there's an event grain — but the trick is that *every
+event has two users*: the actor (who did the action) and
+the author (who owns the post). Most candidates use a
+single user FK on the fact and try to derive the author
+via a join through `dim_posts`. That works for "engagement
+per post" but breaks down for "engagement per creator"
+(the most common creator-economy question). This lesson
+teaches the *two-user-key* trick, the *factless-fact*
+pattern (a fact with no numeric measures), and the
+engagement / virality / feed-ranking question taxonomy
+that social-media analytics is built around.
 
 ---
 
 ## The prompt
 
-> "Design a data warehouse for Instagram so the analytics team
-> can answer questions about engagement, reach, and creator
-> performance."
+> "Design a data warehouse for a social media platform
+> (Instagram-style — feed of posts, likes, comments,
+> shares, follows) so the analytics team can answer
+> questions about engagement, virality, feed ranking,
+> and creator performance."
 
 This is the third canonical question. The trick is the
 *actor-vs-author* distinction: every event has a user who
@@ -273,15 +296,47 @@ LIMIT 5;
 
 Open
 [`code/star_schemas.py`](../code/star_schemas.py) and read
-`build_instagram_schema`. Then:
+`build_instagram_schema` (the function backs the social-
+media lesson; the schema is identical). Then:
 
 1. State the grain out loud: "one row per (post, actor,
    event_type, minute)."
 2. Identify the two foreign keys to `dim_users` and explain
-   why each is there.
+   why each is there — the actor for "what did this user
+   do" queries, the author for "engagement per creator."
 3. Run the test and watch the 10 sample events aggregate
    correctly.
 
+For the social-media framing, the questions the
+analytics team asks are:
+
+- **Engagement:** "engagement rate per post," "top
+  creators by engagement," "what % of viewers also
+  like."
+- **Virality:** "what % of viewers come from a share,"
+  "how does engagement spread through the follower
+  graph," "K-factor of a post."
+- **Feed ranking:** "what's the click-through rate
+  per slot in the feed," "how does dwell time
+  correlate with like probability."
+
+All three are queries against the same `fact_post_events`
+table. The schema doesn't change between them.
+
 ---
+
+## In the interview, you would say...
+
+> "Social media is an event-grain factless fact — one
+> row per (post, actor, event_type, minute), with
+> *two* user keys to capture the actor (who did the
+> action) and the author (who owns the post). The
+> two-key trick is what makes 'engagement per creator'
+> a single join. The fact has no numeric measures;
+> engagement rate, virality, and feed-ranking ratios
+> are all computed in the same scan with `CASE WHEN`
+> over `dim_event_type.is_engagement`. `dim_users` is
+> SCD 2 for creator analytics; `dim_posts` is SCD 1
+> because posts are immutable after creation."
 
 *Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*

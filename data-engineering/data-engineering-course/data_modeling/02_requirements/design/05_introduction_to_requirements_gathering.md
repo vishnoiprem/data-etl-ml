@@ -1,7 +1,8 @@
-# Lesson 05 — Why Business Requirements Come First
+# Introduction to Gathering Business Requirements
 
-> **What you'll learn:** the concrete cost of skipping requirements,
-> and the three signals that tell you a candidate is doing it right.
+## Why this lesson
+
+This is the gateway lesson for Module 02 and arguably for the entire data modeling interview. Interviewers are not testing your ability to draw a star schema — they are testing your ability to *discover* the right star schema. The first 5–8 minutes of the round, spent gathering requirements, are the most leveraged 5 minutes in the round. This lesson explains *why* requirements come first, what it costs to skip them, and the three visible signals a senior candidate emits when they're doing it right. If you only internalize one thing from this module, internalize this: discovery before design.
 
 ---
 
@@ -118,4 +119,15 @@ will feel natural.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+## In the interview, you would say...
+
+> "Before I draw a single table, I'm going to spend about 5
+> minutes gathering requirements. I'll ask 5–8 specific questions
+> about consumers, use cases, freshness, volume, and grain — then
+> I'll write a short requirements doc and read the grain back to
+> you. This 5-minute investment saves 15–25 minutes of redraw and
+> earns the highest-weighted bucket on the rubric."
+
+---
+
+*Author: Prem Vishnoi <prem.vishnoi@example.com>*

@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-10-10 — Data Modeling Spec Remap
+
+The `data_modeling/` track was rewritten to match the official
+curriculum spec (Course era / Interview Kickstart-style). The lesson
+*count* was already 36; the lesson *names* and *practice scenarios*
+now match the spec exactly.
+
+### Remapped modules
+
+- **M2 — Gathering Business Requirements** (8 lessons): renamed to
+  the spec's exact titles — Introduction, Recognizing the Core
+  Business Problem, Analyzing Metrics, Analyzing Query Patterns,
+  Defining Latency Requirements, Data Volume & Scalability, Data
+  Retention Policies, Example. Each lesson now opens with a "Why this
+  lesson" hook and closes with an "In the interview, you would say…"
+  blockquote.
+- **M3 — High-Level Model Diagrams** (8 lessons): 2 conceptual
+  (Creating Diagrams, Evolving Models) + 6 practice (E-commerce, Social
+  Media, Video Streaming, Ride-Sharing, Cloud Services, Online
+  Advertising). Two new practice lessons (Cloud Services, Online
+  Advertising) added; the existing 5 schemas kept and reframed.
+- **M4 — Dimension Design** (3 lessons): new foundational lesson
+  *Dimension Table Design* added (the anatomy, the wide-and-
+  denormalized rule, the 7 components of a good dim); SCDs and
+  Advanced Dimension Design follow.
+- **M7 — Mock Interviews** (6 lessons): rewritten to the spec's
+  scenario list — Ride-Sharing, Customer Support, Airbnb, Stripe,
+  Instagram, Amazon. Four new mocks written (Customer Support, Airbnb,
+  Stripe, Instagram); Uber→Ride-Sharing; the off-spec fitness/
+  library/hospital/hotel mocks removed.
+
+### Stats
+
+- **Lessons**: 36 (unchanged)
+- **Tests**: 115 (was 91; +24 from the 2 new M3 schemas + 4 new M7 schemas)
+- **Files added**: 9 (M2 rewrite, M3/M4 new lessons, M7 new mocks + 2 new schemas)
+- **Files renamed**: 17 (across M2, M3, M4, M7)
+- **Files removed**: 5 (1 M4 junk-degenerate merged into M4 advanced; 4 M7 off-spec mocks)
+- All tests still pass green.
+
+---
+
 ## 2026-10-10 — Round-2 Review Pass: End-to-End Interview Coverage
 
 A second code-review pass identified 8 P0 gaps that would prevent the

@@ -1,9 +1,28 @@
-# Lesson 17 — Designing a Star Schema for Ride-Sharing
+# Lesson 17 — Practice: Ride-Sharing Platform
 
 > **What you'll learn:** the multi-fact ride-sharing star, with
 > the trip-cancellation split and surge as a measure. By the end
 > of this lesson you'll be able to draw the schema in under 10
 > minutes.
+
+---
+
+## Why this lesson
+
+Ride-sharing is the prompt you get at Uber, Lyft, Grab,
+and any company that operates a two-sided marketplace
+(drivers and riders). The schema looks like e-commerce
+on the surface — there's a fact table, there are
+dimensions — but the trick is that *two* events matter
+(completed trips and cancellations), and the trickier
+trick is that **surge is a measure, not a dimension.**
+Most mid-level candidates draw one fact and try to fit
+both events into it; that breaks the grain rule. Most
+also make `dim_surge` a tiny dim of buckets
+(`1.0`, `1.2`, `1.5`), which loses the fact that surge
+is continuous. This lesson teaches the two-fact split
+and the "continuous measure" decision, both of which
+show up in every ride-sharing interview.
 
 ---
 
@@ -279,5 +298,19 @@ add a 6th schema for the GPS event stream and write
 3 tests for it.
 
 ---
+
+## In the interview, you would say...
+
+> "Ride-sharing is two facts, not one — `fact_trips` at
+> the completed-trip grain and `fact_cancellations` at
+> the cancellation grain. Combining them requires
+> nullable measures and breaks the grain rule. Surge is
+> a measure on `fact_trips`, not a `dim_surge` of
+> buckets, because surge is continuous (1.37 is as valid
+> as 1.5). Drivers and cities are SCD 2 (vehicle, city
+> rate card change over time); riders are SCD 1. The
+> GPS ping stream is a third fact at the event grain,
+> not denormalized onto `fact_trips` because there are
+> hundreds of pings per trip."
 
 *Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*

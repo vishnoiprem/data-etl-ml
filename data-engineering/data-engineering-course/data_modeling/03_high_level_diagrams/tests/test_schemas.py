@@ -1,4 +1,4 @@
-"""Tests for the five star schemas and the ER-to-table translator.
+"""Tests for the practice star schemas and the ER-to-table translator.
 
 Author: Prem Vishnoi <prem.vishnoi@example.com>
 """
@@ -34,8 +34,10 @@ from er_to_tables import (  # type: ignore
     translate_er,
 )
 from star_schemas import (  # type: ignore
+    build_cloud_services_schema,
     build_ecommerce_schema,
     build_instagram_schema,
+    build_online_advertising_schema,
     build_rideshare_schema,
     build_spotify_schema,
     build_support_schema,
@@ -240,6 +242,102 @@ class TestSpotifyStar(unittest.TestCase):
         # sanity: skipped count <= total
         for r in rows:
             self.assertLessEqual(r["n_skipped"], r["n"])
+
+
+class TestCloudServicesStar(unittest.TestCase):
+    def test_creates_all_tables(self):
+        with QueryRunner(":memory:") as q:
+            names = build_cloud_services_schema(q)
+        for n in (
+            "dim_customer",
+            "dim_service",
+            "dim_region",
+            "dim_usage_type",
+            "dim_date",
+            "fact_usage",
+        ):
+            self.assertIn(n, names)
+
+    def test_fact_usage_carries_cost(self):
+        with QueryRunner(":memory:") as q:
+            build_cloud_services_schema(q)
+            cols = {row["name"] for row in q.query_all("PRAGMA table_info(fact_usage)")}
+        for needle in (
+            "usage_qty",
+            "unit_price",
+            "cost_usd",
+            "customer_key",
+            "service_key",
+            "region_key",
+        ):
+            self.assertIn(needle, cols)
+
+    def test_cost_rollup_by_service(self):
+        with QueryRunner(":memory:") as q:
+            build_cloud_services_schema(q)
+            rows = q.query_all(
+                """
+                SELECT s.service_name, SUM(f.cost_usd) AS total_cost
+                FROM fact_usage f
+                JOIN dim_service s ON f.service_key = s.service_key
+                GROUP BY s.service_name
+                """
+            )
+        # 3 services have usage rows
+        self.assertEqual(len(rows), 3)
+        # sum of cost_usd in the inserted data is 5 + 10 + 18 = 33
+        total = sum(r["total_cost"] for r in rows)
+        self.assertAlmostEqual(total, 33.0, places=2)
+
+
+class TestOnlineAdvertisingStar(unittest.TestCase):
+    def test_creates_all_tables(self):
+        with QueryRunner(":memory:") as q:
+            names = build_online_advertising_schema(q)
+        for n in (
+            "dim_advertiser",
+            "dim_campaign",
+            "dim_creative",
+            "dim_event_type",
+            "dim_date",
+            "fact_ad_events",
+        ):
+            self.assertIn(n, names)
+
+    def test_fact_ad_events_carries_event_flags(self):
+        with QueryRunner(":memory:") as q:
+            build_online_advertising_schema(q)
+            cols = {row["name"] for row in q.query_all("PRAGMA table_info(fact_ad_events)")}
+        for needle in (
+            "impressions",
+            "clicks",
+            "conversions",
+            "cost_usd",
+            "revenue_usd",
+            "advertiser_key",
+            "campaign_key",
+        ):
+            self.assertIn(needle, cols)
+
+    def test_ctr_by_campaign(self):
+        with QueryRunner(":memory:") as q:
+            build_online_advertising_schema(q)
+            rows = q.query_all(
+                """
+                SELECT
+                    c.campaign_name,
+                    SUM(f.impressions) AS imps,
+                    SUM(f.clicks)      AS cls
+                FROM fact_ad_events f
+                JOIN dim_campaign c ON f.campaign_key = c.campaign_key
+                GROUP BY c.campaign_name
+                """
+            )
+        # 2 campaigns have rows; sanity check the totals
+        self.assertEqual(len(rows), 2)
+        for r in rows:
+            self.assertGreaterEqual(r["imps"], 1)
+            self.assertGreaterEqual(r["cls"], 0)
 
 
 # ---- er_to_tables.py -----------------------------------------------------
