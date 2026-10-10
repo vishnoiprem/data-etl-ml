@@ -14,11 +14,12 @@
 
 ---
 
-## The 1 entry so far
+## The 2 entries so far
 
 | File | Course | Instructor | Length | Best for |
 |---|---|---|---|---|
 | `ed-donner-ai-engineer-core-track.md` | AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents | Ed Donner (Udemy) | 33.5 hr, 8 projects, 8 weeks | The most balanced companion course. 8 projects map 1:1 to Phase 1-5 modules. Best for candidates targeting AI FDE roles at any company. |
+| `intro-to-ai-agents.md` | Intro to AI Agents and Agentic AI | (instructor TBD, Udemy) | 2h 11m, 54 lectures, 9 sections | The shortest, most-focused primer. 2 hours to learn the agent vocabulary (ReAct, ReWoo, multi-agent, n8n workflow) before tackling Ed Donner's Week 8 capstone or the Phase 4 multi-agent project. |
 
 ---
 
