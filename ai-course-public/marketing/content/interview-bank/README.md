@@ -147,6 +147,9 @@ The companies that are integrating AI into existing products. Stronger on domain
 | 98 | Canva (Magic Studio) | ML Engineer | [98-canva.md](./98-canva.md) |
 | 99 | Palantir (ML / AIP) | ML Engineer | [99-palantir.md](./99-palantir.md) |
 | 100 | Anduril (ML / Lattice) | ML Engineer | [100-anduril.md](./100-anduril.md) |
+| 89 | Waymo (AV / Perception) | ML Engineer | [89-waymo.md](./89-waymo.md) |
+| 92 | Datadog (Observability / AIOps) | ML Engineer | [92-datadog.md](./92-datadog.md) |
+| 93 | Snowflake (Snowpark / Cortex AI) | ML Engineer | [93-snowflake.md](./93-snowflake.md) |
 
 ---
 
