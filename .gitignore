@@ -87,3 +87,11 @@ data-engineering/data-engineering-course/aws_snowflake_dbt_course/dbt_project/.u
 data-engineering/data-engineering-course/aws_snowflake_dbt_course/dbt_project/user_logs/
 data-engineering/data-engineering-course/aws_snowflake_dbt_course/dbt_project/.state/
 data-engineering/data-engineering-course/aws_snowflake_dbt_course/.venv/
+
+# leads-pipeline PII (tailored resumes, HTML previews, scraped job pages) — NEVER commit
+leads-pipeline/draft-cron/.tailored_resumes/
+leads-pipeline/draft-cron/.preview/
+leads-pipeline/draft-cron/*.html
+leads-pipeline/draft-cron/*.docx
+**/.tailored_resumes/
+**/.preview/
