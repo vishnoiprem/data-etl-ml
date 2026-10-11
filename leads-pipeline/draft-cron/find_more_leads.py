@@ -54,7 +54,7 @@ BOUNCE_DENY = {
     "advtravel365.com", "servicelink.com",
 }
 
-# Senior-level filter
+# Senior-level filter — INCLUDES CTO/Head of/VP/Director for leadership roles
 JUNIOR_TERMS = re.compile(
     r"\b(junior|jr\.?|intern|entry|graduate|new grad|co-?op|apprentice|"
     r"associate|asst\.?|assistant|level\s*[i1])\b", re.I
@@ -72,7 +72,9 @@ AI_DATA_TERMS = re.compile(
     r"airflow|dagster|prefect|terraform|kubernetes|cloud|aws|gcp|"
     r"azure|sre|devops|platform|backend|api|microservices|distributed|"
     r"python|pytorch|tensorflow|llmops|vector|embedding|fine.?tun|"
-    r"prompt|chatbot|inference|training)\b", re.I
+    r"prompt|chatbot|inference|training|cto|chief|vp\s+eng|"
+    r"head\s+of\s+eng|head\s+of\s+data|head\s+of\s+ai|"
+    r"head\s+of\s+platform|head\s+of\s+ml|head\s+of\s+infra)\b", re.I
 )
 
 JUNK_EMAIL_RE = re.compile(
@@ -214,7 +216,11 @@ def derive_email(company, url):
 
 
 def is_senior_eng(title, description):
-    """Return True if this looks like a senior AI/ML/data/cloud engineering role."""
+    """Return True if this looks like a senior AI/ML/data/cloud/leadership role.
+    Includes senior+ engineers, CTO, VP, Head of, Director, Principal, Staff,
+    and Lead roles — for both Avilx BDE pod placements and direct-client CTO
+    search.
+    """
     t = f"{title} {description or ''}".lower()
     if JUNIOR_TERMS.search(t):
         return False
@@ -222,9 +228,11 @@ def is_senior_eng(title, description):
         return False
     if not AI_DATA_TERMS.search(t):
         return False
-    # Require 'senior' / 'staff' / 'lead' / 'principal' / 'head' or years of experience
-    if re.search(r"\b(senior|staff|principal|lead|head|manager|architect|"
-                 r"engineer\s*ii|engineer\s*iii|sr\.?|ii|iii)\b", t):
+    # Accept CTO/Chief/VP/Head/Director/Principal/Staff/Lead/Senior/Architect
+    if re.search(r"\b(cto|chief\s+technology|chief\s+data|chief\s+ai|"
+                 r"vp|vice\s+president|head\s+of|director|principal|"
+                 r"staff|senior|lead|architect|manager|"
+                 r"engineer\s*ii|engineer\s*iii|sr\.?)\b", t):
         return True
     if re.search(r"\b(\d{1,2})\+?\s*years?\b", t):
         return True
@@ -521,6 +529,53 @@ def scrape_hiringcafe():
     return out
 
 
+def scrape_cocomby():
+    """Cocomby is a curated AI/ML job board. Their jobs page exposes a
+    public JSON-ish listing at /jobs. We try the public listings URL
+    and parse any structured job links.
+    """
+    out = []
+    urls = [
+        "https://cocomby.com/jobs",
+        "https://cocomby.com/ai-jobs",
+        "https://cocomby.com/remote-jobs",
+    ]
+    for url in urls:
+        try:
+            html = http_get(url).text
+            # Look for job cards: <a href="/jobs/<slug>">...</a>
+            for m in re.finditer(
+                r'<a[^>]+href=["\']([^"\']*cocomby\.com/jobs/[^"\']+)["\'][^>]*>(.*?)</a>',
+                html, re.S | re.I,
+            ):
+                link = m.group(1)
+                if not link.startswith("http"):
+                    link = urljoin(url, link)
+                inner = m.group(2)
+                # Title is usually inside an <h*> or first text node
+                title_m = re.search(r"<h\d[^>]*>(.*?)</h\d>", inner, re.S)
+                title = re.sub(r"<[^>]+>", " ", title_m.group(1) if title_m else inner)
+                title = unescape(title).strip()[:200]
+                if not title or not is_senior_eng(title, ""):
+                    continue
+                # Co and role
+                co, role = split_company_role(title)
+                # Cocomby is a job board, not a company — derive company email
+                em = (extract_email_from_text(inner) or
+                      derive_email_from_company(co))
+                if not em:
+                    continue
+                out.append({
+                    "company": co, "role": role, "contact_email": em,
+                    "source_url": link, "source": "cocomby",
+                    "jd_text": "",
+                })
+            time.sleep(MIN_INTERVAL)
+        except Exception as e:
+            print(f"  [Cocomby] {e}")
+    return out
+
+
 SCRAPERS = [
     ("WWR", scrape_weworkremotely),
     ("RemoteOK", scrape_remoteok),
@@ -528,6 +583,7 @@ SCRAPERS = [
     ("YC", scrape_yc_workatastartup),
     ("Wellfound", scrape_wellfound),
     ("HiringCafe", scrape_hiringcafe),
+    ("Cocomby", scrape_cocomby),
 ]
 
 

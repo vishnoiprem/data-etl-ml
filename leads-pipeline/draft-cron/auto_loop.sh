@@ -51,8 +51,10 @@ for i in $(seq 1 "$LOOP_MAX"); do
 
     # 1. Refresh leads in background (don't block email phase)
     if (( i % 5 == 1 )); then
-        echo "[$i/$LOOP_MAX] refreshing lead list..." | tee -a "$LOG"
-        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python find_more_leads.py >> "$LOG" 2>&1 || echo "  (lead refresh failed, continuing)"
+        echo "[$i/$LOOP_MAX] refreshing lead list (job boards)..." | tee -a "$LOG"
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python find_more_leads.py >> "$LOG" 2>&1 || echo "  (find_more_leads failed, continuing)"
+        echo "[$i/$LOOP_MAX] refreshing lead list (clients + AI-native)..." | tee -a "$LOG"
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python find_clients.py >> "$LOG" 2>&1 || echo "  (find_clients failed, continuing)"
     fi
 
     # 2. Sync bounces
