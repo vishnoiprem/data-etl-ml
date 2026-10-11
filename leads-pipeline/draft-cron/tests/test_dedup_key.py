@@ -98,10 +98,72 @@ def test_legitimate_email_not_filtered():
     print("  ✓ legitimate email passes JUNK filter")
 
 
+def test_db_unique_index_is_role_aware():
+    """The DB unique index must be on (co, em, role), not just (co, em).
+    If it's the old (co, em) index, the ON CONFLICT clause in
+    insert_leads() will not be honored and a 2nd row with a different
+    role will silently succeed instead of being skipped."""
+    from db.lead_store import get_cursor
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT indexname, indexdef
+            FROM pg_indexes
+            WHERE tablename = 'leads'
+              AND indexname IN ('leads_company_email_unique',
+                                'leads_company_email_role_unique')
+        """)
+        rows = cur.fetchall()
+        names = {r["indexname"] for r in cur.fetchall()}
+    # Re-fetch (cur.fetchall() consumed the cursor)
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT indexname
+            FROM pg_indexes
+            WHERE tablename = 'leads'
+        """)
+        all_idx = {r["indexname"] for r in cur.fetchall()}
+    print(f"  existing indexes: {sorted(all_idx)}")
+    assert "leads_company_email_role_unique" in all_idx, (
+        "Migration 001 not applied — leads_company_email_role_unique is missing. "
+        "Run: psql -f db/migrations/001_role_aware_unique_index.sql"
+    )
+    assert "leads_company_email_unique" not in all_idx, (
+        "Old (co, em) unique index still present — DROP it before the new one takes effect."
+    )
+    print("  ✓ DB unique index is role-aware")
+
+
+def test_on_conflict_does_not_duplicate():
+    """Insert the same (co, em, role) twice — 2nd call must skip via
+    ON CONFLICT (not silently insert via tracking_id collision)."""
+    from find_more_leads import insert_leads
+    import time, uuid
+    uniq = f"oc-{uuid.uuid4().hex[:6]}"
+    leads = [
+        {"company": f"OC{uniq}", "role": "Senior AI Engineer",
+         "contact_email": f"hr@{uniq}.example.com",
+         "source": "test", "source_url": "", "jd_text": ""},
+    ]
+    first_ins, first_skp, first_err = insert_leads(leads, dry=False)
+    print(f"  first:  ins={first_ins} skp={first_skp} err={first_err}")
+    assert first_ins == 1 and first_err == 0
+    second_ins, second_skp, second_err = insert_leads(leads, dry=False)
+    print(f"  second: ins={second_ins} skp={second_skp} err={second_err}")
+    assert second_ins == 0 and second_skp == 1 and second_err == 0
+    # Cleanup
+    from db.lead_store import get_cursor
+    with get_cursor() as cur:
+        cur.execute("DELETE FROM leads WHERE LOWER(company) = %s",
+                    (f"oc{uniq}",))
+    print("  ✓ ON CONFLICT correctly skips dupes")
+
+
 if __name__ == "__main__":
     print("🧪 test_dedup_key")
     test_dedup_keys_distinct_for_different_roles()
     test_dedup_keys_collapse_for_same_role()
     test_junk_email_filtered()
     test_legitimate_email_not_filtered()
+    test_db_unique_index_is_role_aware()
+    test_on_conflict_does_not_duplicate()
     print("  ✅ all passed")
