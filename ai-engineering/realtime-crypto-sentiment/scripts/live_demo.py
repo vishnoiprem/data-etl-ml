@@ -145,6 +145,7 @@ class Demo:
 
         self.tick_count = 0
         self.tweet_count = 0
+        self._traded_signal_keys: set[tuple[str, str, str]] = set()
 
     def seed_history(self) -> None:
         """Backfill 90 min of price history + scored tweets so signal
@@ -251,7 +252,9 @@ class Demo:
             momentum_value=momentum_value,
             momentum_history=mom_hist,
         )
-        # Real DB write
+        # Normalize ts to tz-naive UTC for SQLite (production bug; see
+        # synth_tweet comment).
+        sig.ts = sig.ts.replace(tzinfo=None) if sig.ts.tzinfo else sig.ts
         db.insert_signal(sig.to_row())
         self.signals_emitted.append({
             "ts": sig.ts,
@@ -268,6 +271,13 @@ class Demo:
         if not last:
             return
         sig_row = last[0]
+        # Dedupe: the production pipeline only consumes the in-memory
+        # _latest_signals dict, so a signal fires once. The demo re-reads
+        # from the DB every 2s, so we skip if this signal was already
+        # traded (key = (ts, symbol, action)).
+        key = (str(sig_row["ts"]), sym, sig_row["action"])
+        if key in self._traded_signal_keys:
+            return
         # Build a Signal object the broker expects
         from src.ml.signal import Signal
         sig = Signal(
@@ -285,8 +295,14 @@ class Demo:
         fill = self.broker.on_signal(sig, float(price))
         if fill is None:
             return None
+        # Normalize ts to tz-naive for SQLite (production bug; see synth_tweet)
+        _ts = fill.ts
+        if isinstance(_ts, str):
+            from datetime import datetime as _dt
+            _ts = _dt.fromisoformat(_ts)
+        fill_ts = _ts.replace(tzinfo=None) if _ts.tzinfo else _ts
         db.insert_paper_trade({
-            "ts": fill.ts,
+            "ts": fill_ts,
             "symbol": fill.symbol,
             "side": fill.side,
             "qty": fill.qty,
@@ -299,14 +315,14 @@ class Demo:
         pos = self.broker.positions.get(sym)
         if pos is not None:
             db.upsert_position({
-                "ts": fill.ts,
+                "ts": fill_ts,
                 "symbol": sym,
                 "qty": pos.qty,
                 "avg_price": pos.avg_price,
                 "realized_pnl": pos.realized_pnl,
             })
         self.fills.append({
-            "ts": fill.ts,
+            "ts": fill_ts,
             "symbol": fill.symbol,
             "side": fill.side,
             "qty": fill.qty,
@@ -314,6 +330,7 @@ class Demo:
             "fee": fill.fee_usd,
             "cash": fill.cash_after,
         })
+        self._traded_signal_keys.add(key)
 
     # ── Live status table ──────────────────────────────────────────
 
