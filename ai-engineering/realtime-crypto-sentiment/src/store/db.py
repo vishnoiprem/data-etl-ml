@@ -191,7 +191,7 @@ def upsert_tweet(t: dict) -> bool:
     if raw is not None and not isinstance(raw, str):
         raw = json.dumps(raw, default=str)
     row = {
-        "ts": t["ts"],
+        "ts": _to_naive_utc(t["ts"]),
         "tweet_id": t["tweet_id"],
         "symbol": t["symbol"],
         "text": t["text"],
@@ -235,7 +235,7 @@ def update_tweet_sentiment(tweet_id: int, ts, score: float) -> int:
                 "UPDATE tweets SET sentiment_score=:s "
                 "WHERE tweet_id=:id AND ts=:ts"
             ),
-            {"s": score, "id": tweet_id, "ts": ts},
+            {"s": score, "id": tweet_id, "ts": _to_naive_utc(ts)},
         )
         if result.rowcount > 0:
             return result.rowcount
@@ -270,10 +270,41 @@ def fetch_unscored_tweets(limit: int = 256) -> list[dict]:
     return [dict(r._mapping) for r in rows]
 
 
+def _to_naive_utc(ts):
+    """Coerce a tz-aware datetime to a naive UTC datetime.
+
+    SQLAlchemy's SQLite DateTime type rejects tz-aware datetimes on
+    insert. Postgres tolerates either, so we normalize at the
+    store-boundary so the same code path works on both backends.
+
+    Accepts:
+      - datetime (tz-aware or naive)
+      - pandas.Timestamp
+      - ISO-8601 string (e.g. from a raw SQL roundtrip via SQLite)
+    """
+    if ts is None:
+        return None
+    # pandas.Timestamp
+    if hasattr(ts, "to_pydatetime"):
+        ts = ts.to_pydatetime()
+    # String (SQLite SELECT returns datetimes as text)
+    elif isinstance(ts, str):
+        from datetime import datetime as _dt
+        try:
+            ts = _dt.fromisoformat(ts)
+        except ValueError:
+            # Some drivers emit "YYYY-MM-DD HH:MM:SS.ffffff" (no T).
+            ts = _dt.strptime(ts.split(".")[0], "%Y-%m-%d %H:%M:%S")
+    if ts.tzinfo is not None:
+        from datetime import UTC
+        ts = ts.astimezone(UTC).replace(tzinfo=None)
+    return ts
+
+
 def insert_signal(s: dict) -> None:
     engine = get_engine()
     row = {
-        "ts": s["ts"],
+        "ts": _to_naive_utc(s["ts"]),
         "symbol": s["symbol"],
         "action": s["action"],
         "score": s["score"],
@@ -375,7 +406,7 @@ def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> list[di
 def insert_paper_trade(t: dict) -> None:
     engine = get_engine()
     row = {
-        "ts": t["ts"],
+        "ts": _to_naive_utc(t["ts"]),
         "symbol": t["symbol"],
         "side": t["side"],
         "qty": t["qty"],
@@ -405,7 +436,7 @@ def upsert_position(p: dict) -> None:
     """Record a position snapshot (overwrite by symbol)."""
     engine = get_engine()
     row = {
-        "ts": p["ts"],
+        "ts": _to_naive_utc(p["ts"]),
         "symbol": p["symbol"],
         "qty": p["qty"],
         "avg_price": p["avg_price"],
