@@ -5,7 +5,7 @@
 **Goal:** $3,000–10,000/month by month 3.
 **Time:** 4 hours/day, 28 hours/week.
 **Budget to first dollar:** $0–50 (domain + landing page).
-**Current focus:** the **SMB vertical** — 5 workflows, 5 prompts, 1 hour/day, 7 days. See [`business/plan/smb-offer-ladder.md`](business/plan/smb-offer-ladder.md).
+**Promise for the SMB owner:** save 10+ hours/week with 5 copy-paste AI workflows — no code, $20/month in subscriptions. 1 hour/day, 7 days to ship.
 
 ---
 
@@ -30,11 +30,12 @@ ai-course-public/
 │   ├── ai-fde/                   # 9-week AI Forward-Deployed Engineer curriculum (the FDE track)
 │   ├── 180-day-ai/               # 6-month founder / indie-hacker track
 │   ├── practice/                 # hands-on exercises + labs
-│   ├── hardcode/                 # 4 production-grade reference projects
+│   ├── hardcode/                 # 9-level reference curriculum (llm-foundations → failure-handling) + eval suite
 │   ├── capstone-starters/        # 6 runnable capstones (1-5 = engineer SaaS, 6 = SMB workflow)
 │   ├── outlines/                 # the master course outline + 54-lecture index
 │   ├── workbooks/                # student workbooks
 │   ├── projects/                 # the IDEAL framework + capstone guide
+│   ├── scripts/                  # course-gen automation + data-pipeline helpers
 │   └── PRACTICE-GUIDE.md         # the practice philosophy
 │
 ├── marketing/                    # everything that reaches a customer
@@ -51,7 +52,7 @@ ai-course-public/
 ├── research/                     # market research, competitor analysis, interview questions
 ├── resources/                    # prompt library, tool stack, useful articles
 ├── results/                      # revenue tracker, metrics dashboard, testimonials
-├── prototypes/                   # 2 prototypes (the SMB Content Recycler CLI + a full-stack demo)
+├── prototypes/                   # 6 prototypes: 180-day-course, ai-engineer-course, course-site, full-stack, landing-page, prompt-tool
 └── nb_helpers/                   # Jupyter helpers (for the data-engineering lectures)
 ```
 
@@ -76,7 +77,7 @@ ai-course-public/
 
 - **The full curriculum:** [`course/ai-fde/README.md`](course/ai-fde/README.md) — 9 weeks, 4 phases
 - **The 6 capstones:** [`course/capstone-starters/README.md`](course/capstone-starters/README.md) — pick by audience + technique
-- **The 4 hardcode reference projects:** [`course/hardcode/`](course/hardcode/) — production-grade reference code
+- **The 9-level hardcode reference curriculum:** [`course/hardcode/`](course/hardcode/) — level-1 (LLM foundations) → level-9 (failure-handling), with eval suite (RAG hallucination labels, ingested fixtures, eval report)
 
 **Why this is the deep track:** the engineer reader is a different buyer (higher LTV, longer consideration, $997 cohort). The 6 capstones span RAG, agents, multimodal, code interpreter, function calling, and the no-code SMB workflow.
 
@@ -85,7 +86,7 @@ ai-course-public/
 > **Promise:** build a portfolio + a product + a teaching business in 6 months. 1 project/week. Public-by-default.
 
 - **The 6-month path:** [`course/180-day-ai/README.md`](course/180-day-ai/README.md) — month-by-month project list
-- **The 9 sections of the AI FDE:** [`course/ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/`](course/ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/) — 9 sections × 3-4 lectures each
+- **The 10 sections of the AI FDE:** [`course/ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/`](course/ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/) — 10 sections × 3-4 lectures each
 
 **Why this is the long game:** the 6-month path is for the founder who wants to ship in public. The first 3 months build the portfolio; the second 3 months build the product + the course.
 
@@ -93,18 +94,25 @@ ai-course-public/
 
 ## Current status (week of 2026-10-11)
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| **SMB Substack post** | 1 published | ✅ `2026-10-smb-ai-quick-wins/01-post-body.md` (2,300 words) | Ready |
-| **SMB offer ladder** | 1 written | ✅ `business/plan/smb-offer-ladder.md` | Ready |
-| **L9-4 SMB lecture** | 1 written | ✅ `L9-4-the-smb-first-7-days.md` (~3,000 words) | Ready |
-| **Capstone 6 (SMB content recycler)** | 1 + tests | ✅ `06-smb-content-recycler/` + 5 tests passing | Ready |
-| **Email list** | 100 subs by month 1 | ⏳ 0 (post not published yet) | Pending |
-| **$47 SMB sales** | 50 by month 1 | ⏳ 0 | Pending |
-| **$197 SMB sales** | 20 by month 2 | ⏳ 0 | Pending |
+> **Status legend:** 📝 = drafted (file exists, not published) · 📤 = published (live) · 💰 = revenue event · ⏳ = not started
 
-**The 7-day plan from here:**
-- **Day 1-2:** publish the Substack post.
+| Asset | Target | Actual | Status |
+|-------|--------|--------|--------|
+| **SMB Substack post** | 1 published | 📝 `2026-10-smb-ai-quick-wins/01-post-body.md` drafted (2,300 words) | Not yet on Substack |
+| **SMB offer ladder** | 1 written | 📝 `business/plan/smb-offer-ladder.md` drafted | Not yet on landing page |
+| **L9-4 SMB lecture** | 1 written | 📝 `L9-4-the-smb-first-7-days.md` drafted (~3,000 words) | In course, not yet taught |
+| **Capstone 6 (SMB content recycler)** | 1 + tests | 📝 `06-smb-content-recycler/` drafted · 5/5 tests pass | Code complete, no users yet |
+| **Substack publication** | 1 post live | ⏳ 0 (post not published yet) | Blocker for everything else |
+| **Landing page** | 1 live | ⏳ 0 | Not yet built |
+| **ConvertKit / email infra** | configured | ⏳ 0 | Not yet wired |
+| **Email list** | 100 subs by month 1 | ⏳ 0 | Blocked on Substack publish |
+| **$47 SMB sales** | 50 by month 1 | ⏳ 0 | Blocked on landing page + list |
+| **$197 SMB sales** | 20 by month 2 | ⏳ 0 | Blocked on $47 traction |
+
+**The honest blocker:** everything is drafted; **nothing is published or wired**. The first unblock is publishing the Substack post, then building the landing page, then wiring ConvertKit, then driving traffic. The 90-day revenue plan in `business/plan/smb-offer-ladder.md` assumes these are done in week 1-2.
+
+**The 7-day plan from here (once Substack is live):**
+- **Day 1-2:** ship the landing page + ConvertKit welcome sequence for the $47 tier.
 - **Day 3-5:** post 3-5x on LinkedIn, link to the Substack.
 - **Day 6-7:** send 20 DMs to SMB owners in SG/TW; pitch the $47 tier.
 - **Day 8-30:** run the 7-day welcome sequence; convert 5% of readers to $47.
@@ -143,7 +151,7 @@ ai-course-public/
 - A **public portfolio** of an AI teaching business. Every doc, every script, every prompt is here.
 - A **3-track curriculum** (SMB owner / AI engineer / 6-month founder) with cross-links.
 - A **business plan with revenue math** — the SMB offer ladder has month-by-month projections grounded in 2026 LinkedIn/Substack distribution data.
-- A **runnable codebase** — 6 capstones + 4 hardcode reference projects + 1 prototype.
+- A **runnable codebase** — 6 capstones + 9-level hardcode reference curriculum + 6 prototypes.
 
 **IS NOT:**
 - A **closed-source product.** Everything here is MIT-licensed. Use freely.
