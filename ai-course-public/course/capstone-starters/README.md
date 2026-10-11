@@ -17,7 +17,7 @@ All 6 capstone templates are runnable starters — same general shape, but the *
 | 5 | [AI Content Generator](./05-ai-content-generator/) | GPT-4o + Tavily + SEO scoring | Marketers, agencies, indie hackers | $39/mo | Better SERP research, brand voice |
 | 6 | [**SMB Content Recycler**](./06-smb-content-recycler/) | 5 prompts + 1-page SOP (no code) | SMB owners, content creators, indie hackers | $0-47 | Better brand-voice customization |
 
-> **Capstone 6 is different from 1-5.** It's not a SaaS; it's a workflow. The starter ships as 5 copy-paste prompts + a 1-page SOP that the SMB owner uses in ChatGPT. An optional 50-line Python wrapper is included for SMB owners who want to automate the API call. See the [SMB offer ladder](../../../../business/plan/smb-offer-ladder.md) for how this capstone fits the $47/$197/$497/$997 product stack.
+> **Capstone 6 is different from 1-5.** It's not a SaaS; it's a workflow. The starter ships as 5 copy-paste prompts + a 1-page SOP that the SMB owner uses in ChatGPT. An optional 50-line Python wrapper is included for SMB owners who want to automate the API call. See the [SMB offer ladder](../../business/plan/smb-offer-ladder.md) for how this capstone fits the $47/$197/$497/$997 product stack.
 
 ---
 
@@ -158,6 +158,10 @@ When you change one of capstones 1-5, you've learned the pattern for all five. C
 4. **Get 10 users** before you polish (1-5) or **get 10 posts in a week** before you refine (6)
 5. **Demo on day 56** at cohort Demo Day (1-5) or **document the SOP for an employee on day 30** (6)
 
-For the full 8-week schedule, IDEAL framework, and grading rubric, see [`../projects/ai-engineer-capstone-guide.md`](../projects/ai-engineer-capstone-guide.md). For the SMB 7-day ramp and the 5 guardrails, see [`../../ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/s09-ai-agents-in-business/L9-4-the-smb-first-7-days.md`](../../ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/s09-ai-agents-in-business/L9-4-the-smb-first-7-days.md).
+For the full 8-week schedule, IDEAL framework, and grading rubric, see [`../projects/ai-engineer-capstone-guide.md`](../projects/ai-engineer-capstone-guide.md). For the SMB 7-day ramp and the 5 guardrails, see [`../ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/s09-ai-agents-in-business/L9-4-the-smb-first-7-days.md`](../ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/s09-ai-agents-in-business/L9-4-the-smb-first-7-days.md).
 
 Ship it. 🚀
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

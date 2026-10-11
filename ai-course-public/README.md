@@ -188,6 +188,6 @@ This is a public, open-source teaching repo. If you're an SMB owner who shipped 
 
 ---
 
-**Last updated:** 2026-10-11.
+**Last updated:** 2026-10-12 (refreshed: status table, hardcode, prototypes, 10 sections, scripts dir, value-prop).
 **License:** MIT.
 **Maintainer:** Vishnoi.

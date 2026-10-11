@@ -132,12 +132,11 @@ See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full document.
 
 ## Paired learning resources
 
-- **Lesson labs** — [`../../practice/level-6-multimodal/`](../../practice/level-6-multimodal/) covers Whisper + multimodal patterns
+- **Lesson labs** — [`../../practice/level-3-building-with-apis/`](../../practice/level-3-building-with-apis/) (lessons 5.1-5.7: vision, image gen, TTS, Whisper, video, multimodal patterns, document AI) covers Whisper + multimodal patterns
 - **Codebook** — [`../../workbooks/ai-engineer-codebook.md`](../../workbooks/ai-engineer-codebook.md) § 5 covers function calling patterns
 - **Exercises** — [`../../workbooks/exercises/section-3-prompt-engineering-exercises.md`](../../workbooks/exercises/section-3-prompt-engineering-exercises.md) extends what you build here
 
 ---
 
-## License
-
-MIT — use freely in your own products.
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.

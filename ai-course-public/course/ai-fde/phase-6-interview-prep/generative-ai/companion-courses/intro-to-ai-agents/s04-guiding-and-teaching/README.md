@@ -45,3 +45,7 @@ This section maps to **Phase 1 (Foundations) + Phase 4 (Capstone — SLM project
 ## The thesis
 
 **The 3 levers are ordered by leverage and cost.** The system prompt is the highest-leverage, lowest-cost lever; it should be tried first and tuned carefully. Few-shot examples are the second lever; they are the most reliable way to teach output format and behavior. Fine-tuning and distillation are the levers of last resort; they are expensive (GPU time, dataset curation, eval) and reserved for cases where prompt engineering has been exhausted. **The FDE candidate who can name all 3 levers and explain when to escalate is the candidate who can ship a well-behaved agent on a budget.**
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -168,3 +168,7 @@ Every system design question fits one (or more) of these 9 patterns. **Memorize 
 3. **Practice on 1 question per pattern.** Total: 9 practice questions, 60 min each = 9 hours of practice.
 4. **Rehearse with an AI assistant.** Have it score you on the 4 anti-patterns.
 5. **Use the cost calculation as the closing line.** "Total cost: $X/month at Y QPS, under the $Z/month ceiling." That's the FDE answer.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -126,3 +126,7 @@ Palantir's decomposition round has 5 sub-rounds (called "the 5 questions"). They
 5. **"Tell me about a time you shipped a system like this."** (Phase 1-5 case studies)
 
 **The 5 sub-rounds are the 4-step framework + the behavioral answer.** Same prep, same artifacts, same STAR format.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

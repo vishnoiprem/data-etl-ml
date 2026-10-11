@@ -19,7 +19,7 @@
 | File | Course | Instructor | Length | Best for |
 |---|---|---|---|---|
 | `ed-donner-ai-engineer-core-track.md` | AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents | Ed Donner (Udemy) | 33.5 hr, 8 projects, 8 weeks | The most balanced companion course. 8 projects map 1:1 to Phase 1-5 modules. Best for candidates targeting AI FDE roles at any company. |
-| `intro-to-ai-agents.md` | Intro to AI Agents and Agentic AI | (instructor TBD, Udemy) | 2h 11m, 54 lectures, 9 sections | The shortest, most-focused primer. 2 hours to learn the agent vocabulary (ReAct, ReWoo, multi-agent, n8n workflow) before tackling Ed Donner's Week 8 capstone or the Phase 4 multi-agent project. |
+| `intro-to-ai-agents.md` | Intro to AI Agents and Agentic AI | Ed Donner (Udemy) | 2h 11m, 54 lectures, 9 sections | The shortest, most-focused primer. 2 hours to learn the agent vocabulary (ReAct, ReWoo, multi-agent, n8n workflow) before tackling Ed Donner's Week 8 capstone or the Phase 4 multi-agent project. |
 
 ---
 
@@ -37,3 +37,7 @@
 Phase 1-5 teaches the FDE pattern. The companion courses teach the technical craft. **The complete FDE candidate pairs both** — they can build the artifact (Ed's 8 projects) AND ship it to a customer (Phase 1-5's eval-set-as-spec, cost-ceiling-as-score, handoff-as-proof, state-externalization-as-precondition).
 
 **Build the artifact. Ship it to a customer. Hand it off. That's the FDE.**
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

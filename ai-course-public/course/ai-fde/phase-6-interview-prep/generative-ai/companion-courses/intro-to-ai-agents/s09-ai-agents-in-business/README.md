@@ -57,3 +57,7 @@ The 4 lectures are short on purpose. The agent's commercial layer is the FDE's s
 ## Read next
 
 `L9-1-the-business-case-for-ai-agents.md` — the ROI formula, the 3 customer personas, the 4 objection handlers. The FDE's CFO pitch.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

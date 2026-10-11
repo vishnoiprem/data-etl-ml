@@ -227,3 +227,7 @@ breaker.
 - [`../01-mcp-drafter/`](../01-mcp-drafter/) — the MCP server the drafter can call
 - [`../02-multi-agent-dispatcher/`](../02-multi-agent-dispatcher/) — the multi-agent orchestrator (uses the MCP server)
 - [`../04-ai-data-analyst/`](../04-ai-data-analyst/) — a different customer, a different security model — the project that proves the FDE pattern transfers
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  
