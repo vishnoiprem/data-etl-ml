@@ -520,6 +520,107 @@ def scrape_hnhiring():
     return out
 
 
+def scrape_hn_algolia_24h():
+    """Scrape HN stories + comments from the last 24h that mention
+    'hiring' alongside AI/ML keywords. Uses the public Algolia HN
+    Search API (no auth). Replaces scrape_hnhiring.com (a JS-only SPA
+    that returns empty for non-browser clients) and Twitter (Nitter
+    is dead, X.com requires paid auth).
+    """
+    import time as _time
+    out = []
+    end_ts = int(_time.time())
+    begin_ts = end_ts - 24 * 3600
+    # Mix of "story" and "comment" queries — many hiring posts are in
+    # comments (e.g. Show HN, Ask HN threads).
+    queries = [
+        ('hiring "machine learning"', 'story'),
+        ('hiring AI engineer', 'story'),
+        ('"we are hiring" AI', 'story'),
+        ('"we are hiring" ML', 'story'),
+        ('hiring AI', 'comment'),
+        ('hiring "machine learning"', 'comment'),
+    ]
+    seen_ids: set[str] = set()
+    base = "https://hn.algolia.com/api/v1/search_by_date"
+    for q, tag in queries:
+        try:
+            r = requests.get(
+                base,
+                params={
+                    "query": q,
+                    "tags": tag,
+                    "numericFilters": f"created_at_i>{begin_ts}",
+                    "hitsPerPage": 30,
+                },
+                timeout=12,
+                headers={"User-Agent": "AvilxBot/1.0 (leads-pipeline)"},
+            )
+            if r.status_code != 200:
+                continue
+            for hit in r.json().get("hits", []):
+                oid = hit.get("objectID", "")
+                if oid in seen_ids:
+                    continue
+                seen_ids.add(oid)
+                title = (hit.get("title") or hit.get("story_title") or "").strip()
+                # For comments, prepend the story title for context
+                if not title and hit.get("story_title"):
+                    title = hit["story_title"]
+                text = hit.get("story_text") or hit.get("comment_text") or title
+                if not is_senior_eng(title, text):
+                    continue
+                # Many HN hiring posts read like "Foo is hiring X engineers"
+                # rather than "X at Foo". Handle that pattern.
+                m = re.match(r"^([A-Z][\w&.'-]+(?:\s+[A-Z][\w&.'-]+)?)\s+is\s+hiring\b(.*)$",
+                             title, re.S)
+                if m:
+                    co = m.group(1).strip()
+                    rest = m.group(2).strip().rstrip(".")
+                    # If the rest is empty, fall back to "Engineer"
+                    role = rest or "Engineer"
+                else:
+                    co, role = split_company_role(title)
+                # Filter out HN-internal noise that gets through the regex
+                if not co or co.lower() in ("unknown", "n/a", ""):
+                    # Try to mine from URL
+                    url = hit.get("url") or hit.get("story_url") or ""
+                    if "://" in url:
+                        host = url.split("/")[2].replace("www.", "")
+                        co = host.split(".")[0].title()
+                co_l = co.lower().strip()
+                if any(bad in co_l for bad in (
+                    "ask hn", "show hn", "tell hn", "launch hn",
+                    "ycombinator", "news.ycombinator", "hn hiring",
+                    "mrbeast", "youtube", "tiktok", "twitter",
+                )):
+                    continue
+                # Drop roles that are clearly questions / news headlines
+                role_l = (role or "").lower()
+                if role_l.startswith(("how ", "what ", "why ", "when ", "where ")):
+                    continue
+                item_url = hit.get("story_url") or hit.get("url") or ""
+                if tag == "comment":
+                    item_url = f"https://news.ycombinator.com/item?id={oid}"
+                # Try multiple email-derivation strategies
+                em = (extract_email_from_text(text) or
+                      derive_email_from_company(co) or
+                      derive_email(co, item_url))
+                if not em:
+                    continue
+                out.append({
+                    "company": co,
+                    "role": role or "Engineer",
+                    "contact_email": em,
+                    "source_url": item_url,
+                    "source": f"hn_algolia_24h_{tag}",
+                    "jd_text": (text or "")[:500],
+                })
+        except Exception as e:
+            print(f"  [HN-Algolia-24h] {q!r}: {e}")
+    return out
+
+
 def scrape_yc_workatastartup():
     out = []
     try:
@@ -641,6 +742,7 @@ SCRAPERS = [
     ("WWR", scrape_weworkremotely),
     ("RemoteOK", scrape_remoteok),
     ("HNHiring", scrape_hnhiring),
+    ("HN-Algolia-24h", scrape_hn_algolia_24h),
     ("YC", scrape_yc_workatastartup),
     ("Wellfound", scrape_wellfound),
     ("HiringCafe", scrape_hiringcafe),
