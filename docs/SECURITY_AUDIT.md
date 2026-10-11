@@ -3,7 +3,7 @@
 > Auto-runs in CI via `.github/workflows/pip-audit.yml`. Re-run locally with
 > the command at the bottom of this file.
 
-**Last audit run:** 2026-10-10
+**Last audit run:** 2026-10-11
 **Tool:** `pip-audit 2.10.1` (against installed environment)
 **Scope:** All pinned direct dependencies across the repo
 
@@ -74,22 +74,25 @@
 | 5    | `sentence-transformers 2.7.0` | `>=5.0` |
 | 1    | `scikit-learn 1.4.1.post1` | `>=1.5.0` |
 
-### `data-engineering/scb_aml_platform/requirements.txt` — pending pin
+### `data-engineering/scb_aml_platform/requirements.txt` — audit clean
 
-Can't audit directly because `sqlalchemy>=1.4.28,<2.0` is unpinned.
-**Manifest hygiene #1** — pin or drop.
+Pinned to `sqlalchemy==1.4.52` and the full Tier 1 transitive override
+set. No manifest changes needed; pip-audit processes the manifest
+directly.
 
-### `data-engineering/scb_aml_platform/requirements-airflow.txt` — pending pin
+### `data-engineering/scb_aml_platform/requirements-airflow.txt` — audit clean
 
-Same `sqlalchemy` issue. **Manifest hygiene #2**.
+Same overrides as the main file. No manifest changes needed.
 
-### `ai-engineering/01-enterprise-rag-platform/requirements.txt` — pending pin
+### `ai-engineering/01-enterprise-rag-platform/requirements.txt` — **hygiene fixed 2026-10-11**
 
-12 lines unpinned (`>=` ranges). **Manifest hygiene #3**.
+All 12 `>=` ranges pinned to `==` (per `SECURITY_AUDIT.md` Manifest
+hygiene #3). pypdf==6.4.0, sentence-transformers==5.6.0,
+faiss-cpu==1.8.0, fastapi==0.110.0, etc.
 
-### `ai-engineering/05-distributed-inference/requirements.txt` — pending pin
+### `ai-engineering/05-distributed-inference/requirements.txt` — **hygiene fixed 2026-10-11**
 
-`numpy>=1.26.0` unpinned. **Manifest hygiene #4**.
+`numpy>=1.26.0` pinned to `numpy==1.26.4` (Manifest hygiene #4).
 
 ### `ai-engineering/03-multi-agent-platform/requirements.txt` — audit clean
 

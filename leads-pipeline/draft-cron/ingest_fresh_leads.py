@@ -3,17 +3,23 @@
 ingest_fresh_leads.py — Ingest the 50 fresh leads returned by the
 lead-finder-scout agent. Derives candidate recruiter emails from
 known company-domain patterns, dedups against the existing 141
-companies, and inserts them via autopilot.queue_leads().
-
+companies, and inserts them via the unique index
+  leads_company_email_unique (LOWER(company), LOWER(contact_email))
 Run:  python3 ingest_fresh_leads.py
 """
 
 import re
 import sys
+import secrets
 from pathlib import Path
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
+
+
+def _short_id() -> str:
+    """Generate a short, URL-safe tracking id like 'dremio-3k9a'."""
+    return secrets.token_hex(3)  # 6 hex chars
 
 
 # ============================================================
@@ -99,13 +105,17 @@ def main():
     print(f"📥 Ingesting {len(LEADS)} fresh leads from lead-finder-scout agent")
     print()
 
-    # dedup against existing in DB
+    # dedup against existing in DB by (company, email) pair
     import db.lead_store as ls
     existing_keys = set()
     with ls.get_cursor() as cur:
-        cur.execute("SELECT LOWER(company), LOWER(role) FROM leads")
+        cur.execute("""
+            SELECT LOWER(company) AS co, LOWER(contact_email) AS em
+            FROM leads
+            WHERE contact_email IS NOT NULL
+        """)
         for r in cur.fetchall():
-            existing_keys.add((r[0] or "", r[1] or ""))
+            existing_keys.add((r["co"] or "", r["em"] or ""))
 
     inserted = 0
     skipped_dup = 0
@@ -116,33 +126,39 @@ def main():
         co = (lead["company"] or "").strip()
         role = (lead["role"] or "").strip()
         em = (lead.get("contact_email") or "").strip()
-        key = (co.lower(), role.lower())
+        key = (co.lower(), em.lower())
         if key in existing_keys or key in queue_seen:
             skipped_dup += 1
-            print(f"  ⏭  DUP   {co[:30]:30s} {role[:50]}")
+            print(f"  ⏭  DUP   {co[:30]:30s} {em}")
             continue
         if is_junk(lead):
             skipped_junk += 1
             print(f"  ⏭  JUNK  {co[:30]:30s} {em}")
             continue
+        # build a short tracking id like 'dremio-3k9a'
+        slug = re.sub(r"[^a-z0-9]+", "-", co.lower())[:12].strip("-") or "lead"
+        tid = f"{slug}-{_short_id()}"
         try:
             with ls.get_cursor() as cur:
                 cur.execute("""
                     INSERT INTO leads
-                        (company, role, contact_email, source_url, jd_text,
-                         source, status, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
-                    ON CONFLICT (company, role) DO NOTHING
+                        (tracking_id, company, role, contact_email,
+                         source_url, jd_text, source, status,
+                         created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending',
+                            NOW(), NOW())
+                    ON CONFLICT DO NOTHING
                     RETURNING id
                 """, (
-                    co, role, em, lead["source_url"], lead["jd_text"],
-                    lead["source"],
+                    tid, co, role, em,
+                    lead["source_url"], lead["jd_text"], lead["source"],
                 ))
                 row = cur.fetchone()
             if row:
                 inserted += 1
                 queue_seen.add(key)
-                print(f"  ✅ NEW   #{row[0] if isinstance(row, tuple) else row['id']:3d}  {co[:30]:30s} {role[:60]:60s} {em}")
+                rid = row["id"] if isinstance(row, dict) else row[0]
+                print(f"  ✅ NEW   #{rid:3d}  {co[:30]:30s} {role[:50]:50s} {em}")
             else:
                 skipped_dup += 1
         except Exception as e:
