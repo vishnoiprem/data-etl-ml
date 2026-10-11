@@ -2,7 +2,7 @@
 venv/
 .venv/
 .env
-
+ .idea/workspace.xml
 # IDE
 .idea/
 

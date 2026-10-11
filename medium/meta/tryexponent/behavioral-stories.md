@@ -188,6 +188,12 @@ Eight STAR-format story scaffolds for the Meta DE Ownership round. Each story is
 
 ---
 
+## Related prep
+
+- **[`l6-quick-reference.md`](./l6-quick-reference.md)** — Meta L6 DE interview playbook: round-by-round map, story-to-round index, L6 bar signals, system-design framework, bar-raiser playbook, and L6 pricing/leveling guidance. Rehearse this file *after* Stories 6, 7, 8.
+
+---
+
 ## Story 6 — Led the unified data platform at Lazada end-to-end (real-time + campaign data)
 
 **Prompt:** Tell me about a time you led a project end-to-end.
