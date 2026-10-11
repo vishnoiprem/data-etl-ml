@@ -482,6 +482,82 @@ def per_symbol_buckets(minutes: int, hours: int) -> list[dict]:
     return [dict(r._mapping) for r in rows]
 
 
+def daily_topic_aggregates(days: int, limit: int = 10) -> list[dict]:
+    """Top-N topics (i.e. tracked `symbol`s) aggregated per day for the
+    last `days` days. Each row is one (day, symbol) pair with metrics
+    suitable for the '📡 Live' tab's 'Top topics by day' panel:
+
+        day, symbol, tweet_count, unique_authors, total_likes,
+        total_retweets, total_reach, avg_sentiment, pos_count,
+        neg_count, velocity
+
+    `velocity` = (today's tweet_count) - (yesterday's tweet_count) for
+    the same symbol. Positive = trending up, negative = cooling.
+
+    `total_reach` = SUM(followers) — proxy for "how many eyeballs saw
+    this topic today" (real impressions are unavailable without the
+    X.com API).
+    """
+    engine = get_engine()
+    with engine.connect() as conn:
+        if engine.dialect.name == "postgresql":
+            rows = conn.execute(
+                text(
+                    "SELECT DATE_TRUNC('day', ts) AS day, "
+                    "symbol, COUNT(*) AS tweet_count, "
+                    "COUNT(DISTINCT author) AS unique_authors, "
+                    "COALESCE(SUM(likes), 0) AS total_likes, "
+                    "COALESCE(SUM(retweets), 0) AS total_retweets, "
+                    "COALESCE(SUM(followers), 0) AS total_reach, "
+                    "AVG(sentiment_score) AS avg_sentiment, "
+                    "SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END) AS pos_count, "
+                    "SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS neg_count "
+                    "FROM tweets "
+                    "WHERE ts > NOW() - (:d || ' days')::INTERVAL "
+                    "GROUP BY day, symbol "
+                    "ORDER BY day DESC, tweet_count DESC"
+                ),
+                {"d": str(days)},
+            ).fetchall()
+        else:
+            # SQLite: epoch-day = strftime('%s', ts) / 86400
+            rows = conn.execute(
+                text(
+                    "SELECT CAST(strftime('%s', ts) / 86400 AS INTEGER) AS day, "
+                    "symbol, COUNT(*) AS tweet_count, "
+                    "COUNT(DISTINCT author) AS unique_authors, "
+                    "COALESCE(SUM(likes), 0) AS total_likes, "
+                    "COALESCE(SUM(retweets), 0) AS total_retweets, "
+                    "COALESCE(SUM(followers), 0) AS total_reach, "
+                    "AVG(sentiment_score) AS avg_sentiment, "
+                    "SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END) AS pos_count, "
+                    "SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS neg_count "
+                    "FROM tweets "
+                    "WHERE ts > datetime('now', :d) "
+                    "GROUP BY day, symbol "
+                    "ORDER BY day DESC, tweet_count DESC"
+                ),
+                {"d": f"-{days} days"},
+            ).fetchall()
+    # Compute velocity in Python (cheaper than another SQL pass)
+    by_day_symbol: dict[tuple[int, str], dict] = {
+        (r._mapping["day"], r._mapping["symbol"]): dict(r._mapping) for r in rows
+    }
+    today_keys = set()
+    for r in rows:
+        m = dict(r._mapping)
+        if m["day"] == max(b["day"] for b in by_day_symbol.values()):
+            today_keys.add((m["day"], m["symbol"]))
+    for k, row in by_day_symbol.items():
+        prev = by_day_symbol.get((k[0] - 1, k[1]))
+        row["velocity"] = (row["tweet_count"] - prev["tweet_count"]) if prev else row["tweet_count"]
+    # Return the top-N per day (only for the most recent day for "today's top"
+    # view; caller can iterate to see all days)
+    out = list(by_day_symbol.values())
+    out.sort(key=lambda r: (r["day"], r["tweet_count"]), reverse=True)
+    return out[: max(limit, 1)]
+
+
 def insert_paper_trade(t: dict) -> None:
     engine = get_engine()
     row = {

@@ -109,8 +109,18 @@ def _synthetic_price(likes: int, retweets: int, followers: int) -> float:
 # ── Seed tweets (6h, ~5 per tag every 5 min) ──────────────────────────
 
 def seed_tweets() -> int:
+    """Backfill ~7 days of synthetic tweets so the daily-aggregate panels
+    on the Live tab have multiple days to plot. Two regimes:
+
+    - Last 6 hours: dense, one tweet per tag per 5 min (powers the
+      hourly sentiment timeline).
+    - Days 1-7: sparser, one tweet per tag every 30 min, with per-day
+      velocity drift so "trending up" / "trending down" looks real on
+      the Top-10 panel.
+    """
     n = 0
-    for minutes_ago in range(360, -1, -5):  # 6h, every 5 min
+    # ── Last 6 hours, dense (5-min resolution) ─────────────────────
+    for minutes_ago in range(360, -1, -5):
         ts = NOW - timedelta(minutes=minutes_ago)
         for tag in TAGS:
             templates = TWEET_TEMPLATES.get(tag, [("x", 0.0)])
@@ -129,6 +139,35 @@ def seed_tweets() -> int:
                 "sentiment_score": score + random.uniform(-0.1, 0.1),
             })
             n += 1
+
+    # ── Days 1-7, sparse (30-min resolution) with per-day velocity ──
+    # Each tag gets a "heat" factor that ramps up or down across the
+    # 7 days, so the stacked-bar and velocity leaderboards look organic.
+    heat_factor: dict[str, float] = {t: random.uniform(0.4, 1.6) for t in TAGS}
+    for days_ago in range(1, 8):
+        # Tags heat up / cool down across the week
+        for tag in TAGS:
+            drift = 1.0 + 0.15 * (7 - days_ago) * (heat_factor[tag] - 1.0)
+            drift = max(0.3, min(2.5, drift))
+            base_n = int(48 * drift)  # 48 = 24h * 2 (one per 30 min)
+            for i in range(base_n):
+                ts = NOW - timedelta(days=days_ago, minutes=30 * i)
+                templates = TWEET_TEMPLATES.get(tag, [("x", 0.0)])
+                text, score = random.choice(templates)
+                db.upsert_tweet({
+                    "ts": ts,
+                    "tweet_id": int(ts.timestamp() * 1_000_000) + (hash(tag) + days_ago * 7919) % 999999,
+                    "symbol": tag,
+                    "text": text,
+                    "author": f"user_{random.randint(100, 9999)}",
+                    "likes": random.randint(0, 800),
+                    "retweets": random.randint(0, 200),
+                    "followers": random.randint(100, 50_000),
+                    "url": f"https://x.com/synthetic/{tag}/{int(ts.timestamp())}",
+                    "source_adapter": "nitter",
+                    "sentiment_score": score + random.uniform(-0.1, 0.1),
+                })
+                n += 1
     return n
 
 
@@ -136,6 +175,7 @@ def seed_tweets() -> int:
 
 def seed_signals() -> int:
     n = 0
+    # Dense signals for last 6h
     for minutes_ago in range(360, -1, -15):
         ts = NOW - timedelta(minutes=minutes_ago)
         for tag in TAGS:

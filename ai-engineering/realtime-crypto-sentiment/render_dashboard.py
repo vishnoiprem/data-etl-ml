@@ -9,6 +9,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import streamlit as st
 from src.store import db
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None  # type: ignore
+
 db.override_engine("sqlite:///./dashboard_demo.db")
 db.ensure_sqlite_schema()
 st.cache_data.clear()
@@ -143,7 +148,71 @@ else:
         keep = keep[keep >= 5].index.tolist()
         sym = sym[sym["symbol"].isin(keep)]
         if not sym.empty:
-            # Pivot to: rows=bucket, cols=symbol, values=avg_sent
+            pv = sym.pivot_table(index="bucket", columns="symbol", values="avg_sent", aggfunc="mean")
+            pv = pv.fillna(0).round(2)
+            cols = list(pv.columns)
+            header = "  " + "bucket (UTC)".ljust(20) + "  " + "  ".join(f"{c:>7s}" for c in cols)
+            print(header)
+            print("  " + "-" * len(header))
+            for ts, row in pv.iterrows():
+                ts_str = ts.strftime("%Y-%m-%d %H:%M") if hasattr(ts, "strftime") else str(ts)[:16]
+                vals = "  ".join(f"{row[c]:+7.2f}" for c in cols)
+                print(f"  {ts_str:20s}  {vals}")
+
+    # ── Top-10 daily topics (new section) ────────────────────────────
+    print()
+    banner("TAB 5b — 🏆 TOP TRENDING TOPICS (DAILY)", "🏆")
+    daily = app._daily_topics(days=7, limit=70)
+    if daily.empty:
+        print("  (no daily aggregates)")
+    else:
+        # Today's top 10
+        latest_day = daily["day"].max()
+        today = daily[daily["day"] == latest_day].sort_values("tweet_count", ascending=False).head(10)
+        latest_day_str = pd.Timestamp(latest_day).strftime("%Y-%m-%d")
+        print(f"  Today ({latest_day_str}) top 10:")
+        print(f"  {'Topic':20s}  {'Tweets':>7s}  {'Velocity':>9s}  {'Authors':>8s}  "
+              f"{'Likes':>7s}  {'Retweets':>8s}  {'Reach':>10s}  {'Pos':>4s}  {'Neg':>4s}  {'AvgSent':>7s}")
+        print("  " + "-" * 110)
+        for _, r in today.iterrows():
+            vel = r["velocity"]
+            vel_str = f"{vel:+d} ▲" if vel > 0 else (f"{vel:d} ▼" if vel < 0 else "  0 ─")
+            print(f"  {r['symbol']:20s}  {int(r['tweet_count']):>7,}  {vel_str:>9s}  "
+                  f"{int(r['unique_authors']):>8,}  {int(r['total_likes']):>7,}  "
+                  f"{int(r['total_retweets']):>8,}  {int(r['total_reach']):>10,}  "
+                  f"{int(r['pos_count']):>4,}  {int(r['neg_count']):>4,}  "
+                  f"{r['avg_sentiment']:>+7.3f}")
+
+        # Per-day stacked bars
+        print()
+        print("  Per-day tweet volume (stacked per topic, last 7 days):")
+        pv = daily.pivot_table(
+            index="day", columns="symbol", values="tweet_count", aggfunc="sum",
+        ).fillna(0).astype(int)
+        top_syms = pv.sum().sort_values(ascending=False).head(10).index.tolist()
+        pv = pv[top_syms]
+        days_sorted = sorted(pv.index)
+        for d in days_sorted:
+            day_str = pd.Timestamp(d).strftime("%Y-%m-%d")
+            parts = [f"{s}={int(pv.loc[d, s])}" for s in top_syms if pv.loc[d, s] > 0]
+            print(f"    {day_str}  total={int(pv.loc[d].sum()):>4}   " + "  ".join(parts[:6]) + ("  ..." if len(parts) > 6 else ""))
+
+        # Reach leaderboard
+        print()
+        print("  👀 Reach leaderboard (cumulative Σ followers across window):")
+        reach = daily.groupby("symbol", as_index=False)["total_reach"].sum() \
+                     .sort_values("total_reach", ascending=False).head(10)
+        for _, r in reach.iterrows():
+            print(f"    {r['symbol']:20s}  {int(r['total_reach']):>10,} followers")
+
+    print()
+    print("  Per-tag hourly avg sentiment (last 48h, symbols with ≥5 tweets):")
+    sym = app._per_symbol_buckets_df(60, 48)
+    if not sym.empty:
+        keep = sym.groupby("symbol")["n"].sum()
+        keep = keep[keep >= 5].index.tolist()
+        sym = sym[sym["symbol"].isin(keep)]
+        if not sym.empty:
             pv = sym.pivot_table(index="bucket", columns="symbol", values="avg_sent", aggfunc="mean")
             pv = pv.fillna(0).round(2)
             cols = list(pv.columns)

@@ -510,6 +510,26 @@ def _per_symbol_buckets_df(minutes: int, hours: int) -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=30)
+def _daily_topics(days: int = 7, limit: int = 50) -> pd.DataFrame:
+    """Top topics per day (with velocity, reach, unique authors).
+
+    Note: the SQL helper returns `day` as an integer day-number
+    (epoch_seconds / 86400). Convert to a Timestamp by multiplying by 86400
+    and using `unit="s"`.
+    """
+    rows = db.daily_topic_aggregates(days=days, limit=limit)
+    if not rows:
+        return pd.DataFrame(columns=[
+            "day", "symbol", "tweet_count", "unique_authors", "total_likes",
+            "total_retweets", "total_reach", "avg_sentiment", "pos_count",
+            "neg_count", "velocity",
+        ])
+    df = pd.DataFrame(rows)
+    df["day"] = pd.to_datetime(df["day"].astype(int) * 86400, unit="s", utc=True)
+    return df
+
+
 def page_live() -> None:
     """Live macro view — hourly + daily sentiment aggregated across ALL
     tracked tags. Useful for spotting regime shifts (24h mood swing,
@@ -598,8 +618,100 @@ def page_live() -> None:
     else:
         st.info("No per-tag bucketed data yet.")
 
+    # ── Daily top-10 trending topics ───────────────────────────────────
+    st.markdown("### 🏆 Top-10 trending topics (today, daily aggregate)")
+    st.caption(
+        "Velocity = today's tweet count − yesterday's tweet count "
+        "(positive = heating up, negative = cooling). "
+        "Reach = Σ followers of authors who posted — a proxy for eyeballs, "
+        "since X.com impressions aren't available without the API."
+    )
+    days = st.slider("Lookback (days)", 1, 30, 7, step=1, key="top_topics_days")
+    top_n = st.slider("Top N per day", 5, 25, 10, step=1, key="top_topics_n")
+    daily = _daily_topics(days=days, limit=top_n * days)
+    if daily.empty:
+        st.info("Not enough tweet history to compute daily aggregates yet.")
+    else:
+        # ── "Today's top-N" summary table ──────────────────────────────
+        latest_day = daily["day"].max()
+        today = daily[daily["day"] == latest_day].copy()
+        today = today.sort_values("tweet_count", ascending=False).head(top_n)
+        if not today.empty:
+            t = today.copy()
+            t["avg_sentiment"] = t["avg_sentiment"].fillna(0.0).round(3)
+            t["velocity_str"] = t["velocity"].apply(
+                lambda v: f"{v:+d} ▲" if v > 0 else (f"{v:d} ▼" if v < 0 else " 0 ─")
+            )
+            t["reach_str"] = t["total_reach"].apply(lambda r: f"{int(r):,}")
+            st.dataframe(
+                t[[
+                    "symbol", "tweet_count", "velocity_str", "unique_authors",
+                    "total_likes", "total_retweets", "reach_str",
+                    "pos_count", "neg_count", "avg_sentiment",
+                ]].rename(columns={
+                    "symbol": "Topic", "tweet_count": "Tweets",
+                    "velocity_str": "Velocity", "unique_authors": "Authors",
+                    "total_likes": "Likes", "total_retweets": "Retweets",
+                    "reach_str": "Reach (Σ followers)",
+                    "pos_count": "Pos", "neg_count": "Neg",
+                    "avg_sentiment": "Avg sent",
+                })
+                .style.format({
+                    "Tweets": "{:,}",
+                    "Likes": "{:,}",
+                    "Retweets": "{:,}",
+                    "Pos": "{:,}",
+                    "Neg": "{:,}",
+                    "Avg sent": "{:+.3f}",
+                })
+                .bar(subset=["Tweets"], color="#7f7f7f")
+                .bar(subset=["Avg sent"], color="#d62728", align="mid"),
+                use_container_width=True,
+                height=320,
+            )
+
+        # ── Per-day stacked bar: which topics are gaining / losing ─────
+        st.markdown("### Topic volume over time (stacked per day)")
+        pv = daily.pivot_table(
+            index="day", columns="symbol", values="tweet_count", aggfunc="sum",
+        ).fillna(0).astype(int)
+        if not pv.empty:
+            top_syms = pv.sum().sort_values(ascending=False).head(top_n).index.tolist()
+            pv = pv[top_syms]
+            fig3 = go.Figure()
+            for sym in top_syms:
+                fig3.add_trace(go.Bar(
+                    x=pv.index, y=pv[sym], name=sym,
+                ))
+            fig3.update_layout(
+                barmode="stack", height=380,
+                xaxis_title="Day (UTC)", yaxis_title="Tweet count",
+                margin={"l": 40, "r": 40, "t": 30, "b": 30},
+            )
+            st.plotly_chart(fig3, use_container_width=True)
+
+        # ── Reach leaderboard ──────────────────────────────────────────
+        st.markdown("### 👀 Reach leaderboard (Σ follower-counts per topic)")
+        reach = (
+            daily.groupby("symbol", as_index=False)["total_reach"]
+            .sum()
+            .sort_values("total_reach", ascending=False)
+            .head(top_n)
+        )
+        if not reach.empty:
+            fig4 = px.bar(
+                reach, x="total_reach", y="symbol", orientation="h",
+                title="Cumulative reach across selected window",
+                text="total_reach",
+            )
+            fig4.update_layout(
+                yaxis={"autorange": "reversed"}, height=380,
+                xaxis_title="Reach (Σ followers)",
+                margin={"l": 100, "r": 40, "t": 30, "b": 30},
+            )
+            st.plotly_chart(fig4, use_container_width=True)
+
     # ── Detail table ───────────────────────────────────────────────────
-    st.markdown("### Bucketed detail")
     detail = g.copy()
     detail["pos%"] = (detail["pos_n"] / detail["n"] * 100).round(1)
     detail["neg%"] = (detail["neg_n"] / detail["n"] * 100).round(1)
