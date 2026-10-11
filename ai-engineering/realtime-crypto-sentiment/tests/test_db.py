@@ -217,9 +217,13 @@ def test_sentiment_buckets_aggregates_by_5min(sqlite_db):
     of the host machine's timezone. Two clearly distinct 5-min windows
     are used so the 5-min bucket boundary is observable.
     """
-    # 30 min ago is well inside the 1h lookback. Add small offsets so
-    # each group fits within a single 5-min window.
-    base = datetime.utcnow().replace(microsecond=0) - timedelta(minutes=30)
+    # 30 min ago is well inside the 1h lookback. Floor to a 5-min boundary
+    # so Group A's tweets (10s, 20s, 30s offsets) are guaranteed to land
+    # in the same bucket — otherwise an unlucky `base` straddles the
+    # boundary and the test becomes order-dependent on the wall clock.
+    now = datetime.utcnow().replace(microsecond=0, second=0)
+    base = now - timedelta(minutes=30)
+    base = base - timedelta(minutes=base.minute % 5)
     # Group A: 3 tweets in the 5-min window starting at `base`.
     # 0.4, 0.6, 0.5 → mean 0.5.
     for i, score in enumerate([0.4, 0.6, 0.5]):

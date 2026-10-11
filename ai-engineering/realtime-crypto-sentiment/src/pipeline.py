@@ -207,7 +207,7 @@ class CryptoPipeline:
 
         grouped = aggregate_tags(all_hits)
         rows_written = 0
-        for (bucket, tag), val in grouped.items():
+        for val in grouped.values():
             try:
                 db.upsert_trending_tag({
                     "ts": val["ts"],

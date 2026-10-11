@@ -18,7 +18,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 # ── Regexes ────────────────────────────────────────────────────────────
 
@@ -122,10 +122,21 @@ def aggregate_tags(
 
 
 def _floor_to_bucket(ts: datetime, bucket_seconds: int) -> datetime:
-    """Floor `ts` down to the nearest `bucket_seconds` boundary."""
-    epoch = int(ts.timestamp())
+    """Floor `ts` down to the nearest `bucket_seconds` boundary.
+
+    `ts` is treated as UTC (naive datetimes are common in this pipeline
+    since FinBERT/scoring uses utcnow()). The output is also a naive
+    UTC datetime so it can be inserted into a TIMESTAMP column without
+    timezone conversion.
+    """
+    if ts.tzinfo is None:
+        # Naive datetime assumed UTC.
+        epoch = int(ts.replace(tzinfo=UTC).timestamp())
+    else:
+        epoch = int(ts.timestamp())
     floored = epoch - (epoch % bucket_seconds)
-    return datetime.utcfromtimestamp(floored)
+    # Return naive UTC to match the contract (callers insert into TIMESTAMP cols)
+    return datetime.fromtimestamp(floored, tz=UTC).replace(tzinfo=None)
 
 
 def top_n_over_window(
@@ -139,7 +150,7 @@ def top_n_over_window(
     """
     grouped = aggregate_tags(hits)
     by_tag: dict[str, dict] = {}
-    for key, val in grouped.items():
+    for val in grouped.values():
         tag = val["tag"]
         if tag not in by_tag:
             by_tag[tag] = {

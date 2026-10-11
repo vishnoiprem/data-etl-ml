@@ -618,6 +618,10 @@ def fetch_trending_tags(minutes: int = 5, limit: int = 50) -> list[dict]:
                 "GROUP BY tag, tag_kind "
                 "ORDER BY total_count DESC LIMIT :lim"
             ),
-            {"m": f"-{minutes}", "lim": limit},
+            # SQLite `datetime('now', '-5 minutes')` requires the modifier as
+            # a single string with a unit. Pass `-N minutes` (with the unit
+            # baked in) so both dialects can substitute it verbatim.
+            {"m": f"-{minutes} minutes" if engine.dialect.name == "sqlite" else str(minutes),
+             "lim": limit},
         ).fetchall()
     return [dict(r._mapping) for r in rows]
