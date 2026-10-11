@@ -1,4 +1,4 @@
-.PHONY: up test smoke run
+.PHONY: up test smoke run dashboard check
 
 up:
 	pip install -r requirements.txt
@@ -11,3 +11,9 @@ smoke:
 
 run:
 	python -m bot.main
+
+dashboard:
+	python -m bot.dashboard
+
+check:
+	python -m bot.dashboard --check
