@@ -76,10 +76,17 @@ def _kpis() -> dict:
     )
     # Mark-to-market with the latest price per symbol
     if not positions.empty:
-        latest = _query(
-            "SELECT DISTINCT ON (symbol) symbol, price_usd FROM prices "
-            "ORDER BY symbol, ts DESC"
-        )
+        if db.get_engine().dialect.name == "postgresql":
+            latest = _query(
+                "SELECT DISTINCT ON (symbol) symbol, price_usd FROM prices "
+                "ORDER BY symbol, ts DESC"
+            )
+        else:
+            # SQLite: no DISTINCT ON — pick max(ts) per symbol via subquery.
+            latest = _query(
+                "SELECT symbol, price_usd FROM prices p1 "
+                "WHERE ts = (SELECT MAX(ts) FROM prices p2 WHERE p2.symbol = p1.symbol)"
+            )
         positions = positions.merge(latest, on="symbol", how="left")
         positions["mkt_value"] = positions["qty"] * positions["price_usd"].fillna(positions["avg_price"])
     else:
@@ -262,7 +269,7 @@ def _equity_curve(hours: int = 24) -> pd.DataFrame:
             qty.get(s, 0.0) * float(p) for s, p in row.items() if pd.notna(p) and qty.get(s, 0.0) > 0
         )
         eq.loc[ts] = cash + m2m
-    eq = eq.fillna(method="ffill").fillna(settings.starting_cash_usd)
+    eq = eq.ffill().fillna(settings.starting_cash_usd)
     return pd.DataFrame({"ts": eq.index, "equity": eq.values})
 
 
@@ -309,7 +316,16 @@ def page_overview() -> None:
     if positions.empty:
         st.info("No open positions yet. Run `make pipeline` in another terminal to start trading.")
     else:
-        latest = _query("SELECT DISTINCT ON (symbol) symbol, price_usd FROM prices ORDER BY symbol, ts DESC")
+        if db.get_engine().dialect.name == "postgresql":
+            latest = _query(
+                "SELECT DISTINCT ON (symbol) symbol, price_usd FROM prices "
+                "ORDER BY symbol, ts DESC"
+            )
+        else:
+            latest = _query(
+                "SELECT symbol, price_usd FROM prices p1 "
+                "WHERE ts = (SELECT MAX(ts) FROM prices p2 WHERE p2.symbol = p1.symbol)"
+            )
         merged = positions.merge(latest, on="symbol", how="left")
         merged["mkt_value"] = merged["qty"] * merged["price_usd"].fillna(merged["avg_price"])
         merged["unrealized_pnl"] = (merged["price_usd"].fillna(merged["avg_price"]) - merged["avg_price"]) * merged["qty"]
