@@ -115,6 +115,47 @@ else:
         sent_str = f"{r['avg_sentiment']:+.2f}" if r['avg_sentiment'] is not None else "  —  "
         print(f"  {r['tag']:22s}  {r['kind']:10s}  {r['total_count']:>8,}  {sent_str:>8s}")
 
+
+# ── Tab 5: Live (hourly + daily aggregates) ───────────────────────────
+banner("TAB 5 — 📡 LIVE AGGREGATES (hourly, last 48h)", "📡")
+g = app._global_buckets(60, 48)
+if g.empty:
+    print("  (no scored tweets in window)")
+else:
+    latest = g.iloc[-1]
+    print(f"  Latest hour:           avg_sent={latest['avg_sent']:+.3f}  "
+          f"tweets={int(latest['n'])}  pos={int(latest['pos_n'])}  neg={int(latest['neg_n'])}")
+    print()
+    print("  Hourly sentiment (all tags, last 48h):")
+    print(f"  {'bucket (UTC)':20s}  {'tweets':>7s}  {'pos':>5s}  {'neg':>5s}  {'avg_sent':>9s}  bar")
+    print("  " + "-" * 72)
+    for _, r in g.iterrows():
+        bar = ("+" if r["avg_sent"] >= 0 else "-") * int(abs(r["avg_sent"]) * 30)
+        ts = r["bucket"].strftime("%Y-%m-%d %H:%M") if hasattr(r["bucket"], "strftime") else str(r["bucket"])[:16]
+        print(f"  {ts:20s}  {int(r['n']):>7,}  {int(r['pos_n']):>5,}  {int(r['neg_n']):>5,}  "
+              f"{r['avg_sent']:>+9.3f}  {bar}")
+
+    print()
+    print("  Per-tag hourly avg sentiment (last 48h, symbols with ≥5 tweets):")
+    sym = app._per_symbol_buckets_df(60, 48)
+    if not sym.empty:
+        keep = sym.groupby("symbol")["n"].sum()
+        keep = keep[keep >= 5].index.tolist()
+        sym = sym[sym["symbol"].isin(keep)]
+        if not sym.empty:
+            # Pivot to: rows=bucket, cols=symbol, values=avg_sent
+            pv = sym.pivot_table(index="bucket", columns="symbol", values="avg_sent", aggfunc="mean")
+            pv = pv.fillna(0).round(2)
+            cols = list(pv.columns)
+            header = "  " + "bucket (UTC)".ljust(20) + "  " + "  ".join(f"{c:>7s}" for c in cols)
+            print(header)
+            print("  " + "-" * len(header))
+            for ts, row in pv.iterrows():
+                ts_str = ts.strftime("%Y-%m-%d %H:%M") if hasattr(ts, "strftime") else str(ts)[:16]
+                vals = "  ".join(f"{row[c]:+7.2f}" for c in cols)
+                print(f"  {ts_str:20s}  {vals}")
+
+
 print()
 print("=" * 78)
 print("  All data from: sqlite:///./dashboard_demo.db (seeded by seed_dashboard.py)")

@@ -488,12 +488,142 @@ def page_trending() -> None:
     )
 
 
+# ── Live tab (hourly + daily aggregates) ────────────────────────────────
+
+@st.cache_data(ttl=30)
+def _global_buckets(minutes: int, hours: int) -> pd.DataFrame:
+    rows = db.global_sentiment_buckets(minutes=minutes, hours=hours)
+    if not rows:
+        return pd.DataFrame(columns=["bucket", "avg_sent", "n", "pos_n", "neg_n"])
+    df = pd.DataFrame(rows)
+    df["bucket"] = pd.to_datetime(df["bucket"], unit="s", utc=True)
+    return df
+
+
+@st.cache_data(ttl=30)
+def _per_symbol_buckets_df(minutes: int, hours: int) -> pd.DataFrame:
+    rows = db.per_symbol_buckets(minutes=minutes, hours=hours)
+    if not rows:
+        return pd.DataFrame(columns=["bucket", "symbol", "avg_sent", "n"])
+    df = pd.DataFrame(rows)
+    df["bucket"] = pd.to_datetime(df["bucket"], unit="s", utc=True)
+    return df
+
+
+def page_live() -> None:
+    """Live macro view — hourly + daily sentiment aggregated across ALL
+    tracked tags. Useful for spotting regime shifts (24h mood swing,
+    daily trend) rather than the noisy 5-min view on the Trending tab.
+    """
+    st.subheader("📡 Live aggregates (hourly + daily)")
+    timeframe = st.radio(
+        "Bucket size", ["Hourly (1h, last 48h)", "Daily (1d, last 30d)"],
+        horizontal=True,
+    )
+    if timeframe.startswith("Hourly"):
+        minutes, hours = 60, 48
+        title_avg, title_volume = "Avg sentiment per hour (last 48h)", "Tweet volume per hour (last 48h)"
+    else:
+        minutes, hours = 60 * 24, 30 * 24
+        title_avg, title_volume = "Avg sentiment per day (last 30d)", "Tweet volume per day (last 30d)"
+
+    # ── Cross-tag aggregate ─────────────────────────────────────────────
+    g = _global_buckets(minutes, hours)
+    if g.empty:
+        st.info(
+            "No scored tweets in this window yet. Start the pipeline "
+            "and give it a few minutes for buckets to fill."
+        )
+        return
+
+    # Header KPIs from the latest bucket
+    latest = g.iloc[-1]
+    delta = g["avg_sent"].iloc[-1] - g["avg_sent"].iloc[-2] if len(g) > 1 else 0.0
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric(
+        f"{'Latest hour' if minutes == 60 else 'Latest day'} avg sentiment",
+        f"{latest['avg_sent']:+.3f}",
+        delta=f"{delta:+.3f}",
+    )
+    c2.metric("Tweets", f"{int(latest['n']):,}")
+    c3.metric("Positive", f"{int(latest['pos_n']):,}")
+    c4.metric("Negative", f"{int(latest['neg_n']):,}")
+
+    # ── Stacked bars: positive vs negative tweet volume per bucket ────
+    st.markdown(f"### {title_volume}")
+    g["neg_n"] = g["neg_n"].astype(float)
+    g["pos_n"] = g["pos_n"].astype(float)
+    g["neu_n"] = (g["n"] - g["pos_n"] - g["neg_n"]).clip(lower=0)
+    bar_df = g.set_index("bucket")[["pos_n", "neu_n", "neg_n"]]
+    bar_df.columns = ["Positive", "Neutral", "Negative"]
+    st.bar_chart(bar_df, color=["#2ca02c", "#7f7f7f", "#d62728"], height=260)
+
+    # ── Line: avg sentiment across all tags ─────────────────────────────
+    st.markdown(f"### {title_avg}")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=g["bucket"], y=g["avg_sent"], name="Avg sentiment",
+        line={"color": "#1f77b4", "width": 2.5},
+        fill="tozeroy", fillcolor="rgba(31,119,180,0.15)",
+    ))
+    fig.add_hline(y=0, line_dash="dash", line_color="#888")
+    fig.update_layout(
+        yaxis={"title": "Sentiment [-1, +1]", "range": [-1, 1]},
+        xaxis={"title": "Time (UTC)"},
+        height=320, margin={"l": 40, "r": 40, "t": 30, "b": 30},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # ── Per-tag breakdown (line chart, one trace per symbol) ───────────
+    st.markdown("### Per-tag breakdown")
+    sym_df = _per_symbol_buckets_df(minutes, hours)
+    if not sym_df.empty:
+        # Drop symbols with too few tweets in this window to avoid noisy
+        # single-tweet spikes dominating the chart.
+        sym_counts = sym_df.groupby("symbol")["n"].sum()
+        keep = sym_counts[sym_counts >= 5].index.tolist()
+        sym_df = sym_df[sym_df["symbol"].isin(keep)]
+        if not sym_df.empty:
+            fig2 = px.line(
+                sym_df, x="bucket", y="avg_sent", color="symbol",
+                title="Avg sentiment per tag",
+            )
+            fig2.update_layout(
+                yaxis={"range": [-1, 1]},
+                height=420, margin={"l": 40, "r": 40, "t": 30, "b": 30},
+            )
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Not enough tweets per tag to draw per-tag lines yet.")
+    else:
+        st.info("No per-tag bucketed data yet.")
+
+    # ── Detail table ───────────────────────────────────────────────────
+    st.markdown("### Bucketed detail")
+    detail = g.copy()
+    detail["pos%"] = (detail["pos_n"] / detail["n"] * 100).round(1)
+    detail["neg%"] = (detail["neg_n"] / detail["n"] * 100).round(1)
+    detail["avg_sent"] = detail["avg_sent"].round(3)
+    detail["bucket"] = detail["bucket"].dt.strftime("%Y-%m-%d %H:%M UTC")
+    st.dataframe(
+        detail[["bucket", "n", "pos_n", "neg_n", "pos%", "neg%", "avg_sent"]]
+        .rename(columns={
+            "bucket": "Bucket", "n": "Tweets", "pos_n": "Pos",
+            "neg_n": "Neg", "pos%": "Pos %", "neg%": "Neg %",
+            "avg_sent": "Avg sent",
+        })
+        .iloc[::-1],  # newest first
+        use_container_width=True,
+        height=300,
+    )
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 
 def main() -> None:
     _render_header()
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Overview", "Sentiment", "Paper PnL", "🔥 Trending"
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Overview", "Sentiment", "Paper PnL", "🔥 Trending", "📡 Live"
     ])
     with tab1:
         page_overview()
@@ -503,6 +633,8 @@ def main() -> None:
         page_paper_pnl()
     with tab4:
         page_trending()
+    with tab5:
+        page_live()
 
     with st.sidebar:
         st.markdown("### Status")

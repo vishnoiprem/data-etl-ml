@@ -403,6 +403,85 @@ def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> list[di
     return [dict(r._mapping) for r in rows]
 
 
+def global_sentiment_buckets(minutes: int, hours: int) -> list[dict]:
+    """Cross-tag sentiment aggregation: one row per `minutes`-wide bucket,
+    averaged across ALL symbols. Used by the 'Live' tab to chart the
+    macro hourly / daily sentiment trend.
+
+    Returns: list of {bucket, avg_sent, n, pos_n, neg_n}.
+    """
+    engine = get_engine()
+    total_minutes = hours * 60
+    with engine.connect() as conn:
+        if engine.dialect.name == "postgresql":
+            rows = conn.execute(
+                text(
+                    f"SELECT time_bucket('{minutes} minutes', ts) AS bucket, "
+                    f"AVG(sentiment_score) AS avg_sent, COUNT(*) AS n, "
+                    f"SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END) AS pos_n, "
+                    f"SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS neg_n "
+                    f"FROM tweets "
+                    f"WHERE sentiment_score IS NOT NULL "
+                    f"AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                    f"GROUP BY bucket ORDER BY bucket ASC"
+                ),
+                {"m": str(total_minutes)},
+            ).fetchall()
+        else:
+            seconds = minutes * 60
+            rows = conn.execute(
+                text(
+                    "SELECT CAST((strftime('%s', ts) / :sec) * :sec AS INTEGER) AS bucket, "
+                    "AVG(sentiment_score) AS avg_sent, COUNT(*) AS n, "
+                    "SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END) AS pos_n, "
+                    "SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS neg_n "
+                    "FROM tweets "
+                    "WHERE sentiment_score IS NOT NULL "
+                    "AND ts > datetime('now', :m) "
+                    "GROUP BY bucket ORDER BY bucket ASC"
+                ),
+                {"m": f"-{total_minutes} minutes", "sec": seconds},
+            ).fetchall()
+    return [dict(r._mapping) for r in rows]
+
+
+def per_symbol_buckets(minutes: int, hours: int) -> list[dict]:
+    """Cross-tag bucketed sentiment, but broken out per symbol so the
+    'Live' tab can show per-tag hourly/daily lines on one chart.
+
+    Returns: list of {bucket, symbol, avg_sent, n}.
+    """
+    engine = get_engine()
+    total_minutes = hours * 60
+    with engine.connect() as conn:
+        if engine.dialect.name == "postgresql":
+            rows = conn.execute(
+                text(
+                    f"SELECT time_bucket('{minutes} minutes', ts) AS bucket, "
+                    f"symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                    f"FROM tweets "
+                    f"WHERE sentiment_score IS NOT NULL "
+                    f"AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                    f"GROUP BY bucket, symbol ORDER BY bucket ASC"
+                ),
+                {"m": str(total_minutes)},
+            ).fetchall()
+        else:
+            seconds = minutes * 60
+            rows = conn.execute(
+                text(
+                    "SELECT CAST((strftime('%s', ts) / :sec) * :sec AS INTEGER) AS bucket, "
+                    "symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                    "FROM tweets "
+                    "WHERE sentiment_score IS NOT NULL "
+                    "AND ts > datetime('now', :m) "
+                    "GROUP BY bucket, symbol ORDER BY bucket ASC"
+                ),
+                {"m": f"-{total_minutes} minutes", "sec": seconds},
+            ).fetchall()
+    return [dict(r._mapping) for r in rows]
+
+
 def insert_paper_trade(t: dict) -> None:
     engine = get_engine()
     row = {
