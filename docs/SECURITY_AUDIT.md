@@ -10,16 +10,17 @@
 > The Dependabot digest from 2026-10-10 reported **374 vulnerabilities on
 > the default branch** (17 critical / 115 high / 201 moderate / 41 low).
 > After the Tier 1 + Round 2/3 + Tier 2 sweep in this commit, the
-> Tier-1-only audit drops from **337** (after the first bump round) to
-> **66 residual** advisories, of which:
-> - 51 are `pypdf` entries whose fix version (6.10.0+) is **not yet on
->   PyPI** — we are at 6.9.2 (latest published) and must wait for upstream.
-> - 11 are `cryptography` 46.x→50.0.0 (CVE-2026-69247/69248) — major
->   version jump (46→50) deferred to Tier 3 (see "Tier 3" below).
-> - 2  are `pyarrow` 17.x→23.0.1 (CVE-2026-25087) — major jump (17→26)
->   deferred to Tier 3.
-> - 1  is `nltk` 3.10.3 with **no fix published** (CVE-2026-81726).
-> - 1  is `mlflow` 3.15.0 with **no fix published** (CVE-2026-71211).
+> Tier-1-only audit dropped from **337** (after the first bump round) to
+> **66 residual** advisories. As of 2026-10-11 (this commit), three
+> bumps have closed **64 of those 66**:
+> - 51 `pypdf` 6.9.2 → 6.20.0 (fix now on PyPI; was unavailable yesterday).
+> - 11 `cryptography` 46.0.5 → 50.0.2 (CVE-2026-69247/69248; major bump 46→50).
+> - 2  `pyarrow` 17.0.0 → 26.0.0 (CVE-2026-25087; major bump 17→26).
+>
+> **2 residual advisories remain**, both upstream "no fix published":
+> - 1 `nltk` 3.10.3 (CVE-2026-81726) — 3.10.3 is still the latest on PyPI.
+> - 1 `mlflow` 3.15.0 (CVE-2026-71211) — `mlflow==3.17.0` is now available
+>   but is not the documented fix version; deferred to the next audit pass.
 > pip-audit's data source does not emit severity ratings (every entry
 > comes back as `UNKNOWN`); severity buckets are derived from CVSS / GHSA
 > metadata in the upstream PYSEC advisories.
