@@ -306,7 +306,7 @@ def fetch_recent_signals(symbol: str, hours: int = 24, limit: int = 200) -> List
                 "WHERE symbol=:s AND ts > datetime('now', :h) "
                 "ORDER BY ts DESC LIMIT :lim"
             ),
-            {"s": symbol, "h": f"-{hours}", "lim": limit},
+            {"s": symbol, "h": f"-{hours} hours", "lim": limit},
         ).fetchall()
     return [dict(r._mapping) for r in rows]
 

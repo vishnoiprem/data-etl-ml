@@ -49,10 +49,16 @@ class PaperBroker:
         max_open_positions: int = None,
         fee_bps: int = None,
     ):
-        self.cash_usd: float = starting_cash_usd or settings.starting_cash_usd
-        self.max_position_pct: float = max_position_pct or settings.max_position_pct
-        self.max_open_positions: int = max_open_positions or settings.max_open_positions
-        self.fee_bps: int = fee_bps or settings.fee_bps
+        self.cash_usd: float = (
+            starting_cash_usd if starting_cash_usd is not None else settings.starting_cash_usd
+        )
+        self.max_position_pct: float = (
+            max_position_pct if max_position_pct is not None else settings.max_position_pct
+        )
+        self.max_open_positions: int = (
+            max_open_positions if max_open_positions is not None else settings.max_open_positions
+        )
+        self.fee_bps: int = fee_bps if fee_bps is not None else settings.fee_bps
         self.fee_fraction: float = self.fee_bps / 10_000.0
 
         self.positions: Dict[str, Position] = {}

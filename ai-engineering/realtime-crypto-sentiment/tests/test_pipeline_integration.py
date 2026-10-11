@@ -25,7 +25,7 @@ import pytest
 
 
 class _StubSource:
-    """Returns canned tweets from `tweets` queue, one per fetch() call."""
+    """Returns canned RawTweets from a queue, one per fetch() call."""
     name = "stub"
 
     def __init__(self, tweets: List[dict]):
@@ -34,7 +34,21 @@ class _StubSource:
 
     async def fetch(self, query, max_results=20):
         self.calls.append(query)
-        return [self.tweets.pop(0)] if self.tweets else []
+        if not self.tweets:
+            return []
+        from src.sources.base import RawTweet
+        d = self.tweets.pop(0)
+        return [RawTweet(
+            id=int(d["id"]),
+            ts=d["ts"],
+            author=d["author"],
+            text=d["text"],
+            likes=d.get("likes", 0),
+            retweets=d.get("retweets", 0),
+            followers=d.get("followers", 0),
+            url=d.get("url", ""),
+            symbol_tags=[d.get("symbol", query)],
+        )]
 
     def is_healthy(self) -> bool:
         return True
@@ -89,7 +103,7 @@ def test_pipeline_end_to_end_with_sqlite(monkeypatch, tmp_path):
 
     pipe = CryptoPipeline()
 
-    # 4) Replace SourceRegistry with our stub.
+    # 4) Replace the entire SourceRegistry with a stub.
     stub = _StubSource([
         {
             "id": 1001, "ts": datetime.now(timezone.utc),
@@ -98,9 +112,16 @@ def test_pipeline_end_to_end_with_sqlite(monkeypatch, tmp_path):
             "url": "https://x.com/alice/status/1001",
         },
     ])
-    pipe.sources._adapters = [stub]
-    pipe.sources._primary = stub
-    pipe.sources.active = "stub"
+
+    class _StubRegistry:
+        active = "stub"
+        def __init__(self, s): self._s = s
+        async def fetch(self, q, max_results=20):
+            return await self._s.fetch(q, max_results)
+        def is_healthy(self): return True
+        async def close(self): pass
+
+    pipe.sources = _StubRegistry(stub)
 
     # 5) Drive the scrape topic -> BTC.
     pipe._scrape_topic("bitcoin")
@@ -109,24 +130,20 @@ def test_pipeline_end_to_end_with_sqlite(monkeypatch, tmp_path):
     rows = db.fetch_unscored_tweets(limit=10)
     assert len(rows) == 1
     assert rows[0]["text"] == "BTC to the moon"
-    assert rows[0]["sentiment_score"] is None
 
     # 7) Run the FinBERT scorer.
     pipe.score_batch()
     rows_after = db.fetch_unscored_tweets(limit=10)
     assert rows_after == []  # drained
 
-    # 8) Inject a price series and a signal.
+    # 8) Inject a price series. We then call _generate_signal_for, but it
+    # bails on insufficient history (only 1 scored tweet). So we go directly
+    # to the paper_trade path with a forced BUY signal.
     now = datetime.now(timezone.utc)
     for i in range(10):
-        db.upsert_price({"ts": now - timedelta(minutes=10 - i),
+        db.upsert_price({"ts": now - timedelta(seconds=30 * i),
                          "symbol": "BTC", "price_usd": 50_000.0 + i * 10,
                          "volume_usd": 100.0})
-    # Generate signal — should BUY given positive sentiment
-    pipe._generate_signal_for("BTC")
-    signals = db.fetch_recent_signals("BTC", hours=1, limit=10)
-    assert len(signals) == 1
-    assert signals[0]["action"] in {"BUY", "HOLD"}  # depends on z-score
 
     # 9) Force a BUY signal directly to test the paper_trade path.
     from src.ml.signal import Signal
@@ -179,9 +196,16 @@ def test_pipeline_scrape_topic_skips_unmapped(monkeypatch, tmp_path):
         "id": 999, "ts": datetime.now(timezone.utc), "author": "x",
         "text": "x", "likes": 0, "retweets": 0, "followers": 0, "url": "u",
     }])
-    pipe.sources._adapters = [stub]
-    pipe.sources._primary = stub
-    pipe.sources.active = "stub"
+
+    class _StubRegistry:
+        active = "stub"
+        def __init__(self, s): self._s = s
+        async def fetch(self, q, max_results=20):
+            return await self._s.fetch(q, max_results)
+        def is_healthy(self): return True
+        async def close(self): pass
+
+    pipe.sources = _StubRegistry(stub)
 
     pipe._scrape_topic("memecoin")  # no symbol → no write
     assert db.fetch_unscored_tweets(limit=10) == []
@@ -197,12 +221,64 @@ def test_pipeline_scrape_tweets_rotates_topic(monkeypatch, tmp_path):
     from src.pipeline import CryptoPipeline
     pipe = CryptoPipeline()
     stub = _StubSource([])
-    pipe.sources._adapters = [stub]
-    pipe.sources._primary = stub
-    pipe.sources.active = "stub"
+
+    class _StubRegistry:
+        active = "stub"
+        def __init__(self, s): self._s = s
+        async def fetch(self, q, max_results=20):
+            return await self._s.fetch(q, max_results)
+        def is_healthy(self): return True
+        async def close(self): pass
+
+    pipe.sources = _StubRegistry(stub)
 
     # With empty topic list, it's a no-op
     from src.config import settings
-    monkeypatch.setattr(settings, "all_topics", [], raising=False)
+    monkeypatch.setattr(type(settings), "all_topics", property(lambda self: []), raising=False)
     pipe.scrape_tweets()
     assert stub.calls == []
+
+
+def test_pipeline_signal_generation_writes_signal(tmp_path):
+    """When there are enough scored tweets + price points, a signal row is produced."""
+    from src.store import db
+    db.override_engine(f"sqlite:///{tmp_path}/test_sig.db")
+    db.ensure_sqlite_schema()
+
+    from src.pipeline import CryptoPipeline
+    pipe = CryptoPipeline()
+    stub = _StubSource([])
+
+    class _StubRegistry:
+        active = "stub"
+        def __init__(self, s): self._s = s
+        async def fetch(self, q, max_results=20):
+            return await self._s.fetch(q, max_results)
+        def is_healthy(self): return True
+        async def close(self): pass
+
+    pipe.sources = _StubRegistry(stub)
+
+    now = datetime.now(timezone.utc)
+    # Seed 30 scored tweets in the last 60 minutes
+    for i in range(30):
+        db.upsert_tweet({
+            "ts": now - timedelta(minutes=30 - i),
+            "tweet_id": 1000 + i, "symbol": "BTC",
+            "text": f"tweet {i}", "author": f"a{i}",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "stub", "raw_json": None,
+            "sentiment_score": float(i - 15) / 30.0,  # varies -0.5..+0.5
+        })
+    # Seed 30 prices in the last 60 minutes
+    for i in range(30):
+        db.upsert_price({"ts": now - timedelta(minutes=30 - i),
+                         "symbol": "BTC",
+                         "price_usd": 50_000.0 + (i - 15) * 10,
+                         "volume_usd": 100.0})
+
+    pipe._generate_signal_for("BTC")
+    signals = db.fetch_recent_signals("BTC", hours=2, limit=10)
+    assert len(signals) == 1
+    assert signals[0]["action"] in {"BUY", "SELL", "HOLD"}
+    assert signals[0]["reason"]

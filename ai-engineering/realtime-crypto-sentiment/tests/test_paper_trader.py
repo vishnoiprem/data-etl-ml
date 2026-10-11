@@ -81,8 +81,10 @@ def test_sell_increases_cash_and_closes_position():
     assert fill is not None
     assert fill.side == "SELL"
     assert fill.qty == pytest.approx(pos_qty, rel=1e-6)
-    # Realized PnL: (51000 - 50000) * qty - 2*fee
-    expected_realized = (51_000.0 - 50_000.0) * pos_qty - 2 * (pos_qty * 51_000.0 * b.fee_fraction)
+    # Realized PnL = (proceeds - sell_fee) - cost_basis * qty
+    #              = pos_qty*(price-avg_price) - sell_fee
+    sell_fee = pos_qty * 51_000.0 * b.fee_fraction
+    expected_realized = (51_000.0 - 50_000.0) * pos_qty - sell_fee
     assert b.positions["BTC"].realized_pnl == pytest.approx(expected_realized, rel=1e-6)
     assert b.positions["BTC"].qty == 0.0
     assert b.positions["BTC"].avg_price == 0.0
@@ -122,10 +124,12 @@ def test_re_buy_same_symbol_does_not_count_as_new_position():
     b = PaperBroker(starting_cash_usd=100_000.0, fee_bps=0, max_position_pct=10.0, max_open_positions=1)
     b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
     assert b.open_position_count() == 1
+    # 10% of 100k = 10k / 50k = 0.2 BTC per BUY
+    assert b.positions["BTC"].qty == pytest.approx(0.2, rel=1e-6)
     # Re-buy same symbol should be allowed (it has a position already)
     fill = b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
     assert fill is not None
-    assert b.positions["BTC"].qty == pytest.approx(0.1 + 0.1, rel=1e-6)  # doubled
+    assert b.positions["BTC"].qty == pytest.approx(0.4, rel=1e-6)  # doubled
 
 
 # ── Equity & metrics ────────────────────────────────────────────────────

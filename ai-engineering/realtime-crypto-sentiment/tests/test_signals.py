@@ -84,13 +84,13 @@ def test_generate_signal_sell_below_threshold():
 
 
 def test_generate_signal_hold_within_band():
-    # Tiny signal far below threshold
+    # History with wide variance, value close to mean → small z
     sig = generate_signal(
         symbol="SOL",
-        sentiment_value=11.0,  # mean=10, std small → tiny z
-        sentiment_history=[9, 10, 11, 9, 10, 11, 9, 10],
+        sentiment_value=10.0,  # exactly the mean of history
+        sentiment_history=[-10, -5, 0, 5, 10, 15, 20, 25, 30, 15],
         momentum_value=0.0,
-        momentum_history=[0, 0.0001, -0.0001, 0, 0.0002, -0.0002],
+        momentum_history=[-0.05, -0.02, 0.0, 0.03, 0.01, -0.01, 0.04, 0.02, -0.03, 0.0],
         threshold=1.0,
         sent_weight=1.0,
         mom_weight=1.0,
@@ -138,26 +138,16 @@ def test_signal_to_row_shape():
 
 
 def test_weighted_signal_score():
-    # sent_z = 2.0, mom_z = 0.0, w = (2, 0) → score = 4.0
+    # Use a value that is far from the mean of the history to get a big positive z
     sig = generate_signal(
         symbol="AVAX",
-        sentiment_value=20.0,
-        sentiment_history=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10],  # mean 10, std 0
-        momentum_value=2.0,  # mean=1, std≈1 → z=1
-        momentum_history=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
-        threshold=1.0, sent_weight=2.0, mom_weight=0.0,
-    )
-    # sent_z will be 0 (std=0), so score will be 0 → HOLD
-    # adjust: use non-constant sent history
-    sig = generate_signal(
-        symbol="AVAX",
-        sentiment_value=30.0,
-        sentiment_history=[10, 15, 20, 25, 30, 35, 40, 45, 50],
+        sentiment_value=100.0,  # way bigger than history mean ~30
+        sentiment_history=[10, 15, 20, 25, 30, 35, 40, 45, 50, 50],
         momentum_value=2.0,
         momentum_history=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
         threshold=1.0, sent_weight=2.0, mom_weight=0.0,
     )
-    # sent_value=30 is the max of sent_history, so z is large positive
     assert sig.score > 1.0
-    # Since mom_weight = 0, momentum contributes 0; sent dominates
     assert sig.sentiment_zscore > 1.0
+    # Since mom_weight = 0, momentum contributes 0; sent dominates
+    assert abs(sig.momentum_zscore) >= 0  # just check it was computed

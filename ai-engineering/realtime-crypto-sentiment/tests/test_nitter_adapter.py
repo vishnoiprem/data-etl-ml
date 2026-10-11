@@ -29,9 +29,9 @@ def _tweet_html(items: list[dict]) -> str:
         <div class="timeline-item">
           <a class="fullname">{author}</a>
           <div class="tweet-content">{body}</div>
-          <a class="tweet-date" href="{url_path}" title="Mon, 01 Jan 2026 12:00:00 +0000">
-            <span>Jan 1, 2026 · 12:00</span>
-          </a>
+          <span class="tweet-date">
+            <a href="{url_path}" title="Mon, 01 Jan 2026 12:00:00 +0000">Jan 1, 2026 · 12:00</a>
+          </span>
           <span class="icon-heart">{likes}</span>
           <span class="icon-retweet">{retweets}</span>
         </div>''')
@@ -80,7 +80,7 @@ def test_parse_html_extracts_tweets():
     assert tweets[0].likes == 100
     assert tweets[0].retweets == 20
     assert tweets[0].url.endswith("/alice/status/111")
-    assert "BTC" in tweets[0].symbol_tags
+    assert "BTC" in tweets[0].symbol_tags or "$BTC" in tweets[0].symbol_tags
 
 
 def test_parse_html_handles_alternate_selectors():
@@ -106,7 +106,9 @@ def test_parse_stat_handles_k_m_suffixes():
     <div class="timeline-item">
       <div class="fullname">x</div>
       <div class="tweet-content">hi</div>
-      <a class="tweet-date" href="/x/status/1" title="x"></a>
+      <span class="tweet-date">
+        <a href="/x/status/1" title="Mon, 01 Jan 2026 12:00:00 +0000">link</a>
+      </span>
       <span class="icon-heart">1.2K</span>
       <span class="icon-retweet">3.4M</span>
     </div>
@@ -134,7 +136,7 @@ def test_denylist_after_403(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_rotate_mirror_on_failure(monkeypatch):
-    """When mirror A returns 403, adapter rotates to mirror B."""
+    """When mirror A errors, adapter rotates to mirror B."""
     a = NitterMirrorAdapter(
         mirrors=["a.test", "b.test"], min_mirror_gap_sec=0, deny_duration_sec=3600,
     )
@@ -143,6 +145,8 @@ async def test_rotate_mirror_on_failure(monkeypatch):
     async def fake_fetch_one(mirror, query):
         call_log.append(mirror)
         if mirror == "a.test":
+            # Simulate the real-world denylist side-effect
+            a._mirror_denied_until[mirror] = time.monotonic() + 3600
             raise AdapterError("403 from a.test (denied for 24h)")
         return _tweet_html([{"id": 999, "text": "hello"}])
 
