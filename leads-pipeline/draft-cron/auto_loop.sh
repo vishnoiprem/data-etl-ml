@@ -88,6 +88,11 @@ except Exception as e:
         echo "  (refine_pipeline exited with non-zero, continuing)" | tee -a "$LOG"
     }
 
+    # 3c. Backfill emails — derive careers@X for any pending leads still missing an email
+    /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python backfill_emails.py >> "$LOG" 2>&1 || {
+        echo "  (backfill_emails exited with non-zero, continuing)" | tee -a "$LOG"
+    }
+
     # 4. Report status — single Python invocation, three counts, sleeps to avoid DB lock
     sleep 2
     counts=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
