@@ -155,6 +155,28 @@ Eight STAR-format story scaffolds for the Meta DE Ownership round. Each story is
 >
 > **R:** The Go service shipped on time, ran with 1/10th the memory of the Python service, and our average job-run cost dropped ~40% because we stopped spinning up new connections and could actually cancel zombie jobs we previously orphaned. The REST API became the default way other teams trigger Databricks — three teams adopted it in the first month without me asking. Latency p95 went from ~3s to ~300ms. **What I'd change:** I would have stood up the shadow-mode cutover earlier in week two instead of week four — the integration tests caught things the unit tests didn't, and I burned a weekend chasing a polling bug I would've caught on day three.
 
+### Inline Q&A — likely follow-ups and your rehearsed answer
+
+These are the questions a senior interviewer is most likely to ask *immediately* after you finish the STAR. Rehearse these as if they're a continuation of the story, not a separate answer.
+
+**Q: "Why Go and not just optimize the Python service?"**
+A: "Two reasons. First, the Python service's real cost wasn't the language — it was the *patterns*: a new HTTP connection on every poll, no cancellation, and zombie jobs that ran for hours because the wrapper had no way to cancel them. I could've fixed those in Python. But the second reason is that this was going to be a long-lived service that other teams depended on, and Go's static binary, low memory, and `net/http` stdlib meant the operational surface area was tiny. One binary, no venv, no dependency drift. For a control-plane service that orchestrates Databricks, that was the right shape."
+
+**Q: "How did you learn Go so fast? What was your ramp-up plan?"**
+A: "I didn't try to learn all of Go. I learned the 20% I'd actually use: structs, interfaces, goroutines, channels, `context`, and `net/http`. I did the Tour of Go in a day, then spent the rest of week one reading the Databricks REST API docs and building a `curl` CLI against the 4 endpoints we used. That gave me a working mental model of the *system* before I touched the *language*. I pair-programmed with a senior Go engineer twice in week two — that one decision saved me a week of debugging on concurrency. The mistake I avoided: I didn't read 5 Go books and then start coding. I started coding on day one and let the language questions drive the reading."
+
+**Q: "How did you cut the cost by 40%? Where was the money going?"**
+A: "Three places. First, connection reuse — the Python service opened a new HTTP client on every poll, so we were paying TLS handshakes on every Databricks API call. I switched to a single shared `http.Client` in Go, which keeps the connection pool warm. Second, cancellation — Python's old wrapper had no way to cancel a Databricks job when our service shut down, so jobs kept running and burning DBU even after the caller was gone. Go's `context.Context` made this a 3-line change and we immediately stopped orphaning jobs. Third, retries — Python was failing fast and re-running jobs; I added exponential backoff and the retry storms stopped. Together: 1/10th the memory, 40% lower job-run cost, p95 latency from 3 seconds to 300 milliseconds."
+
+**Q: "What was the hardest part of writing it in Go?"**
+A: "The mental shift from Python's dynamic typing to Go's explicit error handling. The first week I wrote way too much defensive code — I was treating every error as if it would crash prod. I learned to trust small interfaces and let errors bubble, because the caller was already the right place to decide what to do. The other thing that tripped me up was concurrency: I initially had a goroutine leak because I wasn't propagating `context` to every blocking call. The senior Go engineer caught that in our second pairing session."
+
+**Q: "How did you get the team to actually use it? You said three teams adopted it without you asking — how?"**
+A: "I didn't pitch a rewrite. I shipped the Go service in shadow mode — both services ran side-by-side for a week, with the same traffic, and I had metrics comparing them. Once the cost and latency numbers were visible in the same Grafana dashboard, the other teams' tech leads started pinging me. By the time I cut over, two teams had already migrated themselves because the API was cleaner. I think the lesson is: adoption follows *visible proof*, not announcements."
+
+**Q: "What would you do differently?"**
+A: "Three things. First, stand up shadow mode in week two, not week four — I would have caught the polling bug on day three instead of burning a weekend. Second, write a kickoff doc for *myself* on day one: endpoints, SLAs, failure modes, non-goals. I did it informally and it cost me. Third, lift the senior Go engineer's review checklist into a shared doc on day one, not after the second pairing session."
+
 **What this story proves:** ramped a new language in 1 week, used docs + hands-on prototyping over passive learning, scoped the v1 to ship, used senior engineers strategically, instrumented from day one, and reflected honestly on what to improve.
 
 ### Talking points if they probe deeper
@@ -219,6 +241,28 @@ Eight STAR-format story scaffolds for the Meta DE Ownership round. Each story is
 >
 > **R:** Campaign data: 24h → 60s. Last-mile SLA breaches: 6h+ → under 2 min on the ops dashboard. Marketing ran its first flash sale on real-time data. Data-science campaign-attribution went from a 1-week project to a 1-hour query. 5 stacks → 1, 10+ engineers migrated, all 5 legacy stacks retired inside 4 months. **What I'd change:** I would have stood up the schema registry in shadow mode *during* architecture design, not as Phase 1. Two teams quietly built new producers during the design phase that I had to retrofit. I should have caught those before they were written.
 
+### Inline Q&A — likely follow-ups and your rehearsed answer
+
+These are the questions a senior interviewer is most likely to ask *immediately* after you finish the STAR. Rehearse these as if they're a continuation of the story, not a separate answer.
+
+**Q: "You said you made the schema contract call before you had buy-in. What if the senior engineers had been right and you'd been wrong?"**
+A: "Two answers. First, I had *evidence* on my side — 3 production incidents in the prior quarter from silent schema drift, and a 1-week glue-code tax on every cross-stack analysis. That wasn't a hunch. Second, the design had a built-in safety valve: rejection at write-time, but with a 1-week grace period for known migrations. If the contracts turned out to be wrong, the cost of undoing them was small — we could soften the policy. I wasn't making an irreversible call; I was making a *reversible* call early so we could learn fast. That's the difference between L6 ownership and L7 mandates — I picked the policy but kept the door open."
+
+**Q: "How did you decide streaming vs batch per use case? Why didn't you just pick one for all five stacks?"**
+A: "By the consumer, not by the source. The decision rule was: does the consumer need sub-minute freshness, or is nightly close good enough? Last-mile ops, campaigns, and real-time fraud needed sub-minute, so they went on Kafka + stream processor. Finance close and regulatory reporting were nightly, so they stayed on batch. If I'd picked streaming for everything, I'd have spent 6 months rebuilding pipelines that didn't need to be rebuilt. If I'd picked batch for everything, I'd have failed the freshness SLA on day one. The architecture served the consumers — the consumers didn't serve the architecture."
+
+**Q: "How did you keep 10+ engineers aligned across 4 stakeholder groups? That sounds like a coordination nightmare."**
+A: "Three mechanisms. First, a written Friday one-pager — one page, no meeting, leadership could read it in 2 minutes. That removed the 'where are we?' question. Second, a single Slack channel for migration questions, so everyone saw the same answers. Third, a 30-min weekly office hour. The bottleneck was never code; it was *unblocking* people. I sat with the two hardest migrations — last-mile and campaign — for a week each. After that, the rest of the teams had a playbook to copy."
+
+**Q: "What would you have done if marketing had refused to migrate their pipelines to the new platform?"**
+A: "I would have started with the highest-traffic marketing pipeline, migrated it myself, and shown them the freshness numbers. The pattern that worked elsewhere on the platform was: I migrate the first pipeline, you see the win, you come to me. I would not have tried to mandate it. Mandates fail with marketing teams — adoption has to be pull. Worst case, I would have asked leadership to make it a quarterly priority with a hard date, and I would have offered to do the migration for the team. Either way, the platform had to win on its own merits first."
+
+**Q: "How did you measure success beyond freshness? What were the leading indicators?"**
+A: "Three categories. *Headline:* freshness went from 24h to 60 seconds for campaigns and from 6h+ to under 2 minutes for last-mile. *Adoption:* 10+ engineers migrated, all 5 legacy stacks retired inside 4 months. *Incident reduction:* 3 schema-drift incidents auto-caught in the first quarter that would have been silent data loss under the old stacks. The adoption and incident numbers are what I'd point to if leadership asked 'is this still paying off 6 months later' — freshness is the headline, but adoption and reliability are the proof."
+
+**Q: "Why didn't you just do a big-bang cutover? What was the cost of phasing?"**
+A: "Big-bang on 5 stacks, 150 tables, 40 dbt models, and 30 BI dashboards would have been an 8-hour full-team freeze, with a single point of failure and no fast rollback. If anything broke, finance, exec dashboards, and customer-facing analytics all went dark at the same time. The cost of phasing was: dual-running two warehouses for 5 weeks, which doubled storage and some compute, and it took longer end-to-end. That cost was real and I called it out. The trade-off was: I traded 5 weeks of dual-running cost for the ability to roll back a single wave in a config change instead of an all-hands rollback at 2am. For a 5-stack migration, that trade is obvious. For a 2-table migration, big-bang is fine."
+
 **What this story proves:** owned a platform-level, cross-team initiative; made the hard governance trade-off and won buy-in through an RFC, not a mandate; phased with dual-writes for safety; quantified latency / freshness / adoption; and reflected honestly on sequencing.
 
 ### Talking points if they probe deeper
@@ -256,6 +300,28 @@ Eight STAR-format story scaffolds for the Meta DE Ownership round. Each story is
 > **A:** I didn't say "no." I put together a one-pager the same week with three things: (1) a list of the 12 highest-risk tables and *why* each was risky; (2) an honest cutover-window estimate — big-bang needed an 8-hour full-team freeze, phased could be done in 3-hour windows over a month; (3) a strangler-fig plan I sketched myself. The phased plan: both warehouses run in parallel, ingestion writes to both, dbt models dual-materialize, dashboards flip to the new warehouse one team at a time — lowest-stakes internal tools first, finance and exec last. I booked 30 min with my manager and her skip-level, walked through the doc, and acknowledged the deadline up front. **The key move:** I proposed phased *with* a hard cap — every table migrated within 6 weeks, old warehouse decommissioned the day after the deadline no matter what, per-wave rollback documented. The skip-level agreed. The manager agreed once the cap was in.
 >
 > **R:** Full migration in 5 weeks, 3 waves, **zero downtime**. The first 2 waves surfaced 4 query-performance issues and 2 schema edge cases that would have been a single catastrophic incident under big-bang. We hit the contract deadline with a week to spare. **What I'd change:** I would have raised the concern the day the cutover plan was first proposed, not the week before kickoff. I lost a week of lead time because I was nervous about pushing back, and we did the first wave in a rush that didn't need to be a rush.
+
+### Inline Q&A — likely follow-ups and your rehearsed answer
+
+These are the questions a senior interviewer is most likely to ask *immediately* after you finish the STAR. Rehearse these as if they're a continuation of the story, not a separate answer.
+
+**Q: "Did you go over your manager's head? That's a serious accusation in a disagreement story."**
+A: "No. I invited her skip-level to the same meeting. I didn't escalate behind her back; I made sure the decision-maker above her heard my plan in the room, *with her present*, so she could respond to it in real time. That preserved the relationship and made the decision land faster. If I'd asked the skip-level separately, my manager would have heard about it later and felt bypassed. The framing of the meeting mattered — I led by acknowledging the deadline constraint up front, then walked through the trade-off, then proposed phased with a hard cap. The hard cap was the move that brought my manager on board."
+
+**Q: "What if your manager had said no, even with the hard cap?"**
+A: "I would have executed big-bang, but with the per-wave rollback plan I'd already written. If she said no, the deadline constraint was real and I wasn't going to miss it for an opinion. The disagreement was about risk-control, not about whether to do the migration — we both wanted it done. If she'd pushed back on phased even with the hard cap, my fallback was: do big-bang, but have the rollback pre-scripted and tested for the 12 highest-risk tables so we could recover fast. I wanted phased, but I was prepared to execute her call."
+
+**Q: "How did you get the data to back up your pushback? What made the risk concrete?"**
+A: "I profiled the 12 highest-risk tables myself — the ones with the most complex dbt models, the largest row counts, and the most dashboard consumers. I put them in a table in the one-pager with a column for 'why risky.' That made the abstract risk concrete: under big-bang, those 12 tables would either all succeed or all fail, and a single failure would take down every consumer at once. The same 12 tables were also the easiest to migrate first under phased, because they had the best test coverage. I made the cutover plan and the risk analysis out of the same data."
+
+**Q: "What was the rollback plan? If a wave broke, what did you do?"**
+A: "Each wave had a documented rollback: flip the dashboard or model back to Redshift, which was still receiving writes the whole time we were dual-running. The blast radius of any single wave was tiny — usually 3–5 tables and one team's dashboards. Rollback was a config change in our routing layer, not a fire drill. We had the rollback command in a runbook for each wave, and we dry-ran it on a non-prod environment before each production cutover."
+
+**Q: "What did you learn about disagreeing well?"**
+A: "Two things. First: bring the homework, not just the opinion. The one-pager with the 12 high-risk tables and the phased plan was the difference between a complaint and a contribution. Second: raise it early. I waited a week because I was nervous, and we did the first migration wave in a rush that didn't need to be a rush. The same pushback a week earlier would have given us a week of margin. Now when I disagree, I write the doc the same day, not the week before the deadline."
+
+**Q: "Did the manager relationship survive? How did it land afterward?"**
+A: "Yes. The hard cap was the move that made her trust me — I wasn't just pushing back, I was taking her constraint seriously. After the migration landed, she gave me the next migration project, which was bigger. I think the relationship got stronger because I showed I could push back *and* deliver. Pushback without delivery is just friction; pushback with delivery is partnership."
 
 **What this story proves:** disagreed with evidence and a concrete alternative, didn't go over the manager's head, respected the hard constraint instead of ignoring it, proposed a path that honored the deadline, and reflected on the cost of waiting too long.
 
@@ -295,6 +361,31 @@ Eight STAR-format story scaffolds for the Meta DE Ownership round. Each story is
 > **A:** First I catalogued the 3 most common source patterns — REST API, relational DB, SFTP/file drop — and built one config-driven abstraction per pattern. An engineer now writes a YAML config: source type, endpoint/table, schedule, schema contract, warehouse target. The framework handles the rest: idempotent landing in S3 as partitioned Parquet, schema-drift detection, Great Expectations tests, dbt model scaffolding, retries with exponential backoff, PagerDuty alerts wired to the right Slack channels. Built on top of Airflow + dbt + the existing warehouse, so teams learned nothing new — they just wrote config. **The de-risk move:** I dogfooded it myself. I personally migrated the two highest-traffic pipelines (orders and customers feeds) end-to-end before asking anyone else to use it. That gave me two things — a proof point with real numbers, and a list of every rough edge before other teams hit it. After the migration numbers were in, I wrote a one-page README, a worked example, and ran a 30-min lunch-and-learn. **The other teams started asking to onboard within a week.** I didn't pitch a framework — I shipped one.
 >
 > **R:** Time to add a new source: **~2 weeks → ~2 days.** Within 3 months, **8 of 30** one-off pipelines migrated. On-call pages for ingestion failures dropped **~70%**. The framework auto-caught **3 schema-drift incidents** in the first quarter that would previously have been silent data loss. **What I'd change:** I would have instrumented the framework with row-count and freshness metrics from day one. I added them in month two, and there were two quiet incidents in the gap where the framework succeeded but the data was stale, and we didn't know until a dashboard broke. The lesson: a framework without observability is a framework you'll discover the failure mode of, not the one you'll catch it in.
+
+### Inline Q&A — likely follow-ups and your rehearsed answer
+
+These are the questions a senior interviewer is most likely to ask *immediately* after you finish the STAR. Rehearse these as if they're a continuation of the story, not a separate answer.
+
+**Q: "Why a framework and not just a template? What's the difference?"**
+A: "A template gets copied and then drifts. Within a sprint of someone copying a template, they've edited it to their use case, and now there are two versions. Within a quarter, there are 30 versions and nobody can patch a bug across all of them. A framework with config-driven source types means every new pipeline *inherits* the same schema-drift detection, tests, and alerting — the wins compound across teams. The framework is a contract: you write config, the framework handles the rest. If we find a bug, we fix it once and every pipeline benefits. With a template, you fix it once and 30 teams ignore the fix."
+
+**Q: "How did you pick the 3 source patterns? What about the long tail?"**
+A: "I counted them. REST API, relational DB, and SFTP/file drop covered ~90% of our pipelines. I left Kafka, event streams, and CDC for a v2. The discipline was: cover the 90% first, because that's where the cost was. If I'd tried to support every source type from day one, I'd still be in v1. The other 10% could wait — and after v1 shipped, two of those teams asked to be the v2 pilot, which gave me free user-research."
+
+**Q: "What was hardest about the migration? What surprised you?"**
+A: "Schema drift. The old one-off pipelines had quietly allowed columns to come and go — the source API added a field, the pipeline silently accepted it, the warehouse had a different schema than the contract said. The new framework failed loud: it rejected the non-conforming event and paged the producer. That broke the first week, because every legitimate schema change triggered a page. I added a 'known drift' whitelist and a 1-week grace period so teams weren't paged on the first legitimate schema change — they had a week to update the contract. The lesson: governance is a process, not just a tech toggle. The framework's value wasn't that it failed loud; it was that it failed loud *and* gave producers a clear path to make the change legitimate."
+
+**Q: "How did you get buy-in? You said 8 teams adopted it without you asking — but what about the teams that *didn't* adopt it?"**
+A: "I didn't pitch a framework — I shipped one. I migrated the two highest-traffic pipelines (orders and customers feeds) myself, end-to-end, before asking anyone else to use it. That gave me the proof. After the migration numbers were in, I wrote a one-page README, a worked example, and ran a 30-min lunch-and-learn. Eight teams onboarded within 3 months. The teams that didn't adopt were the ones with very specialized pipelines — Kafka, event streams, custom ML training jobs — which I'd scoped out of v1. After v2, three of those teams adopted too. The lesson: build the thing, ship the thing, let the proof do the work. Adoption follows visible wins, not announcements."
+
+**Q: "Did anyone push back? How did you handle the senior engineer who preferred his custom DAG?"**
+A: "Yes — one senior engineer preferred his custom DAG. He said it gave him more control and that the framework was too rigid. I didn't argue in a meeting. I offered to migrate his pipeline myself. He agreed. Once it was migrated, he became the framework's strongest advocate — because the framework caught a schema-drift incident in his pipeline within the first month that his custom DAG would have missed silently. I think the lesson is: don't argue with skeptics, *convert* them by doing the work. The pipeline migration took me 3 days; arguing about it in meetings would have taken 3 weeks and not changed his mind."
+
+**Q: "How do you keep a framework from becoming a bottleneck as more teams adopt it?"**
+A: "By making the YAML contract the API. As long as the config covers the new case, teams don't need me in the loop. The 8 teams onboarded without filing a single PR against the framework — they just wrote configs. I added 2 new source patterns in v2 (Kafka and CDC) based on the most-requested gaps, and I documented them. I also moved the framework to a self-serve onboarding flow: an engineer submits a config, the framework's CI runs the schema contract and a dry-run, and the pipeline is live in hours. The bottleneck moved from 'me writing the pipeline' to 'the engineer writing a config,' which is exactly where I wanted it. The framework should be *enabling*, not gating."
+
+**Q: "What would you do differently?"**
+A: "Three things. First, instrument the framework with row-count and freshness metrics from day one. I added them in month two, and there were two quiet incidents in the gap where the framework succeeded but the data was stale, and we didn't know until a dashboard broke. Second, write the migration runbook *before* migrating the first pipeline, not after the second — I burned a few hours on the first migration that I would have saved with a runbook. Third, set up a monthly office hour for users from day one. The questions I got in month four would have been more useful in month one."
 
 **What this story proves:** saw a repeating pain across the org, built a single abstraction instead of more one-offs, dogfooded on the highest-stakes pipelines to de-risk it, drove adoption through proof rather than mandate, quantified before/after, and reflected on what to add sooner.
 
