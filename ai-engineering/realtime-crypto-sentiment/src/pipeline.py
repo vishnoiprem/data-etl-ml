@@ -3,15 +3,19 @@
 Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 APScheduler jobs:
-- scrape_tweets: every 60s, rotating topic set
-- score_batch: every 60s, drains unscored tweets, runs FinBERT
-- binance_stream: long-running asyncio task
-- generate_signals: every 60s, per-symbol z-score + signal
-- paper_trade: every 5s, consumes latest signals & ticks
+- scrape_tweets: every 60s, rotating tracked_tags set
+- score_batch: every 60s, drains unscored tweets, runs sentiment model
+- generate_signals: every 60s, per-tag sentiment z-score → signal
+- paper_trade: every 5s, consumes latest signals + synthetic prices
+- scrape_trending: every 60s, runs trending-tag discovery
+
+Note: there is no live price feed. The paper broker uses a synthetic
+unit price derived from the most recent tweet's engagement for that
+tag (likes + 2×retweets + 0.1×followers, floored to ≥1). This is a
+toy signal for the simulator — not a production price proxy.
 """
 from __future__ import annotations
 
-import asyncio
 import signal
 import sys
 from datetime import datetime
@@ -31,9 +35,8 @@ from src.metrics import (
     TWEETS_SCRAPED,
     start_metrics_server,
 )
-from src.ml.finbert import FinBERTScorer
+from src.ml.sentiment import TwitterSentimentScorer
 from src.ml.signal import generate_signal
-from src.prices.binance_ws import stream_prices
 from src.sources.registry import SourceRegistry
 from src.sources.trending import (
     aggregate_tags,
@@ -43,102 +46,83 @@ from src.store import db
 from src.trader.paper import PaperBroker
 
 
-class CryptoPipeline:
+class SentimentPipeline:
     def __init__(self):
         self.sources = SourceRegistry.from_settings()
-        self.scorer: FinBERTScorer | None = None  # lazy
+        self.scorer: TwitterSentimentScorer | None = None  # lazy
         self.broker = PaperBroker()
-        # Latest tick per symbol (used by signal generator)
+        # Latest synthetic unit price per tag (used by paper_trade)
         self._latest_prices: dict[str, dict] = {}
-        # Latest signal per symbol (used by paper_trade)
+        # Latest signal per tag (used by paper_trade)
         self._latest_signals: dict[str, object] = {}
-        self._stop = asyncio.Event()
         self.scheduler = BlockingScheduler(timezone="UTC")
 
     # ── Jobs ─────────────────────────────────────────────────────────
 
     def scrape_tweets(self) -> None:
-        """Pull tweets for one topic per cycle; rotates through the topic list."""
-        topics = settings.all_topics
-        if not topics:
+        """Pull tweets for one tracked_tag per cycle; rotates through the list."""
+        tags = settings.tracked_tags
+        if not tags:
             return
         # Use a stable rotating index based on minutes since epoch
-        idx = int(datetime.utcnow().timestamp() // settings.scrape_interval_sec) % len(topics)
-        topic = topics[idx]
-        self._scrape_topic(topic)
+        idx = int(datetime.utcnow().timestamp() // settings.scrape_interval_sec) % len(tags)
+        tag = tags[idx]
+        self._scrape_tag(tag)
 
-    def _scrape_topic(self, topic: str) -> None:
-        asyncio.run(self._scrape_topic_async(topic))
+    def _scrape_tag(self, tag: str) -> None:
+        import asyncio
+        asyncio.run(self._scrape_tag_async(tag))
 
-    async def _scrape_topic_async(self, topic: str) -> None:
-        # Determine the symbol(s) the topic maps to (cashtag/hashtag → symbols)
-        symbols = self._symbols_for_topic(topic)
-        if not symbols:
-            return
+    async def _scrape_tag_async(self, tag: str) -> None:
         with SCRAPE_LATENCY.labels(adapter=self.sources.active).time():
             try:
-                tweets = await self.sources.fetch(topic, max_results=20)
+                tweets = await self.sources.fetch(tag, max_results=20)
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="scrape").inc()
-                logger.error(f"scrape error for {topic!r}: {e}")
+                logger.error(f"scrape error for {tag!r}: {e}")
                 return
         TWEETS_SCRAPED.labels(adapter=self.sources.active).inc(len(tweets))
-        # Insert one row per (tweet, symbol) — multi-tag if multiple symbols match
+        # Insert one row per tweet. No per-symbol fanout — we use the tag
+        # itself as the symbol so the dashboard can group by topic.
         for t in tweets:
-            for sym in symbols:
-                row = {
-                    "ts": t.ts,
-                    "tweet_id": t.id,
-                    "symbol": sym,
-                    "text": t.text,
-                    "author": t.author,
-                    "likes": t.likes,
-                    "retweets": t.retweets,
-                    "followers": t.followers,
-                    "url": t.url,
-                    "source_adapter": self.sources.active,
-                    "raw_json": None,
-                }
-                try:
-                    db.upsert_tweet(row)
-                except Exception as e:
-                    PIPELINE_ERRORS.labels(stage="upsert_tweet").inc()
-                    logger.debug(f"upsert_tweet error: {e}")
-
-    @staticmethod
-    def _symbols_for_topic(topic: str) -> list[str]:
-        """Map a topic to one or more symbols.
-
-        `$BTC` → `BTC`; `#memecoin` → none; `bitcoin` → `BTC`; etc.
-        """
-        t = topic.strip().lower().lstrip("$").lstrip("#")
-        alias = {
-            "bitcoin": "BTC", "btc": "BTC",
-            "ethereum": "ETH", "eth": "ETH",
-            "solana": "SOL", "sol": "SOL",
-            "binance coin": "BNB", "bnb": "BNB",
-            "ripple": "XRP", "xrp": "XRP",
-            "dogecoin": "DOGE", "doge": "DOGE",
-            "cardano": "ADA", "ada": "ADA",
-            "avalanche": "AVAX", "avax": "AVAX",
-            "chainlink": "LINK", "link": "LINK",
-            "polygon": "MATIC", "matic": "MATIC",
-            "memecoin": "", "altcoin": "",  # no single symbol
-        }
-        out = alias.get(t, "")
-        return [out] if out else []
+            row = {
+                "ts": t.ts,
+                "tweet_id": t.id,
+                "symbol": tag,
+                "text": t.text,
+                "author": t.author,
+                "likes": t.likes,
+                "retweets": t.retweets,
+                "followers": t.followers,
+                "url": t.url,
+                "source_adapter": self.sources.active,
+                "raw_json": None,
+            }
+            try:
+                db.upsert_tweet(row)
+            except Exception as e:
+                PIPELINE_ERRORS.labels(stage="upsert_tweet").inc()
+                logger.debug(f"upsert_tweet error: {e}")
+            # Compute a synthetic unit price from this tweet's engagement
+            # for the paper broker. This is a stand-in; there is no live
+            # market price.
+            self._latest_prices[tag] = {
+                "ts": t.ts,
+                "symbol": tag,
+                "price": _synthetic_price(t.likes, t.retweets, t.followers),
+            }
 
     def score_batch(self) -> None:
-        """Drain unscored tweets, run FinBERT, write back sentiment_score."""
+        """Drain unscored tweets, run sentiment model, write back sentiment_score."""
         if self.scorer is None:
             try:
-                self.scorer = FinBERTScorer(
-                    model_name=settings.finbert_model,
-                    batch_size=settings.finbert_batch_size,
+                self.scorer = TwitterSentimentScorer(
+                    model_name=settings.sentiment_model,
+                    batch_size=settings.sentiment_batch_size,
                 )
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="scorer_init").inc()
-                logger.error(f"FinBERT init failed: {e}")
+                logger.error(f"sentiment model init failed: {e}")
                 return
 
         rows = db.fetch_unscored_tweets(limit=128)
@@ -149,7 +133,7 @@ class CryptoPipeline:
                 scores = self.scorer.score([r["text"] for r in rows])
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="score").inc()
-                logger.error(f"FinBERT score failed: {e}")
+                logger.error(f"sentiment score failed: {e}")
                 return
         TWEETS_SCORED.inc(len(rows))
         for r, s in zip(rows, scores):
@@ -160,31 +144,32 @@ class CryptoPipeline:
                 logger.debug(f"update sentiment error: {e}")
 
     def generate_signals(self) -> None:
-        """For each symbol, compute z-score sentiment + momentum and emit a signal."""
-        for sym in settings.symbols:
+        """For each tracked tag, compute sentiment z-score and emit a signal."""
+        for tag in settings.tracked_tags:
             try:
-                self._generate_signal_for(sym)
+                self._generate_signal_for(tag)
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="signal").inc()
-                logger.error(f"signal error for {sym}: {e}")
+                logger.error(f"signal error for {tag}: {e}")
 
     def scrape_trending(self) -> None:
-        """Scrape the trending_queries list (crypto + AI/data + stocks + dating),
+        """Scrape the trending_queries list (AI/data + stocks + dating),
         extract every cashtag/hashtag/keyword, and write 1-min-bucketed counts
         to `trending_tags`. Powers the dashboard's top-10 panel.
         """
+        import asyncio
         queries = settings.trending_queries
         if not queries:
             return
         all_hits: list = []
         for q in queries:
             try:
-                tweets = asyncio.run(self._scrape_topic_async(q))
+                tweets = asyncio.run(self._scrape_tag_async(q))
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="trending_scrape").inc()
                 logger.debug(f"trending scrape error for {q!r}: {e}")
                 continue
-            # Score sentiment with FinBERT if we have a scorer; else skip
+            # Score sentiment with the scorer if available; else skip
             for t in tweets:
                 sentiment = None
                 if self.scorer is not None:
@@ -226,40 +211,23 @@ class CryptoPipeline:
         if rows_written:
             logger.info(f"trending: {len(all_hits)} tag hits → {rows_written} bucketed rows")
 
-    def _generate_signal_for(self, sym: str) -> None:
+    def _generate_signal_for(self, tag: str) -> None:
         # Z-score the current 5-min sentiment mean against a history of
         # 5-min-bucket means (not raw per-tweet scores), so the std isn't
         # dominated by per-tweet noise.
         from src.store.db import sentiment_buckets
         buckets = sentiment_buckets(
-            sym, minutes=5, hours=settings.signal_lookback_hours,
+            tag, minutes=5, hours=settings.signal_lookback_hours,
         )
         if len(buckets) < 2:
             return
         sentiment_value = float(buckets[-1]["avg_sent"])
         history_scores = [float(b["avg_sent"]) for b in buckets]
 
-        # Momentum: 5-min price return vs history of 5-min returns over lookback
-        rets_5m = db.recent_price_returns(sym, minutes=5)
-        if not rets_5m:
-            return
-        momentum_value = sum(rets_5m)  # net 5-min return
-        from src.store.db import recent_price_returns as _rpr
-        history_returns: list[float] = []
-        # Sample 5-min-return windows over the lookback
-        # Cheap implementation: minute returns then aggregate every 5
-        minute_returns = _rpr(sym, minutes=settings.signal_lookback_hours * 60)
-        for i in range(0, len(minute_returns) - 4, 5):
-            history_returns.append(sum(minute_returns[i : i + 5]))
-        if len(history_returns) < 2:
-            return
-
         sig = generate_signal(
-            symbol=sym,
+            symbol=tag,
             sentiment_value=sentiment_value,
             sentiment_history=history_scores,
-            momentum_value=momentum_value,
-            momentum_history=history_returns,
         )
         SIGNAL_LATENCY.observe(0.0)  # placeholder; full e2e latency not tracked here
         SIGNALS_GENERATED.labels(action=sig.action).inc()
@@ -269,16 +237,16 @@ class CryptoPipeline:
             PIPELINE_ERRORS.labels(stage="insert_signal").inc()
             logger.debug(f"insert_signal error: {e}")
         # Hand to broker
-        self._latest_signals[sym] = sig
+        self._latest_signals[tag] = sig
 
     def paper_trade(self) -> None:
-        """Consume latest signals + latest prices; fill via PaperBroker."""
+        """Consume latest signals + latest synthetic prices; fill via PaperBroker."""
         for sym, sig in list(self._latest_signals.items()):
             tick = self._latest_prices.get(sym)
             if tick is None:
                 continue
             try:
-                fill = self.broker.on_signal(sig, float(tick["price_usd"]))
+                fill = self.broker.on_signal(sig, float(tick["price"]))
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="paper_trade").inc()
                 logger.error(f"paper_trade error for {sym}: {e}")
@@ -291,8 +259,8 @@ class CryptoPipeline:
                         "symbol": fill.symbol,
                         "side": fill.side,
                         "qty": fill.qty,
-                        "price_usd": fill.price_usd,
-                        "fee_usd": fill.fee_usd,
+                        "price": fill.price,
+                        "fee": fill.fee,
                         "cash_after": fill.cash_after,
                         "reason": fill.reason,
                     })
@@ -312,18 +280,6 @@ class CryptoPipeline:
 
     # ── Lifecycle ─────────────────────────────────────────────────────
 
-    async def _on_tick(self, tick: dict) -> None:
-        self._latest_prices[tick["symbol"]] = tick
-        self.broker.on_price_tick(tick)
-        try:
-            db.upsert_price(tick)
-        except Exception as e:
-            PIPELINE_ERRORS.labels(stage="upsert_price").inc()
-            logger.debug(f"upsert_price error: {e}")
-
-    async def _run_ws(self) -> None:
-        await stream_prices(self._on_tick, stop_event=self._stop)
-
     def start(self) -> None:
         """Boot the pipeline; blocks until SIGINT."""
         logger.info("pipeline: init schema")
@@ -340,7 +296,7 @@ class CryptoPipeline:
 
         logger.info("pipeline: scheduling jobs")
         # max_instances=1, coalesce=True: never run two cycles in parallel.
-        # Without these, a slow FinBERT batch can overlap the next scrape and
+        # Without these, a slow sentiment batch can overlap the next scrape and
         # double-score the same unscored rows.
         self.scheduler.add_job(self.scrape_tweets, "interval",
                               seconds=settings.scrape_interval_sec, id="scrape",
@@ -363,29 +319,10 @@ class CryptoPipeline:
                               next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=20),
                               max_instances=1, coalesce=True)
 
-        # Start the WS task in the background
-        loop = asyncio.new_event_loop()
-        def _kick_ws():
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(self._run_ws())
-        import threading
-        ws_thread = threading.Thread(target=_kick_ws, daemon=True)
-        ws_thread.start()
-
         def _handle_signal(signum, frame):
-            # Signal handlers run on the main thread in CPython. We must NOT
-            # call sys.exit() here — APScheduler's main loop catches
-            # SystemExit and the race leaves the WS thread orphaned.
-            # Just shut down the scheduler; the `try/except (KeyboardInterrupt,
-            # SystemExit)` around scheduler.start() will let main() return.
             logger.info("pipeline: SIGINT/SIGTERM, shutting down")
-            self._stop.set()
             try:
                 self.scheduler.shutdown(wait=False)
-            except Exception:
-                pass
-            try:
-                loop.call_soon_threadsafe(loop.stop)
             except Exception:
                 pass
         signal.signal(signal.SIGINT, _handle_signal)
@@ -396,14 +333,28 @@ class CryptoPipeline:
             self.scheduler.start()
         except (KeyboardInterrupt, SystemExit):
             pass
-
-        # Wait briefly for the WS thread to drain after shutdown.
-        ws_thread.join(timeout=5)
         logger.info("pipeline: stopped")
 
 
+# Backwards-compat alias so old imports / tests still work.
+CryptoPipeline = SentimentPipeline
+
+
+def _synthetic_price(likes: int, retweets: int, followers: int) -> float:
+    """Stand-in unit price derived from tweet engagement.
+
+    The paper broker needs a numeric fill price to compute PnL, but there
+    is no live market feed. This heuristic treats a tweet's reach as a
+    rough proxy for "how much attention is on this topic" and floors at
+    1.0 to avoid zero-qty fills.
+
+    floors at 1.0 to avoid zero-qty fills.
+    """
+    return max(1.0, float(likes) + 2.0 * float(retweets) + 0.1 * float(followers))
+
+
 def main() -> int:
-    CryptoPipeline().start()
+    SentimentPipeline().start()
     return 0
 
 

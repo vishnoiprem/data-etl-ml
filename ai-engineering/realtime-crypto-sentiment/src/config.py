@@ -3,6 +3,10 @@
 Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 All knobs live in .env. This module is the single source of truth.
+
+Project is now a domain-agnostic real-time X.com sentiment analytics
+tool with a paper-trading simulator. There is no live price feed —
+the broker uses synthetic prices derived from tweet engagement.
 """
 from __future__ import annotations
 
@@ -27,16 +31,8 @@ class Settings(BaseSettings):
 
     # ── Storage ───────────────────────────────────────────────────────────
     database_url: str = Field(
-        default="postgresql+psycopg2://postgres:postgres@localhost:5432/crypto"
+        default="postgresql+psycopg2://postgres:postgres@localhost:5432/sentiment"
     )
-
-    # ── Prices ────────────────────────────────────────────────────────────
-    binance_ws: str = "wss://stream.binance.com:9443/stream"
-    binance_rest: str = "https://api.binance.com"
-    symbols: list[str] = Field(
-        default_factory=lambda: ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "AVAX", "LINK", "MATIC"]
-    )
-    backfill_days: int = 7
 
     # ── Sources (Nitter / Syndication) ─────────────────────────────────────
     mirrors: list[str] = Field(
@@ -52,58 +48,47 @@ class Settings(BaseSettings):
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
     )
 
-    # ── Topics ────────────────────────────────────────────────────────────
-    cashtags: list[str] = Field(
+    # ── Tracked tags (per-tag dashboard grouping) ─────────────────────────
+    # Topics the pipeline scrapes every cycle and routes tweets to.
+    # These are free-text search queries; the trending-tag extractor pulls
+    # the actual cashtags/hashtags/keywords from the returned tweets.
+    tracked_tags: list[str] = Field(
         default_factory=lambda: [
-            "$BTC", "$ETH", "$SOL", "$BNB", "$XRP", "$DOGE", "$ADA", "$AVAX", "$LINK", "$MATIC",
-        ]
-    )
-    hashtags: list[str] = Field(
-        default_factory=lambda: [
-            "#bitcoin", "#ethereum", "#solana", "#bnb", "#xrp", "#dogecoin",
-            "#ada", "#avax", "#chainlink", "#matic", "#memecoin", "#altcoin",
-        ]
-    )
-    keywords: list[str] = Field(
-        default_factory=lambda: [
-            "bitcoin", "ethereum", "solana", "binance coin", "ripple",
-            "dogecoin", "cardano", "avalanche", "chainlink", "polygon",
+            # AI / Data
+            "AI", "LLM", "data engineering", "vector database",
+            # Stocks
+            "S&P 500", "nasdaq", "TSLA", "NVDA",
         ]
     )
 
     # ── Trending tags (free-text queries scraped for tag discovery) ───────
-    # Mix of crypto + AI/data + stocks + dating so the dashboard's top-10
-    # panel isn't dominated by one vertical. The pipeline scrapes each
-    # every 60s and counts how often each cashtag/hashtag appears.
+    # Mix of verticals so the dashboard's top-10 isn't single-domain.
     trending_queries: list[str] = Field(
         default_factory=lambda: [
-            # Crypto
-            "bitcoin", "ethereum", "solana", "memecoin",
             # AI / Data
             "AI", "data engineering", "LLM", "vector database",
             # Stocks
             "S&P 500", "nasdaq", "TSLA", "NVDA",
-            # Dating / "girlf"
+            # Dating
             "dating", "girlf", "girlfriend", "tiktok dating",
         ]
     )
-    trending_window_minutes: int = 5   # rolling window for the top-N count
-    trending_top_n: int = 10           # how many tags to show on the dashboard
+    trending_window_minutes: int = 5
+    trending_top_n: int = 10
 
-    # ── ML ────────────────────────────────────────────────────────────────
-    finbert_model: str = "ProsusAI/finbert"
-    finbert_batch_size: int = 32
+    # ── ML (Twitter sentiment) ────────────────────────────────────────────
+    sentiment_model: str = "cardiffnlp/twitter-roberta-base-sentiment-latest"
+    sentiment_batch_size: int = 32
 
     # ── Paper trader ──────────────────────────────────────────────────────
-    starting_cash_usd: float = 10_000.0
+    # "Units" — generic; the broker has no real-money concept.
+    starting_units: float = 10_000.0
     max_position_pct: float = 5.0
     max_open_positions: int = 3
     fee_bps: int = 10  # basis points (0.1% = 10 bps)
 
     # ── Signals ───────────────────────────────────────────────────────────
     signal_threshold: float = 1.0
-    sentiment_weight: float = 0.6
-    momentum_weight: float = 0.4
     signal_lookback_hours: int = 24
 
     # ── Pipeline ──────────────────────────────────────────────────────────
@@ -115,20 +100,12 @@ class Settings(BaseSettings):
     prometheus_port: int = 8000
     log_level: str = "INFO"
 
-    @field_validator("symbols", "mirrors", "cashtags", "hashtags", "keywords", "trending_queries", mode="before")
+    @field_validator("mirrors", "tracked_tags", "trending_queries", mode="before")
     @classmethod
     def _split_csv(cls, v):
         if isinstance(v, str):
             return [s.strip() for s in v.split(",") if s.strip()]
         return v
-
-    @property
-    def symbols_with_usdt(self) -> list[str]:
-        return [f"{s}USDT" for s in self.symbols]
-
-    @property
-    def all_topics(self) -> list[str]:
-        return self.cashtags + self.hashtags + self.keywords
 
     @property
     def fee_fraction(self) -> float:

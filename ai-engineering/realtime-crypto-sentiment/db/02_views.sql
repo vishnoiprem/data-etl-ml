@@ -1,4 +1,4 @@
--- realtime-crypto-sentiment — convenience views
+-- realtime-x-sentiment — convenience views
 -- Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 -- Latest signal per symbol (last 24h)
@@ -24,27 +24,27 @@ GROUP BY symbol
 ORDER BY tweet_count DESC
 LIMIT 10;
 
--- Equity curve (paper trader) — derives from paper_trades + current prices
+-- Paper-trade log (in chronological order)
 CREATE OR REPLACE VIEW paper_pnl_per_trade AS
 SELECT
     pt.ts,
     pt.symbol,
     pt.side,
     pt.qty,
-    pt.price_usd,
-    pt.fee_usd,
+    pt.price,
+    pt.fee,
     pt.cash_after
 FROM paper_trades pt
 ORDER BY pt.ts;
 
--- Daily PnL summary
+-- Daily PnL summary (per symbol)
 CREATE OR REPLACE VIEW daily_pnl AS
 SELECT
     DATE_TRUNC('day', ts) AS day,
     symbol,
-    SUM(CASE WHEN side = 'SELL' THEN qty * price_usd - fee_usd
-             WHEN side = 'BUY'  THEN -(qty * price_usd + fee_usd)
-             ELSE 0 END) AS net_pnl_usd,
+    SUM(CASE WHEN side = 'SELL' THEN qty * price - fee
+             WHEN side = 'BUY'  THEN -(qty * price + fee)
+             ELSE 0 END) AS net_pnl,
     COUNT(*)             AS trade_count
 FROM paper_trades
 GROUP BY 1, 2

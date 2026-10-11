@@ -6,6 +6,11 @@ Compatible with both Postgres (TimescaleDB hypertables) and SQLite
 (used by the integration test). The schema.sql file is Postgres-only
 and is not applied under SQLite; the integration test uses the
 `ensure_sqlite_schema()` helper below.
+
+Currency note: there is no real money in this system. The paper-
+trading broker uses synthetic "unit prices" derived from tweet
+engagement, so all monetary fields are unitless (price, fee, cash)
+rather than USD.
 """
 from __future__ import annotations
 
@@ -93,14 +98,6 @@ class Tweet(Base):
     raw_json = Column(Text, nullable=True)  # JSON-stringified for sqlite
 
 
-class Price(Base):
-    __tablename__ = "prices"
-    ts = Column(DateTime, primary_key=True)
-    symbol = Column(String, primary_key=True)
-    price_usd = Column(Float, nullable=False)
-    volume_usd = Column(Float, default=0.0)
-
-
 class Signal(Base):
     __tablename__ = "signals"
     ts = Column(DateTime, primary_key=True)
@@ -108,7 +105,7 @@ class Signal(Base):
     action = Column(String, nullable=False)
     score = Column(Float, nullable=False)
     sentiment_zscore = Column(Float, nullable=False)
-    momentum_zscore = Column(Float, nullable=False)
+    momentum_zscore = Column(Float, nullable=False)  # always 0; kept for back-compat
     reason = Column(Text, nullable=False)
 
 
@@ -117,7 +114,7 @@ class Position(Base):
     ts = Column(DateTime, primary_key=True)
     symbol = Column(String, primary_key=True)
     qty = Column(Float, nullable=False)
-    avg_price = Column(Float, nullable=False)
+    avg_price = Column(Float, nullable=False)  # synthetic unit price
     realized_pnl = Column(Float, default=0.0)
 
 
@@ -127,8 +124,8 @@ class PaperTrade(Base):
     symbol = Column(String, primary_key=True)
     side = Column(String, nullable=False)
     qty = Column(Float, nullable=False)
-    price_usd = Column(Float, nullable=False)
-    fee_usd = Column(Float, nullable=False)
+    price = Column(Float, nullable=False)
+    fee = Column(Float, nullable=False)
     cash_after = Column(Float, nullable=False)
     reason = Column(Text, nullable=True)
 
@@ -273,54 +270,6 @@ def fetch_unscored_tweets(limit: int = 256) -> list[dict]:
     return [dict(r._mapping) for r in rows]
 
 
-def upsert_price(p: dict) -> None:
-    """Idempotent insert (ts, symbol). On conflict, update price+volume."""
-    engine = get_engine()
-    row = {
-        "ts": p["ts"],
-        "symbol": p["symbol"],
-        "price_usd": p["price_usd"],
-        "volume_usd": float(p.get("volume_usd", 0.0)),
-    }
-    with engine.begin() as conn:
-        if engine.dialect.name == "postgresql":
-            stmt = pg_insert(Price.__table__).values(**row)
-            stmt = stmt.on_conflict_do_update(
-                index_elements=["ts", "symbol"],
-                set_={"price_usd": stmt.excluded.price_usd, "volume_usd": stmt.excluded.volume_usd},
-            )
-            conn.execute(stmt)
-        else:
-            conn.execute(
-                text(
-                    "INSERT OR REPLACE INTO prices (ts, symbol, price_usd, volume_usd) "
-                    "VALUES (:ts, :symbol, :price_usd, :volume_usd)"
-                ),
-                row,
-            )
-
-
-def bulk_upsert_prices(prices: Iterable[dict]) -> int:
-    n = 0
-    for p in prices:
-        upsert_price(p)
-        n += 1
-    return n
-
-
-def latest_price(symbol: str) -> dict | None:
-    engine = get_engine()
-    with engine.connect() as conn:
-        row = conn.execute(
-            text(
-                "SELECT ts, symbol, price_usd, volume_usd FROM prices "
-                "WHERE symbol=:s ORDER BY ts DESC LIMIT 1"
-            ),
-            {"s": symbol},
-        ).fetchone()
-    return dict(row._mapping) if row else None
-
-
 def insert_signal(s: dict) -> None:
     engine = get_engine()
     row = {
@@ -329,7 +278,9 @@ def insert_signal(s: dict) -> None:
         "action": s["action"],
         "score": s["score"],
         "sentiment_zscore": s["sentiment_zscore"],
-        "momentum_zscore": s["momentum_zscore"],
+        # momentum_zscore is kept in the schema (back-compat) but always 0
+        # now that prices are gone.
+        "momentum_zscore": s.get("momentum_zscore", 0.0),
         "reason": s["reason"],
     }
     with engine.begin() as conn:
@@ -381,36 +332,6 @@ def fetch_recent_tweets(symbol: str, minutes: int = 5) -> list[dict]:
     return [dict(r._mapping) for r in rows]
 
 
-def recent_price_returns(symbol: str, minutes: int = 5) -> list[float]:
-    """Return the per-minute price-returns for the last `minutes`.
-
-    Returns: list of (price_now - price_then) / price_then for each minute.
-    """
-    engine = get_engine()
-    with engine.connect() as conn:
-        if engine.dialect.name == "postgresql":
-            rows = conn.execute(
-                text(
-                    "SELECT bucket, close FROM prices_1m "
-                    "WHERE symbol=:s AND bucket > NOW() - (:m || ' minutes')::INTERVAL "
-                    "ORDER BY bucket ASC"
-                ),
-                {"s": symbol, "m": str(minutes + 1)},
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                text(
-                    "SELECT ts AS bucket, price_usd AS close FROM prices "
-                    "WHERE symbol=:s AND ts > datetime('now', :m) ORDER BY ts ASC"
-                ),
-                {"s": symbol, "m": f"-{minutes + 1} minutes"},
-            ).fetchall()
-    closes = [float(r._mapping["close"]) for r in rows]
-    if len(closes) < 2:
-        return []
-    return [(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))]
-
-
 def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> list[dict]:
     """Return list of {bucket, avg_sentiment, n} aggregated to `minutes`-wide buckets.
 
@@ -458,8 +379,8 @@ def insert_paper_trade(t: dict) -> None:
         "symbol": t["symbol"],
         "side": t["side"],
         "qty": t["qty"],
-        "price_usd": t["price_usd"],
-        "fee_usd": t["fee_usd"],
+        "price": t["price"],
+        "fee": t["fee"],
         "cash_after": t["cash_after"],
         "reason": t.get("reason"),
     }
@@ -472,7 +393,7 @@ def fetch_paper_trades(limit: int = 200) -> list[dict]:
     with engine.connect() as conn:
         rows = conn.execute(
             text(
-                "SELECT ts, symbol, side, qty, price_usd, fee_usd, cash_after, reason "
+                "SELECT ts, symbol, side, qty, price, fee, cash_after, reason "
                 "FROM paper_trades ORDER BY ts DESC LIMIT :lim"
             ),
             {"lim": limit},

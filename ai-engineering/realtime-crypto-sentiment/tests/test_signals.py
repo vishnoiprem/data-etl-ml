@@ -3,6 +3,9 @@
 Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 Pure-Python tests; no DB, no external services.
+
+The signal is sentiment-only now (prices were removed). Tests that
+combined sentiment + momentum with weights have been dropped.
 """
 from __future__ import annotations
 
@@ -75,32 +78,26 @@ def _now():
 
 def test_generate_signal_buy_above_threshold():
     sig = generate_signal(
-        symbol="BTC",
+        symbol="AI",
         sentiment_value=100.0,
         sentiment_history=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        momentum_value=100.0,
-        momentum_history=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         threshold=1.0,
-        sent_weight=1.0,
-        mom_weight=1.0,
         now=_now(),
     )
     assert sig.action == "BUY"
     assert sig.score > 1.0
-    assert sig.symbol == "BTC"
+    assert sig.symbol == "AI"
     assert sig.ts == _now()
+    # Momentum is always 0 now
+    assert sig.momentum_zscore == 0.0
 
 
 def test_generate_signal_sell_below_threshold():
     sig = generate_signal(
-        symbol="ETH",
+        symbol="LLM",
         sentiment_value=-100.0,
         sentiment_history=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        momentum_value=-100.0,
-        momentum_history=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         threshold=1.0,
-        sent_weight=1.0,
-        mom_weight=1.0,
         now=_now(),
     )
     assert sig.action == "SELL"
@@ -110,14 +107,10 @@ def test_generate_signal_sell_below_threshold():
 def test_generate_signal_hold_within_band():
     # History with wide variance, value close to mean → small z
     sig = generate_signal(
-        symbol="SOL",
+        symbol="vector database",
         sentiment_value=10.0,  # exactly the mean of history
         sentiment_history=[-10, -5, 0, 5, 10, 15, 20, 25, 30, 15],
-        momentum_value=0.0,
-        momentum_history=[-0.05, -0.02, 0.0, 0.03, 0.01, -0.01, 0.04, 0.02, -0.03, 0.0],
         threshold=1.0,
-        sent_weight=1.0,
-        mom_weight=1.0,
     )
     assert sig.action == "HOLD"
 
@@ -125,31 +118,28 @@ def test_generate_signal_hold_within_band():
 def test_generate_signal_too_little_history_holds_or_handles_gracefully():
     # With <2 history points, zscore returns 0 → score = 0 → HOLD
     sig = generate_signal(
-        symbol="BNB",
+        symbol="TSLA",
         sentiment_value=999.0,
         sentiment_history=[42.0],
-        momentum_value=999.0,
-        momentum_history=[42.0],
         threshold=1.0,
     )
     assert sig.action == "HOLD"
 
 
-def test_generate_signal_reason_includes_both_zscores():
+def test_generate_signal_reason_includes_sentiment_zscore():
     sig = generate_signal(
-        symbol="XRP",
+        symbol="NVDA",
         sentiment_value=10.0,
         sentiment_history=[1, 2, 3, 4, 5],
-        momentum_value=-10.0,
-        momentum_history=[5, 4, 3, 2, 1],
     )
     assert "sentiment" in sig.reason
-    assert "momentum" in sig.reason
+    # Momentum leg is gone, so "momentum" should not appear
+    assert "momentum" not in sig.reason
 
 
 def test_signal_to_row_shape():
     sig = Signal(
-        symbol="DOGE", ts=_now(), action="BUY", score=1.5,
+        symbol="NVDA", ts=_now(), action="BUY", score=1.5,
         sentiment_zscore=2.0, momentum_zscore=1.0, reason="test",
     )
     row = sig.to_row()
@@ -157,59 +147,22 @@ def test_signal_to_row_shape():
         "ts", "symbol", "action", "score",
         "sentiment_zscore", "momentum_zscore", "reason",
     }
-    assert row["symbol"] == "DOGE"
+    assert row["symbol"] == "NVDA"
     assert row["action"] == "BUY"
 
 
-def test_weighted_signal_score():
-    """sent_weight=2, mom_weight=0 → score = 2*sent_z, mom_z must NOT contribute.
-    Pre-fix this only checked the trivial abs(z) >= 0; now we verify the
-    actual weighting math: score equals 2 * sentiment_zscore exactly."""
+def test_score_equals_sentiment_zscore_directly():
+    """Since momentum was removed, score is sent_z exactly (no weighted sum).
+    Verifies the math without the weighted-leg dependency."""
     sig = generate_signal(
-        symbol="AVAX",
-        sentiment_value=100.0,  # way bigger than history mean
-        sentiment_history=[10, 15, 20, 25, 30, 35, 40, 45, 50, 50],
-        momentum_value=2.0,
-        momentum_history=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2],
-        threshold=1.0, sent_weight=2.0, mom_weight=0.0,
-    )
-    # The score is exactly 2*sent_z + 0*mom_z. If mom_weight leaked in,
-    # the equality below would fail.
-    assert math.isclose(sig.score, 2.0 * sig.sentiment_zscore, rel_tol=1e-9)
-    assert sig.sentiment_zscore > 1.0
-
-
-def test_weighted_signal_score_mom_only():
-    """Symmetric case: sent_weight=0, mom_weight=3 → score = 3*mom_z only."""
-    sig = generate_signal(
-        symbol="LINK",
-        sentiment_value=0.0,
-        sentiment_history=[0, 0, 0, 0, 0],  # constant → sent_z=0
-        momentum_value=10.0,  # far from mean
-        momentum_history=[1, 2, 3, 4, 5],
-        threshold=1.0, sent_weight=0.0, mom_weight=3.0,
-    )
-    assert sig.sentiment_zscore == 0.0  # constant history → 0 z
-    assert math.isclose(sig.score, 3.0 * sig.momentum_zscore, rel_tol=1e-9)
-
-
-def test_weighted_signal_score_combined_math():
-    """End-to-end: score must equal sent_w * sent_z + mom_w * mom_z exactly
-    for arbitrary weights, with hand-computed expected values."""
-    # Sentiment: history = [0, 10, 20] → mean=10, var=200/3, std=sqrt(66.67)≈8.165
-    # sent_value=30 → sent_z = (30-10)/8.165 ≈ 2.449
-    # Momentum: history = [0, 5, 10] → mean=5, var=50/3, std=sqrt(16.67)≈4.082
-    # mom_value=-5 → mom_z = (-5-5)/4.082 ≈ -2.449
-    sig = generate_signal(
-        symbol="MATIC",
+        symbol="AI",
         sentiment_value=30.0,
         sentiment_history=[0.0, 10.0, 20.0],
-        momentum_value=-5.0,
-        momentum_history=[0.0, 5.0, 10.0],
-        threshold=1.0, sent_weight=0.6, mom_weight=0.4,
     )
-    expected = 0.6 * sig.sentiment_zscore + 0.4 * sig.momentum_zscore
-    assert math.isclose(sig.score, expected, rel_tol=1e-9)
+    assert math.isclose(sig.score, sig.sentiment_zscore, rel_tol=1e-9)
+    # Sanity: sent_z = (30 - 10) / sqrt(200/3) ≈ 2.449
+    expected = 20.0 / math.sqrt(sum((x - 10) ** 2 for x in [0.0, 10.0, 20.0]) / 3)
+    assert math.isclose(sig.sentiment_zscore, expected, rel_tol=1e-6)
 
 
 def test_threshold_boundary_exactly_at_threshold_is_hold():
@@ -218,15 +171,12 @@ def test_threshold_boundary_exactly_at_threshold_is_hold():
     test)."""
     # Construct a history where we know the exact z-score
     sig = generate_signal(
-        symbol="XLM",
-        sentiment_value=10.0,  # mean of history below
+        symbol="data engineering",
+        sentiment_value=10.0,  # mean of history
         sentiment_history=[0.0, 10.0, 20.0],  # mean=10
-        momentum_value=5.0,  # mean of history below
-        momentum_history=[0.0, 5.0, 10.0],  # mean=5
         threshold=0.0,  # any nonzero score → BUY or SELL
     )
     # With threshold=0, a score of exactly 0 is HOLD, positive is BUY, negative is SELL
-    # Our constructed case → sent_z=0, mom_z=0 → score=0
     assert sig.score == 0.0
     assert sig.action == "HOLD"
 
@@ -235,15 +185,11 @@ def test_reason_string_format():
     """The reason is what shows up in the dashboard; pin its format so a
     refactor doesn't accidentally change the dashboard contract."""
     sig = generate_signal(
-        symbol="AVAX",
+        symbol="girlf",
         sentiment_value=1.0,
         sentiment_history=[0.0, 0.0, 0.0, 1.0, 2.0],
-        momentum_value=1.0,
-        momentum_history=[0.0, 0.0, 0.0, 1.0, 2.0],
     )
-    # Must include both z-scores and the final score
     assert "sentiment" in sig.reason
-    assert "momentum" in sig.reason
     assert "σ" in sig.reason  # Greek sigma character
     # Format must include sign-prefixed floats: e.g. +1.23
     import re

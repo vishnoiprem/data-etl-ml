@@ -1,8 +1,7 @@
--- realtime-crypto-sentiment — TimescaleDB schema
+-- realtime-x-sentiment — TimescaleDB schema
 -- Author: Prem Vishnoi <pvishnoi@avilx.com>
 --
--- Cloned pattern from realtime-stock-pipeline/db/01_init_timescale.sql.
--- 4 hypertables: tweets, prices, signals, positions.
+-- Hypertables: tweets, signals, positions, paper_trades, trending_tags.
 -- Compression after 7d, retention 90d raw / 365d aggregates.
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
@@ -19,7 +18,7 @@ CREATE TABLE IF NOT EXISTS tweets (
     followers       INTEGER     NOT NULL DEFAULT 0,
     url             TEXT        NOT NULL,
     source_adapter  TEXT        NOT NULL,
-    sentiment_score DOUBLE PRECISION,  -- NULL until FinBERT scores
+    sentiment_score DOUBLE PRECISION,  -- NULL until Twitter sentiment model scores
     raw_json        JSONB,
     UNIQUE (tweet_id, ts)
 );
@@ -37,26 +36,6 @@ ALTER TABLE tweets SET (
 SELECT add_compression_policy('tweets', INTERVAL '7 days', if_not_exists => TRUE);
 SELECT add_retention_policy('tweets', INTERVAL '90 days', if_not_exists => TRUE);
 
--- ── prices ──────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS prices (
-    ts          TIMESTAMPTZ NOT NULL,
-    symbol      TEXT        NOT NULL,
-    price_usd   DOUBLE PRECISION NOT NULL,
-    volume_usd  DOUBLE PRECISION NOT NULL DEFAULT 0
-);
-SELECT create_hypertable('prices', 'ts',
-    chunk_time_interval => INTERVAL '1 day',
-    if_not_exists => TRUE);
-CREATE INDEX IF NOT EXISTS prices_symbol_ts_idx ON prices (symbol, ts DESC);
-
-ALTER TABLE prices SET (
-    timescaledb.compress,
-    timescaledb.compress_segmentby = 'symbol',
-    timescaledb.compress_orderby = 'ts DESC'
-);
-SELECT add_compression_policy('prices', INTERVAL '7 days', if_not_exists => TRUE);
-SELECT add_retention_policy('prices', INTERVAL '90 days', if_not_exists => TRUE);
-
 -- ── signals ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS signals (
     ts               TIMESTAMPTZ NOT NULL,
@@ -64,7 +43,7 @@ CREATE TABLE IF NOT EXISTS signals (
     action           TEXT        NOT NULL CHECK (action IN ('BUY','SELL','HOLD')),
     score            DOUBLE PRECISION NOT NULL,
     sentiment_zscore DOUBLE PRECISION NOT NULL,
-    momentum_zscore  DOUBLE PRECISION NOT NULL,
+    momentum_zscore  DOUBLE PRECISION NOT NULL,  -- always 0 (sentiment-only signals)
     reason           TEXT        NOT NULL
 );
 SELECT create_hypertable('signals', 'ts',
@@ -80,7 +59,7 @@ CREATE TABLE IF NOT EXISTS positions (
     ts          TIMESTAMPTZ NOT NULL,
     symbol      TEXT        NOT NULL,
     qty         DOUBLE PRECISION NOT NULL,
-    avg_price   DOUBLE PRECISION NOT NULL,
+    avg_price   DOUBLE PRECISION NOT NULL,  -- synthetic unit price; not real money
     realized_pnl DOUBLE PRECISION NOT NULL DEFAULT 0
 );
 SELECT create_hypertable('positions', 'ts',
@@ -94,8 +73,8 @@ CREATE TABLE IF NOT EXISTS paper_trades (
     symbol      TEXT        NOT NULL,
     side        TEXT        NOT NULL CHECK (side IN ('BUY','SELL')),
     qty         DOUBLE PRECISION NOT NULL,
-    price_usd   DOUBLE PRECISION NOT NULL,
-    fee_usd     DOUBLE PRECISION NOT NULL,
+    price       DOUBLE PRECISION NOT NULL,
+    fee         DOUBLE PRECISION NOT NULL,
     cash_after  DOUBLE PRECISION NOT NULL,
     reason      TEXT
 );
@@ -109,7 +88,7 @@ SELECT add_retention_policy('paper_trades', INTERVAL '365 days', if_not_exists =
 -- ── trending tags (top-N cashtags/hashtags over a rolling window) ─────
 -- One row per (bucket, tag). `bucket` is the 1-min floor of `ts`.
 -- `count` is the number of distinct tweets that mentioned the tag in
--- the bucket. `avg_sentiment` is the mean FinBERT score for those tweets.
+-- the bucket. `avg_sentiment` is the mean sentiment score for those tweets.
 CREATE TABLE IF NOT EXISTS trending_tags (
     ts            TIMESTAMPTZ NOT NULL,
     bucket        TIMESTAMPTZ NOT NULL,

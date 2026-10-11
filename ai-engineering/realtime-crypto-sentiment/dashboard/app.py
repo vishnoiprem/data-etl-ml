@@ -1,16 +1,20 @@
-"""Streamlit 4-page dashboard for realtime-crypto-sentiment.
+"""Streamlit 4-page dashboard for realtime-x-sentiment.
 
-Author: Prem Vishnoi <pvishnoi@avilx.com>
+Author: Prem Vishnoi <pvishnoi@avishnoi@avilx.com>
 
 Pages (tabs):
 1. Overview       — KPI cards (cash, equity, today's PnL, signal counts).
-2. Sentiment      — tweets_1m.avg_sentiment 5-min line; top-10 mentions bar.
-3. Prices+Signals — dual-axis prices_1m + BUY/SELL markers.
-4. Paper PnL      — equity curve, drawdown, win-rate gauge, trade log.
+2. Sentiment      — avg sentiment per tracked tag, 5-min timeline.
+3. Paper PnL      — equity curve (cash-after), trade log, win-rate gauge.
+4. 🔥 Trending   — top-10 cashtags/hashtags/keywords in the last 5 min.
 
 Auto-refresh: 60s by default (overridable via DASHBOARD_REFRESH env).
 
 Read-only against TimescaleDB. No write paths.
+
+Note: there is no live price feed. The paper broker uses synthetic
+unit prices derived from tweet engagement, so all monetary figures
+are in "units" (not USD).
 """
 from __future__ import annotations
 
@@ -37,7 +41,7 @@ from src.store import db
 # ── Streamlit page config (must be first st call) ────────────────────────
 
 st.set_page_config(
-    page_title="Realtime Crypto Sentiment",
+    page_title="Real-time X.com Sentiment",
     page_icon=":chart_with_upwards_trend:",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -66,29 +70,18 @@ def _query(sql: str, params: dict | None = None) -> pd.DataFrame:
 def _kpis() -> dict:
     """Compute dashboard KPIs from `paper_trades` and `positions`."""
     trades = _query(
-        "SELECT ts, side, qty, price_usd, fee_usd, cash_after, symbol "
+        "SELECT ts, side, qty, price, fee, cash_after, symbol "
         "FROM paper_trades ORDER BY ts DESC LIMIT 500"
     )
-    last_cash = float(trades["cash_after"].iloc[0]) if not trades.empty else settings.starting_cash_usd
+    last_cash = float(trades["cash_after"].iloc[0]) if not trades.empty else settings.starting_units
     positions = _query(
         "SELECT ts, symbol, qty, avg_price, realized_pnl FROM positions "
         "WHERE qty > 0 ORDER BY ts DESC"
     )
-    # Mark-to-market with the latest price per symbol
+    # Mark-to-market: no live price feed, so positions are valued at
+    # their avg_price (no unrealized PnL component).
     if not positions.empty:
-        if db.get_engine().dialect.name == "postgresql":
-            latest = _query(
-                "SELECT DISTINCT ON (symbol) symbol, price_usd FROM prices "
-                "ORDER BY symbol, ts DESC"
-            )
-        else:
-            # SQLite: no DISTINCT ON — pick max(ts) per symbol via subquery.
-            latest = _query(
-                "SELECT symbol, price_usd FROM prices p1 "
-                "WHERE ts = (SELECT MAX(ts) FROM prices p2 WHERE p2.symbol = p1.symbol)"
-            )
-        positions = positions.merge(latest, on="symbol", how="left")
-        positions["mkt_value"] = positions["qty"] * positions["price_usd"].fillna(positions["avg_price"])
+        positions["mkt_value"] = positions["qty"] * positions["avg_price"]
     else:
         positions["mkt_value"] = []
     position_value = float(positions["mkt_value"].sum()) if not positions.empty else 0.0
@@ -123,7 +116,7 @@ def _signal_counts() -> pd.DataFrame:
 
 
 def _sentiment_per_symbol(minutes: int = 60) -> pd.DataFrame:
-    """Avg sentiment per symbol over the last `minutes` minutes."""
+    """Avg sentiment per tag over the last `minutes` minutes."""
     if db.get_engine().dialect.name == "postgresql":
         return _query(
             "SELECT symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
@@ -168,7 +161,7 @@ def _tweet_volume_5m() -> pd.DataFrame:
 
 
 def _top_mentions(limit: int = 10) -> pd.DataFrame:
-    """Top-N symbols by tweet count over the last hour."""
+    """Top-N tags by tweet count over the last hour."""
     if db.get_engine().dialect.name == "postgresql":
         return _query(
             "SELECT symbol, COUNT(*) AS mentions FROM tweets "
@@ -182,28 +175,6 @@ def _top_mentions(limit: int = 10) -> pd.DataFrame:
         "GROUP BY symbol ORDER BY mentions DESC LIMIT :lim",
         {"lim": limit},
     )
-
-
-def _price_series(symbol: str, hours: int = 1) -> pd.DataFrame:
-    if db.get_engine().dialect.name == "postgresql":
-        df = _query(
-            "SELECT bucket, close FROM prices_1m "
-            "WHERE symbol=:s AND bucket > NOW() - (:h || ' hours')::INTERVAL "
-            "ORDER BY bucket ASC",
-            {"s": symbol, "h": str(hours)},
-        )
-    else:
-        df = _query(
-            "SELECT ts AS bucket, price_usd AS close FROM prices "
-            "WHERE symbol=:s AND ts > datetime('now', :h) ORDER BY ts ASC",
-            {"s": symbol, "h": f"-{hours} hours"},
-        )
-    # SQLAlchemy returns datetime columns as `object` on SQLite; the reindex
-    # with method="nearest" in page_prices_signals() requires a real datetime
-    # dtype or it raises "unsupported operand type(s) for -: 'str' and 'str'".
-    if not df.empty and "bucket" in df.columns:
-        df["bucket"] = pd.to_datetime(df["bucket"], utc=True)
-    return df
 
 
 def _signals(symbol: str, hours: int = 1) -> pd.DataFrame:
@@ -228,7 +199,7 @@ def _signals(symbol: str, hours: int = 1) -> pd.DataFrame:
 
 def _trade_log(limit: int = 100) -> pd.DataFrame:
     df = _query(
-        "SELECT ts, symbol, side, qty, price_usd, fee_usd, cash_after, reason "
+        "SELECT ts, symbol, side, qty, price, fee, cash_after, reason "
         "FROM paper_trades ORDER BY ts DESC LIMIT :lim",
         {"lim": limit},
     )
@@ -246,60 +217,6 @@ def _trending_tags(minutes: int = 5, limit: int = 10) -> pd.DataFrame:
     return db.fetch_trending_tags(minutes=minutes, limit=limit)
 
 
-def _equity_curve(hours: int = 24) -> pd.DataFrame:
-    """Build a mark-to-market equity curve by joining prices + positions over time.
-
-    Cheap approximation: re-evaluate equity at the close of each 1-min bucket by
-    replaying the paper_trade cash balance forward and applying price moves.
-    """
-    if db.get_engine().dialect.name == "postgresql":
-        prices = _query(
-            "SELECT bucket, symbol, close FROM prices_1m "
-            "WHERE bucket > NOW() - (:h || ' hours')::INTERVAL "
-            "ORDER BY bucket ASC, symbol ASC",
-            {"h": str(hours)},
-        )
-    else:
-        prices = _query(
-            "SELECT ts AS bucket, symbol, price_usd AS close FROM prices "
-            "WHERE ts > datetime('now', :h) ORDER BY ts ASC, symbol ASC",
-            {"h": f"-{hours} hours"},
-        )
-    trades = _query(
-        "SELECT ts, symbol, side, qty, price_usd, cash_after FROM paper_trades "
-        "ORDER BY ts ASC"
-    )
-    if prices.empty:
-        return pd.DataFrame(columns=["ts", "equity"])
-    # Pivot to wide: rows=bucket, columns=symbol
-    pv = prices.pivot_table(index="bucket", columns="symbol", values="close").sort_index()
-    eq = pd.Series(index=pv.index, dtype=float)
-    cash = settings.starting_cash_usd
-    qty: dict[str, float] = {}
-    cost_basis: dict[str, float] = {}  # for unrealized
-    trade_iter = iter(trades.to_dict("records")) if not trades.empty else iter(())
-    next_trade = next(trade_iter, None)
-    pv_iter = pv.iterrows()
-    for ts, row in pv_iter:
-        # Apply any trades that occurred at-or-before this ts
-        while next_trade is not None and pd.Timestamp(next_trade["ts"]) <= pd.Timestamp(ts):
-            cash = float(next_trade["cash_after"])
-            if next_trade["side"] == "BUY":
-                qty[next_trade["symbol"]] = qty.get(next_trade["symbol"], 0.0) + float(next_trade["qty"])
-                cost_basis[next_trade["symbol"]] = float(next_trade["price_usd"])
-            else:  # SELL closes the position
-                qty[next_trade["symbol"]] = 0.0
-                cost_basis[next_trade["symbol"]] = 0.0
-            next_trade = next(trade_iter, None)
-        # Mark-to-market
-        m2m = sum(
-            qty.get(s, 0.0) * float(p) for s, p in row.items() if pd.notna(p) and qty.get(s, 0.0) > 0
-        )
-        eq.loc[ts] = cash + m2m
-    eq = eq.ffill().fillna(settings.starting_cash_usd)
-    return pd.DataFrame({"ts": eq.index, "equity": eq.values})
-
-
 # ── UI helpers ───────────────────────────────────────────────────────────
 
 def _kpi_card(label: str, value: str, delta: str | None = None) -> None:
@@ -307,15 +224,16 @@ def _kpi_card(label: str, value: str, delta: str | None = None) -> None:
 
 
 def _render_header() -> None:
-    st.title(":chart_with_upwards_trend: Realtime Crypto Sentiment")
+    st.title(":chart_with_upwards_trend: Real-time X.com Sentiment")
     st.caption(
         f"Refresh every {REFRESH_MS // 1000}s · DB: `{settings.database_url.split('@')[-1]}` · "
         f"Last render: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}"
     )
     st.caption(
         ":warning: **Decision-support only — not financial advice.** "
-        "Paper-trades simulated at last-tick. Past performance ≠ future results. "
-        "See `docs/trading_disclaimer.md`."
+        "Paper-trades are simulated at synthetic unit prices derived from "
+        "tweet engagement. Past performance ≠ future results. See "
+        "`docs/trading_disclaimer.md`."
     )
 
 
@@ -330,10 +248,10 @@ def page_overview() -> None:
         return
 
     cols = st.columns(4)
-    cols[0].metric("Cash (USD)", f"${k['cash']:,.2f}")
-    cols[1].metric("Equity (USD)", f"${k['equity']:,.2f}")
+    cols[0].metric("Cash (units)", f"{k['cash']:,.2f}")
+    cols[1].metric("Equity (units)", f"{k['equity']:,.2f}")
     cols[2].metric("Today's trades", str(k["today_trades"]))
-    cols[3].metric("Realized PnL (USD)", f"${k['realized_pnl']:+,.2f}")
+    cols[3].metric("Realized PnL (units)", f"{k['realized_pnl']:+,.2f}")
 
     st.markdown("### Open positions")
     positions = _query(
@@ -343,28 +261,17 @@ def page_overview() -> None:
     if positions.empty:
         st.info("No open positions yet. Run `make pipeline` in another terminal to start trading.")
     else:
-        if db.get_engine().dialect.name == "postgresql":
-            latest = _query(
-                "SELECT DISTINCT ON (symbol) symbol, price_usd FROM prices "
-                "ORDER BY symbol, ts DESC"
-            )
-        else:
-            latest = _query(
-                "SELECT symbol, price_usd FROM prices p1 "
-                "WHERE ts = (SELECT MAX(ts) FROM prices p2 WHERE p2.symbol = p1.symbol)"
-            )
-        merged = positions.merge(latest, on="symbol", how="left")
-        merged["mkt_value"] = merged["qty"] * merged["price_usd"].fillna(merged["avg_price"])
-        merged["unrealized_pnl"] = (merged["price_usd"].fillna(merged["avg_price"]) - merged["avg_price"]) * merged["qty"]
+        # No live price feed → unrealized PnL is always 0.
+        positions["mkt_value"] = positions["qty"] * positions["avg_price"]
+        positions["unrealized_pnl"] = 0.0
         st.dataframe(
-            merged[["symbol", "qty", "avg_price", "price_usd", "mkt_value", "unrealized_pnl", "realized_pnl"]]
+            positions[["symbol", "qty", "avg_price", "mkt_value", "unrealized_pnl", "realized_pnl"]]
             .round(4)
             .style.format({
-                "avg_price": "${:.2f}",
-                "price_usd": "${:.2f}",
-                "mkt_value": "${:.2f}",
-                "unrealized_pnl": "${:+.2f}",
-                "realized_pnl": "${:+.2f}",
+                "avg_price": "{:.2f}",
+                "mkt_value": "{:.2f}",
+                "unrealized_pnl": "{:+.2f}",
+                "realized_pnl": "{:+.2f}",
             }),
             use_container_width=True,
         )
@@ -391,17 +298,17 @@ def page_sentiment() -> None:
 
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown(f"### Avg sentiment by symbol (last {window}m)")
+        st.markdown(f"### Avg sentiment by tag (last {window}m)")
         chart = avg.set_index("symbol")[["avg_sent"]]
         st.bar_chart(chart, color="#1f77b4")
 
     with c2:
-        st.markdown("### Tweet volume by symbol (last 1h)")
+        st.markdown("### Tweet volume by tag (last 1h)")
         tm = _top_mentions(limit=10)
         if tm.empty:
             st.info("No tweet activity yet.")
         else:
-            fig = px.bar(tm, x="symbol", y="mentions", title="Top symbols by mentions")
+            fig = px.bar(tm, x="symbol", y="mentions", title="Top tags by mentions")
             st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("### 5-min sentiment timeline")
@@ -423,69 +330,33 @@ def page_sentiment() -> None:
         st.plotly_chart(fig, use_container_width=True)
 
 
-def page_prices_signals() -> None:
-    st.subheader("Prices + Signals")
-    symbols = settings.symbols
-    sym = st.selectbox("Symbol", options=symbols, index=0)
-    hours = st.slider("Window (hours)", 1, 24, 6, step=1)
-
-    px_df = _price_series(sym, hours=hours)
-    sig_df = _signals(sym, hours=hours)
-
-    if px_df.empty:
-        st.info(f"No price data for {sym} in last {hours}h. Start the pipeline and wait ~30s.")
-        return
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=px_df["bucket"], y=px_df["close"], name=f"{sym} price",
-        line={"color": "#1f77b4", "width": 2},
-    ))
-    if not sig_df.empty:
-        buys = sig_df[sig_df["action"] == "BUY"]
-        sells = sig_df[sig_df["action"] == "SELL"]
-        if not buys.empty:
-            fig.add_trace(go.Scatter(
-                x=buys["ts"], y=px_df.set_index("bucket")["close"].reindex(buys["ts"], method="nearest").values,
-                mode="markers", name="BUY", marker={"symbol": "triangle-up", "size": 12, "color": "#2ca02c"},
-            ))
-        if not sells.empty:
-            fig.add_trace(go.Scatter(
-                x=sells["ts"], y=px_df.set_index("bucket")["close"].reindex(sells["ts"], method="nearest").values,
-                mode="markers", name="SELL", marker={"symbol": "triangle-down", "size": 12, "color": "#d62728"},
-            ))
-    fig.update_layout(height=500, xaxis_title="time (UTC)", yaxis_title="price (USD)")
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown("### Recent signals")
-    if sig_df.empty:
-        st.info("No signals in window.")
-    else:
-        st.dataframe(
-            sig_df.sort_values("ts", ascending=False).head(50).reset_index(drop=True),
-            use_container_width=True,
-        )
-
-
 def page_paper_pnl() -> None:
     st.subheader("Paper PnL")
     hours = st.slider("Window (hours)", 1, 168, 24, step=1)
 
-    eq = _equity_curve(hours=hours)
-    if eq.empty:
-        st.info("No equity data yet. Run the pipeline for a few minutes.")
+    # Equity curve from cash_after of paper_trades (no live mark-to-market
+    # since there is no real price feed).
+    trades = _query(
+        "SELECT ts, side, qty, price, fee, cash_after FROM paper_trades "
+        "ORDER BY ts ASC"
+    )
+    if trades.empty:
+        st.info("No paper trades yet. Run the pipeline for a few minutes.")
         return
 
+    trades["ts"] = pd.to_datetime(trades["ts"], utc=True)
+    eq = trades[["ts", "cash_after"]].rename(columns={"cash_after": "equity"})
+
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=eq["ts"], y=eq["equity"], name="Equity (USD)", fill="tozeroy", line={"color": "#2ca02c"}))
+    fig.add_trace(go.Scatter(x=eq["ts"], y=eq["equity"], name="Equity (units)", fill="tozeroy", line={"color": "#2ca02c"}))
     # Drawdown overlay
     running_max = eq["equity"].cummax()
     dd = running_max - eq["equity"]
-    fig.add_trace(go.Scatter(x=eq["ts"], y=dd, name="Drawdown (USD)", yaxis="y2", line={"color": "#d62728", "width": 1}))
+    fig.add_trace(go.Scatter(x=eq["ts"], y=dd, name="Drawdown (units)", yaxis="y2", line={"color": "#d62728", "width": 1}))
     fig.update_layout(
         height=400,
-        yaxis={"title": "Equity (USD)"},
-        yaxis2={"title": "Drawdown (USD)", "overlaying": "y", "side": "right"},
+        yaxis={"title": "Equity (units)"},
+        yaxis2={"title": "Drawdown (units)", "overlaying": "y", "side": "right"},
         margin={"l": 40, "r": 40, "t": 30, "b": 30},
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -500,7 +371,7 @@ def page_paper_pnl() -> None:
         if not sells.empty:
             # Approx win-rate by realized PnL on each sell row's cash_after delta
             sells_sorted = sells.sort_values("ts")
-            cash_before = sells_sorted["cash_after"].shift(1, fill_value=settings.starting_cash_usd)
+            cash_before = sells_sorted["cash_after"].shift(1, fill_value=settings.starting_units)
             pnl = sells_sorted["cash_after"] - cash_before
             wins = int((pnl > 0).sum())
         total = len(sells)
@@ -510,15 +381,15 @@ def page_paper_pnl() -> None:
         c1.metric("Trades", str(len(log)))
         c2.metric("Sells (closed)", str(total))
         c3.metric("Win rate", f"{win_rate:.0%}")
-        c4.metric("Total fees (USD)", f"${log['fee_usd'].sum():.2f}")
+        c4.metric("Total fees (units)", f"{log['fee'].sum():.2f}")
 
         st.markdown("### Trade log (most recent 100)")
         st.dataframe(
             log.head(100).style.format({
                 "qty": "{:.6f}",
-                "price_usd": "${:.2f}",
-                "fee_usd": "${:.4f}",
-                "cash_after": "${:,.2f}",
+                "price": "{:.2f}",
+                "fee": "{:.4f}",
+                "cash_after": "{:,.2f}",
             }),
             use_container_width=True,
         )
@@ -526,8 +397,8 @@ def page_paper_pnl() -> None:
 
 def page_trending() -> None:
     """Top-10 trending tags on X.com right now, with sentiment, sample
-    tweet, and a per-vertical breakdown. Mixes crypto + AI/data + stocks
-    + dating so the panel isn't single-domain.
+    tweet, and a per-vertical breakdown. Mixes AI/data + stocks +
+    dating so the panel isn't single-domain.
     """
     st.subheader("🔥 Trending tags (X.com)")
     minutes = st.slider("Window (minutes)", 1, 60, settings.trending_window_minutes, step=1)
@@ -596,35 +467,31 @@ def page_trending() -> None:
 
 def main() -> None:
     _render_header()
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "Overview", "Sentiment", "Prices + Signals", "Paper PnL", "🔥 Trending"
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "Overview", "Sentiment", "Paper PnL", "🔥 Trending"
     ])
     with tab1:
         page_overview()
     with tab2:
         page_sentiment()
     with tab3:
-        page_prices_signals()
-    with tab4:
         page_paper_pnl()
-    with tab5:
+    with tab4:
         page_trending()
 
     with st.sidebar:
         st.markdown("### Status")
         try:
             n_tweets = int(_query("SELECT COUNT(*) AS n FROM tweets").iloc[0]["n"])
-            n_prices = int(_query("SELECT COUNT(*) AS n FROM prices").iloc[0]["n"])
             n_signals = int(_query("SELECT COUNT(*) AS n FROM signals").iloc[0]["n"])
             n_trades = int(_query("SELECT COUNT(*) AS n FROM paper_trades").iloc[0]["n"])
             st.write(f"Tweets: **{n_tweets:,}**")
-            st.write(f"Prices: **{n_prices:,}**")
             st.write(f"Signals: **{n_signals:,}**")
             st.write(f"Paper trades: **{n_trades:,}**")
         except Exception as e:
             st.error(f"DB unreachable: {e}")
         st.markdown("---")
-        st.caption("v0.2 · ProsusAI/FinBERT + Binance WS + Nitter mirrors + trending tags")
+        st.caption("v0.3 · Twitter sentiment + paper-trading simulator")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ TWEETS_SCRAPED = Counter(
 )
 TWEETS_SCORED = Counter(
     "tweets_scored_total",
-    "Tweets sentiment-scored by FinBERT",
+    "Tweets sentiment-scored by the Twitter sentiment model",
 )
 SIGNALS_GENERATED = Counter(
     "signals_generated_total",
@@ -42,7 +42,7 @@ SCRAPE_LATENCY = Histogram(
 )
 SCORE_LATENCY = Histogram(
     "score_latency_seconds",
-    "FinBERT batch scoring latency",
+    "Sentiment-model batch scoring latency",
     buckets=(0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0),
 )
 SIGNAL_LATENCY = Histogram(

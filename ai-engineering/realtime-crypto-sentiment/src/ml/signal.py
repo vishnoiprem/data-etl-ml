@@ -1,6 +1,11 @@
-"""Signal generation: combine sentiment z-score + momentum z-score.
+"""Signal generation: sentiment z-score → BUY / SELL / HOLD.
 
 Author: Prem Vishnoi <pvishnoi@avilx.com>
+
+Originally combined sentiment z + momentum z (5-min price returns).
+With prices removed, the signal is sentiment-only. The dataclass
+keeps the `momentum_zscore` field for backward compatibility with
+existing DB schemas but the value is always 0.0.
 """
 from __future__ import annotations
 
@@ -19,7 +24,7 @@ class Signal:
     action: str  # BUY | SELL | HOLD
     score: float
     sentiment_zscore: float
-    momentum_zscore: float
+    momentum_zscore: float  # always 0.0 since prices were removed
     reason: str
 
     def to_row(self) -> dict:
@@ -54,22 +59,18 @@ def generate_signal(
     symbol: str,
     sentiment_value: float,
     sentiment_history: Sequence[float],
-    momentum_value: float,
-    momentum_history: Sequence[float],
     threshold: float | None = None,
-    sent_weight: float | None = None,
-    mom_weight: float | None = None,
     now: datetime | None = None,
 ) -> Signal:
-    """Combine a sentiment z + momentum z into a BUY/SELL/HOLD signal."""
+    """Compute a sentiment-only BUY/SELL/HOLD signal.
+
+    Score = sentiment z-score directly (no weighted sum, no momentum).
+    """
     threshold = threshold if threshold is not None else settings.signal_threshold
-    sent_w = sent_weight if sent_weight is not None else settings.sentiment_weight
-    mom_w = mom_weight if mom_weight is not None else settings.momentum_weight
     now = now or datetime.utcnow()
 
     sent_z = zscore(sentiment_value, sentiment_history)
-    mom_z = zscore(momentum_value, momentum_history)
-    score = sent_w * sent_z + mom_w * mom_z
+    score = sent_z  # signal is sentiment-only
 
     if score > threshold:
         action = "BUY"
@@ -79,8 +80,7 @@ def generate_signal(
         action = "HOLD"
 
     reason = (
-        f"5-min sentiment {sent_z:+.2f}σ, momentum {mom_z:+.2f}σ → "
-        f"score {score:+.2f}"
+        f"5-min sentiment {sent_z:+.2f}σ → score {score:+.2f}"
     )
     return Signal(
         symbol=symbol,
@@ -88,6 +88,6 @@ def generate_signal(
         action=action,
         score=score,
         sentiment_zscore=sent_z,
-        momentum_zscore=mom_z,
+        momentum_zscore=0.0,
         reason=reason,
     )

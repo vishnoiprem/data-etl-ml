@@ -2,11 +2,15 @@
 
 Author: Prem Vishnoi <pvishnoi@avilx.com>
 
-Simulated fills at last-tick. State: cash + positions + trade log.
-Enforces:
+Simulated fills at the most recent synthetic unit price. State: cash
+(units) + positions + trade log. Enforces:
 - MAX_POSITION_PCT (fraction of equity per symbol)
 - MAX_OPEN_POSITIONS
 - FEE_BPS fee on each fill
+
+Note: there is no real money. "Price" is a synthetic unit price (in
+this pipeline, derived from tweet engagement — see pipeline.py). All
+monetary fields are unitless.
 """
 from __future__ import annotations
 
@@ -27,8 +31,8 @@ class Fill:
     symbol: str
     side: str  # BUY | SELL
     qty: float
-    price_usd: float
-    fee_usd: float
+    price: float
+    fee: float
     cash_after: float
     reason: str | None = None
     realized_pnl: float = 0.0  # populated on SELL (0 on BUY)
@@ -44,13 +48,13 @@ class Position:
 class PaperBroker:
     def __init__(
         self,
-        starting_cash_usd: float | None = None,
+        starting_units: float | None = None,
         max_position_pct: float | None = None,
         max_open_positions: int | None = None,
         fee_bps: int | None = None,
     ):
-        self.cash_usd: float = (
-            starting_cash_usd if starting_cash_usd is not None else settings.starting_cash_usd
+        self.cash: float = (
+            starting_units if starting_units is not None else settings.starting_units
         )
         self.max_position_pct: float = (
             max_position_pct if max_position_pct is not None else settings.max_position_pct
@@ -70,8 +74,11 @@ class PaperBroker:
     # ── Public API ───────────────────────────────────────────────────
 
     def on_price_tick(self, tick: dict) -> None:
-        """Update mark-to-market and append an equity-curve sample."""
-        self._latest_prices[tick["symbol"]] = float(tick["price_usd"])
+        """Update mark-to-market and append an equity-curve sample.
+
+        `tick` is `{ts, symbol, price}` (price is a synthetic unit price).
+        """
+        self._latest_prices[tick["symbol"]] = float(tick["price"])
         # Sample equity at most once per second (cheap hash check)
         if not self.equity_curve or (tick["ts"] - self.equity_curve[-1][0]).total_seconds() >= 1:
             self.equity_curve.append((tick["ts"], self.equity()))
@@ -87,7 +94,7 @@ class PaperBroker:
         return None
 
     def equity(self) -> float:
-        return self.cash_usd + sum(
+        return self.cash + sum(
             (self.positions[s].qty * self._latest_prices.get(s, self.positions[s].avg_price))
             for s in self.positions
             if self.positions[s].qty > 0
@@ -106,9 +113,9 @@ class PaperBroker:
         sells = [t for t in self.trades if t.side == "SELL"]
         if not self.trades:
             return {
-                "pnl_usd": 0.0,
+                "pnl": 0.0,
                 "win_rate": 0.0,
-                "max_drawdown_usd": 0.0,
+                "max_drawdown": 0.0,
                 "sharpe": 0.0,
                 "trade_count": 0,
             }
@@ -145,9 +152,9 @@ class PaperBroker:
             sharpe = 0.0
 
         return {
-            "pnl_usd": realized,
+            "pnl": realized,
             "win_rate": win_rate,
-            "max_drawdown_usd": max_dd,
+            "max_drawdown": max_dd,
             "sharpe": sharpe,
             "trade_count": len(self.trades),
         }
@@ -162,13 +169,13 @@ class PaperBroker:
         equity = self.equity()
         max_notional = equity * (self.max_position_pct / 100.0)
         # Cap by available cash too
-        max_qty_by_cash = self.cash_usd / (price * (1 + self.fee_fraction))
+        max_qty_by_cash = self.cash / (price * (1 + self.fee_fraction))
         qty = min(max_notional / price, max_qty_by_cash)
         if qty <= 0:
             return None
         cost = qty * price
         fee = cost * self.fee_fraction
-        self.cash_usd -= (cost + fee)
+        self.cash -= (cost + fee)
 
         pos = self.positions.setdefault(symbol, Position())
         # Update avg price (weighted)
@@ -179,12 +186,12 @@ class PaperBroker:
             pos.avg_price = ((pos.avg_price * pos.qty) + (price * qty)) / total_qty
         pos.qty += qty
         fill = Fill(
-            ts=ts, symbol=symbol, side="BUY", qty=qty, price_usd=price,
-            fee_usd=fee, cash_after=self.cash_usd, reason=reason,
+            ts=ts, symbol=symbol, side="BUY", qty=qty, price=price,
+            fee=fee, cash_after=self.cash, reason=reason,
         )
         self.trades.append(fill)
         logger.info(
-            f"BUY {qty:.6f} {symbol} @ ${price:.2f} (fee ${fee:.2f}); cash=${self.cash_usd:.2f}"
+            f"BUY {qty:.6f} {symbol} @ {price:.2f} (fee {fee:.2f}); cash={self.cash:.2f}"
         )
         return fill
 
@@ -196,17 +203,17 @@ class PaperBroker:
         proceeds = qty * price
         fee = proceeds * self.fee_fraction
         realized = proceeds - fee - (pos.avg_price * qty)
-        self.cash_usd += (proceeds - fee)
+        self.cash += (proceeds - fee)
         pos.realized_pnl += realized
         pos.qty = 0.0
         pos.avg_price = 0.0
         fill = Fill(
-            ts=ts, symbol=symbol, side="SELL", qty=qty, price_usd=price,
-            fee_usd=fee, cash_after=self.cash_usd, reason=reason,
+            ts=ts, symbol=symbol, side="SELL", qty=qty, price=price,
+            fee=fee, cash_after=self.cash, reason=reason,
             realized_pnl=realized,
         )
         self.trades.append(fill)
         logger.info(
-            f"SELL {qty:.6f} {symbol} @ ${price:.2f} (fee ${fee:.2f}); realized=${realized:+.2f}; cash=${self.cash_usd:.2f}"
+            f"SELL {qty:.6f} {symbol} @ {price:.2f} (fee {fee:.2f}); realized={realized:+.2f}; cash={self.cash:.2f}"
         )
         return fill

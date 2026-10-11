@@ -159,52 +159,6 @@ def test_fetch_unscored_respects_limit(sqlite_db):
     assert len(db.fetch_unscored_tweets(limit=100)) == 20
 
 
-# ── upsert_price: insert AND update paths ─────────────────────────────
-
-
-def test_upsert_price_inserts_new_row(sqlite_db):
-    db.upsert_price({
-        "ts": datetime(2026, 1, 1, 12, 0, 0),
-        "symbol": "BTC", "price_usd": 50_000.0, "volume_usd": 123.4,
-    })
-    p = db.latest_price("BTC")
-    assert p is not None
-    assert p["price_usd"] == 50_000.0
-    assert p["volume_usd"] == 123.4
-
-
-def test_upsert_price_overwrites_on_same_ts_and_symbol(sqlite_db):
-    """Same (ts, symbol) → price/volume are updated in place (not duplicated)."""
-    ts = datetime(2026, 1, 1, 12, 0, 0)
-    db.upsert_price({"ts": ts, "symbol": "BTC", "price_usd": 50_000.0, "volume_usd": 100.0})
-    db.upsert_price({"ts": ts, "symbol": "BTC", "price_usd": 51_000.0, "volume_usd": 200.0})
-    p = db.latest_price("BTC")
-    assert p["price_usd"] == 51_000.0
-    assert p["volume_usd"] == 200.0
-
-
-def test_upsert_price_does_not_confuse_symbols(sqlite_db):
-    """Same ts, different symbol → two distinct rows."""
-    ts = datetime(2026, 1, 1, 12, 0, 0)
-    db.upsert_price({"ts": ts, "symbol": "BTC", "price_usd": 50_000.0, "volume_usd": 1.0})
-    db.upsert_price({"ts": ts, "symbol": "ETH", "price_usd": 3_000.0, "volume_usd": 2.0})
-    assert db.latest_price("BTC")["price_usd"] == 50_000.0
-    assert db.latest_price("ETH")["price_usd"] == 3_000.0
-
-
-def test_latest_price_returns_none_when_no_data(sqlite_db):
-    assert db.latest_price("NOPE") is None
-
-
-def test_latest_price_picks_most_recent_ts(sqlite_db):
-    """When there are multiple price rows for the same symbol, the
-    most recent ts is returned (not the first-inserted)."""
-    db.upsert_price({"ts": datetime(2026, 1, 1, 10, 0, 0), "symbol": "BTC", "price_usd": 49_000.0, "volume_usd": 1.0})
-    db.upsert_price({"ts": datetime(2026, 1, 1, 12, 0, 0), "symbol": "BTC", "price_usd": 50_000.0, "volume_usd": 1.0})
-    db.upsert_price({"ts": datetime(2026, 1, 1, 11, 0, 0), "symbol": "BTC", "price_usd": 49_500.0, "volume_usd": 1.0})
-    assert db.latest_price("BTC")["price_usd"] == 50_000.0
-
-
 # ── sentiment_buckets: the production signal depends on this ─────────
 
 
@@ -291,38 +245,6 @@ def test_sentiment_buckets_filters_by_symbol(sqlite_db):
     assert math.isclose(eth[0]["avg_sent"], -0.9, abs_tol=1e-6)
 
 
-# ── recent_price_returns: per-minute returns ──────────────────────────
-
-
-def test_recent_price_returns_computes_per_minute_diffs(sqlite_db):
-    """(p1-p0)/p0, (p2-p1)/p1, ... — len = N-1 for N prices."""
-    now = datetime.utcnow().replace(microsecond=0)
-    prices = [100.0, 110.0, 99.0, 100.0]
-    for i, p in enumerate(prices):
-        db.upsert_price({"ts": now - timedelta(minutes=10 - i),
-                         "symbol": "BTC", "price_usd": p, "volume_usd": 1.0})
-    rets = db.recent_price_returns("BTC", minutes=15)
-    assert rets == pytest.approx([0.10, -0.10, 1/99.0], rel=1e-6)
-
-
-def test_recent_price_returns_empty_for_one_point(sqlite_db):
-    """Need at least 2 points to compute a return."""
-    db.upsert_price({"ts": datetime.utcnow(),
-                     "symbol": "BTC", "price_usd": 100.0, "volume_usd": 1.0})
-    assert db.recent_price_returns("BTC", minutes=10) == []
-
-
-def test_recent_price_returns_handles_zero_prices_without_division_error(sqlite_db):
-    """The implementation guards against division by zero. A price going
-    to 0 would produce an inf/nan return; ensure the test still runs."""
-    now = datetime.utcnow().replace(microsecond=0)
-    db.upsert_price({"ts": now, "symbol": "BTC", "price_usd": 100.0, "volume_usd": 1.0})
-    db.upsert_price({"ts": now + timedelta(minutes=1), "symbol": "BTC", "price_usd": 0.0, "volume_usd": 1.0})
-    rets = db.recent_price_returns("BTC", minutes=10)
-    assert len(rets) == 1
-    assert rets[0] in (float("inf"), float("-inf")) or math.isfinite(rets[0])
-
-
 # ── fetch_recent_signals: SQLite hour offset ──────────────────────────
 
 
@@ -365,13 +287,32 @@ def test_fetch_paper_trades_orders_desc(sqlite_db):
     now = datetime.utcnow()
     for i in range(3):
         db.insert_paper_trade({
-            "ts": now - timedelta(minutes=i), "symbol": "BTC", "side": "BUY",
-            "qty": 0.1, "price_usd": 50_000.0, "fee_usd": 5.0, "cash_after": 5_000.0,
+            "ts": now - timedelta(minutes=i), "symbol": "AI", "side": "BUY",
+            "qty": 0.1, "price": 50.0, "fee": 5.0, "cash_after": 5_000.0,
             "reason": f"r{i}",
         })
     rows = db.fetch_paper_trades(limit=10)
     assert rows[0]["reason"] == "r0"
     assert rows[-1]["reason"] == "r2"
+
+
+def test_fetch_paper_trades_uses_currency_agnostic_columns(sqlite_db):
+    """After the crypto-removal refactor, paper_trades columns are `price`
+    and `fee` (not `price_usd`/`fee_usd`). Verify both the insert and
+    read paths use the new names."""
+    now = datetime.utcnow()
+    db.insert_paper_trade({
+        "ts": now, "symbol": "AI", "side": "BUY", "qty": 1.0,
+        "price": 100.0, "fee": 0.1, "cash_after": 9_900.0, "reason": "r0",
+    })
+    rows = db.fetch_paper_trades(limit=10)
+    assert len(rows) == 1
+    assert "price" in rows[0]
+    assert "fee" in rows[0]
+    assert "price_usd" not in rows[0]
+    assert "fee_usd" not in rows[0]
+    assert rows[0]["price"] == pytest.approx(100.0)
+    assert rows[0]["fee"] == pytest.approx(0.1)
 
 
 # ── all_open_positions: only qty>0, latest snapshot ───────────────────
@@ -417,12 +358,3 @@ def test_bulk_upsert_tweets_returns_new_count(sqlite_db):
     # Re-bulk same rows → all duplicates
     n2 = db.bulk_upsert_tweets(rows)
     assert n2 == 0
-
-
-def test_bulk_upsert_prices_returns_call_count(sqlite_db):
-    rows = [
-        {"ts": datetime(2026, 1, 1, 12, 0, i), "symbol": "BTC",
-         "price_usd": 100.0 + i, "volume_usd": 1.0}
-        for i in range(3)
-    ]
-    assert db.bulk_upsert_prices(rows) == 3

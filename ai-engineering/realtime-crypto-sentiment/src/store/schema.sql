@@ -1,4 +1,4 @@
--- realtime-crypto-sentiment — schema (applied to PG by init_schema())
+-- realtime-x-sentiment — schema (applied to PG by init_schema())
 -- Author: Prem Vishnoi <pvishnoi@avilx.com>
 --
 -- This file is the same as db/01_init_timescale.sql; src/store/db.py
@@ -37,32 +37,13 @@ ALTER TABLE tweets SET (
 SELECT add_compression_policy('tweets', INTERVAL '7 days', if_not_exists => TRUE);
 SELECT add_retention_policy('tweets', INTERVAL '90 days', if_not_exists => TRUE);
 
-CREATE TABLE IF NOT EXISTS prices (
-    ts          TIMESTAMPTZ NOT NULL,
-    symbol      TEXT        NOT NULL,
-    price_usd   DOUBLE PRECISION NOT NULL,
-    volume_usd  DOUBLE PRECISION NOT NULL DEFAULT 0
-);
-SELECT create_hypertable('prices', 'ts',
-    chunk_time_interval => INTERVAL '1 day',
-    if_not_exists => TRUE);
-CREATE INDEX IF NOT EXISTS prices_symbol_ts_idx ON prices (symbol, ts DESC);
-
-ALTER TABLE prices SET (
-    timescaledb.compress,
-    timescaledb.compress_segmentby = 'symbol',
-    timescaledb.compress_orderby = 'ts DESC'
-);
-SELECT add_compression_policy('prices', INTERVAL '7 days', if_not_exists => TRUE);
-SELECT add_retention_policy('prices', INTERVAL '90 days', if_not_exists => TRUE);
-
 CREATE TABLE IF NOT EXISTS signals (
     ts               TIMESTAMPTZ NOT NULL,
     symbol           TEXT        NOT NULL,
     action           TEXT        NOT NULL CHECK (action IN ('BUY','SELL','HOLD')),
     score            DOUBLE PRECISION NOT NULL,
     sentiment_zscore DOUBLE PRECISION NOT NULL,
-    momentum_zscore  DOUBLE PRECISION NOT NULL,
+    momentum_zscore  DOUBLE PRECISION NOT NULL,  -- always 0 (sentiment-only signals)
     reason           TEXT        NOT NULL
 );
 SELECT create_hypertable('signals', 'ts',
@@ -76,7 +57,7 @@ CREATE TABLE IF NOT EXISTS positions (
     ts          TIMESTAMPTZ NOT NULL,
     symbol      TEXT        NOT NULL,
     qty         DOUBLE PRECISION NOT NULL,
-    avg_price   DOUBLE PRECISION NOT NULL,
+    avg_price   DOUBLE PRECISION NOT NULL,  -- synthetic unit price; not real money
     realized_pnl DOUBLE PRECISION NOT NULL DEFAULT 0
 );
 SELECT create_hypertable('positions', 'ts',
@@ -88,8 +69,8 @@ CREATE TABLE IF NOT EXISTS paper_trades (
     symbol      TEXT        NOT NULL,
     side        TEXT        NOT NULL CHECK (side IN ('BUY','SELL')),
     qty         DOUBLE PRECISION NOT NULL,
-    price_usd   DOUBLE PRECISION NOT NULL,
-    fee_usd     DOUBLE PRECISION NOT NULL,
+    price       DOUBLE PRECISION NOT NULL,  -- synthetic unit price at fill
+    fee         DOUBLE PRECISION NOT NULL,
     cash_after  DOUBLE PRECISION NOT NULL,
     reason      TEXT
 );
