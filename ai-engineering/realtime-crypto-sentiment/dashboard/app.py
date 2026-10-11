@@ -1,12 +1,14 @@
-"""Streamlit 4-page dashboard for realtime-x-sentiment.
+"""Streamlit 5-page dashboard for realtime-x-sentiment.
 
-Author: Prem Vishnoi <pvishnoi@avishnoi@avilx.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 Pages (tabs):
 1. Overview       — KPI cards (cash, equity, today's PnL, signal counts).
 2. Sentiment      — avg sentiment per tracked tag, 5-min timeline.
 3. Paper PnL      — equity curve (cash-after), trade log, win-rate gauge.
 4. 🔥 Trending   — top-10 cashtags/hashtags/keywords in the last 5 min.
+5. 📡 Live       — hourly + daily cross-tag aggregates; top-10 trending
+                    topics per day with velocity / reach / unique authors.
 
 Auto-refresh: 60s by default (overridable via DASHBOARD_REFRESH env).
 
@@ -61,7 +63,15 @@ except Exception as e:  # pragma: no cover
 
 @st.cache_data(ttl=30, show_spinner=False)
 def _query(sql: str, params: dict | None = None) -> pd.DataFrame:
-    """Run a read-only SQL and return a DataFrame. Cached 30s."""
+    """Run a read-only SQL and return a DataFrame. Cached 30s.
+
+    Note: Streamlit's @st.cache_data can be poisoned by a transient DB
+    error — if the first call inside a 30s window raises, every
+    subsequent call in the same window also raises the same exception
+    (the cache treats it as a non-cacheable result). For a 5-tab
+    dashboard this is fine; just call `_query.clear()` if you swap the
+    underlying engine (e.g. via `db.override_engine()` in a test).
+    """
     engine = db.get_engine()
     with engine.connect() as conn:
         return pd.read_sql(text(sql), conn, params=params or {})

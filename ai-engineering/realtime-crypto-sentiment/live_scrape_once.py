@@ -1,5 +1,6 @@
-"""One-shot live scrape: hit a real Nitter mirror, score with a fast
-lexicon-based sentiment, write to SQLite, and print the dashboard.
+"""One-shot live scrape: hit Apify (preferred) or Nitter (fallback),
+score with a fast lexicon-based sentiment, write to SQLite, and print
+a text-mode dashboard.
 
 Why a lexicon (not the 600MB cardiffnlp model)?
 - Cold-start is instant. No 500MB download, no GPU.
@@ -10,11 +11,14 @@ Why a lexicon (not the 600MB cardiffnlp model)?
   this script just overrides it for the demo.
 
 What it does:
-1. Scrapes Nitter for each TRACKED_TAGS tag.
+1. Scrapes each TRACKED_TAGS entry via SourceRegistry (apify → nitter
+   → syndication auto-fallback).
 2. Runs a lexicon-based sentiment scorer on the tweet text.
 3. Writes tweets + per-tag 5-min bucketed sentiment to live.db.
-4. Extracts cashtags/hashtags/keywords and writes trending_tags rows.
-5. Prints a text-mode rendering of all 4 dashboard tabs.
+4. Extracts cashtags/hashtags and writes 1-min bucketed trending_tags rows.
+5. Prints a text-mode rendering of the dashboard's Overview, Sentiment,
+   and Trending tabs (the heavy Paper-PnL and Live tabs are skipped to
+   keep the script output focused on the just-scraped data).
 """
 from __future__ import annotations
 
@@ -181,9 +185,8 @@ async def main() -> int:
 
     # 4) Trending tags: extract cashtags/hashtags/keywords from scraped
     #    tweets and write 1-min bucketed counts to trending_tags.
-    from src.sources.trending import TagHit
     from src.sources.base import RawTweet
-    tag_hits: list[TagHit] = []
+    tag_hits = []
     for t in all_tweets:
         # Reconstruct a minimal RawTweet (a TypedDict-style object) so
         # the trending extractor can read .text / .symbol_tags / .ts

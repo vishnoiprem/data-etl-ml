@@ -651,6 +651,13 @@ def short_id(company, role):
 
 
 def insert_leads(leads, dry=False):
+    """Insert a batch of leads with role-aware dedup.
+
+    Dedup key: (LOWER(company), LOWER(contact_email), LOWER(role))
+    so the same company+recruiter with a *different* role is treated as
+    a new lead. Empty role still de-dupes on (company, email) to avoid
+    inflating generic backlog rows.
+    """
     from db.lead_store import get_cursor
     inserted = 0
     skipped = 0
@@ -658,16 +665,18 @@ def insert_leads(leads, dry=False):
     existing = set()
     with get_cursor() as cur:
         cur.execute("""
-            SELECT LOWER(company) AS co, LOWER(contact_email) AS em
+            SELECT LOWER(company) AS co, LOWER(contact_email) AS em,
+                   LOWER(role) AS role
             FROM leads WHERE contact_email IS NOT NULL
         """)
         for r in cur.fetchall():
-            existing.add((r["co"] or "", r["em"] or ""))
+            existing.add((r["co"] or "", r["em"] or "", r["role"] or ""))
 
     seen = set()
     for ld in leads:
         co = (ld.get("company") or "").strip()
         em = (ld.get("contact_email") or "").strip()
+        role = (ld.get("role") or "").strip()
         if not co or not em or JUNK_EMAIL_RE.search(em) or JUNK_COMPANY_RE.match(co):
             skipped += 1
             continue
@@ -680,16 +689,18 @@ def insert_leads(leads, dry=False):
                 continue
         except Exception:
             pass
-        key = (co.lower(), em.lower())
+        # Role-aware dedup. If role is empty, fall back to (co, em) only.
+        key = (co.lower(), em.lower(), role.lower())
         if key in existing or key in seen:
             skipped += 1
             continue
         if dry:
-            print(f"  [DRY] would insert {co} {em}")
+            print(f"  [DRY] would insert {co} {em} {role[:40]}")
             inserted += 1
+            seen.add(key)
             continue
         try:
-            tid = short_id(co, ld.get("role", ""))
+            tid = short_id(co, role)
             with get_cursor() as cur:
                 cur.execute("""
                     INSERT INTO leads
@@ -698,7 +709,7 @@ def insert_leads(leads, dry=False):
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
                     ON CONFLICT DO NOTHING
                     RETURNING id
-                """, (tid, co[:80], ld.get("role", "")[:120], em,
+                """, (tid, co[:80], role[:120], em,
                       ld.get("source_url", "")[:500],
                       (ld.get("jd_text") or "")[:1500],
                       ld.get("source", "auto")))
@@ -706,7 +717,7 @@ def insert_leads(leads, dry=False):
             if row:
                 inserted += 1
                 seen.add(key)
-                print(f"  ✅ #{row['id']:3d} {co[:30]:30s} {ld.get('role','')[:50]:50s} {em}")
+                print(f"  ✅ #{row['id']:3d} {co[:30]:30s} {role[:50]:50s} {em}")
             else:
                 skipped += 1
         except Exception as e:

@@ -9,7 +9,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
-[![Tests](https://img.shields.io/badge/tests-144%20passing-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-160%20passing-brightgreen)](./tests)
 [![dbt](https://img.shields.io/badge/storage-TimescaleDB-orange)](https://www.timescale.com)
 
 > **NOT a money printer.** This is a decision-support tool. The
@@ -68,8 +68,10 @@ That's the real value here.
 ```bash
 cd ai-engineering/realtime-crypto-sentiment
 cp .env.example .env
+# Optional: add APIFY_TOKEN=apify_api_... for real X.com data
 make up            # docker compose up -d timescaledb
-make test          # 144 tests, ~6s, all green
+make test          # 160 tests, ~6s, all green
+make healthcheck   # confirm DB + at least one data source is reachable
 make pipeline      # terminal A — pipeline
 make dashboard     # terminal B — Streamlit :8501
 ```
@@ -136,6 +138,7 @@ different sentiment distributions.
 | Sentiment | 5-min rolling sentiment per tag; top-10 mentions bar |
 | Paper PnL | Equity curve (cash-after), max drawdown, win-rate gauge, trade log |
 | 🔥 Trending | Top-10 cashtags/hashtags/keywords in the last 5 minutes |
+| 📡 Live | Hourly + daily cross-tag aggregates; top-10 trending topics with velocity, reach, unique-author counts |
 
 ## 8. Honest expectations
 
