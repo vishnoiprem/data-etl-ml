@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/medium/meta/datadriven/python-code-5.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/medium/meta/tryexponent/onsite-solutions.md" beforeDir="false" afterPath="$PROJECT_DIR$/medium/meta/tryexponent/onsite-solutions.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +38,8 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "feature/meta-arch",
+    "git-widget-placeholder": "fetaure-meta-practice-12-oct",
+    "last_opened_file_path": "/Users/prem/PycharmProjects/data-etl-ml/medium/meta/tryexponent",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -47,6 +49,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/medium/meta/tryexponent" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
