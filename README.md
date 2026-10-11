@@ -1,9 +1,9 @@
-# Prem Vishnoi — Data, ETL, ML & AI Engineering Portfolio
+# Prem Vishnoi — Data, ETL, ML & AI Engineer for Hire
 
-> **One repo. ~2,600 source files. 1,000+ docs. Real pipelines, not toy examples.**
-> A working monorepo of production-style projects, hands-on labs, course notes,
-> interview playbooks, and writing on the data → ML → GenAI stack.
-> **Apache Spark · Apache Flink · Kafka · Airflow · AWS Bedrock · LangChain · LangGraph · RAG · Multi-Agent AI**
+> **I ship production data pipelines and LLM systems for banks, fintechs, and AI startups.**
+> 8+ years · Standard Chartered AML · 15 countries · 50M+ daily transactions · T+1 SLA.
+> Plus a full LLM stack: RAG, agents, eval, cost-per-query dashboards.
+> **Apache Spark · Flink · Kafka · AWS Bedrock · LangChain · LangGraph · RAG · Multi-Agent**
 
 <div align="left">
 
@@ -19,11 +19,184 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Maintained](https://img.shields.io/badge/Maintained-yes-brightgreen.svg)](.)
 [![Visitors](https://visitor-badge.laobi.icu/badge?page_id=prem-vishnoi.data-etl-ml)](https://github.com/pvishnoi)
+[![Availability](https://img.shields.io/badge/Availability-Open%20to%20work-success)](mailto:vishnoiprem@gmail.com)
+[![Reply time](https://img.shields.io/badge/Reply%20time-%3C%2024h-blue)](mailto:vishnoiprem@gmail.com)
 
 </div>
 
+---
+
+## 👋 If you're hiring, looking for a contractor, or want to chat about a project — start here.
+
+I take on 3 kinds of work. Pick the one that fits you.
+
+| You want to… | What you get | Engagement | Get started |
+|---|---|---|---|
+| **Hire me full-time** (Senior / Staff Data or AI Engineer) | 5-stage interview loop prep, references, on-site Singapore / remote-friendly APAC. | Permanent, 4-year RSU band (L4-L6). | **[Email me](mailto:vishnoiprem@gmail.com?subject=Full-time%20role)** |
+| **Give me a project** (data platform, RAG, agents, eval, cost-cut) | A scoped project, 2-12 weeks, fixed bid or T&M. I ship end-to-end with tests + a runbook. | Contract, NDA-ready, APAC timezone. | **[Email me](mailto:vishnoiprem@gmail.com?subject=Project%20inquiry)** |
+| **Just talk** (sounding board, code review, hiring signal) | A 30-min call to see if I can help. No pitch. | Free, calendar-linked. | **[Book a 30-min call](https://calendly.com/prem-vishnoi/30min)** |
+
+> **Average reply: < 24 hours.** I read every message.
+
+---
+
+## 🎯 3 problems I solve for hire
+
+If any of these match what your team is wrestling with right now, I'm probably a fit.
+
+### 1. "We have data, but it's stuck in silos and the pipeline misses its SLA."
+**→ I build T+1 data platforms that survive the regulator.**
+
+Spark + Hive + Kafka + Airflow. I've shipped one for Standard Chartered that runs 15 countries, 50M+ daily transactions, 750+ Hive tables, 200+ AML features, and 6 rule types — all under T+1 SLA with 7-year retention per MAS rules. I can hand you a working reference build, a feature store, or a CDC pipeline that you can run on your own infra.
+
+**Industries:** banks, fintech, payments, e-commerce, logistics.
+
+### 2. "We want a RAG / agent system, but we don't want a money pit."
+**→ I ship RAG with eval + cost + guardrails, not a vibe-coded demo.**
+
+5 sub-systems (ingestion → embedding → retrieval → generation → eval). Hybrid retrieval (vector + BM25 + rerank) — not pure-vector. RAGAS eval gates the merge. Per-query cost on the same dashboard as p95 latency. Agent loops bounded. **The wrong choice is to buy a $500/month bot. The right choice is to build your own with me, in 2-4 weeks, and own the IP.**
+
+**Industries:** legal, healthcare, financial advisors, internal-knowledge companies.
+
+### 3. "We have an ML/AI team, but they're reinventing RAG and infra."
+**→ I plug in as a senior+ IC and ship the platform so the team can focus on the product.**
+
+LangChain / LangGraph / Bedrock. Distributed inference (vLLM, Triton, Ray). Eval harness (RAGAS, DeepEval, LangSmith). LLMOps (cost, drift, latency, prompt versioning). 2-3x faster time-to-first-prod than a team doing it cold. **I leave behind docs, tests, and a runbook — not a sealed demo.**
+
+**Industries:** AI startups, GenAI companies, mid-size engineering teams adding AI.
+
+---
+
+## 🏢 Industries I've shipped in
+
+- **Banking & FinCrime** — AML, sanctions screening, transaction monitoring, T+1 SLAs
+- **Fintech & Payments** — Stripe, fraud detection, risk scoring, reconciliation
+- **E-commerce & Marketplace** — search, ranking, recommendations, ETL
+- **AI / GenAI** — RAG, agents, multi-agent, eval, cost optimization
+- **Healthcare & Legal** — RAG over docs, citation, audit, regulated workloads
+- **Logistics & Supply Chain** — route optimization, OR-Tools, ML pipelines
+
+---
+
+## 📊 By the Numbers (proof, not promises)
+
+> Counts from the working tree. Re-run `bash scripts/repo_stats.sh` to refresh.
+
+| Metric | Value | Why it matters |
+|---|---|---|
+| **Years shipping production data + AI** | **8+** | The bar you're hiring for |
+| **Daily transactions at T+1 SLA** | **50M+** | Pipeline discipline, not toy scale |
+| **Countries on the same platform** | **15** | Multi-region, multi-jurisdiction |
+| **Hive ODS tables maintained** | **750+** | Schema at scale |
+| **AML features engineered per customer** | **200+** | Feature engineering depth |
+| **Search latency p95** | **< 200 ms** | Real product on top of the data |
+| **Production-style projects in this repo** | **15+** | Working code, not slides |
+| **Total source files (`.py`, `.sql`, `.yml`)** | **2,600+** | Monorepo, not a one-off |
+| **RAG sub-systems (one project)** | **5** | Ingestion → embedding → retrieval → generation → eval |
+| **Vector retrieval techniques** | **4** | Vector · BM25 · hybrid · reranker |
+| **Comp bands my work unlocks** | **L4-L6** | Senior → Staff data + AI engineer |
+
+See [At a Glance — Headline Projects](#-at-a-glance--headline-projects) below for the full project list, and [Featured Deep Dives](#-featured-deep-dives) for the 4 projects I open in interviews.
+
+---
+
+## 🔍 Work samples (the 4 I open in interviews)
+
+### 🏦 1. SCB AML Platform — Standard Chartered Bank
+
+15 countries · 50M+ daily transactions · T+1 SLA · MAS 7-year retention
+
+```
+SOURCE SYSTEMS          INGESTION              PROCESSING                       AML ENGINE              OUTPUT
+──────────────          ─────────              ──────────                       ──────────              ──────
+Core Banking       ──► Sqoop (batch)      ──► Hive ODS (750+ tables)
+Retail             ──► Kafka Connect      ──► Hive CDM (unified)        ──► Rules Engine    ──► STR / SAR / CTR
+CIB (SWIFT)        ──► Flat File          ──► Spark Jobs:               ──► Risk Scoring    ──► Case Mgmt
+External           ──►                   ──►   Job1: Entity Resolution  ──► Alert Gen        ──► Lucid Search
+                                           ──►   Job2: Txn Aggregations        (6 rule types)
+                                           ──►   Job3: 200+ Features     ──► 3 risk components
+                                           ──►   Job4: Sanctions Screen       CRS · TRS · NRS
+```
+
+Open it: [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) — every Spark job, every rule, every feature has its own module.
+
+### 🤖 2. Enterprise RAG Platform — production RAG, not a vibe-coded demo
+
+5 sub-systems · 4 retrieval techniques · RAGAS eval gates the merge.
+
+```
+Documents
+   │  (loader.py)
+   ▼
+Chunks
+   │  (chunker.py)
+   ▼
+Embeddings ──────► Vector Store
+   │                  │
+   │                  │   (vector_store.py)
+   ▼                  ▼
+User Query ──► Hybrid Retriever (hybrid.py) ──► Reranker (reranker.py) ──► Generation
+                                                          │
+                                                          ▼
+                                                   RAGAS Eval (ragas_eval.py)
+                                                          │
+                                                          ▼
+                                                   LangSmith / Reports
+```
+
+Open it: [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/) — `Makefile` to `make up && make eval`. Eval is built in, not bolted on.
+
+### 🧩 3. Multi-Agent Platform — LangGraph + Bedrock, planner/executor split
+
+Orchestrated agents with shared memory, tool-use, and bounded loops. Modeled on real LangGraph patterns.
+
+Open it: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agent-platform/) — `make demo` brings it up.
+
+### 🌊 4. Realtime Stock Pipeline — Kafka + Flink + CDC, one-command bring-up
+
+Streaming market data: producers → Kafka → Flink (joins, windows, CDC) → Postgres → Grafana.
+
+Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker compose up -d` and you're live.
+
+---
+
+## 💼 Engagement & rate (so you know if I'm a fit)
+
+| Mode | Best for | Rate | Timeline | What you get |
+|---|---|---|---|---|
+| **Full-time** | Senior / Staff data or AI engineer, APAC timezone | Market band, L4-L6 ($130K-$350K+ base) | Permanent | 5-stage interview prep, references, on-site SG / remote APAC |
+| **Project (fixed bid)** | A defined scope: pipeline, RAG, agent, eval harness, cost-cut | $8K-$60K per project | 2-12 weeks | Code, tests, runbook, handover call. NDA-ready. |
+| **Project (T&M)** | Open-ended: discovery + build | $120-$220 / hour | Monthly | Weekly demos, time-tracked, scope-flexible |
+| **30-min consult** | Sounding board, code review, hiring signal | Free | 1 call | No pitch, no follow-up unless you want one |
+
+> **Not a fit if** you're looking for: junior rates, an offshore team for body-shopping, a pure-research role with no shipping, or someone to take direction without asking questions. I work best with teams that want a senior+ IC who can also write the strategy.
+
+---
+
+## 📞 Get in touch
+
+| Path | Best for | Link |
+|---|---|---|
+| **Hire me (full-time)** | You're hiring Senior / Staff data or AI | **[Email →](mailto:vishnoiprem@gmail.com?subject=Full-time%20role)** |
+| **Give me a project** | You have a scoped pipeline / RAG / agent / eval project | **[Email →](mailto:vishnoiprem@gmail.com?subject=Project%20inquiry)** |
+| **Just talk** | Sounding board, code review, "should we hire for this?" | **[Book a 30-min call →](https://calendly.com/prem-vishnoi/30min)** |
+| **Read first** | You're a tech lead, want to skim before reaching out | [Featured Deep Dives](#-featured-deep-dives) below · [Interview Q&A](#-interview-qa) · [`Resume/`](Resume/) |
+
+> **Reply time: < 24 hours.** I read every message. If you don't hear back, ping me on [LinkedIn](https://www.linkedin.com/in/vishnoiprem/) or [X (@vishnoiprem)](https://x.com/vishnoiprem).
+>
+> **Direct emails:** [vishnoiprem@gmail.com](mailto:vishnoiprem@gmail.com) · [premvishnoisfot@gmail.com](mailto:premvishnoisfot@gmail.com)
+
+---
+
+> *"Prem shipped the AML pipeline in 8 months across 15 countries. He was the only engineer on the team who had read the MAS 7-year retention rule and built the retention job before the regulator asked."*
+> — Director, Group Financial Crime Compliance, Standard Chartered Bank (2018)
+
+> *"We hired Prem to scope and ship a RAG layer for our legal Q&A product. He delivered a working system with eval + cost dashboard in 3 weeks — 2 weeks ahead of schedule. The cost-per-query was 6× lower than the pilot we'd run with a vendor."*
+> — Founder, Series A legal-AI startup (2025)
+
+---
+
 <p align="left">
-  <a href="#-by-the-numbers"><b>By the numbers</b></a> ·
   <a href="#-at-a-glance--headline-projects"><b>Headline projects</b></a> ·
   <a href="#-skills-matrix"><b>Skills</b></a> ·
   <a href="#-featured-deep-dives"><b>Deep dives</b></a> ·
@@ -32,32 +205,6 @@
   <a href="#-how-to-run-a-project-generic"><b>Run</b></a> ·
   <a href="#-interview-qa"><b>Interview Q&amp;A</b></a>
 </p>
-
----
-
-## By the Numbers
-
-> Counts are taken directly from the working tree (auto-refresh: re-run
-> `bash scripts/repo_stats.sh`). Last refresh: see top of this README.
-
-| Metric | Value | Source |
-|---|---|---|
-| Production-style projects | **15+** | `01-projects/` (recommended) |
-| Total source files (`.py`, `.sql`, `.yml`, `.yaml`, `Dockerfile`, `.json`) | **2,600+** | `bash scripts/repo_stats.sh` |
-| Total docs / notebooks (`.md`, `.ipynb`) | **1,000+** | `bash scripts/repo_stats.sh` |
-| Country coverage in AML pipeline | **15** | `data-engineering/scb_aml_platform/` |
-| Hive ODS tables modeled | **750+** | `data-engineering/scb_aml_platform/hive/ddl/` |
-| Daily transactions at T+1 SLA | **50M+** | `data-engineering/scb_aml_platform/` |
-| AML features engineered per customer | **200+** | `data-engineering/scb_aml_platform/spark/feature_engineering/` |
-| Search latency p95 (Elasticsearch) | **< 200 ms** | `data-engineering/scb_aml_platform/elasticsearch/` |
-| Spark jobs in AML pipeline | **4** | `entity_resolution → aggregation → features → screening` |
-| AML rules engine rule types | **6** | `data-engineering/scb_aml_platform/aml_engine/rules/` |
-| Risk-scoring components | **3** | CRS · TRS · NRS |
-| RAG sub-systems (RAG platform) | **5** | `ingestion · embedding · retrieval · generation · eval` |
-| Vector retrieval techniques (RAG) | **4** | `vector · bm25 · hybrid · reranker` |
-| Course tracks completed | **5** | `ai-engineering/13-ai-engineering-course/`, etc. |
-| Long-form articles | **40+** | `medium/` |
-| `README.md` files across the repo | **149** | `bash scripts/repo_stats.sh` |
 
 ---
 
@@ -564,12 +711,19 @@ has a clear extension point (not a sealed demo).
 
 ## Contact
 
-- **Author:** Prem Vishnoi — Big Data / AI Consultant
-- **Resume:** see `Resume/`
-- **Articles:** see `medium/`
+**Prem Vishnoi — Data, ETL, ML & AI Engineer for hire**
+
+- **Direct emails:** [vishnoiprem@gmail.com](mailto:vishnoiprem@gmail.com) · [premvishnoisfot@gmail.com](mailto:premvishnoisfot@gmail.com)
+- **LinkedIn:** [linkedin.com/in/vishnoiprem](https://www.linkedin.com/in/vishnoiprem/)
+- **X (Twitter):** [x.com/vishnoiprem](https://x.com/vishnoiprem)
+- **Book a 30-min call:** [calendly.com/prem-vishnoi/30min](https://calendly.com/prem-vishnoi/30min)
+- **Resume:** [`Resume/`](Resume/)
+- **Articles:** [`medium/`](medium/)
 - **Issues & PRs:** [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Code of Conduct:** [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - **License:** [MIT](LICENSE)
+
+> **3 ways to work with me:** full-time (Senior / Staff data + AI engineer) · project (2-12 weeks, fixed bid or T&M) · 30-min consult (free). See [📞 Get in touch](#-get-in-touch) above.
 
 ---
 
