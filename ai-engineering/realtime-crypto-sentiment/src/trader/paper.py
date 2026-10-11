@@ -12,9 +12,8 @@ from __future__ import annotations
 
 import math
 from collections import deque
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Deque, Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime
 
 from loguru import logger
 
@@ -31,7 +30,7 @@ class Fill:
     price_usd: float
     fee_usd: float
     cash_after: float
-    reason: Optional[str] = None
+    reason: str | None = None
     realized_pnl: float = 0.0  # populated on SELL (0 on BUY)
 
 
@@ -45,10 +44,10 @@ class Position:
 class PaperBroker:
     def __init__(
         self,
-        starting_cash_usd: float = None,
-        max_position_pct: float = None,
-        max_open_positions: int = None,
-        fee_bps: int = None,
+        starting_cash_usd: float | None = None,
+        max_position_pct: float | None = None,
+        max_open_positions: int | None = None,
+        fee_bps: int | None = None,
     ):
         self.cash_usd: float = (
             starting_cash_usd if starting_cash_usd is not None else settings.starting_cash_usd
@@ -62,11 +61,11 @@ class PaperBroker:
         self.fee_bps: int = fee_bps if fee_bps is not None else settings.fee_bps
         self.fee_fraction: float = self.fee_bps / 10_000.0
 
-        self.positions: Dict[str, Position] = {}
-        self.trades: List[Fill] = []
+        self.positions: dict[str, Position] = {}
+        self.trades: list[Fill] = []
         # Equity curve samples (ts, equity)
-        self.equity_curve: Deque = deque(maxlen=10_000)
-        self._latest_prices: Dict[str, float] = {}
+        self.equity_curve: deque = deque(maxlen=10_000)
+        self._latest_prices: dict[str, float] = {}
 
     # ── Public API ───────────────────────────────────────────────────
 
@@ -77,7 +76,7 @@ class PaperBroker:
         if not self.equity_curve or (tick["ts"] - self.equity_curve[-1][0]).total_seconds() >= 1:
             self.equity_curve.append((tick["ts"], self.equity()))
 
-    def on_signal(self, sig: Signal, price: float) -> Optional[Fill]:
+    def on_signal(self, sig: Signal, price: float) -> Fill | None:
         """Act on a signal at the given `price`. Returns the Fill or None."""
         if sig.action == "HOLD":
             return None
@@ -123,11 +122,9 @@ class PaperBroker:
         max_dd = 0.0
         peak = -math.inf
         for _, eq in self.equity_curve:
-            if eq > peak:
-                peak = eq
+            peak = max(peak, eq)
             dd = peak - eq
-            if dd > max_dd:
-                max_dd = dd
+            max_dd = max(max_dd, dd)
 
         # Sharpe (annualized) over equity-curve returns
         if len(self.equity_curve) >= 2:
@@ -157,7 +154,7 @@ class PaperBroker:
 
     # ── Internals ────────────────────────────────────────────────────
 
-    def _buy(self, symbol: str, price: float, ts: datetime, reason: str) -> Optional[Fill]:
+    def _buy(self, symbol: str, price: float, ts: datetime, reason: str) -> Fill | None:
         # Position-size cap
         if self.open_position_count() >= self.max_open_positions and self.positions.get(symbol, Position()).qty == 0:
             logger.debug(f"buy({symbol}): max open positions reached")
@@ -191,7 +188,7 @@ class PaperBroker:
         )
         return fill
 
-    def _sell(self, symbol: str, price: float, ts: datetime, reason: str) -> Optional[Fill]:
+    def _sell(self, symbol: str, price: float, ts: datetime, reason: str) -> Fill | None:
         pos = self.positions.get(symbol)
         if pos is None or pos.qty <= 0:
             return None

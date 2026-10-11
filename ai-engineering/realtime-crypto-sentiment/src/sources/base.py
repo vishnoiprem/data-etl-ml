@@ -7,7 +7,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
 
 
 class AdapterError(RuntimeError):
@@ -24,9 +23,9 @@ class RawTweet:
     retweets: int = 0
     followers: int = 0
     url: str = ""
-    symbol_tags: List[str] = field(default_factory=list)
+    symbol_tags: list[str] = field(default_factory=list)
 
-    def matches(self, symbols: List[str]) -> List[str]:
+    def matches(self, symbols: list[str]) -> list[str]:
         """Return the subset of `symbols` mentioned in `text` (case-insensitive)."""
         lower = self.text.lower()
         return [s for s in symbols if s.lower() in lower]
@@ -41,7 +40,7 @@ class SourceAdapter(ABC):
     name: str = "abstract"
 
     @abstractmethod
-    async def fetch(self, query: str, max_results: int = 30) -> List[RawTweet]:
+    async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         """Return up to `max_results` tweets matching `query`."""
         raise NotImplementedError
 

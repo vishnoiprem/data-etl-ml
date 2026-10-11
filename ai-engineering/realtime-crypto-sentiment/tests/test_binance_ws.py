@@ -5,12 +5,11 @@ Author: Prem Vishnoi <pvishnoi@pvishnoi.com>
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
 from src.prices.binance_ws import build_stream_url, parse_trade_frame
-
 
 # ── build_stream_url ─────────────────────────────────────────────────────
 
@@ -40,7 +39,7 @@ def test_parse_trade_frame_valid():
     assert tick["symbol"] == "BTCUSDT"
     assert tick["price_usd"] == pytest.approx(67123.45)
     assert tick["volume_usd"] == pytest.approx(67123.45 * 0.012)
-    assert tick["ts"] == datetime.fromtimestamp(1700000000.123, tz=timezone.utc)
+    assert tick["ts"] == datetime.fromtimestamp(1700000000.123, tz=UTC)
 
 
 def test_parse_trade_frame_uses_event_time_as_fallback():
@@ -54,7 +53,7 @@ def test_parse_trade_frame_uses_event_time_as_fallback():
     tick = parse_trade_frame(frame)
     assert tick is not None
     assert tick["symbol"] == "ETHUSDT"
-    assert tick["ts"] == datetime.fromtimestamp(1700000000.999, tz=timezone.utc)
+    assert tick["ts"] == datetime.fromtimestamp(1700000000.999, tz=UTC)
 
 
 def test_parse_trade_frame_invalid_json():
@@ -85,8 +84,9 @@ def test_parse_trade_frame_empty_string():
 @pytest.mark.asyncio
 async def test_stream_prices_respects_stop_event(monkeypatch):
     """If stop_event is set, the function returns promptly without connecting."""
-    from src.prices import binance_ws
     import asyncio
+
+    from src.prices import binance_ws
 
     stop = asyncio.Event()
     stop.set()  # already stopped

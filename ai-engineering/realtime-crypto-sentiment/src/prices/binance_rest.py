@@ -5,8 +5,7 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 from __future__ import annotations
 
 import time
-from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
 import requests
 from loguru import logger
@@ -21,8 +20,8 @@ def backfill_klines(
     symbol: str,
     interval: str = "1m",
     days: int = 7,
-    base_url: Optional[str] = None,
-) -> List[dict]:
+    base_url: str | None = None,
+) -> list[dict]:
     """Fetch 1m klines for `symbol` going back `days` days.
 
     Returns a list of {ts, symbol, price_usd, volume_usd} dicts (using
@@ -31,7 +30,7 @@ def backfill_klines(
     base = base_url or settings.binance_rest
     end = int(time.time() * 1000)
     start = end - days * 24 * 3600 * 1000
-    out: List[dict] = []
+    out: list[dict] = []
     cursor = start
 
     while cursor < end:
@@ -61,7 +60,7 @@ def backfill_klines(
 
         for row in rows:
             ts_ms, _open, _high, _low, close, volume, *_ = row
-            ts = datetime.fromtimestamp(ts_ms / 1000.0, tz=timezone.utc)
+            ts = datetime.fromtimestamp(ts_ms / 1000.0, tz=UTC)
             out.append({
                 "ts": ts,
                 "symbol": symbol,

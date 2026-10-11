@@ -5,9 +5,9 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Sequence
 
 from src.config import settings
 
@@ -56,10 +56,10 @@ def generate_signal(
     sentiment_history: Sequence[float],
     momentum_value: float,
     momentum_history: Sequence[float],
-    threshold: Optional[float] = None,
-    sent_weight: Optional[float] = None,
-    mom_weight: Optional[float] = None,
-    now: Optional[datetime] = None,
+    threshold: float | None = None,
+    sent_weight: float | None = None,
+    mom_weight: float | None = None,
+    now: datetime | None = None,
 ) -> Signal:
     """Combine a sentiment z + momentum z into a BUY/SELL/HOLD signal."""
     threshold = threshold if threshold is not None else settings.signal_threshold

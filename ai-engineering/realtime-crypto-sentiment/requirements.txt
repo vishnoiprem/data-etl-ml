@@ -1,5 +1,10 @@
 # realtime-crypto-sentiment — Python dependencies
 # Pinned to keep security advisories + model reproducibility stable.
+#
+# Python 3.11+ required (torch 2.5.1 is not published for 3.10). On
+# Python 3.13, `pip` will auto-relax some pins (torch, protobuf) at install
+# time. The FinBERT model is lazy-loaded and mocked in tests, so a
+# slightly older torch (>=2.2,<2.5) is fine for actual runtime.
 
 # ── Tier 1 security overrides (transitive pins from root requirements.txt)
 urllib3==2.8.0

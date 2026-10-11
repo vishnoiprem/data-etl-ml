@@ -13,13 +13,8 @@ External services (Nitter, Binance WS, FinBERT) are stubbed.
 """
 from __future__ import annotations
 
-import asyncio
 import sys
-from datetime import datetime, timedelta, timezone
-from typing import List
-
-import pytest
-
+from datetime import UTC, datetime, timedelta
 
 # ── Stubs ────────────────────────────────────────────────────────────────
 
@@ -28,9 +23,9 @@ class _StubSource:
     """Returns canned RawTweets from a queue, one per fetch() call."""
     name = "stub"
 
-    def __init__(self, tweets: List[dict]):
+    def __init__(self, tweets: list[dict]):
         self.tweets = list(tweets)
-        self.calls: List[str] = []
+        self.calls: list[str] = []
 
     async def fetch(self, query, max_results=20):
         self.calls.append(query)
@@ -106,7 +101,7 @@ def test_pipeline_end_to_end_with_sqlite(monkeypatch, tmp_path):
     # 4) Replace the entire SourceRegistry with a stub.
     stub = _StubSource([
         {
-            "id": 1001, "ts": datetime.now(timezone.utc),
+            "id": 1001, "ts": datetime.now(UTC),
             "author": "alice", "text": "BTC to the moon",
             "likes": 100, "retweets": 10, "followers": 5000,
             "url": "https://x.com/alice/status/1001",
@@ -139,7 +134,7 @@ def test_pipeline_end_to_end_with_sqlite(monkeypatch, tmp_path):
     # 8) Inject a price series. We then call _generate_signal_for, but it
     # bails on insufficient history (only 1 scored tweet). So we go directly
     # to the paper_trade path with a forced BUY signal.
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     for i in range(10):
         db.upsert_price({"ts": now - timedelta(seconds=30 * i),
                          "symbol": "BTC", "price_usd": 50_000.0 + i * 10,
@@ -193,7 +188,7 @@ def test_pipeline_scrape_topic_skips_unmapped(monkeypatch, tmp_path):
     from src.pipeline import CryptoPipeline
     pipe = CryptoPipeline()
     stub = _StubSource([{
-        "id": 999, "ts": datetime.now(timezone.utc), "author": "x",
+        "id": 999, "ts": datetime.now(UTC), "author": "x",
         "text": "x", "likes": 0, "retweets": 0, "followers": 0, "url": "u",
     }])
 
@@ -259,7 +254,7 @@ def test_pipeline_signal_generation_writes_signal(tmp_path):
 
     pipe.sources = _StubRegistry(stub)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     # Seed 30 scored tweets in the last 60 minutes
     for i in range(30):
         db.upsert_tweet({

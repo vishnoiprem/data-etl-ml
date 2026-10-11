@@ -14,17 +14,21 @@ from __future__ import annotations
 import asyncio
 import signal
 import sys
-from datetime import datetime, timezone
-from statistics import mean
-from typing import Dict, List, Optional
+from datetime import datetime
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from loguru import logger
 
 from src.config import settings
 from src.metrics import (
-    PAPER_TRADES, PIPELINE_ERRORS, SCORE_LATENCY, SCRAPE_LATENCY,
-    SIGNALS_GENERATED, SIGNAL_LATENCY, TWEETS_SCORED, TWEETS_SCRAPED,
+    PAPER_TRADES,
+    PIPELINE_ERRORS,
+    SCORE_LATENCY,
+    SCRAPE_LATENCY,
+    SIGNAL_LATENCY,
+    SIGNALS_GENERATED,
+    TWEETS_SCORED,
+    TWEETS_SCRAPED,
     start_metrics_server,
 )
 from src.ml.finbert import FinBERTScorer
@@ -38,12 +42,12 @@ from src.trader.paper import PaperBroker
 class CryptoPipeline:
     def __init__(self):
         self.sources = SourceRegistry.from_settings()
-        self.scorer: Optional[FinBERTScorer] = None  # lazy
+        self.scorer: FinBERTScorer | None = None  # lazy
         self.broker = PaperBroker()
         # Latest tick per symbol (used by signal generator)
-        self._latest_prices: Dict[str, dict] = {}
+        self._latest_prices: dict[str, dict] = {}
         # Latest signal per symbol (used by paper_trade)
-        self._latest_signals: Dict[str, object] = {}
+        self._latest_signals: dict[str, object] = {}
         self._stop = asyncio.Event()
         self.scheduler = BlockingScheduler(timezone="UTC")
 
@@ -98,7 +102,7 @@ class CryptoPipeline:
                     logger.debug(f"upsert_tweet error: {e}")
 
     @staticmethod
-    def _symbols_for_topic(topic: str) -> List[str]:
+    def _symbols_for_topic(topic: str) -> list[str]:
         """Map a topic to one or more symbols.
 
         `$BTC` → `BTC`; `#memecoin` → none; `bitcoin` → `BTC`; etc.
@@ -179,7 +183,7 @@ class CryptoPipeline:
             return
         momentum_value = sum(rets_5m)  # net 5-min return
         from src.store.db import recent_price_returns as _rpr
-        history_returns: List[float] = []
+        history_returns: list[float] = []
         # Sample 5-min-return windows over the lookback
         # Cheap implementation: minute returns then aggregate every 5
         minute_returns = _rpr(sym, minutes=settings.signal_lookback_hours * 60)

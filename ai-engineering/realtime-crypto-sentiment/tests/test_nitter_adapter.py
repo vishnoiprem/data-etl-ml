@@ -4,14 +4,12 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 from __future__ import annotations
 
-import asyncio
 import time
 
 import pytest
 
+from src.sources.base import AdapterError
 from src.sources.nitter_mirror import NitterMirrorAdapter, TokenBucket
-from src.sources.base import AdapterError, RawTweet
-
 
 # ── HTML fixtures ────────────────────────────────────────────────────────
 

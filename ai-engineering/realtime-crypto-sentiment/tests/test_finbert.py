@@ -5,10 +5,8 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 from __future__ import annotations
 
 import sys
-from typing import List
 
 import pytest
-
 
 # ── Stubs ────────────────────────────────────────────────────────────────
 
@@ -19,7 +17,7 @@ class _StubResult:
         self.per_text = per_text
 
 
-def _stub_pipeline_factory(per_text_responses: List[List[dict]]):
+def _stub_pipeline_factory(per_text_responses: list[list[dict]]):
     """Build a fake transformers.pipeline that returns canned outputs in order."""
     state = {"i": 0, "calls": []}
 

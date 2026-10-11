@@ -11,16 +11,22 @@ from __future__ import annotations
 
 import json
 import pathlib
+from collections.abc import Iterable
 from contextlib import contextmanager
-from datetime import datetime, timezone
-from typing import Iterable, List, Optional
 
 from loguru import logger
 from sqlalchemy import (
-    Column, DateTime, Float, Integer, String, Text, BigInteger, create_engine,
-    text, Index,
+    BigInteger,
+    Column,
+    DateTime,
+    Float,
+    Integer,
+    String,
+    Text,
+    create_engine,
+    text,
 )
-from sqlalchemy.dialects.postgresql import insert as pg_insert, JSONB
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from src.config import settings
@@ -29,7 +35,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 
 # ── Engine / Session ────────────────────────────────────────────────────
 
-def _make_engine(url: Optional[str] = None):
+def _make_engine(url: str | None = None):
     url = url or settings.database_url
     if url.startswith("sqlite"):
         return create_engine(url, connect_args={"check_same_thread": False})
@@ -223,7 +229,7 @@ def update_tweet_sentiment(tweet_id: int, ts, score: float) -> int:
         return result.rowcount
 
 
-def fetch_unscored_tweets(limit: int = 256) -> List[dict]:
+def fetch_unscored_tweets(limit: int = 256) -> list[dict]:
     engine = get_engine()
     with engine.connect() as conn:
         rows = conn.execute(
@@ -272,7 +278,7 @@ def bulk_upsert_prices(prices: Iterable[dict]) -> int:
     return n
 
 
-def latest_price(symbol: str) -> Optional[dict]:
+def latest_price(symbol: str) -> dict | None:
     engine = get_engine()
     with engine.connect() as conn:
         row = conn.execute(
@@ -300,7 +306,7 @@ def insert_signal(s: dict) -> None:
         conn.execute(Signal.__table__.insert().values(**row))
 
 
-def fetch_recent_signals(symbol: str, hours: int = 24, limit: int = 200) -> List[dict]:
+def fetch_recent_signals(symbol: str, hours: int = 24, limit: int = 200) -> list[dict]:
     engine = get_engine()
     with engine.connect() as conn:
         rows = conn.execute(
@@ -321,7 +327,7 @@ def fetch_recent_signals(symbol: str, hours: int = 24, limit: int = 200) -> List
     return [dict(r._mapping) for r in rows]
 
 
-def fetch_recent_tweets(symbol: str, minutes: int = 5) -> List[dict]:
+def fetch_recent_tweets(symbol: str, minutes: int = 5) -> list[dict]:
     engine = get_engine()
     with engine.connect() as conn:
         if engine.dialect.name == "postgresql":
@@ -345,7 +351,7 @@ def fetch_recent_tweets(symbol: str, minutes: int = 5) -> List[dict]:
     return [dict(r._mapping) for r in rows]
 
 
-def recent_price_returns(symbol: str, minutes: int = 5) -> List[float]:
+def recent_price_returns(symbol: str, minutes: int = 5) -> list[float]:
     """Return the per-minute price-returns for the last `minutes`.
 
     Returns: list of (price_now - price_then) / price_then for each minute.
@@ -375,7 +381,7 @@ def recent_price_returns(symbol: str, minutes: int = 5) -> List[float]:
     return [(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))]
 
 
-def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> List[dict]:
+def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> list[dict]:
     """Return list of {bucket, avg_sentiment, n} aggregated to `minutes`-wide buckets.
 
     Used by signal generation so the z-score compares a current 5-min mean
@@ -431,7 +437,7 @@ def insert_paper_trade(t: dict) -> None:
         conn.execute(PaperTrade.__table__.insert().values(**row))
 
 
-def fetch_paper_trades(limit: int = 200) -> List[dict]:
+def fetch_paper_trades(limit: int = 200) -> list[dict]:
     engine = get_engine()
     with engine.connect() as conn:
         rows = conn.execute(
@@ -476,7 +482,7 @@ def upsert_position(p: dict) -> None:
             )
 
 
-def all_open_positions() -> List[dict]:
+def all_open_positions() -> list[dict]:
     engine = get_engine()
     with engine.connect() as conn:
         rows = conn.execute(

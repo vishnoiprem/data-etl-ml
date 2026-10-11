@@ -29,7 +29,7 @@ test:  ## Run pytest.
 	$(BIN)/python scripts/run_all_tests.py
 
 lint:  ## Run ruff.
-	$(BIN)/ruff check src tests dashboard || true
+	$(BIN)/ruff check src tests dashboard
 
 clean:  ## Remove caches and venv.
 	rm -rf .pytest_cache __pycache__ */__pycache__ */*/__pycache__ .ruff_cache

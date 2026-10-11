@@ -6,10 +6,8 @@ All knobs live in .env. This module is the single source of truth.
 """
 from __future__ import annotations
 
-import os
 from functools import lru_cache
 from pathlib import Path
-from typing import List
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -35,13 +33,13 @@ class Settings(BaseSettings):
     # ── Prices ────────────────────────────────────────────────────────────
     binance_ws: str = "wss://stream.binance.com:9443/stream"
     binance_rest: str = "https://api.binance.com"
-    symbols: List[str] = Field(
+    symbols: list[str] = Field(
         default_factory=lambda: ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE", "ADA", "AVAX", "LINK", "MATIC"]
     )
     backfill_days: int = 7
 
     # ── Sources (Nitter / Syndication) ─────────────────────────────────────
-    mirrors: List[str] = Field(
+    mirrors: list[str] = Field(
         default_factory=lambda: [
             "nitter.net",
             "nitter.privacydev.net",
@@ -55,18 +53,18 @@ class Settings(BaseSettings):
     )
 
     # ── Topics ────────────────────────────────────────────────────────────
-    cashtags: List[str] = Field(
+    cashtags: list[str] = Field(
         default_factory=lambda: [
             "$BTC", "$ETH", "$SOL", "$BNB", "$XRP", "$DOGE", "$ADA", "$AVAX", "$LINK", "$MATIC",
         ]
     )
-    hashtags: List[str] = Field(
+    hashtags: list[str] = Field(
         default_factory=lambda: [
             "#bitcoin", "#ethereum", "#solana", "#bnb", "#xrp", "#dogecoin",
             "#ada", "#avax", "#chainlink", "#matic", "#memecoin", "#altcoin",
         ]
     )
-    keywords: List[str] = Field(
+    keywords: list[str] = Field(
         default_factory=lambda: [
             "bitcoin", "ethereum", "solana", "binance coin", "ripple",
             "dogecoin", "cardano", "avalanche", "chainlink", "polygon",
@@ -106,11 +104,11 @@ class Settings(BaseSettings):
         return v
 
     @property
-    def symbols_with_usdt(self) -> List[str]:
+    def symbols_with_usdt(self) -> list[str]:
         return [f"{s}USDT" for s in self.symbols]
 
     @property
-    def all_topics(self) -> List[str]:
+    def all_topics(self) -> list[str]:
         return self.cashtags + self.hashtags + self.keywords
 
     @property

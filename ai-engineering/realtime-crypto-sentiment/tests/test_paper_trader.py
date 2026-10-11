@@ -4,16 +4,16 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
 from src.ml.signal import Signal
-from src.trader.paper import Fill, PaperBroker, Position
+from src.trader.paper import PaperBroker
 
 
 def _now():
-    return datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+    return datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC)
 
 
 def _sig(symbol: str, action: str, reason: str = "test") -> Signal:

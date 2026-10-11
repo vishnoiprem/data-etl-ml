@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
-from datetime import datetime, timezone
-from typing import Awaitable, Callable, List, Optional
+from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 
 import websockets
 from loguru import logger
@@ -25,13 +24,13 @@ from src.config import settings
 OnTick = Callable[[dict], Awaitable[None]]
 
 
-def build_stream_url(symbols_usdt: List[str], base: Optional[str] = None) -> str:
+def build_stream_url(symbols_usdt: list[str], base: str | None = None) -> str:
     base = base or settings.binance_ws
     streams = "/".join(f"{s.lower()}@trade" for s in symbols_usdt)
     return f"{base}?streams={streams}"
 
 
-def parse_trade_frame(payload: str) -> Optional[dict]:
+def parse_trade_frame(payload: str) -> dict | None:
     """Parse a Binance trade frame; return a PriceTick dict or None on error."""
     try:
         msg = json.loads(payload)
@@ -48,7 +47,7 @@ def parse_trade_frame(payload: str) -> Optional[dict]:
         return None
     try:
         return {
-            "ts": datetime.fromtimestamp(ts_ms / 1000.0, tz=timezone.utc),
+            "ts": datetime.fromtimestamp(ts_ms / 1000.0, tz=UTC),
             "symbol": sym,
             "price_usd": float(price),
             "volume_usd": float(price) * float(qty),
@@ -59,9 +58,9 @@ def parse_trade_frame(payload: str) -> Optional[dict]:
 
 async def stream_prices(
     on_tick: OnTick,
-    symbols_usdt: Optional[List[str]] = None,
-    base_url: Optional[str] = None,
-    stop_event: Optional[asyncio.Event] = None,
+    symbols_usdt: list[str] | None = None,
+    base_url: str | None = None,
+    stop_event: asyncio.Event | None = None,
 ) -> None:
     """Forever-stream Binance trade ticks; calls on_tick(tick_dict) per trade.
 

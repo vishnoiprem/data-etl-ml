@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Make the project root importable when launched via `streamlit run dashboard/app.py`
@@ -96,8 +96,8 @@ def _kpis() -> dict:
         "equity": equity,
         "position_value": position_value,
         "realized_pnl": realized,
-        "trade_count": int(len(trades)),
-        "today_trades": int(len(today_trades)),
+        "trade_count": len(trades),
+        "today_trades": len(today_trades),
     }
 
 
@@ -276,7 +276,7 @@ def _render_header() -> None:
     st.title(":chart_with_upwards_trend: Realtime Crypto Sentiment")
     st.caption(
         f"Refresh every {REFRESH_MS // 1000}s · DB: `{settings.database_url.split('@')[-1]}` · "
-        f"Last render: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+        f"Last render: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}"
     )
     st.caption(
         ":warning: **Decision-support only — not financial advice.** "
@@ -353,7 +353,7 @@ def page_sentiment() -> None:
         st.bar_chart(chart, color="#1f77b4")
 
     with c2:
-        st.markdown(f"### Tweet volume by symbol (last 1h)")
+        st.markdown("### Tweet volume by symbol (last 1h)")
         tm = _top_mentions(limit=10)
         if tm.empty:
             st.info("No tweet activity yet.")
@@ -370,12 +370,12 @@ def page_sentiment() -> None:
         fig.add_trace(go.Bar(x=tv["bucket"], y=tv["tweets"], name="Tweets", marker_color="#7f7f7f", opacity=0.5))
         fig.add_trace(go.Scatter(
             x=tv["bucket"], y=tv["avg_sent"], name="Avg sentiment",
-            yaxis="y2", line=dict(color="#d62728", width=2),
+            yaxis="y2", line={"color": "#d62728", "width": 2},
         ))
         fig.update_layout(
-            yaxis=dict(title="Tweet count"),
-            yaxis2=dict(title="Avg sentiment", overlaying="y", side="right", range=[-1, 1]),
-            height=350, margin=dict(l=40, r=40, t=30, b=30),
+            yaxis={"title": "Tweet count"},
+            yaxis2={"title": "Avg sentiment", "overlaying": "y", "side": "right", "range": [-1, 1]},
+            height=350, margin={"l": 40, "r": 40, "t": 30, "b": 30},
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -396,7 +396,7 @@ def page_prices_signals() -> None:
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=px_df["bucket"], y=px_df["close"], name=f"{sym} price",
-        line=dict(color="#1f77b4", width=2),
+        line={"color": "#1f77b4", "width": 2},
     ))
     if not sig_df.empty:
         buys = sig_df[sig_df["action"] == "BUY"]
@@ -404,12 +404,12 @@ def page_prices_signals() -> None:
         if not buys.empty:
             fig.add_trace(go.Scatter(
                 x=buys["ts"], y=px_df.set_index("bucket")["close"].reindex(buys["ts"], method="nearest").values,
-                mode="markers", name="BUY", marker=dict(symbol="triangle-up", size=12, color="#2ca02c"),
+                mode="markers", name="BUY", marker={"symbol": "triangle-up", "size": 12, "color": "#2ca02c"},
             ))
         if not sells.empty:
             fig.add_trace(go.Scatter(
                 x=sells["ts"], y=px_df.set_index("bucket")["close"].reindex(sells["ts"], method="nearest").values,
-                mode="markers", name="SELL", marker=dict(symbol="triangle-down", size=12, color="#d62728"),
+                mode="markers", name="SELL", marker={"symbol": "triangle-down", "size": 12, "color": "#d62728"},
             ))
     fig.update_layout(height=500, xaxis_title="time (UTC)", yaxis_title="price (USD)")
     st.plotly_chart(fig, use_container_width=True)
@@ -434,16 +434,16 @@ def page_paper_pnl() -> None:
         return
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=eq["ts"], y=eq["equity"], name="Equity (USD)", fill="tozeroy", line=dict(color="#2ca02c")))
+    fig.add_trace(go.Scatter(x=eq["ts"], y=eq["equity"], name="Equity (USD)", fill="tozeroy", line={"color": "#2ca02c"}))
     # Drawdown overlay
     running_max = eq["equity"].cummax()
     dd = running_max - eq["equity"]
-    fig.add_trace(go.Scatter(x=eq["ts"], y=dd, name="Drawdown (USD)", yaxis="y2", line=dict(color="#d62728", width=1)))
+    fig.add_trace(go.Scatter(x=eq["ts"], y=dd, name="Drawdown (USD)", yaxis="y2", line={"color": "#d62728", "width": 1}))
     fig.update_layout(
         height=400,
-        yaxis=dict(title="Equity (USD)"),
-        yaxis2=dict(title="Drawdown (USD)", overlaying="y", side="right"),
-        margin=dict(l=40, r=40, t=30, b=30),
+        yaxis={"title": "Equity (USD)"},
+        yaxis2={"title": "Drawdown (USD)", "overlaying": "y", "side": "right"},
+        margin={"l": 40, "r": 40, "t": 30, "b": 30},
     )
     st.plotly_chart(fig, use_container_width=True)
 

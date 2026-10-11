@@ -22,8 +22,7 @@ import asyncio
 import hashlib
 import re
 import time
-from datetime import datetime, timezone
-from typing import List, Optional, Dict
+from datetime import UTC, datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -66,7 +65,7 @@ class NitterMirrorAdapter(SourceAdapter):
 
     def __init__(
         self,
-        mirrors: List[str],
+        mirrors: list[str],
         user_agent: str = "Mozilla/5.0",
         timeout: float = 5.0,
         min_mirror_gap_sec: float = 30.0,
@@ -81,14 +80,14 @@ class NitterMirrorAdapter(SourceAdapter):
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": self.user_agent})
         self.bucket = TokenBucket(rate=1.0, burst=2)
-        self._mirror_last_used: Dict[str, float] = {}
-        self._mirror_denied_until: Dict[str, float] = {}
+        self._mirror_last_used: dict[str, float] = {}
+        self._mirror_denied_until: dict[str, float] = {}
         # Mirror that served the last successful fetch (used for URL rewriting).
-        self._active_mirror: Optional[str] = None
+        self._active_mirror: str | None = None
 
     # ── Public API ───────────────────────────────────────────────────
 
-    async def fetch(self, query: str, max_results: int = 30) -> List[RawTweet]:
+    async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         """Fetch a query by trying each healthy mirror in turn.
 
         Returns a (possibly empty) list. Raises AdapterError only if
@@ -98,7 +97,7 @@ class NitterMirrorAdapter(SourceAdapter):
             raise AdapterError("no mirrors configured")
 
         clean_q = self._normalize_query(query)
-        last_err: Optional[Exception] = None
+        last_err: Exception | None = None
         for mirror in self._healthy_mirrors():
             try:
                 html = await self._fetch_one(mirror, clean_q)
@@ -118,7 +117,7 @@ class NitterMirrorAdapter(SourceAdapter):
 
     # ── Internals ────────────────────────────────────────────────────
 
-    def _healthy_mirrors(self) -> List[str]:
+    def _healthy_mirrors(self) -> list[str]:
         now = time.monotonic()
         return [
             m for m in self.mirrors
@@ -128,7 +127,7 @@ class NitterMirrorAdapter(SourceAdapter):
     def _normalize_query(self, q: str) -> str:
         q = q.strip()
         # Nitter's search uses the `q` param; cashtags/hashtags go through verbatim.
-        if q.startswith("$") or q.startswith("#"):
+        if q.startswith(("$", "#")):
             return q.lstrip("$#")
         return q
 
@@ -162,14 +161,14 @@ class NitterMirrorAdapter(SourceAdapter):
 
         return resp.text
 
-    def _parse(self, html: str, query: str, max_results: int) -> List[RawTweet]:
+    def _parse(self, html: str, query: str, max_results: int) -> list[RawTweet]:
         soup = BeautifulSoup(html, "lxml")
         items = soup.select(".timeline-item")
         if not items:
             # alternate selectors (some mirrors use different classes)
             items = soup.select(".tweet")
 
-        tweets: List[RawTweet] = []
+        tweets: list[RawTweet] = []
         for item in items[:max_results]:
             try:
                 tweets.append(self._parse_one(item, query))
@@ -198,7 +197,7 @@ class NitterMirrorAdapter(SourceAdapter):
         # Stats
         likes = self._parse_stat(item, ".icon-heart, .heart, [data-count-likes]")
         retweets = self._parse_stat(item, ".icon-retweet, .retweet, [data-count-retweets]")
-        replies = self._parse_stat(item, ".icon-comment, .reply, [data-count-replies]")
+        self._parse_stat(item, ".icon-comment, .reply, [data-count-replies]")
 
         # Timestamp — best-effort; fall back to now
         ts = self._parse_timestamp(item)
@@ -216,7 +215,7 @@ class NitterMirrorAdapter(SourceAdapter):
         )
 
     @staticmethod
-    def _extract_id(url: str) -> Optional[int]:
+    def _extract_id(url: str) -> int | None:
         if not url:
             return None
         # Nitter URLs: /user/status/1234567890
@@ -235,7 +234,7 @@ class NitterMirrorAdapter(SourceAdapter):
         the same id across restarts. With this, the (tweet_id, ts) ON CONFLICT
         idempotency in db.upsert_tweet actually works.
         """
-        h = hashlib.sha1(f"{author}::{text}".encode("utf-8")).hexdigest()
+        h = hashlib.sha1(f"{author}::{text}".encode()).hexdigest()
         # Take the first 10 hex chars, max 0xFFFFFFFFFF (just under 2^40)
         return int(h[:10], 16)
 
@@ -274,4 +273,4 @@ class NitterMirrorAdapter(SourceAdapter):
                 return parsedate_to_datetime(date_el["title"])
             except (TypeError, ValueError):
                 pass
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)

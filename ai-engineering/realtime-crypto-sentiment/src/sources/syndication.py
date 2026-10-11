@@ -15,8 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from datetime import UTC, datetime
 
 import requests
 from loguru import logger
@@ -41,7 +40,7 @@ class SyndicationAdapter(SourceAdapter):
         self._last_used: float = 0.0
         self._min_gap: float = 2.0  # generous: 1 req per 2s
 
-    async def fetch(self, query: str, max_results: int = 30) -> List[RawTweet]:
+    async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         handle = query.lstrip("@").strip()
         if not handle:
             raise AdapterError("empty handle")
@@ -72,10 +71,10 @@ class SyndicationAdapter(SourceAdapter):
     async def close(self) -> None:
         self.session.close()
 
-    def _parse(self, data: dict, max_results: int) -> List[RawTweet]:
+    def _parse(self, data: dict, max_results: int) -> list[RawTweet]:
         # Timeline entries live under data["timeline"]["entries"]; each has
         # .tweet.id_str, .tweet.text, .tweet.user.screen_name, etc.
-        out: List[RawTweet] = []
+        out: list[RawTweet] = []
         entries = (data.get("timeline", {}) or {}).get("entries", []) or []
         for entry in entries[:max_results]:
             tweet = (entry.get("tweet") or {})
@@ -94,7 +93,7 @@ class SyndicationAdapter(SourceAdapter):
                 followers = int(user.get("followers_count", 0) or 0)
                 # Timestamp
                 ts_str = tweet.get("created_at", "")
-                ts = self._parse_twitter_date(ts_str) or datetime.now(timezone.utc)
+                ts = self._parse_twitter_date(ts_str) or datetime.now(UTC)
                 url = f"https://twitter.com/{user.get('screen_name', '')}/status/{tid}"
 
                 out.append(
@@ -131,7 +130,7 @@ class SyndicationAdapter(SourceAdapter):
         return text.strip()
 
     @staticmethod
-    def _parse_twitter_date(s: str) -> Optional[datetime]:
+    def _parse_twitter_date(s: str) -> datetime | None:
         if not s:
             return None
         try:

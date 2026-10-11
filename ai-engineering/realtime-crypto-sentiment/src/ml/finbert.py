@@ -14,7 +14,6 @@ Output mapping:
 from __future__ import annotations
 
 import os
-from typing import List, Optional
 
 from loguru import logger
 
@@ -52,20 +51,20 @@ class FinBERTScorer:
         logger.info("FinBERT loaded")
         return self._pipeline
 
-    def score(self, texts: List[str]) -> List[float]:
+    def score(self, texts: list[str]) -> list[float]:
         """Score a list of texts; return list of floats in [-1, +1]."""
         if not texts:
             return []
         pipe = self._load()
         results = pipe(texts, batch_size=self.batch_size)
         # `results` is a list of list-of-dicts (one inner list per text)
-        scores: List[float] = []
+        scores: list[float] = []
         for per_text in results:
             scores.append(self._combine(per_text))
         return scores
 
     @staticmethod
-    def _combine(per_text: List[dict]) -> float:
+    def _combine(per_text: list[dict]) -> float:
         """Combine positive/negative/neutral into a signed score.
 
         FinBERT output looks like:
@@ -73,7 +72,7 @@ class FinBERTScorer:
            {"label":"negative","score":0.04},
            {"label":"neutral", "score":0.03}]
         """
-        pos = neg = neu = 0.0
+        pos = neg = 0.0
         for d in per_text:
             lbl = d.get("label", "").lower()
             sc = float(d.get("score", 0.0))
@@ -82,7 +81,7 @@ class FinBERTScorer:
             elif lbl == "negative":
                 neg = sc
             else:
-                neu = sc
+                pass
         return pos - neg  # neutral contributes 0
 
 

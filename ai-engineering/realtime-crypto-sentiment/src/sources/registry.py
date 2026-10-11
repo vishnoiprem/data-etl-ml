@@ -4,14 +4,12 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 from __future__ import annotations
 
-import asyncio
 import time
-from typing import List, Optional
 
 from loguru import logger
 
 from src.config import settings
-from src.sources.base import AdapterError, RawTweet, SourceAdapter
+from src.sources.base import AdapterError, RawTweet
 from src.sources.nitter_mirror import NitterMirrorAdapter
 from src.sources.syndication import SyndicationAdapter
 
@@ -29,7 +27,7 @@ class SourceRegistry:
         self._active_until: float = 0.0
 
     @classmethod
-    def from_settings(cls) -> "SourceRegistry":
+    def from_settings(cls) -> SourceRegistry:
         return cls(
             nitter=NitterMirrorAdapter(
                 mirrors=settings.mirrors,
@@ -44,7 +42,7 @@ class SourceRegistry:
             return "auto"
         return self._active
 
-    async def fetch(self, query: str, max_results: int = 30) -> List[RawTweet]:
+    async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         if self._active == "nitter" and self.nitter.is_healthy():
             try:
                 result = await self.nitter.fetch(query, max_results)
