@@ -26,6 +26,7 @@ from sqlalchemy import (
     create_engine,
     text,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -201,14 +202,15 @@ def upsert_tweet(t: dict) -> bool:
             result = conn.execute(stmt)
             return result.rowcount > 0
         else:
-            existing = conn.execute(
-                text("SELECT 1 FROM tweets WHERE tweet_id=:id AND ts=:ts"),
-                {"id": row["tweet_id"], "ts": row["ts"]},
-            ).fetchone()
-            if existing:
+            # SQLite: SELECT-then-INSERT can race; the WHERE ts=:ts check
+            # also has a string-mismatch problem when Python round-trips
+            # microsecond-precision datetimes. Catch IntegrityError on the
+            # INSERT as the source of truth for the dedup decision.
+            try:
+                conn.execute(Tweet.__table__.insert().values(**row))
+                return True
+            except IntegrityError:
                 return False
-            conn.execute(Tweet.__table__.insert().values(**row))
-            return True
 
 
 def bulk_upsert_tweets(tweets: Iterable[dict]) -> int:
@@ -223,6 +225,22 @@ def update_tweet_sentiment(tweet_id: int, ts, score: float) -> int:
             text(
                 "UPDATE tweets SET sentiment_score=:s "
                 "WHERE tweet_id=:id AND ts=:ts"
+            ),
+            {"s": score, "id": tweet_id, "ts": ts},
+        )
+        if result.rowcount > 0:
+            return result.rowcount
+        # Fallback: SQLite string-compare on the WHERE ts=:ts clause can
+        # silently miss the row even though it exists (microsecond
+        # formatting mismatch). Re-match by tweet_id and verify the ts
+        # is within 1 second of the requested ts — that's tight enough
+        # to avoid clobbering a different tweet with the same id.
+        if engine.dialect.name == "postgresql":
+            return 0
+        result = conn.execute(
+            text(
+                "UPDATE tweets SET sentiment_score=:s "
+                "WHERE tweet_id=:id AND ABS(strftime('%s', ts) - strftime('%s', :ts)) < 1"
             ),
             {"s": score, "id": tweet_id, "ts": ts},
         )

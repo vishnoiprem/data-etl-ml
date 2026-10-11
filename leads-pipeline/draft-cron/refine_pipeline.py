@@ -279,10 +279,12 @@ def find_more_clients(verbose=True):
 
 
 def dedup_and_deny(verbose=True):
-    """Auto-derive the bounce deny list from actual bounces in DB."""
+    """Auto-derive the bounce deny list from actual bounces in DB.
+    Mutates find_more_leads.BOUNCE_DENY in-place so subsequent
+    derive_email_from_company() calls skip bounced domains."""
     from db.lead_store import get_cursor
-    from find_more_leads import BOUNCE_DENY
-    new_deny = set(BOUNCE_DENY)
+    import find_more_leads as fml
+    added = 0
     with get_cursor() as cur:
         cur.execute("""
             SELECT SPLIT_PART(contact_email, '@', 2) AS domain, COUNT(*)
@@ -292,10 +294,11 @@ def dedup_and_deny(verbose=True):
         """)
         for r in cur.fetchall():
             dom = r["domain"]
-            if dom and dom not in new_deny:
-                new_deny.add(dom)
+            if dom and dom not in fml.BOUNCE_DENY:
+                fml.BOUNCE_DENY.add(dom)
+                added += 1
     if verbose:
-        print(f"  [deny] bounce deny list now has {len(new_deny)} domains")
+        print(f"  [deny] bounce deny list now has {len(fml.BOUNCE_DENY)} domains (+{added})")
 
 
 def main():

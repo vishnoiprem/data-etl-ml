@@ -41,25 +41,47 @@ def _tweet_html(items: list[dict]) -> str:
 
 @pytest.mark.asyncio
 async def test_token_bucket_initial_burst():
+    """The first `burst` acquires are immediate; only the (burst+1)-th waits."""
     b = TokenBucket(rate=1.0, burst=3)
     t0 = time.monotonic()
     # First 3 should be free
     for _ in range(3):
         await b.acquire()
-    # 4th should wait
+    burst_elapsed = time.monotonic() - t0
+    # Burst phase must complete in well under the refill interval
+    assert burst_elapsed < 0.5, f"burst should be instant, took {burst_elapsed:.3f}s"
+    # The 4th must wait ~1s (rate=1.0/sec)
     await b.acquire()
-    elapsed = time.monotonic() - t0
-    assert elapsed >= 0.9  # waited at least ~1s for 4th token
+    total_elapsed = time.monotonic() - t0
+    # Total = ~1s for the 4th token to refill
+    assert 0.9 <= total_elapsed <= 1.6, f"4th token wait unexpected: {total_elapsed:.3f}s"
 
 
 @pytest.mark.asyncio
 async def test_token_bucket_refill():
+    """rate=2/sec means ~0.5s between tokens after the burst is exhausted."""
     b = TokenBucket(rate=2.0, burst=1)
     t0 = time.monotonic()
-    await b.acquire()
-    await b.acquire()  # should wait ~0.5s
+    await b.acquire()  # burst=1, instant
+    burst_elapsed = time.monotonic() - t0
+    assert burst_elapsed < 0.3
+    await b.acquire()  # must wait ~0.5s for refill at rate=2/sec
+    refill_elapsed = time.monotonic() - t0
+    assert 0.4 <= refill_elapsed <= 1.0, f"refill rate wrong: {refill_elapsed:.3f}s"
+
+
+@pytest.mark.asyncio
+async def test_token_bucket_concurrent_acquires_serialize_correctly():
+    """10 concurrent acquires on burst=3 + rate=10/sec must finish in
+    ~0.7s (7 tokens needed after the burst). If the lock is broken,
+    multiple acquires may pass the check and over-grant tokens."""
+    import asyncio as _asyncio
+    b = TokenBucket(rate=10.0, burst=3)
+    t0 = time.monotonic()
+    await _asyncio.gather(*[b.acquire() for _ in range(10)])
     elapsed = time.monotonic() - t0
-    assert 0.3 < elapsed < 1.5
+    # Need 10 - 3 = 7 refills at 10/sec = 0.7s
+    assert 0.6 <= elapsed <= 1.2, f"concurrent acquire timing wrong: {elapsed:.3f}s"
 
 
 # ── Parser ───────────────────────────────────────────────────────────────
@@ -114,6 +136,87 @@ def test_parse_stat_handles_k_m_suffixes():
     tweets = a._parse(html, query="x", max_results=5)
     assert tweets[0].likes == 1_200
     assert tweets[0].retweets == 3_400_000
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("42", 42),
+    ("1,234", 1234),       # comma-separated
+    ("0", 0),
+    ("1.5K", 1_500),       # decimal with K
+    ("2.7M", 2_700_000),   # decimal with M
+    ("100k", 100_000),     # lowercase k (the regex uppercases)
+    ("5B", 0),             # B is NOT supported → returns 0 (not 5e9)
+    ("", 0),               # empty
+    ("not-a-number", 0),   # garbage
+    ("  100  ", 100),      # get_text(strip=True) already trims whitespace
+])
+def test_parse_stat_edge_cases(raw, expected):
+    a = NitterMirrorAdapter(mirrors=["x"])
+    assert a._parse_stat(_stat_item(raw), ".stat") == expected
+
+
+def _stat_item(text):
+    """Build a parent element with a `.stat` child containing the given text.
+    parse_stat(item, selector) does item.select_one(selector)."""
+    from bs4 import BeautifulSoup
+    return BeautifulSoup(f'<div class="item"><span class="stat">{text}</span></div>', "lxml").select_one(".item")
+
+
+def test_parse_html_url_uses_active_mirror_not_first_configured():
+    """Pre-fix this used mirrors[0] even when the response came from
+    mirrors[1]. Now the URL must reference the mirror that actually served
+    the response (so the link is a real tweet, not a 404)."""
+    a = NitterMirrorAdapter(mirrors=["primary.test", "fallback.test"], min_mirror_gap_sec=0)
+    a._active_mirror = "fallback.test"
+    html = _tweet_html([{"id": 555, "text": "hi", "author": "a"}])
+    tweets = a._parse(html, query="x", max_results=5)
+    assert "fallback.test" in tweets[0].url
+    assert "primary.test" not in tweets[0].url
+
+
+def test_parse_html_respects_max_results():
+    """If the page has 20 timeline-items and max_results=3, only 3 are returned."""
+    a = NitterMirrorAdapter(mirrors=["x"])
+    items = [{"id": i, "text": f"t{i}", "author": "a"} for i in range(20)]
+    tweets = a._parse(_tweet_html(items), query="x", max_results=3)
+    assert len(tweets) == 3
+    assert [t.id for t in tweets] == [0, 1, 2]
+
+
+def test_parse_html_does_not_crash_on_garbage_items():
+    """The parser is tolerant by design — items with no author/text/link
+    are returned as RawTweet('unknown', '', '', ...) rather than raising.
+    What matters is that valid items around them still come through."""
+    a = NitterMirrorAdapter(mirrors=["x"])
+    html = '''
+    <html><body>
+      <div class="timeline-item">
+        <a class="fullname">good</a>
+        <div class="tweet-content">valid tweet</div>
+        <span class="tweet-date">
+          <a href="/good/status/1" title="Mon, 01 Jan 2026 12:00:00 +0000">link</a>
+        </span>
+      </div>
+      <div class="timeline-item">
+        <!-- no content, no link, no author → empty tweet -->
+      </div>
+      <div class="timeline-item">
+        <a class="fullname">good2</a>
+        <div class="tweet-content">another valid tweet</div>
+        <span class="tweet-date">
+          <a href="/good2/status/2" title="Mon, 01 Jan 2026 12:00:00 +0000">link</a>
+        </span>
+      </div>
+    </body></html>
+    '''
+    tweets = a._parse(html, query="x", max_results=10)
+    # No exception, all 3 items parsed (the empty one as an empty tweet)
+    assert len(tweets) == 3
+    # The two valid ones have the expected content
+    assert tweets[0].text == "valid tweet"
+    assert tweets[0].id == 1
+    assert tweets[2].text == "another valid tweet"
+    assert tweets[2].id == 2
 
 
 # ── Denylist & rotation ──────────────────────────────────────────────────
@@ -182,6 +285,34 @@ def test_normalize_query_strips_cashtag():
     assert a._normalize_query("$BTC") == "BTC"
     assert a._normalize_query("#memecoin") == "memecoin"
     assert a._normalize_query("ethereum") == "ethereum"
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("$BTC", "BTC"),
+    ("$$BTC", "BTC"),       # lstrip strips all leading $
+    ("$btc", "btc"),        # case preserved (search is case-insensitive upstream)
+    ("#BTC", "BTC"),
+    ("##hashtag", "hashtag"),  # lstrip strips all leading #
+    ("  $ETH  ", "ETH"),     # whitespace is stripped
+    ("Solana", "Solana"),
+    ("", ""),                # empty stays empty
+])
+def test_normalize_query_edge_cases(raw, expected):
+    a = NitterMirrorAdapter(mirrors=["x"])
+    assert a._normalize_query(raw) == expected
+
+
+def test_extract_id_from_various_url_formats():
+    """Tweet id extraction must work on Nitter (/user/status/ID), bare
+    Twitter (twitter.com/user/status/ID), and bare ID-in-string fallback."""
+    a = NitterMirrorAdapter(mirrors=["x"])
+    assert a._extract_id("https://nitter.net/alice/status/1234567890") == 1234567890
+    assert a._extract_id("https://twitter.com/alice/status/9876543210") == 9876543210
+    # Falls back to a 10+ digit number anywhere in the string
+    assert a._extract_id("garbage/1234567890/more") == 1234567890
+    # No digits → None
+    assert a._extract_id("https://example.com/no-id") is None
+    assert a._extract_id("") is None
 
 
 def test_stable_id_is_deterministic_across_runs():

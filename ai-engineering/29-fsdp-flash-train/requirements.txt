@@ -1,1 +1,2 @@
-# fsdp-flash-train: stdlib only (dataclasses)
+# fsdp-flash-train: stdlib + numpy for the meaningful workload
+numpy>=1.20

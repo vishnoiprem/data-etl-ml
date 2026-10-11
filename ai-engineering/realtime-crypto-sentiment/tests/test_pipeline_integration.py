@@ -16,6 +16,8 @@ from __future__ import annotations
 import sys
 from datetime import UTC, datetime, timedelta
 
+import pytest
+
 # ── Stubs ────────────────────────────────────────────────────────────────
 
 
@@ -76,6 +78,23 @@ def _install_fake_pipeline(monkeypatch, responses):
     sys.modules["transformers"] = _FakeTransformers
 
 
+class _StubRegistry:
+    """Minimal SourceAdapter-shaped stand-in for SourceRegistry."""
+    active = "stub"
+
+    def __init__(self, s):
+        self._s = s
+
+    async def fetch(self, q, max_results=20):
+        return await self._s.fetch(q, max_results)
+
+    def is_healthy(self) -> bool:
+        return True
+
+    async def close(self):
+        pass
+
+
 # ── Tests ────────────────────────────────────────────────────────────────
 
 
@@ -107,14 +126,6 @@ def test_pipeline_end_to_end_with_sqlite(monkeypatch, tmp_path):
             "url": "https://x.com/alice/status/1001",
         },
     ])
-
-    class _StubRegistry:
-        active = "stub"
-        def __init__(self, s): self._s = s
-        async def fetch(self, q, max_results=20):
-            return await self._s.fetch(q, max_results)
-        def is_healthy(self): return True
-        async def close(self): pass
 
     pipe.sources = _StubRegistry(stub)
 
@@ -192,14 +203,6 @@ def test_pipeline_scrape_topic_skips_unmapped(monkeypatch, tmp_path):
         "text": "x", "likes": 0, "retweets": 0, "followers": 0, "url": "u",
     }])
 
-    class _StubRegistry:
-        active = "stub"
-        def __init__(self, s): self._s = s
-        async def fetch(self, q, max_results=20):
-            return await self._s.fetch(q, max_results)
-        def is_healthy(self): return True
-        async def close(self): pass
-
     pipe.sources = _StubRegistry(stub)
 
     pipe._scrape_topic("memecoin")  # no symbol → no write
@@ -216,14 +219,6 @@ def test_pipeline_scrape_tweets_rotates_topic(monkeypatch, tmp_path):
     from src.pipeline import CryptoPipeline
     pipe = CryptoPipeline()
     stub = _StubSource([])
-
-    class _StubRegistry:
-        active = "stub"
-        def __init__(self, s): self._s = s
-        async def fetch(self, q, max_results=20):
-            return await self._s.fetch(q, max_results)
-        def is_healthy(self): return True
-        async def close(self): pass
 
     pipe.sources = _StubRegistry(stub)
 
@@ -243,14 +238,6 @@ def test_pipeline_signal_generation_writes_signal(tmp_path):
     from src.pipeline import CryptoPipeline
     pipe = CryptoPipeline()
     stub = _StubSource([])
-
-    class _StubRegistry:
-        active = "stub"
-        def __init__(self, s): self._s = s
-        async def fetch(self, q, max_results=20):
-            return await self._s.fetch(q, max_results)
-        def is_healthy(self): return True
-        async def close(self): pass
 
     pipe.sources = _StubRegistry(stub)
 
@@ -277,3 +264,187 @@ def test_pipeline_signal_generation_writes_signal(tmp_path):
     assert len(signals) == 1
     assert signals[0]["action"] in {"BUY", "SELL", "HOLD"}
     assert signals[0]["reason"]
+
+
+def test_pipeline_signal_generation_hold_on_insufficient_history(tmp_path):
+    """With only 1 scored tweet, the signal generator must NOT crash and
+    must NOT write a signal (the z-score is undefined for n<2)."""
+    from src.store import db
+    db.override_engine(f"sqlite:///{tmp_path}/test_hold.db")
+    db.ensure_sqlite_schema()
+
+    from src.pipeline import CryptoPipeline
+    pipe = CryptoPipeline()
+    pipe.sources = _StubRegistry(_StubSource([]))
+
+    db.upsert_tweet({
+        "ts": datetime.now(UTC), "tweet_id": 1, "symbol": "BTC",
+        "text": "x", "author": "a", "likes": 0, "retweets": 0, "followers": 0,
+        "url": "u", "source_adapter": "stub", "sentiment_score": 0.9,
+    })
+    pipe._generate_signal_for("BTC")
+    # No signal row written
+    assert db.fetch_recent_signals("BTC", hours=1, limit=10) == []
+
+
+def test_pipeline_signal_generation_buy_on_bullish_seed(tmp_path):
+    """A clearly bullish seed (positive sentiment, rising price) should
+    produce a BUY signal — verifies the wiring of sentiment + momentum.
+
+    Seeding recipe:
+    - 13 minute-resolution prices over the last 5 min so recent_price_returns
+      (which queries `ts > now - 6 min`) has at least 2 points.
+    - 13 minute-resolution prices over the prior hour to give the momentum
+      history something to compute std against.
+    - 13 tweets spread across the last 65 min so the 5-min sentiment buckets
+      have at least 2 buckets.
+    """
+    from src.store import db
+    db.override_engine(f"sqlite:///{tmp_path}/test_buy.db")
+    db.ensure_sqlite_schema()
+
+    from src.pipeline import CryptoPipeline
+    pipe = CryptoPipeline()
+    pipe.sources = _StubRegistry(_StubSource([]))
+
+    now = datetime.now(UTC)
+    # Tweets: 13 spaced 5 min apart ending at `now - 2 min` so the most
+    # recent bucket (containing the last tweet) is well inside the lookback.
+    for i in range(13):
+        db.upsert_tweet({
+            "ts": now - timedelta(minutes=65 - i * 5), "tweet_id": 100 + i,
+            "symbol": "BTC", "text": f"t{i}", "author": "a",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "stub",
+            "sentiment_score": 0.4 + i * 0.05,  # 0.4 → 1.0
+        })
+    # Prices (current 5-min window): 6 points at 1-min spacing, rising
+    for i in range(6):
+        db.upsert_price({
+            "ts": now - timedelta(minutes=5 - i),
+            "symbol": "BTC", "price_usd": 50_000.0 + i * 20,  # +20/min
+            "volume_usd": 1.0,
+        })
+    # Prices (history of 5-min returns): 60 minute-resolution points ending
+    # 6 min ago. Combined with the current window that gives the momentum
+    # z-score a real std to compare against.
+    for i in range(60):
+        db.upsert_price({
+            "ts": now - timedelta(minutes=66 + i),  # 66 → 125 min ago
+            "symbol": "BTC", "price_usd": 49_000.0 - i * 0.1,  # slowly falling
+            "volume_usd": 1.0,
+        })
+
+    pipe._generate_signal_for("BTC")
+    sigs = db.fetch_recent_signals("BTC", hours=2, limit=10)
+    assert len(sigs) == 1, f"expected 1 signal, got {len(sigs)}: {sigs}"
+    assert sigs[0]["action"] == "BUY"
+    # Score must be > threshold (1.0)
+    assert sigs[0]["score"] > 1.0
+
+
+def test_pipeline_signal_generation_sell_on_bearish_seed(tmp_path):
+    """Symmetric: clearly bearish seed → SELL signal."""
+    from src.store import db
+    db.override_engine(f"sqlite:///{tmp_path}/test_sell.db")
+    db.ensure_sqlite_schema()
+
+    from src.pipeline import CryptoPipeline
+    pipe = CryptoPipeline()
+    pipe.sources = _StubRegistry(_StubSource([]))
+
+    now = datetime.now(UTC)
+    for i in range(13):
+        db.upsert_tweet({
+            "ts": now - timedelta(minutes=65 - i * 5), "tweet_id": 100 + i,
+            "symbol": "BTC", "text": f"t{i}", "author": "a",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "stub",
+            "sentiment_score": -0.4 - i * 0.05,  # -0.4 → -1.0
+        })
+    # Current 5-min window: falling
+    for i in range(6):
+        db.upsert_price({
+            "ts": now - timedelta(minutes=5 - i),
+            "symbol": "BTC", "price_usd": 50_000.0 - i * 20,
+            "volume_usd": 1.0,
+        })
+    # History: slowly rising (so current fall stands out)
+    for i in range(60):
+        db.upsert_price({
+            "ts": now - timedelta(minutes=66 + i),
+            "symbol": "BTC", "price_usd": 49_000.0 + i * 0.1,
+            "volume_usd": 1.0,
+        })
+
+    pipe._generate_signal_for("BTC")
+    sigs = db.fetch_recent_signals("BTC", hours=2, limit=10)
+    assert len(sigs) == 1, f"expected 1 signal, got {len(sigs)}: {sigs}"
+    assert sigs[0]["action"] == "SELL"
+    assert sigs[0]["score"] < -1.0
+
+
+def test_pipeline_paper_trade_records_pnl_round_trip(tmp_path, monkeypatch):
+    """BUY at $50k then SELL at $51k via paper_trade → realized > 0
+    recorded in the DB."""
+    from src.store import db
+    db.override_engine(f"sqlite:///{tmp_path}/test_pnl.db")
+    db.ensure_sqlite_schema()
+
+    from src.pipeline import CryptoPipeline
+    pipe = CryptoPipeline()
+    pipe.sources = _StubRegistry(_StubSource([]))
+    now = datetime.now(UTC)
+
+    # Force a BUY signal
+    from src.ml.signal import Signal
+    pipe._latest_signals["BTC"] = Signal(
+        symbol="BTC", ts=now, action="BUY", score=1.5,
+        sentiment_zscore=2.0, momentum_zscore=1.0, reason="force",
+    )
+    pipe._latest_prices["BTC"] = {"ts": now, "symbol": "BTC",
+                                   "price_usd": 50_000.0, "volume_usd": 1.0}
+    pipe.paper_trade()
+    assert len(db.fetch_paper_trades(limit=10)) == 1
+
+    # Now force a SELL signal at a higher price. Bump the ts by 1ms so
+    # the (ts, symbol) PK on paper_trades doesn't conflict with the BUY.
+    sell_ts = now + timedelta(milliseconds=1)
+    pipe._latest_signals["BTC"] = Signal(
+        symbol="BTC", ts=sell_ts, action="SELL", score=-1.5,
+        sentiment_zscore=-2.0, momentum_zscore=-1.0, reason="force-sell",
+    )
+    pipe._latest_prices["BTC"] = {"ts": sell_ts, "symbol": "BTC",
+                                   "price_usd": 51_000.0, "volume_usd": 1.0}
+    pipe.paper_trade()
+    trades = db.fetch_paper_trades(limit=10)
+    assert len(trades) == 2, f"expected 2 trades, got {len(trades)}: {trades}"
+    # The SELL trade's stored reason matches (DESC order → SELL first)
+    assert trades[0]["side"] == "SELL"
+    assert trades[0]["reason"] == "force-sell"
+    assert trades[0]["price_usd"] == pytest.approx(51_000.0, abs=1e-6)
+    assert trades[1]["side"] == "BUY"
+    assert trades[1]["price_usd"] == pytest.approx(50_000.0, abs=1e-6)
+
+
+def test_pipeline_scrape_topic_writes_one_row_per_symbol_for_multi_tag(tmp_path):
+    """If a source returns a tweet that maps to multiple symbols (rare
+    in practice, but the pipeline supports it), each (tweet, symbol)
+    pair gets its own row. Here we force a single-symbol case via the
+    bitcoin→BTC mapping and verify exactly 1 row."""
+    from src.store import db
+    db.override_engine(f"sqlite:///{tmp_path}/test_multi.db")
+    db.ensure_sqlite_schema()
+
+    from src.pipeline import CryptoPipeline
+    pipe = CryptoPipeline()
+    stub = _StubSource([{
+        "id": 777, "ts": datetime.now(UTC), "author": "x",
+        "text": "btc stuff", "likes": 0, "retweets": 0, "followers": 0,
+        "url": "u",
+    }])
+    pipe.sources = _StubRegistry(stub)
+    pipe._scrape_topic("bitcoin")
+    # Exactly one row inserted (bitcoin → BTC, single symbol)
+    assert len(db.fetch_unscored_tweets(limit=10)) == 1
+    assert stub.calls == ["bitcoin"]

@@ -192,7 +192,10 @@ class NitterMirrorAdapter(SourceAdapter):
         # Preserve the mirror we actually scraped from so the URL isn't a 404.
         if url.startswith("/"):
             url = f"https://{self._active_mirror or self.mirrors[0]}{url}"
-        tweet_id = self._extract_id(url) or self._stable_id(text, author)
+        # NOTE: cannot use `or` here — tweet_id=0 is a valid id, and
+        # `0 or stable_id` would short-circuit to the stable_id fallback.
+        extracted = self._extract_id(url)
+        tweet_id = extracted if extracted is not None else self._stable_id(text, author)
 
         # Stats
         likes = self._parse_stat(item, ".icon-heart, .heart, [data-count-likes]")

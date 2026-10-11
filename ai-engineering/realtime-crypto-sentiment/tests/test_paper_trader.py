@@ -4,7 +4,7 @@ Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -160,15 +160,92 @@ def test_metrics_empty_broker_returns_zeros():
 
 
 def test_metrics_after_round_trip():
+    """Single round-trip at a $1k profit → trade_count=2, pnl>0, win_rate=1.0
+    (the one and only SELL was a win)."""
     b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=10, max_position_pct=20.0)
     b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
     b.on_signal(_sig("BTC", "SELL"), price=51_000.0)
     m = b.metrics()
     assert m["trade_count"] == 2
-    assert m["pnl_usd"] > 0  # net profitable on a $1k move
-    # Win rate based on a single sell position with realized > 0
-    assert m["win_rate"] >= 0.0
+    # Net realized PnL: $1k move × qty - fees
+    assert m["pnl_usd"] > 0
+    # One SELL, that SELL was profitable → 1/1
+    assert m["win_rate"] == pytest.approx(1.0, abs=1e-6)
     assert m["max_drawdown_usd"] >= 0.0
+
+
+def test_metrics_loss_round_trip_records_losing_sell():
+    """BUY at 50k, SELL at 49k → realized < 0, win_rate = 0.0."""
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=0, max_position_pct=20.0)
+    b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    sell = b.on_signal(_sig("BTC", "SELL"), price=49_000.0)
+    m = b.metrics()
+    assert sell is not None
+    assert sell.realized_pnl < 0
+    assert m["win_rate"] == 0.0
+    assert m["pnl_usd"] < 0
+
+
+def test_metrics_pnl_excludes_open_position_unrealized():
+    """Open positions are NOT counted in pnl_usd (only closed SELLs).
+    BUY only → pnl_usd = 0 even though the position has mark-to-market value."""
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=0, max_position_pct=20.0)
+    b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    b.on_price_tick({"symbol": "BTC", "ts": _now(), "price_usd": 60_000.0})
+    m = b.metrics()
+    assert m["pnl_usd"] == 0.0  # open position, no realized PnL
+    # 20% of 10k = $2k notional → 0.04 BTC. After buy: cash=8000, position=0.04 BTC.
+    # At $60k: position value = $2,400. Equity = 8000 + 2400 = 10,400.
+    assert b.equity() == pytest.approx(10_400.0, rel=1e-6)
+
+
+def test_equity_curve_appends_only_one_sample_per_second(monkeypatch):
+    """The broker throttles equity-curve samples to 1Hz to bound memory."""
+    b = PaperBroker(starting_cash_usd=10_000.0)
+    base = _now()
+    # 5 ticks in the same second → only 1 sample
+    for i in range(5):
+        b.on_price_tick({"symbol": "BTC", "ts": base, "price_usd": 50_000.0 + i})
+    assert len(b.equity_curve) == 1
+    # A tick 2s later → new sample
+    b.on_price_tick({"symbol": "BTC", "ts": base + timedelta(seconds=2), "price_usd": 51_000.0})
+    assert len(b.equity_curve) == 2
+
+
+def test_sell_realized_pnl_includes_fee():
+    """Fee is deducted from realized PnL — buyer pays $X + fee, seller
+    receives $Y - fee. PnL = (Y - fee) - X (for fee=0 case), or
+    (Y - sell_fee) - (X + buy_fee) when buy_fee is also non-zero."""
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=10, max_position_pct=20.0)
+    b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    # Buy qty = 2000 / 50000 = 0.04
+    # Buy fee = 0.04 * 50000 * 0.001 = 2.0
+    # Sell at 50_000 (flat price): proceeds = 0.04 * 50000 = 2000
+    # sell fee = 2000 * 0.001 = 2.0
+    # realized = (2000 - 2) - (50_000 * 0.04) = 1998 - 2000 = -2 (just the fees)
+    sell = b.on_signal(_sig("BTC", "SELL"), price=50_000.0)
+    assert sell is not None
+    assert sell.realized_pnl == pytest.approx(-2.0, abs=0.01)
+    assert sell.fee_usd == pytest.approx(2.0, abs=0.01)
+
+
+def test_avg_price_weighted_across_re_buys():
+    """If the broker re-buys the same symbol at different prices, the
+    avg_price must be a weighted average, not a simple overwrite."""
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=0, max_position_pct=10.0)
+    # 10% of 10k = $1k notional; at $50k → 0.02 BTC
+    b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    assert b.positions["BTC"].qty == pytest.approx(0.02)
+    assert b.positions["BTC"].avg_price == 50_000.0
+    # Re-buy at $60k → 0.0167 BTC more (limited by same 10% of equity)
+    # Actually since equity grew, the size is 1k / 60k ≈ 0.01667
+    b.on_signal(_sig("BTC", "BUY"), price=60_000.0)
+    pos = b.positions["BTC"]
+    # New qty
+    second_buy_qty = 1_000.0 / 60_000.0
+    expected_avg = (50_000.0 * 0.02 + 60_000.0 * second_buy_qty) / (0.02 + second_buy_qty)
+    assert pos.avg_price == pytest.approx(expected_avg, rel=1e-6)
+    assert pos.qty == pytest.approx(0.02 + second_buy_qty, rel=1e-6)
 
 
 def test_metrics_multiple_round_trips_correct_win_rate():
