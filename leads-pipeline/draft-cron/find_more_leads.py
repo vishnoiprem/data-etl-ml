@@ -53,6 +53,13 @@ BOUNCE_DENY = {
     "codewin.pt", "teneo.com", "boldmetrics.com", "pairio.com",
     "advtravel365.com", "servicelink.com",
 }
+# Persist any additions to state/bounce_deny.json so subprocesses (refine_pipeline,
+# find_clients, backfill_emails) all see the same denylist. See state/bounce_deny_store.py.
+try:
+    from state.bounce_deny_store import BOUNCE_DENY as _PERSISTED_DENY  # noqa: F401
+    BOUNCE_DENY |= _PERSISTED_DENY
+except Exception:
+    pass
 
 # Senior-level filter — INCLUDES CTO/Head of/VP/Director for leadership roles
 JUNIOR_TERMS = re.compile(

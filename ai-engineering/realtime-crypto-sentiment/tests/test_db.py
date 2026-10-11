@@ -530,3 +530,40 @@ def test_daily_topic_aggregates_first_day_has_velocity_eq_today(sqlite_db):
 def test_daily_topic_aggregates_empty_when_no_data(sqlite_db):
     """No tweets → empty list, no error."""
     assert db.daily_topic_aggregates(days=1, limit=10) == []
+
+
+# ── _agg_table_for_minutes: continuous-aggregate fast-path routing ──────
+
+
+def test_agg_table_for_minutes_maps_known_widths_to_aggregates():
+    """The Live tab's per-tag chart reads from pre-aggregated
+    `tweets_1h` / `tweets_1d` continuous aggregates when the
+    requested bucket width matches. Verify the routing helper."""
+    assert db._agg_table_for_minutes(60) == "tweets_1h"
+    assert db._agg_table_for_minutes(60 * 24) == "tweets_1d"
+
+
+def test_agg_table_for_minutes_falls_back_for_other_widths():
+    """5-min, 15-min, 30-min, 1-min, 12-hour widths don't have a
+    matching pre-aggregate — the helper should return None so the
+    query falls back to a live `time_bucket` scan on `tweets`."""
+    for minutes in (1, 5, 15, 30, 60 * 12):
+        assert db._agg_table_for_minutes(minutes) is None, minutes
+
+
+def test_per_symbol_buckets_sqlite_uses_live_scan_path(sqlite_db):
+    """SQLite doesn't have the pre-aggregates — `per_symbol_buckets`
+    must use the live `time_bucket`-equivalent scan and still return
+    the right shape."""
+    now = datetime.utcnow().replace(microsecond=0)
+    for i, sym in enumerate(["AI", "AI", "TSLA"]):
+        db.upsert_tweet({
+            "ts": now - timedelta(minutes=10 - i), "tweet_id": 1000 + i,
+            "symbol": sym, "text": "x", "author": "a",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "nitter", "sentiment_score": 0.5 + i * 0.1,
+        })
+    rows = db.per_symbol_buckets(minutes=5, hours=1)
+    assert len(rows) >= 1
+    for r in rows:
+        assert set(r.keys()) == {"bucket", "symbol", "avg_sent", "n"}

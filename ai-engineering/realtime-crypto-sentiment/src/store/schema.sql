@@ -27,6 +27,12 @@ SELECT create_hypertable('tweets', 'ts',
     chunk_time_interval => INTERVAL '1 day',
     if_not_exists => TRUE);
 CREATE INDEX IF NOT EXISTS tweets_symbol_ts_idx ON tweets (symbol, ts DESC);
+-- Partial index for the Live tab's bucketed-sentiment queries
+-- (global_sentiment_buckets, per_symbol_buckets in src/store/db.py).
+-- Scans only scored rows, ordered newest-first.
+CREATE INDEX IF NOT EXISTS tweets_scored_ts_idx
+    ON tweets (ts DESC) WHERE sentiment_score IS NOT NULL;
+-- Tiny index for the unscored-row backfill scanner.
 CREATE INDEX IF NOT EXISTS tweets_unscored_idx ON tweets (ts) WHERE sentiment_score IS NULL;
 
 ALTER TABLE tweets SET (

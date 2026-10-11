@@ -433,6 +433,13 @@ def global_sentiment_buckets(minutes: int, hours: int) -> list[dict]:
     macro hourly / daily sentiment trend.
 
     Returns: list of {bucket, avg_sent, n, pos_n, neg_n}.
+
+    Note: we deliberately do NOT use the `tweets_1h` / `tweets_1d`
+    continuous aggregates here, because the pre-aggregates don't
+    track the positive/negative breakdown this function returns.
+    The per-symbol helper `per_symbol_buckets` does use the
+    pre-aggregates for the same reason `time_bucket(:w, ts)` is
+    fine when no pos/neg split is needed.
     """
     minutes = _validate_bucket_minutes(minutes)
     engine = get_engine()
@@ -476,24 +483,50 @@ def per_symbol_buckets(minutes: int, hours: int) -> list[dict]:
     'Live' tab can show per-tag hourly/daily lines on one chart.
 
     Returns: list of {bucket, symbol, avg_sent, n}.
+
+    On Postgres, when the requested width matches a pre-aggregated
+    continuous aggregate (60min → tweets_1h, 1day → tweets_1d) we
+    read from the aggregate table instead of scanning `tweets` —
+    these tables are kept up to date by a 15-min/1-hour refresh
+    policy and are dramatically faster on a 90-day-retention
+    hypertable. Other widths (5 min, 15 min, etc.) still scan
+    `tweets` directly.
     """
     minutes = _validate_bucket_minutes(minutes)
     engine = get_engine()
     total_minutes = hours * 60
     with engine.connect() as conn:
         if engine.dialect.name == "postgresql":
-            rows = conn.execute(
-                text(
-                    "SELECT time_bucket(:bucket_width, ts) AS bucket, "
-                    "symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
-                    "FROM tweets "
-                    "WHERE sentiment_score IS NOT NULL "
-                    "AND ts > NOW() - (:m || ' minutes')::INTERVAL "
-                    "GROUP BY bucket, symbol ORDER BY bucket ASC"
-                ),
-                {"bucket_width": f"{minutes} minutes",
-                 "m": str(total_minutes)},
-            ).fetchall()
+            # Fast-path: read from the pre-aggregated continuous
+            # aggregate when the requested bucket width is exactly 1h
+            # or 1d. The aggregates only carry avg_sentiment + counts
+            # (no pos/neg breakdown) which is fine for per-symbol
+            # line charts.
+            agg_table = _agg_table_for_minutes(minutes)
+            if agg_table is not None:
+                rows = conn.execute(
+                    text(
+                        f"SELECT bucket, symbol, avg_sentiment AS avg_sent, "
+                        f"tweet_count AS n "
+                        f"FROM {agg_table} "
+                        f"WHERE bucket > NOW() - (:m || ' minutes')::INTERVAL "
+                        f"ORDER BY bucket ASC"
+                    ),
+                    {"m": str(total_minutes)},
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    text(
+                        "SELECT time_bucket(:bucket_width, ts) AS bucket, "
+                        "symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                        "FROM tweets "
+                        "WHERE sentiment_score IS NOT NULL "
+                        "AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                        "GROUP BY bucket, symbol ORDER BY bucket ASC"
+                    ),
+                    {"bucket_width": f"{minutes} minutes",
+                     "m": str(total_minutes)},
+                ).fetchall()
         else:
             seconds = minutes * 60
             rows = conn.execute(
@@ -508,6 +541,23 @@ def per_symbol_buckets(minutes: int, hours: int) -> list[dict]:
                 {"m": f"-{total_minutes} minutes", "sec": seconds},
             ).fetchall()
     return [dict(r._mapping) for r in rows]
+
+
+def _agg_table_for_minutes(minutes: int) -> str | None:
+    """Map a bucket width in minutes to a TimescaleDB continuous
+    aggregate table that pre-computes that exact width. Returns None
+    when no pre-aggregate matches (callers should fall back to a
+    live `time_bucket` scan).
+
+    The aggregates are created in `src/store/aggregates.sql`:
+        tweets_1h  → 60-min buckets, refreshed every 15 min
+        tweets_1d  → 1-day buckets, refreshed every 1 hour
+    """
+    if minutes == 60:
+        return "tweets_1h"
+    if minutes == 60 * 24:
+        return "tweets_1d"
+    return None
 
 
 def daily_topic_aggregates(days: int, limit: int = 10) -> list[dict]:

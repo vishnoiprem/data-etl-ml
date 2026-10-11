@@ -9,7 +9,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](#license)
-[![Tests](https://img.shields.io/badge/tests-160%20passing-brightgreen)](./tests)
+[![Tests](https://img.shields.io/badge/tests-180%20passing-brightgreen)](./tests)
 [![dbt](https://img.shields.io/badge/storage-TimescaleDB-orange)](https://www.timescale.com)
 
 > **NOT a money printer.** This is a decision-support tool. The

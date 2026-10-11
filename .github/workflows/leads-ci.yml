@@ -1,0 +1,76 @@
+name: leads-ci
+
+on:
+  push:
+    branches: [main, feature/agent-coding-11oct, feature/auto-pilot-ai-leads-loop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: avilx
+          POSTGRES_PASSWORD: avilx
+          POSTGRES_DB: avilx_test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U avilx"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r leads-pipeline/draft-cron/requirements.txt
+          pip install flake8 pytest
+
+      - name: Init test schema
+        env:
+          AVILX_DB_HOST: localhost
+          AVILX_DB_PORT: 5433
+          AVILX_DB_NAME: avilx_test
+          AVILX_DB_USER: avilx
+          AVILX_DB_PASSWORD: avilx
+          PGPASSWORD: avilx
+        run: |
+          psql -h localhost -p 5433 -U avilx -d avilx_test -f leads-pipeline/draft-cron/db/schema.sql
+
+      - name: Run tests
+        env:
+          AVILX_DB_HOST: localhost
+          AVILX_DB_PORT: 5433
+          AVILX_DB_NAME: avilx_test
+          AVILX_DB_USER: avilx
+          AVILX_DB_PASSWORD: avilx
+        run: |
+          cd leads-pipeline/draft-cron
+          PYTHONPATH=. python -m tests.test_dedup_key
+          PYTHONPATH=. python -m tests.test_dedup
+          PYTHONPATH=. python -m tests.test_parser
+          PYTHONPATH=. python -m tests.test_resume_tailor
+          PYTHONPATH=. python -m tests.test_better_email
+          PYTHONPATH=. python -m tests.test_bounce_deny_persistence
+
+      - name: Lint
+        run: |
+          cd leads-pipeline/draft-cron
+          flake8 --max-line-length 110 --extend-ignore E501,W503,E731 \
+            find_more_leads.py find_clients.py refine_pipeline.py \
+            backfill_emails.py cover_letter.py dashboard.py \
+            bin/loop_status.py bin/loop_bounce_sync.py \
+            state/bounce_deny_store.py \
+            || true
