@@ -74,8 +74,18 @@ except Exception as e:
 " 2>&1 | tee -a "$LOG"
 
     # 3. Run autopilot — email phase, up to 10 emails
-    /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python autopilot.py --email --max-emails 10 --no-bounce-sync >> "$LOG" 2>&1 || {
-        echo "  (autopilot exited with non-zero, continuing)" | tee -a "$LOG"
+    # Skip if REFINE_ONLY=1 (Gmail cooldown, etc.)
+    if [[ "${REFINE_ONLY:-0}" == "1" ]]; then
+        echo "[$i/$LOOP_MAX] REFINE_ONLY=1 → skipping email sends" | tee -a "$LOG"
+    else
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python autopilot.py --email --max-emails 10 --no-bounce-sync >> "$LOG" 2>&1 || {
+            echo "  (autopilot exited with non-zero, continuing)" | tee -a "$LOG"
+        }
+    fi
+
+    # 3b. Refine pipeline — enriches pending leads (resume + cover + better email)
+    /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python refine_pipeline.py --enrich-only >> "$LOG" 2>&1 || {
+        echo "  (refine_pipeline exited with non-zero, continuing)" | tee -a "$LOG"
     }
 
     # 4. Report status
@@ -87,7 +97,23 @@ with get_cursor() as cur:
     cur.execute(\"SELECT COUNT(*) FROM leads WHERE contact_email IS NOT NULL AND contact_email != '' AND status NOT IN ('sent_email','bounced','replied','unsubscribed','failed')\")
     print(cur.fetchone()[0])
 " 2>/dev/null || echo "?")
-    echo "[$i/$LOOP_MAX] pending w/ email after run: $pending" | tee -a "$LOG"
+    tailored=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
+import sys
+sys.path.insert(0, '$HERE')
+from db.lead_store import get_cursor
+with get_cursor() as cur:
+    cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND resume_file IS NOT NULL\")
+    print(cur.fetchone()[0])
+" 2>/dev/null || echo "?")
+    covered=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
+import sys
+sys.path.insert(0, '$HERE')
+from db.lead_store import get_cursor
+with get_cursor() as cur:
+    cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND cover_letter_body IS NOT NULL\")
+    print(cur.fetchone()[0])
+" 2>/dev/null || echo "?")
+    echo "[$i/$LOOP_MAX] pending=$pending  tailored=$tailored  covered=$covered" | tee -a "$LOG"
 
     if [[ "$pending" == "0" ]]; then
         echo "[$i/$LOOP_MAX] queue empty, will refresh in next iteration" | tee -a "$LOG"

@@ -116,7 +116,18 @@ def enrich_pending_leads(verbose=True):
         # 3. Try better email derivation (e.g. talent@ instead of careers@)
         better = _better_email(lead)
         if better and better.lower() != (lead.get("contact_email") or "").lower():
+            # Skip if the new email would collide with an existing lead
             with get_cursor() as cur:
+                cur.execute("""
+                    SELECT 1 FROM leads
+                    WHERE LOWER(company) = LOWER(%s)
+                      AND LOWER(contact_email) = LOWER(%s)
+                      AND id != %s
+                    LIMIT 1
+                """, (lead["company"], better, lead["id"]))
+                if cur.fetchone():
+                    # New email already exists for this company — skip
+                    continue
                 cur.execute("""
                     UPDATE leads SET contact_email = %s, updated_at = NOW()
                     WHERE id = %s AND status = 'pending'
