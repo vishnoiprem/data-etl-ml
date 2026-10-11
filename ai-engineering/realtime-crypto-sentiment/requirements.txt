@@ -48,6 +48,10 @@ plotly==5.24.1
 streamlit-autorefresh==1.0.1
 apscheduler==3.10.4
 prometheus-client==0.21.0
+# pyarrow 19+ requires numpy 2.x; we're pinned to numpy 1.26 for pandas 2.2.x compat.
+# Last pyarrow release that supports numpy 1.x is 18.x. Without this pin, every
+# st.dataframe() call in the dashboard crashes with "pyarrow requires NumPy 2.0+".
+pyarrow==18.1.0
 python-dotenv==1.0.0
 loguru==0.7.2
 rich==13.5.3

@@ -35,6 +35,10 @@ from src.ml.finbert import FinBERTScorer
 from src.ml.signal import generate_signal
 from src.prices.binance_ws import stream_prices
 from src.sources.registry import SourceRegistry
+from src.sources.trending import (
+    aggregate_tags,
+    extract_tags_from_tweet,
+)
 from src.store import db
 from src.trader.paper import PaperBroker
 
@@ -163,6 +167,64 @@ class CryptoPipeline:
             except Exception as e:
                 PIPELINE_ERRORS.labels(stage="signal").inc()
                 logger.error(f"signal error for {sym}: {e}")
+
+    def scrape_trending(self) -> None:
+        """Scrape the trending_queries list (crypto + AI/data + stocks + dating),
+        extract every cashtag/hashtag/keyword, and write 1-min-bucketed counts
+        to `trending_tags`. Powers the dashboard's top-10 panel.
+        """
+        queries = settings.trending_queries
+        if not queries:
+            return
+        all_hits: list = []
+        for q in queries:
+            try:
+                tweets = asyncio.run(self._scrape_topic_async(q))
+            except Exception as e:
+                PIPELINE_ERRORS.labels(stage="trending_scrape").inc()
+                logger.debug(f"trending scrape error for {q!r}: {e}")
+                continue
+            # Score sentiment with FinBERT if we have a scorer; else skip
+            for t in tweets:
+                sentiment = None
+                if self.scorer is not None:
+                    try:
+                        sentiment = float(self.scorer.score([t.text])[0])
+                    except Exception:
+                        sentiment = None
+                hits = extract_tags_from_tweet(
+                    tweet_text=t.text,
+                    tweet_id=t.id,
+                    ts=t.ts,
+                    sentiment=sentiment,
+                    url=t.url,
+                    keywords=None,  # cashtags + hashtags only for trending
+                )
+                all_hits.extend(hits)
+
+        if not all_hits:
+            return
+
+        grouped = aggregate_tags(all_hits)
+        rows_written = 0
+        for (bucket, tag), val in grouped.items():
+            try:
+                db.upsert_trending_tag({
+                    "ts": val["ts"],
+                    "bucket": val["bucket"],
+                    "tag": val["tag"],
+                    "tag_kind": val["tag_kind"],
+                    "count": val["count"],
+                    "avg_sentiment": val.get("avg_sentiment"),
+                    "sample_text": val.get("sample_text"),
+                    "sample_url": val.get("sample_url"),
+                })
+                rows_written += 1
+            except Exception as e:
+                PIPELINE_ERRORS.labels(stage="upsert_trending_tag").inc()
+                logger.debug(f"upsert_trending_tag error: {e}")
+        if rows_written:
+            logger.info(f"trending: {len(all_hits)} tag hits → {rows_written} bucketed rows")
 
     def _generate_signal_for(self, sym: str) -> None:
         # Z-score the current 5-min sentiment mean against a history of
@@ -295,6 +357,10 @@ class CryptoPipeline:
         self.scheduler.add_job(self.paper_trade, "interval",
                               seconds=settings.trade_interval_sec, id="trader",
                               next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=15),
+                              max_instances=1, coalesce=True)
+        self.scheduler.add_job(self.scrape_trending, "interval",
+                              seconds=settings.scrape_interval_sec, id="trending",
+                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=20),
                               max_instances=1, coalesce=True)
 
         # Start the WS task in the background

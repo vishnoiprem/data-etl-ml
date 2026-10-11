@@ -71,6 +71,25 @@ class Settings(BaseSettings):
         ]
     )
 
+    # ── Trending tags (free-text queries scraped for tag discovery) ───────
+    # Mix of crypto + AI/data + stocks + dating so the dashboard's top-10
+    # panel isn't dominated by one vertical. The pipeline scrapes each
+    # every 60s and counts how often each cashtag/hashtag appears.
+    trending_queries: list[str] = Field(
+        default_factory=lambda: [
+            # Crypto
+            "bitcoin", "ethereum", "solana", "memecoin",
+            # AI / Data
+            "AI", "data engineering", "LLM", "vector database",
+            # Stocks
+            "S&P 500", "nasdaq", "TSLA", "NVDA",
+            # Dating / "girlf"
+            "dating", "girlf", "girlfriend", "tiktok dating",
+        ]
+    )
+    trending_window_minutes: int = 5   # rolling window for the top-N count
+    trending_top_n: int = 10           # how many tags to show on the dashboard
+
     # ── ML ────────────────────────────────────────────────────────────────
     finbert_model: str = "ProsusAI/finbert"
     finbert_batch_size: int = 32
@@ -96,7 +115,7 @@ class Settings(BaseSettings):
     prometheus_port: int = 8000
     log_level: str = "INFO"
 
-    @field_validator("symbols", "mirrors", "cashtags", "hashtags", "keywords", mode="before")
+    @field_validator("symbols", "mirrors", "cashtags", "hashtags", "keywords", "trending_queries", mode="before")
     @classmethod
     def _split_csv(cls, v):
         if isinstance(v, str):

@@ -105,3 +105,26 @@ SELECT create_hypertable('paper_trades', 'ts',
 CREATE INDEX IF NOT EXISTS paper_trades_symbol_idx ON paper_trades (symbol, ts DESC);
 
 SELECT add_retention_policy('paper_trades', INTERVAL '365 days', if_not_exists => TRUE);
+
+-- ── trending tags (top-N cashtags/hashtags over a rolling window) ─────
+-- One row per (bucket, tag). `bucket` is the 1-min floor of `ts`.
+-- `count` is the number of distinct tweets that mentioned the tag in
+-- the bucket. `avg_sentiment` is the mean FinBERT score for those tweets.
+CREATE TABLE IF NOT EXISTS trending_tags (
+    ts            TIMESTAMPTZ NOT NULL,
+    bucket        TIMESTAMPTZ NOT NULL,
+    tag           TEXT        NOT NULL,
+    tag_kind      TEXT        NOT NULL CHECK (tag_kind IN ('cashtag','hashtag','keyword')),
+    count         INTEGER     NOT NULL DEFAULT 0,
+    avg_sentiment DOUBLE PRECISION,
+    sample_text   TEXT,
+    sample_url    TEXT,
+    UNIQUE (bucket, tag)
+);
+SELECT create_hypertable('trending_tags', 'ts',
+    chunk_time_interval => INTERVAL '1 day',
+    if_not_exists => TRUE);
+CREATE INDEX IF NOT EXISTS trending_tags_bucket_idx ON trending_tags (bucket DESC, count DESC);
+CREATE INDEX IF NOT EXISTS trending_tags_tag_idx ON trending_tags (tag, bucket DESC);
+
+SELECT add_retention_policy('trending_tags', INTERVAL '30 days', if_not_exists => TRUE);

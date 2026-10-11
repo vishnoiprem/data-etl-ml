@@ -133,6 +133,18 @@ class PaperTrade(Base):
     reason = Column(Text, nullable=True)
 
 
+class TrendingTag(Base):
+    __tablename__ = "trending_tags"
+    ts = Column(DateTime, primary_key=True)
+    bucket = Column(DateTime, primary_key=True)
+    tag = Column(String, primary_key=True)
+    tag_kind = Column(String, nullable=False)
+    count = Column(Integer, default=0)
+    avg_sentiment = Column(Float, nullable=True)
+    sample_text = Column(Text, nullable=True)
+    sample_url = Column(Text, nullable=True)
+
+
 # ── Schema bootstrap ────────────────────────────────────────────────────
 
 # Resolve once: src/store/ → project root
@@ -513,5 +525,99 @@ def all_open_positions() -> list[dict]:
                 "WHERE qty > 0 AND ts IN (SELECT MAX(ts) FROM positions GROUP BY symbol) "
                 "ORDER BY symbol"
             )
+        ).fetchall()
+    return [dict(r._mapping) for r in rows]
+
+
+# ── trending_tags CRUD ──────────────────────────────────────────────────
+
+
+def upsert_trending_tag(row: dict) -> None:
+    """Insert or update a (bucket, tag) row. count/avg_sentiment/sample
+    fields are taken from the latest scrape; we keep the most recent
+    sample_text/sample_url so the dashboard can render a representative
+    tweet.
+    """
+    engine = get_engine()
+    payload = {
+        "ts": row["ts"],
+        "bucket": row["bucket"],
+        "tag": row["tag"],
+        "tag_kind": row["tag_kind"],
+        "count": int(row.get("count", 0)),
+        "avg_sentiment": row.get("avg_sentiment"),
+        "sample_text": row.get("sample_text"),
+        "sample_url": row.get("sample_url"),
+    }
+    with engine.begin() as conn:
+        if engine.dialect.name == "postgresql":
+            stmt = pg_insert(TrendingTag.__table__).values(**payload)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["bucket", "tag"],
+                set_={
+                    "ts": stmt.excluded.ts,
+                    "count": stmt.excluded.count,
+                    "avg_sentiment": stmt.excluded.avg_sentiment,
+                    "sample_text": stmt.excluded.sample_text,
+                    "sample_url": stmt.excluded.sample_url,
+                },
+            )
+            conn.execute(stmt)
+        else:
+            conn.execute(
+                text(
+                    "INSERT OR REPLACE INTO trending_tags "
+                    "(ts, bucket, tag, tag_kind, count, avg_sentiment, sample_text, sample_url) "
+                    "VALUES (:ts, :bucket, :tag, :tag_kind, :count, :avg_sentiment, :sample_text, :sample_url)"
+                ),
+                payload,
+            )
+
+
+def bulk_upsert_trending_tags(rows: Iterable[dict]) -> int:
+    """Insert/update many trending tag rows. Returns count processed."""
+    n = 0
+    for r in rows:
+        upsert_trending_tag(r)
+        n += 1
+    return n
+
+
+def fetch_trending_tags(minutes: int = 5, limit: int = 50) -> list[dict]:
+    """Return the top-N (by count) tags seen in the last `minutes`."""
+    engine = get_engine()
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text(
+                # Aggregate per-tag over the window.
+                "SELECT tag, tag_kind, SUM(count) AS total_count, "
+                "AVG(avg_sentiment) AS avg_sent, "
+                "(SELECT sample_url FROM trending_tags t2 "
+                " WHERE t2.tag = t1.tag AND t2.bucket > datetime('now', :m) "
+                " ORDER BY t2.bucket DESC LIMIT 1) AS sample_url, "
+                "(SELECT sample_text FROM trending_tags t2 "
+                " WHERE t2.tag = t1.tag AND t2.bucket > datetime('now', :m) "
+                " ORDER BY t2.bucket DESC LIMIT 1) AS sample_text "
+                "FROM trending_tags t1 "
+                "WHERE bucket > datetime('now', :m) "
+                "GROUP BY tag, tag_kind "
+                "ORDER BY total_count DESC LIMIT :lim"
+                if engine.dialect.name == "sqlite"
+                else
+                "SELECT tag, tag_kind, SUM(count) AS total_count, "
+                "AVG(avg_sentiment) AS avg_sent, "
+                # Postgres supports DISTINCT ON to grab the latest sample.
+                "(SELECT sample_url FROM trending_tags t2 "
+                " WHERE t2.tag = t1.tag AND t2.bucket > NOW() - (:m || ' minutes')::INTERVAL "
+                " ORDER BY t2.bucket DESC LIMIT 1) AS sample_url, "
+                "(SELECT sample_text FROM trending_tags t2 "
+                " WHERE t2.tag = t1.tag AND t2.bucket > NOW() - (:m || ' minutes')::INTERVAL "
+                " ORDER BY t2.bucket DESC LIMIT 1) AS sample_text "
+                "FROM trending_tags t1 "
+                "WHERE bucket > NOW() - (:m || ' minutes')::INTERVAL "
+                "GROUP BY tag, tag_kind "
+                "ORDER BY total_count DESC LIMIT :lim"
+            ),
+            {"m": f"-{minutes}", "lim": limit},
         ).fetchall()
     return [dict(r._mapping) for r in rows]

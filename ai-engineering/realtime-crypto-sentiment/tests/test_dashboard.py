@@ -184,3 +184,75 @@ def test_open_positions_query_latest_price_per_symbol(seeded_db):
     eth_price = latest[latest["symbol"] == "ETH"]["price_usd"].iloc[0]
     # Must be the recent one (3000+), not the old one (2500)
     assert eth_price > 2_900.0, f"expected latest ETH price ~3009, got {eth_price}"
+
+
+# ── End-to-end page-render regression tests ────────────────────────────────
+# These would have caught the pyarrow + datetime-string bugs that broke
+# the deployed dashboard.
+
+def test_dashboard_import_does_not_crash(seeded_db):
+    """The dashboard imports pyarrow via streamlit's st.dataframe. With
+    pyarrow pinned to <=18 for numpy 1.x compat, this must work."""
+    app = _import_dashboard()
+    assert hasattr(app, "page_overview")
+    assert hasattr(app, "page_sentiment")
+    assert hasattr(app, "page_prices_signals")
+    assert hasattr(app, "page_paper_pnl")
+
+
+def test_price_series_returns_datetime_indexed_bucket(seeded_db):
+    """Regression: reindex(method='nearest') requires a real datetime
+    dtype, not strings. SQLAlchemy returns SQLite datetime columns as
+    `object`; the dashboard must coerce them."""
+    app = _import_dashboard()
+    df = app._price_series("BTC", hours=1)
+    assert not df.empty
+    assert pd.api.types.is_datetime64_any_dtype(df["bucket"]), (
+        f"expected datetime dtype, got {df['bucket'].dtype}"
+    )
+
+
+def test_signals_returns_datetime_indexed_ts(seeded_db):
+    app = _import_dashboard()
+    df = app._signals("BTC", hours=1)
+    assert not df.empty
+    assert pd.api.types.is_datetime64_any_dtype(df["ts"])
+
+
+def test_trade_log_returns_datetime_indexed_ts(seeded_db):
+    app = _import_dashboard()
+    df = app._trade_log(10)
+    assert not df.empty
+    assert pd.api.types.is_datetime64_any_dtype(df["ts"])
+
+
+def test_tweet_volume_5m_returns_datetime_indexed_bucket(seeded_db):
+    app = _import_dashboard()
+    df = app._tweet_volume_5m()
+    # Empty seeded DB for tweets_5m is OK; just verify dtype if not empty
+    if not df.empty:
+        assert pd.api.types.is_datetime64_any_dtype(df["bucket"])
+
+
+def test_page_overview_renders_end_to_end(seeded_db):
+    """The pyarrow + DISTINCT ON bug crashed this page in production.
+    Now all 4 pages must render without traceback."""
+    app = _import_dashboard()
+    app.page_overview()  # must not raise
+
+
+def test_page_sentiment_renders_end_to_end(seeded_db):
+    app = _import_dashboard()
+    app.page_sentiment()
+
+
+def test_page_prices_signals_renders_end_to_end(seeded_db):
+    """This page was the second casualty — the reindex(method='nearest')
+    on string bucket crashed with TypeError on every render."""
+    app = _import_dashboard()
+    app.page_prices_signals()
+
+
+def test_page_paper_pnl_renders_end_to_end(seeded_db):
+    app = _import_dashboard()
+    app.page_paper_pnl()

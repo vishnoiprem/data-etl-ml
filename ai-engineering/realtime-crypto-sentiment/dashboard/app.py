@@ -146,7 +146,7 @@ def _sentiment_per_symbol(minutes: int = 60) -> pd.DataFrame:
 def _tweet_volume_5m() -> pd.DataFrame:
     """Time-bucketed tweet count + avg sentiment over the last 5 min."""
     if db.get_engine().dialect.name == "postgresql":
-        return _query(
+        df = _query(
             "SELECT time_bucket('1 minute', ts) AS bucket, "
             "COUNT(*) AS tweets, AVG(sentiment_score) AS avg_sent "
             "FROM tweets "
@@ -154,13 +154,17 @@ def _tweet_volume_5m() -> pd.DataFrame:
             "AND sentiment_score IS NOT NULL "
             "GROUP BY bucket ORDER BY bucket ASC"
         )
-    return _query(
-        "SELECT strftime('%Y-%m-%d %H:%M:00', ts) AS bucket, "
-        "COUNT(*) AS tweets, AVG(sentiment_score) AS avg_sent "
-        "FROM tweets WHERE ts > datetime('now', '-5 minutes') "
-        "AND sentiment_score IS NOT NULL "
-        "GROUP BY bucket ORDER BY bucket ASC"
-    )
+    else:
+        df = _query(
+            "SELECT strftime('%Y-%m-%d %H:%M:00', ts) AS bucket, "
+            "COUNT(*) AS tweets, AVG(sentiment_score) AS avg_sent "
+            "FROM tweets WHERE ts > datetime('now', '-5 minutes') "
+            "AND sentiment_score IS NOT NULL "
+            "GROUP BY bucket ORDER BY bucket ASC"
+        )
+    if not df.empty and "bucket" in df.columns:
+        df["bucket"] = pd.to_datetime(df["bucket"], utc=True)
+    return df
 
 
 def _top_mentions(limit: int = 10) -> pd.DataFrame:
@@ -182,41 +186,64 @@ def _top_mentions(limit: int = 10) -> pd.DataFrame:
 
 def _price_series(symbol: str, hours: int = 1) -> pd.DataFrame:
     if db.get_engine().dialect.name == "postgresql":
-        return _query(
+        df = _query(
             "SELECT bucket, close FROM prices_1m "
             "WHERE symbol=:s AND bucket > NOW() - (:h || ' hours')::INTERVAL "
             "ORDER BY bucket ASC",
             {"s": symbol, "h": str(hours)},
         )
-    return _query(
-        "SELECT ts AS bucket, price_usd AS close FROM prices "
-        "WHERE symbol=:s AND ts > datetime('now', :h) ORDER BY ts ASC",
-        {"s": symbol, "h": f"-{hours} hours"},
-    )
+    else:
+        df = _query(
+            "SELECT ts AS bucket, price_usd AS close FROM prices "
+            "WHERE symbol=:s AND ts > datetime('now', :h) ORDER BY ts ASC",
+            {"s": symbol, "h": f"-{hours} hours"},
+        )
+    # SQLAlchemy returns datetime columns as `object` on SQLite; the reindex
+    # with method="nearest" in page_prices_signals() requires a real datetime
+    # dtype or it raises "unsupported operand type(s) for -: 'str' and 'str'".
+    if not df.empty and "bucket" in df.columns:
+        df["bucket"] = pd.to_datetime(df["bucket"], utc=True)
+    return df
 
 
 def _signals(symbol: str, hours: int = 1) -> pd.DataFrame:
     if db.get_engine().dialect.name == "postgresql":
-        return _query(
+        df = _query(
             "SELECT ts, action, score, sentiment_zscore, momentum_zscore, reason "
             "FROM signals "
             "WHERE symbol=:s AND ts > NOW() - (:h || ' hours')::INTERVAL "
             "ORDER BY ts ASC",
             {"s": symbol, "h": str(hours)},
         )
-    return _query(
-        "SELECT ts, action, score, sentiment_zscore, momentum_zscore, reason "
-        "FROM signals WHERE symbol=:s AND ts > datetime('now', :h) ORDER BY ts ASC",
-        {"s": symbol, "h": f"-{hours} hours"},
-    )
+    else:
+        df = _query(
+            "SELECT ts, action, score, sentiment_zscore, momentum_zscore, reason "
+            "FROM signals WHERE symbol=:s AND ts > datetime('now', :h) ORDER BY ts ASC",
+            {"s": symbol, "h": f"-{hours} hours"},
+        )
+    if not df.empty and "ts" in df.columns:
+        df["ts"] = pd.to_datetime(df["ts"], utc=True)
+    return df
 
 
 def _trade_log(limit: int = 100) -> pd.DataFrame:
-    return _query(
+    df = _query(
         "SELECT ts, symbol, side, qty, price_usd, fee_usd, cash_after, reason "
         "FROM paper_trades ORDER BY ts DESC LIMIT :lim",
         {"lim": limit},
     )
+    if not df.empty and "ts" in df.columns:
+        df["ts"] = pd.to_datetime(df["ts"], utc=True)
+    return df
+
+
+@st.cache_data(ttl=30)
+def _trending_tags(minutes: int = 5, limit: int = 10) -> pd.DataFrame:
+    """Top-N tags (cashtags, hashtags, keywords) by mention count over
+    the last `minutes` minutes. Returns DataFrame with columns:
+    tag, kind, total_count, avg_sentiment, sample_text, sample_url.
+    """
+    return db.fetch_trending_tags(minutes=minutes, limit=limit)
 
 
 def _equity_curve(hours: int = 24) -> pd.DataFrame:
@@ -497,11 +524,81 @@ def page_paper_pnl() -> None:
         )
 
 
+def page_trending() -> None:
+    """Top-10 trending tags on X.com right now, with sentiment, sample
+    tweet, and a per-vertical breakdown. Mixes crypto + AI/data + stocks
+    + dating so the panel isn't single-domain.
+    """
+    st.subheader("🔥 Trending tags (X.com)")
+    minutes = st.slider("Window (minutes)", 1, 60, settings.trending_window_minutes, step=1)
+    top_n = st.slider("Top N", 5, 25, settings.trending_top_n, step=1)
+
+    df = _trending_tags(minutes=minutes, limit=top_n)
+    if df.empty:
+        st.info(
+            f"No trending-tag data yet. The pipeline scrapes every "
+            f"{settings.scrape_interval_sec}s; give it 1-2 minutes. "
+            f"You can also run `make pipeline` in another terminal."
+        )
+        return
+
+    # ── Bar chart: total mentions per tag, color by kind ─────────────────
+    color_map = {
+        "cashtag": "#1f77b4",
+        "hashtag": "#ff7f0e",
+        "keyword": "#2ca02c",
+    }
+    fig = go.Figure()
+    for kind in ["cashtag", "hashtag", "keyword"]:
+        sub = df[df["kind"] == kind]
+        if not sub.empty:
+            fig.add_trace(go.Bar(
+                x=sub["total_count"], y=sub["tag"], orientation="h",
+                name=kind, marker_color=color_map[kind],
+                text=sub["total_count"], textposition="outside",
+            ))
+    fig.update_layout(
+        height=400,
+        xaxis_title="mentions (last window)",
+        yaxis={"autorange": "reversed"},
+        barmode="group",
+        margin={"l": 100, "r": 40, "t": 30, "b": 30},
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # ── Detail table: tag, kind, count, sentiment, sample tweet ─────────
+    st.markdown("### Detail")
+    show = df.copy()
+    show["avg_sentiment"] = show["avg_sentiment"].fillna(0.0)
+    show["link"] = show["sample_url"].apply(
+        lambda u: f"[tweet]({u})" if isinstance(u, str) and u else "—"
+    )
+    st.dataframe(
+        show[["tag", "kind", "total_count", "avg_sentiment", "sample_text", "link"]]
+        .rename(columns={
+            "tag": "Tag", "kind": "Kind", "total_count": "Mentions",
+            "avg_sentiment": "Avg sentiment", "sample_text": "Sample tweet",
+            "link": "Link",
+        })
+        .style.format({
+            "Mentions": "{:,.0f}",
+            "Avg sentiment": "{:+.2f}",
+            "Sample tweet": lambda s: (s[:80] + "…") if isinstance(s, str) and len(s) > 80 else s,
+        })
+        .bar(subset=["Mentions"], color="#7f7f7f")
+        .bar(subset=["Avg sentiment"], color="#d62728", align="mid"),
+        use_container_width=True,
+        height=400,
+    )
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 
 def main() -> None:
     _render_header()
-    tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Sentiment", "Prices + Signals", "Paper PnL"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Overview", "Sentiment", "Prices + Signals", "Paper PnL", "🔥 Trending"
+    ])
     with tab1:
         page_overview()
     with tab2:
@@ -510,6 +607,8 @@ def main() -> None:
         page_prices_signals()
     with tab4:
         page_paper_pnl()
+    with tab5:
+        page_trending()
 
     with st.sidebar:
         st.markdown("### Status")
@@ -525,7 +624,7 @@ def main() -> None:
         except Exception as e:
             st.error(f"DB unreachable: {e}")
         st.markdown("---")
-        st.caption("v0.1 · ProsusAI/FinBERT + Binance WS + Nitter mirrors")
+        st.caption("v0.2 · ProsusAI/FinBERT + Binance WS + Nitter mirrors + trending tags")
 
 
 if __name__ == "__main__":
