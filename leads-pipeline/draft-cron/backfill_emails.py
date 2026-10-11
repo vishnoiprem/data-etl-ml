@@ -20,13 +20,20 @@ sys.path.insert(0, str(HERE))
 
 def backfill(verbose=False, limit=500):
     from db.lead_store import get_cursor
-    from find_more_leads import derive_email_from_company
+    from find_more_leads import derive_email_from_company, BOUNCE_DENY
+    from refine_pipeline import dedup_and_deny
+
+    # First, refresh BOUNCE_DENY from current bounced leads
+    dedup_and_deny(verbose=verbose)
 
     count_updated = 0
     count_skipped_no_match = 0
     count_skipped_bounce_deny = 0
     count_skipped_collision = 0
+    count_skipped_duplicate_company = 0
 
+    # First pass: figure out which (company → email) pairs have multiple
+    # pending-no-email leads. For those, only backfill the lowest id.
     with get_cursor() as cur:
         cur.execute("""
             SELECT id, company FROM leads
@@ -35,20 +42,33 @@ def backfill(verbose=False, limit=500):
             ORDER BY id
             LIMIT %s
         """, (limit,))
-        leads = cur.fetchall()
+        leads = [dict(r) for r in cur.fetchall()]
+
+    # Group by company; only the lowest id wins
+    by_company = {}
+    for lead in leads:
+        by_company.setdefault(lead["company"].lower(), []).append(lead)
+    eligible = set()
+    for ls in by_company.values():
+        ls.sort(key=lambda l: l["id"])
+        eligible.add(ls[0]["id"])
+        if len(ls) > 1:
+            count_skipped_duplicate_company += len(ls) - 1
 
     if verbose:
-        print(f"  [backfill] candidates: {len(leads)}")
+        print(f"  [backfill] candidates: {len(leads)}  "
+              f"eligible: {len(eligible)}  "
+              f"skipped (dup-company): {count_skipped_duplicate_company}")
 
-    for r in leads:
-        lead = dict(r)
+    for lead in leads:
+        if lead["id"] not in eligible:
+            continue
         em = derive_email_from_company(lead["company"])
         if not em:
             count_skipped_no_match += 1
             continue
         # derive_email_from_company already checks BOUNCE_DENY but
         # we double-check here just in case the map was updated.
-        from find_more_leads import BOUNCE_DENY
         domain = em.split("@", 1)[1].lower()
         if domain in BOUNCE_DENY:
             count_skipped_bounce_deny += 1
@@ -77,7 +97,8 @@ def backfill(verbose=False, limit=500):
         print(f"  [backfill] updated={count_updated} "
               f"no_match={count_skipped_no_match} "
               f"deny={count_skipped_bounce_deny} "
-              f"collision={count_skipped_collision}")
+              f"collision={count_skipped_collision} "
+              f"dup_company={count_skipped_duplicate_company}")
     return count_updated
 
 

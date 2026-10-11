@@ -26,8 +26,8 @@ from sqlalchemy import (
     create_engine,
     text,
 )
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from src.config import settings

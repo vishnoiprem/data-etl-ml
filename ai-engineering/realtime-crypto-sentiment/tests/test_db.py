@@ -8,7 +8,7 @@ and the queries that the production signal generator depends on.
 from __future__ import annotations
 
 import math
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 
@@ -210,17 +210,18 @@ def test_latest_price_picks_most_recent_ts(sqlite_db):
 
 def test_sentiment_buckets_aggregates_by_5min(sqlite_db):
     """Tweets in the same 5-min window are averaged together; different
-    windows are separate buckets. This is the core of the z-score math."""
-    # Anchor at "now" so the time-windowed query (`ts > now - 1h`) matches.
-    now = datetime.utcnow().replace(microsecond=0)
-    # Floor `now` to the most recent 5-min boundary so we can offset inside
-    # the window without crossing it. Without this, e.g. now=12:03:47 + 30s
-    # = 12:04:17 lands in the *next* bucket from now=12:03:47.
-    seconds_in_window = 300
-    bucket_floor = int(now.timestamp()) // seconds_in_window * seconds_in_window
-    base = datetime.utcfromtimestamp(bucket_floor)
-    # Group A: 3 tweets at base+10s, +20s, +40s — all inside [base, base+5m).
-    # Scores 0.4, 0.6, 0.5 → mean 0.5.
+    windows are separate buckets. This is the core of the z-score math.
+
+    We anchor the test data relative to `datetime.utcnow()` so the
+    `ts > datetime('now', -1h)` filter always includes them, regardless
+    of the host machine's timezone. Two clearly distinct 5-min windows
+    are used so the 5-min bucket boundary is observable.
+    """
+    # 30 min ago is well inside the 1h lookback. Add small offsets so
+    # each group fits within a single 5-min window.
+    base = datetime.utcnow().replace(microsecond=0) - timedelta(minutes=30)
+    # Group A: 3 tweets in the 5-min window starting at `base`.
+    # 0.4, 0.6, 0.5 → mean 0.5.
     for i, score in enumerate([0.4, 0.6, 0.5]):
         db.upsert_tweet({
             "ts": base + timedelta(seconds=10 + i * 10), "tweet_id": i,
@@ -228,8 +229,8 @@ def test_sentiment_buckets_aggregates_by_5min(sqlite_db):
             "likes": 0, "retweets": 0, "followers": 0, "url": "u",
             "source_adapter": "nitter", "sentiment_score": score,
         })
-    # Group B: 2 tweets at base+10m, base+10m+10s — the *next* 5-min window.
-    # Scores -0.5, -0.7 → mean -0.6.
+    # Group B: 2 tweets in a *different* 5-min window 10 min later.
+    # -0.5, -0.7 → mean -0.6.
     base_b = base + timedelta(minutes=10)
     for i, score in enumerate([-0.5, -0.7]):
         db.upsert_tweet({

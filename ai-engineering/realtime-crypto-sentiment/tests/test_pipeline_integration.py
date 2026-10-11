@@ -288,16 +288,14 @@ def test_pipeline_signal_generation_hold_on_insufficient_history(tmp_path):
 
 
 def test_pipeline_signal_generation_buy_on_bullish_seed(tmp_path):
-    """A clearly bullish seed (positive sentiment, rising price) should
-    produce a BUY signal — verifies the wiring of sentiment + momentum.
+    """A clearly bullish seed (positive sentiment, sharply rising price)
+    should produce a BUY signal — verifies the wiring of sentiment + momentum.
 
-    Seeding recipe:
-    - 13 minute-resolution prices over the last 5 min so recent_price_returns
-      (which queries `ts > now - 6 min`) has at least 2 points.
-    - 13 minute-resolution prices over the prior hour to give the momentum
-      history something to compute std against.
-    - 13 tweets spread across the last 65 min so the 5-min sentiment buckets
-      have at least 2 buckets.
+    Seeding recipe (no regime change at the boundary, so the momentum
+    z-score reflects only the *current* 5-min return vs flat history):
+    - 6 prices in the current 5-min window, sharply rising +200/min
+    - 30 prices in the 30-min history, FLAT around the same baseline
+    - 13 tweets across 5-min buckets, all positive
     """
     from src.store import db
     db.override_engine(f"sqlite:///{tmp_path}/test_buy.db")
@@ -308,8 +306,7 @@ def test_pipeline_signal_generation_buy_on_bullish_seed(tmp_path):
     pipe.sources = _StubRegistry(_StubSource([]))
 
     now = datetime.now(UTC)
-    # Tweets: 13 spaced 5 min apart ending at `now - 2 min` so the most
-    # recent bucket (containing the last tweet) is well inside the lookback.
+    # Tweets: 13 spaced 5 min apart, all positive
     for i in range(13):
         db.upsert_tweet({
             "ts": now - timedelta(minutes=65 - i * 5), "tweet_id": 100 + i,
@@ -318,27 +315,31 @@ def test_pipeline_signal_generation_buy_on_bullish_seed(tmp_path):
             "source_adapter": "stub",
             "sentiment_score": 0.4 + i * 0.05,  # 0.4 → 1.0
         })
-    # Prices (current 5-min window): 6 points at 1-min spacing, rising
+    # History prices: 30 points at 1-min spacing, flat at $50,000.
+    # This produces 29 minute-returns ≈ 0, which aggregate to ~6 history
+    # 5-min returns ≈ 0 with std ≈ 0. (If std is 0, the z-score guard
+    # returns 0 — but at the *boundary* there will be one return from
+    # history[-1] to current_window[0] which is the regime change.)
+    for i in range(30):
+        db.upsert_price({
+            "ts": now - timedelta(minutes=35 - i),  # 35 → 5 min ago
+            "symbol": "BTC", "price_usd": 50_000.0,
+            "volume_usd": 1.0,
+        })
+    # Current 5-min window: 6 points at 1-min spacing, sharply rising.
+    # The boundary return (price@-5m vs price@-5m) is 0 because the
+    # boundary is shared. The 5 in-window returns each = 200/50000 = 0.004.
     for i in range(6):
         db.upsert_price({
             "ts": now - timedelta(minutes=5 - i),
-            "symbol": "BTC", "price_usd": 50_000.0 + i * 20,  # +20/min
-            "volume_usd": 1.0,
-        })
-    # Prices (history of 5-min returns): 60 minute-resolution points ending
-    # 6 min ago. Combined with the current window that gives the momentum
-    # z-score a real std to compare against.
-    for i in range(60):
-        db.upsert_price({
-            "ts": now - timedelta(minutes=66 + i),  # 66 → 125 min ago
-            "symbol": "BTC", "price_usd": 49_000.0 - i * 0.1,  # slowly falling
+            "symbol": "BTC", "price_usd": 50_000.0 + i * 200,  # +200/min
             "volume_usd": 1.0,
         })
 
     pipe._generate_signal_for("BTC")
     sigs = db.fetch_recent_signals("BTC", hours=2, limit=10)
     assert len(sigs) == 1, f"expected 1 signal, got {len(sigs)}: {sigs}"
-    assert sigs[0]["action"] == "BUY"
+    assert sigs[0]["action"] == "BUY", f"expected BUY, got {sigs[0]}"
     # Score must be > threshold (1.0)
     assert sigs[0]["score"] > 1.0
 
@@ -362,25 +363,25 @@ def test_pipeline_signal_generation_sell_on_bearish_seed(tmp_path):
             "source_adapter": "stub",
             "sentiment_score": -0.4 - i * 0.05,  # -0.4 → -1.0
         })
-    # Current 5-min window: falling
+    # History: flat
+    for i in range(30):
+        db.upsert_price({
+            "ts": now - timedelta(minutes=35 - i),
+            "symbol": "BTC", "price_usd": 50_000.0,
+            "volume_usd": 1.0,
+        })
+    # Current 5-min window: sharply falling
     for i in range(6):
         db.upsert_price({
             "ts": now - timedelta(minutes=5 - i),
-            "symbol": "BTC", "price_usd": 50_000.0 - i * 20,
-            "volume_usd": 1.0,
-        })
-    # History: slowly rising (so current fall stands out)
-    for i in range(60):
-        db.upsert_price({
-            "ts": now - timedelta(minutes=66 + i),
-            "symbol": "BTC", "price_usd": 49_000.0 + i * 0.1,
+            "symbol": "BTC", "price_usd": 50_000.0 - i * 200,
             "volume_usd": 1.0,
         })
 
     pipe._generate_signal_for("BTC")
     sigs = db.fetch_recent_signals("BTC", hours=2, limit=10)
     assert len(sigs) == 1, f"expected 1 signal, got {len(sigs)}: {sigs}"
-    assert sigs[0]["action"] == "SELL"
+    assert sigs[0]["action"] == "SELL", f"expected SELL, got {sigs[0]}"
     assert sigs[0]["score"] < -1.0
 
 

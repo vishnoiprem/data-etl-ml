@@ -165,6 +165,7 @@ async def test_stream_prices_respects_stop_event(monkeypatch):
 async def test_stream_prices_processes_received_ticks(monkeypatch):
     """End-to-end: synthetic recv() frames flow through to on_tick."""
     import asyncio
+
     from src.prices import binance_ws
 
     received: list[dict] = []
@@ -212,6 +213,7 @@ async def test_stream_prices_processes_received_ticks(monkeypatch):
 async def test_stream_prices_skips_malformed_frames_silently(monkeypatch):
     """A bad frame (missing required fields) is skipped, not raised."""
     import asyncio
+
     from src.prices import binance_ws
 
     received: list[dict] = []
