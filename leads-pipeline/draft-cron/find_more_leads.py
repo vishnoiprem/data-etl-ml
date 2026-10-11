@@ -621,6 +621,174 @@ def scrape_hn_algolia_24h():
     return out
 
 
+# ============================================================
+# X / Twitter (Playwright with stored auth cookies)
+# ============================================================
+# Why Playwright + cookies:
+#   - X.com returns 403 for unauthenticated requests (verified Dec 2025+)
+#   - All Nitter instances are dead
+#   - The public GraphQL API requires a guest token (now also 403)
+#   - Cookies (auth_token + ct0) let Playwright bypass the login wall
+# Setup:
+#   1. Log into x.com in a real browser
+#   2. Open DevTools → Application → Cookies → https://x.com
+#   3. Export auth_token and ct0 as JSON to state/x_cookies.json
+#      (template: state/x_cookies.example.json)
+#   4. Or set AVILX_X_AUTH_TOKEN and AVILX_X_CT0 env vars
+# Cost: ~3s per page render (Playwright launch overhead is the bottleneck)
+# Reliability: medium — X occasionally rotates ct0; re-export if you get
+#   "Your session has expired" or empty body.
+
+X_COOKIES_PATH = os.getenv(
+    "AVILX_X_COOKIES_PATH",
+    str(Path(__file__).resolve().parent / "state" / "x_cookies.json"),
+)
+
+
+def _load_x_cookies() -> list[dict] | None:
+    """Load X.com auth cookies from file or env. Returns None if missing."""
+    # File first
+    p = Path(X_COOKIES_PATH)
+    if p.exists():
+        try:
+            with open(p) as f:
+                cookies = json.load(f)
+            if isinstance(cookies, list) and cookies:
+                return cookies
+        except Exception as e:
+            print(f"  [X.com] failed to read {p}: {e}")
+    # Env fallback
+    auth = os.getenv("AVILX_X_AUTH_TOKEN")
+    ct0 = os.getenv("AVILX_X_CT0")
+    if auth and ct0:
+        return [
+            {"name": "auth_token", "value": auth, "domain": ".x.com",
+             "path": "/", "expires": -1, "httpOnly": True, "secure": True,
+             "sameSite": "None"},
+            {"name": "ct0", "value": ct0, "domain": ".x.com",
+             "path": "/", "expires": -1, "httpOnly": False, "secure": True,
+             "sameSite": "Lax"},
+        ]
+    return None
+
+
+def scrape_x_com():
+    """Scrape X.com search for hiring posts (last 24h by default).
+
+    Requires auth cookies. If cookies are missing or invalid, returns
+    [] and logs a clear message — does NOT block the loop.
+    """
+    cookies = _load_x_cookies()
+    if not cookies:
+        print("  [X.com] no auth cookies — skipping. Set AVILX_X_AUTH_TOKEN + "
+              "AVILX_X_CT0 or create state/x_cookies.json")
+        return []
+    queries = os.getenv(
+        "AVILX_X_QUERIES",
+        "AI engineer hiring,ML engineer remote,senior AI hiring "
+        "china remote hiring,USA remote AI hiring",
+    ).split(",")
+    queries = [q.strip() for q in queries if q.strip()]
+    out: list[dict] = []
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print("  [X.com] playwright not installed — run: pip install playwright && playwright install chromium")
+        return []
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            ctx = browser.new_context(
+                user_agent=("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/120.0.0.0 Safari/537.36"),
+            )
+            ctx.add_cookies(cookies)
+            page = ctx.new_page()
+            for q in queries:
+                try:
+                    url = ("https://x.com/search?q=" +
+                           requests.utils.quote(q) +
+                           "&src=typed_query&f=live")
+                    page.goto(url, wait_until="domcontentloaded",
+                              timeout=30000)
+                    # Wait up to 12s for tweets to render
+                    try:
+                        page.wait_for_selector(
+                            'article[data-testid="tweet"]', timeout=12000,
+                        )
+                    except Exception:
+                        # No tweets or session expired
+                        body = (page.query_selector("body").inner_text()
+                                if page.query_selector("body") else "")
+                        if not body or "log in" in body.lower():
+                            print(f"  [X.com] {q!r}: session expired or "
+                                  "login wall — refresh cookies")
+                            break
+                        continue
+                    articles = page.query_selector_all(
+                        'article[data-testid="tweet"]')
+                    for art in articles[:25]:
+                        try:
+                            # Tweet text
+                            txt_el = art.query_selector(
+                                '[data-testid="tweetText"]')
+                            text = (txt_el.inner_text() if txt_el else "").strip()
+                            # User handle
+                            user_el = art.query_selector(
+                                '[data-testid="User-Name"]')
+                            user = (user_el.inner_text() if user_el else "").strip()
+                            # Tweet permalink
+                            link_el = art.query_selector(
+                                'a[href*="/status/"]')
+                            link = (link_el.get_attribute("href")
+                                    if link_el else "")
+                            if link and link.startswith("/"):
+                                link = "https://x.com" + link
+                            if not is_senior_eng(text or "", ""):
+                                continue
+                            # Try to extract company + role
+                            m = re.match(
+                                r"^([A-Z][\w&.'-]+(?:\s+[A-Z][\w&.'-]+)?)\s+is\s+hiring\b(.*)$",
+                                text, re.S)
+                            if m:
+                                co = m.group(1).strip()
+                                role = m.group(2).strip().rstrip(".") or "Engineer"
+                            else:
+                                co, role = split_company_role(text)
+                            if not co or co.lower() in ("unknown", "n/a", ""):
+                                # Try to mine from user handle
+                                if user.startswith("@"):
+                                    co = user[1:].title()
+                            co_l = co.lower().strip()
+                            if any(bad in co_l for bad in (
+                                "ask x", "ask twitter", "show x", "show twitter",
+                                "ycombinator", "x corp", "twitter inc",
+                            )):
+                                continue
+                            em = (extract_email_from_text(text) or
+                                  derive_email_from_company(co) or
+                                  derive_email(co, link or ""))
+                            if not em:
+                                continue
+                            out.append({
+                                "company": co,
+                                "role": role or "Engineer",
+                                "contact_email": em,
+                                "source_url": link or url,
+                                "source": "x_com_search",
+                                "jd_text": text[:500],
+                            })
+                        except Exception as e:
+                            print(f"  [X.com] article parse error: {e}")
+                except Exception as e:
+                    print(f"  [X.com] {q!r}: {e}")
+            browser.close()
+    except Exception as e:
+        print(f"  [X.com] playwright error: {e}")
+    return out
+
+
 def scrape_yc_workatastartup():
     out = []
     try:
@@ -743,6 +911,7 @@ SCRAPERS = [
     ("RemoteOK", scrape_remoteok),
     ("HNHiring", scrape_hnhiring),
     ("HN-Algolia-24h", scrape_hn_algolia_24h),
+    ("X.com", scrape_x_com),
     ("YC", scrape_yc_workatastartup),
     ("Wellfound", scrape_wellfound),
     ("HiringCafe", scrape_hiringcafe),

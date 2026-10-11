@@ -25,6 +25,9 @@ env/
 # Runtime state (JSON files written by running scripts)
 state/bounce_deny.json
 state/imap_last_uid.json
+# X.com auth cookies — contains real session secrets (gitignored).
+# x_cookies.example.json is committed as a template only.
+state/x_cookies.json
 
 # PID files
 *.pid
