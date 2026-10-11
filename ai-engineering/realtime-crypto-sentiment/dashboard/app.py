@@ -214,7 +214,19 @@ def _trending_tags(minutes: int = 5, limit: int = 10) -> pd.DataFrame:
     the last `minutes` minutes. Returns DataFrame with columns:
     tag, kind, total_count, avg_sentiment, sample_text, sample_url.
     """
-    return db.fetch_trending_tags(minutes=minutes, limit=limit)
+    rows = db.fetch_trending_tags(minutes=minutes, limit=limit)
+    if not rows:
+        # Always return a DataFrame with the expected columns so callers
+        # can use `df.empty`, `df["kind"]`, etc. without type-checking.
+        return pd.DataFrame(columns=[
+            "tag", "kind", "total_count", "avg_sent",
+            "sample_text", "sample_url",
+        ])
+    df = pd.DataFrame(rows)
+    # The DB schema column is `tag_kind`; the dashboard contract is `kind`.
+    if "tag_kind" in df.columns and "kind" not in df.columns:
+        df = df.rename(columns={"tag_kind": "kind"})
+    return df
 
 
 # ── UI helpers ───────────────────────────────────────────────────────────
@@ -333,15 +345,17 @@ def page_sentiment() -> None:
 def page_paper_pnl() -> None:
     st.subheader("Paper PnL")
     hours = st.slider("Window (hours)", 1, 168, 24, step=1)
+    cutoff = (pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=hours)).to_pydatetime()
 
     # Equity curve from cash_after of paper_trades (no live mark-to-market
     # since there is no real price feed).
     trades = _query(
         "SELECT ts, side, qty, price, fee, cash_after FROM paper_trades "
-        "ORDER BY ts ASC"
+        "WHERE ts > :cutoff ORDER BY ts ASC",
+        {"cutoff": cutoff},
     )
     if trades.empty:
-        st.info("No paper trades yet. Run the pipeline for a few minutes.")
+        st.info("No paper trades in the selected window. Run the pipeline for a few minutes.")
         return
 
     trades["ts"] = pd.to_datetime(trades["ts"], utc=True)
@@ -361,10 +375,14 @@ def page_paper_pnl() -> None:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Trade stats
+    # Trade stats — fetch the full log then filter in pandas (the SQL filter
+    # is already applied above for the equity curve; here we want all rows
+    # within the window for the win-rate calculation).
     log = _trade_log(limit=500)
+    if not log.empty:
+        log = log[log["ts"] >= cutoff]
     if log.empty:
-        st.info("No paper trades yet.")
+        st.info("No paper trades in the selected window.")
     else:
         sells = log[log["side"] == "SELL"]
         wins = 0

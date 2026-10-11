@@ -1,100 +1,103 @@
 # Expected behavior
 
-This page is the honest, in-the-room version of what the project is good at, what
-it isn't, and what you should expect to see when you turn it on.
+This page is the honest, in-the-room version of what the project is good at,
+what it isn't, and what you should expect to see when you turn it on.
 
 ## What you're actually getting
 
 A reproducible, end-to-end **decision-support** lab that:
 
-1. Streams public social-media chatter on 10 crypto symbols every minute.
-2. Streams Binance trade prints on the same 10 symbols with sub-second latency.
-3. Scores every tweet with a finance-tuned transformer (FinBERT).
-4. Computes a per-symbol z-score sentiment + z-score momentum and emits a
-   `BUY / SELL / HOLD` signal.
-5. Optionally fills the signal through a paper broker.
-6. Surfaces everything in a 4-page Streamlit dashboard and a Prometheus `/metrics`.
+1. Scrapes public X.com (Twitter) chatter on a configurable list of tags
+   (AI/data, stocks, dating, etc.) every minute via Nitter mirrors with
+   syndication.twitter.com fallback.
+2. Scores every tweet with a general-purpose Twitter sentiment model
+   (`cardiffnlp/twitter-roberta-base-sentiment-latest`).
+3. Computes a per-tag z-score over the rolling 5-min bucketed sentiment
+   history and emits a `BUY / SELL / HOLD` signal.
+4. Optionally fills the signal through a paper broker that uses a
+   *synthetic* unit price derived from each tweet's engagement — there is
+   no live price feed in this project.
+5. Surfaces everything in a 4-page Streamlit dashboard and a Prometheus
+   `/metrics` endpoint.
 
-The combined system is a single Python process orchestrated by APScheduler. It is
-deliberately **not** Kafka, **not** Flink, **not** multi-region. It is a tight,
-debuggable, single-developer codebase.
+The combined system is a single Python process orchestrated by APScheduler.
+It is deliberately **not** Kafka, **not** Flink, **not** multi-region. It
+is a tight, debuggable, single-developer codebase.
 
 ## Where the signals are *useful*
 
-- **Liquidations cascade.** A burst of negative FinBERT on a token that is being
-  long-liquidated is a credible SHORT signal. The current model captures this
-  partially via the 5-min sentiment window.
-- **FOMC / CPI reactions.** A 30-second news shock in either direction shows up
-  in tweets within ~60 seconds; FinBERT aggregates the net tone; the
-  momentum-z component (price change in the same window) confirms the move.
-- **Trend resumption.** After a tight 30-min range, a sentiment-z breakout
-  combined with a momentum-z confirmation has historically been a reasonable
-  mean-reversion-to-trend signal.
-- **Regime filter research.** The dashboard's "Open positions" + "Trade log" +
-  "Equity curve" panels are designed to be inspected by a human trader making
-  *qualitative* decisions, not a bot firing autonomously.
+- **Narrative detection.** A burst of positive sentiment on a topic (e.g.
+  a new LLM announcement) can flag a research lead before the topic
+  trends.
+- **Sentiment drift.** When a previously positive topic goes persistently
+  neutral, the rolling z-score catches the regime change.
+- **Trending panel.** The 1-min aggregated cashtags/hashtags/keywords
+  panel surfaces what the broader X.com conversation is engaging with
+  *right now* — useful for editorial / content-research workflows.
+- **Decision support, not automation.** The dashboard's panels are
+  designed to be inspected by a human researcher making *qualitative*
+  decisions, not a bot firing autonomously.
 
 ## Where the signals are *noise*
 
-- **Chop.** When BTC and ETH are ranging within ±0.3% for 4+ hours, sentiment is
-  flat and momentum is flat; the combined z-score rarely crosses ±1.0σ, so
-  most cycles are HOLD — which is correct.
-- **Bear trend.** A persistent downtrend produces persistent negative sentiment.
-  The z-score is *mean-reverting*, so the signal will short on the way down
-  but flat or wrongly long at the bottom. This is by design: a z-score system
-  assumes the underlying signal is stationary over the lookback.
-- **Pump-and-dump.** Shilled, in-group altcoin pumps produce a FinBERT-positive
-  burst that is *not* a real demand signal. The model has no way to know.
-- **Macro event cliff.** A surprise Fed pause or bankruptcy headline can move
-  the market 10% in 5 minutes. By the time the first tweets propagate through
-  the model, the move is over.
-- **Symbol-specific noise.** The default topic list maps `bitcoin → BTC`,
-  `ethereum → ETH`, etc. Topics like `memecoin` and `altcoin` are deliberately
-  not mapped because they don't single-symbol.
+- **Chop.** When sentiment on a topic is flat for hours, the z-score
+  rarely crosses ±1.0σ, so most cycles are HOLD — which is correct.
+- **Persistent trend.** A persistent downtrend in narrative tone produces
+  persistent negative sentiment. The z-score is *mean-reverting*, so
+  the signal will mark it as oversold at the bottom. This is by design:
+  a z-score system assumes the underlying signal is stationary over
+  the lookback.
+- **Hype cycles.** Shilled, in-group narratives produce a positive
+  sentiment burst that is *not* a real signal. The model has no way
+  to know.
+- **Topic-specific noise.** Multi-topic tweets (a single tweet that
+  mentions both `AI` and `dating`) get bucketed by the scrape-time tag
+  but the sentiment_score is per-tweet, not per-tag. Mixed-topic
+  tweets are an irreducible source of noise.
 
 ## Realistic 30-day paper-trading profile
 
-In our reference run on a quiet summer tape (low realized vol):
+In our reference run with the default `tracked_tags` and a synthetic
+unit-price feed:
 
 | Metric | Expected range |
 |---|---|
 | Trades / day | 5 – 30 |
 | Win rate | 35 % – 55 % |
-| Sharpe (annualized, minute-level) | 0.0 – 0.5 |
 | Max drawdown | 1 % – 5 % of equity |
 | Total fees | ~0.1 % of notional per fill |
-| Profit | Often within ±$200 of starting $10k |
+| PnL | Often within ±200 units of starting 10k |
 
-Sharpe above 0.5 is rare without regime filtering. Sharpe above 1.0 over a
-30-day window is suspicious — likely a fitting artifact on a low-vol regime.
+Because the price feed is synthetic, **none of these numbers reflect a
+realizable trading edge**. They are useful only for end-to-end pipeline
+verification.
 
 ## What changes if you want better numbers
 
 Ranked by impact, in our experience:
 
-1. **Regime filter.** Detect "high vol" vs "low vol" vs "trending up/down" and
-   disable the strategy entirely in the wrong regime.
-2. **Better signal weighting.** The 0.6/0.4 sentiment/momentum split is
-   arbitrary. Sweep over a grid and use walk-forward validation.
-3. **Order book features.** Binance public REST exposes depth-20 snapshots.
-   Adding spread and imbalance as a third z-score input is the single highest-
-   impact free feature.
-4. **Position-sizing.** Kelly-criterion sizing beats flat 5%-per-position. The
-   paper broker has knobs for it; they're just not exposed in the UI.
-5. **Higher-quality source.** Nitter mirrors go down. syndication.twitter.com
-   rate-limits. A paid X.com API tier (Basic, $100/mo) gives 10k tweets/month
-   with reliable structure.
-6. **Latency arbitrage.** The signal-to-fill window in this stack is ~5–15
-   seconds. Co-locating in AWS Tokyo reduces it to <1s and is worth ~0.05 Sharpe
-   on liquid pairs.
+1. **Replace the synthetic price feed.** A live price feed (X.com
+   cashtag signal + a real ticker) would let the paper broker measure
+   real PnL. Without it, every paper-trading metric is a function of
+   tweet engagement, not market behavior.
+2. **Regime filter.** Detect "high vol" vs "low vol" vs "trending
+   up/down" and disable the strategy entirely in the wrong regime.
+3. **Better signal weighting.** A single z-score is a starting point.
+   A weighted combination of multiple windows (5-min, 1-h, 24-h) often
+   outperforms any single one.
+4. **Position-sizing.** Kelly-criterion sizing beats flat 5%-per-
+   position. The paper broker has knobs for it; they're just not
+   exposed in the UI.
+5. **Higher-quality source.** Nitter mirrors go down.
+   syndication.twitter.com rate-limits. A paid X.com API tier (Basic,
+   $100/mo) gives 10k tweets/month with reliable structure.
 
 ## The point of the project
 
-The pipeline + dashboard + research lab is the actual deliverable. The signal
-quality is a starting point. The user's "always make money" framing is real
-ambition but the honest answer is: **a 30-day, off-the-shelf signal like this
-will not make money consistently; a well-tuned, regime-aware version of it
-*can* make money in narrow windows, and the lab is what makes tuning possible.**
+The pipeline + dashboard + research lab is the actual deliverable. The
+signal quality is a starting point. The honest answer is: **a 30-day,
+off-the-shelf sentiment signal like this will not produce consistent
+edge without real price data; the lab is what makes iteration possible.**
 
-If you trade the live version, do it with size you can afford to lose while you
-iterate. The dashboard makes iteration cheap.
+If you trade the live version, do it with size you can afford to lose
+while you iterate. The dashboard makes iteration cheap.

@@ -1,10 +1,10 @@
 .PHONY: up test smoke
 
 up:
-\tpip install -r requirements.txt
+	pip install -r requirements.txt
 
 test:
-\tpytest -q
+	pytest -q
 
 smoke:
-\tpython ontology/objects.py
+	python ontology/objects.py

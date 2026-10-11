@@ -1,9 +1,9 @@
 """Live-data demo driver.
 
 Runs the *real* pipeline code paths — same signal generator, same paper
-broker, same DB upserts, same FinBERT scorer interface — but feeds it
-synthetic prices and tweets, since this sandbox has no outbound access
-to Binance or Nitter.
+broker, same DB upserts, same Twitter-sentiment scorer interface — but
+feeds it synthetic tweets and engagement-derived unit prices, since
+this sandbox has no outbound access to Nitter or X.com.
 
 Watches the SQL tables + the broker fill its wallet in real time so you
 can see the live state change as ticks arrive.
@@ -20,8 +20,8 @@ from datetime import UTC, datetime, timedelta
 from loguru import logger
 
 from src.config import settings
-from src.ml.finbert import FinBERTScorer
-from src.ml.signal import generate_signal
+from src.ml.sentiment import TwitterSentimentScorer
+from src.ml.signal import Signal, generate_signal
 from src.store import db
 from src.trader.paper import PaperBroker
 
@@ -29,93 +29,95 @@ from src.trader.paper import PaperBroker
 # ── Demo knobs ────────────────────────────────────────────────────────
 
 DURATION_SEC = 30
-TICK_INTERVAL = 0.5  # one Binance trade every 500ms
-TWEETS_PER_BATCH = 5  # tweets scraped per cycle
-SCORE_BATCH_INTERVAL = 5.0  # score every 5s
-SIGNAL_INTERVAL = 5.0  # generate_signal every 5s
-TRADE_INTERVAL = 2.0  # paper_trade every 2s
+TICK_INTERVAL = 0.5  # one synthetic tweet every 500ms
+TWEETS_PER_BATCH = 5
+SCORE_BATCH_INTERVAL = 5.0
+SIGNAL_INTERVAL = 5.0
+TRADE_INTERVAL = 2.0
 
-# Mock FinBERT (the real one needs ~600MB download + GPU/CPU minutes)
-USE_MOCK_FINBERT = True
+# Mock sentiment model (the real one needs ~600MB download + GPU/CPU minutes)
+USE_MOCK_SENTIMENT = True
 
-SYMBOLS = ["BTC", "ETH", "SOL"]
+TAGS = ["AI", "LLM", "TSLA"]
 
 
-# ── Synthetic price walk (geometric Brownian motion) ──────────────────
+# ── Synthetic price walk (geometric Brownian motion over engagement) ─
 
-def gbm_walk(start: float, drift: float, vol: float, dt: float) -> float:
-    """One step of geometric Brownian motion."""
-    return start * math.exp((drift - 0.5 * vol**2) * dt + vol * math.sqrt(dt) * random.gauss(0, 1))
+def engagement_walk(likes: int, retweets: int, followers: int, dt: float) -> tuple[int, int, int]:
+    """Random walk on (likes, retweets, followers) — used to derive a
+    synthetic unit price from tweet engagement."""
+    new_likes = max(0, int(likes * math.exp(random.gauss(0, 0.05))))
+    new_retweets = max(0, int(retweets * math.exp(random.gauss(0, 0.05))))
+    new_followers = max(0, int(followers * math.exp(random.gauss(0, 0.001))))
+    return new_likes, new_retweets, new_followers
+
+
+def synthetic_unit_price(likes: int, retweets: int, followers: int) -> float:
+    """Same formula as src/pipeline.py:_synthetic_price."""
+    return max(1.0, float(likes) + 2.0 * float(retweets) + 0.1 * float(followers))
 
 
 # ── Synthetic tweet generator ─────────────────────────────────────────
 
 TWEET_TEMPLATES = {
-    "BTC": [
-        ("$BTC breaking out — institutional buying picking up", +0.7),
-        ("$BTC forming a textbook bull flag, 80k target next", +0.6),
-        ("$BTC liquidation cascade — drop incoming, leverage is high", -0.6),
-        ("$BTC dominance climbing, alts getting crushed", -0.3),
-        ("Just bought more $BTC, the 4-year cycle still has runway", +0.4),
-        ("$BTC consolidating at support, breakout imminent", +0.2),
-        ("$BTC flash crash to 60k, paper hands selling", -0.5),
-        ("Massive $BTC inflow to spot ETFs, smart money accumulating", +0.8),
+    "AI": [
+        ("New LLM is going to change everything", +0.7),
+        ("AI safety research is finally getting funded", +0.6),
+        ("Yet another AI hype cycle, ignore the noise", -0.3),
+        ("Open-source models closing the gap fast", +0.5),
+        ("AI bubble is bursting, layoffs accelerating", -0.6),
+        ("GPU shortage continues, training costs ballooning", -0.4),
+        ("Agentic workflows shipping in production now", +0.7),
     ],
-    "ETH": [
-        ("$ETH gas fees spiking — bull market is back", +0.5),
-        ("$ETH underperforming $BTC again, frustrating", -0.4),
-        ("$ETH/BTC pair bottoming — alt season loading", +0.6),
-        ("$ETH staking yields attractive vs treasuries", +0.3),
-        ("$ETH devs shipping, fundamentals strong long-term", +0.4),
-        ("$ETH getting rejected at resistance, weak hands folding", -0.3),
+    "LLM": [
+        ("LLM eval scores are improving quarter over quarter", +0.5),
+        ("Hallucination rates still unacceptably high", -0.6),
+        ("Fine-tuning open models beats GPT-4 for our use case", +0.4),
+        ("LLM API prices dropped 10x this year", +0.3),
+        ("Context windows are getting absurdly long", +0.2),
     ],
-    "SOL": [
-        ("$SOL blazing fast, the ETH killers narrative is back", +0.7),
-        ("$SOL network congestion issues, need to scale", -0.4),
-        ("$SOL meme coin mania pumping the chain", +0.5),
-        ("$SOL funding rates negative, shorts paying longs", +0.3),
-        ("$SOL under heavy selling pressure, breaking down", -0.6),
+    "TSLA": [
+        ("TSLA delivery numbers missed expectations again", -0.6),
+        ("FSD v13 is a huge step forward, finally usable", +0.7),
+        ("TSLA valuation still disconnected from fundamentals", -0.4),
+        ("Cybertruck production ramp is finally happening", +0.3),
+        ("Margin compression continues, competition biting", -0.5),
     ],
 }
 
 
-def synth_tweet(symbol: str, idx: int, spread_minutes: int = 90) -> dict:
-    """Synthesize one tweet row for the given symbol.
+def synth_tweet(tag: str, idx: int, spread_minutes: int = 90) -> dict:
+    """Synthesize one tweet row for the given tag.
 
-    `spread_minutes` spreads tweet timestamps back across that window so the
-    sentiment_buckets aggregator has multiple populated buckets to z-score
-    against (production sees the same effect once tweets accumulate).
-
-    NOTE: returns a tz-NAIVE UTC datetime to match the SQLite `DateTime`
-    column. The production code round-trips tz-aware datetimes through
-    SQLite and gets a string-mismatch on the WHERE clause — Postgres is
-    unaffected. Tracked for a separate fix; demo works around it.
+    `spread_minutes` spreads tweet timestamps back across that window so
+    the sentiment_buckets aggregator has multiple populated buckets to
+    z-score against.
     """
-    text, score = random.choice(TWEET_TEMPLATES[symbol])
-    ts = datetime.utcnow() - timedelta(minutes=random.uniform(0, spread_minutes))
+    text, score = random.choice(TWEET_TEMPLATES[tag])
+    ts = datetime.now(UTC) - timedelta(minutes=random.uniform(0, spread_minutes))
     return {
         "ts": ts,
-        "tweet_id": int(time.time() * 1_000_000) + idx,  # unique
-        "symbol": symbol,
+        "tweet_id": int(time.time() * 1_000_000) + idx,
+        "symbol": tag,
         "text": text,
-        "author": f"trader_{random.randint(1000, 9999)}",
+        "author": f"user_{random.randint(1000, 9999)}",
         "likes": random.randint(0, 500),
         "retweets": random.randint(0, 100),
         "followers": random.randint(50, 50_000),
-        "url": f"https://x.com/synthetic/{symbol}/{idx}",
+        "url": f"https://x.com/synthetic/{tag}/{idx}",
         "source_adapter": "demo",
         "raw_json": None,
-        "_true_sentiment": score,  # stash for mock FinBERT
+        "_true_sentiment": score,
     }
 
 
-# ── Mock FinBERT (same interface as the real one) ────────────────────
+# ── Mock sentiment model (same interface as the real one) ────────────
 
-class MockFinBERT:
-    """Stand-in for FinBERTScorer — returns the score we stashed on the tweet."""
+class MockSentiment:
+    """Stand-in for TwitterSentimentScorer — returns the score we stashed
+    on the tweet."""
 
     def score(self, texts: list[str]) -> list[float]:
-        # The demo stashes truth on the row; we look it up by tweet_id.
         return [getattr(self, "_next_score", 0.0)] * len(texts)
 
 
@@ -123,8 +125,13 @@ class MockFinBERT:
 
 class Demo:
     def __init__(self):
-        self.prices: dict[str, float] = {"BTC": 67_500.0, "ETH": 3_500.0, "SOL": 175.0}
-        self.history_prices: dict[str, list[tuple[datetime, float]]] = {s: [] for s in SYMBOLS}
+        # Per-tag synthetic "engagement state" — used to derive a unit
+        # price for the paper broker.
+        self.engagement: dict[str, tuple[int, int, int]] = {
+            t: (random.randint(10, 100), random.randint(1, 10), random.randint(1000, 10000))
+            for t in TAGS
+        }
+        self.history_prices: dict[str, list[tuple[datetime, float]]] = {t: [] for t in TAGS}
         self.scored_tweets: list[dict] = []
         self.signals_emitted: list[dict] = []
         self.fills: list[dict] = []
@@ -133,14 +140,14 @@ class Demo:
         db.override_engine("sqlite:///./demo.db")
         db.ensure_sqlite_schema()
         # Real broker
-        self.broker = PaperBroker(starting_cash_usd=10_000.0)
+        self.broker = PaperBroker(starting_units=10_000.0)
         # Real scorer, mocked
-        if USE_MOCK_FINBERT:
-            self.scorer = MockFinBERT()
+        if USE_MOCK_SENTIMENT:
+            self.scorer = MockSentiment()
         else:
-            self.scorer = FinBERTScorer(
-                model_name=settings.finbert_model,
-                batch_size=settings.finbert_batch_size,
+            self.scorer = TwitterSentimentScorer(
+                model_name=settings.sentiment_model,
+                batch_size=settings.sentiment_batch_size,
             )
 
         self.tick_count = 0
@@ -148,32 +155,29 @@ class Demo:
         self._traded_signal_keys: set[tuple[str, str, str]] = set()
 
     def seed_history(self) -> None:
-        """Backfill 90 min of price history + scored tweets so signal
-        generation has a real history to z-score against (matches the
-        behavior of the production pipeline ~90 min after boot)."""
-        now = datetime.utcnow()
+        """Backfill 90 min of engagement-derived price history + scored
+        tweets so signal generation has a real history to z-score against
+        (matches production behavior ~90 min after boot)."""
+        now = datetime.now(UTC)
         rng = random.Random(7)
-        # 90 min × 1 tick/min = 90 price rows per symbol
-        for sym in SYMBOLS:
-            start_p = self.prices[sym] * 0.97  # 3% drift up over the window
+        # 90 min × 1 tick/min = 90 price rows per tag
+        for tag in TAGS:
             for m in range(90, 0, -1):
                 ts = (now - timedelta(minutes=m)).replace(microsecond=0)
-                # gentle walk back to start_p
-                target = start_p + (self.prices[sym] - start_p) * (90 - m) / 90
-                price = target * math.exp(rng.gauss(0, 0.003))
-                tick = {
-                    "ts": ts, "symbol": sym, "price_usd": price,
-                    "volume_usd": price * rng.uniform(0.01, 0.5),
-                }
-                db.upsert_price(tick)
+                # Random engagement, derive price
+                likes, retweets, followers = self.engagement[tag]
+                likes += rng.randint(-5, 5)
+                retweets += rng.randint(-1, 1)
+                price = synthetic_unit_price(likes, retweets, followers)
+                tick = {"ts": ts, "symbol": tag, "price": price}
                 self.broker.on_price_tick(tick)
-                self.history_prices[sym].append((ts, price))
-        # ~3 scored tweets per 5-min bucket × 18 buckets × 3 symbols = ~162 rows
-        for sym in SYMBOLS:
+                self.history_prices[tag].append((ts, price))
+        # ~3 scored tweets per 5-min bucket × 18 buckets × 3 tags = ~162 rows
+        for tag in TAGS:
             for m in range(90, 0, -1):
                 ts = (now - timedelta(minutes=m)).replace(microsecond=0)
                 for k in range(3):
-                    t = synth_tweet(sym, m * 100 + k, spread_minutes=0)
+                    t = synth_tweet(tag, m * 100 + k, spread_minutes=0)
                     t["ts"] = ts - timedelta(seconds=k * 30)
                     row = {kk: v for kk, v in t.items() if not kk.startswith("_")}
                     if db.upsert_tweet(row):
@@ -181,42 +185,33 @@ class Demo:
                     db.update_tweet_sentiment(t["tweet_id"], t["ts"], t["_true_sentiment"])
         logger.info(f"seeded history: {self.tick_count} ticks, {self.tweet_count} tweets")
 
-    # ── Pipeline stage 1: synthetic price tick → DB ──────────────────
+    # ── Pipeline stage 1: synthetic engagement tick → broker ─────────
 
-    def on_price_tick(self, symbol: str, price: float, ts: datetime) -> None:
-        self.prices[symbol] = price
-        self.history_prices[symbol].append((ts, price))
-        if len(self.history_prices[symbol]) > 600:
-            self.history_prices[symbol].pop(0)
-        # Normalize to tz-naive UTC for SQLite round-trip (see synth_tweet
-        # note about the production bug).
-        ts_naive = ts.replace(tzinfo=None) if ts.tzinfo else ts
-        tick = {
-            "ts": ts_naive,
-            "symbol": symbol,
-            "price_usd": price,
-            "volume_usd": price * random.uniform(0.001, 0.5),
-        }
-        db.upsert_price(tick)  # real DB write
-        self.broker.on_price_tick(tick)  # real broker mark-to-market
+    def on_engagement_tick(self, tag: str, ts: datetime) -> None:
+        likes, retweets, followers = engagement_walk(*self.engagement[tag], TICK_INTERVAL)
+        self.engagement[tag] = (likes, retweets, followers)
+        price = synthetic_unit_price(likes, retweets, followers)
+        tick = {"ts": ts, "symbol": tag, "price": price}
+        self.broker.on_price_tick(tick)
+        self.history_prices[tag].append((ts, price))
+        if len(self.history_prices[tag]) > 600:
+            self.history_prices[tag].pop(0)
         self.tick_count += 1
 
     # ── Pipeline stage 2: synth tweets → DB → score ────────────────
 
     def scrape_and_score(self) -> int:
         new_rows = []
-        for sym in SYMBOLS:
+        for tag in TAGS:
             for i in range(TWEETS_PER_BATCH):
-                t = synth_tweet(sym, i)
-                # Real DB upsert
+                t = synth_tweet(tag, i)
                 inserted = db.upsert_tweet({k: v for k, v in t.items() if not k.startswith("_")})
                 if inserted:
                     self.tweet_count += 1
-                # Pull back from DB to get the row we'd actually see in production
                 new_rows.append(t)
-        # Real FinBERT (or mock)
+        # Score
         texts = [t["text"] for t in new_rows]
-        if USE_MOCK_FINBERT:
+        if USE_MOCK_SENTIMENT:
             scores = [t["_true_sentiment"] for t in new_rows]
         else:
             scores = self.scorer.score(texts)
@@ -226,35 +221,19 @@ class Demo:
 
     # ── Pipeline stage 3: generate signal → DB → broker ─────────────
 
-    def generate_signal_for(self, sym: str) -> str | None:
-        # Aggregate sentiment history (5-min bucket means) — same call
-        # the real pipeline uses. Lookback 2h so the seeded 90-min
-        # history is fully in window.
-        buckets = db.sentiment_buckets(sym, minutes=5, hours=2)
+    def generate_signal_for(self, tag: str) -> str | None:
+        # Aggregate sentiment history (5-min bucket means)
+        buckets = db.sentiment_buckets(tag, minutes=5, hours=2)
         if len(buckets) < 3:
             return None
         sentiment_value = float(buckets[-1]["avg_sent"])
         sent_hist = [float(b["avg_sent"]) for b in buckets]
 
-        # Momentum: net 5-min return
-        rets_5m = db.recent_price_returns(sym, minutes=5)
-        if not rets_5m:
-            return None
-        momentum_value = sum(rets_5m)
-        # 5-min-return history (sample over the same 2h lookback)
-        minute_returns = db.recent_price_returns(sym, minutes=120)
-        mom_hist = [sum(minute_returns[i:i+5]) for i in range(0, len(minute_returns) - 4, 5)]
-
         sig = generate_signal(
-            symbol=sym,
+            symbol=tag,
             sentiment_value=sentiment_value,
             sentiment_history=sent_hist,
-            momentum_value=momentum_value,
-            momentum_history=mom_hist,
         )
-        # Normalize ts to tz-naive UTC for SQLite (production bug; see
-        # synth_tweet comment).
-        sig.ts = sig.ts.replace(tzinfo=None) if sig.ts.tzinfo else sig.ts
         db.insert_signal(sig.to_row())
         self.signals_emitted.append({
             "ts": sig.ts,
@@ -265,21 +244,14 @@ class Demo:
         })
         return sig.action
 
-    def paper_trade_for(self, sym: str) -> None:
-        # Latest signal for this symbol
-        last = db.fetch_recent_signals(sym, hours=2, limit=1)
+    def paper_trade_for(self, tag: str) -> None:
+        last = db.fetch_recent_signals(tag, hours=2, limit=1)
         if not last:
             return
         sig_row = last[0]
-        # Dedupe: the production pipeline only consumes the in-memory
-        # _latest_signals dict, so a signal fires once. The demo re-reads
-        # from the DB every 2s, so we skip if this signal was already
-        # traded (key = (ts, symbol, action)).
-        key = (str(sig_row["ts"]), sym, sig_row["action"])
+        key = (str(sig_row["ts"]), tag, sig_row["action"])
         if key in self._traded_signal_keys:
             return
-        # Build a Signal object the broker expects
-        from src.ml.signal import Signal
         sig = Signal(
             symbol=sig_row["symbol"],
             ts=sig_row["ts"],
@@ -289,45 +261,37 @@ class Demo:
             momentum_zscore=sig_row["momentum_zscore"],
             reason=sig_row["reason"],
         )
-        price = self.prices.get(sym)
-        if price is None:
-            return
+        # Use the latest engagement-derived unit price for this tag
+        price = self.history_prices[tag][-1][1] if self.history_prices[tag] else 50.0
         fill = self.broker.on_signal(sig, float(price))
         if fill is None:
-            return None
-        # Normalize ts to tz-naive for SQLite (production bug; see synth_tweet)
-        _ts = fill.ts
-        if isinstance(_ts, str):
-            from datetime import datetime as _dt
-            _ts = _dt.fromisoformat(_ts)
-        fill_ts = _ts.replace(tzinfo=None) if _ts.tzinfo else _ts
+            return
         db.insert_paper_trade({
-            "ts": fill_ts,
+            "ts": fill.ts,
             "symbol": fill.symbol,
             "side": fill.side,
             "qty": fill.qty,
-            "price_usd": fill.price_usd,
-            "fee_usd": fill.fee_usd,
+            "price": fill.price,
+            "fee": fill.fee,
             "cash_after": fill.cash_after,
             "reason": fill.reason,
         })
-        # Snapshot position
-        pos = self.broker.positions.get(sym)
+        pos = self.broker.positions.get(tag)
         if pos is not None:
             db.upsert_position({
-                "ts": fill_ts,
-                "symbol": sym,
+                "ts": fill.ts,
+                "symbol": tag,
                 "qty": pos.qty,
                 "avg_price": pos.avg_price,
                 "realized_pnl": pos.realized_pnl,
             })
         self.fills.append({
-            "ts": fill_ts,
+            "ts": fill.ts,
             "symbol": fill.symbol,
             "side": fill.side,
             "qty": fill.qty,
-            "price": fill.price_usd,
-            "fee": fill.fee_usd,
+            "price": fill.price,
+            "fee": fill.fee,
             "cash": fill.cash_after,
         })
         self._traded_signal_keys.add(key)
@@ -341,24 +305,24 @@ class Demo:
         print(f"  ⏱  t={elapsed:5.1f}s   ticks={self.tick_count:4d}   "
               f"tweets={self.tweet_count:4d}   signals={len(self.signals_emitted):3d}   "
               f"fills={len(self.fills):3d}")
-        print(f"  💰  cash=${self.broker.cash_usd:>10,.2f}   "
-              f"equity=${eq:>10,.2f}   "
-              f"realized PnL=${m['pnl_usd']:+,.2f}   "
+        print(f"  💰  cash={self.broker.cash:>10,.2f}u   "
+              f"equity={eq:>10,.2f}u   "
+              f"realized PnL={m['pnl']:+,.2f}u   "
               f"win-rate={m['win_rate']:.0%}   "
-              f"max DD=${m['max_drawdown_usd']:.2f}")
+              f"max DD={m['max_drawdown']:.2f}u")
         print(f"  📈  ", end="")
-        for s in SYMBOLS:
-            p = self.prices[s]
-            n = len(self.history_prices[s])
-            print(f"{s}=${p:,.2f} ({n} ticks)  ", end="")
+        for t in TAGS:
+            likes, retweets, followers = self.engagement[t]
+            p = synthetic_unit_price(likes, retweets, followers)
+            n = len(self.history_prices[t])
+            print(f"{t}={p:>6.2f}u ({n} ticks)  ", end="")
         print()
-        # Recent fills + signals (last 3 each)
         if self.fills:
             print(f"  📋  Last fills:")
             for f in self.fills[-3:]:
                 print(f"        {f['ts'].strftime('%H:%M:%S')}  {f['side']}  "
-                      f"{f['qty']:.6f} {f['symbol']} @ ${f['price']:,.2f}  "
-                      f"cash=${f['cash']:,.2f}")
+                      f"{f['qty']:.6f} {f['symbol']} @ {f['price']:,.2f}u  "
+                      f"cash={f['cash']:,.2f}u")
         if self.signals_emitted:
             print(f"  🎯  Last signals:")
             for s in self.signals_emitted[-3:]:
@@ -370,7 +334,7 @@ class Demo:
 
 async def run():
     demo = Demo()
-    print("⏳ Seeding 90 minutes of price + tweet history…")
+    print("⏳ Seeding 90 minutes of engagement + tweet history…")
     demo.seed_history()
     start = time.monotonic()
     last_score = start
@@ -379,52 +343,40 @@ async def run():
     last_render = start
     rng = random.Random(42)
     print(f"⏳ Running live demo for {DURATION_SEC}s…")
-    print(f"   Symbols: {SYMBOLS}")
+    print(f"   Tags: {TAGS}")
     print(f"   DB: sqlite:///./demo.db")
-    print(f"   Scorer: {'MOCK (synthetic truth)' if USE_MOCK_FINBERT else settings.finbert_model}")
+    print(f"   Scorer: {'MOCK (synthetic truth)' if USE_MOCK_SENTIMENT else settings.sentiment_model}")
     print()
     while time.monotonic() - start < DURATION_SEC:
         now = time.monotonic()
-        # tz-naive for SQLite (see synth_tweet note)
-        ts = datetime.utcnow().replace(microsecond=0)
-        # tick all 3 symbols (simulating a Binance trade every 0.5s)
-        for s in SYMBOLS:
-            vol = {"BTC": 0.015, "ETH": 0.02, "SOL": 0.03}[s]
-            drift = rng.gauss(0, 0.0001)
-            demo.prices[s] = gbm_walk(demo.prices[s], drift, vol, TICK_INTERVAL)
-            demo.on_price_tick(s, demo.prices[s], ts)
-        # scrape + score every SCORE_BATCH_INTERVAL
+        ts = datetime.now(UTC).replace(microsecond=0)
+        for t in TAGS:
+            demo.on_engagement_tick(t, ts)
         if now - last_score >= SCORE_BATCH_INTERVAL:
             n = demo.scrape_and_score()
             logger.debug(f"scored {n} tweets")
             last_score = now
-        # generate signals every SIGNAL_INTERVAL
         if now - last_signal >= SIGNAL_INTERVAL:
-            for s in SYMBOLS:
-                demo.generate_signal_for(s)
+            for t in TAGS:
+                demo.generate_signal_for(t)
             last_signal = now
-        # paper-trade every TRADE_INTERVAL
         if now - last_trade >= TRADE_INTERVAL:
-            for s in SYMBOLS:
-                demo.paper_trade_for(s)
+            for t in TAGS:
+                demo.paper_trade_for(t)
             last_trade = now
-        # render every 2s
         if now - last_render >= 2.0:
             demo.render_status(time.monotonic() - start)
             last_render = now
         await asyncio.sleep(TICK_INTERVAL)
-    # Final render
     demo.render_status(time.monotonic() - start)
-    # DB final state
     print("\n" + "─" * 78)
     print("  📊  Final database state (sqlite:///./demo.db)")
     print("─" * 78)
     with db.get_engine().connect() as conn:
         from sqlalchemy import text
-        for table in ("tweets", "prices", "signals", "paper_trades", "positions"):
+        for table in ("tweets", "signals", "paper_trades", "positions", "trending_tags"):
             count = conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar_one()
             print(f"  {table:15s}  {count:5d} rows")
-    # Cleanup
     import os
     try:
         os.remove("demo.db")

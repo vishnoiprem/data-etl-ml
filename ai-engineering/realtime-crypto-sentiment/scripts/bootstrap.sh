@@ -44,4 +44,4 @@ done
 echo "==> 6. Initializing schema"
 python -c "from src.store.db import init_schema; init_schema()"
 
-echo "==> Bootstrap complete. Try: make backfill && make test && make pipeline"
+echo "==> Bootstrap complete. Try: make test && make pipeline"

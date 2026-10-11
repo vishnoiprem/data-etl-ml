@@ -1,15 +1,17 @@
-"""FinBERT sentiment scorer.
+"""Twitter sentiment scorer.
 
 Author: Prem Vishnoi <pvishnoi@avilx.com>
 
-Loads `ProsusAI/finbert` via the `transformers` pipeline. The model
-is lazy-loaded on first `score()` call so test environments don't need
-the ~500MB download.
+Loads `cardiffnlp/twitter-roberta-base-sentiment-latest` via the
+`transformers` pipeline. The model is lazy-loaded on first `score()`
+call so test environments don't need the ~500MB download.
 
-Output mapping:
-- positive  →  +score  (0..+1)
-- negative  →  -score  (-1..0)
-- neutral   →  0
+Output mapping (for the cardiffnlp model):
+- LABEL_0 (negative) → -score
+- LABEL_1 (neutral)  →  0
+- LABEL_2 (positive) → +score
+
+The signed result is in [-1, +1].
 """
 from __future__ import annotations
 
@@ -21,12 +23,16 @@ from loguru import logger
 os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
 
 
-class FinBERTScorer:
-    """Lazy-loaded FinBERT sentiment scorer."""
+class TwitterSentimentScorer:
+    """Lazy-loaded Twitter sentiment scorer.
+
+    Default model: `cardiffnlp/twitter-roberta-base-sentiment-latest`
+    (general-purpose, ~500MB, trained on ~124M tweets).
+    """
 
     def __init__(
         self,
-        model_name: str = "ProsusAI/finbert",
+        model_name: str = "cardiffnlp/twitter-roberta-base-sentiment-latest",
         batch_size: int = 32,
         max_length: int = 128,
     ):
@@ -40,7 +46,7 @@ class FinBERTScorer:
             return self._pipeline
         from transformers import pipeline  # heavy import; deferred
 
-        logger.info(f"loading FinBERT ({self.model_name})…")
+        logger.info(f"loading Twitter sentiment model ({self.model_name})…")
         self._pipeline = pipeline(
             "sentiment-analysis",
             model=self.model_name,
@@ -48,7 +54,7 @@ class FinBERTScorer:
             truncation=True,
             max_length=self.max_length,
         )
-        logger.info("FinBERT loaded")
+        logger.info("Twitter sentiment model loaded")
         return self._pipeline
 
     def score(self, texts: list[str]) -> list[float]:
@@ -65,29 +71,36 @@ class FinBERTScorer:
 
     @staticmethod
     def _combine(per_text: list[dict]) -> float:
-        """Combine positive/negative/neutral into a signed score.
+        """Combine negative/neutral/positive into a signed score.
 
-        FinBERT output looks like:
-          [{"label":"positive","score":0.93},
-           {"label":"negative","score":0.04},
-           {"label":"neutral", "score":0.03}]
+        cardiffnlp output looks like:
+          [{"label":"LABEL_0","score":0.04},
+           {"label":"LABEL_1","score":0.03},
+           {"label":"LABEL_2","score":0.93}]
+        where LABEL_0 = negative, LABEL_1 = neutral, LABEL_2 = positive.
+        Also handles FinBERT-style "positive"/"negative"/"neutral" labels
+        for backward-compat with existing tests.
         """
         pos = neg = 0.0
         for d in per_text:
             lbl = d.get("label", "").lower()
             sc = float(d.get("score", 0.0))
-            if lbl == "positive":
+            if lbl in ("label_2", "positive"):
                 pos = sc
-            elif lbl == "negative":
+            elif lbl in ("label_0", "negative"):
                 neg = sc
-            else:
-                pass
-        return pos - neg  # neutral contributes 0
+            # LABEL_1 / neutral → contributes 0
+        return pos - neg
 
 
-def make_default() -> FinBERTScorer:
+def make_default() -> TwitterSentimentScorer:
     from src.config import settings
-    return FinBERTScorer(
-        model_name=settings.finbert_model,
-        batch_size=settings.finbert_batch_size,
+    return TwitterSentimentScorer(
+        model_name=settings.sentiment_model,
+        batch_size=settings.sentiment_batch_size,
     )
+
+
+# Backwards-compat alias — older imports / tests may still reference the
+# FinBERT name.
+FinBERTScorer = TwitterSentimentScorer

@@ -2,7 +2,7 @@ PY ?= python3
 VENV ?= .venv
 BIN := $(VENV)/bin
 
-.PHONY: help up down logs backfill pipeline dashboard test lint clean shell
+.PHONY: help up down logs pipeline dashboard test lint clean shell
 
 help:  ## Show this help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
@@ -15,9 +15,6 @@ down:  ## Stop all containers.
 
 logs:  ## Tail docker logs.
 	docker compose logs -f
-
-backfill:  ## Backfill 7 days of 1m klines for all symbols.
-	$(BIN)/python scripts/backfill_prices.py
 
 pipeline:  ## Run the scraping + scoring + signals + paper-trader pipeline.
 	$(BIN)/python -m src.pipeline

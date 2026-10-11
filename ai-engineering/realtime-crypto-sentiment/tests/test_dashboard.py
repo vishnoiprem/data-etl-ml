@@ -12,7 +12,6 @@ tab) and 4 page functions (Overview, Sentiment, Paper PnL, Trending).
 
 from __future__ import annotations
 
-import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -90,17 +89,21 @@ def test_kpis_runs_on_sqlite(seeded_db):
     assert kpis["equity"] == pytest.approx(9_499.5 + 0.5)
 
 
-def test_kpis_with_no_trades_uses_starting_units(seeded_db):
-    """An empty DB should fall back to settings.starting_units for cash."""
+def test_kpis_with_no_trades_falls_back_to_starting_units(tmp_path):
+    """When paper_trades is empty, the dashboard falls back to
+    settings.starting_units for cash. We bypass Streamlit's @st.cache_data
+    by calling the underlying function on a fresh empty DB."""
+    import streamlit as st
     app = _import_dashboard()
-    # Wipe the trades by recreating the DB
-    import os
-    db.override_engine("sqlite:///:memory:")
+    # Clear the Streamlit cache so the @st.cache_data(_kpis) wrapper
+    # doesn't return a previous test's result.
+    st.cache_data.clear()
+    db.override_engine(f"sqlite:///{tmp_path}/empty_kpis.db")
     db.ensure_sqlite_schema()
     kpis = app._kpis()
-    # The cash is the configured starting_units
-    assert kpis["cash"] == app.settings.starting_units
+    assert kpis["cash"] == pytest.approx(app.settings.starting_units)
     assert kpis["trade_count"] == 0
+    assert kpis["position_value"] == 0.0
 
 
 def test_signal_counts_runs_on_sqlite(seeded_db):
