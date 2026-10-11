@@ -9,18 +9,29 @@ import time
 from loguru import logger
 
 from src.config import settings
+from src.sources.apify_x import ApifyXAdapter
 from src.sources.base import AdapterError, RawTweet
 from src.sources.nitter_mirror import NitterMirrorAdapter
 from src.sources.syndication import SyndicationAdapter
 
 
 class SourceRegistry:
-    """Tries Nitter mirrors first; falls back to syndication.pub on AdapterError.
+    """Resolves which adapter to use, in priority order:
+
+    1. Apify (if `tweet_source=apify` or `auto` with `APIFY_TOKEN` set)
+    2. Nitter mirrors (mostly dead since 2024)
+    3. syndication.twitter.com fallback (rate-limited)
 
     Caches the working adapter for 10 minutes.
     """
 
-    def __init__(self, nitter: NitterMirrorAdapter, syndication: SyndicationAdapter):
+    def __init__(
+        self,
+        apify: ApifyXAdapter | None,
+        nitter: NitterMirrorAdapter,
+        syndication: SyndicationAdapter,
+    ):
+        self.apify = apify
         self.nitter = nitter
         self.syndication = syndication
         self._active: str = "nitter"
@@ -28,7 +39,15 @@ class SourceRegistry:
 
     @classmethod
     def from_settings(cls) -> SourceRegistry:
+        apify = None
+        if settings.apify_token or settings.tweet_source in ("apify", "auto"):
+            apify = ApifyXAdapter(
+                token=settings.apify_token,
+                actor=settings.apify_actor,
+                max_wait_sec=settings.apify_max_wait_sec,
+            )
         return cls(
+            apify=apify,
             nitter=NitterMirrorAdapter(
                 mirrors=settings.mirrors,
                 user_agent=settings.user_agent,
@@ -43,15 +62,30 @@ class SourceRegistry:
         return self._active
 
     async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
-        if self._active == "nitter" and self.nitter.is_healthy():
+        # 1) Apify (preferred when configured)
+        if self.apify and self.apify.is_healthy():
+            try:
+                result = await self.apify.fetch(query, max_results)
+                if result:
+                    self._active = "apify"
+                    self._active_until = time.monotonic() + 600
+                    return result
+                logger.debug(f"apify returned 0 tweets for {query!r}; trying next")
+            except AdapterError as e:
+                logger.warning(f"apify failed: {e}; trying nitter")
+
+        # 2) Nitter mirrors
+        if self.nitter.is_healthy():
             try:
                 result = await self.nitter.fetch(query, max_results)
-                self._active_until = time.monotonic() + 600  # 10 min
-                return result
+                if result:
+                    self._active = "nitter"
+                    self._active_until = time.monotonic() + 600
+                    return result
             except AdapterError as e:
                 logger.warning(f"nitter failed: {e}; falling back to syndication")
 
-        # Fallback path
+        # 3) Syndication
         try:
             result = await self.syndication.fetch(query, max_results)
             self._active = "syndication"
@@ -62,5 +96,7 @@ class SourceRegistry:
             return []
 
     async def close(self) -> None:
+        if self.apify:
+            await self.apify.close()
         await self.nitter.close()
         await self.syndication.close()

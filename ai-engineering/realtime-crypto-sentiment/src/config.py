@@ -63,6 +63,20 @@ class Settings(BaseSettings):
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
     )
 
+    # ── Tweet source adapter ──────────────────────────────────────────────
+    # Which adapter to use as the live data source. Options:
+    #   "apify"     — Apify X.com scraper (recommended; real data, ~$0.40/1k)
+    #   "nitter"    — public Nitter mirrors (mostly dead since 2024)
+    #   "syndication" — syndication.twitter.com fallback (rate-limited)
+    #   "auto"      — try apify if token present, else nitter, else syndication
+    tweet_source: str = "auto"
+
+    # ── Apify X.com scraper config ────────────────────────────────────────
+    # Get a free token at https://console.apify.com → Settings → Integrations
+    apify_token: str = ""
+    apify_actor: str = "dannyquek/x-twitter-scraper"
+    apify_max_wait_sec: int = 90
+
     # ── Tracked tags (per-tag dashboard grouping) ─────────────────────────
     # Topics the pipeline scrapes every cycle and routes tweets to.
     # These are free-text search queries; the trending-tag extractor pulls

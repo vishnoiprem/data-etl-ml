@@ -36,7 +36,9 @@ load_dotenv(PROJECT / ".env")
 from loguru import logger  # noqa: E402
 
 from src.config import settings  # noqa: E402
+from src.sources.apify_x import ApifyXAdapter  # noqa: E402
 from src.sources.nitter_mirror import NitterMirrorAdapter  # noqa: E402
+from src.sources.registry import SourceRegistry  # noqa: E402
 from src.sources.trending import aggregate_tags, extract_tags_from_tweet  # noqa: E402
 from src.store import db  # noqa: E402
 
@@ -83,8 +85,11 @@ def lexicon_score(text: str) -> float:
 
 # ── Scrape one tag from Nitter ─────────────────────────────────────────
 
-async def scrape_tag(source: NitterMirrorAdapter, tag: str) -> list[dict]:
-    """Returns list of {ts, text, author, likes, retweets, url, tweet_id}."""
+async def scrape_tag(source, tag: str) -> list[dict]:
+    """Returns list of {ts, text, author, likes, retweets, url, tweet_id}.
+
+    `source` is a SourceRegistry (auto-fallback across apify/nitter/syndication).
+    """
     try:
         tweets = await source.fetch(tag, max_results=20)
         return [
@@ -94,6 +99,7 @@ async def scrape_tag(source: NitterMirrorAdapter, tag: str) -> list[dict]:
                 "author": t.author,
                 "likes": t.likes,
                 "retweets": t.retweets,
+                "followers": t.followers,
                 "url": t.url,
                 "tweet_id": t.id,
             }
@@ -114,12 +120,16 @@ async def main() -> int:
     # Make sure we don't accidentally trigger a 500MB model download.
     settings.sentiment_model = "lexicon-fast"  # not used; we use lexicon_score()
 
-    source = NitterMirrorAdapter(
-        mirrors=settings.mirrors,
-        user_agent=settings.user_agent,
-    )
-    if not source.is_healthy():
-        logger.error("no healthy Nitter mirror — abort")
+    # Pick the source: Apify if token present, else Nitter fallback.
+    # The registry auto-falls-back across the chain on errors.
+    source = SourceRegistry.from_settings()
+    apify_ok = source.apify is not None and source.apify.is_healthy()
+    if apify_ok:
+        logger.info(f"  using Apify X.com scraper (actor={settings.apify_actor})")
+    elif source.nitter.is_healthy():
+        logger.info("  Apify not configured — falling back to Nitter (mostly offline)")
+    else:
+        logger.error("no healthy source — abort")
         return 1
 
     # 1) Scrape each tracked tag
@@ -133,8 +143,12 @@ async def main() -> int:
             t["sentiment_score"] = lexicon_score(t["text"])
         all_tweets.extend(tweets)
         logger.info(f"  scraped {tag!r:20s} → {len(tweets)} tweets")
-        await asyncio.sleep(1.0)  # politeness: 1 req/sec per mirror
+        # Apify runs are cloud-side async (10-60s); Nitter is local (~1s).
+        # Pace accordingly to stay under rate limits and $ budget.
+        sleep_s = 2.0 if apify_ok else 1.0
+        await asyncio.sleep(sleep_s)
 
+    logger.info(f"  active source: {source.active}")
     await source.close()
 
     # 2) Insert into tweets table
@@ -216,7 +230,8 @@ def print_dashboard(per_tag_counts: dict[str, int], total_tweets: int) -> None:
     print(f"  DB:             {settings.database_url}")
     print(f"  Tags scraped:   {len(per_tag_counts)}")
     print(f"  Tweets fetched: {total_tweets}")
-    print(f"  Source:         Nitter (real)")
+    src = "Apify (real X.com)" if settings.apify_token else "Nitter (likely empty)"
+    print(f"  Source:         {src}")
 
     banner("TAB 1 — OVERVIEW (KPIs)", "📊")
     k = app._kpis()
