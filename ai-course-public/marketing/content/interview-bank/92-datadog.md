@@ -22,7 +22,7 @@
 **Tip:** Datadog values scale + observability. Mention specific throughput, latency, and MTTD/MTTR numbers.
 
 ### Q1.2: "Why Datadog?"
-**Answer:** Specific bet + test + disagreement. "I want to work on the Watchdog team because the AI for ops thesis is the most important bet in 2026. The bet: as systems get more complex, the human on-call needs an AI co-pilot, not just dashboards. The 1 thing I'd test: whether LLM-based root cause analysis (RCA) can match human accuracy on the top 100 incident types. The 1 thing I disagree with: I think Datadog is too conservative on the LLM side — the Bits AI assistant should be allowed to take actions (e.g., restart a service), not just suggest."
+**Answer:** Specific bet + test + disagreement. "I want to work on the Watchdog team because the AI for ops thesis is the most important bet in 2026. The bet: as systems get more complex, the on-call needs an AI co-pilot, not more dashboards. The 1 thing I'd test: whether LLM-based RCA can match human accuracy on the top 100 incident types. The 1 thing I disagree with: I think Datadog is too conservative on the LLM side — Bits AI should be allowed to take actions (restart a service), not just suggest."
 **Tip:** Reference Bits AI + Watchdog + the AI for ops roadmap.
 
 ## Stage 2: Technical phone screen (60 min)

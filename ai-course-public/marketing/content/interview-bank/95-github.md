@@ -24,7 +24,7 @@ GitHub's Copilot team is the canonical "AI for developers" interview. The loop t
 **Tip:** Be specific about LLM work. GitHub Copilot is all about LLMs.
 
 ### Q1.2: "Why GitHub?"
-**Answer:** "Three reasons. First, Copilot is the most successful AI product in history — the data flywheel from 100M+ users is unmatched. Second, Copilot Workspace and the 2026 agentic features (Copilot for PRs, Copilot Chat, code review) are the frontier of AI-for-engineering. Third, GitHub's culture is genuinely developer-first — they ship fast and treat engineers as customers."
+**Answer:** "Three reasons. First, Copilot is the most successful AI product in history — the data flywheel from 100M+ users is unmatched. Second, Copilot Workspace and the 2026 agentic features (Copilot for PRs, Chat, code review) are the frontier of AI for engineering. Third, GitHub's culture is genuinely developer-first — they ship fast and treat engineers as customers."
 **Tip:** Reference Copilot Workspace, Copilot Chat, Copilot for PRs, and the 2026 features (multi-file edits, agent mode, code review).
 
 ### Q1.3: "Location + comp"

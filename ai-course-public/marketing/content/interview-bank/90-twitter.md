@@ -24,7 +24,7 @@ Twitter/X's loop is one of the most rigorous in consumer ML. Since the 2022 acqu
 **Tip:** Be specific about scale — Twitter does billions of impressions per day.
 
 ### Q1.2: "Why Twitter/X?"
-**Answer:** "Three reasons. First, the timeline ML is the textbook problem — real-time engagement prediction on a bipartite graph with adversarial content. Second, Grok is a unique opportunity to integrate LLM reasoning into a live social product. Third, I want to work on a platform where the cost of bad ML is civic — viral misinformation, election integrity. That's a responsibility I want."
+**Answer:** "Three reasons. First, the timeline ML is the textbook problem — real-time engagement prediction on a bipartite graph with adversarial content. Second, Grok is a unique chance to integrate LLM reasoning into a live social product. Third, I want to work on a platform where the cost of bad ML is civic — viral misinformation, election integrity. That's a responsibility I want."
 **Tip:** Reference Grok, the "For You" feed, and X's real-time data advantage.
 
 ### Q1.3: "Location + comp"

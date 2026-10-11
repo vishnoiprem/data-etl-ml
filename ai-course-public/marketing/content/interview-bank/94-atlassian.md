@@ -24,7 +24,7 @@ Atlassian's loop is well-structured but slightly less intense than FAANG — the
 **Tip:** Atlassian is more "product engineering" than "ML research" — emphasize shipping.
 
 ### Q1.2: "Why Atlassian?"
-**Answer:** "Three reasons. First, Rovo is a real product with 300K+ enterprise customers — that's a great distribution for AI. Second, Atlassian's culture is genuinely 'open company, no bullshit' — the playbook is public. Third, I want to work on AI that helps teams ship faster, not just chat. The integration with Jira workflows is a unique ML product surface."
+**Answer:** "Three reasons. First, Rovo is a real product with 300K+ enterprise customers — great distribution for AI. Second, Atlassian's culture is genuinely 'open company, no bullshit' — the playbook is public. Third, I want to work on AI that helps teams ship faster, not just chat. The Jira workflow integration is a unique ML surface."
 **Tip:** Reference Atlassian's open-work culture, the Rovo launch, and the 2026 AI features.
 
 ### Q1.3: "Location + remote"

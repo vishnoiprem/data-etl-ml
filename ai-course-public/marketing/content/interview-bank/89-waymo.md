@@ -74,9 +74,9 @@ class KalmanFilter:
     def update(self, z):
         H = np.array([[1, 0]])
         y = z - H @ self.x
-        S = H @ self.P @ H.T + self.R
+        S = (H @ self.P @ H.T + self.R)[0, 0]
         K = self.P @ H.T / S
-        self.x = self.x + K * y
+        self.x = (self.x + K.flatten() * float(y)).reshape(-1)
         self.P = (np.eye(2) - K @ H) @ self.P
 ```
 **Tip:** Explain the 2-step predict-update cycle, the trade-off between trusting the model (Q) vs. sensor (R), and the extension to EKF/UKF for nonlinear motion.

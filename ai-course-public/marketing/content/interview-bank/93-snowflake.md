@@ -22,7 +22,7 @@
 **Tip:** Snowflake values data engineering depth. Mention specific scale, latency, and the data quality story.
 
 ### Q1.2: "Why Snowflake, specifically?"
-**Answer:** Specific bet + test + disagreement. "I want to work on the Cortex AI team because the data + AI convergence is the most important architectural shift of 2026. The bet: as models get bigger, the data warehouse becomes the moat — the model is commoditized, the data is the differentiator. The 1 thing I'd test: whether Cortex AI's function-calling interface can match the latency of a custom LLM wrapper at 10K QPS. The 1 thing I disagree with: I think Snowflake is too conservative on the open-source side — open-sourcing the Cortex feature store would accelerate adoption more than the current proprietary path."
+**Answer:** Specific bet + test + disagreement. "I want to work on Cortex AI because the data + AI convergence is the most important architectural shift of 2026. The bet: as models get bigger, the data warehouse becomes the moat — the model is commoditized, the data is the differentiator. The 1 thing I'd test: whether Cortex's function-calling interface can match the latency of a custom LLM wrapper at 10K QPS. The 1 thing I disagree with: I think Snowflake is too conservative on open source — open-sourcing the Cortex feature store would accelerate adoption more than the current proprietary path."
 **Tip:** Reference Cortex AI + Snowpark + the data cloud thesis.
 
 ## Stage 2: Technical phone screen (60 min)

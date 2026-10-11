@@ -24,7 +24,7 @@ LinkedIn's ML org is large and well-organized. The unique surface is professiona
 **Tip:** Be specific about business impact — LinkedIn is metric-driven.
 
 ### Q1.2: "Why LinkedIn?"
-**Answer:** "Three reasons. First, the professional graph is the most interesting ML substrate — every interaction has economic intent (job, hire, sell, learn). Second, LinkedIn's investment in AI (Premium AI features, Recruiter AI, AI-assisted profiles) is real and growing. Third, I want my ML to help people get hired or grow careers — that's mission-aligned work."
+**Answer:** "Three reasons. First, the professional graph is the most interesting ML substrate I know of — every interaction has economic intent (job, hire, sell, learn). Second, LinkedIn's investment in AI (Premium AI, Recruiter AI, AI-assisted profiles) is real and growing. Third, I want my ML to help people get hired or grow careers. That's mission-aligned work for me."
 **Tip:** Reference 2026 LinkedIn AI: Premium AI, Recruiter AI, AI-assisted profiles, collaborative articles.
 
 ### Q1.3: "Location + comp"

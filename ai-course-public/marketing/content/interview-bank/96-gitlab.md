@@ -25,8 +25,8 @@ GitLab is a fully-remote, async-first company. The interview loop itself reflect
 **Tip:** GitLab values async written communication. Speak in structured, clear sentences.
 
 ### Q1.2: "Why GitLab?"
-**Answer:** "Three reasons. First, async-first means I can do my best work without meetings — and the loop itself is async-friendly. Second, Duo is a real product, but the bar is to ship to enterprise customers with strict security and self-hosted requirements. Third, GitLab's open handbook and culture are uniquely transparent — I want to work somewhere that documents how it works."
-**Tip:** Reference GitLab's handbook, the async culture, the self-hosted AI offering (a real differentiator for enterprise/government customers).
+**Answer:** "Three reasons. First, async-first means I can do my best work without meetings — and the loop itself is async-friendly. Second, Duo is a real product, but the bar is shipping to enterprise customers with strict security and self-hosted requirements. Third, GitLab's open handbook and culture are uniquely transparent — I want to work somewhere that documents how it actually runs."
+**Tip:** Reference GitLab's handbook, the async culture, the self-hosted AI offering (a real differentiator for enterprise and government).
 
 ### Q1.3: "Location + remote + comp band"
 **Answer:** GitLab is global remote. They pay in country-specific bands. Be clear on location. Comp is good but varies by country (US is highest).
