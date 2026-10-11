@@ -187,8 +187,7 @@ async def main() -> int:
         obj.text = t["text"]
         obj.symbol_tags = [t["tag"]]
         obj.ts = t["ts"]
-        for hit in extract_tags_from_tweet(obj, kind=None):
-            tag_hits.append(hit)
+        tag_hits.extend(extract_tags_from_tweet(obj, kind=None))
     # Aggregate
     if tag_hits:
         aggregated = aggregate_tags(tag_hits)

@@ -72,21 +72,33 @@ class ApifyXAdapter(SourceAdapter):
         self.session = requests.Session()
         if self.token:
             self.session.headers.update({"Authorization": f"Bearer {self.token}"})
+        # Health-check cache: avoid hitting /v2/users/me on every fetch().
+        # Token doesn't change at runtime, so 5-min cache is fine.
+        self._health_checked_at: float = 0.0
+        self._health_ok: bool = False
 
     # ── Public API ──────────────────────────────────────────────────
 
-    def is_healthy(self) -> bool:
-        """Cheap liveness check: /v2/users/me with our token."""
+    def is_healthy(self, force_check: bool = False) -> bool:
+        """Cheap liveness check: /v2/users/me with our token.
+
+        Cached for 5 minutes (or until `force_check=True`).
+        """
         if not self.token:
             return False
+        now = time.monotonic()
+        if not force_check and (now - self._health_checked_at) < 300:
+            return self._health_ok
         try:
             r = self.session.get(
                 "https://api.apify.com/v2/users/me", timeout=5
             )
-            return r.status_code == 200
+            self._health_ok = r.status_code == 200
         except requests.RequestException as e:
             logger.debug(f"apify health check failed: {e}")
-            return False
+            self._health_ok = False
+        self._health_checked_at = now
+        return self._health_ok
 
     async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         """Run an Actor for one search term, return up to `max_results` tweets.
