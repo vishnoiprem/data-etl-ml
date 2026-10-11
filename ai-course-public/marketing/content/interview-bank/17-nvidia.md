@@ -1,8 +1,17 @@
 # 17. NVIDIA (CUDA / AI Software)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (TensorRT-LLM + NVSwitch serving topology). Color: company brand color as accent (NVIDIA green). Headline on image: "NVIDIA (CUDA / AI Software) / AI Software Engineer / 2026".
+
+> **TL;DR:** NVIDIA's CUDA / AI Software loop runs 4 stages and rejects ~97% of candidates — the signature is the 5 verbatim CUDA questions (vector-add coalescing, producer-consumer with clean shutdown, LRU in C++ with smart pointers, lock-free GPU queue, Kahan summation). The winning candidate names the 128-byte cache line, the FP4 vs. FP8 trade-off, and reasons at the warp-shuffle + register-pressure level.
+
+```
+Recruiter (50%) → Phone (40%) → Panel (30%) → Domain round (50%) → Committee → Offer
+                                     └── 5 verbatim CUDA questions ──┘
+```
+
 - **Role:** AI Software Engineer
 - **Tech stack:** C++, CUDA, Python, PyTorch, TensorRT-LLM, Triton
-- **Comp band:** $300K-$1.1M (L3-L5)
+- **Comp band:** $300K-$1.1M total comp (L3-L5 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen (45-60 min)** | C++ or Python with GPU-aware follow-ups | 1-2 weeks | ~40% advance |
 | 3. **Panel interviews (2 × 90 min)** | Panel 1: coding + project deep-dive; Panel 2: hardware-aware system design | 1-2 weeks | ~30% advance |
 | 4. **Final technical round (60-90 min)** | Domain deep-dive with target team | 1-2 weeks | ~50% advance |
+
+The loop is the slowest of the AI shops (3-5 weeks), and the panel repeats the same 5 verbatim CUDA questions — candidates who prep the specific phrasing win; candidates who only know PyTorch lose the panel outright.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -32,6 +43,8 @@
 
 ### Q2.2: "LRU Cache in C++ with smart pointers, move semantics, thread safety"
 **Answer:** `class LRUCache { list<pair<int,int>> l; unordered_map<int, list::iterator> m; ... }`; on `get` move to front; on `put` at cap, evict back. `std::shared_ptr` for shared ownership; `std::move` for insertions. Sharded locks for concurrency.
+
+The phone screen is producer-consumer + LRU. The panel is the CUDA gauntlet — coding, project deep-dive, hardware-aware system design. The verbatim questions are the signal.
 
 ## Stage 3: Panel interviews (2 × 90 min)
 
@@ -93,3 +106,9 @@ Committee weighs technical depth (CUDA, system design) + values (innovation, int
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026)
 - [Levels.fyi — NVIDIA compensation](https://www.levels.fyi/companies/nvidia/salaries/software-engineer)
 - [NVIDIA Engineering Blog](https://developer.nvidia.com/blog/)
+
+---
+
+## The 1 thing to remember
+
+At NVIDIA (CUDA / AI Software), prep the 5 verbatim CUDA questions by name — memory access pattern detection, lock-free GPU queue, Kahan summation, producer-consumer shutdown, LRU with smart pointers. The candidate who only knows PyTorch loses the panel.

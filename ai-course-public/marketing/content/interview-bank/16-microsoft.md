@@ -1,8 +1,16 @@
 # 16. Microsoft (Azure AI / Copilot)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Copilot + Semantic Kernel + Azure AI Search stack). Color: company brand color as accent (Microsoft blue + slate). Headline on image: "Microsoft (Azure AI / Copilot) / Applied Scientist / 2026".
+
+> **TL;DR:** Microsoft's Azure AI / Copilot loop runs 5 stages and rejects ~98% of candidates — the signature pattern is Azure-first system design (name AI Search + Semantic Kernel + prompt caching + the 4-layer eval rubric, not generic infra). The winning candidate anchors comp with a Google offer, defends "Adaptable, Self-aware, Customer-obsessed, Drive for Results" behavioral framework, and names the <200ms p99 latency budget for Copilot at 10K QPS.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Team match → Offer
+```
+
 - **Role:** Applied Scientist
 - **Tech stack:** Python, PyTorch, Azure ML, Semantic Kernel, C#, TypeScript
-- **Comp band:** $250K-$1.1M+ (L62-L64)
+- **Comp band:** $250K-$1.1M+ total comp (L62-L64 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Onsite (4-5 rounds in 1-2 days)** | 2 coding → 1 system design (Azure) → 1 ML theory → 1 behavioral ("As Appropriate") | 1-2 days | ~30% advance |
 | 4. **Hiring committee** | Packet → committee vote | 1-2 weeks | ~60% advance |
 | 5. **Team match + offer** | Match to Azure AI / Copilot / Bing / M365 | 1-2 weeks | — |
+
+The loop feels conversational, but the comp negotiation is real — bring a top-of-band Google offer and the L63-L64 band opens up. Most candidates don't anchor and leave 15-20% on the table.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -33,6 +43,8 @@
 
 ### Q2.2: "Implement a thread-safe bounded blocking queue"
 **Answer:** `queue.Queue(maxsize=N)` is the standard answer. For higher concurrency: sharded queues with a dispatcher. Mention the wake-up correctness (notify_all vs. notify) for the bounded case.
+
+The phone screen is a BST-validation warmup. The onsite is the Azure-first gauntlet — coding, Azure-infra system design, ML theory, behavioral. Generic infra answers lose.
 
 ## Stage 3: Onsite (4-5 rounds)
 
@@ -102,3 +114,9 @@ Microsoft comp negotiates: base + RSU + sign-on + bonus. The play: come with a c
 - [r/leetcode — I cracked a Microsoft L63 (Senior) role (Nov 2025)](https://www.reddit.com/r/leetcode/comments/1osm7o9/i_cracked_a_microsoft_l63_senior_role_and_wanted/)
 - [Levels.fyi — Microsoft compensation](https://www.levels.fyi/companies/microsoft/salaries/software-engineer)
 - [Glassdoor — Microsoft Interview Questions (2026)](https://www.glassdoor.com/Interview/Microsoft-Interview-Questions-E1651.htm)
+
+---
+
+## The 1 thing to remember
+
+At Microsoft Azure AI / Copilot, anchor comp with a top-of-band Google offer, name every Azure component in the system design, and the L63-L64 band opens up — most candidates don't anchor and leave 15-20% on the table.

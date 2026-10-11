@@ -2,8 +2,27 @@
 
 - **Role:** AI Engineer (Copilot, Copilot Chat, Copilot Workspace)
 - **Tech stack:** Python, C#, TypeScript, Go, PyTorch, Hugging Face, vLLM, ONNX, Transformers, Vector DBs, OpenAI/Anthropic APIs
-- **Comp band:** $200K-$500K (IC3-IC4 Senior); IC5 (Senior+) $350K-$800K; IC6 Principal $500K-$1.2M (Levels.fyi 2026, after Microsoft leveling)
+- **Comp band:** $200K-$500K total comp (IC3-IC4 Senior); IC5 (Senior+) $350K-$800K total comp; IC6 Principal $500K-$1.2M total comp (Levels.fyi 2026, after Microsoft leveling) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (an LLM code completion — VS Code editor with a Copilot ghost-text suggestion streaming in). Color: GitHub dark (#0D1117) with Copilot gradient. Headline: "GitHub / AI Engineer / 2026".
+
+> **TL;DR:** GitHub's loop is the canonical AI-engineer interview — they test LLM fluency, code-specific embeddings, fine-tuning tradeoffs, and eval rigor, and the design round is almost always an inline suggestion or chat system. The winning candidate speaks vLLM/latency, names HumanEval + MBPP fluently, and treats eval as a first-class discipline.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                  GITHUB COPILOT LLM SERVING FLOW                  │
+├──────────────────────────────────────────────────────────────────┤
+│  Editor (VS Code) ──► debounce 200ms ──► prefix+suffix+context   │
+│         │                                              │          │
+│         ▼                                              ▼          │
+│   Tokenize / route ──► vLLM / proprietary Code-LLM ──► Stream   │
+│                                                                  │
+│  First token: <200ms │ Cost: $X per user-day │ Privacy: on-prem   │
+│                                                                  │
+│  Loop: accept/reject signal ──► Eval pipeline ──► Model retrain   │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +48,8 @@ GitHub's Copilot team is the canonical "AI for developers" interview. The loop t
 
 ### Q1.3: "Location + comp"
 **Answer:** GitHub is remote-friendly (after Microsoft acquisition). SF, NYC, Berlin, Vancouver are common. Some teams are remote-OK. Comp is Microsoft-band.
+
+GitHub's recruiter screen rewards candidates who can name the Copilot flywheel. The phone screen is where LLM fluency gets tested — a coding medium, a RAG-for-code ML question, and a system design that lands on inline suggestion or chat. Latency and cost should be on your tongue from minute one.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -66,6 +87,8 @@ GitHub's Copilot team is the canonical "AI for developers" interview. The loop t
 **Q3.4.2:** "Time you improved a model's quality metric by 10%+." STAR.
 **Q3.4.3:** "How do you handle LLM hallucination in a user-facing product?" — be specific.
 
+The onsite is 4 rounds across 1-2 days, and the system-design round is the centerpiece — Copilot Chat multi-turn or a code-review AI, both of which demand agent thinking. The ML deep-dive wants fine-tuning vs prompting tradeoffs defended, and the behavioral round is a "did you actually ship?" STAR test.
+
 ## Stage 4: Hiring committee
 Microsoft-style calibration. IC3 (Senior SDE) vs IC4 (Senior+) vs IC5 (Principal) is decided here. The bar for IC4 requires independent LLM feature ownership. IC5 requires influence on the Copilot platform or model-serving infra. Committee is cross-org and includes a senior leader.
 
@@ -90,3 +113,9 @@ GitHub comp is Microsoft-band: solid base, RSU refresh annually, ESPP. RSU vests
 - [Levels.fyi GitHub](https://www.levels.fyi/companies/github)
 - [Glassdoor GitHub interviews](https://www.glassdoor.com/Interview/GitHub-Interview-Questions-E422265.htm)
 - [LeetCode GitHub tagged](https://leetcode.com/company/github/)
+
+---
+
+## The 1 thing to remember
+
+At GitHub, the model is the product and the eval is the rubric — the IC4+ candidate is the one who can name HumanEval + MBPP from memory, defends fine-tuning tradeoffs, and treats every shipped LLM feature as a measurable artifact, not a vibe.

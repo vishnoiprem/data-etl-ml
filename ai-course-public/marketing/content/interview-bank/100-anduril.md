@@ -2,8 +2,31 @@
 
 - **Role:** ML Engineer / Computer Vision Engineer (Lattice, Sentry, Ghost Helicopter, Roadrunner, Bolt)
 - **Tech stack:** Rust, C++, Python, TypeScript, PyTorch, TensorRT, CUDA, ROS, gRPC, Kubernetes, embedded Linux
-- **Comp band:** $180K-$400K (L3-L4 Senior); L5 (Staff) $350K-$700K; L6 Principal $500K-$1.2M (Levels.fyi 2026; lower than Big Tech, but mission + equity)
+- **Comp band:** $180K-$400K total comp (L3-L4 Senior); L5 (Staff) $350K-$700K total comp; L6 Principal $500K-$1.2M total comp (Levels.fyi 2026; lower than Big Tech, but mission + equity) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a Sentry tower with a sensor stack fanning into a Lattice command view, with a Ghost helicopter silhouette). Color: Anduril black + signature copper. Headline: "Anduril / AI ML Engineer / 2026".
+
+> **TL;DR:** Anduril's loop is defense-tech-flavored and sensor-fusion-first — they care about real-time perception, embedded constraints, and the asymmetric cost of false positives (a $1M interceptor vs a bird), and they want engineers who can defend the mission as well as the model. The winning candidate names Kalman + multi-modal fusion fluently, treats the Lattice as the system, and is ready to discuss autonomous weapons thoughtfully.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                  ANDURIL SENSOR FUSION PIPELINE                   │
+├──────────────────────────────────────────────────────────────────┤
+│  Sensors (cam + radar + lidar + acoustic + IR)                   │
+│           │                                                       │
+│           ▼                                                       │
+│  Time-sync (PTP) ──► Per-sensor detector (Jetson / embedded)     │
+│           │                                                       │
+│           ▼                                                       │
+│  Tracker (Kalman + association) ──► Fused track state            │
+│           │                                                       │
+│           ▼                                                       │
+│  Lattice platform ──► C2 (command + control) ──► Interceptor     │
+│                                                                  │
+│  Asymmetric cost: FP = $1M interceptor on a bird                  │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +52,8 @@ Anduril is a defense-tech company building autonomous systems (Sentry towers, Gh
 
 ### Q1.3: "Citizenship, clearance, willingness to deploy"
 **Answer:** US citizenship is required for most roles. Active TS/SCI is a strong plus. Be honest about clearance status.
+
+Anduril's recruiter screen is the mission-and-clearance check. The phone screen is where sensor fusion shows up — expect a coding medium, an ML/CV question that tests drone detection, and a system design that lands on Lattice's sensor pipeline. False-positive cost should be on your tongue from minute one.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -65,6 +90,8 @@ Anduril is a defense-tech company building autonomous systems (Sentry towers, Gh
 **Q3.4.2:** "Time you had to defend a technical decision to a non-technical stakeholder." STAR — military customers are not engineers.
 **Q3.4.3:** "What's your view on autonomous weapons?" — be thoughtful. Anduril is controversial.
 
+The onsite is 4-5 rounds across 1-2 days, and the system-design round is the centerpiece — an autonomous drone perception stack or Lattice C2. The ML/CV deep-dive lands on adversarial conditions: low light, fog, camouflage. The behavioral round is a "defend a technical decision to a non-technical stakeholder" STAR, and the autonomous-weapons question is real, not rhetorical.
+
 ## Stage 4: Hiring committee
 Anduril's committee is a structured loop debrief. L4 (Senior) requires independent ownership of a perception / autonomy module. L5 (Staff) requires cross-team influence on the platform. L6 (Principal) is rare and requires org-level technical leadership. Clearance is a real filter — many candidates can't progress without one.
 
@@ -89,3 +116,9 @@ Anduril comp is below Big Tech for base, but equity is meaningful and the missio
 - [Levels.fyi Anduril](https://www.levels.fyi/companies/anduril-industries)
 - [Glassdoor Anduril interviews](https://www.glassdoor.com/Interview/Anduril-Industries-Interview-Questions-E5131445.htm)
 - [LeetCode Anduril tagged](https://leetcode.com/company/anduril/)
+
+---
+
+## The 1 thing to remember
+
+At Anduril, the cost of a false positive is a $1M interceptor and a diplomatic incident — the L4+ candidate is the one who designs sensor fusion with asymmetric costs on the whiteboard, not as an afterthought, and treats the mission as a constraint, not a poster.

@@ -2,8 +2,31 @@
 
 - **Role:** Forward Deployed Engineer (FDE) / ML Engineer (AIP — AI Platform)
 - **Tech stack:** Java, TypeScript, Python, Scala, Spark, Flink, Foundry, Ontology, AWS/Azure/GovCloud, PostgreSQL, Kubernetes
-- **Comp band:** $130K-$300K base + significant equity; senior $250K-$500K; staff $400K-$1M+ (Levels.fyi 2026, including equity)
+- **Comp band:** $130K-$300K base + significant equity; senior $250K-$500K total comp; staff $400K-$1M+ total comp (Levels.fyi 2026, including equity) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1.5-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (an ontology graph — entities, links, actions — with an AIP LLM agent overlay acting on the graph). Color: Palantir black + signature cyan. Headline: "Palantir / AI FDE / 2026".
+
+> **TL;DR:** Palantir's loop is customer-deployment-heavy and ontology-first — they care about FDE readiness, mission-critical AI, and the ability to ship AIP to defense, healthcare, and supply-chain customers under real pressure. The winning candidate speaks entity-resolution fluently, defends air-gapped deployment, and treats the ontology as the system, not just a data model.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                 PALANTIR ONTOLOGY + AIP FLOW                      │
+├──────────────────────────────────────────────────────────────────┤
+│  Enterprise sources ──► Connectors ──► Ontology (entities,      │
+│  (JDBC/S3/API/SFTP)         │            links, actions)         │
+│                              ▼                                    │
+│                       Foundry object store                       │
+│                              │                                    │
+│                              ▼                                    │
+│  AIP agent ◄── tools (query/transform/write) ◄── LLM planner    │
+│     │              │                                              │
+│     ▼              ▼                                              │
+│  Human-in-the-loop checkpoints ──► Audit log ──► Live write      │
+│                                                                  │
+│  Deployment: on-prem / air-gapped / GovCloud / customer VPC     │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +52,8 @@ Palantir's loop is unique: Forward Deployed Engineers are the primary hire, and 
 
 ### Q1.3: "Deployment willingness + clearance"
 **Answer:** Palantir FDEs travel (often 50%+). Be clear on willingness. Some roles require TS/SCI clearance.
+
+Palantir's recruiter screen is the deployment-fit check — they'll ask about travel, clearance, and customer-facing work. The coding screen is the bar reveal: medium-hard LeetCode, plus a system-design chat that lands on enterprise data integration. Ontology thinking should already be on your tongue by minute 30.
 
 ## Stage 2: Coding screen (60 min)
 
@@ -67,6 +92,8 @@ Palantir's loop is unique: Forward Deployed Engineers are the primary hire, and 
 ### Round 3.5: Hiring manager
 **Q3.5.1:** "Walk me through your favorite customer-facing project." Be specific about technical work and customer impact.
 
+The onsite is 5-6 rounds across 2-3 days — the longest of any loop in the bank. The deployment round is its own round, and air-gapped / on-prem architecture is the test. The architecture round will land on Foundry customer deployment, and the behavioral round is a customer-pushback STAR. Have a thoughtful answer about mission and controversy ready.
+
 ## Stage 4: Hiring committee
 Palantir's committee includes the site lead and a senior FDE. The bar is "can this person deploy to a government customer next quarter?" — practical, not theoretical. Senior requires independent deployment leadership. Staff requires cross-customer platform influence. Loop is long (2-3 days) and rigorous.
 
@@ -91,3 +118,9 @@ Palantir comp is high but with a lower base than FAANG and more equity weight. R
 - [Levels.fyi Palantir](https://www.levels.fyi/companies/palantir)
 - [Glassdoor Palantir interviews](https://www.glassdoor.com/Interview/Palantir-Interview-Questions-E236428.htm)
 - [LeetCode Palantir tagged](https://leetcode.com/company/palantir/)
+
+---
+
+## The 1 thing to remember
+
+At Palantir, the ontology is the moat and deployment is the discipline — the senior+ candidate is the one who builds AI on top of an integrated data model, ships air-gapped, and treats a defense customer as a peer, not a user.

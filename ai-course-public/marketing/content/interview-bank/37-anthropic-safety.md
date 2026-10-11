@@ -1,8 +1,16 @@
 # 37. Anthropic (Safety / Alignment)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "ANTHROPIC / AI SAFETY / 2026".
+
+> **TL;DR:** Anthropic's safety loop is the hardest filter in the file — the cumulative pass rate is ~1-2% and the bar is set by people who publish interpretability papers. The signature lens is **calibrated risk judgment under uncertainty** (deception, scheming, situational awareness), and the winning candidate reads the RSP and Constitutional AI by heart.
+
+```
+Recruiter (40%) → Phone (25%) → Onsite (25%) → Safety Review (50%) → Offer
+```
+
 - **Role:** AI Safety Researcher / Research Engineer (Alignment, Interpretability, Societal Impacts, RLHF)
 - **Tech stack:** Python, PyTorch, JAX, Triton, CUDA, transformer internals, evals tooling
-- **Comp band:** $300K-$900K (E3-E6); senior+ crosses $1.2M+; RSUs + cash, 4-year vest
+- **Comp band:** $300K-$900K total comp (E3-E6) | RSUs 4-year, 1-year cliff + cash; senior+ crosses $1.2M+
 - **Cumulative pass rate:** ~1-2% (safety is the hardest filter)
 
 > Note: This file covers the *safety-specific* loop at Anthropic, which differs from the general AI Engineer loop in file #2. Use both files together.
@@ -17,6 +25,8 @@
 | 4. **Safety review + hiring committee** | Cross-functional review with safety experts | 2-3 weeks | ~50% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+The safety loop at Anthropic is the most academically calibrated in this file. The bar is set by people who publish mechanistic interpretability papers, and the panel *tests* your views on AI risk — not just your technical chops.
+
 ## Stage 1: Recruiter screen (45 min — longer than typical)
 
 ### Q1.1: "Why Anthropic for safety work?"
@@ -28,6 +38,8 @@
 **Tip:** Anthropic *tests* your views. They want thoughtful, calibrated, mission-aligned people.
 
 ## Stage 2: Technical phone screens (3 x 60 min)
+
+The phone screens are dense and research-discriminatory. Transformer internals are expected at a level most candidates underestimate; if you can't whiteboard paged attention or RoPE, the safety case round will go badly.
 
 ### Q2.1: Coding: "Implement attention with KV-cache and FlashAttention-style tiling"
 **Answer:** Scaled dot-product attention, causal masking, KV-cache update, paged or tiled.
@@ -50,6 +62,8 @@ def attn(q, k, v, mask=None):
 **Tip:** Anthropic's safety loop is about *judgement under uncertainty*, not perfect answers.
 
 ## Stage 3: Onsite (4-5 rounds, 2-3 days)
+
+Two to three days, four to five rounds — the safety onsite is a marathon, not a sprint. Energy management matters more than usual: research first, then alignment deep-dive, then coding when fresh, then behavioral last.
 
 ### Round 3.1: Research deep-dive (90 min)
 - **Q:** "Walk through your most relevant research." (Should be interpretability, alignment, or RLHF.)
@@ -97,3 +111,9 @@ Cash + RSUs. Anthropic is top-of-market for safety roles — competitive with Op
 - [Anthropic Research](https://www.anthropic.com/research)
 - [Responsible Scaling Policy](https://www.anthropic.com/news/anthropics-responsible-scaling-policy)
 - [r/MachineLearning Anthropic thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Anthropic safety, calibrated beats clever — read the RSP, the Core Views, and Constitutional AI, then show you can think about deception and scheming with nuance, because the panel is grading judgment under uncertainty, not trivia.

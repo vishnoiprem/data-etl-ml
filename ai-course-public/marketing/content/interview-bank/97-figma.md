@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer / AI Engineer (Figma AI, Search, Recommendations, Design Generation)
 - **Tech stack:** TypeScript, C++, Rust, Python, React, WebGL, Postgres, Redis, Kubernetes, PyTorch, Hugging Face, multi-modal models
-- **Comp band:** $200K-$500K (L3-L4 Senior); L5 (Staff) $400K-$900K; L6 Principal $600K-$1.3M (Levels.fyi 2026)
+- **Comp band:** $200K-$500K total comp (L3-L4 Senior); L5 (Staff) $400K-$900K total comp; L6 Principal $600K-$1.3M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a Figma canvas with an AI-generated frame and a multi-modal prompt overlay). Color: Figma multicolor on coral (#F24E1E). Headline: "Figma / AI Engineer / 2026".
+
+> **TL;DR:** Figma's loop is multi-modal and velocity-first — they care about text-to-UI generation, image+text retrieval, and eval rigor across visual quality, prompt faithfulness, and style consistency. The winning candidate ships a Figma critique unprompted, names the data pipeline (design files → JSON), and treats renderability as a release gate.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       FIGMA HIRING FUNNEL                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Tech Phone (35%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Loop Debrief      │
+│          (25%)                                  (60%)           │
+│                                                                  │
+│  Committee ──► Offer (L4 vs L5 split) ──► SF / NYC team match    │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Figma's AI org focuses on three areas: (1) Figma AI (generate, edit, summarize),
 
 ### Q1.3: "Location + comp"
 **Answer:** SF and NYC primary. Some remote. Comp is competitive Bay Area.
+
+Figma's recruiter screen rewards candidates who can name a Figma AI feature from the last 6 months. The phone screen is where multi-modal shows up — expect a coding medium, a text-to-UI LLM question, and a system design that lands on template search or plugin recommendations with image+text retrieval.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -65,6 +84,8 @@ Figma's AI org focuses on three areas: (1) Figma AI (generate, edit, summarize),
 **Q3.4.2:** "Time you had to design for edge cases (mobile, low-bandwidth)." STAR.
 **Q3.4.3:** "What's your favorite Figma feature and how would you improve it?" — be specific.
 
+The onsite is 4 rounds across 1-2 days, and velocity shows up everywhere. The system-design round will pull from Figma Make or plugin recommendations; the ML deep-dive will test multi-modal evaluation across FID, CLIP-score, and human eval. The behavioral round is a "what's broken and how would you fix it?" test — bring a real Figma feature critique.
+
 ## Stage 4: Hiring committee
 Figma's committee is a structured loop debrief. L4 (Senior) requires independent ML feature ownership. L5 (Staff) requires cross-team influence on the platform. L6 (Principal) is rare. Committee is fast — usually 1 week.
 
@@ -89,3 +110,9 @@ Figma comp is competitive with Bay Area. RSU is 4-year vest. They negotiate on e
 - [Levels.fyi Figma](https://www.levels.fyi/companies/figma)
 - [Glassdoor Figma interviews](https://www.glassdoor.com/Interview/Figma-Interview-Questions-E2865493.htm)
 - [LeetCode Figma tagged](https://leetcode.com/company/figma/)
+
+---
+
+## The 1 thing to remember
+
+At Figma, renderability is a release gate — the L4+ candidate is the one who treats every text-to-UI output as a renderable artifact, not just a token sequence, and names fidelity + style consistency on the eval rubric before the interviewer does.

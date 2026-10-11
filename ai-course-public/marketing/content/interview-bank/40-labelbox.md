@@ -1,8 +1,16 @@
 # 40. Labelbox
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "LABELBOX / AI DATA PLATFORM / 2026".
+
+> **TL;DR:** Labelbox's loop is **customer-centric and small-company fast** — the company is the platform that 300+ AI teams build on top of, and every answer bends toward labeling UX, active learning, and consensus. The signature stack is **Annotate + Catalog + Model Foundry + Boost**, and the winning candidate shows customer empathy by reflex.
+
+```
+Recruiter (55%) → Phone (45%) → Onsite (35%) → Tech Panel (60%) → Offer
+```
+
 - **Role:** ML Engineer / Forward Deployed Engineer (Labeling Platform, Catalog, Model Foundry)
 - **Tech stack:** Python, PyTorch, TensorFlow, React/Typescript, GraphQL, Postgres, Kubernetes, Spark
-- **Comp band:** $200K-$550K (L3-L5); senior crosses $700K+; RSUs + cash, 4-year vest
+- **Comp band:** $200K-$550K total comp (L3-L5) | RSUs 4-year, 1-year cliff + cash; senior crosses $700K+
 - **Cumulative pass rate:** ~3-4%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Labelbox's loop is the most "small-company" in the data-platform space — expect to wear multiple hats, ship fast, and partner with customers directly. "Customer First" is a primary signal, not a slide.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Labelbox?"
@@ -26,6 +36,8 @@
 **Tip:** Show you understand the labeling workflow deeply — not just "I labeled some data."
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens are where Labelbox quietly tests for *data-platform* thinking — if your labeling design doesn't reach for model-assisted pre-labeling and active learning, you're missing the Labelbox frame.
 
 ### Q2.1: Coding: "Implement a debounce function"
 **Answer:** Closure with timer/timeout. Edge cases: leading vs trailing edge, cancel, max wait.
@@ -48,6 +60,8 @@ def debounce(fn, wait, leading=False):
 **Tip:** Reference *Model Foundry* (train models in-platform) and *Boost* (active learning).
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and customer-obsessed. Coding, then multi-tenant labeling platform system design, then ML deep-dive (often consensus algorithms or eval design), then "Customer First" behavioral last.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: LRU cache. O(1) get/put.
@@ -91,3 +105,9 @@ Cash + RSUs. Labelbox is competitive for the size — below FAANG top-of-band. N
 - [Labelbox blog](https://labelbox.com/blog/)
 - [Labelbox docs](https://docs.labelbox.com/)
 - [Glassdoor Labelbox interviews](https://www.glassdoor.com/Interview/Labelbox-Interview-Questions-E3268993.htm)
+
+---
+
+## The 1 thing to remember
+
+At Labelbox, the labeling platform is the product — name Annotate, Catalog, Model Foundry, and Boost, and reach for consensus algorithms and active learning by reflex, because customer empathy is the cultural signal and the technical one.

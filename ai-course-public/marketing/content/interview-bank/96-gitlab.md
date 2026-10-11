@@ -2,8 +2,25 @@
 
 - **Role:** AI Engineer (GitLab Duo, Code Suggestions, Chat)
 - **Tech stack:** Ruby, Go, Python, TypeScript, Vue, Postgres, Redis, Gitaly, Kubernetes, PyTorch, Hugging Face, Anthropic / Vertex AI / self-hosted models
-- **Comp band:** $150K-$400K (IC3-IC4 Senior); Staff (IC5) $300K-$650K; Principal $400K-$900K (Levels.fyi 2026; comp varies by country)
+- **Comp band:** $150K-$400K total comp (IC3-IC4 Senior); Staff (IC5) $300K-$650K total comp; Principal $400K-$900K total comp (Levels.fyi 2026; comp varies by country) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a self-hosted LLM box with a Duo MR-review comment thread, all running on-prem). Color: GitLab orange (#FC6D26) + tan. Headline: "GitLab / AI Engineer / 2026".
+
+> **TL;DR:** GitLab's loop is async-first and self-hosted-flavored — they care about writing clarity, on-prem LLM tradeoffs, and shipping to enterprise customers with strict security, and the design round almost always lands on Duo Chat or self-hosted serving. The winning candidate writes in structured sentences, knows GPU scheduling, and treats the handbook as required reading.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       GITLAB HIRING FUNNEL                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (55%) ──► Take-Home (50%) ──► Tech Phone    │
+│                                                                  │
+│  Phone ──► Onsite (3-4 rounds, often async) ──► Written Debrief  │
+│        (35%)                                       (65%)         │
+│                                                                  │
+│  Committee ──► Offer (IC4 vs IC5 split) ──► Remote team match    │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -36,6 +53,8 @@ GitLab is a fully-remote, async-first company. The interview loop itself reflect
 GitLab's take-home is typically a written exercise: design a system, or write a small LLM-based application, or analyze a tradeoff. Submit a markdown doc or PR.
 
 **Tip:** Take your time. They want clarity, structure, and depth. Show your work.
+
+GitLab's recruiter screen checks async-fit, the take-home is a written design exercise, and the phone screen is the first live conversation. Expect medium LeetCode, a self-hosted LLM question, and a Duo Chat design that tests prompt caching and model-selection instincts.
 
 ## Stage 3: Technical phone screen (60 min)
 
@@ -72,6 +91,8 @@ GitLab's take-home is typically a written exercise: design a system, or write a 
 **Q4.4.2:** "Time you worked async across timezones." STAR.
 **Q4.4.3:** "What would you change about GitLab's product?" — be specific.
 
+The onsite is 3-4 rounds across 1-2 days and frequently async-friendly. The system-design round will pull from Duo MR review or self-hosted LLM serving — GPU scheduling, model caching, cost attribution. The behavioral round is often written and tests shipping under security constraints and working across timezones.
+
 ## Stage 5: Hiring committee
 GitLab uses async written panel debriefs. Each interviewer writes up their notes in a shared doc, then the committee calibrates level and decision. IC3 vs IC4 (Senior) is decided here. IC5 (Staff) requires cross-team influence. Loop typically wraps in 1-2 weeks.
 
@@ -96,3 +117,9 @@ GitLab comp is solid for remote work but varies by country. US band is competiti
 - [GitLab Duo Documentation](https://docs.gitlab.com/ee/user/duo/)
 - [Levels.fyi GitLab](https://www.levels.fyi/companies/gitlab)
 - [Glassdoor GitLab interviews](https://www.glassdoor.com/Interview/GitLab-Interview-Questions-E891556.htm)
+
+---
+
+## The 1 thing to remember
+
+At GitLab, the writing is the work — the IC4+ candidate is the one who treats the handbook as required reading, names self-hosted LLM tradeoffs unprompted, and ships async with a paper trail that anyone in any timezone can follow.

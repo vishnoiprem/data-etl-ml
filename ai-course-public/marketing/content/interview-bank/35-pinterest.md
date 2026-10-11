@@ -1,8 +1,16 @@
 # 35. Pinterest (ML / Visual Search / Ranking)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "PINTEREST / AI VISUAL SEARCH / 2026".
+
+> **TL;DR:** Pinterest's loop is **graph-structured and creator-positive** — Pin → Board → Pinner is the relationship you have to think in. The signature stack is **PinSage + PinnerFormer + Pixie** (all published), and the winning candidate thinks about long-tail creators, not just consumers.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Home Feed, Visual Search, Ads Ranking, Shop)
 - **Tech stack:** Python, PyTorch, C++, MXNet, Flink, Kafka, HBase, Pinball (workflow), Manas (search)
-- **Comp band:** $250K-$700K (L4-L6); senior crosses $900K+; RSUs vest 4-year
+- **Comp band:** $250K-$700K total comp (L4-L6) | RSUs 4-year, 1-year cliff; senior crosses $900K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Onsite (4 rounds)** | Coding, system design, ML, behavior | 1-2 days | ~30% advance |
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
+
+Pinterest's loop is the most "publishes-their-work" in visual search — the panel knows PinSage and PinnerFormer by heart, and so should you. "Put pinners first" is the cultural operating system; show you think about both consumers and creators.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -27,6 +37,8 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
+The phone screens are where Pinterest quietly checks for graph-thinking — if you reach for random walks, two-tower retrieval, or PinSage-style aggregation in the ML round, you've already cleared the bar.
+
 ### Q2.1: Coding: "Implement K-means clustering"
 **Answer:** Lloyd's algorithm with random init + multiple restarts.
 **Tip:** ML-flavored coding questions are common.
@@ -36,6 +48,8 @@
 **Tip:** Pinterest publishes — reference *PinSage*, *PinnerFormer*, *Pixie*.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and creator-conscious. Coding, then embedding-serving system design (the 100M+ QPS question is real), then ML deep-dive (often cold-start or Ads relevance), then "put pinners first" behavioral last.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Word search II (Boggle). Trie + DFS with pruning.
@@ -79,3 +93,9 @@ Cash + RSUs. Pinterest is competitive but typically below FAANG top-of-band. Neg
 - [Pinterest Engineering blog](https://medium.com/pinterest-engineering)
 - [Pinterest Research](https://research.pinterest.com/)
 - [r/MachineLearning Pinterest thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Pinterest, "Pin → Board → Pinner" is the relationship you think in — name PinSage, PinnerFormer, and Pixie, and reach for graph features and creator-positive framing, because 50B+ pins is a graph problem, not a vector problem.

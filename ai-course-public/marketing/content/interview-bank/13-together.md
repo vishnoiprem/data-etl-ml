@@ -23,6 +23,8 @@ Recruiter (60%) → Phone (40%) → Onsite (30%) → Reference + offer
 | 3. **Onsite (4 rounds, 1 day)** | Coding → GPU systems → ML deep-dive → behavioral | 1-2 days | ~30% advance |
 | 4. **Reference + offer** | Comp negotiation real | 1-2 weeks | — |
 
+The loop is GPU-heavy end-to-end — every system-design question assumes the inference context. Most PyTorch-only candidates lose the GPU systems round despite strong ML signal.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Tell me about your background"
@@ -52,6 +54,8 @@ __global__ void reduce(float* in, float* out, int n) {
 ```
 Warp shuffle for the last 32 elements (faster than shared memory).
 **Tip:** Reduction is the Together warmup.
+
+The phone screen is a CUDA reduction. The onsite is the GPU gauntlet — coding, GPU systems, ML deep-dive, behavioral. CUDA + Triton + FlashAttention is the signal.
 
 ## Stage 3: Onsite (4 rounds)
 
@@ -122,3 +126,9 @@ Together comp is base + RSU + sign-on. Cash component is decent; equity is meani
 - [FlashAttention paper](https://arxiv.org/abs/2205.14135)
 - [vLLM — PagedAttention paper](https://arxiv.org/abs/2309.06180)
 - [Levels.fyi — Together AI compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At Together, name the FlashAttention tile-based SRAM trick and the 16-token paged-attention page size — the candidate who only knows PyTorch loses the GPU systems round.

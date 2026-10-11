@@ -1,8 +1,17 @@
 # 19. Databricks (Mosaic AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Bronze-Silver-Gold Medallion architecture on Delta Lake). Color: company brand color as accent (Databricks red). Headline on image: "Databricks (Mosaic AI) / ML Engineer / 2026".
+
+> **TL;DR:** Databricks's loop runs 5 stages and rejects ~97% of candidates — the signature is the systems-flavored coding round (windowed aggregation with watermark for late-arriving data, event-time joins, K-Means in PySpark RDD API). The winning candidate knows Spark internals (Catalyst, Tungsten, DAG, shuffle cost, data skew), names the Bronze-Silver-Gold layers, and anchors comp with a Snowflake or Google offer.
+
+```
+Recruiter (50%) → Coding screen (40%) → Onsite (30%) → Committee (60%) → Team match → Offer
+                                            └── systems-flavor coding ──┘
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, PySpark, SQL, MLflow, Delta Lake, Unity Catalog
-- **Comp band:** $180K-$1.4M+ (L3-L7)
+- **Comp band:** $180K-$1.4M+ total comp (L3-L7 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -14,6 +23,8 @@
 | 3. **Virtual onsite (4-5 rounds in 1-2 days)** | 2 coding → 1 system design (ML platform) → 1 ML deep-dive → 1 behavioral | 1-2 days | ~30% advance |
 | 4. **Hiring committee** | Packet → committee vote | 1 week | ~60% advance |
 | 5. **Team match + offer** | Match to a team | 1 week | — |
+
+The loop is fast (1 week post-onsite) and assumes Spark + ML platform depth — generic ML candidates lose the systems-flavored coding round despite strong algorithm signal.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -50,6 +61,8 @@ SELECT MAX(salary) FROM emp WHERE salary < (SELECT MAX(salary) FROM emp);
 -- With window:
 SELECT salary FROM (SELECT salary, DENSE_RANK() OVER (PARTITION BY dept ORDER BY salary DESC) rk FROM emp) WHERE rk=2;
 ```
+
+The phone screen is a windowed-aggregation + SQL warmup. The onsite is the ML-platform gauntlet — coding (systems-flavor), ML implementation, ML-platform system design, behavioral. Spark + Delta + MLflow is the bet.
 
 ## Stage 3: Virtual onsite (4-5 rounds)
 
@@ -121,3 +134,9 @@ Databricks comp is base + RSU + sign-on. Total $180K-$1.4M+ L3-L7. The play: anc
 - [Final Round AI — Databricks Interview Process: Complete 2026 Guide](https://www.finalroundai.com/blog/databricks-interview-process)
 - [Databricks — Interview Prep (Official)](https://www.databricks.com/company/careers/interview-prep)
 - [Levels.fyi — Databricks compensation](https://www.levels.fyi/companies/databricks/salaries/software-engineer)
+
+---
+
+## The 1 thing to remember
+
+At Databricks, name the Spark shuffle cost + data-skew fix and the Bronze-Silver-Gold Medallion architecture — generic ML interview prep loses the systems-flavored coding round.

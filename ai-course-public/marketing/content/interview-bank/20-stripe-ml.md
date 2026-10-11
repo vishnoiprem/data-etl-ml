@@ -1,8 +1,18 @@
 # 20. Stripe (ML Platform)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Radar fraud pipeline + idempotency keys). Color: company brand color as accent (Stripe indigo). Headline on image: "Stripe (ML Platform) / ML Engineer (Radar / Fraud) / 2026".
+
+> **TL;DR:** Stripe's loop runs 5 stages (HackerRank OA first) and rejects ~97% of candidates — the signature round is Bug Squash (find and fix a bug in an unfamiliar codebase, graded on process, not the answer), backed by the open-book Integration round. The winning candidate bakes idempotency into every payments answer (24h TTL, key-reuse corner case returns 422), matches the codebase's idiomatic patterns, and defends the optimistic-thoroughness values.
+
+```
+Recruiter (50%) → HackerRank (50%) → Phone (40%) → Onsite (30%) → Committee → Offer
+                                                      ├── Bug Squash (signature) ──┤
+                                                      └── Integration (open-book) ─┘
+```
+
 - **Role:** ML Engineer (Radar / Fraud)
 - **Tech stack:** Python, Ruby, Scala, Spark, Kafka, ML infrastructure
-- **Comp band:** $200K-$1.2M+ (L1-L5, flat titles)
+- **Comp band:** $200K-$1.2M+ total comp (L1-L5, flat titles) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -14,6 +24,8 @@
 | 3. **Technical screen (60 min)** | Live coding, practical scenario | 1-2 weeks | ~40% advance |
 | 4. **Virtual onsite (5 rounds in 1-2 days)** | Coding → Bug Squash → Integration → System Design → Behavioral | 1-2 days | ~30% advance |
 | 5. **Hiring committee + offer** | Packet → committee vote | 1-2 weeks | — |
+
+The loop is breakneck and information-dense — Bug Squash and the open-book Integration round are the differentiators. Most candidates treat them as generic debugging + coding and lose the loop.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -46,6 +58,8 @@ class PaymentStateMachine:
 ```
 Stripe graders want idempotency baked in: each transition writes a `transition_id` (UUID) that's checked before applying.
 **Tip:** Idempotency keys are non-negotiable in payments.
+
+The phone screen is a payment-state-machine warmup. The onsite is the payments-domain gauntlet — coding, Bug Squash, Integration (open-book), system design, behavioral. Idempotency is the gate.
 
 ## Stage 3: Virtual onsite (5 rounds)
 

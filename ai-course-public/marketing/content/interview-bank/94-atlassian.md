@@ -47,6 +47,8 @@ Atlassian's loop is well-structured but slightly less intense than FAANG — the
 ### Q1.3: "Location + remote"
 **Answer:** Atlassian is "Team Anywhere" — fully remote globally. They pay in local bands. This is a real perk.
 
+Atlassian's recruiter screen rewards candidates who can name the open-work culture. The phone screen is where Rovo and RAG show up — expect a coding medium, a RAG-style ML question, and a system design that almost always touches cross-product search with permissions.
+
 ## Stage 2: Technical phone screen (60 min)
 
 ### Q2.1: Coding — "Merge K sorted lists" or "LRU cache"
@@ -95,6 +97,8 @@ def mergeKLists(lists):
 **Q3.4.2:** "Time you disagreed with a teammate on architecture." STAR.
 **Q3.4.3:** "How do you embody Atlassian's values (Open, Bold, Playful, Customer-first)?" — be specific.
 
+The onsite is structured and predictable — 4 rounds in 1 day, each with a clear rubric. The system-design round will pull from Rovo agents, cross-product search, or enterprise search; the ML deep-dive will test eval methodology, not just model accuracy. Bring a STAR about shipping ML into an existing workflow, not into a greenfield chat.
+
 ## Stage 4: Hiring committee
 Atlassian's committee is a structured loop debrief where the interviewers share notes and calibrate level. IC3 vs IC4 (Senior) vs IC5 (Staff) is decided here. The bar is high but the loop is more forgiving than FAANG. Loop typically wraps in 1-2 weeks.
 
@@ -119,3 +123,9 @@ Atlassian comp is good but below FAANG. Remote is genuine — they pay in local 
 - [Levels.fyi Atlassian](https://www.levels.fyi/companies/atlassian)
 - [Glassdoor Atlassian interviews](https://www.glassdoor.com/Interview/Atlassian-Interview-Questions-E115075.htm)
 - [LeetCode Atlassian tagged](https://leetcode.com/company/atlassian/)
+
+---
+
+## The 1 thing to remember
+
+At Atlassian, permissions are part of the model — the IC4+ candidate is the one who designs Rovo retrieval as access-controlled from day one, not as a post-launch patch.

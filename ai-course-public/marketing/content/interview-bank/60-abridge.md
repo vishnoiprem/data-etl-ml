@@ -82,7 +82,7 @@ def chunk_by_speaker(transcript, max_chunk_sec=30):
 - **Q3.5.2:** "What's the next 2 years of clinical AI look like?"
 
 ## Stage 4: Hiring committee
-Abridge's committee is high-bar and includes clinicians. They look for: (a) production ML chops (you should have shipped real-time systems), (b) clinical workflow curiosity, (c) humility about AI's role in healthcare, (d) regulatory awareness (HIPAA, FDA SaMD). Red flags: never having shipped to production, no healthcare exposure, weak on real-time systems.
+Abridge's committee is high-bar and includes clinicians. They look for: (a) production ML chops (you should have shipped real-time systems), (b) clinical workflow curiosity, (c) humility about AI's role in healthcare, (d) regulatory awareness (HIPAA, FDA SaMD). Red flags: never having shipped to production, no healthcare exposure, weak on real-time systems. The committee treats "real-time" as the live filter — a candidate who can talk partial ASR, diarization, and EHR integration in the same answer is in a different league than one who can describe a batch pipeline.
 
 ## Stage 5: Offer
 Base is at the high end ($220K-$320K+ for senior), equity is meaningful (private, high valuation). Negotiation: equity, sign-on, level.
@@ -105,3 +105,9 @@ Base is at the high end ($220K-$320K+ for senior), equity is meaningful (private
 - [Abridge clinical research](https://www.abridge.com/research)
 - [Abridge Glassdoor](https://www.glassdoor.com/Interview/Abridge-Interview-Questions-E3509700.htm)
 - [Levels.fyi Abridge](https://www.levels.fyi/companies/abridge)
+
+---
+
+## The 1 thing to remember
+
+Have a real-time ML shipping story ready for the system design round — Abridge's signature question is the transcription pipeline with sub-500ms partials, and the candidate who has shipped streaming ASR in production (and can name their p99 latency) wins the clinician-staffed committee, while batch-only stories are politely closed.

@@ -1,8 +1,16 @@
 # 38. OpenAI (Research / Applied Research)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "OPENAI / AI RESEARCH / 2026".
+
+> **TL;DR:** OpenAI's research loop is the most competitive in the file — ~1% pass rate and the bar is set by people who trained frontier models. The signature lens is **research taste** (asking the question behind the question), and the winning candidate is current on o1/o3, R1, Sora, and has frontier-scale systems thinking.
+
+```
+Recruiter (40%) → Phone (25%) → Onsite (25%) → Research Committee (50%) → Offer
+```
+
 - **Role:** Research Engineer / Member of Technical Staff (Reasoning, Multimodal, Agents, Alignment)
 - **Tech stack:** Python, PyTorch, JAX, Triton, CUDA, transformer internals, distributed training (FSDP, Megatron), RLHF infra
-- **Comp band:** $400K-$1.5M+ (E3-E7); senior+ crosses $2M+; cash + RSUs + profit units, 4-year vest
+- **Comp band:** $400K-$1.5M+ total comp (E3-E7) | RSUs 4-year, 1-year cliff + cash + profit units; senior+ crosses $2M+
 - **Cumulative pass rate:** ~1%
 
 > Note: This file covers the *research-focused* loop at OpenAI. For the general AI Engineer loop, see file #1. Use both together.
@@ -17,6 +25,8 @@
 | 4. **Research committee + hiring** | Cross-functional review, calibration | 2-3 weeks | ~50% advance |
 | 5. **Offer** | Comp, team match, profit units | 1 week | — |
 
+OpenAI's research loop is the longest and most selective in the file — 2-3 weeks per stage, 2-3 days onsite, 4-5 rounds, and a final committee that has *veto* power. Most "hire" votes still result in "no hire" because the bar is set by the very best.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why OpenAI for research?"
@@ -28,6 +38,8 @@
 **Tip:** OpenAI researchers are deeply read. Hand-wavey answers score poorly.
 
 ## Stage 2: Technical phone screens (3 x 60 min)
+
+The phone screens are where OpenAI quietly tests *research taste* — the ML research round is a paper discussion, not a system design. If you can't articulate the o1/R1 line of work with both empirical and theoretical nuance, you'll struggle on-site.
 
 ### Q2.1: Coding: "Implement a transformer training loop with mixed precision"
 **Answer:** PyTorch-style loop with autocast, gradient scaler, FSDP sharding, checkpoint.
@@ -51,6 +63,8 @@ for batch in loader:
 **Tip:** OpenAI builds *frontier-scale* infra. Show you understand the trade-offs.
 
 ## Stage 3: Onsite (4-5 rounds, 2-3 days)
+
+Two to three days, four to five rounds — the OpenAI research onsite is a marathon. The research deep-dive (90 min) is the single most discriminating round; show *taste* by asking the question behind the question.
 
 ### Round 3.1: Research deep-dive (90 min)
 - **Q:** "Walk me through your most relevant research." (Should be at the frontier of what you're working on.)
@@ -98,3 +112,9 @@ Cash + RSUs + *profit units* (a unique OpenAI compensation instrument). Total co
 - [OpenAI Research](https://openai.com/research/)
 - [o1 system card](https://openai.com/index/openai-o1-system-card/)
 - [r/MachineLearning OpenAI thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At OpenAI research, taste wins — be current on o1/o3, R1, Sora, and Llama, and show you ask the question behind the question, because "research taste" is the signal the committee is grading, not paper count.

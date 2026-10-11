@@ -69,6 +69,8 @@ class Scheduler:
 
 ## Stage 3: Onsite (4 rounds)
 
+The onsite is dense and operations-flavored. Coding, then real-time dispatch system design, then ML deep-dive (often demand forecasting or ranking), then "we win together" behavioral last.
+
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Top K most frequent elements. Counter + heap.
 - Q: Two sum / Three sum / Four sum. Hash map and DP variants.
@@ -111,3 +113,9 @@ Cash + RSUs. DoorDash is competitive — FAANG-tier for senior+. Negotiation is 
 - [DoorDash Engineering blog](https://doordash.engineering/)
 - [DoorDash ML papers](https://doordash.engineering/tag/machine-learning/)
 - [r/MachineLearning DoorDash thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At DoorDash, every model is a logistics model — name Dispatch, Dasher Assignment, and Ads, then reach for Hungarian matching and switchback experiments, because "30-minute delivery" is the constraint the panel holds you to.

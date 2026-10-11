@@ -1,8 +1,17 @@
 # 15. Inflection AI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Pi empathy + long-context dialogue). Color: company brand color as accent (Inflection peach). Headline on image: "Inflection AI / AI Engineer / 2026".
+
+> **TL;DR:** Inflection's loop runs 4 stages (~95% reject) — the signature is the standalone safety/values round (separate interviewer, like Anthropic's), focused on emotional-safety: detecting distress, preventing sycophancy, calibrated empathy. The winning candidate defends the emotional-intelligence moat over pure-task-completion, builds the 3-layer long-context memory (short + medium + long), and pushes back on Pi's product with empathy, not agreement.
+
+```
+Recruiter (60%) → Phone (40%) → Onsite (30%) → Reference + offer
+                                       └── safety/values round ──┘
+```
+
 - **Role:** AI Engineer
 - **Tech stack:** Python, PyTorch, JAX, CUDA, Triton
-- **Comp band:** $200K-$1M+ (L3-L6)
+- **Comp band:** $200K-$1M+ total comp (L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen** | 1-2 coding + ML fundamentals | 1-2 weeks | ~40% advance |
 | 3. **Onsite (4 rounds, 1 day)** | Coding → ML deep-dive → safety/values round → behavioral | 1-2 days | ~30% advance |
 | 4. **Reference + offer** | Comp negotiation real; mission-fit matters | 1-2 weeks | — |
+
+The loop looks generic on paper, but the safety/values round is a separate interviewer with its own grader — most candidates treat it as a behavioral sub-question and lose.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -39,6 +50,8 @@ def local_global_attn(Q, K, V, window=4096, n_global=64):
     return combined
 ```
 **Tip:** Sliding window + global tokens is the Pi-canonical pattern.
+
+The phone screen is sliding-window + global tokens. The onsite is the dialogue + safety gauntlet — coding, ML deep-dive, safety/values, behavioral. Empathy is the moat.
 
 ## Stage 3: Onsite (4 rounds)
 
@@ -109,3 +122,9 @@ Inflection comp is base + RSU + sign-on. SF / Palo Alto hub. Cash component is d
 - [Inflection AI Engineering Blog](https://inflection.ai/blog)
 - [Mustafa Suleyman — Inflection AI](https://www.linkedin.com/in/mustafasuleyman/)
 - [Levels.fyi — Inflection compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At Inflection, the safety/values round is the gate — name the 3-layer memory, the high-precision emotional-distress protocol, and the calibrated-empathy anti-sycophancy answer, or you lose the loop.

@@ -3,6 +3,8 @@
 > **The complete AI/ML interview prep bank** — 100 companies, 1,500+ real questions with real answers, in a single navigable format.
 > Generated: 2026-10-11. Sources: public interview reports, official company prep pages, Glassdoor, Reddit AMAs, LeetCode discuss.
 
+This bank collects real, question-level prep for 100 of the most-hired AI/ML orgs in the world — frontier labs, big-tech AI teams, AI-native startups, and enterprise integrations. Each file follows the same hiring-loop template: recruiter screen, technical phone screen, full onsite (coding + system design + ML deep-dive + behavioral), hiring committee, and offer stage — with worked answers, comp bands, and pass rates. Use it as a single navigable index when targeting 2-3 companies at a time, or as a longitudinal map of the AI hiring market across tiers. The bank is written in 2026 against Levels.fyi 2026 data, current Glassdoor interviews, and public engineering blogs.
+
 ---
 
 ## The format (per company)
@@ -219,11 +221,23 @@ The companies that are integrating AI into existing products. Stronger on domain
 
 ## How to use this bank
 
-1. **Pick 2-3 target companies** based on the role + tech stack + comp band.
-2. **Read the full file for each target company**, especially the real candidate report at the end.
-3. **Practice the 5-7 questions per stage** in a mock loop.
-4. **Compare the comp bands** across companies to set your negotiation anchors.
-5. **Update the file** with new questions after each loop (your experience helps the next candidate).
+1. **Pick 2-3 target companies** from the tier that matches your level (Tier 1 = frontier, Tier 4 = enterprise). Don't shotgun — depth beats breadth.
+2. **Read the full file** for each target — start with the TL;DR and "The 1 thing to remember," then drill into the real questions, the system design, and the ML deep-dive rounds.
+3. **Mock-loop the 5 questions per stage** out loud. Use the real-candidate report at the bottom of each file as your benchmark for what good sounds like.
+4. **Update the file with new questions** after each loop. Your experience is the next candidate's prep.
+
+---
+
+## How each file is structured (the 6 Medium publishing elements)
+
+Every company file in this bank follows the same editorial template, so the bank reads as a series, not 100 loose posts:
+
+1. **Hero image spec** — a 1400×788 px mood-and-composition brief for the article's lead image.
+2. **TL;DR** — a 2-3 sentence hook: the one-line pitch, the most-asked signature round, and what the winning candidate does.
+3. **ASCII flow diagram** — a hiring funnel, or a domain-specific architecture (Waymo's autonomy stack, Datadog's metrics pipeline, Snowflake's medallion, GitHub Copilot's LLM serving, Palantir's ontology + AIP).
+4. **1-2 narrative transition sentences** between major sections, so the file reads like prose, not a checklist.
+5. **Uniform comp band format** — `$XXXK-$YYY total comp (LEVEL: TITLE) | RSUs 4-year, 1-year cliff` — directly comparable across files.
+6. **"The 1 thing to remember"** — one memorable, specific, actionable sentence at the very bottom of every file.
 
 ---
 

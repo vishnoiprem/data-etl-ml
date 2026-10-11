@@ -1,8 +1,16 @@
 # 39. Scale AI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "SCALE AI / DATA ENGINE / 2026".
+
+> **TL;DR:** Scale's loop is **data-centric and operational** — the company is the data layer of the AI revolution, and every answer bends toward labeling quality, eval rigor, and consensus. The signature stack is **Data Engine + SEAL + GenAI Platform**, and the winning candidate shows that "data is the moat" by reflex.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Data Engine, Fine-tuning, Evaluation, RLHF, SEAL)
 - **Tech stack:** Python, PyTorch, CUDA, Ray, Kubernetes, Kafka, Postgres, React/Typescript (full-stack)
-- **Comp band:** $200K-$600K (L3-L5); senior crosses $800K+; RSUs + cash, 4-year vest
+- **Comp band:** $200K-$600K total comp (L3-L5) | RSUs 4-year, 1-year cliff + cash; senior crosses $800K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Scale's loop is operationally flavored — the panel wants to see that you can ship a system that survives contact with thousands of annotators and petabytes of data. "Build Trust" is a primary signal, not a vibe.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Scale for ML?"
@@ -26,6 +36,8 @@
 **Tip:** Show you understand the "bitter lesson" — data and eval are the moat.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens are where Scale quietly tests for *data-centric* thinking — if your labeling design doesn't reach for consensus, adjudication, and gold-standard injections, you're missing the Scale frame. Distributed-systems questions are common.
 
 ### Q2.1: Coding: "Build a task queue with retries and dead-letter"
 **Answer:** Producer → queue (Kafka) → consumer with retry policy → DLQ on failure.
@@ -47,6 +59,8 @@ def consume():
 **Tip:** Scale's *core* is labeling quality. Show you understand consensus, calibration, annotator bias.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and data-pipeline-flavored. Coding, then RLHF/SEAL system design, then ML deep-dive (often eval design or rubric design), then "Build Trust" behavioral last.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Implement a thread-safe rate limiter.
@@ -90,3 +104,9 @@ Cash + RSUs. Scale is competitive — below FAANG top-of-band but with strong eq
 - [Scale AI Engineering blog](https://scale.com/blog/category/engineering)
 - [SEAL research](https://scale.com/seal)
 - [Glassdoor Scale AI interviews](https://www.glassdoor.com/Interview/Scale-AI-Interview-Questions-E3299049.htm)
+
+---
+
+## The 1 thing to remember
+
+At Scale, "data is the moat" is the frame — name Data Engine, SEAL, and GenAI Platform, and reach for consensus, gold-standard injections, and eval rigor by reflex, because labeling quality is the company's reputation.

@@ -2,8 +2,25 @@
 
 - **Role:** ML / AI Engineer (Magic Studio, Search, Templates, Generative)
 - **Tech stack:** Python, Go, TypeScript, React, C++, PyTorch, TensorFlow, Kubernetes, AWS, GCP, multi-modal models (CLIP, diffusion)
-- **Comp band:** AUD $180K-$400K / USD $150K-$350K (IC3-IC4); Staff (IC5) AUD $300K-$700K / USD $250K-$600K (Levels.fyi 2026)
+- **Comp band:** AUD $180K-$400K / USD $150K-$350K total comp (IC3-IC4); Staff (IC5) AUD $300K-$700K / USD $250K-$600K total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a Canva template grid with a Magic Studio prompt overlay generating a new design). Color: Canva purple (#7D2AE8). Headline: "Canva / AI Engineer / 2026".
+
+> **TL;DR:** Canva's loop is design-led and globally-flavored — they care about Magic Studio (text-to-template, inpainting, generation), brand-consistency evaluation, and serving 220M+ users across 100+ locales. The winning candidate names multi-modal eval fluently, has a real Magic Studio opinion, and treats "kind culture" as a real interview signal, not a poster on the wall.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       CANVA HIRING FUNNEL                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (55%) ──► Tech Phone (40%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Loop Debrief      │
+│          (30%)                                  (65%)           │
+│                                                                  │
+│  Committee ──► Offer (IC4 vs IC5 split) ──► Sydney / SF match    │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Canva's Magic Studio is the AI surface that competes with Adobe Firefly and Figm
 
 ### Q1.3: "Location + comp"
 **Answer:** Sydney primary. Manila, Beijing, SF, London are growing. Be clear on willingness to relocate to Australia if needed. Comp is in AUD; US employees are paid in USD.
+
+Canva's recruiter screen rewards candidates who can name a Magic Studio feature and talk about design-led thinking. The phone screen is where multi-modal and template search show up — expect a coding medium, a text-to-template LLM question, and a system design that touches brand consistency and multi-locale.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -65,6 +84,8 @@ Canva's Magic Studio is the AI surface that competes with Adobe Firefly and Figm
 **Q3.4.2:** "Time you made a design or product decision with limited data." STAR.
 **Q3.4.3:** "How do you embody Canva's values (Be a force for good, Pursue awesome, Be a good human, Make complex simple)?" — be specific.
 
+The onsite is 4 rounds across 1-2 days, and the system-design round is the centerpiece — Magic Edit, template search, or home feed. The ML deep-dive lands on multi-modal evaluation (FID, CLIP, brand consistency). The values round is real, not ceremonial: Canva's kind culture is tested with "be a good human" STAR stories.
+
 ## Stage 4: Hiring committee
 Canva's committee is a structured loop debrief. IC3 vs IC4 (Senior) is decided here. IC5 (Staff) requires cross-team influence. The bar is moderate-to-high; Canva is more forgiving than FAANG but values design thinking and culture fit heavily.
 
@@ -89,3 +110,9 @@ Canva comp is solid for Sydney — top of the Australian market. RSU is 4-year v
 - [Levels.fyi Canva](https://www.levels.fyi/companies/canva)
 - [Glassdoor Canva interviews](https://www.glassdoor.com/Interview/Canva-Interview-Questions-E1108891.htm)
 - [LeetCode Canva tagged](https://leetcode.com/company/canva/)
+
+---
+
+## The 1 thing to remember
+
+At Canva, brand consistency is the user's trust — the IC4+ candidate is the one who treats every generated template as a brand promise, not just an image, and designs multi-locale eval into the loop from day one.

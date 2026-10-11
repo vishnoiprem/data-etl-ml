@@ -1,8 +1,16 @@
 # 36. Perplexity AI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "PERPLEXITY / AI SEARCH / 2026".
+
+> **TL;DR:** Perplexity's loop is **mission-driven and small-company fast** — every hire matters and the founders personally review. The signature stack is **RAG + citations + streaming** (Pro Search, Pages, Spaces), and the winning candidate has shipped RAG end-to-end and reads arxiv.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Founders + Panel (60%) → Offer
+```
+
 - **Role:** AI Engineer / ML Engineer (Search, Retrieval, RAG, Inference)
 - **Tech stack:** Python, PyTorch, vLLM, SGLang, Triton, CUDA, Typescript (full-stack), React, Next.js, MongoDB, Postgres, Redis
-- **Comp band:** $250K-$700K (L3-L5); senior crosses $900K+; equity + cash, 4-year vest
+- **Comp band:** $250K-$700K total comp (L3-L5) | RSUs 4-year, 1-year cliff + cash; senior crosses $900K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Founders + hiring committee** | Cross-functional review, mission fit | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Perplexity's loop is the most startup-flavored in this list — expect in-person rounds at SF, founder involvement, and a heavy weight on shipping speed. The panel grades on "knowledge is power" mission alignment as much as technical bar.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Perplexity?"
@@ -26,6 +36,8 @@
 **Tip:** Perplexity hires people who *read papers*. Show you do.
 
 ## Stage 2: Technical phone screens (90 min)
+
+Perplexity's phone screens are unapologetically *build-something-real* — they want to see your practical RAG chops, not your algorithmic puzzle-solving. The ML round always returns to citation quality.
 
 ### Q2.1: Coding: "Implement a simple RAG pipeline"
 **Answer:** Chunking → embeddings → vector DB → retrieval with re-rank.
@@ -45,6 +57,8 @@ def simple_rag(query, docs, embed, llm):
 **Tip:** Perplexity is the canonical RAG company. Reference *Pages*, *Focus*, *Spaces* by name.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and product-obsessed. Coding, then retrieval/citation system design, then ML deep-dive (often citation accuracy), then mission-fit behavioral last. Read Aravind's essays before the loop — it shows.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Implement streaming LLM output with cancellation.
@@ -88,3 +102,9 @@ Cash + RSUs. Perplexity has grown comp aggressively through 2024-2025. Negotiati
 - [Perplexity blog](https://blog.perplexity.ai/)
 - [Aravind Srinivas Twitter](https://twitter.com/AravSrinivas)
 - [r/MachineLearning Perplexity thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Perplexity, "knowledge is power" is the operating system — name Pro Search, Pages, Spaces, and Comet, and show you've shipped RAG end-to-end, because the founders grade on shipping speed as much as technical depth.

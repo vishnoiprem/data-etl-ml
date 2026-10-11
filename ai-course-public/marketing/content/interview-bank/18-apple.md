@@ -1,8 +1,17 @@
 # 18. Apple (AFM / Siri)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Apple Intelligence 3B on-device + Private Cloud Compute). Color: company brand color as accent (Apple silver + space gray). Headline on image: "Apple (AFM / Siri) / ML Engineer / 2026".
+
+> **TL;DR:** Apple's AFM / Siri loop runs 4 stages and rejects ~97% of candidates — the offer-decider is "Why Apple?" (a techno-behavioral round graded as heavily as coding), where you must name a specific on-device bet, a specific test, and a specific disagreement (e.g., server-side model is too conservative). The winning candidate signals AFM literacy, thinks hardware-first (Neural Engine + Metal), and answers the privacy follow-up on every system design.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Managerial round (50%) → Offer
+                                                  └── "Why Apple" round ──┘
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, PyTorch, Core ML, Swift, Metal, Neural Engine
-- **Comp band:** $180K-$900K+ (ICT2-ICT6)
+- **Comp band:** $180K-$900K+ total comp (ICT2-ICT6 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen (60-90 min)** | ML + coding (BERT, audio, LeetCode medium) | 1-2 weeks | ~40% advance |
 | 3. **Virtual onsite (3-5 rounds in 1-2 days)** | ML deep-dive → coding → system design → techno-behavioral → optional research talk | 1-2 weeks | ~30% advance |
 | 4. **Managerial round** | "Why Apple" + project defense | 1 week | ~50% advance |
+
+The loop is shorter than the US frontier labs, but the "Why Apple" question is graded as heavily as coding. Most candidates under-prepare it and lose the loop despite strong technical rounds.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -33,6 +44,8 @@
 ### Q2.2: "Implement a recommendation system with cold-start"
 **Answer:** Two-tower (user embedding + item embedding, dot product). Cold-start: fall back to content features (item metadata) for new items, popularity prior for new users. On-device personalization: per-user LoRA adapter, periodically synced.
 **Tip:** Two-tower + cold-start fallback is the Apple pattern.
+
+The phone screen is BERT + recommendation. The onsite is the privacy-first gauntlet — ML deep-dive, coding, system design, techno-behavioral. Every system design gets the "how would you adapt this for the Neural Engine?" follow-up.
 
 ## Stage 3: Virtual onsite (3-5 rounds)
 
@@ -104,3 +117,9 @@ Apple ML comp is more cash-heavy than RSU-heavy (50-60% base). RSUs vest 4 years
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026)
 - [Levels.fyi — Apple compensation](https://www.levels.fyi/companies/apple/salaries/software-engineer)
 - [Apple Machine Learning Research](https://machinelearning.apple.com/)
+
+---
+
+## The 1 thing to remember
+
+At Apple AFM / Siri, "Why Apple?" is the offer-decider — name a specific on-device bet, a specific test, a specific disagreement (e.g., server-side model is too conservative), and signal AFM (3B/100B) literacy, or the loop downgrades you.
