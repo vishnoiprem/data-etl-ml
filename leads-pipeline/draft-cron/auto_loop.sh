@@ -88,32 +88,35 @@ except Exception as e:
         echo "  (refine_pipeline exited with non-zero, continuing)" | tee -a "$LOG"
     }
 
-    # 4. Report status
-    pending=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
-import sys
+    # 4. Report status — single Python invocation, three counts, sleeps to avoid DB lock
+    sleep 2
+    counts=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
+import sys, time
 sys.path.insert(0, '$HERE')
-from db.lead_store import get_cursor
-with get_cursor() as cur:
-    cur.execute(\"SELECT COUNT(*) FROM leads WHERE contact_email IS NOT NULL AND contact_email != '' AND status NOT IN ('sent_email','bounced','replied','unsubscribed','failed')\")
-    print(cur.fetchone()[0])
-" 2>/dev/null || echo "?")
-    tailored=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
-import sys
-sys.path.insert(0, '$HERE')
-from db.lead_store import get_cursor
-with get_cursor() as cur:
-    cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND resume_file IS NOT NULL\")
-    print(cur.fetchone()[0])
-" 2>/dev/null || echo "?")
-    covered=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
-import sys
-sys.path.insert(0, '$HERE')
-from db.lead_store import get_cursor
-with get_cursor() as cur:
-    cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND cover_letter_body IS NOT NULL\")
-    print(cur.fetchone()[0])
-" 2>/dev/null || echo "?")
+for _ in range(3):
+    try:
+        from db.lead_store import get_cursor
+        with get_cursor() as cur:
+            cur.execute(\"SELECT COUNT(*) FROM leads WHERE contact_email IS NOT NULL AND contact_email != '' AND status='pending'\")
+            pending = cur.fetchone()['count']
+            cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND resume_file IS NOT NULL\")
+            tailored = cur.fetchone()['count']
+            cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND cover_letter_body IS NOT NULL\")
+            covered = cur.fetchone()['count']
+        print(f'{pending} {tailored} {covered}')
+        sys.exit(0)
+    except Exception as e:
+        time.sleep(2)
+print('? ? ?')
+" 2>/dev/null || echo "? ? ?")
+    read -r pending tailored covered <<< "$counts"
     echo "[$i/$LOOP_MAX] pending=$pending  tailored=$tailored  covered=$covered" | tee -a "$LOG"
+
+    # 4b. Print full report every 10 iterations
+    if (( i % 10 == 0 )); then
+        echo "" | tee -a "$LOG"
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python "$HERE/full_report.py" 2>&1 | head -50 | tee -a "$LOG"
+    fi
 
     if [[ "$pending" == "0" ]]; then
         echo "[$i/$LOOP_MAX] queue empty, will refresh in next iteration" | tee -a "$LOG"
