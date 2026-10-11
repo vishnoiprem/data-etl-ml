@@ -1,0 +1,30 @@
+# ============================================================================
+# 14_section / code / versions_demo.yml
+# ----------------------------------------------------------------------------
+# Demo schema.yml with model versions + deprecation dates.
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+# ============================================================================
+
+version: 2
+
+models:
+  - name: activity_demo
+    description: "Demo model with v1 (deprecated) and v2 (current)."
+    latest_version: 2
+    versions:
+      - v: 2
+        config:
+          contract:
+            enforced: true
+        columns:
+          - name: activity_date
+            data_type: date
+            tests:
+              - not_null
+              - unique
+      - v: 1
+        deprecation_date: 2026-12-31
+        bypass_version_check: false
+        columns:
+          - name: activity_date
+            data_type: date

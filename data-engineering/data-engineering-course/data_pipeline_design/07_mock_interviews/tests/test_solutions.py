@@ -8,7 +8,7 @@ Run with::
 
     python3 scripts/run_all_tests.py data_pipeline_design/07_mock_interviews
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

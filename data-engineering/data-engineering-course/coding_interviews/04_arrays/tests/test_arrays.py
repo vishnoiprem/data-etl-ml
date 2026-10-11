@@ -1,6 +1,6 @@
 """Tests for the Module 04 — Arrays problems.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

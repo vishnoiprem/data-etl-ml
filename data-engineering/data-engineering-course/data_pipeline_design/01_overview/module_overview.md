@@ -6,7 +6,7 @@ A high-level mental model for the data pipeline design interview. By
 the end of this module you'll have a 4-step framework, a whiteboard
 rubric, a tool inventory, and a clear view of when to use ETL vs ELT.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

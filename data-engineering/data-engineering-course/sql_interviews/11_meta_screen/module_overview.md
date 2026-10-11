@@ -1,6 +1,6 @@
 # Module 11 — Meta Data Engineer Technical Screen (2026 Format)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 
@@ -93,8 +93,8 @@ tables, runnable in SQLite with minor syntax adjustments.
 - **5 Jupyter notebooks** (one per problem set)
 - **~30 tests** (each problem has 1-3 tests; Python tests are deterministic)
 - **0 new dependencies** (pure stdlib + SQLite, same as the rest of the course)
-- **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+- **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

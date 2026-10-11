@@ -4,7 +4,7 @@
 > Read it aloud. Note the *state-machine modeling* on
 > tickets and the *multi-channel attribution* problem.
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -304,4 +304,4 @@ on that ticket.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

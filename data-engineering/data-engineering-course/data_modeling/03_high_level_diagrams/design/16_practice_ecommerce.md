@@ -344,4 +344,4 @@ All 24 tests should pass.
 > net revenue per customer, computed by joining
 > `fact_order_items` to `dim_customers` and `dim_date`."
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

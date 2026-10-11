@@ -2,7 +2,7 @@
 
 > **6 lessons · 2 videos · ~3 hours of reading + 1-2 hours of self-assessment**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 This is the on-ramp to engineering management as a career. In 6
 lessons, you get the entire decision framework: what EM actually

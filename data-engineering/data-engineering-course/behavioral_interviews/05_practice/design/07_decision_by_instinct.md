@@ -1,6 +1,6 @@
 # Lesson 07 — "Tell me about a decision you made based on your instincts"
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 >
@@ -120,4 +120,4 @@ setup and not enough decision.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

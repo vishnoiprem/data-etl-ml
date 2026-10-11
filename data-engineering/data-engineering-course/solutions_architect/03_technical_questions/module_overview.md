@@ -2,7 +2,7 @@
 
 > **7 lessons · ~6 hours of reading + 2-3 hours of practice**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 The technical layer under the customer-interaction work.
 Module 02 was about the *customer*; this module is about

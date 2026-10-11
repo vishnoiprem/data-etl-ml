@@ -1,0 +1,39 @@
+%% Diagram: Secure Data Sharing — provider → share → consumer
+%% Source lecture: Snowflake Complete Masterclass - Section 18 (Data Sharing)
+%% Description:  A provider account creates a SHARE, grants USAGE/SELECT on
+%%               the database objects, and adds one or more consumer accounts
+%%               (or a Reader Account, which is a Snowflake-hosted account
+%%               paid for by the provider).
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+```mermaid
+graph LR
+    subgraph PROV["Provider Account (pays storage)"]
+        DB["SNOWFLAKE_DEMO db<br/>GETTING_STARTED schema"]
+        VW["SECURE VIEW<br/>(only shared columns exposed)"]
+    end
+
+    SH["📦 SHARE object<br/>(in metadata)"]
+
+    subgraph CONS1["Consumer Account 1<br/>(pays compute)"]
+        CDB1["DB from share<br/>SELECT * normal SQL"]
+    end
+
+    subgraph CONS2["Consumer Account 2"]
+        CDB2["DB from share<br/>join with local data"]
+    end
+
+    subgraph RA["Reader Account<br/>(no Snowflake subscription)"]
+        CRDB["DB from share<br/>(read-only, billed to provider)"]
+    end
+
+    DB --> VW --> SH
+    SH --> CDB1
+    SH --> CDB2
+    SH --> CRDB
+
+    style SH  fill:#FEF3C7,stroke:#B45309
+    style PROV fill:#E0F2FE,stroke:#0369A1
+    style CONS1 fill:#DCFCE7,stroke:#166534
+    style CONS2 fill:#DCFCE7,stroke:#166534
+    style RA  fill:#FCE7F3,stroke:#9D174D
+```

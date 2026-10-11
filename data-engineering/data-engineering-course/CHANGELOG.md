@@ -1,5 +1,195 @@
 # Changelog
 
+## 2026-10-10 — dbt + Snowflake Analytics Engineering Cert Prep (Udemy course author source)
+
+New track: `aws_snowflake_dbt_course/`. The author-source companion
+for the Udemy course "dbt + Snowflake — Analytics Engineer
+Certification Prep" (19 sections, 131 lectures, 11h 57m). Project-
+based exam prep built on a realistic **Ethereum blockchain dataset**
+in Snowflake. Every lecture maps to an official dbt Analytics
+Engineer exam objective. All 76 pytest tests pass; the shared
+`dbt_project/` validates cleanly with `dbt parse` (no Snowflake
+account required for the smoke test).
+
+### Added — `aws_snowflake_dbt_course/`
+- `README.md`, `SYLLABUS.md` (L01–L131 map), `DIRECTORY.md`, `CHANGELOG.md`, `requirements.txt`, `conftest.py` (with `render_jinja()` mock dbt context)
+- 19 section folders, each with `README.md` + `lecture_scripts/`:
+  - `01_section/` Welcome, dbt init, sources, first model
+  - `02_section/` Transactions: fields, categorization, daily activity, stablecoins
+  - `03_section/` Object dependencies, staging shielding, materialization precedence, incremental + strategies
+  - `04_section/` Practice quiz — materializations
+  - `05_section/` DRY: project organization, CTEs, dbt_project.yml, macros (logging, run_query, if execute, return)
+  - `06_section/` dbt run, test, docs, seed, compile/ls/clean/build, clean DAGs
+  - `07_section/` dbt_project.yml configs: hierarchical, custom schemas, vars, alias
+  - `08_section/` Sources + dbt packages: codegen, dbt_utils, audit_helper, Git packages
+  - `09_section/` Git basics + branching/PRs/protected branches + merge conflicts
+  - `10_section/` Python models + execution constraints
+  - `11_section/` Grants: Snowflake behavior, dbt grants, post-hooks, project-level grants
+  - `12_section/` Practice quiz — developing dbt models
+  - `13_section/` Environments + contracts: schema with codegen, subtleties
+  - `14_section/` Versions: setup + latest view, deprecation dates + warnings
+  - `15_section/` Model access: project structure, fraud domain, groups + private models
+  - `16_section/` Debugging: dbt logs, debug flags, runtime/compilation/db errors
+  - `17_section/` State: manifest, run results, selectors, dbt retry
+  - `18_section/` Managing data pipelines: CI intro, first CI, defer, dbt clone, Slim CI, continuous deployment
+  - `19_section/` Tests (singular, generic, custom, unit, source, severity, selection, advanced), dbt docs, exposures, freshness, snapshots (timestamp + check), microbatch, --sample, final exam
+- 131 lecture scripts `L01_…md` … `L131_…md` in their respective `lecture_scripts/`
+- 19 quizzes in `quizzes/section_1.md` … `quizzes/section_19.md`
+- 4 assignments in `assignments/` (Ethereum ETL, incremental strategy, unit tests, CI pipeline)
+- 6 mermaid diagrams in `diagrams/` (project layout, run flow, materialization decision, incremental merge, CI pipeline, state selectors)
+- 12 per-section `code/` demos + their `test_*.py` (`stg_first_model`, `activity_incremental`, `log_macro_demo`, `dag_demo`, `fraud_score_demo`, `contracts_demo`, `versions_demo`, `state_selectors`, `dbt_ci_workflow`, `transactions_snapshot`, `generic_test_positive`)
+- 2 scripts: `scripts/run_all_tests.py` (discovers all 12 test files + runs `dbt parse` smoke test), `scripts/bootstrap.sh`
+- 1 PDF placeholder in `downloads/`
+
+### Added — `dbt_project/`
+- `dbt_project.yml` (materialization precedence: staging→view, marts→table), `profiles.yml` (mock target), `packages.yml` (codegen, dbt_utils, audit_helper), `selectors.yml` (result + state-based)
+- `models/staging/`: `_sources.yml` (Ethereum sources with freshness), `stg_ethereum__transactions.sql`, `stg_ethereum__blocks.sql`
+- `models/marts/`: `transactions.sql` (incremental merge), `activity.sql` (incremental + is_incremental guard), `stablecoin_activity.sql`, `fraud_score.py` (Python model), `dag_demo.sql`, plus split schema files `_grants.yml`, `_contracts.yml`, `_versions.yml`, `_access.yml` (one .yml per concern per dbt 1.12 rule)
+- `macros/`: `log_macro.sql`, `dry_refactor.sql`, `debug_helper.sql`
+- `seeds/`: `static_categories.csv`
+- `snapshots/`: `transactions_snapshot.sql` (timestamp strategy)
+- `tests/`: `generic/test_positive_value.sql`, `unit/test_fraud_score_unit.yml`
+
+### Verification
+- `dbt parse` exits 0 against the shared `dbt_project/`
+- `python3 scripts/run_all_tests.py` → 76 pytest tests, ALL PASS
+- Author sweep: every `.md` / `.sql` / `.py` / `.yml` contains `Author: Prem Vishnoi <pvishnoi@avilx.com>`; no `pvilx.com` typo in any actual source file
+- Updated parent `README.md` table at line 277 to add the new course row
+
+## 2026-10-10 — Snowflake — The Complete Masterclass (Udemy course author source)
+
+New track: `aws_snowflake_course/`. The author-source companion for
+the Udemy course "Snowflake — The Complete Masterclass" (20
+sections, 187 lectures, 23 idempotent SQL demos, 12 Python test
+suites with **127 tests passing**, 6 mermaid diagrams, 23 quizzes,
+4 hands-on assignments). All Python tests mock the Snowflake
+connector and pass without a live account; the SQL is real Snowflake
+syntax runnable against the free trial.
+
+### Added — `aws_snowflake_course/`
+- `README.md`, `SYLLABUS.md` (L01–L187 map), `DIRECTORY.md`, `CHANGELOG.md`, `requirements.txt`
+- 20 section folders, each with `README.md` + `lecture_scripts/`:
+  - `01_introduction/` (4 lectures)
+  - `02_getting_started/` (10 lectures + `setup_warehouse.sql` + 11 tests)
+  - `03_snowflake_architecture/` (9 lectures + `editions_pricing.sql` + 8 tests)
+  - `04_loading_data/` (9 lectures + `load_csv.sql` + 8 tests)
+  - `05_copy_options/` (8 lectures + `copy_options.sql` + tests)
+  - `06_unstructured_data/` (9 lectures + `parse_json.sql` + `flatten_array.sql` + 12 tests)
+  - `07_performance_optimization/` (9 lectures + `clustering.sql` + tests)
+  - `08_loading_from_aws/` (7 lectures + `aws_storage_integration.sql` + 10 tests)
+  - `09_loading_from_azure/` (7 lectures + `azure_integration.sql` + tests)
+  - `10_loading_from_gcp/` (6 lectures + `gcs_integration.sql` + tests)
+  - `11_snowpipe/` (7 lectures + `snowpipe_setup.sql` + 10 tests)
+  - `12_cortex_ai_ml/` (14 lectures + `cortex_ai_demo.sql` + 9 tests)
+  - `13_snowpipe_azure/` (4 lectures)
+  - `14_time_travel/` (6 lectures + `time_travel_demo.sql` + `undrop.sql` + 10 tests)
+  - `15_fail_safe/` (2 lectures)
+  - `16_types_of_tables/` (4 lectures + `table_types.sql` + tests)
+  - `17_zero_copy_cloning/` (6 lectures + `clone_database.sql` + 8 tests)
+  - `18_data_sharing/` (11 lectures + `create_share.sql` + 9 tests)
+  - `19_data_sampling/` (3 lectures + `sampling.sql` + 7 tests)
+  - `20_extra_topics/` (52 lectures: Tasks, Streams, MVs, Masking, Roles, BI Tools, Best Practices + 25 tests)
+- 23 quizzes (`quizzes/section_1.md` … `section_19.md` + `section_20a.md` … `section_20d.md`, 8–12 questions each)
+- 6 mermaid diagrams in `diagrams/` (snowflake_architecture, warehouse_scaling, storage_integration_flow, snowpipe_architecture, cortex_ai_stack, data_sharing_topology)
+- 4 hands-on assignments (`assignments/assignment_1_end_to_end_etl.md`, `assignment_2_cortex_ai_app.md`, `assignment_3_cdc_pipeline.md`, `assignment_4_secure_data_share.md`)
+- 2 scripts (`scripts/run_all_tests.py`, `scripts/bootstrap.sh`)
+
+### Verified
+- `python3 scripts/run_all_tests.py` reports `ALL PASS` — 127 tests
+  across 12 test files (0.25s runtime, no AWS/Snowflake account needed).
+
+---
+
+## 2026-10-10 — 5 more AWS crash courses
+
+New tracks (siblings to `aws_glue_course/`, `aws_lambda_course/`, `aws_ec2_course/`):
+- `aws_eventbridge_course/` (7 sections, 36 lectures, 5 boto3 + moto demos, 38 tests)
+- `aws_cognito_authorizers_course/` (5 sections, 25 lectures, 2 demos, 11 tests)
+- `aws_lambda_authorizer_course/` (5 sections, 25 lectures, 3 demos, 23 tests)
+- `aws_cdk_v2_course/` (6 sections, 30 lectures, 3 TypeScript CDK projects, npm-tested)
+- `aws_cloudwatch_course/` (7 sections, 35 lectures, 5 boto3 + moto demos, 23 tests)
+
+All 95 boto3 + moto tests pass (`python -m pytest aws_eventbridge_course aws_cognito_authorizers_course aws_lambda_authorizer_course aws_cloudwatch_course -q`).
+
+---
+
+## 2026-10-10 — AWS EC2 + Load Balancing Crash Course (Udemy course author source)
+
+New track: `aws_ec2_course/`. The author-source companion for the
+Udemy course "AWS EC2 Crash Course + Load Balancing with Demos" (8
+sections, 38 lectures, 6 working boto3 + moto demos, 5 mermaid
+diagrams, 8 quizzes, 1 optional assignment). All code samples run
+offline via `pytest` + `moto` — no AWS account required.
+
+### Added — `aws_ec2_course/`
+- `README.md`, `SYLLABUS.md` (L01–L38 map), `DIRECTORY.md`, `CHANGELOG.md`, `requirements.txt`
+- 8 section folders, each with `README.md` and `lecture_scripts/`
+  - `01_intro_to_ec2/` (3 lectures, no code)
+  - `02_ec2_fundamentals/` (5 lectures + `region_az_demo.py` + tests)
+  - `03_creating_ec2/` (10 lectures + `launch_instance.py` + 6 moto tests)
+  - `04_ec2_pricing/` (4 lectures + `pricing_calc.py` + 6 tests)
+  - `05_managing_ec2/` (4 lectures + `snapshot_ami_demo.py` + 4 moto tests)
+  - `06_load_balancing_nlb/` (4 lectures + `nlb_create.py` + 4 moto tests)
+  - `07_load_balancing_alb/` (5 lectures + `alb_create.py` + 4 moto tests)
+  - `08_load_balancing_gwlb/` (3 lectures + `gwlb_create.py` + 3 moto tests)
+- 8 quizzes (`quizzes/section_1.md` … `section_8.md`, 8–12 questions each)
+- 6 mermaid diagrams in `diagrams/` (ec2_anatomy, regions_azs, ha_across_azs, alb_request_flow, nlb_request_flow, gwlb_request_flow)
+- 1 optional assignment (`assignments/assignment_1_ha_webapp.md`)
+- 2 scripts (`scripts/run_all_tests.py`, `scripts/bootstrap.sh`)
+
+### Verified
+- `python scripts/run_all_tests.py` reports `ALL PASS` — 30 tests
+  across 7 test files.
+
+## 2026-10-10 — AWS Lambda course updates (Use Case 3 + missing lectures)
+
+Update to `aws_lambda_course/`. Adds the 3rd enterprise use case
+(FCI Cluster Monitor), the missing Use Case 2 Part 3, the Use Case 2
+re-walk in section 9, and the Bedrock API Keys lecture in section 10.
+
+### Added — `aws_lambda_course/`
+- **Section 15 (new): L82–L87 — Enterprise Use Case 3: FCI Cluster Monitor**
+  (AWS Managed Microsoft AD + FSx for Windows + Lambda + SNS + EventBridge
+  + CloudWatch). 6 lecture scripts, `code/monitor_lambda/` with 7 moto
+  tests, `code/cloudformation/fci_monitor_stack.yaml` with a `DryRun`
+  parameter, `iam_policy.json` (least privilege), `deploy.sh`, and
+  `event_payloads/scheduled_event.json` fixture.
+- **L31a (section 8):** Use Case 2 Part 3 — unified GET + DELETE handler
+  with the full 4xx/5xx error model and CORS. 8 moto tests in
+  `code/api_pt3_handlers/`.
+- **L36a–L36e (section 9):** Use Case 2 re-walked with a security lens
+  (5 new lectures). Working code in `code/usecase2_with_auth/`.
+- **L44a (section 10):** API Keys for Amazon Bedrock. Working code in
+  `code/api_keys_for_bedrock/` (7 moto tests).
+- `quizzes/section_15.md` (10 questions, final quiz).
+- `assignments/assignment_7_fci_monitor.md` (optional extension).
+
+### Verified
+- `python scripts/run_all_tests.py` reports 102 tests across 9 sections
+  with **0 failures**.
+
+## 2026-10-10 — AWS Glue — The Complete Masterclass (Udemy course author source)
+
+New track: `aws_glue_course/`. The author-source markdown for the Udemy course *AWS Glue - The Complete Masterclass* (11 sections, 78 lectures, 4h 11m, 3 role plays, 4 downloadable resources, 6 assignments, 11 quizzes). Section 1 lectures are written as full individual files (L01–L12). Sections 2–10 are bundled per-section (`SECTION_BUNDLE.md`) with one stub file per lecture so the SYLLABUS map resolves.
+
+### Added — `aws_glue_course/`
+- `README.md` (course overview + asset map) and `SYLLABUS.md` (lecture L1–L78 → file).
+- `01_introduction/lecture_scripts/L01–L12.md` — 12 full lecture scripts (IAM, KMS, SNS, GlueJobRole).
+- `02_iam_kms_sns/` through `10_databrew/lecture_scripts/SECTION_BUNDLE.md` — 9 section bundles covering lectures L13–L85.
+- `downloads/city_temperature.csv` (480 rows, 20 cities × 2 years).
+- `downloads/glue_service_trust_policy.json` (the IAM trust policy for `GlueJobRole`).
+- `downloads/glue_pipeline_stack.yaml` (full CloudFormation template: 2 S3 buckets, IAM role, Glue Job).
+- `downloads/glue_job_aggregate_cities.py` (PySpark ETL script, validates with `py_compile`).
+- `quizzes/section_1.md` through `quizzes/section_11.md` — 11 quizzes (5 multi-choice each, with answer keys).
+- `assignments/01–06.md` — 6 assignment prompts (S3, CFN, debug, streaming, DQ, DataBrew).
+- `11_role_plays/RP1_trust_misconfig.md`, `RP2_streaming_falling_behind.md`, `RP3_pitch_data_quality.md` — the 3 role plays with persona + script + worked answer + common mistakes.
+
+### Verified
+- `city_temperature.csv` is 480 rows, 10 columns, valid CSV.
+- `glue_service_trust_policy.json` parses as valid IAM JSON.
+- `glue_pipeline_stack.yaml` parses with a CFN-aware YAML loader; 4 resources, 4 parameters, 4 outputs.
+- `glue_job_aggregate_cities.py` compiles with `python3 -m py_compile`.
+
 ## 2026-10-10 — Meta DE onsite rounds: data modeling + architecture + leadership (E5/E6)
 
 The 4 onsite rounds after the 60-min CoderPad screen: **Data Modeling** (60 min, whiteboard), **Architecture / Product-Sense** (60 min, hardest round), and **Leadership / Ownership** (E5/E6, 30-45 min, standalone). This module ships the worked answers to the 5 most-asked 2026 schema questions, the 5-step architecture framework, and the 4 question families + 5 Meta-value probes for the leadership round.
@@ -330,7 +520,7 @@ build.
 
 ### Author
 
-All work authored by **Prem Vishnoi <prem.vishnoi@example.com>** —
+All work authored by **Prem Vishnoi <pvishnoi@avilx.com>** —
 no AI attribution in any commit metadata.
 
 ---

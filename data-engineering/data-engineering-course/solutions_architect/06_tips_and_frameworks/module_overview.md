@@ -2,7 +2,7 @@
 
 > **9 lessons · 9 videos · ~3-4 hours of reading + 2-3 hours of practice**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 The closing module. The 9 lessons that tie together the
 customer-interaction work from Module 02, the technical

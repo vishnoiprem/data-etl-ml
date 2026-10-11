@@ -272,4 +272,4 @@ ANALYZE` against it. Identify the slowest node. Find a red
 flag. Propose a fix. Apply it. Rerun. That's the loop — and
 it's the answer to "this query is slow, how do you fix it?"
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

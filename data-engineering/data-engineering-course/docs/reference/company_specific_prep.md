@@ -402,4 +402,4 @@ The most common mid-prep shock is: *you've been grinding Meta-style SQL/coding f
 
 ---
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

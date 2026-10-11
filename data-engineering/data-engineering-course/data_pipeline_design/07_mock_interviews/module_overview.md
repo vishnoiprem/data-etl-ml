@@ -17,7 +17,7 @@ harder "open-ended architecture" rounds at FAANG, ad-tech,
 and ML-platform companies. If you're interviewing for a Staff
 or Principal role, start at 31.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

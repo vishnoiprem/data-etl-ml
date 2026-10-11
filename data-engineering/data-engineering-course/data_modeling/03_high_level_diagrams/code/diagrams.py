@@ -9,7 +9,7 @@ The Mermaid output uses the `erDiagram` notation, which is the
 most readable on a virtual whiteboard (Coderpad, Coderabbit,
 Quokka, etc.).
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

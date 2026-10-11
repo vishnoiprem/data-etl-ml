@@ -1,0 +1,15 @@
+# ── Tier 1 security overrides
+urllib3==2.8.0
+pyjwt==2.15.0
+werkzeug==3.1.9
+cryptography==46.0.5
+requests==2.33.0
+idna==3.15
+setuptools==83.0.0
+
+# Snowflake connector (mocked in tests)
+snowflake-connector-python>=3.7.0
+
+# pytest
+pytest>=8.0
+pytest-mock>=3.12

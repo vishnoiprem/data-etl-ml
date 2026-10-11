@@ -1,6 +1,6 @@
 # Mock 115 — E6 Meta Onsite (system-design-flavored coding)
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 ## Format
 

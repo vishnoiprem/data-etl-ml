@@ -1,0 +1,19 @@
+# ── Tier 1 security overrides (must match repo root)
+urllib3==2.8.0
+pyjwt==2.15.0
+werkzeug==3.1.9
+cryptography==46.0.5
+requests==2.33.0
+idna==3.15
+setuptools==83.0.0
+
+# boto3 + botocore (mirror the Lambda course pin)
+boto3>=1.34.0
+botocore>=1.34.0
+
+# moto for offline / unit tests
+moto[ec2,elb]>=5.0
+
+# pytest
+pytest>=8.0
+pytest-mock>=3.12

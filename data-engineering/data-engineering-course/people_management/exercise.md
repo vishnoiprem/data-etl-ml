@@ -1,6 +1,6 @@
 # Capstone Exercise — Build Your Own People Management Question Bank
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 This is the capstone for the People Management track. By the
 end of it, you should have a **20-30 question personal question

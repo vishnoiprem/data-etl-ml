@@ -2,7 +2,7 @@
 
 > **31 lessons · 2 videos · ~6 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The biggest of the three practice modules. 31 problems,
 each one a real LeetCode / StrataScratch / HackerRank SQL

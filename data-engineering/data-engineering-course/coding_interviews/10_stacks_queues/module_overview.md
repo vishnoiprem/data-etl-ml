@@ -1,6 +1,6 @@
 # Module 10: Stacks & Queues
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 8 problems on stacks and queues — including monotonic-stacks and two-stack queues.
 

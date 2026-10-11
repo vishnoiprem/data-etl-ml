@@ -1,6 +1,6 @@
 # Module 08: Graphs
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 9 graph problems covering BFS, DFS, Dijkstra, and topological sort.
 

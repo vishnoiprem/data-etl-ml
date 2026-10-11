@@ -1,6 +1,6 @@
 # 07 — Big-O Notation
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Big-O describes the upper bound of an algorithm's running time or space as the input size grows. We drop constants and lower-order terms.
 

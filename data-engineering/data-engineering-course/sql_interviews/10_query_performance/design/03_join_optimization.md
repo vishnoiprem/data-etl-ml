@@ -349,4 +349,4 @@ the join algorithm, the join key types, and whether the
 join key is wrapped in a function. Fix any of the three.
 Rerun. Watch the plan change.
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

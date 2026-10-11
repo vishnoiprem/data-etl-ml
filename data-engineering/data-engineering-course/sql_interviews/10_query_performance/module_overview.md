@@ -2,7 +2,7 @@
 
 > **4 lessons · 0 videos · ~2 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The module that turns a SQL candidate into a SQL engineer. Every
 L5+ interview round includes some version of "this query is

@@ -2,7 +2,7 @@
 
 > **13 lessons (1 main module + 1 compensation sub-module) · 9 videos · ~5 hours of focused prep**
 >
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 >
 > **Companion articles:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 

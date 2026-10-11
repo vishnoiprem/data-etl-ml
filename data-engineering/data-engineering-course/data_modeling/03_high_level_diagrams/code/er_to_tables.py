@@ -17,7 +17,7 @@ The rules, in order:
 5.  Each derived attribute is *not* stored (it's a query, not a
     column).
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

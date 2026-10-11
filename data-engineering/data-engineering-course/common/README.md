@@ -6,7 +6,7 @@ engineering tracks (`data_modeling/`, `data_pipeline_design/`,
 `system_design/common/` — keep the cross-cutting helpers in one
 place so every exercise reads the same way.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ## Modules
 

@@ -1,6 +1,6 @@
 # 16 — In-place Reversal of a Linked List
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 The classic three-pointer pattern for reversing a singly linked list.
 

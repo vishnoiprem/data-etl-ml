@@ -4,7 +4,7 @@
 > Read it aloud. Note the *grain choices for the four
 > fact-table types*.
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -436,4 +436,4 @@ together" query.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

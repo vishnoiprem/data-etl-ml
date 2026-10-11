@@ -1,6 +1,6 @@
 # Lesson 10 — "What product that you led are you most proud of and why?"
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 >
@@ -133,4 +133,4 @@ another.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

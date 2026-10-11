@@ -1,6 +1,6 @@
 # Module 12: Heaps
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 5 problems on heaps — Python's `heapq` for a min-heap (negate for max).
 

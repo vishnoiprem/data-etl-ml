@@ -2,7 +2,7 @@
 
 > **12 modules · 113 lessons · 6 videos · ~36 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 A focused track for the SQL portion of data engineering interviews.
 The course is designed to be done start-to-finish in roughly a

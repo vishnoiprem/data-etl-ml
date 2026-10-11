@@ -1,6 +1,6 @@
 # 09 — Amortized Analysis
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Amortized analysis averages the cost of an operation over many calls. A single call may be expensive, but the *average* is cheap.
 

@@ -26,7 +26,7 @@ Each solution has a small ``run_*`` function that wires it
 together with realistic test data. The test file in
 ``tests/test_solutions.py`` exercises each one.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

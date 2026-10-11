@@ -8,7 +8,7 @@ orchestration, retry with backoff, and monitoring with SLA
 tracking. By the end you'll be able to talk about reliability
 for an hour.
 
-Author: **Prem Vishnoi &lt;prem.vishnoi@example.com&gt;**
+Author: **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 
 ---
 

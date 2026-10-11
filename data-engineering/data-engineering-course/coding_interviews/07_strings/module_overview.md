@@ -1,6 +1,6 @@
 # Module 07: String Manipulation
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 9 problems covering the most common string operations.
 

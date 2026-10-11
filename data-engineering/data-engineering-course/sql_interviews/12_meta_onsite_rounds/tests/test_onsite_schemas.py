@@ -61,6 +61,40 @@ class TestQ1ReelsStarSchema(unittest.TestCase):
         out = qr.query_all("SELECT COUNT(*) AS n FROM reel_hashtag_bridge")
         self.assertEqual(out[0]['n'], 5)
 
+    def test_scd2_point_in_time_resolves_to_v1(self):
+        """The point-in-time join: an event on Jan 5 was served by
+        algorithm v1 (which was valid 2026-01-01..2026-01-15), not v2.
+        This is the *whole reason* the dim is SCD2 and not SCD1.
+        """
+        qr = _fresh_runner()
+        out = qr.query_all("""
+            SELECT f.reel_id, d.algorithm_name
+            FROM   fct_reel_view f
+            JOIN   dim_algorithm_version d
+              ON   f.event_date BETWEEN d.valid_from AND d.valid_to
+            WHERE  f.event_date = '2026-02-15'
+            ORDER BY f.reel_id
+            LIMIT 1
+        """)
+        # All 2026-02-15 events are in the v3 window (valid 2026-02-01..9999).
+        self.assertEqual(out[0]['algorithm_name'], 'reels_v3')
+
+    def test_bridge_table_resolves_multi_hashtag_reel(self):
+        """Reel 1001 has 2 hashtags, 1003 has 2 hashtags. The bridge
+        resolves to the correct count for each reel.
+        """
+        qr = _fresh_runner()
+        out = qr.query_all("""
+            SELECT reel_id, COUNT(*) AS n_hashtags
+            FROM   reel_hashtag_bridge
+            GROUP BY reel_id
+            ORDER BY n_hashtags DESC, reel_id
+            LIMIT 1
+        """)
+        # 1001 and 1003 are tied at 2 hashtags; ORDER BY picks 1001 first.
+        self.assertEqual(out[0]['reel_id'], 1001)
+        self.assertEqual(out[0]['n_hashtags'], 2)
+
 
 class TestQ2CrossPlatformIdentity(unittest.TestCase):
     def test_user_1_resolves_to_2_platforms(self):

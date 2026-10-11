@@ -1,0 +1,35 @@
+# Avilx leads tracking — Postgres + Adminer (optional UI)
+#
+# Usage:
+#   docker compose up -d            # start postgres + adminer
+#   docker compose down             # stop
+#   docker compose logs -f postgres # view logs
+#
+# Adminer UI: http://localhost:8080  (user=avilx, pass=avilx, db=avilx_leads)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: avilx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: avilx
+      POSTGRES_PASSWORD: avilx
+      POSTGRES_DB: avilx_leads
+    ports:
+      - "5433:5432"   # use 5433 to avoid clashing with any local postgres
+    volumes:
+      - avilx_pg_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+  adminer:
+    image: adminer:latest
+    container_name: avilx-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  avilx_pg_data:

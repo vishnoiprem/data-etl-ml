@@ -1,6 +1,6 @@
 """Tests for the four fact-table types.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 import sys

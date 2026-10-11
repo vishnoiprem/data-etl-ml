@@ -1,6 +1,6 @@
 """Tests for the practice star schemas and the ER-to-table translator.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 import sys

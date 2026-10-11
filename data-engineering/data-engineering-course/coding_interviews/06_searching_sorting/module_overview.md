@@ -1,6 +1,6 @@
 # Module 06: Searching & Sorting
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 8 problems on binary search and in-place sorting.
 

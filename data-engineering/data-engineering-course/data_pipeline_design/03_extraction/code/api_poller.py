@@ -18,7 +18,7 @@ Example::
     for row in poller.poll_all():
         process(row)
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

@@ -2,7 +2,7 @@
 
 > **0 lessons · Cross-link to `../system_design/`**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 System Design is the largest single track in the course, and
 it has its own complete curriculum: **71 lessons, 32

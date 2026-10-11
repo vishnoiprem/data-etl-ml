@@ -1,6 +1,6 @@
 # 01 — Tips for Acing Technical Coding Interviews
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 A short list of high-leverage habits, no fluff.
 

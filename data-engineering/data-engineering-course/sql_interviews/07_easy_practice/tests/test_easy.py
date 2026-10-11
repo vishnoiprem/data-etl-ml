@@ -1,6 +1,6 @@
 """Tests for the 14 M07 (Easy) practice SQL problems.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 Each test method loads the schema, runs the named solution
 from code/solutions.sql, and asserts the result rows match

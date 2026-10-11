@@ -1,6 +1,6 @@
 -- sql_interviews/08_medium_practice/code/schema.sql
 -- Schema and seed data for the M08 (Medium) practice module.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 
 -- ============================================================
 -- Problem 54: Consecutive Numbers

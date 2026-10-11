@@ -2,7 +2,7 @@
 
 > **36 lessons · 6 videos · ~14 hours of focused practice**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion articles:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 
@@ -105,4 +105,4 @@ served.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

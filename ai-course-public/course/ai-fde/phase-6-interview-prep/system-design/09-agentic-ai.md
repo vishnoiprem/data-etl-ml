@@ -120,10 +120,10 @@ tool_calls (
 ```
 
 **The cost ceiling model:**
-- Cost per ticket: $0.05 (LLM $0.03 + retriever $0.01 + tool calls $0.01)
+- Cost per ticket: $0.0017 (LLM $0.001 + retriever $0.0005 + tool calls $0.0002)
 - Tickets per day: 10K
-- Cost per day: $500
-- Cost per month: $15K
+- Cost per day: $17
+- Cost per month: $510 (~$500/month)
 - Cost ceiling: $500/month (the customer wants this)
 - Circuit breaker: fail closed when cost ceiling is hit
 
@@ -131,7 +131,7 @@ tool_calls (
 
 - **Tickets:** 10K/day; ~0.1 tickets/sec average; 5 tickets/sec peak
 - **Latency:** < 2-second P95
-- **Cost:** $500/month (LLM $200 + retriever $100 + tool calls $100 + Postgres $50 + Redis $50)
+- **Cost:** ~$500/month (LLM $300 + retriever $150 + tool calls $50 + Postgres + Redis + observability)
 
 ### Step 4: Tradeoffs (5-7 minutes)
 

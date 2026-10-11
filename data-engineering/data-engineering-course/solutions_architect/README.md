@@ -2,7 +2,7 @@
 
 > **6 modules · 47 lessons · ~62 videos · ~30 hours of focused practice**
 >
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 >
 > **Companion articles:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 

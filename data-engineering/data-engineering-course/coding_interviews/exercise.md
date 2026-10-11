@@ -1,6 +1,6 @@
 # Coding Interviews — Capstone Exercises
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Five graded problems to finish the course. Each is harder than the lessons. Treat them like a real interview: plan, code, test, and time-box yourself.
 

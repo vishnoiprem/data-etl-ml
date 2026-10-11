@@ -1,6 +1,20 @@
 # Intro to AI Agents and Agentic AI — The 2-hour foundations primer
 
 > **Source:** "Intro to AI Agents and Agentic AI" — 9 sections, 54 lectures, 2h 11m total. **This is the shortest, most-focused companion course in Phase 6:** a 2-hour primer that covers the agent fundamentals (ReAct, ReWoo, multi-agent, n8n workflow) in a way that pairs naturally with Ed Donner's 8-week deep-dive. **Best for candidates who want a fast ramp-up to the agent terminology before tackling Ed's Week 8 capstone or the Phase 4 multi-agent project.**
+>
+> **Section 10 (growing):** AI agents for trading workflows. Added in October 2026 as a 1-lecture seed; will grow to cover options/derivatives, multi-strategy, and prop-firm-specific workflows. See `intro-to-ai-agents/s10-ai-in-trading/`.
+
+## In 60 seconds
+
+The five named taxonomies a candidate must recite after reading this primer:
+
+1. **7 ingredients:** model, tools, memory, cost ceiling, system prompt, parser, loop driver.
+2. **5 guardrails:** loop detector, schema validator, cost ceiling, idempotency, audit log.
+3. **3-tier cost ceiling:** per-run ($0.50), per-tenant per-day ($5), per-process per-month ($1,000).
+4. **4 RAGAS metrics:** faithfulness, answer relevance, context precision, context recall.
+5. **5 architecture patterns:** single agent, sequential pipeline, orchestrator, parallel fan-out / fan-in, HTN + HITL.
+
+The "if you only read two lectures in the 54-lecture expansion" pointers: **L2-7** (the 200-line shipping agent that wraps all 7 ingredients + 5 guardrails) and **L9-1** (the ROI formula + CFO pitch). The full `intro-to-ai-agents/` directory (55 lectures across 10 sections — S1-9 complete, S10 seeded) is the read-it-as-a-doc expansion of this cheat sheet.
 
 ---
 
@@ -36,7 +50,7 @@ The course has 9 sections, 54 lectures, 2h 11m. Here's what each section teaches
 
 **The Phase 1-5 module that preps it:** Phase 1 (foundations) + Phase 4 (`course/ai-fde/phase-4-capstone/projects/02-multi-agent-dispatcher/`).
 
-**The company-experience report that tests it:** all 6 reports. Every FDE customer simulation tests "did you build an agent?" or "did you use an agent?" at some point.
+**The company-experience report that tests it:** all 12 company reports. Every FDE customer simulation tests "did you build an agent?" or "did you use an agent?" at some point.
 
 ---
 
@@ -102,7 +116,7 @@ The course has 9 sections, 54 lectures, 2h 11m. Here's what each section teaches
 
 **The Phase 1-5 module that preps it:** Phase 3 (`course/ai-fde/phase-3-deployment/`) — the eval-driven iteration pattern.
 
-**The company-experience report that tests it:** all 6 reports. The "manufacture labels" answer in customer-simulation Q9 is exactly this: build an eval set as the first step.
+**The company-experience report that tests it:** all 12 company reports. The "manufacture labels" answer in customer-simulation Q9 is exactly this: build an eval set as the first step.
 
 ---
 
@@ -216,7 +230,7 @@ The course has 9 sections, 54 lectures, 2h 11m. Here's what each section teaches
 
 **The Phase 1-5 module that preps it:** Phase 2 (the service architecture) + Phase 3 (the deployment + runbook) + Phase 4 (the 4 project deployments).
 
-**The company-experience report that tests it:** all 6 reports. Every FDE company tests deployment readiness as a phase-2 signal.
+**The company-experience report that tests it:** all 12 company reports. Every FDE company tests deployment readiness as a phase-2 signal.
 
 ---
 

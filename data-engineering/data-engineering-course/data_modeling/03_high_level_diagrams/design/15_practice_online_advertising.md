@@ -367,4 +367,4 @@ python3 -m unittest data_modeling/03_high_level_diagrams/tests/test_schemas.py
 > A daily campaign rollup handles dashboards; the event
 > fact handles deep dives."
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

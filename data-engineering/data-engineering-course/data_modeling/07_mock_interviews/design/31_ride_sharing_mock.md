@@ -4,7 +4,7 @@
 > Read it aloud. Note the use of *role-playing
 > dimensions* and *conformed dimensions*.
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -340,4 +340,4 @@ revenue query. Then read the solution above.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

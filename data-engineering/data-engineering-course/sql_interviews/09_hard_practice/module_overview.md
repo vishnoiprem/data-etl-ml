@@ -2,7 +2,7 @@
 
 > **14 lessons · 1 video · ~4 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The hardest practice module. 14 problems that combine
 window functions, recursive CTEs, conditional aggregation,

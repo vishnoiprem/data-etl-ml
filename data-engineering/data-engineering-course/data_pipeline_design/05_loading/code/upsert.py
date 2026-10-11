@@ -8,7 +8,7 @@ The function also implements a more general "merge into" using
 ``INSERT ... ON CONFLICT`` so callers can specify which
 columns to update and which to leave alone.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

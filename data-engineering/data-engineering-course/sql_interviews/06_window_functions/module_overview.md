@@ -2,7 +2,7 @@
 
 > **4 lessons · 0 videos · ~1 hour**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 The deepest SQL feature for interviews. By the end of M06
 you should be comfortable with `ROW_NUMBER`, `RANK`,

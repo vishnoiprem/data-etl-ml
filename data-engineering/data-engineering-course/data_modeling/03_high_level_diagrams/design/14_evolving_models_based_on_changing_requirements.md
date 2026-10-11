@@ -418,4 +418,4 @@ for *creating* a schema. This lesson is about
 > answer names the move, the cost, and the trap in 30
 > seconds."
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

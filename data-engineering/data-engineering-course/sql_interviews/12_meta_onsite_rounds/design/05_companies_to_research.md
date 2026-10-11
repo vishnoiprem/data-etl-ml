@@ -1,6 +1,6 @@
 # Lesson 5 — Which Meta Org Each Question Comes From
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Source:** Cross-referenced from [Interview101 (2026)](https://www.interview101.com/interviews/meta/data-engineer), [Aced (2026)](https://www.aced.io/guides/meta-data-engineer-interview), [Tryexponent (2026)](https://www.tryexponent.com/guides/meta-data-engineer-interview), [Glassdoor 2026](https://www.glassdoor.com/Interview/Meta-Data-Engineer-Interview-Questions-EI_IE40772.0,4_KO5,18.htm)
 

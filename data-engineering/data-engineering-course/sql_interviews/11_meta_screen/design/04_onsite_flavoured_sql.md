@@ -1,6 +1,6 @@
 # 04 — Onsite-Flavored SQL Problems (Deeper, 6 problems)
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 
@@ -215,4 +215,4 @@ timestamp or to add a sequence number.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

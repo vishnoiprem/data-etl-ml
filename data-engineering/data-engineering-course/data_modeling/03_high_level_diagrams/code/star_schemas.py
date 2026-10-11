@@ -22,7 +22,7 @@ Schemas built:
   6. `build_cloud_services_schema`   — Lesson 19 (cloud services)
   7. `build_online_advertising_schema` — Lesson 15 (online advertising)
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

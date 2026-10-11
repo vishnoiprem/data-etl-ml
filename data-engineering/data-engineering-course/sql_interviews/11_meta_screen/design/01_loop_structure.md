@@ -1,6 +1,6 @@
 # 01 — The 60-Minute CoderPad Format
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 
@@ -88,4 +88,4 @@ not the 60-min screen, but the patterns are the same.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

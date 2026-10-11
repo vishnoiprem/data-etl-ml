@@ -1,6 +1,6 @@
 # Module 13: Recursion & Backtracking
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 12 problems on recursive backtracking — the core CS interview technique for combinatorial search.
 

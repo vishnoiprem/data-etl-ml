@@ -2,7 +2,7 @@
 
 > **4 lessons · 0 videos · ~1.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 A fact is a measurement. But not all facts are the same shape.
 The Kimball taxonomy gives us four fact-table types, and the
@@ -69,4 +69,4 @@ who says "transactional" without justification is 2/4.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

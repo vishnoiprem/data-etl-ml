@@ -2,7 +2,7 @@
 
 > **7 lessons · 0 videos · ~1.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 Aggregations are where SQL turns from "filter rows" to
 "compute summaries". M04 covers the patterns you'll use to

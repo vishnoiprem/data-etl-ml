@@ -1,6 +1,6 @@
 # 08 — Space Complexity
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Space complexity counts the **extra** memory the algorithm uses (not the input itself).
 

@@ -25,7 +25,7 @@ example). The event schema mirrors Debezium's:
 The pipeline is wrapped in ``common.Pipeline`` so it gets retries
 and idempotency for free.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

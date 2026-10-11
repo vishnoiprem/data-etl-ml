@@ -1,6 +1,6 @@
 # 06 — Meta Data Engineer 2026: Full Loop Walkthrough
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 
@@ -164,12 +164,15 @@ IC6 is "Senior Staff" — the staff+ bar. The leveling
 rubric isn't public, but the screen pass bar is the
 cleanest signal.
 
-## Comp (2026, levels.fyi + Datavidhya 2026)
+## Comp (2026)
 
 - IC3: ~$168K base
 - IC4: ~$226K base
 - **IC5: ~$311K base** (the L5 target)
 - IC6: ~$439K base
+
+Sources:
+[levels.fyi Meta Data Engineer, 2026-Q3](https://www.levels.fyi/companies/meta/salaries/data-engineer) for the four IC base bands; [Datavidhya 2026](https://datavidhya.com/2026/01/) for the negotiation-leverage callout below.
 
 Negotiation leverage per Datavidhya: competing Meta/Apple
 offers are the "single strongest lever" for comp
@@ -194,4 +197,4 @@ module has the negotiation scripts.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

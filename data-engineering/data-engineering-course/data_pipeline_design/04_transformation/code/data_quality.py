@@ -9,7 +9,7 @@ The functions are pure: they query the table, evaluate, and
 return. They don't modify the data. A pipeline can call them
 in sequence and fail fast on the first ``False``.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

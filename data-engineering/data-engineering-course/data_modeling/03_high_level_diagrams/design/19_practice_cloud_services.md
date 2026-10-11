@@ -411,4 +411,4 @@ python3 -m unittest data_modeling/03_high_level_diagrams/tests/test_schemas.py
 > that shares `dim_customer` — different grain, different
 > consumer."
 
-*Author: Prem Vishnoi <prem.vishnoi@example.com>*
+*Author: Prem Vishnoi <pvishnoi@avilx.com>*

@@ -1,6 +1,6 @@
 # 13 — Fast & Slow Pointers
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 A "tortoise and hare" pattern: two pointers move at different speeds through a sequence.
 

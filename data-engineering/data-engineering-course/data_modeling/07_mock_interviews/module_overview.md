@@ -1,6 +1,6 @@
 # Module 07 — Mock Interviews and Practice
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ## Why this module
 
@@ -104,4 +104,4 @@ per mock, you'll be ahead of 80% of candidates.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

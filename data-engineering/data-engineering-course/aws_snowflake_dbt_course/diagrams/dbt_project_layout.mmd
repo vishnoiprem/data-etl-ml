@@ -1,0 +1,34 @@
+%% dbt_project_layout.mmd
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+%% Lecture reference: L13 "dbt init: Project Initialization & Connection Setup"
+
+graph TD
+    ROOT[dbt_project/]
+    ROOT --> DBT_PROJ[dbt_project.yml]
+    ROOT --> PROFILES[profiles.yml]
+    ROOT --> PACKAGES[packages.yml]
+    ROOT --> SELECTORS[selectors.yml]
+    ROOT --> MODELS[models/]
+    ROOT --> MACROS[macros/]
+    ROOT --> SEEDS[seeds/]
+    ROOT --> SNAPSHOTS[snapshots/]
+    ROOT --> TESTS[tests/]
+    ROOT --> ANALYSES[analyses/]
+
+    MODELS --> STAGING[staging/]
+    MODELS --> MARTS[marts/]
+    STAGING --> STG_T[_sources.yml + stg_*]
+    MARTS --> M_T[transactions, activity, stablecoin, dag_demo]
+    MARTS --> PY_M[fraud_score.py]
+    MARTS --> M_YML[5 .yml config files]
+
+    TESTS --> T_GENERIC[generic/]
+    TESTS --> T_UNIT[unit/]
+    T_GENERIC --> T_GENERIC_SQL[test_positive_value.sql + test_accepted_recent.sql]
+    T_UNIT --> T_UNIT_YML[test_fraud_score_unit.yml]
+
+    style ROOT fill:#e1f5ff
+    style MODELS fill:#fff4e1
+    style STAGING fill:#e8f5e9
+    style MARTS fill:#fce4ec
+    style TESTS fill:#f3e5f5

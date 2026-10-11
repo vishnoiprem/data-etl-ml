@@ -2,7 +2,7 @@
 
 > **12 lessons · 7 videos · ~8-10 hours of reading + 4-6 hours of mock practice**
 
-> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <prem.vishnoi@example.com>
+> **Author:** [Prem Vishnoi](https://medium.com/@premvishnoi) · <pvishnoi@avilx.com>
 
 The core of the SA interview. Customer interaction — discovery,
 demo, objection handling, whiteboarding — is the round most

@@ -2,7 +2,7 @@
 
 > **14 lessons · 3 videos · ~3 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ## Why this module
 

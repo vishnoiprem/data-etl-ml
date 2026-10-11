@@ -11,7 +11,7 @@ should have:
   * Aggregations on the fact produce the documented
     values.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 import sys

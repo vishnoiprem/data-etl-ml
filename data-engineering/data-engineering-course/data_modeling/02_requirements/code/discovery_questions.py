@@ -4,7 +4,7 @@ The 5W+H framework, expanded into 50+ specific questions. Most
 interviewers will answer 5–8 of these in the first 5 minutes; the
 candidate's job is to *pick* the right 5–8, not to ask all 50.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations

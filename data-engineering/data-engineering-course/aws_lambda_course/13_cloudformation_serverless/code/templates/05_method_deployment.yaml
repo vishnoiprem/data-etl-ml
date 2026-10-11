@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  L66+L67 standalone template — full method + deployment + stage wiring
+  for a single REST API. Assumes the Lambda functions and IAM role
+  already exist. The Lambda invoke permission is included so the stack
+  is self-contained.
+  Deploy with:
+    aws cloudformation deploy \
+      --stack-name l66-sandbox \
+      --template-file 05_method_deployment.yaml \
+      --capabilities CAPABILITY_IAM
+
+Parameters:
+  GetObjectFunctionArn:
+    Type: String
+    Description: ARN of the GET Lambda.
+  PutObjectFunctionArn:
+    Type: String
+    Description: ARN of the PUT Lambda.
+  StageName:
+    Type: String
+    Default: prod
+    Description: API Gateway stage.
+
+Resources:
+  ServerlessApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: l66-serverless-api
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  ObjectsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ParentId: !GetAtt ServerlessApi.RootResourceId
+      PathPart: objects
+
+  ObjectKeyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ParentId: !Ref ObjectsResource
+      PathPart: "{proxy+}"
+
+  GetObjectMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ResourceId: !Ref ObjectKeyResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetObjectFunctionArn}/invocations"
+
+  PutObjectMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ResourceId: !Ref ObjectKeyResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutObjectFunctionArn}/invocations"
+
+  GetInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetObjectFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*/GET/objects/*"
+
+  PutInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PutObjectFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*/PUT/objects/*"
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - GetObjectMethod
+      - PutObjectMethod
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      Description: Initial deployment for L66 standalone.
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: !Ref StageName
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${ServerlessApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+    Description: Invoke URL for the API.
+  RestApiId:
+    Value: !Ref ServerlessApi
+  StageName:
+    Value: !Ref StageName

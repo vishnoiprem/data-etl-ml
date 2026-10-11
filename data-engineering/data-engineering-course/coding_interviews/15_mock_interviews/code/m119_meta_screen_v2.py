@@ -19,6 +19,12 @@ SQL screen and the Python screen are the *same* screen, just
 the second half.
 """
 
+from __future__ import annotations
+
+from typing import Dict, Iterable, List, Tuple
+
+import numpy as np
+
 
 # ----------------------------------------------------------------------
 # Problem 1: top 5 pages by upward 30-day impression trend.
@@ -30,7 +36,6 @@ def top_5_pages_by_upward_trend(impressions_df):
     Vectorized: groupby + apply. Iterative loops on the
     DataFrame are rejected at Meta.
     """
-    import numpy as np
     daily = (impressions_df
              .groupby(['page_id', 'day'], as_index=False)['impressions']
              .sum())

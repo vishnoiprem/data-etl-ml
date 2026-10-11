@@ -2,7 +2,7 @@
 
 > **8 lessons · 0 videos · ~1.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 Joins are how SQL combines tables. By the end of M05 you
 should be able to draw the Venn diagram for any join

@@ -1,6 +1,6 @@
 -- sql_interviews/code/capstone_solutions.sql
 -- Reference answers to the 5 capstone questions.
--- Author: Prem Vishnoi <prem.vishnoi@example.com>
+-- Author: Prem Vishnoi <pvishnoi@avilx.com>
 --
 -- These are one valid answer per question. Many
 -- alternatives exist; the comments call out the most

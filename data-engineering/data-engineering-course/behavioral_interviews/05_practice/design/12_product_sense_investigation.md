@@ -1,6 +1,6 @@
 # Lesson 12 — "PM at a food delivery app: conversion rates declined. How do you investigate?"
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 >
 > **Companion:** [medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 >
@@ -109,4 +109,4 @@ hypothesis-tree formation and not enough on ranking.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

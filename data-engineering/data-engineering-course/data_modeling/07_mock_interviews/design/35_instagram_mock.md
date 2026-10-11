@@ -5,7 +5,7 @@
 > *event volume vs storage* trade-off, and the
 > *unbounded graph* modeling for follows.
 
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 ---
 
@@ -364,4 +364,4 @@ they followed the creator. That requires a
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

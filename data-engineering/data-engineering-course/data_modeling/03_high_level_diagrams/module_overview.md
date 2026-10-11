@@ -2,7 +2,7 @@
 
 > **8 lessons · 0 videos · ~3.5 hours**
 >
-> **Author:** Prem Vishnoi &lt;prem.vishnoi@example.com&gt;
+> **Author:** Prem Vishnoi &lt;pvishnoi@avilx.com&gt;
 
 This module is the heart of the data modeling track. It takes you
 from a requirements doc to a working star schema, with six
@@ -85,4 +85,4 @@ practice schema from memory in under 15 minutes.
 
 ---
 
-*Author: Prem Vishnoi &lt;prem.vishnoi@example.com&gt;*
+*Author: Prem Vishnoi &lt;pvishnoi@avilx.com&gt;*

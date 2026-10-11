@@ -1,6 +1,6 @@
 # 17 — Tree BFS
 
-> **Author:** Prem Vishnoi <prem.vishnoi@example.com>
+> **Author:** Prem Vishnoi <pvishnoi@avilx.com>
 
 Breadth-First Search visits a tree level by level using a queue.
 

@@ -17,7 +17,7 @@ incomplete and the retry starts over. If it crashes between 3
 and 4, the load is complete but the audit log is missing;
 a reconciler can detect the discrepancy.
 
-Author: Prem Vishnoi <prem.vishnoi@example.com>
+Author: Prem Vishnoi <pvishnoi@avilx.com>
 """
 
 from __future__ import annotations
