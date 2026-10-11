@@ -10,7 +10,7 @@ Five STAR-format story scaffolds for the Meta DE Ownership round. Each story is 
 
 **Prompt:** Tell me about a time you led a project end-to-end.
 
-**Use when:** Asked about ownership, end-to-end delivery, or "what's the project you're most proud of."
+**Use when:** Asked about ownership, end-to-end delivery, "what's the project you're most proud of," or anything about platform/infra leadership at scale.
 
 ### Scaffold
 
@@ -19,17 +19,25 @@ Five STAR-format story scaffolds for the Meta DE Ownership round. Each story is 
 - **Action (≤2m)** — What *you* did: defining milestones, unblocking the team, making the key technical trade-off, communicating status. Be specific. "I designed the ingestion schema," not "we worked on it."
 - **Result (≤30s)** — Measurable impact + a thing you'd change.
 
-### Sample (data-quality theme)
+### Sample (unified data platform at Lazada — last-mile real-time + campaign data)
 
-> **S:** Our analytics dashboards were showing a 12% gap between the orders pipeline and the source-of-truth OLTP DB, and finance was losing trust in the numbers. I was the lead data engineer on the reconciliation project over a 4-month span.
+> **S:** At Lazada, our data was scattered across five independently-built pipeline stacks — one per product line (orders, inventory, campaigns, last-mile delivery, marketing). Each team owned its own ingestion, schema, and serving layer. Campaign data took 24 hours to land in the dashboard, so marketing was optimizing on yesterday's numbers during a flash sale. Last-mile delivery data took 6+ hours, which meant ops couldn't react to delivery SLA breaches in real time. And because every stack had its own schema conventions, joining campaign exposure to last-mile delivery required a full week of ad-hoc data engineering per analysis. The stakeholders were marketing, last-mile ops, finance, and our data-science team — all blocked by the same fragmentation.
 >
-> **T:** I owned defining the daily reconciliation job end-to-end — schema design, the diff logic, the alerting policy, and the rollout plan across the 3 product teams that depended on the tables.
+> **T:** I was the tech lead for the unified data platform. I owned the end-to-end: the architecture, the schema-governance model, the migration plan across all five pipeline stacks, and the rollout to 10+ engineers across product and data teams. "Done" meant: one governed ingestion layer, real-time + batch on the same platform, schema contracts enforced at write-time, and a single serving API for downstream consumers.
 >
-> **A:** I designed a row-hash-based comparison instead of full-table diffs, which kept the job under 10 min even on our largest 2B-row table. I wrote the alert routing rules so on-call got paged only when the gap crossed 0.5%, not on every transient blip. I drove the rollout: ran the job in shadow mode for two weeks, presented the gap report to finance weekly, and got sign-off before turning off the old report.
+> **A:** The defining trade-off was schema governance, and I had to make the call before we had buy-in. I pushed for a central schema registry and producer-side schema contracts enforced at write-time — meaning any producer that tried to publish a non-conforming event was rejected, not silently coerced. Every senior engineer pushed back; "just let consumers handle it" was the easy answer. I held the line because I'd seen what happened when we didn't: silent schema drift had caused 3 production incidents in the previous quarter, and joining campaign data to last-mile delivery took a week precisely because schemas didn't match. I wrote a 2-page RFC, walked it through every product team, and got sign-off by framing it as "rejection at write-time, with a 1-week grace period for known migrations" — the same pattern that worked in Story 3. On the architecture itself, I chose a streaming-first ingestion layer (Kafka + a stream processor) for last-mile and campaign paths, and kept batch ingestion only for nightly finance close. I split delivery into 3 phases over 4 months: Phase 1 — schema registry and contracts live in shadow mode. Phase 2 — migrate last-mile and campaign pipelines onto the new platform, in production, with dual-writes to the old stacks for rollback. Phase 3 — migrate orders, inventory, and marketing, and deprecate the old stacks. I ran weekly status with marketing, ops, finance, and the data-science lead, and wrote a one-pager every Friday so leadership could see progress without a meeting. I personally unblocked the two hardest migrations (last-mile delivery, because of the volume; and campaign, because of the schema mess) by sitting with those teams for a week each.
 >
-> **R:** Gap dropped from 12% to under 0.3%, finance regained trust, and we retired the old report 60 days later. **One thing I'd change:** I would've pushed back on the original 2-week shadow-mode timeline — we had two near-misses where the shadow run would've caught the bug a sprint earlier.
+> **R:** Data freshness for last-mile and campaigns went from hours/days to seconds/minutes — campaign data was usable in dashboards within 60 seconds of an event, and last-mile delivery SLA breaches showed up on ops dashboards in under 2 minutes. Marketing ran its first flash sale on real-time data; the data-science team's campaign-attribution pipeline went from a 1-week ad-hoc project to a 1-hour query. Five fragmented stacks consolidated into one, 10+ engineers migrated, and we retired all five legacy stacks within 4 months. **What I'd change:** I would have stood up the schema registry in shadow mode a full month earlier, in parallel with the architecture design, instead of treating it as Phase 1 deliverable. Two teams quietly built new producers during the design phase that we had to retrofit — I could have caught those before they were written.
 
-**What this story proves:** scoped + owned + drove cross-functional adoption + quantified outcome + reflective.
+**What this story proves:** owned a platform-level, cross-team initiative end-to-end; made a hard governance trade-off and got buy-in through an RFC, not a mandate; phased the rollout with dual-writes for safety; quantified latency / freshness / adoption; and reflected honestly on sequencing.
+
+### Talking points if they probe deeper
+
+- **"Why schema contracts and not just a registry?"** — A registry is documentation. A contract is enforcement. Without enforcement, drift creeps back in within a sprint. The grace period made it land.
+- **"How did you handle the pushback from senior engineers?"** — I didn't argue in meetings. I wrote the RFC, made the cost of *not* doing it concrete (3 prior incidents, 1 week of glue code per cross-stack analysis), and let the doc do the work. Then I ran the shadow-mode pilot myself first, on my own pipeline, so the answer to "will this slow us down?" was data, not opinion.
+- **"How did you decide streaming vs batch per use case?"** — By the consumer. If the consumer needed sub-minute freshness (last-mile, campaigns, real-time fraud), it went on streaming. If the consumer was a nightly close (finance, regulatory), it stayed on batch. I didn't pick one size for all five stacks.
+- **"How did you keep 10+ engineers aligned?"** — Weekly written status (one-pager, no meeting), a single Slack channel for migration questions, and a 30-min weekly office hour. I also personally sat with the two hardest migrations for a week each. The bottleneck was never code; it was unblocking people.
+- **"What would you do differently?"** — Stand up the schema registry in shadow mode earlier, and write a producer-migration playbook before kickoff instead of mid-Phase 2.
 
 ---
 
