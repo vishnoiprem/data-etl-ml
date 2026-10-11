@@ -714,7 +714,11 @@ def insert_leads(leads, dry=False):
                         (tracking_id, company, role, contact_email, source_url,
                          jd_text, source, status, created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
+                    WHERE contact_email IS NOT NULL
+                      AND role IS NOT NULL
+                      AND role != ''
+                    DO NOTHING
                     RETURNING id
                 """, (tid, co[:80], role[:120], em,
                       ld.get("source_url", "")[:500],
