@@ -51,8 +51,10 @@ for i in $(seq 1 "$LOOP_MAX"); do
 
     # 1. Refresh leads in background (don't block email phase)
     if (( i % 5 == 1 )); then
-        echo "[$i/$LOOP_MAX] refreshing lead list..." | tee -a "$LOG"
-        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python find_more_leads.py >> "$LOG" 2>&1 || echo "  (lead refresh failed, continuing)"
+        echo "[$i/$LOOP_MAX] refreshing lead list (job boards)..." | tee -a "$LOG"
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python find_more_leads.py >> "$LOG" 2>&1 || echo "  (find_more_leads failed, continuing)"
+        echo "[$i/$LOOP_MAX] refreshing lead list (clients + AI-native)..." | tee -a "$LOG"
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python find_clients.py >> "$LOG" 2>&1 || echo "  (find_clients failed, continuing)"
     fi
 
     # 2. Sync bounces
@@ -72,20 +74,54 @@ except Exception as e:
 " 2>&1 | tee -a "$LOG"
 
     # 3. Run autopilot — email phase, up to 10 emails
-    /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python autopilot.py --email --max-emails 10 --no-bounce-sync >> "$LOG" 2>&1 || {
-        echo "  (autopilot exited with non-zero, continuing)" | tee -a "$LOG"
+    # Skip if REFINE_ONLY=1 (Gmail cooldown, etc.)
+    if [[ "${REFINE_ONLY:-0}" == "1" ]]; then
+        echo "[$i/$LOOP_MAX] REFINE_ONLY=1 → skipping email sends" | tee -a "$LOG"
+    else
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python autopilot.py --email --max-emails 10 --no-bounce-sync >> "$LOG" 2>&1 || {
+            echo "  (autopilot exited with non-zero, continuing)" | tee -a "$LOG"
+        }
+    fi
+
+    # 3b. Refine pipeline — enriches pending leads (resume + cover + better email)
+    /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python refine_pipeline.py --enrich-only >> "$LOG" 2>&1 || {
+        echo "  (refine_pipeline exited with non-zero, continuing)" | tee -a "$LOG"
     }
 
-    # 4. Report status
-    pending=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
-import sys
+    # 3c. Backfill emails — derive careers@X for any pending leads still missing an email
+    /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python backfill_emails.py >> "$LOG" 2>&1 || {
+        echo "  (backfill_emails exited with non-zero, continuing)" | tee -a "$LOG"
+    }
+
+    # 4. Report status — single Python invocation, three counts, sleeps to avoid DB lock
+    sleep 2
+    counts=$(/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python -c "
+import sys, time
 sys.path.insert(0, '$HERE')
-from db.lead_store import get_cursor
-with get_cursor() as cur:
-    cur.execute(\"SELECT COUNT(*) FROM leads WHERE contact_email IS NOT NULL AND contact_email != '' AND status NOT IN ('sent_email','bounced','replied','unsubscribed','failed')\")
-    print(cur.fetchone()[0])
-" 2>/dev/null || echo "?")
-    echo "[$i/$LOOP_MAX] pending w/ email after run: $pending" | tee -a "$LOG"
+for _ in range(3):
+    try:
+        from db.lead_store import get_cursor
+        with get_cursor() as cur:
+            cur.execute(\"SELECT COUNT(*) FROM leads WHERE contact_email IS NOT NULL AND contact_email != '' AND status='pending'\")
+            pending = cur.fetchone()['count']
+            cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND resume_file IS NOT NULL\")
+            tailored = cur.fetchone()['count']
+            cur.execute(\"SELECT COUNT(*) FROM leads WHERE status='pending' AND cover_letter_body IS NOT NULL\")
+            covered = cur.fetchone()['count']
+        print(f'{pending} {tailored} {covered}')
+        sys.exit(0)
+    except Exception as e:
+        time.sleep(2)
+print('? ? ?')
+" 2>/dev/null || echo "? ? ?")
+    read -r pending tailored covered <<< "$counts"
+    echo "[$i/$LOOP_MAX] pending=$pending  tailored=$tailored  covered=$covered" | tee -a "$LOG"
+
+    # 4b. Print full report every 10 iterations
+    if (( i % 10 == 0 )); then
+        echo "" | tee -a "$LOG"
+        /Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python "$HERE/full_report.py" 2>&1 | head -50 | tee -a "$LOG"
+    fi
 
     if [[ "$pending" == "0" ]]; then
         echo "[$i/$LOOP_MAX] queue empty, will refresh in next iteration" | tee -a "$LOG"

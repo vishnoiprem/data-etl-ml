@@ -1,0 +1,63 @@
+# realtime-crypto-sentiment — Python dependencies
+# Pinned to keep security advisories + model reproducibility stable.
+#
+# Python 3.11+ required (torch 2.5.1 is not published for 3.10). On
+# Python 3.13, `pip` will auto-relax some pins (torch, protobuf) at install
+# time. The FinBERT model is lazy-loaded and mocked in tests, so a
+# slightly older torch (>=2.2,<2.5) is fine for actual runtime.
+
+# ── Tier 1 security overrides (transitive pins from root requirements.txt)
+urllib3==2.8.0
+pyjwt==2.15.0
+werkzeug==3.1.9
+starlette==1.3.1
+python-multipart==0.0.31
+anyio==4.14.2
+soupsieve==2.9.0
+multidict==6.9.1
+mistune==3.3.4
+requests==2.32.3
+idna==3.15
+setuptools==83.0.0
+pygments==2.20.0
+filelock==3.20.3
+wheel==0.46.2
+tqdm==4.67.3
+cryptography==46.0.5
+protobuf==6.33.5
+pymongo==4.18.2
+fsspec==2026.6.0
+gunicorn==23.0.0
+bleach==6.4.0
+sqlparse==0.6.0
+
+# ── Project deps ────────────────────────────────────────────────────────────
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+pydantic==2.9.2
+pydantic-settings==2.6.1
+beautifulsoup4==4.12.3
+lxml==5.3.0
+websockets==13.1
+transformers==4.46.3
+torch==2.5.1
+numpy==1.26.4
+pandas==2.2.3
+streamlit==1.40.1
+plotly==5.24.1
+streamlit-autorefresh==1.0.1
+apscheduler==3.10.4
+prometheus-client==0.21.0
+# pyarrow 19+ requires numpy 2.x; we're pinned to numpy 1.26 for pandas 2.2.x compat.
+# Last pyarrow release that supports numpy 1.x is 18.x. Without this pin, every
+# st.dataframe() call in the dashboard crashes with "pyarrow requires NumPy 2.0+".
+pyarrow==18.1.0
+python-dotenv==1.0.0
+loguru==0.7.2
+rich==13.5.3
+
+# ── Tests ───────────────────────────────────────────────────────────────────
+pytest==8.3.3
+pytest-asyncio==0.24.0
+responses==0.25.3
+freezegun==1.5.1
