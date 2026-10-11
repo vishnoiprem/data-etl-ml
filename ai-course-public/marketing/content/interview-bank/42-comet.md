@@ -26,10 +26,11 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Implement a streaming metric aggregator"
+### Q2.1: Coding: "Implement a streaming metric aggregator"
 **Answer:**
 ```python
 import bisect
+
 class StreamingPercentile:
     def __init__(self):
         self.sorted = []
@@ -41,7 +42,7 @@ class StreamingPercentile:
 ```
 **Tip:** Discuss the O(n) alternative using two heaps (max-heap below, min-heap above the percentile) — Comet uses this for their live dashboards.
 
-### Q2.2: ML — "How would you build an LLM evaluation pipeline?"
+### Q2.2: ML: "How would you build an LLM evaluation pipeline?"
 **Answer:** Three layers: (1) **offline eval** on golden datasets (accuracy, BLEU, custom rubric), (2) **online eval** with LLM-as-judge for open-ended outputs, (3) **production tracing** with span-level attribution. Mention tools: Opik, LangSmith, Braintrust.
 
 ## Stage 3: Onsite (3-4 rounds)
@@ -52,12 +53,12 @@ class StreamingPercentile:
 - **Q3.1.3:** Parse experiment metadata from a config file and validate it against a schema.
 
 ### Round 3.2: System design
-- **Q3.2.1:** "Design the panel system behind Comet's custom dashboards." Talk nested panel data model, panel-level permissions, real-time updates via WebSocket, materialized aggregations.
-- **Q3.2.2:** "How do you build a production-grade LLM eval service?" Discuss: queue-based async eval, judge model selection, cost budgets, golden dataset curation, regression detection.
+- Q3.2.1: Design the panel system behind Comet's custom dashboards. Talk nested panel data model, panel-level permissions, real-time updates via WebSocket, and materialized aggregations.
+- Q3.2.2: How do you build a production-grade LLM eval service? Discuss: queue-based async eval, judge model selection, cost budgets, golden dataset curation, and regression detection.
 
 ### Round 3.3: ML deep-dive
-- **Q3.3.1:** Walk through a model you took from notebook to production.
-- **Q3.3.2:** "How would you detect data drift in production?" PSI, KS test, embedding-space drift (UMAP + density estimation), and how Comet's production monitoring helps.
+- Q3.3.1: Walk through a model you took from notebook to production.
+- Q3.3.2: How would you detect data drift in production? PSI, KS test, embedding-space drift (UMAP + density estimation), and how Comet's production monitoring helps.
 
 ### Round 3.4: Behavioral
 - **Q3.4.1:** "Tell me about a time you made a tool that users actually loved."

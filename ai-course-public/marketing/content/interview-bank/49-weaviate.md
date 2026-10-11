@@ -26,30 +26,37 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Implement approximate nearest neighbors using LSH"
+### Q2.1: Coding: "Implement approximate nearest neighbors using LSH"
 **Answer:**
 ```python
 import numpy as np
+
 class LSH:
     def __init__(self, dim, n_tables=5, n_bits=10):
-        self.tables = []
-        for _ in range(n_tables):
-            self.tables.append(np.random.randn(n_bits, dim))
-    def hash_(self, v):
-        return [tuple(np.sign(t @ v) > 0) for t in self.tables]
-    def insert(self, id, v):
-        for table, h in zip(self.tables, self.hash_(v)):
-            table.setdefault(h, []).append((id, v))
+        self.dim = dim
+        self.n_tables = n_tables
+        self.n_bits = n_bits
+        # one random hyperplane per bit, per table
+        self.planes = [np.random.randn(n_bits, dim) for _ in range(n_tables)]
+        self.buckets = [dict() for _ in range(n_tables)]
+
+    def _signatures(self, v):
+        return [(np.sign(p @ v) > 0).astype(int).tobytes() for p in self.planes]
+
+    def insert(self, vid, v):
+        for i, sig in enumerate(self._signatures(v)):
+            self.buckets[i].setdefault(sig, []).append((vid, v))
+
     def query(self, v, k=10):
         cands = set()
-        for h, table in zip(self.hash_(v), self.tables):
-            for id, vec in table.get(h, []):
-                cands.add((id, vec))
+        for i, sig in enumerate(self._signatures(v)):
+            for vid, vec in self.buckets[i].get(sig, []):
+                cands.add((vid, vec))
         return sorted(cands, key=lambda x: -np.dot(x[1], v))[:k]
 ```
 **Tip:** Weaviate supports multiple algorithms — HNSW is default, but they support ANNOY, PQ, and IVF too.
 
-### Q2.2: Vector DB — "How would you benchmark recall vs latency in a vector DB?"
+### Q2.2: Vector DB: "How would you benchmark recall vs latency in a vector DB?"
 **Answer:** Three pillars: (1) **ground truth**: brute-force k-NN, (2) **recall@k**: % of true top-k in approximate top-k, (3) **latency**: p50/p95/p99 with concurrency sweeps. ANN-Benchmarks is the standard.
 
 ## Stage 3: Onsite (4 rounds)

@@ -24,7 +24,7 @@ Figma's AI org focuses on three areas: (1) Figma AI (generate, edit, summarize),
 **Tip:** Be specific about multi-modal work if you have it.
 
 ### Q1.2: "Why Figma?"
-**Answer:** "Three reasons. First, Figma AI is genuinely useful — the Figma Make and AI design generation launches in 2025-26 are real ML products. Second, the design surface is uniquely multi-modal — text, image, layout, vector — and the ML is hard. Third, Figma's culture of 'build what you wish existed' and small team ownership is a great fit for me."
+**Answer:** "Three reasons. First, Figma AI is genuinely useful — the Figma Make and AI design generation launches in 2025-26 are real ML products. Second, the design surface is uniquely multi-modal — text, image, layout, vector — and the ML is hard. Third, Figma's culture of 'build what you wish existed' plus small team ownership is a great fit for me."
 **Tip:** Reference Figma Make, AI features, design generation, and the 2026 launches.
 
 ### Q1.3: "Location + comp"

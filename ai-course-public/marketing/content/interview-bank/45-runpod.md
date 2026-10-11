@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Write a GPU job queue with priority scheduling"
+### Q2.1: Coding: "Write a GPU job queue with priority scheduling"
 **Answer:**
 ```python
 import heapq
@@ -52,7 +52,7 @@ class GPUQueue:
 ```
 **Tip:** Talk about bin-packing, fragmentation, MIG vs full GPU, and preemption.
 
-### Q2.2: Infra — "How do you isolate noisy-neighbor GPUs in a multi-tenant cloud?"
+### Q2.2: Infra: "How do you isolate noisy-neighbor GPUs in a multi-tenant cloud?"
 **Answer:** Three layers: (1) **hardware**: MIG slicing for H100/A100, (2) **kernel**: NVIDIA MPS for older GPUs, time-slicing via K8s device plugin, (3) **policy**: per-tenant cgroups, network bandwidth limits, IO throttling.
 
 ## Stage 3: Onsite (3-4 rounds)

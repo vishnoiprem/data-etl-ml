@@ -24,8 +24,8 @@ Discord's ML org is unique: most of their user-generated content is text (chat),
 **Tip:** Be specific about scale. Discord handles billions of messages, so "I worked on a model" without scale context lands flat.
 
 ### Q1.2: "Why Discord?"
-**Answer:** "Three reasons. First, the real-time nature — most ML is async, but Discord is 'what to show this user in the next 200ms'. Second, the trust & safety stakes are unusually high because the user base skews young. Third, Discord's investment in AI features (Clyde, AI companions, server summaries) signals strong leadership commitment. I want my ML to directly protect people, not just optimize ad clicks."
-**Tip:** Reference Clyde, AI server summaries, and voice/avatar generation features from 2025-2026.
+**Answer:** "Three reasons. First, it's real-time — most ML is async, but Discord is 'what to show this user in the next 200ms.' Second, T&S stakes are unusually high because the user base skews young. Third, Discord's investment in AI features (Clyde, AI companions, server summaries) signals real leadership commitment. I want my ML to directly protect people, not just optimize ad clicks."
+**Tip:** Reference Clyde, AI server summaries, voice/avatar generation from 2025-2026.
 
 ### Q1.3: "Location + remote"
 **Answer:** Discord is SF/remote-US. Remote is genuine and well-supported. International is harder.

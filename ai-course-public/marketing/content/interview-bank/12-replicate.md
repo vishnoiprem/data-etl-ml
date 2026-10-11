@@ -48,7 +48,7 @@ Replicate grades Cog fluency + Docker fundamentals.
 ### Q3.1.1: "Build a small queue with retries and exponential backoff"
 **Answer:**
 ```python
-import time, queue, threading
+import time, random, queue, threading
 class RetryQueue:
     def __init__(self, max_retries=5, base=1.0):
         self.q, self.max, self.base = queue.Queue(), max_retries, base

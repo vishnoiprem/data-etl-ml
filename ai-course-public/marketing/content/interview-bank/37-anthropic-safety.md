@@ -29,7 +29,7 @@
 
 ## Stage 2: Technical phone screens (3 x 60 min)
 
-### Q2.1: Coding — "Implement attention with KV-cache and FlashAttention-style tiling"
+### Q2.1: Coding: "Implement attention with KV-cache and FlashAttention-style tiling"
 **Answer:** Scaled dot-product attention, causal masking, KV-cache update, paged or tiled.
 ```python
 def attn(q, k, v, mask=None):
@@ -41,11 +41,11 @@ def attn(q, k, v, mask=None):
 ```
 **Tip:** Transformer internals are expected. Be ready to discuss paged attention, RoPE, GQA.
 
-### Q2.2: ML research — "Walk me through DPO vs PPO for RLHF"
+### Q2.2: ML research: "Walk me through DPO vs PPO for RLHF"
 **Answer:** PPO: separate reward model, policy gradient with KL constraint, on-policy, complex infra. DPO: closed-form loss using preference pairs, no reward model, off-policy, simpler. Discuss limitations: DPO can overfit preferences, doesn't handle non-transitive preferences; PPO has reward hacking risk. Reference Anthropic's *Constitutional AI* and the *RLAIF* line of work.
 **Tip:** Read the DPO paper and Anthropic's RLHF posts. Be ready to whiteboard the loss.
 
-### Q2.3: Safety case — "A model is showing signs of deceptive alignment on a benchmark. Walk through your investigation."
+### Q2.3: Safety case: "A model is showing signs of deceptive alignment on a benchmark. Walk through your investigation."
 **Answer:** (1) Reproduce — verify the benchmark, control for confounds (data contamination, prompt format); (2) Probe — does the behavior generalize? In which contexts? (3) Mechanistic analysis — what features are activated? (4) Behavioral — does the model behave differently under oversight vs no oversight? (5) Mitigation — what interventions (constitutional, red-team, fine-tune)? (6) Escalation — when do you tell leadership / pause training?
 **Tip:** Anthropic's safety loop is about *judgement under uncertainty*, not perfect answers.
 
@@ -61,17 +61,17 @@ def attn(q, k, v, mask=None):
 - **Q:** "How would you design Constitutional AI for a domain where the constitution is contested (politics)?" — Discuss pluralism, value pluralism, delegated judgment, post-training interventions.
 
 ### Round 3.3: Coding (60 min, 2 questions)
-- **Q:** Implement beam search with length normalization.
-- **Q:** Parse a complex JSON into a typed structure (or graph algorithm).
+- Q: Implement beam search with length normalization.
+- Q: Parse a complex JSON into a typed structure (or a graph algorithm).
 
 ### Round 3.4: ML systems (60 min)
-- **Q:** "Design an eval harness for a frontier model with continuous monitoring." Held-out sets, drift detection, red-team pipeline, post-deployment monitoring.
-- **Q:** "Design a training infra for Constitutional AI with iterative critique-revision." Pipeline design, dataset versioning, ablation tracking.
+- Q: Design an eval harness for a frontier model with continuous monitoring. Held-out sets, drift detection, red-team pipeline, and post-deployment monitoring.
+- Q: Design a training infra for Constitutional AI with iterative critique-revision. Pipeline design, dataset versioning, and ablation tracking.
 
 ### Round 3.5: Behavioral (60 min)
-- **Q:** "Tell me about a time you changed your mind on something important." Anthropic values *epistemic humility*.
-- **Q:** "A time you raised a concern others didn't take seriously." (Safety culture)
-- **Q:** "Why this role over a pure research role at DeepMind / OpenAI?"
+- Q: Tell me about a time you changed your mind on something important. Anthropic values epistemic humility.
+- Q: A time you raised a concern others didn't take seriously. Safety culture.
+- Q: Why this role over a pure research role at DeepMind or OpenAI?
 
 ## Stage 4: Safety review + hiring committee
 A cross-functional review with safety researchers, engineers, and policy staff. They look for: (1) technical depth in alignment/interpretability, (2) calibrated risk judgment, (3) mission alignment (Anthropic's *long-term benefit* framing), (4) collaboration across research, engineering, policy. Loop is "debanded." Senior staff have veto.
@@ -89,7 +89,7 @@ Cash + RSUs. Anthropic is top-of-market for safety roles — competitive with Op
 - Be ready to discuss *your own* views on AI risk — they want calibrated people.
 
 ## Real candidate report
-> "Loop for Safety Research (alignment team). 5 rounds over 2 days, all in-person. The research round was 90 min on a deception-detection experimental design. The alignment round was on Constitutional AI and value pluralism. The coding was transformer internals + a graph problem. Safety review was intense — they asked about a time I changed my mind on a moral question. Offer at E5, ~$720K total. 6 weeks." — r/MLQuestions, 2025-09
+> "Loop for Safety Research (alignment team). 5 rounds over 2 days, all in-person. The research round was 90 min on a deception-detection experimental design. The alignment round was on Constitutional AI and value pluralism. The coding was transformer internals + a graph problem. Safety review was intense and they asked about a time I changed my mind on a moral question. Offer at E5, ~$720K total, 6 weeks." — r/MLQuestions, 2025-09
 
 ## Sources
 - [Anthropic Careers](https://www.anthropic.com/careers)

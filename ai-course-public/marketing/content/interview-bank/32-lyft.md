@@ -27,33 +27,33 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Design a URL shortener"
+### Q2.1: Coding: "Design a URL shortener"
 **Answer:** Hash (MD5/SHA) → base62 → 7-char code; store in DB with index; optional caching layer.
 **Tip:** System-design-in-coding-format questions. Sometimes a classic LeetCode medium.
 
-### Q2.2: ML — "Design Lyft's prime-time pricing algorithm"
+### Q2.2: ML: "Design Lyft's prime-time pricing algorithm"
 **Answer:** (1) Inputs — supply (drivers online by H3 cell, geo-fenced), demand (riders requesting), ETA, driver acceptance prob; (2) Objective — match rate + driver earnings; (3) Constraints — fairness, regulatory caps, ethical ride affordability; (4) Model — gradient boosting with controlled experiments; (5) Two-sided — must keep rider conversion and driver acceptance both healthy; (6) Switchback experiments to measure causal impact; (7) Online at 30ms.
 **Tip:** Lyft's prime-time PR crisis is well-known — they want to know you think about *ethics* of pricing.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Search in rotated sorted array → O(log N) modified binary search.
-- **Q:** Word break → DP, O(N·L).
-- (Optional 3rd): Distributed systems — idempotency, exactly-once.
+- Q: Search in rotated sorted array. O(log N) modified binary search.
+- Q: Word break. DP, O(N·L).
+- Optional 3rd: Distributed systems question on idempotency or exactly-once.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Lyft's ETA model"** — Streaming features, geospatial indexing (H3), gradient boosting with map-matching, sub-1s inference, A/B with offline metrics.
-- **Q: "Design Lyft's experimentation platform"** — Bucket assignment (deterministic hashing), switchback design, interleaving, variance reduction (cuped), dashboard.
+- Q: Design Lyft's ETA model. Streaming features, geospatial indexing (H3), gradient boosting with map-matching, sub-1s inference, and A/B with offline metrics.
+- Q: Design Lyft's experimentation platform. Bucket assignment (deterministic hashing), switchback design, interleaving, variance reduction (CUPED), and a dashboard.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you improve Lyft's driver-rider matching?"** — Bipartite matching under constraints, RL for long-term marketplace health, driver-acceptance prediction.
-- **Q: "How would you build an AV perception model for Level 5?"** — Multi-camera 3D detection, transformer-based BEV, eval on Lyft perception dataset.
+- Q: How would you improve Lyft's driver-rider matching? Bipartite matching under constraints, RL for long-term marketplace health, and driver-acceptance prediction.
+- Q: How would you build an AV perception model for Level 5? Multi-camera 3D detection, transformer-based BEV, and eval on the Lyft perception dataset.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you navigated a sensitive product decision." Lyft's "ethics of pricing" is a real topic.
-- **Q:** "A time you shipped a model that made a hard trade-off."
-- **Q:** "Disagreement with a stakeholder."
+- Q: Tell me about a time you navigated a sensitive product decision. Lyft's "ethics of pricing" is a real topic.
+- Q: A time you shipped a model that made a hard trade-off.
+- Q: Disagreement with a stakeholder.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers reviews. They look for: (1) ML bar for the level, (2) marketplace / two-sided thinking, (3) ethics and customer empathy (Lyft's "driver-first" mission), (4) Lyft values (Make it Happen, Be Yourself, Uplift Others, Customer Obsession). Vote is "Strong Hire / Hire / No Hire / Strong No Hire."
@@ -71,7 +71,7 @@ Cash + RSUs. Lyft is competitive but below FAANG top-of-band (post-IPO reset). N
 - Reference Lyft's published ML papers if you've read them.
 
 ## Real candidate report
-> "Loop for Lyft Pricing. 4 rounds in 1 day. The system design was the experimentation platform with switchback designs — they pushed on variance reduction. The ML deep-dive was prime-time pricing — I had to discuss fairness constraints and ethical caps. Behavioral was 'uplift others' flavored. Offer at L5, ~$520K total. 5 weeks." — Blind, 2025-10
+> "Loop for Lyft Pricing. 4 rounds in 1 day. The system design was the experimentation platform with switchback designs and they pushed on variance reduction. The ML deep-dive was prime-time pricing and I had to discuss fairness constraints and ethical caps. Behavioral was 'uplift others' flavored. Offer at L5, ~$520K total, 5 weeks." — Blind, 2025-10
 
 ## Sources
 - [Lyft Careers](https://www.lyft.com/careers)

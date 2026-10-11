@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Bloomberg?"
-**Answer:** "Bloomberg is the only company that owns the entire financial information stack — news, market data, analytics, terminal. I want to apply ML where the data is real-time, multi-modal, and the bar for accuracy is 'trader trust.'"
+**Answer:** "Bloomberg is the only company that owns the entire financial information stack — news, market data, analytics, terminal. I want to apply ML where the data is real-time, multi-modal, and the bar for accuracy is trader trust, not benchmark accuracy."
 **Tip:** Show you've used the Terminal and understand the editorial + data business.
 
 ### Q1.2: "What's your favorite Bloomberg AI feature?"
-**Answer:** "IB Chat (the in-terminal RAG) is a 30-year moat — Bloomberg owns the document corpus, the data feed, and the user. That's a closed loop no one else can build."
-**Tip:** Reference a specific product.
+**Answer:** "IB Chat, the in-terminal RAG. It's a 30-year moat — Bloomberg owns the document corpus, the data feed, and the user. That's a closed loop no one else can build."
+**Tip:** Reference a specific product. Bloomberg wants people who use the Terminal.
 
 ## Stage 2: Technical phone screen
 

@@ -18,17 +18,19 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Pika over Runway/Sora?"
-**Answer:** "Pika's bet is 'video as a creative canvas' — Pikaffects, scene ingredients, lip-sync — every release feels like a creative tool, not just a generator. I want to be on the team that ships that."
-**Tip:** Reference Pika 2.2 and the recent scene ingredient model.
+**Answer:** "Pika's bet is video as a creative canvas. Pikaffects, scene ingredients, lip-sync — every release feels like a creative tool, not just a generator. I want to be on the team that ships that, especially since controllable-edit is a harder product bet than raw scale."
+**Tip:** Reference Pika 2.2 and the recent scene-ingredient model.
 
 ### Q1.2: "What's your favorite Pikaffect?"
-**Answer:** Pick one (e.g., "Pikaffects: Melt it") and explain technically what it does — likely a controlled-edit approach.
+**Answer:** Pick one (try "Melt it") and explain technically what it does. The honest answer is usually a controlled-edit or sparse-attention approach to a known failure mode. Don't bluff the details.
 
 ## Stage 2: Technical phone screen
 
 ### Q2.1: Implement GroupNorm.
 **Answer:**
 ```python
+import torch
+import torch.nn as nn
 class GroupNorm(nn.Module):
     def __init__(self, c, g, eps=1e-5):
         super().__init__(); self.g = g; self.eps = eps
@@ -51,6 +53,8 @@ class GroupNorm(nn.Module):
 **Q:** Implement a sinusoidal timestep embedding.
 **Answer:**
 ```python
+import math
+import torch
 def timestep_embed(t, dim, max_period=10000):
     half = dim // 2
     freqs = torch.exp(-math.log(max_period) * torch.arange(half) / half)

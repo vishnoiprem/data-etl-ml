@@ -18,8 +18,8 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Jump?"
-**Answer:** "Jump is a research-driven firm with serious crypto and equities franchises — I want to be on the team that builds alpha across asset classes, especially as crypto markets mature."
-**Tip:** Reference Jump Crypto and the firm's expansion into prediction markets.
+**Answer:** "Jump runs a tight research loop and the firm already moves serious size in crypto and equities. I want to be on the team that's finding alpha across asset classes, especially as the crypto side matures past the retail phase."
+**Tip:** Reference Jump Crypto and the prediction markets push. Mention a specific alpha source you've studied.
 
 ### Q1.2: "Tell me about a system you optimized."
 **Answer:** STAR with a specific latency or throughput number — Jump rewards measurable wins.
@@ -27,8 +27,8 @@
 ## Stage 2: Technical phone screen
 
 ### Q2.1: 4 dice are rolled. P(sum is 14)?
-**Answer:** C(13,3) / 6^4 = 286/1296 ≈ 0.2207 (using stars and bars, count compositions).
-**Tip:** Combinatorics; they go fast.
+**Answer:** Count compositions of 14 into 4 parts each in [1,6]. By inclusion-exclusion: C(13,3) - 4·C(7,3) + 6·C(1,3) = 286 - 140 + 0 = 146. P = 146/1296 ≈ 0.1127.
+**Tip:** They expect inclusion-exclusion when the parts are bounded, not raw stars-and-bars.
 
 ### Q2.2: Implement a memory pool in C++.
 **Answer:**

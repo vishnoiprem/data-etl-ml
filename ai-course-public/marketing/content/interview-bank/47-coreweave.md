@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Build a job scheduler for a heterogeneous GPU cluster (mix of A100, H100, H200)"
+### Q2.1: Coding: "Build a job scheduler for a heterogeneous GPU cluster (mix of A100, H100, H200)"
 **Answer:**
 ```python
 import heapq
@@ -53,7 +53,7 @@ class HeteroScheduler:
 ```
 **Tip:** Discuss topology-aware placement (NVLink domains, IB fat-tree), bin-packing, and preemption.
 
-### Q2.2: Infra — "How do you build a multi-tenant K8s cluster with GPU isolation?"
+### Q2.2: Infra: "How do you build a multi-tenant K8s cluster with GPU isolation?"
 **Answer:** Three layers: (1) **hardware partitioning** — MIG, time-slicing, MPS, (2) **software isolation** — K8s namespaces, cgroups, network policies, (3) **policy** — quotas, priority classes, preemption. CoreWeave's K8s operator is the gold standard.
 
 ## Stage 3: Onsite (4-5 rounds)

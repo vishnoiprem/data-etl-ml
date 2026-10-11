@@ -29,6 +29,7 @@
 ### Q2.1: "Implement a sliding-window attention with KV cache reuse"
 **Answer:**
 ```python
+import numpy as np
 def sliding_window_attn(Q, K_cache, V_cache, window=512):
     # K_cache, V_cache: (seq_so_far, d)
     # Q: (1, d)  for one new token

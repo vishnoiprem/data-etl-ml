@@ -24,8 +24,8 @@ Uber's loop is one of the most demanding in marketplace engineering. The bar is 
 **Tip:** Uber cares deeply about scale and real-time. Quantify throughput and latency upfront.
 
 ### Q1.2: "Why Uber after [current FAANG]?"
-**Answer:** "Uber is the only marketplace where the supply (drivers) is in motion, the demand is in motion, and the optimization is per-second. That class of problem — real-time dispatch with stochastic demand — is something I've been working toward. The Michelangelo platform and Uber's investment in [specific 2026 project] tells me ML is first-class, not bolted on."
-**Tip:** Reference specific Uber 2026 work (autonomous, AI customer support, Uber Eats recsys).
+**Answer:** "Uber is the only marketplace where supply and demand are both in motion, and the optimization runs per second. Real-time dispatch with stochastic demand is the problem I've been working toward. Michelangelo and the 2026 autonomous push tell me ML is first-class, not bolted on."
+**Tip:** Reference specific Uber 2026 work (autonomous, AI customer support, Eats recsys).
 
 ### Q1.3: "Comp expectations and location"
 **Answer:** Give a range with stock-heavy weighting; Uber RSU refresher is every 4 years. SF, Seattle, NYC, Sunnyvale are core; remote is limited.

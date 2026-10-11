@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Implement a function memoizer with TTL"
+### Q2.1: Coding: "Implement a function memoizer with TTL"
 **Answer:**
 ```python
 import time
@@ -45,7 +45,7 @@ def memoize(ttl_seconds):
 ```
 **Tip:** Modal memoizes container start state aggressively. Talk about warm pool, snapshot/restore, copy-on-write FS.
 
-### Q2.2: Systems — "How would you build a serverless function platform with sub-second cold starts?"
+### Q2.2: Systems: "How would you build a serverless function platform with sub-second cold starts?"
 **Answer:** Four pillars: (1) pre-warmed container pool, (2) snapshot/restore (CRIU, gVisor), (3) lazy import, (4) pre-pulled base images (overlayfs dedup). Modal uses all four.
 **Tip:** Mention Firecracker, microVMs vs containers, and the latency/memory tradeoff.
 

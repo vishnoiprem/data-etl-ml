@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Glean?"
-**Answer:** Three-bet: (1) Glean is the leader in enterprise AI search — they built the data ingest + permission system that's hard to replicate, (2) the engineering culture is ex-Google (Arvind Jain, founder, ex-Google Search), (3) the LLM + search integration (Glean Assistant) is best-in-class for enterprise.
-**Tip:** Mention you've used Glean at a previous job — or, more likely, that you've used Slack AI / Microsoft Copilot and can articulate why Glean is better.
+**Answer:** Three reasons. (1) Glean is the leader in enterprise AI search, and the data ingest + permission system is genuinely hard to replicate. (2) Arvind Jain is ex-Google Search, and the engineering culture carries that ranking DNA. (3) Glean Assistant is the best-in-class LLM-over-internal-data product for the enterprise.
+**Tip:** If you've used Glean at a previous job, name a feature. If not, mention you've used Slack AI or Microsoft Copilot and can articulate why Glean is better.
 
 ### Q1.2: "Tell me about a search or ML system you built"
-**Answer:** Walk through a concrete project that involved: heterogeneous data sources, ranking, retrieval, or LLM integration. Glean cares about enterprise + AI.
+**Answer:** Walk through one project. Name the data sources, the ranking approach, the latency, and the eval. Glean cares about enterprise + AI, so hit both.
 
 ## Stage 2: Technical phone screen
 

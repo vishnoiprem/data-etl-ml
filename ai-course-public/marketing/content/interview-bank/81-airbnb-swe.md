@@ -24,8 +24,8 @@ Airbnb's loop is unique: it uses a "values-based" behavioral round grounded in t
 **Tip:** Airbnb is obsessed with "belong anywhere" — frame your work in terms of trust between two parties.
 
 ### Q1.2: "Why Airbnb over a pure-tech company like Stripe?"
-**Answer:** "I want to work on a two-sided marketplace where ML directly mediates between supply and demand. Stripe optimizes payments, but Airbnb optimizes whether a family in Kyoto gets discovered by a traveler in Berlin — that's a more interesting ML problem. Plus the recent AI-powered Trip ideas launch tells me the leadership is serious about ML product, not just ads."
-**Tip:** Show you've read Airbnb's 2026 product launches (AI trip planner, category search updates).
+**Answer:** "I want to work on a two-sided marketplace where ML directly mediates supply and demand. Stripe optimizes payments; Airbnb optimizes whether a family in Kyoto gets discovered by a traveler in Berlin. That's a more interesting ML problem. The 2026 AI Trip ideas launch tells me leadership is serious about ML product, not just ads."
+**Tip:** Show you've used the AI trip planner and read Airbnb's 2026 launches.
 
 ### Q1.3: "What's your location / remote preference?"
 **Answer:** Be direct. SF, NYC, and remote-considered states (CA, NY, WA, TX, MA) are safest. Airbnb moved to "Live and Work Anywhere" with quarterly travel stipends.

@@ -25,7 +25,7 @@ TikTok/ByteDance has the most demanding ML interview loop of any consumer compan
 **Tip:** TikTok is obsessed with scale. Quantify.
 
 ### Q1.2: "Why TikTok?"
-**Answer:** "Three reasons. First, TikTok's For You Page is the state-of-the-art in recsys — the engineering here is unmatched. Second, I want to work on real-time multi-modal recommendation (video + audio + text + interactions). Third, ByteDance's investment in generative AI (Doubao / Seed) means frontier models are first-class."
+**Answer:** "Three reasons. First, the For You Page is the state-of-the-art in recsys — the engineering here is unmatched. Second, I want to work on real-time multi-modal recommendation across video, audio, text, and interactions. Third, ByteDance's investment in generative AI (Doubao / Seed) means frontier models are first-class."
 **Tip:** Reference specific 2026 work: multi-modal embeddings, generative search, video understanding, AI effects.
 
 ### Q1.3: "Location, visa, comp"

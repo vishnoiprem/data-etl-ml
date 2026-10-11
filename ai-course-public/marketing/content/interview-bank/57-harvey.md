@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Harvey?"
-**Answer:** Three-bet: (1) Harvey is the breakout legal AI company — they won the AmLaw 100 (top law firms) early, and the moat is real (legal-domain fine-tuning + customer data), (2) the founders are ex-lawyers + ex-Stripe infra (Winston Weinberg + Gabe Pereyra), so the team is dual-domain, (3) the engineering culture is best-in-class AI infrastructure work.
-**Tip:** Mention you've used Harvey (or Casetext, or CoCounsel) — Harvey cares about domain curiosity.
+**Answer:** Three reasons. (1) Harvey won the AmLaw 100 early, and the moat (legal-domain fine-tuning + customer data) compounds with every deal. (2) The founders are ex-lawyers and ex-Stripe infra, so the team is dual-domain from day one. (3) The engineering culture is doing real AI infrastructure work, not just LLM wrappers.
+**Tip:** Mention you've used Harvey, Casetext, or CoCounsel. Harvey cares about domain curiosity.
 
 ### Q1.2: "Tell me about a domain-specific AI app you built"
-**Answer:** Walk through a project where you deeply understood the domain (could be legal, medical, financial, etc.) and built AI features for it. Harvey wants people who can partner with experts, not just build generic LLM wrappers.
+**Answer:** Walk through one project where you deeply understood the domain (legal, medical, financial, whatever) and shipped AI features for it. Harvey wants people who can partner with experts, not just prompt-engineer a wrapper.
 
 ## Stage 2: Technical phone screen
 

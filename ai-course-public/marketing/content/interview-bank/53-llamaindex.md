@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why LlamaIndex over LangChain?"
-**Answer:** Three-bet: (1) LlamaIndex was purpose-built for RAG — the indexing abstractions (readers, parsers, retrievers, query engines, agents) are more cohesive than LangChain's, (2) Jerry Liu (CEO) is technical and accessible — the engineering culture is more "framework by RAG practitioners," (3) the data agents (LlamaAgents) are pushing toward autonomous workflows.
-**Tip:** Even better: "I used both, and LlamaIndex's query engine + agent abstractions made my RAG app 30% faster to build."
+**Answer:** Three reasons. (1) LlamaIndex was purpose-built for RAG, and the indexing abstractions (readers, parsers, retrievers, query engines) feel cohesive instead of stitched together. (2) Jerry Liu is technical and accessible — the culture is "framework by RAG practitioners." (3) LlamaAgents is pushing toward autonomous data workflows, which is the next bet.
+**Tip:** Best answer: "I've used both, and LlamaIndex's query engine + agent abstractions let me ship my RAG app in half the lines." Numbers beat vibes.
 
 ### Q1.2: "Tell me about the most complex RAG app you've built"
-**Answer:** Walk through a real project — be specific about the data sources, chunking strategy, retrieval approach (hybrid, reranking), eval methodology, and the failure modes you debugged.
+**Answer:** Be specific. Sources, chunking strategy (and why), retrieval approach (hybrid? reranker?), eval methodology, and one failure mode you debugged. LlamaIndex wants people who've been in the weeds.
 
 ## Stage 2: Technical phone screen
 
@@ -50,7 +50,7 @@ def split_recursive(text, separators=["\n\n", "\n", ". ", " "], chunk_size=500):
             return result
     return [text[:chunk_size]]
 ```
-**Tip:** Mention `SentenceSplitter`, `SemanticSplitter`, and `MarkdownNodeParser` — all real LlamaIndex components.
+**Tip:** Mention real LlamaIndex components: `SentenceSplitter`, `SemanticSplitterNodeParser`, `MarkdownNodeParser`, and `CodeSplitter`. The semantic splitter is what sets them apart from vanilla chunking.
 
 ### Q2.2: LLM — "How would you build a multi-source RAG system (e.g., PDFs + Slack + Notion)?"
 **Answer:** Three layers: (1) **connectors** — LlamaIndex's `SimpleDirectoryReader`, `NotionReader`, `SlackReader`, etc., (2) **standardization** — convert all sources to `Document` objects with metadata, (3) **indexing + retrieval** — unified vector index + metadata filtering, hybrid search (vector + BM25 + reranker).

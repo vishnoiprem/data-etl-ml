@@ -19,12 +19,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Jane Street?"
-**Answer:** "JS is the best trading firm in the world at the things I'm best at — collaborative research, honest culture, real markets. I want to work at a place that has the brainpower to do statistical arbitrage in 50 markets simultaneously."
-**Tip:** Reference JS's open-source contributions (Core, Incremental, owl) and the culture docs.
+**Answer:** "JS is the best trading firm in the world at the things I'm best at — collaborative research, honest culture, real markets. I want to work at a place that has the brainpower to run stat-arb in 50 markets simultaneously and still write a culture doc about it."
+**Tip:** Reference JS's open-source contributions (Core, Incremental, owl) and the culture docs. Interviewers notice if you've read the blog.
 
 ### Q1.2: "Why OCaml?"
-**Answer:** "Type safety prevents whole classes of trading bugs; pattern matching is perfect for parsing market data; the speed is C-like. I learned it specifically because JS uses it."
-**Tip:** If you say "I want to learn OCaml," it's a red flag. They want functional fluency.
+**Answer:** "Type safety prevents whole classes of trading bugs. Pattern matching is great for parsing market data, and the speed is C-like after compilation. I learned it specifically because JS uses it, and I want to keep using it in production."
+**Tip:** If you say "I want to learn OCaml," it's a red flag. They want functional fluency, not a learner.
 
 ## Stage 2: Probability phone (25 puzzles in 60 min)
 

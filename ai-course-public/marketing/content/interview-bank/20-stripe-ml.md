@@ -57,6 +57,9 @@ Stripe graders want idempotency baked in: each transition writes a `transition_i
 ### Q3.1.2: "Rate limiter: token bucket, distributed"
 **Answer:**
 ```python
+import time
+from threading import Lock
+
 class TokenBucket:
     def __init__(self, rate, capacity):
         self.rate, self.capacity, self.tokens, self.ts = rate, capacity, capacity, time.monotonic()

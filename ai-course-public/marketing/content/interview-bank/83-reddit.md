@@ -24,8 +24,8 @@ Reddit's ML org is split between Search (post/comment ranking), Feeds (home feed
 **Tip:** Reddit is community-obsessed. Reference the human element of recommendations.
 
 ### Q1.2: "Why Reddit?"
-**Answer:** "Three things. First, Reddit's data is uniquely rich — long-form text, votes, community structure, all publicly available, which makes the ML problem fundamentally different from short-form social. Second, Reddit Answers and the AI search launch signal real ML investment from leadership. Third, I want to work on ranking where the cost of a bad recommendation is a community you destroy — that responsibility appeals to me."
-**Tip:** Reference Reddit's 2026 AI products (Reddit Answers, AI-powered search, community summaries).
+**Answer:** "Three things. First, Reddit's data is uniquely rich — long-form text, votes, community structure, all public — which makes the ML problem fundamentally different from short-form social. Second, Reddit Answers and the AI search launch signal real ML investment from leadership. Third, I want to work on ranking where the cost of a bad recommendation is a community you wreck. That responsibility appeals to me."
+**Tip:** Reference Reddit's 2026 AI products (Reddit Answers, AI search, community summaries).
 
 ### Q1.3: "Comp + remote"
 **Answer:** Reddit is mostly SF/NYC onsite (3 days/week) for senior roles. Fully-remote is rare. Be clear on your floor and target.

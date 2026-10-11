@@ -27,10 +27,12 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Design a rate limiter"
+### Q2.1: Coding: "Design a rate limiter"
 **Answer:** Token bucket (deque with timestamps) or sliding window counter.
 ```python
 import time
+from collections import deque
+
 class RateLimiter:
     def __init__(self, limit, window):
         self.limit, self.window = limit, window
@@ -45,29 +47,29 @@ class RateLimiter:
 ```
 **Tip:** Distributed-systems questions are common — rate limiting, leader election, idempotency.
 
-### Q2.2: ML — "Design Uber's dynamic pricing model"
+### Q2.2: ML: "Design Uber's dynamic pricing model"
 **Answer:** (1) Inputs — supply (drivers online by H3 hex), demand (riders, destination), ETA, traffic, events (concerts, weather); (2) Model — gradient boosting on tabular features + neural for embeddings; (3) Two-sided: must model impact on driver acceptance + rider conversion; (4) Causal uplift on supply, not just predictive; (5) Constraints — fairness caps, regulatory; (6) Online at 50ms; (7) A/B with switchback design (since users see prices).
 **Tip:** Uber ML is *two-sided*. Show you think about supply *and* demand.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Implement a thread-safe LRU cache (concurrency).
-- **Q:** Find K-th largest in array → quickselect O(N) avg.
-- (Optional 3rd): Graph problem — e.g., "Cheapest flight within K stops."
+- Q: Implement a thread-safe LRU cache (concurrency).
+- Q: Find K-th largest in array. Quickselect, O(N) avg.
+- Optional 3rd: Graph problem, e.g., "Cheapest flight within K stops."
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Michelangelo's feature store"** — Online (Cassandra) + offline (Hive/Spark), point-in-time joins, freshness SLOs, multi-tenant.
-- **Q: "Design a real-time ETA model"** — Streaming features, geospatial indexing (H3), gradient boosting with map-matching, sub-second inference.
+- Q: Design Michelangelo's feature store. Online (Cassandra) + offline (Hive/Spark), point-in-time joins, freshness SLOs, and multi-tenant.
+- Q: Design a real-time ETA model. Streaming features, geospatial indexing (H3), gradient boosting with map-matching, and sub-second inference.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you improve Uber Eats restaurant ranking?"** — Multi-objective (clicks, orders, GMV, retention), position bias, diversity, cold start for new restaurants.
-- **Q: "How would you build a dispatch model for Uber Rides?"** — Bipartite matching under constraints (driver location, ETA), reinforcement learning to optimize long-term marketplace health.
+- Q: How would you improve Uber Eats restaurant ranking? Multi-objective (clicks, orders, GMV, retention), position bias, diversity, and cold start for new restaurants.
+- Q: How would you build a dispatch model for Uber Rides? Bipartite matching under constraints (driver location, ETA), and reinforcement learning to optimize long-term marketplace health.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you dealt with conflicting metrics." (Two-sided markets have this constantly.)
-- **Q:** "A time you shipped imperfect work to learn." (Uber values "build and iterate.")
-- **Q:** "Disagreement with a PM on a marketplace change."
+- Q: Tell me about a time you dealt with conflicting metrics. Two-sided markets have this constantly.
+- Q: A time you shipped imperfect work to learn. Uber values "build and iterate."
+- Q: Disagreement with a PM on a marketplace change.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + PM reviews. They look for: (1) ML bar for the level, (2) marketplace / systems thinking, (3) Uber values (Customer Obsession, Curiosity, Boldness, Inclusion, Integrity), (4) impact at scale. Vote is "Strong Hire / Hire / No Hire / Strong No Hire."
@@ -85,7 +87,7 @@ Cash + RSUs. Uber is competitive with FAANG. Negotiation is real. Team match aft
 - Quantify scale: "millions of trips/day", "10K QPS on pricing", "p99 < 100ms."
 
 ## Real candidate report
-> "Loop for Michelangelo ML Platform. 4 rounds in 1 day. Coding was 2 mediums (LRU + K-th largest). System design was the Michelangelo feature store with point-in-time joins. ML deep-dive was dynamic pricing — they pushed me on causal vs predictive and supply-side fairness. Behavioral was customer-obsession flavored. Offer at L5, ~$580K total. 5 weeks." — r/MachineLearning, 2025-09
+> "Loop for Michelangelo ML Platform. 4 rounds in 1 day. Coding was 2 mediums (LRU + K-th largest). System design was the Michelangelo feature store with point-in-time joins. ML deep-dive was dynamic pricing and they pushed me on causal vs predictive and supply-side fairness. Behavioral was customer-obsession flavored. Offer at L5, ~$580K total, 5 weeks." — r/MachineLearning, 2025-09
 
 ## Sources
 - [Uber Careers](https://www.uber.com/careers/)

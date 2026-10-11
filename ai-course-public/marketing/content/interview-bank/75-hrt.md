@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why HRT?"
-**Answer:** "HRT is the only trading firm that builds its own silicon and writes the lowest-latency C++ in the industry. I want to work where the research and the engineering are both world-class."
-**Tip:** Reference HRT's "Technical Reflections" blog and their FPGA work.
+**Answer:** "HRT is the only trading firm that builds its own silicon and writes the lowest-latency C++ in the industry. I want to work where the research and the engineering are both world-class, not where the two are siloed."
+**Tip:** Reference HRT's "Technical Reflections" blog and their FPGA work. Interviewers check.
 
 ### Q1.2: "Why low-latency systems?"
-**Answer:** "I love the combination of math and systems — to shave microseconds, you need both a good model and a great kernel. That's the rare intersection HRT sits at."
-**Tip:** Show genuine excitement for systems work.
+**Answer:** "I love the combination of math and systems. To shave microseconds you need both a good model and a great kernel, and that's the rare intersection HRT sits at. Most firms pick one or the other."
+**Tip:** Show genuine excitement for systems work. HRT screens for "I just want to do ML" applicants.
 
 ## Stage 2: Technical phone screen
 
@@ -34,6 +34,8 @@
 ### Q2.2: Implement a thread-safe queue in C++.
 **Answer:**
 ```cpp
+#include <queue>
+#include <mutex>
 template<typename T>
 class TSQueue {
     std::queue<T> q; std::mutex m;

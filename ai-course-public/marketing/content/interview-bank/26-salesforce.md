@@ -18,7 +18,7 @@
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Salesforce for AI?"
-**Answer:** "Agentforce is the most concrete deployment of LLM agents in enterprise SaaS. The data moat — every CRM interaction flows through Salesforce — gives the training set for grounding that no startup has. I want to build agents that 150K+ customers actually deploy."
+**Answer:** "Agentforce is the most concrete deployment of LLM agents in enterprise SaaS. The data moat is real: every CRM interaction flows through Salesforce, so the grounding data is something no startup has. I want to build agents that 150K+ customers actually deploy."
 **Tip:** Reference Agentforce + Data Cloud specifically — not generic AI.
 
 ### Q1.2: "Describe an enterprise AI project you shipped"
@@ -27,7 +27,7 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Group anagrams"
+### Q2.1: Coding: "Group anagrams"
 **Answer:** Sort each string → tuple key → append to dict.
 ```python
 def groupAnagrams(strs):
@@ -39,32 +39,32 @@ def groupAnagrams(strs):
 ```
 **Tip:** LeetCode mediums. They expect clean code with O() analysis.
 
-### Q2.2: ML — "Design a lead-scoring model for Sales Cloud"
+### Q2.2: ML: "Design a lead-scoring model for Sales Cloud"
 **Answer:** (1) Features: firmographic, behavioral (email opens, web visits), engagement recency; (2) Labels: qualified or not (from closed deals); (3) Model: gradient boosting (XGBoost/LightGBM) for tabular + embeddings for emails; (4) Multi-task: predict qualification + close probability; (5) Refresh weekly via batch; (6) Online: feature store, sub-50ms inference; (7) Bias check on protected attributes.
 **Tip:** Salesforce is a data-rich company — emphasize *feature engineering* and *business value*.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Merge intervals → sort by start, merge.
-- **Q:** Word break (DP) → O(N·L) where L is max word length.
-- (Optional 3rd): SQL-heavy question — joins, window functions, CTEs.
+- Q: Merge intervals. Sort by start, then merge.
+- Q: Word break (DP). O(N·L) where L is the max word length.
+- Optional 3rd: SQL-heavy question on joins, window functions, CTEs.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Agentforce — an LLM agent platform for CRM"** — Multi-tenant LLM serving, per-customer fine-tuning data, action tool registry, RAG over customer data, guardrails, human-in-the-loop, evaluation harness.
-- **Q: "Design a feature store for Einstein"** — Online + offline, real-time ingestion via Kafka, batch via Spark, point-in-time joins, freshness SLOs.
+- Q: Design Agentforce, an LLM agent platform for CRM. Multi-tenant LLM serving, per-customer fine-tuning data, an action tool registry, RAG over customer data, guardrails, human-in-the-loop, and an evaluation harness.
+- Q: Design a feature store for Einstein. Online + offline, real-time ingestion via Kafka, batch via Spark, point-in-time joins, and freshness SLOs.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you build a RAG system for Slack AI that respects channel permissions?"** — Permission filtering at retrieval (filter by user/role), per-workspace embeddings, citation with redaction, freshness via incremental indexing.
-- **Q: "How would you fine-tune a model for sales email generation with brand safety?"** — SFT on historical emails, RLHF with safety rewards, brand-voice scoring, toxicity classifier in the loop.
+- Q: How would you build a RAG system for Slack AI that respects channel permissions? Permission filtering at retrieval (filter by user/role), per-workspace embeddings, citation with redaction, and freshness via incremental indexing.
+- Q: How would you fine-tune a model for sales email generation with brand safety? SFT on historical emails, RLHF with safety rewards, brand-voice scoring, and a toxicity classifier in the loop.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you worked cross-functionally (PM, design, sales engineering)."
-- **Q:** "A time you disagreed with product on scope." Salesforce uses "Ohana" culture — collaboration matters.
-- **Q:** "Ship something imperfect vs wait for perfection — when?" Salesforce values "trust" but also "innovation."
+- Q: Tell me about a time you worked cross-functionally (PM, design, sales engineering).
+- Q: A time you disagreed with product on scope. Salesforce uses "Ohana" culture and collaboration matters.
+- Q: Ship something imperfect vs wait for perfection. When? Salesforce values trust and innovation, and that tension is real.
 
 ## Stage 4: Hiring committee
-A panel of senior engineers + PMs reviews. They look for: (1) enterprise readiness (multi-tenancy, security, observability), (2) ML bar for the level, (3) Salesforce values (Trust, Customer Success, Innovation, Equality), (4) cross-functional collaboration. They use a "Strong Hire / Hire / No Hire / Strong No Hire" vote. The hiring manager has the tie-breaker.
+A panel of senior engineers and PMs reviews. They look for: (1) enterprise readiness (multi-tenancy, security, observability), (2) ML bar for the level, (3) Salesforce values (Trust, Customer Success, Innovation, Equality), and (4) cross-functional collaboration. The vote is "Strong Hire / Hire / No Hire / Strong No Hire." The hiring manager breaks ties.
 
 ## Stage 5: Offer
 Cash + RSUs. Salesforce is competitive but typically below FAANG top-of-band. Negotiation is real but they have a comp band ceiling. Team match after loop. The comp team is willing to match base for competing offers but less flexible on equity.
@@ -79,7 +79,7 @@ Cash + RSUs. Salesforce is competitive but typically below FAANG top-of-band. Ne
 - For senior+ roles, "innovation" stories score well — Salesforce is pivoting to AI agents.
 
 ## Real candidate report
-> "Loop for Agentforce (Slack AI team). 4 rounds, 1 day. Coding was 2 mediums. System design was a multi-tenant LLM agent platform — they wanted me to discuss per-customer fine-tuning, RAG permission filtering, and an eval harness. ML deep-dive was on fine-tuning with brand safety. Behavioral was 'Ohana' flavored. Offer at MTS-4, ~$420K total. 5 weeks." — r/salesforce, 2025-11
+> "Loop for Agentforce on the Slack AI team. 4 rounds, 1 day. Coding was 2 mediums. System design was a multi-tenant LLM agent platform and they wanted me to talk through per-customer fine-tuning, RAG permission filtering, and an eval harness. ML deep-dive was on fine-tuning with brand safety. Behavioral was 'Ohana' flavored. Offer at MTS-4, ~$420K total. 5 weeks." — r/salesforce, 2025-11
 
 ## Sources
 - [Salesforce Careers](https://www.salesforce.com/careers/)

@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Notion AI?"
-**Answer:** Three-bet: (1) Notion is the most beloved productivity tool — building AI features inside it is a multi-million-user immediate wedge, (2) Notion AI's Q&A (RAG over your workspace) is a real product with real adoption, (3) the engineering culture is product-obsessed — every PM eng can ship.
-**Tip:** Mention you're a Notion power user. Walk through a specific AI feature you use (Notion AI autocomplete, Q&A, translator, etc.).
+**Answer:** Three reasons. (1) Notion is one of the most loved productivity tools, so any AI feature you ship hits millions of users from day one. (2) Notion Q&A (RAG over your workspace) is the real product — it solved the "AI over your stuff" problem before most teams started. (3) The engineering culture is product-obsessed, so a strong eng can ship and own end-to-end.
+**Tip:** Mention you're a Notion power user. Pick one AI feature (autocomplete, Q&A, translator) and talk about how you use it.
 
 ### Q1.2: "Tell me about an LLM feature you shipped"
-**Answer:** Concrete numbers — DAU impact, latency, error rate, eval methodology. Notion values product engineering impact, not just technical depth.
+**Answer:** Concrete numbers — DAU, latency p50/p99, error rate, eval methodology. Notion cares about product engineering impact, not pure research depth.
 
 ## Stage 2: Technical phone screen
 

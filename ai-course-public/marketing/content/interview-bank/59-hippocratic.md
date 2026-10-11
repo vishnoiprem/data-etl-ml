@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Hippocratic AI?"
-**Answer:** Three-bet: (1) Hippocratic AI pioneered the "Polaris" safety-constrained LLM for healthcare — the focus on nurse-role AI (not just clinician copilot) is differentiated, (2) the founding team includes clinicians (Munjal Shah, Alex Morgan) + ex-Stripe AI researchers, so it's dual-domain from day 1, (3) the regulatory-aware safety focus (they care about FDA, HIPAA) is the right bet for healthcare AI.
-**Tip:** Mention you've used or read about Hippocratic AI's Polaris model. Show healthcare AI curiosity.
+**Answer:** Three reasons. (1) Polaris, the safety-constrained LLM, is a real technical bet — the focus on nurse-role AI (not just clinician copilot) is differentiated. (2) The founders (Munjal Shah, Alex Morgan) plus ex-Stripe AI researchers means the team is dual-domain from day one. (3) The FDA / HIPAA awareness isn't marketing — they actually design for it, which is the right bet for healthcare AI.
+**Tip:** Mention you've used or read about Polaris. Show healthcare AI curiosity, but don't fake clinical experience you don't have.
 
 ### Q1.2: "Tell me about a healthcare AI project you built (or wanted to build)"
-**Answer:** Walk through any healthcare AI project — even a side project. Show you've thought about: HIPAA, PHI, model safety, clinical eval, regulatory constraints.
+**Answer:** Walk through any healthcare AI project — even a side project. Show you've thought about HIPAA, PHI, model safety, clinical eval, and regulatory constraints. If you haven't shipped one, say so and describe what you'd build.
 
 ## Stage 2: Technical phone screen
 

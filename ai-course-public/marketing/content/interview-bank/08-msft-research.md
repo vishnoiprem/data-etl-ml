@@ -30,6 +30,10 @@
 ### Q2.1: "Merge two sorted linked lists"
 **Answer:**
 ```python
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val, self.next = val, next
+
 def merge(a, b):
     dummy = ListNode(0); tail = dummy
     while a and b:

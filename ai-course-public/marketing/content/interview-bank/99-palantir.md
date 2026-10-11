@@ -24,8 +24,8 @@ Palantir's loop is unique: Forward Deployed Engineers are the primary hire, and 
 **Tip:** Palantir FDEs deploy. Mention customer-facing work, ability to travel, US citizenship or clearance if you have it.
 
 ### Q1.2: "Why Palantir?"
-**Answer:** "Three reasons. First, AIP is a real product for the most demanding customers — defense, intelligence, healthcare, manufacturing. The ML is mission-critical. Second, the ontology approach is genuinely different — instead of building ML for raw data, you build it on top of an integrated data model. Third, I want to work on AI for problems that actually matter — not ads, not engagement, but supply chains, military logistics, public health."
-**Tip:** Reference AIP, Foundry, and the 2026 customer stories. Be specific about which industries / missions excite you.
+**Answer:** "Three reasons. First, AIP is a real product for the most demanding customers — defense, intel, healthcare, manufacturing. The ML is mission-critical. Second, the ontology approach is genuinely different — instead of building ML on raw data, you build it on an integrated data model. Third, I want to work on AI for problems that actually matter — not ads, not engagement, but supply chains, military logistics, public health."
+**Tip:** Reference AIP, Foundry, and the 2026 customer stories. Be specific about which missions excite you.
 
 ### Q1.3: "Deployment willingness + clearance"
 **Answer:** Palantir FDEs travel (often 50%+). Be clear on willingness. Some roles require TS/SCI clearance.

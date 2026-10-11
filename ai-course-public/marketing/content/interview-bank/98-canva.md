@@ -24,7 +24,7 @@ Canva's Magic Studio is the AI surface that competes with Adobe Firefly and Figm
 **Tip:** Canva is design-led. Show some design / creative-tech interest.
 
 ### Q1.2: "Why Canva?"
-**Answer:** "Three reasons. First, Magic Studio is a real AI product for 220M+ users — that's a unique distribution. Second, Canva's mission of 'empower the world to design' is mission-aligned with my interest in creative tools. Third, Canva's culture is famously kind and values-driven — and the comp is solid for Australia."
+**Answer:** "Three reasons. First, Magic Studio is a real AI product for 220M+ users — unique distribution. Second, Canva's mission of 'empower the world to design' lines up with my interest in creative tools. Third, Canva's culture is famously kind and values-driven, and the comp is solid for Australia."
 **Tip:** Reference Magic Studio features, the 2026 launches, and Canva's kind-culture values.
 
 ### Q1.3: "Location + comp"

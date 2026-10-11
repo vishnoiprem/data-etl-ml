@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Citadel?"
-**Answer:** "Citadel is the most data-driven hedge fund — and Citadel Securities is the largest market maker in equities and options. I want to be at the intersection of fundamental research and the cleanest data in the world."
-**Tip:** Show you know the difference between Citadel (multi-strategy hedge fund) and Citadel Securities (market maker).
+**Answer:** "Citadel is the most data-driven hedge fund. Citadel Securities is the largest market maker in equities and options. I want to be at the intersection of fundamental research and the cleanest data in the world, and Citadel's GQS team is where that happens."
+**Tip:** Show you know the difference between Citadel (multi-strategy hedge fund) and Citadel Securities (market maker). Confusing them is a soft negative.
 
 ### Q1.2: "Why quant vs FAANG?"
-**Answer:** "I'd rather compete on alpha than on resumes — the scoreboard is honest. Citadel's GQS team has the data and infra to do ML at scale, which is the rarest combination."
-**Tip:** Have a real reason; Ken Griffin culture rewards conviction.
+**Answer:** "I'd rather compete on alpha than on resumes. The scoreboard is honest, and at FAANG I'd never know if my work actually mattered. Citadel's GQS team has the data and infra to do ML at scale, which is the rarest combination in this industry."
+**Tip:** Have a real reason. Ken Griffin's culture rewards conviction.
 
 ## Stage 2: Technical phone screen
 

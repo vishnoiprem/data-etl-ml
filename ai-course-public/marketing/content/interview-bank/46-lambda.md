@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Build a job scheduler for a GPU cluster"
+### Q2.1: Coding: "Build a job scheduler for a GPU cluster"
 **Answer:**
 ```python
 import heapq
@@ -53,7 +53,7 @@ class ClusterScheduler:
 ```
 **Tip:** Discuss bin-packing, multi-tenant fairness, queue priorities, and preemption.
 
-### Q2.2: Systems — "How do you monitor GPU health in a 1000-GPU cluster?"
+### Q2.2: Systems: "How do you monitor GPU health in a 1000-GPU cluster?"
 **Answer:** Three layers: (1) **hardware** — IPMI, BMC, NVLink/IB counters, DCGM exporter, (2) **software** — NCCL debug logs, training job metrics (loss, grad norm, throughput), (3) **alerting** — anomaly detection on utilization/temp/power, PagerDuty escalation.
 
 ## Stage 3: Onsite (4 rounds)

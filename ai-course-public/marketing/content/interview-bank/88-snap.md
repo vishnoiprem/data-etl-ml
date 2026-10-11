@@ -24,7 +24,7 @@ Snap's ML org spans computer vision (Lenses, AR), generative AI (My AI, image ge
 **Tip:** Be specific about your product surface. Snap cares about ML that ships to real users.
 
 ### Q1.2: "Why Snap?"
-**Answer:** "Three reasons. First, the camera-first ML is unique — most companies optimize for feed scrolling, Snap optimizes for what you see and create through the camera. Second, My AI and the 2026 generative AR features (Dress Up, Bitmoji generation) show real ML investment. Third, Snap is the right size — large enough to have serious ML infra, small enough to have product impact."
+**Answer:** "Three reasons. First, camera-first ML is unique — most companies optimize feed scrolling, Snap optimizes what you see and create through the camera. Second, My AI and the 2026 generative AR features (Dress Up, Bitmoji generation) show real ML investment. Third, Snap is the right size — large enough for serious ML infra, small enough to have product impact."
 **Tip:** Reference Snap's 2026 features: My AI, generative AR, AR mirrors, Lens Studio AI.
 
 ### Q1.3: "Location + comp"

@@ -27,7 +27,7 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Implement a debounce function"
+### Q2.1: Coding: "Implement a debounce function"
 **Answer:** Closure with timer/timeout. Edge cases: leading vs trailing edge, cancel, max wait.
 ```python
 def debounce(fn, wait, leading=False):
@@ -43,29 +43,29 @@ def debounce(fn, wait, leading=False):
 ```
 **Tip:** Async, debounce/throttle, and concurrent data-structure questions are common.
 
-### Q2.2: ML/System — "Design Labelbox's model-assisted labeling pipeline"
+### Q2.2: ML/System: "Design Labelbox's model-assisted labeling pipeline"
 **Answer:** (1) Customer uploads data; (2) Pre-label with their model; (3) Annotators review/correct via Labelbox UI; (4) Active learning — pick highest-uncertainty examples; (5) Iterative loop; (6) Consensus + adjudication; (7) Export to customer's training pipeline; (8) Model evaluation on the labeled data.
 **Tip:** Reference *Model Foundry* (train models in-platform) and *Boost* (active learning).
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** LRU cache → O(1) get/put.
-- **Q:** Merge K sorted lists → min-heap.
-- (Optional 3rd): Async / Promise.all pattern in Python.
+- Q: LRU cache. O(1) get/put.
+- Q: Merge K sorted lists. Min-heap.
+- Optional 3rd: Async / Promise.all pattern in Python.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design a multi-tenant labeling platform"** — Project/ontology management, role-based access, queue management, annotator assignment, throughput, latency.
-- **Q: "Design an active learning loop at scale"** — Uncertainty sampling, batch diversity, label budget optimization, model retraining, integration with labeling UI.
+- Q: Design a multi-tenant labeling platform. Project/ontology management, role-based access, queue management, annotator assignment, throughput, and latency.
+- Q: Design an active learning loop at scale. Uncertainty sampling, batch diversity, label budget optimization, model retraining, and integration with the labeling UI.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you design an eval pipeline for a customer's object detection model?"** — Ground truth import, prediction upload, IoU-based metrics, confusion matrix, slice analysis, model comparison.
-- **Q: "How would you build a consensus algorithm for subjective labels (e.g., sentiment)?"** — Multi-rater agreement (Krippendorff's alpha), adjudication workflow, rater weighting, training.
+- Q: How would you design an eval pipeline for a customer's object detection model? Ground truth import, prediction upload, IoU-based metrics, confusion matrix, slice analysis, and model comparison.
+- Q: How would you build a consensus algorithm for subjective labels (e.g., sentiment)? Multi-rater agreement (Krippendorff's alpha), adjudication workflow, rater weighting, and training.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you worked with a customer to debug a labeling pipeline." (Labelbox is customer-centric.)
-- **Q:** "A time you shipped a feature in a fast iteration loop."
-- **Q:** "Disagreement with a PM on prioritization."
+- Q: Tell me about a time you worked with a customer to debug a labeling pipeline. Labelbox is customer-centric.
+- Q: A time you shipped a feature in a fast iteration loop.
+- Q: Disagreement with a PM on prioritization.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + product reviews. They look for: (1) ML bar for the level, (2) customer empathy, (3) Labelbox values (Customer-First, Ownership, Curiosity, Speed, Inclusion), (4) data-platform depth. Vote is "Strong Hire / Hire / No Hire / Strong No Hire."
@@ -83,7 +83,7 @@ Cash + RSUs. Labelbox is competitive for the size — below FAANG top-of-band. N
 - Reference *Labelbox 2024* releases — they've shipped a lot recently.
 
 ## Real candidate report
-> "Loop for ML Platform (Annotate + Foundry). 4 rounds in 1 day. The system design was a multi-tenant labeling platform with role-based access. The ML deep-dive was on active learning loops at scale. Behavioral was 'customer first' flavored. Offer at L4, ~$380K total. 4 weeks." — Blind, 2025-08
+> "Loop for ML Platform (Annotate + Foundry). 4 rounds in 1 day. The system design was a multi-tenant labeling platform with role-based access. The ML deep-dive was on active learning loops at scale. Behavioral was 'customer first' flavored. Offer at L4, ~$380K total, 4 weeks." — Blind, 2025-08
 
 ## Sources
 - [Labelbox Careers](https://labelbox.com/careers/)

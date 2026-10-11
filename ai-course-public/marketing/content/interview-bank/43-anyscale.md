@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Implement a task scheduler with priorities and retries"
+### Q2.1: Coding: "Implement a task scheduler with priorities and retries"
 **Answer:**
 ```python
 import heapq, threading, time
@@ -49,7 +49,7 @@ class Scheduler:
 ```
 **Tip:** Ray's task system does exactly this + lineage reconstruction. Mention Plasma object store, GCS, and worker pools.
 
-### Q2.2: Systems — "How does Ray achieve fault tolerance?"
+### Q2.2: Systems: "How does Ray achieve fault tolerance?"
 **Answer:** Three pillars: (1) **lineage reconstruction** — tasks re-execute if their object dependency is lost, (2) **actor restart** — actors restart with checkpoint/restore, (3) **placement group scheduling** — resources reserved for fault domains.
 **Tip:** Discuss the tradeoff: eager re-execution (Ray's default) vs eager but expensive checkpointing (Spark).
 

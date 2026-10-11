@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Implement a sliding-window chunker for documents"
+### Q2.1: Coding: "Implement a sliding-window chunker for documents"
 **Answer:**
 ```python
 def chunk(text, window=500, overlap=50):
@@ -40,7 +40,7 @@ def chunk(text, window=500, overlap=50):
 ```
 **Tip:** Better chunkers: sentence-aware, semantic (use embedding similarity between sentences to detect boundaries), or recursive (Markdown structure). Chroma supports all of these via its `langchain-chroma` integration.
 
-### Q2.2: Vector DB — "How would you evaluate retrieval quality in a RAG system?"
+### Q2.2: Vector DB: "How would you evaluate retrieval quality in a RAG system?"
 **Answer:** Three pillars: (1) **retrieval metrics** — recall@k, MRR (mean reciprocal rank), nDCG, (2) **end-to-end metrics** — answer relevance (LLM-as-judge), faithfulness (no hallucination), (3) **human eval** — domain expert review. Chroma integrates with Ragas, TruLens, and Phoenix.
 
 ## Stage 3: Onsite (3-4 rounds)

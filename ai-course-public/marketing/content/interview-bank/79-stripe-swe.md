@@ -18,8 +18,8 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Stripe?"
-**Answer:** "Stripe moves hundreds of billions of dollars — that scale + reliability mandate is the most interesting engineering problem in payments. I want to work on the payment primitive that the internet runs on."
-**Tip:** Show you've used Stripe (as a developer ideally); reference specific products (Radar, Connect, Issuing).
+**Answer:** "Stripe moves hundreds of billions of dollars a year, and the scale + reliability bar is the most interesting engineering problem in payments. I want to work on the primitive that the internet's commerce runs on."
+**Tip:** Show you've used Stripe (as a developer ideally). Mention specific products (Radar, Connect, Issuing) by name.
 
 ### Q1.2: "Why payments?"
 **Answer:** "I like the strict correctness bar — a bug doesn't just slow users down, it loses money. The combination of correctness + scale + financial domain is the sweet spot for me."

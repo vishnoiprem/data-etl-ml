@@ -18,18 +18,19 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Writer vs OpenAI/Anthropic?"
-**Answer:** "I'm excited by the IP-removal guarantee for enterprise — Writer indemnifies outputs, which is the actual blocker for Fortune 500 deployment. I also want to work on graph-grounded RAG with Knowledge Graph, which Anthropic's API doesn't ship."
+**Answer:** "I'm excited by the IP-removal guarantee for enterprise. Writer indemnifies outputs, which is the actual blocker for Fortune 500 deployment. I also want to work on graph-grounded RAG, which Anthropic's API doesn't ship."
 **Tip:** Show you understand the enterprise compliance gap that frontier labs don't serve.
 
 ### Q1.2: "What's your favorite Writer feature?"
-**Answer:** "GraphRAG with the 'no hallucination' guardrail — you can constrain generation to a typed schema and reject any node not present in the enterprise graph. That's the pattern that finally makes AI reliable in regulated industries."
-**Tip:** Use the docs — they've published benchmark pages for this.
+**Answer:** "GraphRAG with the no-hallucination guardrail. You constrain generation to a typed schema and reject any node not present in the enterprise graph. That's the pattern that finally makes AI reliable in regulated industries."
+**Tip:** Use the docs. Writer has published benchmark pages for this and interviewers will check.
 
 ## Stage 2: Technical phone screen
 
 ### Q2.1: LRU Cache.
 **Answer:**
 ```python
+import collections
 class LRUCache:
     def __init__(self, c):
         self.cap, self.cache = c, collections.OrderedDict()
@@ -41,7 +42,7 @@ class LRUCache:
         self.cache[k] = v
         if len(self.cache) > self.cap: self.cache.popitem(last=False)
 ```
-**Tip:** Standard; they want O(1) both ways.
+**Tip:** Standard; they want O(1) both ways. Tell them the `OrderedDict` move-to-end is amortized O(1) in CPython.
 
 ### Q2.2: Implement constrained decoding for JSON output.
 **Answer:** Build a finite-state machine from the JSON grammar, then at each decode step mask logits to only token IDs whose continuation is a valid prefix. Use `trie` over byte-pair tokens.

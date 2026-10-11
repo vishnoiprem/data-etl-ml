@@ -24,7 +24,7 @@ Roblox has a unique ML surface: kid-safety is the existential priority (COPPA co
 **Tip:** Mention experience with younger or vulnerable users if you have it.
 
 ### Q1.2: "Why Roblox?"
-**Answer:** "Three reasons. First, the safety problem is genuinely hard — kids are using the platform, and an ML model that misses a predator is a story on the front page. I want that responsibility. Second, the discovery ML is interesting because the content is user-generated games with wildly varying quality — pure popularity ranking doesn't work. Third, Roblox's AI Studio and generative avatar features mean ML is being productized, not just used for ranking."
+**Answer:** "Three reasons. First, the safety problem is genuinely hard — kids are using the platform, and a model that misses a predator is a front-page story. I want that responsibility. Second, discovery ML is interesting because the content is user-generated games with wildly varying quality, so pure popularity ranking fails. Third, AI Studio and generative avatar features mean ML is being productized, not just used for ranking."
 **Tip:** Reference Roblox's 2026 AI products: AI Studio, generative avatars, voice, translation.
 
 ### Q1.3: "Comp + location"

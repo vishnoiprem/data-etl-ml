@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Casetext/CoCounsel?"
-**Answer:** Three-bet: (1) Casetext pioneered legal AI (founded 2013, early to LLM pivot in 2022), now part of Thomson Reuters gives it unmatched distribution to lawyers, (2) the team is ex-LexisNexis, ex-Westlaw, and ex-AI researchers, (3) the product (CoCounsel — first AI legal assistant launched in 2023) is a market leader.
+**Answer:** Three reasons. (1) Casetext has been at legal AI since 2013, and the 2022 LLM pivot to CoCounsel put them ahead of the curve. Being inside Thomson Reuters now means distribution no startup can match. (2) The team is ex-LexisNexis, ex-Westlaw, plus AI researchers. (3) CoCounsel was the first real AI legal assistant shipped at scale in 2023.
 **Tip:** Show you've used CoCounsel or read about its features. Casetext values legal domain curiosity.
 
 ### Q1.2: "Tell me about an LLM app you built for a non-technical user"
-**Answer:** Walk through a project where you partnered with a non-engineering user (lawyer, doctor, marketer, etc.) and shipped something they actually use.
+**Answer:** Walk through one project where you partnered with a non-engineering user (lawyer, doctor, marketer) and shipped something they actually use. Mention iteration, since first versions are usually wrong.
 
 ## Stage 2: Technical phone screen
 

@@ -18,18 +18,19 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why music AI?"
-**Answer:** "Music is the next frontier for generative AI — it's structured, emotional, and the IP questions are fascinating. Suno shipped the first product that 10M+ people actually use to make music, and I want to push the audio quality bar higher."
-**Tip:** Reference Suno v4 and Bark; show you've used both.
+**Answer:** "Music is the next frontier for generative AI. It's structured, emotional, and the IP questions are fascinating. Suno shipped the first product 10M+ people actually use to make music, and I want to push the audio quality bar higher."
+**Tip:** Reference Suno v4 and Bark. Show you've used both — Suno knows when you're bluffing.
 
 ### Q1.2: "Tell me about a model you admire."
-**Answer:** "Suno v4's audio quality jump is a real engineering feat — the v4 stack solved the lyrics alignment and timbre consistency problems that plagued v3. The 'Replace Section' feature shows they're shipping UX as fast as research."
-**Tip:** Show product intuition.
+**Answer:** "Suno v4's audio quality jump is a real engineering feat. The v4 stack solved the lyric-alignment and timbre-consistency problems that plagued v3, and the 'Replace Section' feature shows they're shipping UX as fast as research."
+**Tip:** Show product intuition. Suno rewards people who can talk about both.
 
 ## Stage 2: Technical phone screen
 
 ### Q2.1: Implement an STFT in NumPy.
 **Answer:**
 ```python
+import numpy as np
 def stft(x, n_fft=2048, hop=512, win=None):
     if win is None: win = np.hanning(n_fft)
     pad = n_fft // 2

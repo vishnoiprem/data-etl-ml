@@ -24,7 +24,7 @@ Spotify's ML org is one of the most respected in industry for recommender system
 **Tip:** Spotify values long-tail / diversity thinking. Reference the cold-start problem explicitly.
 
 ### Q1.2: "Why Spotify?"
-**Answer:** "Three reasons. First, the recsys problem here is legendary — Discover Weekly is the gold standard. Second, the AI DJ launch and AI playlists show real ML product investment. Third, I want to work at a company where ML directly serves user joy, not just ad revenue. Spotify's mission alignment matters to me."
+**Answer:** "Three reasons. First, the recsys problem here is legendary — Discover Weekly is the gold standard. Second, AI DJ and AI Playlist show real ML product investment. Third, I want to work at a company where ML directly serves user joy, not just ad revenue. That mission alignment matters to me."
 **Tip:** Reference Spotify's 2026 AI features: AI DJ, AI Playlist, voice translation for podcasts.
 
 ### Q1.3: "Location + remote"

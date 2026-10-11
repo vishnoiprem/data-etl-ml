@@ -18,8 +18,8 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Netflix?"
-**Answer:** "Netflix is the only company streaming at true internet scale — 250M+ users, 15% of global bandwidth, and a culture that values senior judgment over process. I want to be in a high-ownership environment."
-**Tip:** Reference Netflix's "Freedom and Responsibility" culture memo and the tech blog.
+**Answer:** "Netflix is the only company streaming at true internet scale — 250M+ users, about 15% of global bandwidth, and a culture that prizes senior judgment over process. I want to work somewhere with high ownership and real consequences."
+**Tip:** Reference the "Freedom and Responsibility" culture memo and the tech blog.
 
 ### Q1.2: "What about streaming interests you?"
 **Answer:** "The combination of real-time delivery at scale, recommendation/ML systems, and the chaos engineering culture is unique. I want to work on the most-watched video pipeline in the world."

@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Jasper after the post-IPO reset?"
-**Answer:** "Jasper pivoted to enterprise marketing OS in 2024 and is the only company shipping end-to-end campaign generation — copy, image, brand voice — at that scale. I want to be there."
-**Tip:** Show you read the Q3 2025 earnings call; they value informed candidates.
+**Answer:** "Jasper pivoted to enterprise marketing OS in 2024, and they're the only company shipping end-to-end campaign generation — copy, image, brand voice — at that scale. I want to be there while the product motion is still being defined."
+**Tip:** Show you read the Q3 2025 earnings call. They value informed candidates.
 
 ### Q1.2: "How do you stay current in a fast-moving field?"
-**Answer:** "I read 3 papers a week on arXiv, follow the Jasper engineering blog, and replicate one new technique a month — last month I built a LoRA pipeline for brand-voice fine-tuning."
-**Tip:** Name specific things you've built or read.
+**Answer:** "I read 3 papers a week on arXiv, follow the Jasper engineering blog, and replicate one new technique a month. Last month I built a LoRA pipeline for brand-voice fine-tuning."
+**Tip:** Name the specific things you've built or read. Be concrete.
 
 ## Stage 2: Take-home + screen
 

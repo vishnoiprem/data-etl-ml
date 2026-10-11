@@ -27,46 +27,49 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Binary tree level order traversal"
+### Q2.1: Coding: "Binary tree level order traversal"
 **Answer:** BFS with a queue, return list of lists.
 ```python
 def levelOrder(root):
-    if not root: return []
+    if not root:
+        return []
     res, q = [], [root]
     while q:
-        level, nq = [], []
+        level = []
+        nq = []
         for n in q:
             level.append(n.val)
             if n.left: nq.append(n.left)
             if n.right: nq.append(n.right)
-        res.append(level); q = nq
+        res.append(level)
+        q = nq
     return res
 ```
 **Tip:** Tree + DP combinations are common.
 
-### Q2.2: ML — "Design an IT ticket classification and routing system"
+### Q2.2: ML: "Design an IT ticket classification and routing system"
 **Answer:** (1) Hierarchical classifier — category → subcategory → assignment group; (2) Multi-label for overlapping categories; (3) Text encoder (sentence-transformer fine-tuned on IT tickets); (4) Features — text, requester history, urgency keywords, attachment type; (5) Online with sub-100ms latency; (6) Active learning loop — when agent reclassifies, log for retraining; (7) Shadow mode before auto-routing.
 **Tip:** ServiceNow loves "human-in-the-loop" — they sell to risk-averse enterprises.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** LRU cache → O(1) get/put.
-- **Q:** Coin change → DP, O(amount × len(coins)).
-- (Optional 3rd): SQL or system scripting question.
+- Q: LRU cache. O(1) get/put.
+- Q: Coin change. DP, O(amount × len(coins)).
+- Optional 3rd: SQL or system scripting question.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Now Assist — a multi-tenant LLM agent platform"** — Per-tenant RAG index, action tool registry (Create Ticket, Update Record, Approve), guardrails, eval harness, human approval flow for sensitive actions, audit logging.
-- **Q: "Design a workflow recommendation engine"** — Mine workflow templates from historical executions, recommend next-best action, A/B test recommendations, measure cycle-time reduction.
+- Q: Design Now Assist, a multi-tenant LLM agent platform. Per-tenant RAG index, action tool registry (Create Ticket, Update Record, Approve), guardrails, eval harness, human approval flow for sensitive actions, and audit logging.
+- Q: Design a workflow recommendation engine. Mine workflow templates from historical executions, recommend the next-best action, A/B test recommendations, and measure cycle-time reduction.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you build a RAG system over customer workflow data with strict ACLs?"** — Per-tenant index, ACL filter at retrieval, encrypted embeddings, redaction, citation with provenance.
-- **Q: "How would you evaluate a customer-service chatbot before launch?"** — Held-out human-rated set, LLM-judge with rubric, A/B with shadow traffic, regression tests for tone, escalation rates, handoff quality.
+- Q: How would you build a RAG system over customer workflow data with strict ACLs? Per-tenant index, ACL filter at retrieval, encrypted embeddings, redaction, and citation with provenance.
+- Q: How would you evaluate a customer-service chatbot before launch? Held-out human-rated set, LLM-judge with rubric, A/B with shadow traffic, regression tests for tone, escalation rates, and handoff quality.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you had to ship a model in a regulated environment."
-- **Q:** "A time you collaborated with a customer success team to debug a deployed model." ServiceNow has a "Customer Zero" ethos.
-- **Q:** "Disagreement with a PM on prioritization."
+- Q: Tell me about a time you had to ship a model in a regulated environment.
+- Q: A time you collaborated with a customer success team to debug a deployed model. ServiceNow has a "Customer Zero" ethos.
+- Q: Disagreement with a PM on prioritization.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + product reviews. They look for: (1) ML bar for the level, (2) enterprise readiness (multi-tenancy, ACLs, audit), (3) ServiceNow values (Customer Zero, Collaboration, Urgency), (4) workflow-domain depth (preferred). Panel vote is "Strong Hire / Hire / No Hire / Strong No Hire." Hiring manager has the tie-breaker.
@@ -84,7 +87,7 @@ Cash + RSUs. ServiceNow is competitive with FAANG, sometimes above for senior+ d
 - Show workflow-domain knowledge: ITSM, HRSD, CSM, App Engine.
 
 ## Real candidate report
-> "Loop for Now Assist. 4 rounds in 1 day. The system design was a multi-tenant RAG + agent platform — they pushed me on ACL filtering at retrieval. The ML deep-dive was eval for a customer-service bot. Behavioral was 'Customer Zero' flavored. Offer at IC4, ~$390K total. 4 weeks total. Interviewer quality was high — they asked thoughtful follow-ups." — Blind, 2025-10
+> "Loop for Now Assist. 4 rounds in 1 day. The system design was a multi-tenant RAG + agent platform and they pushed me on ACL filtering at retrieval. The ML deep-dive was eval for a customer-service bot. Behavioral was 'Customer Zero' flavored. Offer at IC4, ~$390K total, 4 weeks total. Interviewer quality was high and they asked thoughtful follow-ups." — Blind, 2025-10
 
 ## Sources
 - [ServiceNow Careers](https://www.servicenow.com/careers.html)

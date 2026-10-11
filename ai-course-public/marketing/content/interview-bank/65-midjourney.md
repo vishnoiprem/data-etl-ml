@@ -18,22 +18,23 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Midjourney over Stability/OpenAI?"
-**Answer:** "I want to work at the only image lab that's been independent and product-led — that pressure-cooker of taste + research is unique. The V7 launch with consistent character + style refs is the kind of bet I want to be inside."
+**Answer:** "I want to work at the only image lab that's been independent and product-led. That pressure-cooker of taste plus research is unique. The V7 launch with consistent character + style refs is the kind of bet I want to be inside."
 **Tip:** Show deep familiarity with each Midjourney version's distinctive choices (v5.2 stylize, v6 natural language, v7 personalization).
 
 ### Q1.2: "What's your favorite recent image model?"
-**Answer:** "Midjourney V7's 'draft mode' + personalization pass — the two-stage pipeline is novel and the personalization embed is a clean product trick. I think it beats OpenAI's GPT-image-1 on aesthetics."
-**Tip:** Have specific opinions; David Holz values taste.
+**Answer:** "Midjourney V7's draft mode + personalization pass. The two-stage pipeline is novel, and the personalization embed is a clean product trick. I think it beats OpenAI's GPT-image-1 on aesthetics, even if it loses on prompt adherence."
+**Tip:** Have specific opinions. David Holz values taste and pushes back on hedge-y answers.
 
 ## Stage 2: Technical phone screen
 
 ### Q2.1: Derive the forward and reverse diffusion process.
-**Answer:** Forward: q(x_t | x_{t-1}) = N(x_t; √(1-β_t) x_{t-1}, β_t I). Marginal: q(x_t | x_0) = N(x_t; √(α̅_t) x_0, (1-α̅_t) I). Reverse: parameterized Gaussian with mean μ_θ(x_t, t) and variance σ_t^2 I, trained by predicting noise ε. Score-matching equivalence: ∇_x log p_t(x) = -ε_θ(x,t)/σ_t.
-**Tip:** They expect derivations on the board, not just terminology.
+**Answer:** Forward: q(x_t | x_{t-1}) = N(x_t; √(1-β_t) x_{t-1}, β_t I). Marginal: q(x_t | x_0) = N(x_t; √(α̅_t) x_0, (1-α̅_t) I) where α̅_t = ∏_{s≤t}(1-β_s). Reverse is a learned Gaussian with mean μ_θ(x_t, t) and (usually fixed) variance σ_t² I, trained by predicting the noise ε. Score-matching equivalence: ∇_x log p_t(x) = -ε_θ(x,t)/σ_t, so noise prediction is score prediction up to scaling.
+**Tip:** They want derivations on the board, not just terminology. Be ready to derive α̅ from the recurrence.
 
 ### Q2.2: Coding — implement a 2D convolution in NumPy.
 **Answer:**
 ```python
+import numpy as np
 def conv2d(x, k):
     H, W = x.shape; h, w = k.shape
     out = np.zeros((H-h+1, W-w+1))

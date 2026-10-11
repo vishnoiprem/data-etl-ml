@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Two Sigma?"
-**Answer:** "Two Sigma blends fundamental research with engineering — they ship ML to production at scale, and the partnership model means quants have skin in the game. I want to work where scientific rigor meets real P&L."
-**Tip:** Reference specific Two Sigma research (e.g., the academic papers they publish).
+**Answer:** "Two Sigma blends fundamental research with engineering. They ship ML to production at scale, and the partnership model means quants have skin in the game. I want to work where scientific rigor meets real P&L, not where I have to defend an engagement metric."
+**Tip:** Reference specific Two Sigma research papers. They publish a lot, and interviewers check.
 
 ### Q1.2: "Why quant vs FAANG?"
-**Answer:** "I'd rather bet my career on a feedback loop where P&L is the metric than on a proxy metric like engagement. The honesty of the scoreboard attracts me."
-**Tip:** Have a real reason; they screen for the "money-driven" anti-pattern.
+**Answer:** "I'd rather bet my career on a feedback loop where P&L is the metric than on a proxy metric like engagement. The honesty of the scoreboard attracts me, and at FAANG I'd never know if my work actually mattered."
+**Tip:** Have a real reason. They screen for the "money-driven" anti-pattern — don't oversell greed.
 
 ## Stage 2: Technical phone screen
 
@@ -46,7 +46,7 @@
 **Q:** Implement a function to sample from a discrete distribution.
 **Answer:**
 ```python
-import random
+import random, bisect
 def sample(weights):
     cum = []; s = 0
     for w in weights:
@@ -54,7 +54,7 @@ def sample(weights):
     r = random.random() * s
     return bisect.bisect_left(cum, r)
 ```
-**Tip:** Use bisect for O(log n); they care about efficiency.
+**Tip:** Inverse-CDF sampling is the standard answer (O(log n) per sample). Mention the alias method for O(1) sampling after O(n) build — Two Sigma knows both.
 
 ### Round 3.3: ML deep-dive (math-heavy)
 **Q:** Derive the gradient of logistic regression with L2 regularization.

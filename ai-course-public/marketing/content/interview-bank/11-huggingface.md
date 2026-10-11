@@ -49,6 +49,7 @@ The Hugging Face warmup. Know the Trainer API.
 ### Q3.1.1: "Implement a text streaming generator with backpressure"
 **Answer:**
 ```python
+import torch
 def stream_tokens(prompt, model, tokenizer, max_new=200):
     ids = tokenizer(prompt, return_tensors="pt").input_ids
     past = None

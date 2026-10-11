@@ -29,7 +29,7 @@
 
 ## Stage 2: Technical phone screens (3 x 60 min)
 
-### Q2.1: Coding — "Implement a transformer training loop with mixed precision"
+### Q2.1: Coding: "Implement a transformer training loop with mixed precision"
 **Answer:** PyTorch-style loop with autocast, gradient scaler, FSDP sharding, checkpoint.
 ```python
 from torch.cuda.amp import autocast, GradScaler
@@ -42,11 +42,11 @@ for batch in loader:
 ```
 **Tip:** Expect distributed training and optimization depth.
 
-### Q2.2: ML research — "Walk me through how chain-of-thought reasoning might emerge from RL on a reasoning dataset"
+### Q2.2: ML research: "Walk me through how chain-of-thought reasoning might emerge from RL on a reasoning dataset"
 **Answer:** Discuss: (1) base model has latent CoT ability; (2) RL on verifiable rewards (math, code) sharpens CoT; (3) inference-time scaling — longer CoT = better answers; (4) the o1 / R1 line of work; (5) process reward models vs outcome reward models. Show you understand both the empirical and theoretical angles.
 **Tip:** Read the o1 system card and the DeepSeek-R1 paper. Reference both.
 
-### Q2.3: Systems — "Design a training run for a 1T-parameter model"
+### Q2.3: Systems: "Design a training run for a 1T-parameter model"
 **Answer:** (1) Model — MoE with 8-16 experts; (2) Parallelism — TP + PP + DP + ZeRO; (3) Activation recomputation, flash attention, mixed precision; (4) Pipeline schedule (Interleaved 1F1B); (5) Data pipeline with sharded web crawl; (6) Checkpoint every N steps to S3; (7) Monitoring with W&B-style tools; (8) Recovery from faults (NaN, OOM, hardware).
 **Tip:** OpenAI builds *frontier-scale* infra. Show you understand the trade-offs.
 
@@ -62,17 +62,17 @@ for batch in loader:
 - **Q:** "How would you build an eval suite for a coding agent?" Discuss held-out problems, execution-based evaluation, LLM-as-judge, calibration.
 
 ### Round 3.3: Coding (60 min, 2 questions)
-- **Q:** Implement beam search with diverse beam groups.
-- **Q:** BFS/DFS in a graph with weighted edges.
+- Q: Implement beam search with diverse beam groups.
+- Q: BFS/DFS in a graph with weighted edges.
 
 ### Round 3.4: Systems (60 min)
-- **Q:** "Design the inference infra for a 100M-user LLM." Discuss batching (continuous), KV-cache management, prefix caching, speculative decoding, LoRA hot-swap.
-- **Q:** "How would you design a multi-modal model that can take images, audio, and text?" Discuss modality-specific encoders, fusion (cross-attention, Q-Former), training data.
+- Q: Design the inference infra for a 100M-user LLM. Discuss batching (continuous), KV-cache management, prefix caching, speculative decoding, and LoRA hot-swap.
+- Q: How would you design a multi-modal model that can take images, audio, and text? Discuss modality-specific encoders, fusion (cross-attention, Q-Former), and training data.
 
 ### Round 3.5: Behavioral / Mission (60 min)
-- **Q:** "Why this mission?" OpenAI is *mission-driven* — they want people who care about AGI safety + benefit.
-- **Q:** "A time you had to ship imperfect research to meet a deadline."
-- **Q:** "A time you disagreed with a senior researcher."
+- Q: Why this mission? OpenAI is mission-driven and they want people who care about AGI safety and benefit.
+- Q: A time you had to ship imperfect research to meet a deadline.
+- Q: A time you disagreed with a senior researcher.
 
 ## Stage 4: Research committee + hiring
 A committee of senior researchers reviews. They look for: (1) research taste (do you ask good questions?), (2) technical depth, (3) mission alignment, (4) impact at scale. OpenAI's bar is *extremely* high — most "hire" votes still result in "no hire" because the bar is set by the very best.
@@ -90,7 +90,7 @@ Cash + RSUs + *profit units* (a unique OpenAI compensation instrument). Total co
 - For senior+, "research taste" matters more than "number of papers."
 
 ## Real candidate report
-> "Loop for Research Engineer (Reasoning team). 5 rounds over 2 days, in-person at SF. The research round was 90 min on RL for reasoning — they wanted me to discuss o1/R1 line of work. The ML round was on RLHF at 100B scale. The systems round was on inference infra for 100M users. Behavioral was mission-fit flavored. Offer at E5, ~$1.1M total (cash + RSUs + profit units). 5 weeks." — r/MLQuestions, 2025-10
+> "Loop for Research Engineer (Reasoning team). 5 rounds over 2 days, in-person at SF. The research round was 90 min on RL for reasoning and they wanted me to discuss the o1/R1 line of work. The ML round was on RLHF at 100B scale. The systems round was on inference infra for 100M users. Behavioral was mission-fit flavored. Offer at E5, ~$1.1M total (cash + RSUs + profit units), 5 weeks." — r/MLQuestions, 2025-10
 
 ## Sources
 - [OpenAI Careers](https://openai.com/careers/)

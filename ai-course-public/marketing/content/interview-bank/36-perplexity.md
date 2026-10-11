@@ -27,7 +27,7 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Implement a simple RAG pipeline"
+### Q2.1: Coding: "Implement a simple RAG pipeline"
 **Answer:** Chunking → embeddings → vector DB → retrieval with re-rank.
 ```python
 def simple_rag(query, docs, embed, llm):
@@ -40,29 +40,29 @@ def simple_rag(query, docs, embed, llm):
 ```
 **Tip:** Perplexity loves *build-something-real* style coding. They want to see your practical chops.
 
-### Q2.2: ML/System — "Design Perplexity's search pipeline"
+### Q2.2: ML/System: "Design Perplexity's search pipeline"
 **Answer:** (1) Query understanding — decomposition, classification (factual/timeliness/opinion), query rewriting; (2) Multi-source retrieval — web (Bing + internal crawler), vector DB of indexed pages, knowledge base; (3) Re-ranking with cross-encoder; (4) LLM synthesis with citations; (5) Streaming response with token-level citations; (6) Latency budget 2-5s; (7) Eval on factual accuracy + citation quality.
 **Tip:** Perplexity is the canonical RAG company. Reference *Pages*, *Focus*, *Spaces* by name.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Implement streaming LLM output with cancellation.
-- **Q:** Parse a complex JSON spec into a typed structure.
-- (Optional 3rd): Distributed-systems — idempotency, retries, rate limiting.
+- Q: Implement streaming LLM output with cancellation.
+- Q: Parse a complex JSON spec into a typed structure.
+- Optional 3rd: Distributed-systems question on idempotency, retries, or rate limiting.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Perplexity's Pages product"** — Long-form article generation from query, source aggregation, fact-check pipeline, publish/share flow, version control.
-- **Q: "Design a web-scale retrieval system"** — Crawling pipeline, indexing (BM25 + dense), freshness via incremental indexing, 100K+ QPS.
+- Q: Design Perplexity's Pages product. Long-form article generation from a query, source aggregation, fact-check pipeline, publish/share flow, and version control.
+- Q: Design a web-scale retrieval system. Crawling pipeline, indexing (BM25 + dense), freshness via incremental indexing, and 100K+ QPS.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you improve citation accuracy in Perplexity answers?"** — Better extractive quote selection, post-generation verification, hallucination classifier, eval on CiteME-style benchmarks.
-- **Q: "How would you design a multi-modal search for Perplexity?"** — Image + text query, OCR pipeline, visual encoder, multi-modal embeddings.
+- Q: How would you improve citation accuracy in Perplexity answers? Better extractive quote selection, post-generation verification, a hallucination classifier, and eval on CiteME-style benchmarks.
+- Q: How would you design a multi-modal search for Perplexity? Image + text query, OCR pipeline, visual encoder, and multi-modal embeddings.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Why this mission — making knowledge accessible?" Perplexity hires on mission alignment.
-- **Q:** "A time you shipped a product at startup speed."
-- **Q:** "Disagreement with a co-founder or PM."
+- Q: Why this mission, making knowledge accessible? Perplexity hires on mission alignment.
+- Q: A time you shipped a product at startup speed.
+- Q: Disagreement with a co-founder or PM.
 
 ## Stage 4: Founders + hiring committee
 Perplexity has a tight culture. A committee of senior engineers + sometimes a founder (Aravind, Denis, Johnny) reviews. They look for: (1) technical bar, (2) mission alignment ("knowledge is power"), (3) shipping speed, (4) humble intensity. Perplexity is *small* — every hire matters.
@@ -80,7 +80,7 @@ Cash + RSUs. Perplexity has grown comp aggressively through 2024-2025. Negotiati
 - Quantify scale: "500M+ queries/month", "10K QPS", "sub-2s latency".
 
 ## Real candidate report
-> "Loop for Search/RAG team. 4 rounds in 1 day, all in-person at SF. The coding round was a simple RAG implementation. The ML round was on citation accuracy — they wanted me to discuss extractive quote selection and post-hoc verification. The system design was on Pages (article generation). Founders round was 'mission fit' flavored. Offer at L4, ~$520K total. 3 weeks." — Blind, 2025-10
+> "Loop for Search/RAG team. 4 rounds in 1 day, all in-person at SF. The coding round was a simple RAG implementation. The ML round was on citation accuracy and they wanted me to discuss extractive quote selection and post-hoc verification. The system design was on Pages (article generation). Founders round was 'mission fit' flavored. Offer at L4, ~$520K total, 3 weeks." — Blind, 2025-10
 
 ## Sources
 - [Perplexity Careers](https://www.perplexity.ai/careers)

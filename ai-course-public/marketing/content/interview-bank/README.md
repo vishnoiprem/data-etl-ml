@@ -77,8 +77,8 @@ The high-growth AI companies. Lower base, higher equity, faster loops, more prod
 | # | Company | Primary role | File |
 |---|---------|--------------|------|
 | 36 | Perplexity AI | AI Engineer | [36-perplexity.md](./36-perplexity.md) |
-| 37 | Anthropic (startup tier) | AI Engineer | (see #2) |
-| 38 | OpenAI (startup tier) | AI Engineer | (see #1) |
+| 37 | Anthropic (Safety) | AI Engineer | [37-anthropic-safety.md](./37-anthropic-safety.md) |
+| 38 | OpenAI Research | AI Engineer | [38-openai-research.md](./38-openai-research.md) |
 | 39 | Scale AI | ML Engineer | [39-scale.md](./39-scale.md) |
 | 40 | Labelbox | ML Engineer | [40-labelbox.md](./40-labelbox.md) |
 | 41 | Weights & Biases | ML Engineer | [41-wandb.md](./41-wandb.md) |
@@ -135,11 +135,11 @@ The companies that are integrating AI into existing products. Stronger on domain
 | 86 | Spotify (ML / Recsys) | ML Engineer | [86-spotify.md](./86-spotify.md) |
 | 87 | TikTok (ML / Recsys) | ML Engineer | [87-tiktok.md](./87-tiktok.md) |
 | 88 | Snap (ML / Camera) | ML Engineer | [88-snap.md](./88-snap.md) |
-| 89 | Pinterest (already in #35) | — | (see #35) |
+| 89 | Waymo (AV / Perception) | ML Engineer | [89-waymo.md](./89-waymo.md) |
 | 90 | Twitter/X (ML / Recsys) | ML Engineer | [90-twitter.md](./90-twitter.md) |
 | 91 | LinkedIn (ML / Feed) | ML Engineer | [91-linkedin.md](./91-linkedin.md) |
-| 92 | Pinterest (ML) | ML Engineer | (see #35) |
-| 93 | Roblox (already in #85) | — | (see #85) |
+| 92 | Datadog (Observability / AIOps) | ML Engineer | [92-datadog.md](./92-datadog.md) |
+| 93 | Snowflake (Snowpark / Cortex AI) | ML Engineer | [93-snowflake.md](./93-snowflake.md) |
 | 94 | Atlassian (ML / Rovo) | ML Engineer | [94-atlassian.md](./94-atlassian.md) |
 | 95 | GitHub (Copilot) | AI Engineer | [95-github.md](./95-github.md) |
 | 96 | GitLab (Duo) | AI Engineer | [96-gitlab.md](./96-gitlab.md) |
@@ -147,9 +147,6 @@ The companies that are integrating AI into existing products. Stronger on domain
 | 98 | Canva (Magic Studio) | ML Engineer | [98-canva.md](./98-canva.md) |
 | 99 | Palantir (ML / AIP) | ML Engineer | [99-palantir.md](./99-palantir.md) |
 | 100 | Anduril (ML / Lattice) | ML Engineer | [100-anduril.md](./100-anduril.md) |
-| 89 | Waymo (AV / Perception) | ML Engineer | [89-waymo.md](./89-waymo.md) |
-| 92 | Datadog (Observability / AIOps) | ML Engineer | [92-datadog.md](./92-datadog.md) |
-| 93 | Snowflake (Snowpark / Cortex AI) | ML Engineer | [93-snowflake.md](./93-snowflake.md) |
 
 ---
 

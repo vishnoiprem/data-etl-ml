@@ -27,52 +27,56 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Reverse a linked list in groups of K"
+### Q2.1: Coding: "Reverse a linked list in groups of K"
 **Answer:** Iterative with prev/curr/next pointers. O(N) time, O(1) space.
 ```python
 def reverseKGroup(head, k):
-    cur, dummy = head, ListNode(0, head)
+    dummy = ListNode(0, head)
+    group_prev = dummy
     while True:
-        kth = cur
+        kth = group_prev.next
         for _ in range(k):
-            if not kth: return dummy.next
+            if not kth:
+                return dummy.next
             kth = kth.next
-        if not kth: return dummy.next
-        # reverse k nodes
-        prev, c = None, cur
+        # reverse k nodes starting at group_prev.next
+        prev, cur = None, group_prev.next
         for _ in range(k):
-            nxt = c.next; c.next = prev; prev = c; c = nxt
+            nxt = cur.next
+            cur.next = prev
+            prev = cur
+            cur = nxt
         # reconnect
-        dummy.next.next = c
-        nxt_dummy = dummy.next
-        dummy.next = prev
-        dummy = nxt_dummy
+        first = group_prev.next
+        group_prev.next = prev
+        first.next = cur
+        group_prev = first
 ```
 **Tip:** Linked list + tree problems are common. Confirm language upfront (Java vs Python).
 
-### Q2.2: ML — "Design a vector search service for enterprise RAG"
+### Q2.2: ML: "Design a vector search service for enterprise RAG"
 **Answer:** (1) Embedding service — REST/gRPC, supports OpenAI/Cohere/Oracle models; (2) Vector index — HNSW or IVF, 23ai native vector index; (3) Metadata filtering with ACLs; (4) Hybrid retrieval (BM25 + dense); (5) Re-rank with cross-encoder; (6) Latency 50ms p99 for 10M vectors; (7) Multi-tenant isolation via schema or DB.
 **Tip:** Reference *23ai Vector Search* and *Oracle Database* by name. Oracle is a database company first.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Implement a thread-safe rate limiter (token bucket).
-- **Q:** Valid Sudoku → backtracking with row/col/box bitmasks.
-- (Optional 3rd): SQL — window functions, CTEs, recursive queries.
+- Q: Implement a thread-safe rate limiter (token bucket).
+- Q: Valid Sudoku. Backtracking with row/col/box bitmasks.
+- Optional 3rd: SQL with window functions, CTEs, recursive queries.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design OCI Generative AI Service"** — Multi-tenant LLM serving, fine-tuning pipeline, RLHF, content safety filters, dedicated AI clusters (H100/A100), quota management, billing.
-- **Q: "Design a hybrid search service over enterprise documents"** — Oracle 23ai vector + text indexes, ACL filtering, freshness via incremental indexing, OCI Object Storage ingestion.
+- Q: Design OCI Generative AI Service. Multi-tenant LLM serving, fine-tuning pipeline, RLHF, content safety filters, dedicated AI clusters (H100/A100), quota management, and billing.
+- Q: Design a hybrid search service over enterprise documents. Oracle 23ai vector + text indexes, ACL filtering, freshness via incremental indexing, and OCI Object Storage ingestion.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you fine-tune a model for a bank's customer-service use case?"** — On-prem fine-tuning (data sovereignty), guardrails for PII, eval with bank's own data, RAG over policy docs, audit logs.
-- **Q: "How would you evaluate an enterprise RAG system?"** — Faithfulness, relevance, citation accuracy, latency, cost-per-query, customer-specific rubrics.
+- Q: How would you fine-tune a model for a bank's customer-service use case? On-prem fine-tuning (data sovereignty), guardrails for PII, eval with the bank's own data, RAG over policy docs, and audit logs.
+- Q: How would you evaluate an enterprise RAG system? Faithfulness, relevance, citation accuracy, latency, cost-per-query, and customer-specific rubrics.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you worked with a regulated customer." (Healthcare, finance, gov)
-- **Q:** "A time you shipped on-prem." (Critical for OCI)
-- **Q:** "Disagreement with a PM on scope."
+- Q: Tell me about a time you worked with a regulated customer (healthcare, finance, gov).
+- Q: A time you shipped on-prem. Critical for OCI.
+- Q: Disagreement with a PM on scope.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + product reviews. They look for: (1) ML bar for the level, (2) cloud-infra depth (Oracle is a database + cloud company), (3) enterprise readiness (compliance, multi-tenancy, on-prem), (4) Oracle values (Integrity, Collaboration, Innovation, Customer Focus). Vote is "Strong Hire / Hire / No Hire / Strong No Hire."
@@ -90,7 +94,7 @@ Cash + RSUs. Oracle is competitive for cloud roles but typically below FAANG top
 - Show on-prem / hybrid cloud experience if you have it.
 
 ## Real candidate report
-> "Loop for OCI Generative AI. 4 rounds, 1 day. The coding round was 1 Java (rate limiter) and 1 Python (Sudoku). The system design was a multi-tenant vector search service over Oracle 23ai. ML deep-dive was fine-tuning for a bank. Behavioral was sales-driven — they asked about a time I partnered with field sales. Offer at IC4, ~$380K total. 5 weeks total." — Blind, 2025-09
+> "Loop for OCI Generative AI. 4 rounds, 1 day. Coding was 1 Java (rate limiter) and 1 Python (Sudoku). The system design was a multi-tenant vector search service over Oracle 23ai. ML deep-dive was fine-tuning for a bank. Behavioral was sales-driven and they asked about a time I partnered with field sales. Offer at IC4, ~$380K total, 5 weeks total." — Blind, 2025-09
 
 ## Sources
 - [Oracle Careers](https://www.oracle.com/careers/)

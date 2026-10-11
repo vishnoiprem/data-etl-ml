@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Grammarly?"
-**Answer:** Three-bet: (1) Grammarly is a household name writing tool with 30M+ DAU, building AI features is product-validated, (2) the engineering culture balances research (in-house NLP) with production AI (LLM integration), (3) the mission (improve communication) is genuinely compelling.
-**Tip:** Mention a specific Grammarly feature you use, and one you'd want to build.
+**Answer:** Three reasons. (1) Grammarly has 30M+ DAU writing in it every day, so the AI training signal and product validation are already there. (2) The eng culture balances research (in-house NLP) with production LLM integration, which is rare. (3) The mission — making written communication clearer — is genuinely meaningful.
+**Tip:** Mention one Grammarly feature you use, and one you'd want to build.
 
 ### Q1.2: "Tell me about an NLP or LLM project you shipped"
-**Answer:** Concrete numbers — DAU impact, latency, error rate, training methodology. Grammarly values shipped impact, not just research ideas.
+**Answer:** Concrete numbers — DAU impact, latency, error rate, training methodology. Grammarly values shipped impact, not research papers.
 
 ## Stage 2: Technical phone screen
 

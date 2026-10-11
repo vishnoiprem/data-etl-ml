@@ -27,7 +27,7 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Merge overlapping intervals"
+### Q2.1: Coding: "Merge overlapping intervals"
 **Answer:** Sort by start, iterate merging if next.start ≤ curr.end.
 ```python
 def merge(intervals):
@@ -40,29 +40,29 @@ def merge(intervals):
 ```
 **Tip:** LeetCode mediums. Some Firefly roles ask for *image-processing* questions.
 
-### Q2.2: ML — "Design a text-to-image model fine-tuned for brand consistency"
+### Q2.2: ML: "Design a text-to-image model fine-tuned for brand consistency"
 **Answer:** (1) Base — Stable Diffusion 3 / SDXL or Firefly base; (2) LoRA fine-tuning on customer brand assets; (3) IP-Adapter for style consistency; (4) ControlNet for layout; (5) Safety classifier (NSFW, brand violations); (6) Eval — CLIP score, brand-similarity metric, human eval; (7) Serving with IP-reminder for indemnification.
 **Tip:** Adobe is *the* commercially-safe AI. Reference content credentials (C2PA) and indemnification.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Implement k-means from scratch.
-- **Q:** LRU cache with O(1) get/put.
-- (Optional 3rd): Tree/graph problem.
+- Q: Implement k-means from scratch.
+- Q: LRU cache with O(1) get/put.
+- Optional 3rd: Tree/graph problem.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Firefly Services — a generative AI API for enterprises"** — Multi-tenant serving, custom model fine-tuning per customer, content credentials, safety filters, indemnification flow, billing.
-- **Q: "Design a document understanding pipeline (Acrobat AI)"** — OCR, layout analysis, table extraction, RAG over PDF, multi-language, citation.
+- Q: Design Firefly Services, a generative AI API for enterprises. Multi-tenant serving, custom model fine-tuning per customer, content credentials, safety filters, indemnification flow, and billing.
+- Q: Design a document understanding pipeline (Acrobat AI). OCR, layout analysis, table extraction, RAG over PDF, multi-language, and citation.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you fine-tune a diffusion model for a specific brand style with limited examples?"** — DreamBooth / LoRA, regularization set, prior preservation, eval on brand guidelines.
-- **Q: "How would you build a text-to-vector (SVG) model for designers?"** — Sequence-to-sequence transformer, code-as-action tokenization, eval on design-tool use cases (Illustrator).
+- Q: How would you fine-tune a diffusion model for a specific brand style with limited examples? DreamBooth / LoRA, regularization set, prior preservation, and eval on brand guidelines.
+- Q: How would you build a text-to-vector (SVG) model for designers? Sequence-to-sequence transformer, code-as-action tokenization, and eval on design-tool use cases (Illustrator).
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you obsessed over a 1% quality improvement." Adobe values *craft*.
-- **Q:** "A time you partnered with a designer or creative."
-- **Q:** "Disagreement with a PM on a launch."
+- Q: Tell me about a time you obsessed over a 1% quality improvement. Adobe values craft.
+- Q: A time you partnered with a designer or creative.
+- Q: Disagreement with a PM on a launch.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + researchers + PM reviews. They look for: (1) ML bar for the level, (2) creative-AI depth, (3) Adobe values (Creativity for All, Be Genuine, Be Bold, Take Action), (4) commercial-safety mindset. Vote is "Strong Hire / Hire / No Hire / Strong No Hire."
@@ -80,7 +80,7 @@ Cash + RSUs. Adobe is competitive with FAANG, sometimes above for senior+ due to
 - For Document AI roles, expect OCR + layout + RAG depth.
 
 ## Real candidate report
-> "Loop for Firefly Services. 4 rounds in 1 day. The ML deep-dive was on LoRA fine-tuning for brand consistency with limited examples — they wanted DreamBooth specifics. The system design was multi-tenant generative AI with content credentials. Behavioral was 'craft' flavored. Offer at IC4, ~$480K total. 4 weeks." — Blind, 2025-10
+> "Loop for Firefly Services. 4 rounds in 1 day. The ML deep-dive was on LoRA fine-tuning for brand consistency with limited examples and they wanted DreamBooth specifics. The system design was multi-tenant generative AI with content credentials. Behavioral was 'craft' flavored. Offer at IC4, ~$480K total, 4 weeks." — Blind, 2025-10
 
 ## Sources
 - [Adobe Careers](https://www.adobe.com/careers.html)

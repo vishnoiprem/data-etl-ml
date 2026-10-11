@@ -26,7 +26,7 @@
 
 ## Stage 2: Technical phone screen
 
-### Q2.1: Coding — "Implement cosine similarity for batched vectors"
+### Q2.1: Coding: "Implement cosine similarity for batched vectors"
 **Answer:**
 ```python
 import numpy as np
@@ -38,7 +38,7 @@ def cosine_sim_batch(q, vectors):
 ```
 **Tip:** Pinecone uses SIMD-optimized cosine similarity. Mention AVX-512, distance computation in registers, and avoiding memory bandwidth bottlenecks.
 
-### Q2.2: Vector DB — "How does HNSW indexing work?"
+### Q2.2: Vector DB: "How does HNSW indexing work?"
 **Answer:** Hierarchical Navigable Small World graph. Multi-layer proximity graph where each node has neighbors at multiple distance scales. Search starts at top layer (long jumps) and descends (short jumps). Logarithmic complexity.
 **Tip:** Discuss: ef_construction, M, ef_search, recall vs latency tradeoff, recall@10 measurement.
 

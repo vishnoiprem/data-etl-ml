@@ -27,33 +27,33 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Implement K-means clustering"
+### Q2.1: Coding: "Implement K-means clustering"
 **Answer:** Lloyd's algorithm with random init + multiple restarts.
 **Tip:** ML-flavored coding questions are common.
 
-### Q2.2: ML — "Design Pinterest's visual search model"
+### Q2.2: ML: "Design Pinterest's visual search model"
 **Answer:** (1) Visual encoder — ResNet/ViT pretrained + fine-tuned on Pin Board labels; (2) Embedding space optimized for cosine similarity + click-through co-engagement; (3) Two-tower: visual query tower + pin tower; (4) ANN retrieval with FAISS/ScaNN over billions of pins; (5) Re-rank with multi-task model (CTR, save, long-click); (6) Continuous embedding refresh via Flink streaming.
 **Tip:** Pinterest publishes — reference *PinSage*, *PinnerFormer*, *Pixie*.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Word search II (Boggle) → Trie + DFS with pruning.
-- **Q:** LRU cache + variants.
-- (Optional 3rd): Graph — Pin-Board-Pinner traversal.
+- Q: Word search II (Boggle). Trie + DFS with pruning.
+- Q: LRU cache and its variants.
+- Optional 3rd: Graph problem. Pin-Board-Pinner traversal.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Pinterest's home feed ranking"** — Two-tower retrieval from Pinner action history → light ranker → heavy ranker with multi-task heads → diversity re-rank → serving at <100ms.
-- **Q: "Design Pinterest's embedding serving at 100M+ QPS"** — Sharded ANN indices, embedding cache, versioned embeddings, continuous updates.
+- Q: Design Pinterest's home feed ranking. Two-tower retrieval from Pinner action history, then a light ranker, then a heavy ranker with multi-task heads, then diversity re-rank, all serving under 100ms.
+- Q: Design Pinterest's embedding serving at 100M+ QPS. Sharded ANN indices, embedding cache, versioned embeddings, and continuous updates.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you handle cold-start for new pins?"** — Visual features (CLIP), board context, creator prior, popularity priors with exploration.
-- **Q: "How would you improve Ads relevance on Pinterest?"** — Multi-task (CTR, saves, conversion), position bias, diversity, advertiser quality score.
+- Q: How would you handle cold-start for new pins? Visual features (CLIP), board context, creator prior, and popularity priors with exploration.
+- Q: How would you improve Ads relevance on Pinterest? Multi-task (CTR, saves, conversion), position bias, diversity, and an advertiser quality score.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you built a model with diverse content creators in mind." Pinterest is creator-positive.
-- **Q:** "A time you shipped something imperfect to measure impact."
-- **Q:** "Disagreement with a peer."
+- Q: Tell me about a time you built a model with diverse content creators in mind. Pinterest is creator-positive.
+- Q: A time you shipped something imperfect to measure impact.
+- Q: Disagreement with a peer.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + scientists reviews. They look for: (1) ML bar for the level, (2) Pinterest values (Put Pinners First, Act with Kindness, Be a Force for Good, Build Together), (3) creator-positive mindset, (4) impact at scale. Vote is "Strong Hire / Hire / No Hire / Strong No Hire."
@@ -71,7 +71,7 @@ Cash + RSUs. Pinterest is competitive but typically below FAANG top-of-band. Neg
 - For visual search, expect ViT/CLIP-level depth.
 
 ## Real candidate report
-> "Loop for Home Feed ML. 4 rounds in 1 day. The ML deep-dive was on two-tower retrieval with PinSage-style graph features — they wanted me to discuss random walk sampling and embedding staleness. The system design was embedding serving at 100M+ QPS. Behavioral was 'put pinners first' flavored. Offer at L5, ~$580K total. 4 weeks." — Blind, 2025-08
+> "Loop for Home Feed ML. 4 rounds in 1 day. The ML deep-dive was on two-tower retrieval with PinSage-style graph features and they wanted me to discuss random walk sampling and embedding staleness. The system design was embedding serving at 100M+ QPS. Behavioral was 'put pinners first' flavored. Offer at L5, ~$580K total, 4 weeks." — Blind, 2025-08
 
 ## Sources
 - [Pinterest Careers](https://www.pinterestcareers.com/)

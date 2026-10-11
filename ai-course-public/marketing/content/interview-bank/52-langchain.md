@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why LangChain?"
-**Answer:** Three-bet: (1) LangChain is the most widely-adopted LLM framework — you've shipped with it, you understand the abstraction choices, (2) LangGraph (stateful agents) is a serious product beyond just chains, (3) LangSmith (observability) is the cash cow that funds the OSS.
-**Tip:** Mention you've actually used LangChain + LangSmith in production. Negative signal: never having run `langchain` CLI.
+**Answer:** Three reasons. (1) LangChain is the most adopted LLM framework by a wide margin, and the abstraction choices (LCEL, Runnable, callbacks) are battle-tested across thousands of teams. (2) LangGraph took the company from "chain library" to "stateful agent platform," which is a much stickier product. (3) LangSmith funds the OSS, and the more OSS you fund, the more feedback loops you get.
+**Tip:** Show you've actually used LangChain + LangSmith in production. If you've never run the `langchain` CLI, that's a soft negative.
 
 ### Q1.2: "Tell me about an LLM app you built"
-**Answer:** Walk through a real app: problem statement, architecture (chains, agents, retrieval, tools), model choices, eval approach, deployment. Be specific. LangChain wants practitioners, not theorists.
+**Answer:** Walk through one real app end-to-end: problem, architecture (chains vs agents vs retrieval), model choices, eval approach, what broke in prod. LangChain wants builders, not theorists.
 
 ## Stage 2: Technical phone screen
 
@@ -45,7 +45,7 @@ def react_agent(llm_call, tools, max_iters=5):
 **Tip:** Real LangChain agents are richer (tool selection, error handling, retries, output parsing). Mention LangGraph for production.
 
 ### Q2.2: LLM — "How would you build a RAG pipeline that handles 1M documents?"
-**Answer:** Three pillars: (1) **chunking** with overlap + metadata, (2) **embeddings** (batched, async, parallel), (3) **retrieval** (vector + BM25 + reranker). Discuss: chunk size tradeoff, embedding model selection, hybrid search, eval set, latency budget.
+**Answer:** Three pillars: (1) **chunking** — recursive, with overlap and structural metadata; (2) **embeddings** — batched async, with cache hits for repeated docs; (3) **retrieval** — hybrid (BM25 + vector) + a cross-encoder reranker. The hard part is the eval loop: 200 labeled questions, nDCG@10 on retrieval, faithfulness score on answers. Latency budget drives whether you call the reranker at all.
 
 ## Stage 3: Onsite (4 rounds)
 

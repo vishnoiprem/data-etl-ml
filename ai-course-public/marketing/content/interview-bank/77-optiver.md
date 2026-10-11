@@ -18,8 +18,8 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Optiver?"
-**Answer:** "Optiver is the most disciplined options market maker in the world — the combination of quantitative research and engineering rigor is unmatched in options. I want to learn the business of volatility and delta-1 from the best."
-**Tip:** Reference Optiver's published research (e.g., their delta-1 blog series).
+**Answer:** "Optiver is the most disciplined options market maker I know of. The combo of quant research and engineering rigor in options is unmatched, and I want to learn the vol and delta-1 business from people who've been doing it for a decade."
+**Tip:** Reference Optiver's published research (their delta-1 blog series is a good start).
 
 ### Q1.2: "Why options over equities?"
 **Answer:** "Options are the cleanest expression of market opinion — implied vol, skew, term structure are all rich signal sources. I prefer markets where the math is deep and the alpha is durable."
@@ -28,8 +28,8 @@
 ## Stage 2: Technical phone screen
 
 ### Q2.1: A stock is at $100, vol 30%, r = 4%. Value a 6-month ATM straddle.
-**Answer:** Use Black-Scholes: C = P = S*N(d1) - K*e^(-rT)*N(d2). With T=0.5, σ=0.3: d1 ≈ 0.246, d2 ≈ 0.034; C ≈ 12.7, so straddle ≈ 25.4.
-**Tip:** They test Black-Scholes fluency hard.
+**Answer:** Black-Scholes: C = S·N(d1) − K·e^(−rT)·N(d2). With T=0.5, σ=0.3: d1 ≈ 0.2003, d2 ≈ −0.0118; C ≈ P ≈ 9.39, straddle ≈ 18.78.
+**Tip:** They test Black-Scholes fluency hard. Walk through d1, d2, then the call and put.
 
 ### Q2.2: Implement a function to compute the implied vol from a market price (Newton-Raphson).
 **Answer:**

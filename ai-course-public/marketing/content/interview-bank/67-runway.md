@@ -18,18 +18,21 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Runway for video?"
-**Answer:** "Runway is the only company that owns the full video stack — research (Gen-4), product (RunwayML Studio), and creative tools for Hollywood. I want to work on the temporal-consistency problem that's still open."
+**Answer:** "Runway is the only company that owns the full video stack — research (Gen-4), product (RunwayML Studio), and creative tools for Hollywood. I want to work on the temporal-consistency problem that's still open, and Runway's the team most likely to crack it."
 **Tip:** Reference Gen-4, Gen-3 Alpha Turbo, and the Lionsgate partnership.
 
 ### Q1.2: "Tell me about a video model you admire."
-**Answer:** "Gen-4's character consistency across shots — the way it solves the multi-shot coherence problem is novel. Sora was a great single-shot demo; Gen-4 actually ships for production."
-**Tip:** Have taste; show you've used the product.
+**Answer:** "Gen-4's character consistency across shots. The way it solves multi-shot coherence is novel, and the Lionsgate partnership is a real signal that it ships for production. Sora was a great single-shot demo, but Gen-4 is what editors actually use."
+**Tip:** Have taste. Show you've used the product.
 
 ## Stage 2: Technical phone screen
 
 ### Q2.1: Implement multi-head self-attention.
 **Answer:**
 ```python
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 class MHA(nn.Module):
     def __init__(self, d, h):
         super().__init__(); self.h = h; self.qkv = nn.Linear(d, 3*d)

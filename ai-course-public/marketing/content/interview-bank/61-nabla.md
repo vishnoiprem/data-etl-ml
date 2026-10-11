@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why medical AI?"
-**Answer:** "I want to build systems that reduce clinician burnout — the average doctor spends 16 minutes per patient on the EHR. Nabla's ambient scribe flips that, so I'm excited by the 2025 partnership with Epic and the multi-tenant de-identification pipeline."
-**Tip:** Show you've read at least one Nabla research blog post and name a clinician you'd interview.
+**Answer:** "I want to build systems that reduce clinician burnout. The average doctor spends 16 minutes per patient on the EHR, and Nabla's ambient scribe flips that. I'm excited by the 2025 Epic partnership and the multi-tenant de-identification pipeline — that's hard infra to build."
+**Tip:** Show you've read at least one Nabla research blog post and name a clinician you'd actually interview.
 
 ### Q1.2: "How do you handle PHI in training data?"
-**Answer:** "De-id with Philter/NER, never store raw notes beyond 30 days, use BAA-covered cloud regions, and run on-device ASR for the audio path."
-**Tip:** HIPAA is non-negotiable — even a vague answer fails the screen.
+**Answer:** "De-id with Philter or a custom NER, never store raw notes beyond 30 days, use BAA-covered cloud regions, and run on-device ASR for the audio path so audio never leaves the device. Logs are scrubbed before they hit the analytics pipeline."
+**Tip:** HIPAA is non-negotiable. A vague answer fails the screen.
 
 ## Stage 2: Technical phone screen
 

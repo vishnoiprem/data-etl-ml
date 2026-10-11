@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Stability now?"
-**Answer:** "After the 2024 restructure, Stability is doubling down on the open-weights mission — Stable Diffusion 3.5, Stable Audio 2, Stable Video — that's the bet I want in. I want to build open foundation models that actually win."
+**Answer:** "After the 2024 restructure, Stability is doubling down on open-weights. Stable Diffusion 3.5, Stable Audio 2, Stable Video — that's the bet I want in. I want to build open foundation models that actually win on benchmarks, not just brand."
 **Tip:** Show awareness of the new CEO and the 2025 product roadmap.
 
 ### Q1.2: "Open weights vs closed — what's your view?"
-**Answer:** "Open weights win long-term for safety research, customization, and regulatory compliance. The 2024 model of closed labs hoarding capability isn't durable when regulators and enterprises demand transparency."
-**Tip:** Have a real opinion, not a hedge.
+**Answer:** "Open weights win long-term for safety research, customization, and regulatory compliance. The 2024 model of closed labs hoarding capability isn't durable once regulators and enterprises demand transparency."
+**Tip:** Have a real opinion. Stability screens for hedge-y answers here.
 
 ## Stage 2: Technical phone screen
 
@@ -34,6 +34,7 @@
 ### Q2.2: Implement top-p (nucleus) sampling.
 **Answer:**
 ```python
+import torch
 def top_p(logits, p):
     probs = torch.softmax(logits, -1)
     sorted_p, sorted_idx = probs.sort(-1, descending=True)
@@ -52,6 +53,8 @@ def top_p(logits, p):
 **Q:** Implement RMSNorm in PyTorch.
 **Answer:**
 ```python
+import torch
+import torch.nn as nn
 class RMSNorm(nn.Module):
     def __init__(self, d, eps=1e-6):
         super().__init__(); self.w = nn.Parameter(torch.ones(d)); self.eps = eps

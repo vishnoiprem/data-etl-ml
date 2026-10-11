@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Qdrant?"
-**Answer:** Three-bet: (1) Qdrant is the only vector DB written entirely in Rust — performance is unmatched, (2) the open-source + on-prem + cloud model is flexible (Qdrant Cloud just hit GA, but you can self-host), (3) the team (Andrey Vasnetsov, the founder) is deeply technical and the engineering culture is rigorous.
-**Tip:** Qdrant pivoted from AGPL to Apache 2.0 in 2024 — mention OSS love if you have it.
+**Answer:** Three-bet: (1) Qdrant is the only vector DB written in Rust top to bottom, so you get C-like search latency with memory safety, (2) the OSS + on-prem + Cloud model gives you deployment flexibility, (3) Andrey Vasnetsov and the founding team are still coding here, which is rare at this stage.
+**Tip:** Qdrant switched from AGPL to Apache 2.0 in 2024, so mentioning that switch and what it unlocked for adoption lands well.
 
 ### Q1.2: "Tell me about your experience with vector search"
-**Answer:** Walk through a concrete project using Qdrant or a similar tool. Mention scale (number of vectors), dimensionality, and the recall/latency tradeoff you targeted.
+**Answer:** Walk through one concrete project. Name the dataset size, the embedding dimension, the recall target you picked, and the latency you ended up shipping. Numbers beat adjectives.
 
 ## Stage 2: Technical phone screen
 
@@ -47,7 +47,7 @@ fn insert(graph: &mut HnswGraph, vec: Vec<f32>, m: usize) {
 **Tip:** Qdrant's HNSW is SIMD-optimized. Discuss: AVX-512, distance kernels in registers, Cargo's release profile.
 
 ### Q2.2: Vector internals — "How does Qdrant handle filtered search?"
-**Answer:** Two-stage approach: (1) build HNSW with payload filtering tags (vector + filter ID), (2) at query time, traverse HNSW but skip neighbors that don't match the filter. This is faster than post-filtering at scale.
+**Answer:** Qdrant stuffs the payload filter into the HNSW graph traversal itself, so the search skips neighbors that don't match instead of post-filtering the result set. At 100M+ vectors with selective filters, that's a 10x latency win over naive post-filtering. The trick is that HNSW has to be re-ranked with a composite score (vector distance + filter match).
 
 ## Stage 3: Onsite (4 rounds)
 

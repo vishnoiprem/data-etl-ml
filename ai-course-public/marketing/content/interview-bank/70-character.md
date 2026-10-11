@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Character.AI?"
-**Answer:** "Character pioneered the consumer conversational AI category — 200M+ users in 2025, and the roleplay use case is uniquely demanding for long-context coherence. I want to work on the inference stack that makes 100K-token conversations feel real-time."
+**Answer:** "Character pioneered the consumer conversational AI category. 200M+ users in 2025, and the roleplay use case is uniquely demanding for long-context coherence. I want to work on the inference stack that makes 100K-token conversations feel real-time, which is a research problem Character takes seriously."
 **Tip:** Show you've used the product and know the c.ai Group (post-Google deal) dynamics.
 
 ### Q1.2: "What's the hardest problem in conversational AI?"
-**Answer:** "Long-context coherence + persona consistency + safety at scale. Most models drift after 50K tokens; Character's research bet is making 200K-token roleplay indistinguishable from real chat."
-**Tip:** Have a specific opinion.
+**Answer:** "Long-context coherence plus persona consistency plus safety at scale. Most models drift after 50K tokens; Character's bet is making 200K-token roleplay indistinguishable from real chat, which is a memory + retrieval + alignment problem at once."
+**Tip:** Have a specific opinion. Don't hedge.
 
 ## Stage 2: Technical phone screen
 

@@ -18,12 +18,12 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Copy.ai now?"
-**Answer:** "You've moved from copy generation to full go-to-market workflows — that's the right bet. I want to build agents that orchestrate SDR, marketing ops, and RevOps in one graph."
-**Tip:** Show you understand the pivot from "AI copy tool" to "GTM OS".
+**Answer:** "You've moved from copy generation to full go-to-market workflows. That's the right bet — most GTM tools are point solutions, and the orchestration layer is wide open. I want to build agents that connect SDR, marketing ops, and RevOps in one graph."
+**Tip:** Show you understand the pivot from "AI copy tool" to "GTM OS."
 
 ### Q1.2: "Remote experience?"
-**Answer:** "5+ years async; I've led distributed teams; I document everything in Notion; my overlap with SF is 4 hours."
-**Tip:** They are remote-first; don't undersell async fluency.
+**Answer:** "5+ years fully remote, led distributed teams, document everything in Notion, and my SF overlap is 4 hours. I treat writing as a forcing function for clarity."
+**Tip:** They're remote-first. Don't undersell async fluency.
 
 ## Stage 2: Technical phone screen
 

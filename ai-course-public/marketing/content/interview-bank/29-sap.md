@@ -27,7 +27,7 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
-### Q2.1: Coding — "Longest substring without repeating characters"
+### Q2.1: Coding: "Longest substring without repeating characters"
 **Answer:** Sliding window with a set, O(N).
 ```python
 def lengthOfLongestSubstring(s):
@@ -41,29 +41,29 @@ def lengthOfLongestSubstring(s):
 ```
 **Tip:** LeetCode mediums. Some roles use Java.
 
-### Q2.2: ML — "Design a cash-flow forecasting model for an ERP system"
+### Q2.2: ML: "Design a cash-flow forecasting model for an ERP system"
 **Answer:** (1) Features — historical cash flow, AR/AP aging, seasonality, customer payment history, supplier terms, FX rates; (2) Multi-horizon forecast (7/30/90 days); (3) Model — Temporal Fusion Transformer or DeepAR for multivariate time series; (4) Confidence intervals via quantile regression; (5) Integration with S/4HANA tables; (6) Drift monitoring; (7) Explainability for finance teams.
 **Tip:** SAP has a "Business AI" focus — show *business* value, not just model accuracy.
 
 ## Stage 3: Onsite (4 rounds)
 
 ### Round 3.1: Coding (60 min, 2 questions)
-- **Q:** Product of array except self → O(N) with prefix/suffix.
-- **Q:** Validate BST → in-order traversal, O(N).
-- (Optional 3rd): SQL — joins, window functions, complex aggregations.
+- Q: Product of array except self. O(N) with prefix/suffix.
+- Q: Validate BST. In-order traversal, O(N).
+- Optional 3rd: SQL on joins, window functions, and complex aggregations.
 
 ### Round 3.2: System design (60 min)
-- **Q: "Design Joule — an AI copilot for SAP BTP"** — Multi-tenant LLM serving, RAG over customer ERP data, action tool registry (Create PO, Approve Invoice), guardrails, multi-language (40+ languages), audit.
-- **Q: "Design a feature store on SAP HANA"** — Native HANA feature engineering, point-in-time joins, batch + streaming, integration with S/4HANA.
+- Q: Design Joule, an AI copilot for SAP BTP. Multi-tenant LLM serving, RAG over customer ERP data, action tool registry (Create PO, Approve Invoice), guardrails, multi-language (40+ languages), and audit.
+- Q: Design a feature store on SAP HANA. Native HANA feature engineering, point-in-time joins, batch + streaming, and integration with S/4HANA.
 
 ### Round 3.3: ML deep-dive (60 min)
-- **Q: "How would you build a RAG system that respects ERP authorization?"** — Per-user ACL filter at retrieval, customer-specific data isolation, citation with row-level provenance.
-- **Q: "How would you fine-tune a model for SAP's procurement use case?"** — SFT on historical PO data, RLHF with finance expert rewards, multi-language (German, Japanese, English), bias check, audit.
+- Q: How would you build a RAG system that respects ERP authorization? Per-user ACL filter at retrieval, customer-specific data isolation, and citation with row-level provenance.
+- Q: How would you fine-tune a model for SAP's procurement use case? SFT on historical PO data, RLHF with finance expert rewards, multi-language (German, Japanese, English), bias check, and audit.
 
 ### Round 3.4: Behavioral (60 min)
-- **Q:** "Tell me about a time you worked across cultures." SAP is global — Germany, India, US teams are common.
-- **Q:** "A time you had to ship within SAP's release cycle." (Quarterly releases)
-- **Q:** "Disagreement with a stakeholder on a model design."
+- Q: Tell me about a time you worked across cultures. SAP is global. Germany, India, and US teams are common.
+- Q: A time you had to ship within SAP's release cycle (quarterly releases).
+- Q: Disagreement with a stakeholder on a model design.
 
 ## Stage 4: Hiring committee
 A panel of senior engineers + product reviews. They look for: (1) ML bar for the level, (2) enterprise + business-process depth, (3) SAP values (Help, Build, Believe), (4) cross-cultural collaboration. Vote is "Strong Hire / Hire / No Hire / Strong No Hire." Hiring manager has tie-breaker.
@@ -81,7 +81,7 @@ Cash + RSUs + bonus. SAP is competitive in Europe (Walldorf, Munich) but lower f
 - Localization is a real concern — show you've thought about non-English markets.
 
 ## Real candidate report
-> "Loop for Joule (BTP AI). 4 rounds in 1 day, virtual. Coding was 2 mediums. System design was a multi-tenant LLM agent for SAP with RAG over ERP tables — they wanted ACL filtering at the SQL level. ML deep-dive was on fine-tuning for German-language procurement. Behavioral was 'Build' flavored. Offer at IC4, ~$340K total. 6 weeks." — r/sap, 2025-08
+> "Loop for Joule (BTP AI). 4 rounds in 1 day, virtual. Coding was 2 mediums. System design was a multi-tenant LLM agent for SAP with RAG over ERP tables and they wanted ACL filtering at the SQL level. ML deep-dive was on fine-tuning for German-language procurement. Behavioral was 'Build' flavored. Offer at IC4, ~$340K total, 6 weeks." — r/sap, 2025-08
 
 ## Sources
 - [SAP Careers](https://jobs.sap.com/)

@@ -18,11 +18,11 @@
 ## Stage 1: Recruiter screen
 
 ### Q1.1: "Why Abridge?"
-**Answer:** Three-bet: (1) Abridge is the leader in medical conversation AI — they have the largest deployments in US healthcare systems (UPMC, Emory, etc.), (2) the technical moat is real (Whisper fine-tuned for medical dictation, custom clinical LLM, structured note generation), (3) the founder (Shiv Rao) is a practicing cardiologist who understands the clinical workflow deeply.
-**Tip:** Mention you've used Abridge (or read about it) in a clinical context. Abridge cares about clinical workflow understanding.
+**Answer:** Three reasons. (1) Abridge has the largest deployments in US healthcare systems (UPMC, Emory, Kaiser) — distribution you can't easily replicate. (2) The technical moat is real: fine-tuned Whisper for medical dictation, custom clinical LLM, structured SOAP notes. (3) Shiv Rao is a practicing cardiologist, so the team understands the clinical workflow, not just the model.
+**Tip:** Mention you've used Abridge (or read about it) in a clinical context. Don't fake clinical experience.
 
 ### Q1.2: "Tell me about an AI project you built for a non-technical user"
-**Answer:** Walk through a project where you partnered with a non-engineering user (doctor, lawyer, etc.) and shipped something they actually use. Mention iteration with real users.
+**Answer:** Walk through one project where you partnered with a non-engineering user (doctor, lawyer, marketer) and shipped something they actually use. Mention how you iterated with real users — first versions are usually wrong.
 
 ## Stage 2: Technical phone screen
 
