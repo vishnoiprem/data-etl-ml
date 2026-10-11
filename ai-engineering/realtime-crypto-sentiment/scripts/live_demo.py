@@ -320,13 +320,19 @@ class Demo:
         if self.fills:
             print(f"  📋  Last fills:")
             for f in self.fills[-3:]:
-                print(f"        {f['ts'].strftime('%H:%M:%S')}  {f['side']}  "
+                ts = f['ts']
+                if isinstance(ts, str):
+                    ts = ts[:19]  # trim 'YYYY-MM-DD HH:MM:SS' from a longer ISO string
+                print(f"        {ts}  {f['side']}  "
                       f"{f['qty']:.6f} {f['symbol']} @ {f['price']:,.2f}u  "
                       f"cash={f['cash']:,.2f}u")
         if self.signals_emitted:
             print(f"  🎯  Last signals:")
             for s in self.signals_emitted[-3:]:
-                print(f"        {s['ts'].strftime('%H:%M:%S')}  {s['action']:5s}  "
+                ts = s['ts']
+                if isinstance(ts, str):
+                    ts = ts[:19]
+                print(f"        {ts}  {s['action']:5s}  "
                       f"{s['symbol']:5s}  score={s['score']:+.2f}  {s['reason']}")
 
 
