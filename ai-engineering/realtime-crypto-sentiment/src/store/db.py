@@ -465,17 +465,29 @@ def upsert_position(p: dict) -> None:
 
 
 def all_open_positions() -> list[dict]:
+    """Return the latest position snapshot per symbol, filtered to
+    `qty > 0` (i.e. currently-open positions only).
+
+    Bug history: the previous version did `WHERE qty > 0 AND ts = MAX(ts)
+    GROUP BY symbol`, which returned the latest snapshot with `qty > 0`
+    rather than the latest snapshot. A position that was opened then
+    closed (qty: 10 → 0) would still show as open because the latest
+    `qty > 0` row is the opening fill.
+    """
     engine = get_engine()
     with engine.connect() as conn:
         rows = conn.execute(
             text(
-                "SELECT DISTINCT ON (symbol) ts, symbol, qty, avg_price, realized_pnl "
-                "FROM positions WHERE qty > 0 ORDER BY symbol, ts DESC"
+                "SELECT ts, symbol, qty, avg_price, realized_pnl FROM ("
+                "  SELECT ts, symbol, qty, avg_price, realized_pnl, "
+                "         ROW_NUMBER() OVER (PARTITION BY symbol ORDER BY ts DESC) AS rn "
+                "  FROM positions"
+                ") latest WHERE rn = 1 AND qty > 0 ORDER BY symbol"
                 if engine.dialect.name == "postgresql"
                 else
-                "SELECT ts, symbol, qty, avg_price, realized_pnl FROM positions "
-                "WHERE qty > 0 AND ts IN (SELECT MAX(ts) FROM positions GROUP BY symbol) "
-                "ORDER BY symbol"
+                "SELECT ts, symbol, qty, avg_price, realized_pnl FROM positions p1 "
+                "WHERE ts = (SELECT MAX(ts) FROM positions p2 WHERE p2.symbol = p1.symbol) "
+                "AND qty > 0 ORDER BY symbol"
             )
         ).fetchall()
     return [dict(r._mapping) for r in rows]

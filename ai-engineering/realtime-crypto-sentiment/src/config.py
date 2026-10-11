@@ -14,16 +14,29 @@ from functools import lru_cache
 from pathlib import Path
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, EnvSettingsSource, SettingsConfigDict
 
-REPO = Path(__file__).resolve().parents[2]
+# Project root: src/config.py → parents[1] = project dir
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _decode_complex_value_csv(self, field_name, field, value):
+    """Override: skip JSON-decode for CSV list fields. The field_validator
+    on `mirrors` / `tracked_tags` / `trending_queries` parses the CSV
+    itself in `mode='before'`."""
+    return value
+
+
+# Patch pydantic-settings globally so the env source never tries to
+# json.loads() our "a,b,c" CSV strings.
+EnvSettingsSource.decode_complex_value = _decode_complex_value_csv
 
 
 class Settings(BaseSettings):
     """Project-wide settings, loaded from .env at import time."""
 
     model_config = SettingsConfigDict(
-        env_file=REPO / ".env",
+        env_file=PROJECT_ROOT / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
@@ -35,6 +48,8 @@ class Settings(BaseSettings):
     )
 
     # ── Sources (Nitter / Syndication) ─────────────────────────────────────
+    # CSV env vars like `MIRRORS=a,b,c` are parsed by `_split_csv` below;
+    # `CsvEnvSource` stops pydantic-settings from trying json.loads.
     mirrors: list[str] = Field(
         default_factory=lambda: [
             "nitter.net",

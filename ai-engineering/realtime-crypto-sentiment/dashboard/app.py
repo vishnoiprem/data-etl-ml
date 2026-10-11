@@ -219,13 +219,15 @@ def _trending_tags(minutes: int = 5, limit: int = 10) -> pd.DataFrame:
         # Always return a DataFrame with the expected columns so callers
         # can use `df.empty`, `df["kind"]`, etc. without type-checking.
         return pd.DataFrame(columns=[
-            "tag", "kind", "total_count", "avg_sent",
+            "tag", "kind", "total_count", "avg_sentiment",
             "sample_text", "sample_url",
         ])
     df = pd.DataFrame(rows)
-    # The DB schema column is `tag_kind`; the dashboard contract is `kind`.
+    # Normalize DB-schema names → dashboard-contract names.
     if "tag_kind" in df.columns and "kind" not in df.columns:
         df = df.rename(columns={"tag_kind": "kind"})
+    if "avg_sent" in df.columns and "avg_sentiment" not in df.columns:
+        df = df.rename(columns={"avg_sent": "avg_sentiment"})
     return df
 
 
@@ -266,10 +268,15 @@ def page_overview() -> None:
     cols[3].metric("Realized PnL (units)", f"{k['realized_pnl']:+,.2f}")
 
     st.markdown("### Open positions")
-    positions = _query(
-        "SELECT symbol, qty, avg_price, realized_pnl FROM positions "
-        "WHERE qty > 0 ORDER BY symbol"
-    )
+    # Use the helper that picks the LATEST snapshot per symbol, then
+    # filters to qty > 0. A position that was opened (qty=10) and
+    # subsequently closed (qty=0) should NOT show as open, even though
+    # the opening row has qty > 0.
+    open_pos = db.all_open_positions()
+    if not open_pos:
+        positions = pd.DataFrame(columns=["symbol", "qty", "avg_price", "realized_pnl"])
+    else:
+        positions = pd.DataFrame(open_pos)[["symbol", "qty", "avg_price", "realized_pnl"]]
     if positions.empty:
         st.info("No open positions yet. Run `make pipeline` in another terminal to start trading.")
     else:
