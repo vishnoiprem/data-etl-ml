@@ -651,8 +651,16 @@ SCRAPERS = [
 # ============================================================
 # DEDUP + INSERT
 # ============================================================
-def short_id(company, role):
-    h = hashlib.md5(f"{company}|{role}".encode()).hexdigest()[:6]
+def short_id(company, role, email=""):
+    """Build a short public tracking id for the email link.
+
+    The id includes the email so two different leads at the same company
+    (e.g. (Anyscale, Senior AI Engineer, careers@) vs (Anyscale, Senior
+    AI Engineer, talent@) — the latter created by _better_email swap)
+    get distinct ids. Without email, both hashes would collide on
+    leads_tracking_id_key and the 2nd insert would error.
+    """
+    h = hashlib.md5(f"{company}|{role}|{email}".encode()).hexdigest()[:6]
     slug = re.sub(r"[^a-z0-9]+", "-", company.lower())[:12].strip("-") or "lead"
     return f"{slug}-{h}"
 
@@ -707,7 +715,7 @@ def insert_leads(leads, dry=False):
             seen.add(key)
             continue
         try:
-            tid = short_id(co, role)
+            tid = short_id(co, role, em)
             with get_cursor() as cur:
                 cur.execute("""
                     INSERT INTO leads

@@ -158,6 +158,26 @@ def test_on_conflict_does_not_duplicate():
     print("  ✓ ON CONFLICT correctly skips dupes")
 
 
+def test_short_id_distinct_for_different_emails():
+    """The same (co, role) with two different emails (e.g. careers@ vs
+    talent@ — the latter from _better_email swap) must produce two
+    distinct tracking_ids. Otherwise leads_tracking_id_key unique index
+    would reject the 2nd insert with an error."""
+    from find_more_leads import short_id
+    a = short_id("Anyscale", "Senior AI Engineer", "careers@anyscale.com")
+    b = short_id("Anyscale", "Senior AI Engineer", "talent@anyscale.com")
+    assert a != b, f"tracking_id collision: both produce {a!r}"
+    # And the slug is the same (still tied to company)
+    assert a.split("-")[0] == b.split("-")[0] == "anyscale"
+    # And same email = same id (deterministic)
+    c = short_id("Anyscale", "Senior AI Engineer", "careers@anyscale.com")
+    assert a == c
+    # And same co+role with no email = backward-compatible
+    d = short_id("Anyscale", "Senior AI Engineer", "")
+    assert d != a, f"empty email should still differ from careers@ (got {d!r} == {a!r})"
+    print(f"  ✓ careers@→{a}  talent@→{b}  (distinct)")
+
+
 if __name__ == "__main__":
     print("🧪 test_dedup_key")
     test_dedup_keys_distinct_for_different_roles()
@@ -166,4 +186,5 @@ if __name__ == "__main__":
     test_legitimate_email_not_filtered()
     test_db_unique_index_is_role_aware()
     test_on_conflict_does_not_duplicate()
+    test_short_id_distinct_for_different_emails()
     print("  ✅ all passed")
