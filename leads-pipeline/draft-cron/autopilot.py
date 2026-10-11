@@ -1207,13 +1207,31 @@ def queue_leads(leads, dry=False):
     """
     from db.lead_store import insert_lead, find_duplicate
     inserted, skipped, errored = 0, 0, 0
+    # Patterns that scream "this is a test row, not a real lead" — skip them
+    JUNK_EMAIL_RE = re.compile(
+        r"@(?:example\.com|example\.org|test\.com|localhost|invalid)$",
+        re.I,
+    )
+    JUNK_COMPANY_RE = re.compile(
+        r"^(?:TestCo|OldCo|DemoCo|SampleCo|FakeCo)[-_]?[a-f0-9]+$",
+        re.I,
+    )
     for ld in leads:
         try:
+            email = (ld.get("contact_email") or "").strip()
+            company = (ld.get("company") or "").strip()
+            # Skip test/junk rows before they waste a send slot
+            if email and JUNK_EMAIL_RE.search(email):
+                skipped += 1
+                continue
+            if company and JUNK_COMPANY_RE.match(company):
+                skipped += 1
+                continue
             # If no email and not enrichable, mark for manual follow-up
-            if not ld.get("contact_email"):
+            if not email:
                 # Try enrich
                 ld = enrich_url_only_lead(ld)
-            email = ld.get("contact_email")
+                email = (ld.get("contact_email") or "").strip()
             if not email:
                 # Skip but record as URL-only lead (apply_method=url)
                 role = ld["role"]
