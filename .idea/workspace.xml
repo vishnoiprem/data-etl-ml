@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/medium/meta/tryexponent/practice.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/medium/meta/tryexponent/onsite-solutions.md" beforeDir="false" afterPath="$PROJECT_DIR$/medium/meta/tryexponent/onsite-solutions.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/medium/meta/tryexponent/python-practice.md" beforeDir="false" afterPath="$PROJECT_DIR$/medium/meta/tryexponent/python-practice.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
