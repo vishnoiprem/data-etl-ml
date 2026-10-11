@@ -2,8 +2,26 @@
 
 - **Role:** ML Engineer (Observability / AIOps)
 - **Tech stack:** Python, Go, Java, PyTorch, TensorFlow, Kafka, Flink, Kubernetes
-- **Comp band:** $200K-$600K (L3-L6)
+- **Comp band:** $200K-$600K total comp (L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a metrics dashboard — gauge, sparkline, anomaly marker — with a Watchdog AI badge). Color: Datadog purple (#632CA6). Headline: "Datadog / AI ML Engineer / 2026".
+
+> **TL;DR:** Datadog's loop is observability-flavored — every design round is a metrics ingestion pipeline, a tracing system, or an alerting stack, and the ML round is forecasting + anomaly detection, not generative AI. The winning candidate speaks throughput and cardinality fluently, names Bits AI and Watchdog, and treats scale as a meta-rubric.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                  DATADOG METRICS PIPELINE                        │
+├──────────────────────────────────────────────────────────────────┤
+│   Agents ──► Kafka intake ──► Stream agg (Flink) ──► TSDB        │
+│  (10K hosts)  (topic-per-family) (1-sec rollups)  (Druid/custom) │
+│                                                                  │
+│   TSDB ──► Presto query ──► Dashboards / Alerts / Watchdog       │
+│                              + Bits AI (LLM co-pilot)           │
+│                                                                  │
+│   Loop closed: anomaly + RCA ──► PagerDuty / On-call ──► MTTR    │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds (5 stages)
 
@@ -24,6 +42,8 @@
 ### Q1.2: "Why Datadog?"
 **Answer:** Specific bet + test + disagreement. "I want to work on the Watchdog team because the AI for ops thesis is the most important bet in 2026. The bet: as systems get more complex, the on-call needs an AI co-pilot, not more dashboards. The 1 thing I'd test: whether LLM-based RCA can match human accuracy on the top 100 incident types. The 1 thing I disagree with: I think Datadog is too conservative on the LLM side — Bits AI should be allowed to take actions (restart a service), not just suggest."
 **Tip:** Reference Bits AI + Watchdog + the AI for ops roadmap.
+
+Datadog's recruiter screen is fit-focused, but the phone screen is where observability shows up. Expect a streaming-anomaly coding problem and a metrics-ingestion design question that tests whether you actually know what a time-series DB does at 10B-points-per-second scale.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -108,6 +128,8 @@ class TimeSeriesDB:
 **Answer:** Use STAR. Situation (the product, the original scale), Task (your role), Action (the specific bottleneck, the redesign, the rollout), Result (the new throughput, the latency, the cost). Example: "I redesigned the metrics ingestion pipeline from batch to streaming, increasing throughput from 100K metrics/sec to 1M metrics/sec while reducing p99 latency from 5 sec to 200ms."
 **Tip:** Datadog values scale + observability. Mention specific numbers, the failure modes you handled, and the monitoring you added.
 
+The onsite is 4 rounds in 1 day, and every design question is observability-flavored: metrics ingestion, log aggregation, distributed tracing, or alerting. The ML round is forecasting + anomaly detection — Prophet, LSTM, Isolation Forest, multi-signal voting — not generative AI. The behavioral round probes ownership at 10× scale; bring a STAR with throughput and latency numbers.
+
 ## Stage 4: Hiring committee
 The committee reviews the packet. The ML roles have a separate ML review. ~60% advance.
 
@@ -134,3 +156,9 @@ Cash + RSU comp. Comp band L3-L6: $200K-$600K. Comp negotiation is real at L4+.
 - [Datadog AI for Ops — Watchdog + Bits AI](https://www.datadoghq.com/product/ai/) — the AI for ops bet
 - [r/devops — Datadog interview threads](https://www.reddit.com/r/devops/)
 - [Gorilla: A Fast, Scalable, In-Memory Time Series Database (Facebook, 2015)](https://www.vldb.org/pvldb/vol8/p1816-teller.pdf) — the foundational TSDB paper
+
+---
+
+## The 1 thing to remember
+
+At Datadog, scale is the meta-rubric — the L5+ candidate is the one who quotes throughput, cardinality, and p99 in the same breath and treats Bits AI + Watchdog as the next billion-dollar bet, not a side feature.

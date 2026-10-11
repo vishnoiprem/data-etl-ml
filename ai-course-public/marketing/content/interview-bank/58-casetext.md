@@ -1,8 +1,16 @@
 # 58. Casetext (acquired by Thomson Reuters — now CoCounsel)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a CoCounsel document analysis card with a contract clause underlined and the Thomson Reuters red palette). Color: Thomson Reuters red (#E60028 on white). Headline: "Casetext (CoCounsel) / AI Legal Engineer / 2026".
+
+> **TL;DR:** Casetext is now CoCounsel inside Thomson Reuters with the 2013 legal-AI pedigree and a 2022 LLM pivot; the loop is recruiter → 60 min coding+LLM phone → 4-round onsite → Thomson Reuters process committee → offer, and the signature round is "design a legal Q&A system with citations" plus the hallucination-prevention question. The winning candidate has shipped a RAG system, can name LegalBench, and treats hallucination prevention as a first-class engineering problem (not a research paper).
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (Legal AI / Document Analysis)
 - **Tech stack:** Python, TypeScript, React, Kubernetes, OpenAI/Anthropic APIs, Postgres, Elasticsearch, vector DBs, fine-tuning
-- **Comp band:** $180K-$380K (now part of Thomson Reuters, big-tech-like benefits)
+- **Comp band:** $180K-$380K total comp (Senior AI Engineer) | RSUs/equity 4-year vest (TR RSU)
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -62,7 +70,7 @@ def classify_legal_doc(text):
 - **Q3.4.2:** "Why legal AI?"
 
 ## Stage 4: Hiring committee
-Now part of Thomson Reuters, the loop is more structured. The committee looks for: LLM/RAG depth, legal domain curiosity, and a real passion for "AI for experts" products. Red flags: never having built a RAG system, no interest in the legal domain.
+Now part of Thomson Reuters, the loop is more structured. The committee looks for: LLM/RAG depth, legal domain curiosity, and a real passion for "AI for experts" products. Red flags: never having built a RAG system, no interest in the legal domain. The TR process is slower (8-day offer in the real-candidate report) but the bar is also more uniform — the committee optimizes for shipping reliability and legal-domain humility, not research depth.
 
 ## Stage 5: Offer
 Base is at the high end ($200K-$300K+ for senior), equity is now TR RSU (4-year vest, 1-year cliff). TR benefits are excellent. Negotiation: title, sign-on.
@@ -85,3 +93,9 @@ Base is at the high end ($200K-$300K+ for senior), equity is now TR RSU (4-year 
 - [Thomson Reuters AI blog](https://www.thomsonreuters.com/en/ai.html)
 - [LegalBench benchmark](https://huggingface.co/spaces/open-llm-leaderboard/legalbench)
 - [CoCounsel Glassdoor](https://www.glassdoor.com/Interview/Thomson-Reuters-Interview-Questions-E9983.htm)
+
+---
+
+## The 1 thing to remember
+
+Build a citation-aware RAG system before the onsite — Casetext/CoCounsel's #1 concern is hallucination prevention in legal AI, and the candidate who walks grounding, citation verification, and LegalBench numbers in the same answer wins the Thomson Reuters committee, while "I just use GPT-4" gets softly filtered out.

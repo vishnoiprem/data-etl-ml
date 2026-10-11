@@ -2,8 +2,25 @@
 
 - **Role:** Senior Software Engineer (Marketplace)
 - **Tech stack:** Java, Kotlin, Ruby, TypeScript, React, MySQL, Kafka, Spark, Airflow, Kubernetes, TensorFlow
-- **Comp band:** $200K-$650K (L4-L6); IC6 staff $700K-$1.2M (Levels.fyi 2026)
+- **Comp band:** $200K-$650K total comp (L4-L6); IC6 staff $700K-$1.2M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1.5-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a marketplace search ranking layer — listings, hosts, and a two-tower embedder). Color: Airbnb Rausch (#FF5A5F). Headline: "Airbnb / AI Senior SWE / 2026".
+
+> **TL;DR:** Airbnb's loop is values-heavy and marketplace-specific — the system design round almost always touches two-sided dynamics, and the behavioral round pulls from the original culture deck. The winning candidate frames every answer around host vs guest, talks cold-start fluently, and ships clean, readable code over clever LeetCode.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       AIRBNB HIRING FUNNEL                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Phone Screen (35%) ──► Onsite     │
+│                                                                  │
+│  Onsite ──► Coding ×2 / Design / Values ──► Calibration Committee │
+│          (30%)                                  (60%, level vote) │
+│                                                                  │
+│  Committee ──► Offer (1 band per level) ──► Team match (90 days) │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Airbnb's loop is unique: it uses a "values-based" behavioral round grounded in t
 
 ### Q1.3: "What's your location / remote preference?"
 **Answer:** Be direct. SF, NYC, and remote-considered states (CA, NY, WA, TX, MA) are safest. Airbnb moved to "Live and Work Anywhere" with quarterly travel stipends.
+
+Recruiter screens are the easiest filter to pass — they're checking comp fit, location, and your motivation. If you clear this, the real test begins: the phone screen is where Airbnb confirms you can write production code and reason about a marketplace at scale.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -78,6 +97,8 @@ def kth_smallest(root, k):
 **Q3.4.2:** "Describe a project where you had to ship under uncertainty." STAR — show iteration, customer feedback loops.
 **Q3.4.3:** "How do you embody 'belong anywhere' in your work?" Specific story connecting technical work to human impact.
 
+The onsite is the day of truth. Four rounds, two codings, one design, one values — and the design round almost always pulls from search ranking, pricing, or two-sided onboarding. Treat each round as its own interview: the committee will see your packet as a whole and re-weight rounds that wobble.
+
 ## Stage 4: Hiring committee
 Airbnb's committee (the "Calibration Committee") is a 4-6 person cross-functional panel that reviews your packet, including all interviewer scores, a "value fit" assessment, and 1-2 cross-location peer reviewers. They vote on level (L4/L5/L6) independently of the hiring manager. The bar is high for L6 (staff) — they expect system design that influences org-wide direction.
 
@@ -102,3 +123,9 @@ Airbnb has a single comp band per level; negotiation is limited. RSUs vest over 
 - [Levels.fyi Airbnb](https://www.levels.fyi/companies/airbnb)
 - [Glassdoor Airbnb interviews](https://www.glassdoor.com/Interview/Airbnb-Interview-Questions-E391850.htm)
 - [LeetCode Airbnb tagged questions](https://leetcode.com/company/airbnb/)
+
+---
+
+## The 1 thing to remember
+
+Airbnb's hiring rewards the candidate who frames every answer around two-sided trust — host and guest are different customers, and the L6 bar goes to engineers who design for the system, not just the model.

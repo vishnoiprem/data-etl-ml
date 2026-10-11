@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer / Applied Researcher (Video generation)
 - **Tech stack:** PyTorch, JAX, CUDA, Triton, custom video diffusion stack, distributed training
-- **Comp band:** $220K-$450K base + equity (Series C/D, NYC)
+- **Comp band:** $220K-$450K total comp (Senior → Staff) | Base + meaningful equity (Series C/D, $3B+ valuation)
 - **Cumulative pass rate:** ~3-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a film strip unfurling into a latent video diffusion cascade with temporal-attention layers highlighted. Color: Runway green (#00E5A0). Headline: "Runway / AI Video Generation / 2026".
+
+> **TL;DR:** Runway wants researchers who think like filmmakers — temporal consistency and product sense matter as much as raw modeling chops. The signature round is the system design: a 1000-user video inference service. The winning candidate has shipped creative work and can defend a Gen-4 vs Sora opinion.
+
+```
+Recruiter → Phone (math + code) → Onsite (4 rounds) → Founder chat → Offer
+```
+
+The founder round with Cristóbal Valenzuela is where taste and creative empathy are screened. Strong researchers with no creative side projects get cut here.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards video-AI opinions — be ready to name a model you admire and explain why, not just list features.
+
 ### Q1.1: "Why Runway for video?"
 **Answer:** "Runway is the only company that owns the full video stack — research (Gen-4), product (RunwayML Studio), and creative tools for Hollywood. I want to work on the temporal-consistency problem that's still open, and Runway's the team most likely to crack it."
 **Tip:** Reference Gen-4, Gen-3 Alpha Turbo, and the Lionsgate partnership.
@@ -26,6 +38,8 @@
 **Tip:** Have taste. Show you've used the product.
 
 ## Stage 2: Technical phone screen
+
+The phone tests both coding (multi-head attention) and variational inference foundations (reparameterization trick).
 
 ### Q2.1: Implement multi-head self-attention.
 **Answer:**
@@ -51,6 +65,8 @@ class MHA(nn.Module):
 
 ## Stage 3: Onsite
 
+Four rounds covering 3D convolution, video inference at scale, temporal consistency research, and a behavioral that probes creative shipping history.
+
 ### Round 3.1: Coding
 **Q:** Implement a 3D convolution in PyTorch.
 **Answer:** Use F.conv3d with appropriate padding; discuss temporal receptive fields, factorized 3D convs (spatial + temporal).
@@ -74,6 +90,8 @@ Cristóbal Valenzuela (CEO) often joins. He cares about creative empowerment and
 Equity is meaningful; Runway is private and valued >$3B.
 
 ## Tips for the Runway loop
+
+Most candidates over-prep on attention math and under-prep on temporal consistency techniques. Both axes matter.
 - Use Gen-4 before the loop; bring specific feedback.
 - Memorize temporal consistency techniques.
 - Practice CUDA/Triton kernel writing.
@@ -90,3 +108,9 @@ Equity is meaningful; Runway is private and valued >$3B.
 - [Levels.fyi — Runway](https://www.levels.fyi/companies/runway)
 - [Glassdoor — Runway](https://www.glassdoor.com/Interview/Runway-Interview-Questions.htm)
 - [Reddit r/StableDiffusion — Runway threads](https://reddit.com/r/StableDiffusion)
+
+---
+
+## The 1 thing to remember
+
+Runway rewards diffusion and foundation-model depth with a creative twist — if you can't derive the reparameterization trick AND talk about a real creative project, you don't pass the founder round.

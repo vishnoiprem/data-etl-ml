@@ -1,8 +1,16 @@
 # 1. OpenAI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (transformer blocks for OpenAI). Color: company brand color as accent (teal-green). Headline on image: "OpenAI / AI Engineer / 2026".
+
+> **TL;DR:** The OpenAI loop runs 5 stages and kills ~98% of candidates — the gate is the "small system" coding round where you build (not LeetCode) a directed social graph with snapshot queries, then extend it 3 times in 45 minutes. The candidate who wins treats coding like a real codebase (tests at every step, names trade-offs) and names the 3 ablations they didn't run on their ML project.
+
+```
+Recruiter (80%) → Hiring manager (50%) → Skills (40%) → Final loop (25%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer
 - **Tech stack:** Python, PyTorch, CUDA, Triton, vLLM, CoderPad
-- **Comp band:** $251K-$1.89M (L2-L7)
+- **Comp band:** $251K-$1.89M total comp (L2-L7 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Skills assessment** | Pair-coding, take-home, or technical test | 2 weeks | ~40% advance |
 | 4. **Final loop (4-6 hrs)** | Coding → system design → project talk → behavioral → optional agentic round | 1-2 days | ~25% advance |
 | 5. **Decision + offer** | References checked; no negotiation, but level calibration matters | 1 week | — |
+
+The loop is the same as every other frontier lab, but the weight is different. Let me explain what I mean.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -49,6 +59,8 @@ class TokenBucket:
 ```
 For per-tenant extension: maintain hierarchical keys (`tenant:user`), check tenant bucket first, refill user bucket from tenant bucket. OpenAI's graders want "named trade-offs + named thresholds," not 200 lines of code.
 **Tip:** Write the smallest correct version first, then extend. No tests = automatic downlevel.
+
+The phone screen tells you whether you can code. The onsite tells you whether you can think. Here's where the difference shows up.
 
 ## Stage 3: Onsite (4 rounds)
 
@@ -118,3 +130,9 @@ OpenAI does not negotiate salary in the traditional sense — the offer reflects
 - [Levels.fyi — OpenAI compensation](https://www.levels.fyi/companies/openai/salaries/software-engineer)
 - [Glassdoor — OpenAI Interview Questions (2026)](https://www.glassdoor.com/Interview/OpenAI-Interview-Questions-E2210885.htm)
 - [r/OfferEngineering — OpenAI Senior SWE Interview (Oct 2026)](https://www.reddit.com/r/OfferEngineering/comments/1wzedra/openai_senior_software_engineer_interview_it_felt/)
+
+---
+
+## The 1 thing to remember
+
+At OpenAI, the coding round is a small system — build it like a real codebase, test at every step, name the trade-offs, and the loop opens.

@@ -2,8 +2,18 @@
 
 - **Role:** Senior Software Engineer (Streaming / Cloud / Personalization platform)
 - **Tech stack:** Java, Kotlin, Python, Scala, Cassandra, Kafka, Flink, AWS, React, Spinnaker
-- **Comp band:** $300K-$900K base + RSUs (public company, Los Gatos)
+- **Comp band:** $300K-$900K total comp (L5-L7: Senior → Staff) | Base + RSUs (public)
 - **Cumulative pass rate:** ~2-3% (high bar)
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + an Open Connect CDN map with adaptive bitrate (ABR) ladder inset and a Kafka → Flink → Cassandra event pipeline. Color: Netflix red (#E50914). Headline: "Netflix / Streaming SWE / 2026".
+
+> **TL;DR:** Netflix hires senior engineers with high judgment — "freedom and responsibility" isn't a poster, it's the actual bar. The signature round is the system design for the video streaming pipeline: ingest, transcode, Open Connect CDN, ABR. The winning candidate has a specific Netflix area of interest and can defend a high-judgment behavioral answer.
+
+```
+Recruiter → Phone (coding) → Onsite (4-5 rounds) → Hiring committee → Offer
+```
+
+The coding → system design → judgment progression is the spine. Skip the culture memo and you don't pass the behavioral.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards culture-fit fluency. Reference the "Freedom and Responsibility" memo and have a specific Netflix area of interest.
+
 ### Q1.1: "Why Netflix?"
 **Answer:** "Netflix is the only company streaming at true internet scale — 250M+ users, about 15% of global bandwidth, and a culture that prizes senior judgment over process. I want to work somewhere with high ownership and real consequences."
 **Tip:** Reference the "Freedom and Responsibility" culture memo and the tech blog.
@@ -27,6 +39,8 @@
 
 ## Stage 2: Technical phone screen
 
+The phone is a thread-safe rate limiter and a video-recommendation feed design. They expect production-scale thinking.
+
 ### Q2.1: Implement a thread-safe rate limiter.
 **Answer:** Token bucket with atomic counter; per-IP/per-user key. Discuss distributed variants with Redis.
 **Tip:** They use this in production.
@@ -36,6 +50,8 @@
 **Tip:** This is the ML/SWE crossover; they expect depth.
 
 ## Stage 3: Onsite
+
+Five rounds: merge-k-sorted-lists, top-K-frequent-items, video streaming pipeline, real-time event pipeline for 1B events/day, and a high-judgment behavioral.
 
 ### Round 3.1: Coding
 **Q:** Merge k sorted lists.
@@ -65,6 +81,8 @@ Panel of 4-5 staff+ engineers + senior leadership. They look for: (1) senior-lev
 Top of market. Base $300K-$500K, RSUs $300K-$800K+ for senior+. They negotiate hard but pay well.
 
 ## Tips for the Netflix loop
+
+Most candidates under-prep behavioral for senior-level judgment. Netflix screens explicitly — practice "tell me about an unpopular decision."
 - Read the Netflix Tech Blog — they publish deep essays.
 - Study the Open Connect CDN and ABR algorithms.
 - Practice behavioral answers for "high-judgment" questions.
@@ -81,3 +99,9 @@ Top of market. Base $300K-$500K, RSUs $300K-$800K+ for senior+. They negotiate h
 - [Levels.fyi — Netflix](https://www.levels.fyi/companies/netflix)
 - [Glassdoor — Netflix interviews](https://www.glassdoor.com/Interview/Netflix-Interview-Questions-E11891.htm)
 - [Reddit r/cscareerquestions — Netflix thread](https://reddit.com/r/cscareerquestions)
+
+---
+
+## The 1 thing to remember
+
+Netflix is senior judgment over process — every behavioral answer must demonstrate "rare valuable" behavior, and the system design must show trade-off fluency, not just a solution.

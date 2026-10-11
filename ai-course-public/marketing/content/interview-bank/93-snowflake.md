@@ -2,8 +2,28 @@
 
 - **Role:** ML Engineer (Snowpark / Cortex AI)
 - **Tech stack:** Python, SQL, Java/Scala, Snowpark, Anaconda, Streamlit, Kubernetes
-- **Comp band:** $250K-$700K (L3-L6)
+- **Comp band:** $250K-$700K total comp (L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a Snowflake micro-partition diagram — storage layer below, compute warehouses above, separated by metadata services). Color: Snowflake blue (#29B5E8). Headline: "Snowflake / AI ML Engineer / 2026".
+
+> **TL;DR:** Snowflake's loop is the most SQL-heavy of the data-cloud companies — they will test window functions, CTEs, and micro-partition pruning, and the design round is always a warehouse or Cortex AI pipeline. The winning candidate treats SQL optimization as a first-class skill, knows Cortex RAG end-to-end, and speaks the separation-of-storage-and-compute mantra.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                 SNOWFLAKE MEDALLION ARCHITECTURE                 │
+├──────────────────────────────────────────────────────────────────┤
+│   Bronze (raw ingest) ──► Silver (cleaned) ──► Gold (features)   │
+│        │                       │                     │           │
+│        ▼                       ▼                     ▼           │
+│   Streams + Tasks         dbt / Snowpark         Cortex AI       │
+│   (CDC ingest)            (transforms)           (RAG + eval)    │
+│                                                                  │
+│   Storage: micro-partitions (columnar, compressed)               │
+│   Compute: elastic warehouses (auto-suspend)                     │
+│   Metadata: clustering keys + search optimization                │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds (5 stages)
 
@@ -24,6 +44,8 @@
 ### Q1.2: "Why Snowflake, specifically?"
 **Answer:** Specific bet + test + disagreement. "I want to work on Cortex AI because the data + AI convergence is the most important architectural shift of 2026. The bet: as models get bigger, the data warehouse becomes the moat — the model is commoditized, the data is the differentiator. The 1 thing I'd test: whether Cortex's function-calling interface can match the latency of a custom LLM wrapper at 10K QPS. The 1 thing I disagree with: I think Snowflake is too conservative on open source — open-sourcing the Cortex feature store would accelerate adoption more than the current proprietary path."
 **Tip:** Reference Cortex AI + Snowpark + the data cloud thesis.
+
+Snowflake's recruiter screen is the easy filter — they're checking comp, location, and team fit (Snowpark vs Cortex vs Search). The phone screen is where SQL becomes the differentiator: a window-function question, a sliding-window coding problem, and a system design that touches the data warehouse.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -129,6 +151,8 @@ def add_features(df, value_col, date_col):
 **Answer:** Use STAR. Situation (the query, the table size, the original latency), Task (your role), Action (EXPLAIN, identify the bottleneck — full table scan, missing index, bad join order), Result (new query plan, new latency, cost reduction). Example: "I reduced a 10-minute query to 30 seconds by adding a clustering key on the date column, which enabled micro-partition pruning."
 **Tip:** Snowflake values SQL optimization. Mention specific commands (EXPLAIN, SHOW TABLES, clustering depth), the use of query history, and the warehouse sizing.
 
+The onsite is 4-5 rounds across 1-2 days, and SQL shows up in at least two of them. The system-design round is always warehouse-themed — feature store, RAG pipeline, or real-time ingest. The ML round lands on Cortex AI: chunking, embedding, retrieval, eval. The behavioral round specifically probes SQL optimization; bring a STAR with EXPLAIN output and micro-partition pruning.
+
 ## Stage 4: Hiring committee
 The committee reviews the packet and votes. Snowflake has a calibration committee to ensure consistency across teams. ~60% advance.
 
@@ -155,3 +179,9 @@ Cash + RSU comp. Comp band L3-L6: $250K-$700K. Snowflake comp is RSU-heavy (4-ye
 - [Snowflake Cortex AI docs](https://docs.snowflake.com/en/user-guide/snowflake-cortex/llm-functions) — the RAG + LLM functions
 - [Snowpark docs](https://docs.snowflake.com/en/developer-guide/snowpark/index) — the Python API
 - [r/dataengineering — Snowflake interview threads](https://www.reddit.com/r/dataEngineering/)
+
+---
+
+## The 1 thing to remember
+
+At Snowflake, SQL optimization is the litmus test — the L5+ candidate is the one who reads EXPLAIN output like a sentence, prunes micro-partitions on instinct, and treats Cortex as the next data-warehouse surface, not a side feature.

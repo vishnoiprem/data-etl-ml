@@ -2,8 +2,18 @@
 
 - **Role:** Senior Software Engineer (Payments / Infrastructure)
 - **Tech stack:** Ruby, Scala, Go, Java, Python, PostgreSQL, Redis, Kafka, distributed systems
-- **Comp band:** $200K-$700K base + RSUs (public company, SF/South SF)
+- **Comp band:** $200K-$700K total comp (L4-L7: SWE → Staff) | Base + RSUs (public)
 - **Cumulative pass rate:** ~2-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + a payment pipeline diagram (API gateway → fraud check → bank rails → ledger) with idempotency keys and webhook retries inset. Color: Stripe indigo (#635BFF). Headline: "Stripe / Payments SWE / 2026".
+
+> **TL;DR:** Stripe hires engineers who treat correctness as a feature — payment bugs lose money, so the bar is rigor. The signature round is the system design for the payment pipeline: idempotency, 2PC vs Saga, webhooks, reconciliation. The winning candidate has built on the Stripe API and can defend a correctness/shipping trade-off.
+
+```
+Recruiter → Phone (coding) → Onsite (4-5 rounds) → Hiring committee → Offer
+```
+
+The coding → system design → rigor progression is the spine. Skip idempotency patterns and you don't pass the system design.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards payments conviction. Mention specific Stripe products (Radar, Connect, Issuing) by name and why the correctness bar interests you.
+
 ### Q1.1: "Why Stripe?"
 **Answer:** "Stripe moves hundreds of billions of dollars a year, and the scale + reliability bar is the most interesting engineering problem in payments. I want to work on the primitive that the internet's commerce runs on."
 **Tip:** Show you've used Stripe (as a developer ideally). Mention specific products (Radar, Connect, Issuing) by name.
@@ -27,6 +39,8 @@
 
 ## Stage 2: Technical phone screen
 
+The phone tests LRU cache fluency and asks for a URL shortener design. They expect scaling discussion at 1B+ URLs.
+
 ### Q2.1: Implement an LRU cache.
 **Answer:** See Writer's answer — OrderedDict O(1).
 **Tip:** Standard; they want clean code + edge cases.
@@ -36,6 +50,8 @@
 **Tip:** They expect scaling discussion (1B URLs, 10K QPS).
 
 ## Stage 3: Onsite
+
+Five rounds: payment-processing idempotency coding, binary-tree serialization, payment pipeline system design, webhook delivery system design, and a values-based behavioral.
 
 ### Round 3.1: Coding
 **Q:** Implement a payment processing function with idempotency.
@@ -67,6 +83,8 @@ Panel of 4 staff+ engineers + a hiring manager. They look for: (1) strong coding
 Public company RSUs vest over 4 years (25% year 1, then quarterly). Base is top-of-market. They negotiate aggressively for senior+.
 
 ## Tips for the Stripe loop
+
+Most candidates under-prep payment correctness patterns. Stripe's bar is "rigor" — practice idempotency, 2PC, and reconciliation trade-offs.
 - Read the Stripe blog (especially the engineering posts on payments).
 - Practice payment correctness patterns (idempotency, 2PC, eventual consistency).
 - Be ready to discuss real-world payment edge cases.
@@ -83,3 +101,9 @@ Public company RSUs vest over 4 years (25% year 1, then quarterly). Base is top-
 - [Levels.fyi — Stripe](https://www.levels.fyi/companies/stripe)
 - [Glassdoor — Stripe interviews](https://www.glassdoor.com/Interview/Stripe-Interview-Questions-E671932.htm)
 - [Reddit r/cscareerquestions — Stripe thread](https://reddit.com/r/cscareerquestions)
+
+---
+
+## The 1 thing to remember
+
+Stripe is rigor over speed — every "would this lose money?" decision must be backed by an idempotency key, an exactly-once argument, and a reconciliation story.

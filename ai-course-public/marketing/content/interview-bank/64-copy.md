@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer (Workflow agents)
 - **Tech stack:** Python, TypeScript, LangGraph, OpenAI/Anthropic, Postgres, Temporal, AWS
-- **Comp band:** $160K-$320K base + equity (Series B, Memphis/SF-remote)
+- **Comp band:** $160K-$320K total comp (L4-L6: AI Engineer → Staff) | Base + RSUs
 - **Cumulative pass rate:** ~5-6%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a LangGraph agent DAG with CRM → enrichment → LLM → send nodes, one branch labeled "human-in-the-loop". Color: Copy.ai indigo (#5B5FED). Headline: "Copy.ai / Workflow Agents / 2026".
+
+> **TL;DR:** Copy.ai hires engineers who can ship GTM agents end-to-end, not just prompt an LLM. The signature round is the agent system design — candidates design a multi-tenant Temporal workflow with cost dashboards. The winning candidate has talked to a real SDR and can defend cost-per-execution.
+
+```
+Recruiter → Phone → Onsite (3 rounds) → Founder/CTO chat → Offer
+```
+
+The founder round is non-trivial. Paul Yacoubian cares about GTM empathy and shipping speed — vague "I'd build an agent" answers get cut.
 
 ## Hiring rounds
 
@@ -76,3 +86,9 @@ Equity vests 4 years 1-year cliff. They pay below market but RSUs have upside.
 - [Levels.fyi — Copy.ai](https://www.levels.fyi/companies/copy-ai)
 - [Glassdoor — Copy.ai](https://www.glassdoor.com/Interview/Copy-AI-Interview-Questions.htm)
 - [Reddit r/MachineLearning](https://reddit.com/r/MachineLearning)
+
+---
+
+## The 1 thing to remember
+
+Copy.ai rewards GTM empathy and shipping speed — if you can't defend cost-per-execution of an agent and haven't talked to a real SDR, the founder round will cut you.

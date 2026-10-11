@@ -1,8 +1,17 @@
 # 10. NVIDIA Research
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (CUDA kernel hierarchy + Blackwell GPU die). Color: company brand color as accent (NVIDIA green). Headline on image: "NVIDIA Research / Research Software Engineer / 2026".
+
+> **TL;DR:** NVIDIA Research's loop runs 4 stages and rejects ~97% of candidates — the signature is the 5 verbatim CUDA questions (vector-add coalescing, LRU in C++ with smart pointers, lock-free GPU queue, Kahan summation, 64-register occupancy threshold). The winning candidate names the 128-byte cache line, the NVLink 900 GB/s vs. InfiniBand 400 Gb/s bandwidths, and reasons at the warp-shuffle level — not the API level.
+
+```
+Recruiter (50%) → Phone (40%) → Panel (30%) → Domain round (50%) → Committee → Offer
+                                     └── CUDA panel (verbatim) ──┘
+```
+
 - **Role:** Research Software Engineer
 - **Tech stack:** C++, CUDA, Python, PyTorch, Triton, cuBLAS, NCCL
-- **Comp band:** $300K-$1.1M (L3-L5)
+- **Comp band:** $300K-$1.1M total comp (L3-L5 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen (45-60 min)** | C++ or Python with GPU-aware follow-ups | 1-2 weeks | ~40% advance |
 | 3. **Panel interviews (2 × 90 min)** | Panel 1: coding + project deep-dive; Panel 2: hardware-aware system design | 1-2 weeks | ~30% advance |
 | 4. **Final technical round (60-90 min)** | Domain deep-dive with target team | 1-2 weeks | ~50% advance |
+
+The loop is the slowest of the GPU shops (3-5 weeks typical), and the 5 verbatim CUDA questions show up verbatim — candidates who only know PyTorch lose the panel. The hardware hierarchy is graded, not the syntax.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -39,6 +50,8 @@ vecAdd<<<blocks, 256>>>(a, b, c, n);
 ```
 Coalescing: threads in a warp should access consecutive 4-byte addresses, forming a single 128-byte transaction. The 128-byte cache line = 32 threads × 4 bytes. Strided access with stride < 128 bytes can be partially coalesced.
 **Tip:** Name the cache line size, name the threshold, name the implication.
+
+The phone screen is vector-add + coalescing. The onsite is the CUDA panel — coding, project deep-dive, hardware-aware system design. Memory hierarchy is the differentiator.
 
 ## Stage 3: Onsite (2 panels)
 
@@ -103,3 +116,9 @@ NVIDIA comp is base + RSU + sign-on. Total $300K-$1.1M L3-L5. Sign-on is real fo
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026)
 - [Levels.fyi — NVIDIA compensation](https://www.levels.fyi/companies/nvidia/salaries/software-engineer)
 - [NVIDIA Engineering Blog](https://developer.nvidia.com/blog/)
+
+---
+
+## The 1 thing to remember
+
+At NVIDIA Research, name the 128-byte cache line, the 64-register occupancy threshold, and the NVLink 900 GB/s vs. InfiniBand 400 Gb/s bandwidths — the candidate who only knows PyTorch loses the panel.

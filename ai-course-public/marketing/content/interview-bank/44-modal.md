@@ -1,8 +1,16 @@
 # 44. Modal
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Modal function graph with a sub-second container warmup timeline and the Modal lime green color). Color: Modal lime green (#0DFF7F on near-black). Headline: "Modal / AI Serverless Infra Engineer / 2026".
+
+> **TL;DR:** Modal is the highest-talent-density serverless platform; the loop is recruiter → systems phone → 4-round onsite (Erik or Akshat do the founder round themselves) → tight committee → offer, and the signature round is "design Modal's container runtime with sub-second cold starts." The winning candidate has shipped on Modal, can talk snapshot/restore at the kernel level, and has a strong 10x-systems optimization story.
+
+```
+Recruiter → Phone → Onsite (3-4 rounds) → Founder round → Offer
+```
+
 - **Role:** Software Engineer (Serverless Compute / ML Infrastructure)
 - **Tech stack:** Python, Rust, Go, containerd, gVisor, Kubernetes, S3, custom container runtime, FastAPI, React
-- **Comp band:** $220K-$420K (small team, high talent density)
+- **Comp band:** $220K-$420K total comp (Senior SWE, staff+) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -70,7 +78,7 @@ def memoize(ttl_seconds):
 - **Q3.4.3:** "A customer is using 10x the resources they expected. How do you investigate?" (Modal cares a lot about cost-aware design.)
 
 ## Stage 4: Hiring committee
-Modal is small (~50 people) and tight. The committee is usually the founders + 2 senior engs. They look for: systems depth, willingness to be on-call for what you build, and a strong "builder" instinct. Red flags: hand-wavy answers on cold starts, no curiosity about the runtime internals.
+Modal is small (~50 people) and tight. The committee is usually the founders + 2 senior engs. They look for: systems depth, willingness to be on-call for what you build, and a strong "builder" instinct. Red flags: hand-wavy answers on cold starts, no curiosity about the runtime internals. The committee decides fast — Modal is the rare company where a 70% pass rate at this stage is normal because everything before it is already ruthlessly filtered.
 
 ## Stage 5: Offer
 Modal pays top-of-market for senior engineers: $250K-$400K base, meaningful equity (private, well-funded). Equity is the leverage. They also offer unusual perks (4-day workweek tested, generous compute credits). Negotiation: equity is the main lever.
@@ -93,3 +101,9 @@ Modal pays top-of-market for senior engineers: $250K-$400K base, meaningful equi
 - [Erik Bernhardsson's blog](https://erikbern.com)
 - [Modal Glassdoor](https://www.glassdoor.com/Interview/Modal-Interview-Questions-E4605400.htm)
 - [Levels.fyi Modal](https://www.levels.fyi/companies/modal-labs)
+
+---
+
+## The 1 thing to remember
+
+Ship something on Modal before the phone screen — `modal run` a real job, then have a 60-second story about the cold start; the founder round is with Erik or Akshat personally, and "infrastructure should be invisible" is the taste filter everything gets measured against.

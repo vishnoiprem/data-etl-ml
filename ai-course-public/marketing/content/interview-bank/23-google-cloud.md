@@ -1,8 +1,16 @@
 # 23. Google (Cloud AI / Vertex AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "GOOGLE / CLOUD AI / 2026".
+
+> **TL;DR:** Google's loop is calibrated by level — the LSC (Level-Specific Calibration) committee will *down-level* you if your signal screams L4 on an L5 req. The signature round is **Googliness**, which is really intellectual humility on rails. The winning candidate quantifies everything in petabytes and billions, and tells a "I was wrong" story with data.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → LSC Committee (60%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist on Vertex AI, Gemini Cloud, or Cloud Customer Engineering
 - **Tech stack:** Python, JAX, TensorFlow, TPU, Vertex AI (custom training, Vector Search, Pipelines, Model Garden), BigQuery, Dataflow, Go
-- **Comp band:** $250K-$900K (L4-L6); L7+ crosses $1.2M+; RSUs vest 4-year with no cliff
+- **Comp band:** $250K-$900K total comp (L4-L6) | RSUs 4-year, 1-year cliff; L7+ crosses $1.2M+
 - **Cumulative pass rate:** ~2%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (LSC)** | Cross-Googler committee, calibration | 2-3 weeks | ~60% advance |
 | 5. **Offer** | Comp negotiation, team match | 1 week | — |
 
+The Google loop is the most "calibrated" in big tech — every round maps to a level rubric, and the LSC is ruthless about that mapping. Budget 6 weeks total, with the committee stage often being the long pole.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Google Cloud for ML?"
@@ -26,6 +36,8 @@
 **Tip:** Google interviewers want quantified impact at scale. "10% of users" beats "all users" if it's the right 10%.
 
 ## Stage 2: Technical phone screens (90 min)
+
+Google's phone screens are graded by level-specific rubrics — passing the L5 bar on coding is materially harder than passing L4. The ML round here often feels like a mini system-design conversation; that's intentional.
 
 ### Q2.1: Coding — "Serialize/deserialize a binary tree with next pointer"
 **Answer:** BFS with a queue, using `#` as null marker. Or encode length-prefixed.
@@ -46,6 +58,8 @@ def serialize(root):
 **Tip:** Mention ScaNN/Vector Search by name. Cost is graded.
 
 ## Stage 3: Onsite (4-5 rounds)
+
+Plan the onsite in level order: code first (cleaner when fresh), then design, then ML deep-dive, then Googliness last when you have signal to fold in. The "depth" round at L5+ is real and can sink you if you bluff.
 
 ### Round 3.1: Coding (60 min)
 
@@ -124,3 +138,9 @@ Cash + RSUs + target bonus. Negotiation is real and Google typically matches com
 - [Vertex AI docs](https://cloud.google.com/vertex-ai/docs)
 - [Google Research blog](https://research.google/)
 - [r/cscareerquestions Google interview](https://www.reddit.com/r/cscareerquestions/)
+
+---
+
+## The 1 thing to remember
+
+At Google, scale your numbers in petabytes and billions, and rehearse a "I was wrong, the data showed X" story — the LSC committee is grading for level, and Googliness is the tiebreaker.

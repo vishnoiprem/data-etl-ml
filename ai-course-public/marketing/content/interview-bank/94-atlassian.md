@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Rovo AI, Search, Recommendations, Code AI)
 - **Tech stack:** Java, Kotlin, Python, TypeScript, React, AWS, Postgres, Elasticsearch, OpenSearch, PyTorch, Transformers
-- **Comp band:** $180K-$450K (IC3-IC4 Senior); Staff (IC5) $350K-$800K; Principal $500K-$1M (Levels.fyi 2026, USD; AUD is ~20% lower)
+- **Comp band:** $180K-$450K total comp (IC3-IC4 Senior); Staff (IC5) $350K-$800K total comp; Principal $500K-$1M total comp (Levels.fyi 2026, USD; AUD is ~20% lower) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a Jira + Confluence + Bitbucket cross-product Rovo search with a permissions-aware filter). Color: Atlassian blue (#0052CC). Headline: "Atlassian / AI ML Engineer / 2026".
+
+> **TL;DR:** Atlassian's loop is Rovo-heavy and enterprise-flavored — they care deeply about permissions-aware retrieval, agent frameworks, and eval harnesses, and they reward candidates who think "ship ML into a workflow," not "ship ML into a chat." The winning candidate has read the open playbook, speaks RAG fluently, and treats code AI evaluation as a first-class problem.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                      ATLASSIAN HIRING FUNNEL                     │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (55%) ──► Tech Phone (40%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Loop Debrief      │
+│          (35%)                                  (70%)           │
+│                                                                  │
+│  Committee ──► Offer (IC4 vs IC5 split) ──► Team Anywhere match │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 

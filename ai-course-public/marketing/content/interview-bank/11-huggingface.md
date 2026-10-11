@@ -1,8 +1,17 @@
 # 11. Hugging Face
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Hub model + dataset + space trifecta). Color: company brand color as accent (HF yellow). Headline on image: "Hugging Face / ML Engineer / 2026".
+
+> **TL;DR:** Hugging Face's loop runs 4 stages (NYC / Paris / SF) and rejects ~95% of candidates — the signature round is the open-source PR review (you're handed a real PR and graded on tests + docs + backward compat, not the diff). The winning candidate brings a printed GitHub profile, walks through 3 merged PRs, and shows the 5-file model-PR pattern (modeling, config, converter, tests, docs).
+
+```
+Recruiter (60%) → Phone (40%) → Onsite (30%) → Reference + offer
+                                       └── PR review round ──┘
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, PyTorch, JAX, Transformers, Diffusers, Datasets, Rust (safetensors/tokenizers)
-- **Comp band:** $200K-$700K (NYC/Paris/SF, L3-L6)
+- **Comp band:** $200K-$700K total comp (NYC/Paris/SF, L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen** | 1-2 coding + ML fundamentals, transformers-heavy | 1-2 weeks | ~40% advance |
 | 3. **Onsite (4 rounds, 1 day)** | Coding → open-source PR-style review → ML deep-dive → behavioral | 1-2 days | ~30% advance |
 | 4. **Reference + offer** | Comp negotiation real; open-source is the bar | 1-2 weeks | — |
+
+The loop is unique among ML employers — open-source contribution is graded as heavily as coding, and the PR-review round is a real PR, not a contrived prompt. Most candidates under-prep GitHub specifics.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -41,6 +52,8 @@ class EarlyStopPlateau(TrainerCallback):
 ```
 The Hugging Face warmup. Know the Trainer API.
 **Tip:** Trainer + callbacks + safetensors is the HF-canonical stack.
+
+The phone screen is a Trainer callback. The onsite is the 4-round gauntlet — coding, PR review, ML deep-dive, behavioral — and the PR review is the signature.
 
 ## Stage 3: Onsite (4 rounds)
 
@@ -132,3 +145,9 @@ Hugging Face comp is base + RSU + sign-on. NYC / Paris / SF hubs. Cash component
 - [Safetensors](https://github.com/huggingface/safetensors)
 - [Accelerate](https://huggingface.co/docs/accelerate)
 - [Levels.fyi — Hugging Face compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At Hugging Face, bring your GitHub — merged PRs to transformers/diffusers/tokenizers + the 5-file model-PR pattern win the loop; a generic ML interview prep loses it.

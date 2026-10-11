@@ -1,8 +1,16 @@
 # 5. Mistral AI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (open-weights model card with EU flag). Color: company brand color as accent (Mistral orange). Headline on image: "Mistral AI / AI Engineer / 2026".
+
+> **TL;DR:** Mistral's loop runs 4 stages in Paris and rejects ~96% of candidates — the signature questions are RoPE derivation on the whiteboard + GQA/MoE/sliding-window implementation, graded on transformer-efficiency depth. The winning candidate defends the open-weights + EU-sovereignty thesis, names a specific sovereignty test (regulated-industry eval), and disagrees with the closed-source Mistral Large pivot.
+
+```
+Recruiter (60%) → Phone (40%) → Onsite (30%) → Reference + offer
+```
+
 - **Role:** AI Engineer
 - **Tech stack:** Python, PyTorch, JAX, CUDA, Triton, vLLM, Rust
-- **Comp band:** €150K-€500K+ (Paris, L3-L6)
+- **Comp band:** €150K-€500K+ total comp (Paris, L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~3-4%
 
 ## Hiring rounds
@@ -13,6 +21,8 @@
 | 2. **Technical phone screen** | 1-2 coding + ML fundamentals, lean coding | 1-2 weeks | ~40% advance |
 | 3. **Onsite (4 rounds, 1 day, Paris)** | Coding → ML theory → system design → behavioral | 1-2 days | ~30% advance |
 | 4. **Reference checks + offer** | Fast; comp negotiation is real | 1-2 weeks | — |
+
+The loop is on-site in Paris, technically deep, and shorter than the US frontier labs. The transformer-efficiency questions are the gate — most US-trained candidates under-prepare RoPE and MoE on the whiteboard.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -39,6 +49,8 @@ def apply_rope(x, cos, sin):
 ```
 RoPE rotates each pair of features by a position-dependent angle, encoding relative position via the inner product.
 **Tip:** RoPE is the Mistral-canonical architecture question.
+
+The phone screen is a RoPE derivation. The onsite is the architecture gauntlet — MoE, GQA, sliding-window, on-prem sovereignty. Here's where the depth gets tested end-to-end.
 
 ## Stage 3: Onsite (4 rounds)
 
@@ -106,3 +118,9 @@ Mistral comp is base + RSU + sign-on. Cash component is high; the Paris cost of 
 - [Mistral AI Wikipedia](https://en.wikipedia.org/wiki/Mistral_AI)
 - [Forbes — How France's Mistral Built a $14B AI Empire (Apr 2026)](https://www.forbes.com/sites/iainmartin/2026/04/16/how-frances-mistral-built-a-14-billion-ai-empire-by-not-being-american/)
 - [Levels.fyi — Mistral compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At Mistral, the sovereignty bet is the gate — defend open-weights for EU regulated industries, name the on-prem test, and the loop opens.

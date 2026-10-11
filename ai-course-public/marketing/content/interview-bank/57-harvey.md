@@ -1,8 +1,16 @@
 # 57. Harvey (Legal AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Harvey legal citation card with a case reference, e.g. "410 U.S. 113", and the Harvey cream/burgundy palette). Color: Harvey burgundy (#7B2D26 on cream #F5F1EA). Headline: "Harvey / AI Legal Engineer / 2026".
+
+> **TL;DR:** Harvey is the domain-specific legal AI leader with the AmLaw 100 moat; the loop is recruiter → 60-90 min coding+LLM/agent phone → 4-5 round onsite (with a legal-domain round and a Winston founder round) → high-bar committee → offer, and the signature round is "build a legal Q&A system that cites its sources." The winning candidate knows the difference between M&A and litigation, has shipped domain-specific AI, and treats grounded generation + citation verification as a first-class engineering problem.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (25%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (LLM Features / Domain-Specific AI)
 - **Tech stack:** Python, TypeScript, React, Kubernetes, OpenAI/Anthropic APIs, fine-tuning (PEFT, LoRA), vLLM, vector DBs, Postgres, Redis
-- **Comp band:** $200K-$450K (well-funded, $5B+ valuation, AI infra premium)
+- **Comp band:** $200K-$450K total comp (Senior AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~2-4%
 
 ## Hiring rounds
@@ -71,7 +79,7 @@ def extract_citations(text):
 - **Q3.5.2:** "Tell me about a time you built something for a non-technical domain expert."
 
 ## Stage 4: Hiring committee
-Harvey's committee is high-bar. They look for: (a) top 5% engineering chops, (b) domain curiosity (you should know the difference between civil law and common law, or between M&A and litigation), (c) humility + collaboration with lawyers. Red flags: arrogant about AI capabilities, never having worked with domain experts, weak on grounding/citations.
+Harvey's committee is high-bar. They look for: (a) top 5% engineering chops, (b) domain curiosity (you should know the difference between civil law and common law, or between M&A and litigation), (c) humility + collaboration with lawyers. Red flags: arrogant about AI capabilities, never having worked with domain experts, weak on grounding/citations. The committee is the rare one that will reject a stronger engineer for a slightly weaker one who has shipping experience with non-technical domain experts — humility is the filter.
 
 ## Stage 5: Offer
 Base is at the high end ($250K-$350K+), equity is meaningful (private, high valuation). Negotiation: equity, sign-on, level.
@@ -94,3 +102,9 @@ Base is at the high end ($250K-$350K+), equity is meaningful (private, high valu
 - [Harvey case studies](https://www.harvey.ai/customers)
 - [Harvey Glassdoor](https://www.glassdoor.com/Interview/Harvey-Interview-Questions-E3509500.htm)
 - [Levels.fyi Harvey](https://www.levels.fyi/companies/harvey)
+
+---
+
+## The 1 thing to remember
+
+Read a few Supreme Court opinions before the legal-domain round — Harvey's committee is ex-lawyers and ex-Stripe infra, and the candidate who can walk an M&A use case AND describe their grounded-generation pipeline in the same answer wins, while "I just use the LLM API" gets respectfully closed.

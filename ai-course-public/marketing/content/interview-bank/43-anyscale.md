@@ -1,8 +1,16 @@
 # 43. Anyscale (Ray)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Ray distributed graph with actor nodes, task arrows, and the Anyscale purple color). Color: Anyscale purple (#7C3AED). Headline: "Anyscale / AI Distributed Systems Engineer / 2026".
+
+> **TL;DR:** Anyscale builds the productized Ray; the loop is recruiter → 90-min systems phone → 4-round onsite (with a Ray committer in the room) → committee → offer, and the signature round is "design Ray's autoscaler." The winning candidate has read the Ray paper, knows lineage reconstruction cold, and has shipped something on Ray or vLLM in public.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** Distributed Systems Engineer / ML Infrastructure Engineer
 - **Tech stack:** Python, C++, Go, Ray, Kubernetes, gRPC, Pluggable Transport, KubeRay, PyTorch, vLLM, MLflow, Postgres, Redis
-- **Comp band:** $220K-$450K (Ray creators, premium)
+- **Comp band:** $220K-$450K total comp (E4-E6: SWE/ML Infra) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~2-4%
 
 ## Hiring rounds
@@ -74,7 +82,7 @@ class Scheduler:
 - **Q3.4.3:** "Why open-source ML infra?" (Anyscale is committed to Ray OSS; this matters culturally.)
 
 ## Stage 4: Hiring committee
-The committee is technical and tends to be ex-Ray maintainers, ex-databricks, ex-Anyscale. They look for: deep systems knowledge (you should know the difference between task backpressure, actor concurrency, and object store spilling), the ability to write production C++ and Python, and a strong opinion on what makes Ray special.
+The committee is technical and tends to be ex-Ray maintainers, ex-databricks, ex-Anyscale. They look for: deep systems knowledge (you should know the difference between task backpressure, actor concurrency, and object store spilling), the ability to write production C++ and Python, and a strong opinion on what makes Ray special. A public OSS contribution — even a small PR to Ray or vLLM — is the single biggest signal you can send, because the committee has seen every type of "I read the paper" candidate.
 
 ## Stage 5: Offer
 Anyscale pays near-big-tech for senior engineers ($300K+ all-in for E5). Equity is meaningful (private, strong valuation). Negotiation lever: title (E5 vs E6) and equity grants.
@@ -97,3 +105,9 @@ Anyscale pays near-big-tech for senior engineers ($300K+ all-in for E5). Equity 
 - [Anyscale engineering blog](https://www.anyscale.com/blog)
 - [Anyscale Glassdoor](https://www.glassdoor.com/Interview/Anyscale-Interview-Questions-E3257849.htm)
 - [Levels.fyi Anyscale](https://www.levels.fyi/companies/anyscale)
+
+---
+
+## The 1 thing to remember
+
+Read the Ray paper and have an OSS PR (or a substantive local fork) before the onsite — the Anyscale committee is staffed by Ray maintainers, and the candidate who can talk lineage reconstruction, placement groups, and actor restart without Googling wins.

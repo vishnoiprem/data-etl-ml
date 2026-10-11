@@ -1,8 +1,16 @@
 # 41. Weights & Biases (W&B)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a wandb dashboard with run comparison lines, parallel coordinates, and the wandb blue color). Color: W&B blue (#FFCC33 yellow accent on dark). Headline: "W&B / AI ML Engineer / 2026".
+
+> **TL;DR:** W&B is the gold-standard ML experiment tracker; the loop is recruiter → coding+ML phone → 4-round onsite → committee → offer, and the question you'll answer twice is "why W&B over MLflow." The winning candidate has run a real sweep, can compare W&B vs MLflow at the data-model level, and brings a founder-fit story about building for ML practitioners.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** ML Engineer (Experiment Tracking / ML Platform)
 - **Tech stack:** Python, TypeScript, React, GraphQL, Kubernetes, gRPC, Postgres, Redis, Kafka, PyTorch, TensorFlow, MLflow (interop), Sweep (HPO)
-- **Comp band:** $180K-$380K (L3-L5) + meaningful equity (private, late-stage)
+- **Comp band:** $180K-$380K total comp (L3-L5: SWE/ML Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -65,7 +73,7 @@ def diff_runs(run_a, run_b):
 - Q3.4.2: A user is furious because their sweep is slow. Walk me through your triage.
 
 ## Stage 4: Hiring committee
-The panel (3-4 senior engs) debates signal vs noise. They're looking for: (a) you've actually used W&B at scale, (b) you can write production Python + Go, (c) you care about developer experience — W&B's moat is DX. Strong negative signals: not knowing what an "artifact" is, or never having run a sweep.
+The panel (3-4 senior engs) debates signal vs noise. They're looking for: (a) you've actually used W&B at scale, (b) you can write production Python + Go, (c) you care about developer experience — W&B's moat is DX. Strong negative signals: not knowing what an "artifact" is, or never having run a sweep. The bar here isn't "could you pass?" — it's "do you actually ship for ML practitioners, by ML practitioners?"
 
 ## Stage 5: Offer
 Base is competitive with big tech; equity is the upside (W&B is late-stage private, ~$1.25B valuation). Refreshers vest over 4 years with 1-year cliff. Negotiation lever: sign-on bonus and equity refreshers. Most offers come back within 5 business days.
@@ -88,3 +96,9 @@ Base is competitive with big tech; equity is the upside (W&B is late-stage priva
 - [W&B interview reports on Glassdoor](https://www.glassdoor.com/Interview/Weights-and-Biases-Interview-Questions-E3150808.htm)
 - [Levels.fyi W&B compensation](https://www.levels.fyi/companies/weights-and-biases)
 - [W&B docs](https://docs.wandb.ai)
+
+---
+
+## The 1 thing to remember
+
+Run `wandb sweep` on a toy example before the onsite — every W&B interviewer asks about Artifacts, Sweeps, or Weave, and the candidate who has logged runs in the last week wins the committee round.

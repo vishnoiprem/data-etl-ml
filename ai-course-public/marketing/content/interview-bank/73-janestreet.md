@@ -2,8 +2,18 @@
 
 - **Role:** Quant Trader / Quant Researcher / Quant SWE
 - **Tech stack:** OCaml (primary!), Python, C++, kdb+, React, distributed systems
-- **Comp band:** $300K-$1.2M base + bonus (no public equity; "partner" track)
+- **Comp band:** $300K-$1.2M total comp (Quant → Senior Quant → Partner-track) | Base + bonus (top of market; no public equity)
 - **Cumulative pass rate:** ~1-2% (one of the hardest)
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + an OCaml snippet (`let () = ... match ... with`) overlaid on a market-making order book grid. Color: Jane Street pink (#E91E63). Headline: "Jane Street / Quant Trader & SWE / 2026".
+
+> **TL;DR:** Jane Street is the hardest quant interview on Earth — 25 probability puzzles in 60 minutes is the gate, not the final. The signature round is the trading phone: a market-making simulation where they watch you think about edge, not just quotes. The winning candidate has built something non-trivial in OCaml and can defend a belief update on a real market scenario.
+
+```
+Recruiter → Probability phone (25 in 60) → Trading phone → Onsite (4-5 rounds) → Committee → Offer
+```
+
+The math → coding → trading → systems progression is the spine. Skip OCaml fluency and you're filtered out before the onsite.
 
 ## Hiring rounds
 
@@ -18,6 +28,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards collaboration and intellectual humility. Reference JS's open-source (Core, Incremental, owl) and the culture docs.
+
 ### Q1.1: "Why Jane Street?"
 **Answer:** "JS is the best trading firm in the world at the things I'm best at — collaborative research, honest culture, real markets. I want to work at a place that has the brainpower to run stat-arb in 50 markets simultaneously and still write a culture doc about it."
 **Tip:** Reference JS's open-source contributions (Core, Incremental, owl) and the culture docs. Interviewers notice if you've read the blog.
@@ -27,6 +39,8 @@
 **Tip:** If you say "I want to learn OCaml," it's a red flag. They want functional fluency, not a learner.
 
 ## Stage 2: Probability phone (25 puzzles in 60 min)
+
+Twenty-five questions in sixty minutes — speed and clean combinatorics matter. They escalate fast.
 
 ### Q2.1: You roll a fair die 3 times. What's the probability of at least one 6?
 **Answer:** 1 - (5/6)^3 = 91/216 ≈ 0.421.
@@ -43,6 +57,8 @@
 **Tip:** They want to see that you think about edge, not just quoting.
 
 ## Stage 4: Onsite
+
+Five rounds: probability/stats derivations, OCaml coding, trading deep-dive, market-making system design, and a behavioral that probes intellectual humility.
 
 ### Round 4.1: Probability/statistics
 **Q:** Derive the bias of the sample variance estimator.
@@ -73,6 +89,8 @@ Panel of senior traders + researchers. They look for: (1) intellectual honesty, 
 Top of market; $400K-$1.2M base + $200K-$500K sign-on for new grads; partnership track after ~2 years.
 
 ## Tips for the Jane Street loop
+
+Most candidates over-prep options and under-prep OCaml fluency. JS's bar is set by functional programmers who also do math — both axes matter.
 - Practice 25 probability questions in 60 min — speed drill.
 - Read Avellaneda-Stoikov market making paper.
 - Memorize the bias/MSE derivations for common estimators.
@@ -89,3 +107,9 @@ Top of market; $400K-$1.2M base + $200K-$500K sign-on for new grads; partnership
 - [Levels.fyi — Jane Street](https://www.levels.fyi/companies/jane-street)
 - [Glassdoor — Jane Street](https://www.glassdoor.com/Interview/Jane-Street-Interview-Questions-E275940.htm)
 - [Reddit r/quant — Jane Street threads](https://reddit.com/r/quant)
+
+---
+
+## The 1 thing to remember
+
+Jane Street's math canon is the gate — Heard on the Street, Avellaneda-Stoikov, and OCaml fluency (not "I want to learn it") are not optional, and the greenbook problems decide who gets the trading phone.

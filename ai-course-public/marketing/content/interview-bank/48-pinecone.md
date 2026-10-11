@@ -1,8 +1,16 @@
 # 48. Pinecone
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a vector index diagram with HNSW graph layers, a query arrow descending through layers, and the Pinecone teal/black palette). Color: Pinecone teal (#0E1F2C background, #00C7B7 accent). Headline: "Pinecone / AI Vector DB Engineer / 2026".
+
+> **TL;DR:** Pinecone pioneered serverless vector DB and the role is heavy on indexing algorithms + distributed storage; the loop is recruiter → 60-90 min systems phone → 4-round onsite (with a "design a billion-scale similarity search service" round) → committee → offer, and the signature round is comparing HNSW vs IVF vs ScaNN with the recall/latency tradeoff. The winning candidate has shipped a real RAG app, can derive HNSW complexity, and has opinions on separation of compute and storage.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** Software Engineer (Vector Database / Distributed Systems)
 - **Tech stack:** Go, Rust, Python, gRPC, Kubernetes, AWS/GCP, custom storage engine, HNSW/IVF indexing, S3, Prometheus
-- **Comp band:** $200K-$420K (late-stage, well-funded)
+- **Comp band:** $200K-$420K total comp (Senior SWE, staff+) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~2-4%
 
 ## Hiring rounds
@@ -62,7 +70,7 @@ def cosine_sim_batch(q, vectors):
 - **Q3.4.2:** "Why Pinecone? Why vector DBs?"
 
 ## Stage 4: Hiring committee
-The committee is technical and tends to be ex-storage, ex-DB infra (Spanner, Bigtable, Cassandra). They look for: distributed systems depth, knowledge of indexing algorithms, and a real passion for the vector DB problem. Red flags: not knowing what HNSW is, weak on recall vs latency tradeoff.
+The committee is technical and tends to be ex-storage, ex-DB infra (Spanner, Bigtable, Cassandra). They look for: distributed systems depth, knowledge of indexing algorithms, and a real passion for the vector DB problem. Red flags: not knowing what HNSW is, weak on recall vs latency tradeoff. The committee is small and tight, so a precise, opinionated answer to "HNSW vs IVF vs ScaNN" is the single highest-leverage prep — vague hand-waves here sink otherwise strong loops.
 
 ## Stage 5: Offer
 Base is at the high end ($250K+ for senior), equity is post-Series C/D (private but liquid secondary). Negotiation: title, sign-on, and equity refreshers.
@@ -85,3 +93,9 @@ Base is at the high end ($250K+ for senior), equity is post-Series C/D (private 
 - [Pinecone docs](https://docs.pinecone.io)
 - [Pinecone Glassdoor](https://www.glassdoor.com/Interview/Pinecone-Interview-Questions-E3509400.htm)
 - [Levels.fyi Pinecone](https://www.levels.fyi/companies/pinecone)
+
+---
+
+## The 1 thing to remember
+
+Build a real RAG app on Pinecone before the phone screen — the candidate who can derive HNSW search complexity and name their recall@k number beats the one who can only recite the marketing page, and the committee will absolutely ask you to derive it.

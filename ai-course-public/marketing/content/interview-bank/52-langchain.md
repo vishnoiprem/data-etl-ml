@@ -1,8 +1,16 @@
 # 52. LangChain
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a LangGraph agent node-edge diagram with a ReAct loop, an LLM call, and the LangChain green palette). Color: LangChain green (#1C3C3C background, #00B86B accent). Headline: "LangChain / AI Framework Engineer / 2026".
+
+> **TL;DR:** LangChain is the most adopted LLM framework and LangGraph turned it into a stateful agent platform; the loop is recruiter → 60-90 min coding+LLM app phone → 4-round onsite (with a "design LangSmith" round) → committee → offer, and the signature round is "implement an agent loop (ReAct) and design observability for LLM apps." The winning candidate has shipped a real LangChain + LangGraph + LangSmith app, has opinions on chunking/retrieval/eval, and can defend a framework choice.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer / Software Engineer (LLM Framework / Agent Infrastructure)
 - **Tech stack:** Python, TypeScript, LangChain/LangGraph, React, FastAPI, Postgres, Redis, OpenAI/Anthropic APIs, vector DBs (Pinecone, Weaviate, Qdrant), LangSmith
-- **Comp band:** $200K-$420K (well-funded, AI infra)
+- **Comp band:** $200K-$420K total comp (Senior AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -67,7 +75,7 @@ def react_agent(llm_call, tools, max_iters=5):
 - **Q3.4.2:** "Why are frameworks valuable? What would you build differently?"
 
 ## Stage 4: Hiring committee
-LangChain is a hot AI infra company. The committee looks for: production LLM experience (not just demos), framework/infrastructure chops (you should be opinionated about abstractions), and a builder mentality. Red flags: never having built a real LLM app, weak on retrieval eval, never having used LangSmith.
+LangChain is a hot AI infra company. The committee looks for: production LLM experience (not just demos), framework/infrastructure chops (you should be opinionated about abstractions), and a builder mentality. Red flags: never having built a real LLM app, weak on retrieval eval, never having used LangSmith. The committee checks for "demo vs production" instinct — a candidate who can name their eval methodology and their cost-per-trace is worlds ahead of one who can only describe the chain they built.
 
 ## Stage 5: Offer
 Base is at the high end ($200K-$300K), equity is meaningful (private, growing fast, raised Series B at $1B+ valuation). Negotiation: equity refreshers + sign-on.
@@ -90,3 +98,9 @@ Base is at the high end ($200K-$300K), equity is meaningful (private, growing fa
 - [LangSmith docs](https://docs.smith.langchain.com)
 - [LangChain GitHub](https://github.com/langchain-ai/langchain)
 - [LangChain Glassdoor](https://www.glassdoor.com/Interview/LangChain-Interview-Questions-E3509100.htm)
+
+---
+
+## The 1 thing to remember
+
+Use LangSmith before the phone screen — set up tracing, run a real eval, and have a screenshot of the trace tree; the "design LangSmith" system design round is the bar, and the candidate who's used it the morning of the interview beats the one who can only describe it.

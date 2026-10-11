@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Feed, Search, Ads, Hiring, Recsys)
 - **Tech stack:** Java, Scala, Python, C++, PyTorch, TensorFlow, Kafka, Pinot, Voldemort (custom KV), Espresso, Spark
-- **Comp band:** $200K-$550K (IC3-IC5); Staff (IC6) $400K-$1M; Director (IC7) $700K-$1.4M (Levels.fyi 2026)
+- **Comp band:** $200K-$550K total comp (IC3-IC5); Staff (IC6) $400K-$1M total comp; Director (IC7) $700K-$1.4M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a two-sided professional graph — job ↔ candidate ↔ recruiter — with a connection-degree overlay). Color: LinkedIn blue (#0A66C2). Headline: "LinkedIn / AI ML Engineer / 2026".
+
+> **TL;DR:** LinkedIn's loop is the most structured of the big-tech recsys loops — it's still FAANG-tough, but the design round is almost always two-sided matching and the values round always probes engagement vs professional value. The winning candidate speaks economic intent, knows the recruiter-search system, and has a job-recommendation critique ready.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                      LINKEDIN HIRING FUNNEL                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Tech Phone (35%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Cross-org Review  │
+│          (25%)                                  (60%)           │
+│                                                                  │
+│  Committee ──► Offer (IC5 vs IC6 split) ──► Sunnyvale / SF match │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ LinkedIn's ML org is large and well-organized. The unique surface is professiona
 
 ### Q1.3: "Location + comp"
 **Answer:** Sunnyvale, SF primary. Some remote-US. Be clear on willingness to relocate. Comp is solid for Bay Area.
+
+LinkedIn's recruiter screen rewards candidates who speak two-sided marketplace language — every interaction has economic intent. The phone screen confirms you can code mediums and reason about a job-recommendation or feed-ranking system; cold start and engagement-vs-professional-value are the answers they're listening for.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -75,6 +94,8 @@ def merge(intervals):
 **Q3.4.2:** "Time you improved a system by 10%+ in 2 months." STAR.
 **Q3.4.3:** "How do you balance 'engagement' with 'professional value'?" — LinkedIn is explicit about this tradeoff.
 
+The onsite is methodical — 4-5 rounds across 1-2 days, each interviewer scoring against a rubric. The design round will land on Recruiter search or ads targeting, and the values round will explicitly probe engagement vs professional value. The ML deep-dive is a cold-start or spam-classification problem, not a pure model question.
+
 ## Stage 4: Hiring committee
 LinkedIn's committee is structured and multi-level. The bar for IC5 (Senior) is "ship a 2-3 quarter ML project with measurable business impact." IC6 (Staff) requires influence on the ML platform or org-wide direction. LinkedIn is more methodical than FAANG — expect 1-2 weeks for committee.
 
@@ -99,3 +120,9 @@ LinkedIn comp is competitive with Bay Area but slightly below top FAANG. RSU is 
 - [Levels.fyi LinkedIn](https://www.levels.fyi/companies/linkedin)
 - [Glassdoor LinkedIn interviews](https://www.glassdoor.com/Interview/LinkedIn-Interview-Questions-E34865.htm)
 - [LeetCode LinkedIn tagged](https://leetcode.com/company/linkedin/)
+
+---
+
+## The 1 thing to remember
+
+At LinkedIn, every interaction has economic intent — the IC5+ candidate is the one who designs the feed as a long-term trust system, not a short-term engagement loop.

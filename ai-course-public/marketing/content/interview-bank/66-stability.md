@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer / Researcher (Open foundation models)
 - **Tech stack:** PyTorch, JAX, CUDA, Triton, Hugging Face, large-scale distributed training
-- **Comp band:** $200K-$450K base + equity (post-restructuring, London/SF-remote)
+- **Comp band:** $200K-$450K total comp (L5-L7: Senior → Staff) | Base + RSUs
 - **Cumulative pass rate:** ~3-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: an open-weights hub with image/video/audio/3D model icons radiating from a central "open" lock. Color: Stability black + lime (#FF6A00). Headline: "Stability AI / Open Foundation Models / 2026".
+
+> **TL;DR:** Stability rewards open-weights generalists who can ship across image, video, and audio, not narrow specialists. The signature round is the SD3 architecture walkthrough — MMDiT, rectified flow, the 16-channel VAE. The winning candidate has shipped open-source work and can defend an opinion on open vs closed.
+
+```
+Recruiter → Phone (math) → Onsite (4 rounds) → Hiring committee → Offer
+```
+
+The onsite spans four modalities in spirit if not in name. Candidates who treat SD3 as their magnum opus and ignore Stable Video / Stable Audio don't get the offer.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen probes mission fit and forces an opinion on open vs closed weights. Hedge-y answers get cut here.
+
 ### Q1.1: "Why Stability now?"
 **Answer:** "After the 2024 restructure, Stability is doubling down on open-weights. Stable Diffusion 3.5, Stable Audio 2, Stable Video — that's the bet I want in. I want to build open foundation models that actually win on benchmarks, not just brand."
 **Tip:** Show awareness of the new CEO and the 2025 product roadmap.
@@ -26,6 +38,8 @@
 **Tip:** Have a real opinion. Stability screens for hedge-y answers here.
 
 ## Stage 2: Technical phone screen
+
+The phone emphasizes derivations — cross-entropy through softmax, plus an implementation question on sampling.
 
 ### Q2.1: Derive cross-entropy loss for a softmax classifier.
 **Answer:** L = -Σ y_i log p_i, with p_i = exp(z_i) / Σ exp(z_j). Show gradient ∂L/∂z_i = p_i - y_i.
@@ -48,6 +62,8 @@ def top_p(logits, p):
 **Tip:** Talk about temperature, repetition penalty, why top-p vs top-k.
 
 ## Stage 3: Onsite
+
+The onsite is four rounds of math, systems, and ML — RMSNorm, FSDP training, MMDiT walkthrough, and a behavioral that screens for ownership.
 
 ### Round 3.1: Coding
 **Q:** Implement RMSNorm in PyTorch.
@@ -83,6 +99,8 @@ Research leads from image + video + audio teams. They screen for breadth across 
 Post-restructure, equity refreshers are tighter; base is competitive.
 
 ## Tips for the Stability loop
+
+Most candidates under-prep flow matching. The math is the gate, the systems design is the differentiator.
 - Read the SD3 technical report end-to-end.
 - Know flow matching and rectified flow derivations.
 - Practice CUDA kernel writing on paper.
@@ -99,3 +117,9 @@ Post-restructure, equity refreshers are tighter; base is competitive.
 - [Levels.fyi — Stability AI](https://www.levels.fyi/companies/stability-ai)
 - [Glassdoor — Stability AI](https://www.glassdoor.com/Interview/Stability-AI-Interview-Questions.htm)
 - [Reddit r/StableDiffusion — Stability threads](https://reddit.com/r/StableDiffusion)
+
+---
+
+## The 1 thing to remember
+
+Stability rewards diffusion and foundation-model breadth — read the SD3 technical report end-to-end and be ready to derive rectified flow on a whiteboard.

@@ -2,8 +2,18 @@
 
 - **Role:** Senior ML Engineer (Financial NLP / market data)
 - **Tech stack:** Python, C++, PyTorch, NLP, kdb+, Solr, Bloomberg Terminal stack
-- **Comp band:** $200K-$500K base + bonus (no public equity)
+- **Comp band:** $200K-$500K total comp (Senior → Staff) | Base + bonus (no public equity)
 - **Cumulative pass rate:** ~3-5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a Terminal-style news ticker with auto-tagged entity overlays and a real-time market data graph. Color: Bloomberg black + amber (#FA8B1A). Headline: "Bloomberg / Financial NLP & Market Data / 2026".
+
+> **TL;DR:** Bloomberg is the only company that owns news, market data, and the terminal — a closed-loop moat no one else can build. The signature round is the real-time news feed with entity tagging at <500ms p99. The winning candidate treats trader trust as the bar and can backtest their NER model against market moves.
+
+```
+Recruiter → Phone → Onsite (4 rounds) → Hiring committee → Offer
+```
+
+The committee explicitly values shipping over research prestige. Candidates who can ship a precision/recall curve AND explain why a trader would trust it get the offer.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards Terminal fluency — use the product, name a Bloomberg AI feature you actually like, and explain why.
+
 ### Q1.1: "Why Bloomberg?"
 **Answer:** "Bloomberg is the only company that owns the entire financial information stack — news, market data, analytics, terminal. I want to apply ML where the data is real-time, multi-modal, and the bar for accuracy is trader trust, not benchmark accuracy."
 **Tip:** Show you've used the Terminal and understand the editorial + data business.
@@ -26,6 +38,8 @@
 **Tip:** Reference a specific product. Bloomberg wants people who use the Terminal.
 
 ## Stage 2: Technical phone screen
+
+The phone tests coding (merge intervals) and asks for a financial sentiment classifier design. They care about backtested correlation.
 
 ### Q2.1: Merge intervals.
 **Answer:**
@@ -45,6 +59,8 @@ def merge(ivs):
 **Tip:** They care about backtested correlation with market moves.
 
 ## Stage 3: Onsite
+
+Four rounds: combined LRU+rate-limiter coding, real-time news feed design, financial NER eval, and a behavioral that probes cross-team coordination.
 
 ### Round 3.1: Coding
 **Q:** Implement an LRU cache + a rate limiter combined.
@@ -69,6 +85,8 @@ Panel of senior engineers + research lead + product. They look for: (1) financia
 No public equity. Base is competitive with FAANG. Annual bonus is significant (15-30% of base). They rarely negotiate above band.
 
 ## Tips for the Bloomberg loop
+
+Most candidates over-index on academic NLP. Bloomberg's bar is "would a trader trust this?" — backtest your claims against market moves.
 - Read the Bloomberg Terminal if you can.
 - Know the difference between "news," "data," and "analytics" products.
 - Practice entity linking, NER, and sentiment tasks.
@@ -85,3 +103,9 @@ No public equity. Base is competitive with FAANG. Annual bonus is significant (1
 - [Levels.fyi — Bloomberg](https://www.levels.fyi/companies/bloomberg)
 - [Glassdoor — Bloomberg interviews](https://www.glassdoor.com/Interview/Bloomberg-Interview-Questions-E3096.htm)
 - [Reddit r/cscareerquestions — Bloomberg](https://reddit.com/r/cscareerquestions)
+
+---
+
+## The 1 thing to remember
+
+Bloomberg is shipping over research prestige — every "would a trader trust this?" decision must be backed by a backtest, not a benchmark.

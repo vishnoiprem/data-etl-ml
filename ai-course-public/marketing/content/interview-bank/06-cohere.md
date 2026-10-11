@@ -1,8 +1,16 @@
 # 6. Cohere
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (hybrid retrieval / RAG stack diagram). Color: company brand color as accent (Cohere deep blue). Headline on image: "Cohere / ML Engineer / 2026".
+
+> **TL;DR:** Cohere's loop runs 4 stages (Toronto / SF / London) and rejects ~96% of candidates — the signature question is "implement BM25 from scratch," graded on retrieval depth, not syntax. The winning candidate can name the 4-layer RAG stack (ingestion, chunking, retrieval, generation), defend the enterprise-RAG thesis over the consumer-pivot, and recite the trade-offs of hybrid vs. dense retrieval.
+
+```
+Recruiter (60%) → Phone (40%) → Onsite (30%) → Reference + offer
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, PyTorch, JAX, CUDA, Triton, vLLM
-- **Comp band:** CAD 200K-700K / USD 180K-600K (L3-L6)
+- **Comp band:** CAD 200K-700K / USD 180K-600K total comp (L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~3-4%
 
 ## Hiring rounds
@@ -13,6 +21,8 @@
 | 2. **Technical phone screen** | 1-2 coding + ML fundamentals, RAG-heavy | 1-2 weeks | ~40% advance |
 | 3. **Onsite (4 rounds, 1 day, Toronto/SF/London)** | Coding → RAG system design → ML deep-dive → behavioral | 1-2 days | ~30% advance |
 | 4. **Reference checks + offer** | Comp negotiation real | 1-2 weeks | — |
+
+The loop assumes the RAG context in every system-design round — generic ML answers lose. Most candidates under-prepare retrieval fundamentals (BM25 derivation, hybrid fusion, reranker lift).
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -52,6 +62,8 @@ class BM25:
 ```
 The Cohere warmup. Name k1, b, the IDF formula.
 **Tip:** BM25 + hybrid retrieval is the Cohere-canonical answer.
+
+The phone screen is BM25 from scratch. The onsite assumes you're already in a RAG context — name the 4 layers, the bar, the trade-off at every step.
 
 ## Stage 3: Onsite (4 rounds)
 
@@ -124,3 +136,9 @@ Cohere comp is base + RSU + sign-on. Toronto is the primary hub (lower cost of l
 - [Cohere Rerank](https://cohere.com/rerank)
 - [Cohere Compass](https://docs.cohere.com/docs/compass)
 - [Levels.fyi — Cohere compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At Cohere, BM25 derivation is the gate — name k1, b, and the IDF formula, then build the 4-layer RAG stack on top; enterprise-RAG thesis, not consumer-pivot, wins the loop.

@@ -1,8 +1,16 @@
 # 24. Meta (GenAI / Ads ML / FAIR)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "META / AI GENAI / 2026".
+
+> **TL;DR:** Meta's loop moves fast — coding rounds are *timed* and they expect signal density. The signature ML questions are calibration, multi-task learning, and Ads-scale serving. The winning candidate can whiteboard paged attention + FSDP and has a "disagree directly" story backed by data.
+
+```
+Recruiter (50%) → Phone (30%) → Onsite (30%) → ML Panel (50%) → Offer
+```
+
 - **Role:** ML Engineer or Research Engineer (GenAI, Ads ranking, Integrity, FAIR)
 - **Tech stack:** Python, PyTorch (heavily), C++, CUDA, FBGEMM, TorchRec, FSDP, React/GraphQL for some roles
-- **Comp band:** $300K-$1.2M (E3-E7); E7+ crosses $2M+; RSUs heavy, base high
+- **Comp band:** $300K-$1.2M total comp (E3-E7) | RSUs 4-year, 1-year cliff; E7+ crosses $2M+
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (ML cross-functional)** | Senior ML panel vote | 2-3 weeks | ~50% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Meta's loop is the fastest in big tech — 4-5 weeks from screen to offer if everything clicks. The compressed timeline is by design: "move fast" is the operating system, and the interview process mirrors it.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Meta for ML?"
@@ -26,6 +36,8 @@
 **Tip:** "Move fast" energy is rewarded at Meta. Show iteration speed.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens are where Meta quietly decides if you're a peer to the people who already work there. The ML round is conversational but specific — "design a system" is code for "show me you know the names of the techniques."
 
 ### Q2.1: Coding — "K-th largest element in a stream"
 **Answer:** Maintain a min-heap of size K. Push new elements; if size > K, pop.
@@ -47,6 +59,8 @@ class KthLargest:
 **Tip:** Meta ML questions are *very* applied. They want scale and engagement signal specifics.
 
 ## Stage 3: Onsite (4-5 rounds)
+
+Energy management matters here — the onsite is dense, sometimes 4-5 rounds in a single day. Open with coding (fresh brain), close with behavioral (which is really about how you handle conflict). The optional C++/PyTorch round is real and can sink senior candidates.
 
 ### Round 3.1: Coding (45-60 min)
 
@@ -125,3 +139,9 @@ Cash + RSUs. Meta is one of the highest-paying employers in tech. Negotiation is
 - [PyTorch blog](https://pytorch.org/blog/)
 - [Meta AI Research](https://ai.meta.com/research/)
 - [r/MachineLearning Meta thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Meta, signal density wins — talk while you code, name every technique (paged attention, FSDP, DPO), and bring a "disagree directly" story with the data that proved you right.

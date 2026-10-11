@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Search, Discovery, Trust & Safety, Avatar/Generative AI)
 - **Tech stack:** Python, C++, Lua, PyTorch, TensorFlow, Cassandra, Kafka, Spark, Kubernetes, gRPC
-- **Comp band:** $220K-$550K (L3-L5); L6 (Staff) $450K-$1M; L7 Director $700K-$1.5M (Levels.fyi 2026)
+- **Comp band:** $220K-$550K total comp (L3-L5); L6 (Staff) $450K-$1M total comp; L7 Director $700K-$1.5M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (an avatar being generated in a blocky 3D viewport with a safety classification overlay). Color: Roblox black + signature red. Headline: "Roblox / AI ML Engineer / 2026".
+
+> **TL;DR:** Roblox's loop is kid-safety-first, with ML questions that test age-aware thresholds, COPPA instincts, and the cost of false positives in moderation. The winning candidate is the one who designs for a 9-year-old worst case, knows how to evaluate generative avatars, and treats discovery as more than popularity ranking.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       ROBLOX HIRING FUNNEL                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (45%) ──► Tech Phone (30%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Responsible-AI    │
+│          (25%)                                  Review (55%)    │
+│                                                                  │
+│  Committee ──► Offer (L5 vs L6 split) ──► Pre-match team          │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Roblox has a unique ML surface: kid-safety is the existential priority (COPPA co
 
 ### Q1.3: "Comp + location"
 **Answer:** San Mateo HQ is primary. Some remote-US for senior. International is rare.
+
+The recruiter screen rewards candidates who name the safety stakes upfront. The phone screen is where Roblox confirms you can reason about a kid-safety classifier — age-aware thresholds, COPPA instincts, and the cost of false positives are exactly what they're probing.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -81,6 +100,8 @@ def ladderLength(beginWord, endWord, wordList):
 **Q3.4.2:** "How do you handle pressure to ship fast when safety is at stake?" — Roblox cares deeply.
 **Q3.4.3:** "What would you do if you found your model was biased against a demographic?" — be specific.
 
+The onsite is 4-5 rounds across 1-2 days, and the ML deep-dive round is always a kid-safety system. Expect "what's the cost of a false positive?" three different ways — and prepare a real answer for each. The behavioral round probes whether you'll ship under pressure when safety is on the line.
+
 ## Stage 4: Hiring committee
 Roblox's committee includes a senior leader outside the team. They explicitly test for "responsible AI" and "kid-safety instincts." Senior (L5) requires independent project leadership; L6 (Staff) requires cross-team influence. They move slowly on offers — typically 1-2 weeks for committee.
 
@@ -105,3 +126,9 @@ Roblox is competitive with Bay Area. Base is solid, RSU is 4-year vest with 1-ye
 - [Levels.fyi Roblox](https://www.levels.fyi/companies/roblox)
 - [Glassdoor Roblox interviews](https://www.glassdoor.com/Interview/Roblox-Interview-Questions-E425581.htm)
 - [LeetCode Roblox tagged](https://leetcode.com/company/roblox/)
+
+---
+
+## The 1 thing to remember
+
+Roblox is designing for a 9-year-old worst case — the L5+ candidate is the one who names that user before the interviewer does and designs age-aware thresholds instead of one-size-fits-all.

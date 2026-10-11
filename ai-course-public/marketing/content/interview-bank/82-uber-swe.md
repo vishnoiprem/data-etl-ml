@@ -2,8 +2,25 @@
 
 - **Role:** Senior Software Engineer (Marketplace / Rides)
 - **Tech stack:** Go, Java, Python, Kotlin (Android), Swift (iOS), React, gRPC, Kafka, Flink, Cassandra, Schemaless, Hive, TensorFlow, PyTorch, Michelangelo
-- **Comp band:** $180K-$550K (L3-L5a); Staff (L5b) $400K-$900K; L6 Director $700K-$1.5M (Levels.fyi 2026)
+- **Comp band:** $180K-$550K total comp (L3-L5a); Staff (L5b) $400K-$900K total comp; L6 Director $700K-$1.5M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1.5-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a dispatch map — H3 hex grid overlaying city streets with a moving driver dot). Color: Uber black + signature green. Headline: "Uber / AI Senior SWE / 2026".
+
+> **TL;DR:** Uber's loop is real-time, real-scale, real LeetCode hard — they will test trie/graph problems and a marketplace design that touches dispatch or ETA, and they expect ML fluency in online learning and quantile losses. The winning candidate speaks in QPS and p99, has a surge-pricing story, and demonstrates org-wide influence for L5b.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                          UBER HIRING FUNNEL                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Coding Phone (35%) ──► Onsite    │
+│                                                                  │
+│  Onsite ──► Coding ×2 / Design / ML / Values ──► Bar Raiser      │
+│          (25%)                                  (60%, can veto) │
+│                                                                  │
+│  Bar Raiser ──► Offer (L5a vs L5b = $200K swing) ──► Team match │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Uber's loop is one of the most demanding in marketplace engineering. The bar is 
 
 ### Q1.3: "Comp expectations and location"
 **Answer:** Give a range with stock-heavy weighting; Uber RSU refresher is every 4 years. SF, Seattle, NYC, Sunnyvale are core; remote is limited.
+
+Recruiter screens at Uber are about scale and comp. The phone screen is where the bar moves — Uber will hand you a real LeetCode hard, and your ability to talk about a marketplace at 10M-driver scale in real-time starts there.
 
 ## Stage 2: Coding phone screen (60 min)
 
@@ -90,6 +109,8 @@ def findWords(board, words):
 **Q3.4.2:** "Disagreement with PM on scope." STAR.
 **Q3.4.3:** "Why Uber over a smaller marketplace startup?"
 
+The onsite is dense — 4-5 rounds, each a distinct lens on you. Uber's onsite design round is almost always dispatch or Eats ranking, and the ML round tests whether you understand real-time scoring at scale. The behavioral round is your chance to show postmortem leadership and PM-disagreement stories.
+
 ## Stage 4: Hiring committee
 Uber uses a "bar raiser" model inspired by Amazon. A senior engineer outside your target team reviews your packet and can veto below-bar hires. Level calibration is cross-org. L5a vs L5b is determined here — L5b staff requires system design that affects multiple teams.
 
@@ -114,3 +135,9 @@ Base + RSU refresher every 4 years is the unique perk. RSUs vest annually after 
 - [Levels.fyi Uber](https://www.levels.fyi/companies/uber)
 - [Glassdoor Uber interviews](https://www.glassdoor.com/Interview/Uber-Interview-Questions-E575263.htm)
 - [LeetCode Uber tagged](https://leetcode.com/company/uber/)
+
+---
+
+## The 1 thing to remember
+
+At Uber, real-time is the religion — speak in QPS and p99, default to pinball loss for any ETA question, and remember that L5b is decided on whether you can influence the org, not just the service.

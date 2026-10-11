@@ -1,8 +1,16 @@
 # 30. Adobe (Firefly / Sensei / Document AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "ADOBE / AI FIREFLY / 2026".
+
+> **TL;DR:** Adobe's loop is built around **commercially-safe generative AI** — Firefly is the only indemnified model in production, and every answer should bend toward content credentials. The signature lens is **craft**: pixel-level obsession over metrics. The winning candidate names C2PA and DreamBooth without prompting.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer / Research Engineer (Firefly, Sensei, Document AI, Acrobat AI)
 - **Tech stack:** Python, PyTorch, JAX, CUDA, Diffusers, Transformers, Houdini, After Effects SDKs, Java/C++
-- **Comp band:** $250K-$700K (IC3-IC5); senior crosses $900K+; RSUs vest 4-year
+- **Comp band:** $250K-$700K total comp (IC3-IC5) | RSUs 4-year, 1-year cliff; senior crosses $900K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Adobe's loop is "craft-obsessed" by design — the panel is half engineers, half researchers, half PMs, and they all grade on output quality. If your design doesn't reach for content credentials or indemnification, you're missing the unique Adobe frame.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Adobe for AI?"
@@ -26,6 +36,8 @@
 **Tip:** Adobe culture values *craft* deeply. Show you care about output quality, not just metrics.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens are where Adobe quietly checks for *craft* and *commercial safety*. If you don't mention IP-Adapter, ControlNet, or content credentials in the ML round, the interviewer will.
 
 ### Q2.1: Coding: "Merge overlapping intervals"
 **Answer:** Sort by start, iterate merging if next.start ≤ curr.end.
@@ -45,6 +57,8 @@ def merge(intervals):
 **Tip:** Adobe is *the* commercially-safe AI. Reference content credentials (C2PA) and indemnification.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and craft-flavored. Firefly, Acrobat AI, and Sensei are all different conversations — confirm your target product with the recruiter so you can rehearse the right ML deep-dive.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Implement k-means from scratch.
@@ -88,3 +102,9 @@ Cash + RSUs. Adobe is competitive with FAANG, sometimes above for senior+ due to
 - [Adobe Research blog](https://research.adobe.com/)
 - [Firefly docs](https://www.adobe.com/products/firefly.html)
 - [r/MachineLearning Adobe thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Adobe, "commercially safe" is the differentiator — name Firefly, content credentials (C2PA), and indemnification by default, because every model Adobe ships has to defend itself in front of an enterprise legal team.

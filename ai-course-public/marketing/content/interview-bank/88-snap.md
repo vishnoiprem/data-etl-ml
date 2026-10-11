@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Camera, AR, Generative, Recsys, Ads)
 - **Tech stack:** Python, C++, Objective-C/Swift, Java, PyTorch, TensorFlow, gRPC, Cassandra, Kafka, Kubernetes
-- **Comp band:** $200K-$500K (L4-L5); L6 (Staff) $400K-$1M; L7 Director $700K-$1.4M (Levels.fyi 2026)
+- **Comp band:** $200K-$500K total comp (L4-L5); L6 (Staff) $400K-$1M total comp; L7 Director $700K-$1.4M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1.5-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a phone camera viewport with an AR Lens overlay and a face landmark mesh). Color: Snap yellow (#FFFC00). Headline: "Snap / AI ML Engineer / 2026".
+
+> **TL;DR:** Snap's loop is camera-first and creative-product-flavored — they care about on-device inference constraints, multi-modal ML, and generative AR, and they test notification quality as a proxy for whether you understand user annoyance. The winning candidate names battery/latency as a real constraint and has a favorite Lens ready to defend.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        SNAP HIRING FUNNEL                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Tech Phone (35%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Cross-org Review  │
+│          (30%)                                  (60%)           │
+│                                                                  │
+│  Committee ──► Offer (L5 vs L6 split) ──► LA / SF team match     │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Snap's ML org spans computer vision (Lenses, AR), generative AI (My AI, image ge
 
 ### Q1.3: "Location + comp"
 **Answer:** Snap is primarily LA (Santa Monica) with offices in SF, Seattle, NYC, London. Relocation to LA is common. Remote is limited.
+
+Snap's recruiter screen rewards product-aware candidates — they want engineers who love the camera surface. The phone screen is where they confirm you can code clean mediums and reason about a Lens retrieval or notification-quality problem; on-device constraints should be on your tongue, not on your sleeve.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -74,6 +93,8 @@ def groupAnagrams(strs):
 **Q3.4.2:** "Time you influenced product direction with data." STAR.
 **Q3.4.3:** "What's your favorite Lens and why?" — be specific, shows product love.
 
+The onsite is 4 rounds in 1 day, with the ML deep-dive almost always pulling from Camera, Lens, or multi-modal. The system-design round will land on Stories or AR Lens ranking — and battery/latency is the constraint you need to be visibly thinking about. The behavioral round rewards product love (favorite Lens ready).
+
 ## Stage 4: Hiring committee
 Snap's committee includes the hiring manager, 2-3 cross-functional peers, and a senior leader. The bar for L5 (Senior) is "scope and ship a 2-quarter ML project independently." L6 (Staff) requires influence on the ML platform or org-wide direction. Snap takes 1-2 weeks for committee.
 
@@ -98,3 +119,9 @@ Snap comp is solid for the Bay Area but slightly below FAANG. RSU is 4-year vest
 - [Levels.fyi Snap](https://www.levels.fyi/companies/snap)
 - [Glassdoor Snap interviews](https://www.glassdoor.com/Interview/Snap-Interview-Questions-E950299.htm)
 - [LeetCode Snap tagged](https://leetcode.com/company/snap/)
+
+---
+
+## The 1 thing to remember
+
+At Snap, the constraint is the phone — the L5+ candidate is the one who names battery and latency as the first design constraint, not the last optimization step.

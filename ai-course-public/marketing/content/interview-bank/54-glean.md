@@ -1,8 +1,16 @@
 # 54. Glean
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Glean enterprise search stack — connectors + identity graph + inverted index + LLM reranker — and the Glean teal/blue palette). Color: Glean teal (#2D6CDF on near-white). Headline: "Glean / AI Enterprise Search Engineer / 2026".
+
+> **TL;DR:** Glean is the leader in enterprise AI search with the hardest permission-aware RAG problem; the loop is recruiter → 60 min coding+system design phone → 4-round onsite (with a Google-style "design the full search stack" round) → big-tech-style committee → offer, and the signature round is "build an enterprise permission-aware search backend." The winning candidate has shipped search or RAG with real ACLs, knows BM25+vector+reranker tradeoffs, and treats 100+ SaaS connectors as an interesting systems problem.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer / Software Engineer (Enterprise Search)
 - **Tech stack:** Python, Go, TypeScript, React, Kubernetes, Postgres, Elasticsearch, vector DBs, LLM APIs, embeddings, OAuth/SAML/SCIM connectors
-- **Comp band:** $200K-$420K (late-stage, well-funded, $4B+ valuation)
+- **Comp band:** $200K-$420K total comp (Senior SWE/AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -80,7 +88,7 @@ class BM25:
 - **Q3.4.2:** "Why enterprise? Why AI for enterprise?"
 
 ## Stage 4: Hiring committee
-Glean is structured — ex-Google leadership, big-tech-style loop review. They look for: deep systems experience, search/ranking familiarity, and an enterprise mindset (security, permissions, scale). Red flags: never having built a search system, weak on ML, no enterprise experience.
+Glean is structured — ex-Google leadership, big-tech-style loop review. They look for: deep systems experience, search/ranking familiarity, and an enterprise mindset (security, permissions, scale). Red flags: never having built a search system, weak on ML, no enterprise experience. The committee is comfortable saying no on culture fit, so a candidate who can pair "I've shipped search at scale" with "I care about permissions" wins on both signal dimensions at once.
 
 ## Stage 5: Offer
 Base is at big-tech level ($200K-$300K+ for senior), equity is meaningful (private, well-funded, late-stage). Negotiation: title, sign-on, equity refreshers.
@@ -103,3 +111,9 @@ Base is at big-tech level ($200K-$300K+ for senior), equity is meaningful (priva
 - [Glean docs](https://docs.glean.com)
 - [Glean Glassdoor](https://www.glassdoor.com/Interview/Glean-Interview-Questions-E3509300.htm)
 - [Levels.fyi Glean](https://www.levels.fyi/companies/glean)
+
+---
+
+## The 1 thing to remember
+
+Practice the "design an enterprise permission-aware search backend" round before the onsite — Glean's moat is the identity graph + ACL filter at query time, and the candidate who walks 100+ SaaS connectors, BM25+vector+reranker, and ACL extraction in 45 minutes is the one the ex-Google committee fights to close.

@@ -1,8 +1,16 @@
 # 33. Airbnb (ML / Search & Discovery)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "AIRBNB / AI SEARCH / 2026".
+
+> **TL;DR:** Airbnb's loop is **search-heavy** and mission-driven — the trinity is long-tail handling, cold-start, and offline/online metric alignment. The signature lens is **"belong anywhere"** — every behavioral answer gets reframed through craft and host empathy. The winning candidate reads the Airbnb Tech Blog before the loop and quotes it back.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Search Ranking, Recommendations, Trust, LLM)
 - **Tech stack:** Python, PyTorch, Java, Kotlin, Scala, Spark, Kafka, Druid, MySQL, Elasticsearch, ML infra
-- **Comp band:** $300K-$850K (L4-L6); senior crosses $1M+; RSUs vest 4-year with no cliff
+- **Comp band:** $300K-$850K total comp (L4-L6) | RSUs 4-year, 1-year cliff; senior crosses $1M+
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Onsite (4-5 rounds)** | Coding, system design, ML, behavior, cross-fn | 1-2 days | ~30% advance |
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
+
+Airbnb's loop is the most "bar-raising" of the marketplace companies — the panel is famously calibrated, and "no hire" is the default when signal is mixed. Read the tech blog before your loop; it's the cheapest competitive advantage you can buy.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -27,6 +37,8 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
+The phone screens are where Airbnb quietly tests for *search depth* — multi-objective ranking, position bias, and the two-sided host/guest dynamic. If you don't name specific Airbnb research posts (TRIPS, listing embeddings), you're behind.
+
 ### Q2.1: Coding: "Implement a trie with insert/search/startsWith"
 **Answer:** Node-based with 26 children. O(L) per operation.
 **Tip:** Some roles use Java or Kotlin. Confirm with recruiter.
@@ -36,6 +48,8 @@
 **Tip:** Airbnb has published extensively — reference specific models.
 
 ## Stage 3: Onsite (4-5 rounds)
+
+The onsite is dense and design-conscious. Five rounds means a dedicated cross-functional slot — that's your chance to show partnership with PM and design, which is a real signal at Airbnb.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: LRU cache. O(1) get/put.
@@ -83,3 +97,9 @@ Cash + RSUs (heavily RSU-weighted). Airbnb is *top-of-market* — competitive wi
 - [Airbnb Tech Blog](https://medium.com/airbnb-engineering)
 - [Airbnb Research](https://research.airbnb.com/)
 - [r/MachineLearning Airbnb thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Airbnb, read the tech blog before the loop and quote it back — name listing embeddings, TRIPS, and "be a host," because the panel is calibrated to the Airbnb voice and a generic ML answer sinks you.

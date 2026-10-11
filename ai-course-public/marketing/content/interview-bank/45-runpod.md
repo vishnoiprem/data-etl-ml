@@ -1,8 +1,16 @@
 # 45. RunPod
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a RunPod pod hierarchy with GPU passthrough diagram and the RunPod purple color). Color: RunPod purple (#6E40C0). Headline: "RunPod / AI Cloud GPU Engineer / 2026".
+
+> **TL;DR:** RunPod is the developer-friendly GPU cloud; the loop is recruiter → K8s+GPU coding+infra phone → 3-4 round onsite (with a founder round) → committee → offer, and the signature question is "isolating noisy-neighbor GPUs in a multi-tenant cloud." The winning candidate has debugged a real CUDA job, knows MIG/MPS/cgroups cold, and can talk MIG vs full-GPU scheduling tradeoffs.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** ML Infrastructure Engineer / Cloud GPU Engineer
 - **Tech stack:** Python, Go, TypeScript, Kubernetes, Docker, CUDA, NVIDIA drivers, Triton, vLLM, S3, K8s operators, Terraform
-- **Comp band:** $170K-$340K (smaller than Lambda/CoreWeave, growing fast)
+- **Comp band:** $170K-$340K total comp (Senior ML Infra Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -76,7 +84,7 @@ class GPUQueue:
 - **Q3.4.3:** "A customer complains about GPU availability. Walk me through your investigation." (RunPod is obsessed with capacity.)
 
 ## Stage 4: Hiring committee
-Smaller team (~150 people), tight review. They look for: K8s + GPU depth, ability to debug at the kernel level, customer empathy (RunPod has a strong community/DX focus). Red flags: not knowing what MIG is, or never having used a K8s GPU operator.
+Smaller team (~150 people), tight review. They look for: K8s + GPU depth, ability to debug at the kernel level, customer empathy (RunPod has a strong community/DX focus). Red flags: not knowing what MIG is, or never having used a K8s GPU operator. The committee decides in days, not weeks, because RunPod's interview loop is built to filter for "GPU in anger" rather than abstract infra talk.
 
 ## Stage 5: Offer
 Base is competitive for the size; equity is moderate (RunPod is private, growing). They sometimes offer GPU compute credits as a perk. Negotiation: sign-on + equity.
@@ -99,3 +107,9 @@ Base is competitive for the size; equity is moderate (RunPod is private, growing
 - [RunPod engineering blog](https://www.runpod.io/blog)
 - [RunPod Glassdoor](https://www.glassdoor.com/Interview/RunPod-Interview-Questions-E5078000.htm)
 - [Levels.fyi RunPod](https://www.levels.fyi/companies/runpod)
+
+---
+
+## The 1 thing to remember
+
+Run a real GPU job on RunPod before the interview — set up a pod, train a tiny model, deploy a serverless endpoint; the founder round is where the candidate who has actually used GPUs in anger separates from the one who's just read K8s docs.

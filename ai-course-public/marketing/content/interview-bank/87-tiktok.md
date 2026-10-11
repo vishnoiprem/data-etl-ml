@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Recommendation, Ranking, Search, T&S)
 - **Tech stack:** Python, C++, Go, PyTorch, TensorFlow, Flink, Kafka, ClickHouse, Kubernetes, Monolith (TikTok's ML serving), ByteDance's Volcano
-- **Comp band:** $250K-$700K (L3-L6); L7 (Staff) $500K-$1.2M; L8 Director $800K-$1.8M (Levels.fyi 2026)
+- **Comp band:** $250K-$700K total comp (L3-L6); L7 (Staff) $500K-$1.2M total comp; L8 Director $800K-$1.8M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~0.8-1.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a For You feed with multi-modal embeddings — video frames, audio waveform, hashtag vectors — fanning into a ranking tower). Color: TikTok pink/cyan/black. Headline: "TikTok / AI ML Engineer / 2026".
+
+> **TL;DR:** TikTok's loop is the most demanding recsys + LeetCode-hard combination in consumer — they expect DIN/DIEN fluency, multi-modal embedding knowledge, and the ability to derive contrastive losses on a whiteboard. The winning candidate quantifies everything in QPS, treats online learning as default, and ships a TikTok-feature critique unprompted.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       TIKTOK HIRING FUNNEL                        │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (40%) ──► Online Assessment (40%) ──► Phone │
+│                                                                  │
+│  Phone ──► Onsite (4-5 rounds) ──► Bar Raiser Committee         │
+│         (30%)                              (50%, can veto)      │
+│                                                                  │
+│  Committee ──► Offer (L6 vs L7 split) ──► Team match (30 days)  │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -38,6 +55,8 @@ TikTok/ByteDance has the most demanding ML interview loop of any consumer compan
 ### Q2.3: "Math/greedy/array problem" — 30 min
 
 **Tip:** Practice LeetCode mediums in 30-min windows. The OA is the first filter — many candidates don't make it past.
+
+The online assessment is where most candidates fall off — TikTok's bar is real, and the phone screen confirms you can survive a LeetCode hard under time pressure. From there, every conversation is a recsys depth test: DIN, DIEN, multi-modal embeddings, online learning.
 
 ## Stage 3: Technical phone screen (60 min)
 
@@ -85,6 +104,8 @@ class LRUCache(OrderedDict):
 **Q4.4.2:** "Time you disagreed with a senior engineer." STAR.
 **Q4.4.3:** "What's your favorite TikTok feature and how would you improve it?" — be specific, shows product depth.
 
+The onsite is 4-5 rounds across 1-2 days, and the ML deep-dive is where TikTok separates staff from senior. Be ready to derive loss functions on the whiteboard and defend an online-learning architecture. The behavioral round specifically rewards product critique — bring a "favorite feature I'd improve" answer.
+
 ## Stage 5: Hiring committee
 TikTok has a serious bar-raiser process. The committee is cross-org, includes a senior leader outside the team, and is empowered to reject below-bar candidates. Level calibration is strict — L5 vs L6 is decided here, often after debate. Staff (L7) is rare and requires a separate committee.
 
@@ -109,3 +130,9 @@ TikTok comp is top of market. Base is strong, RSU is generous. They will negotia
 - [Levels.fyi TikTok](https://www.levels.fyi/companies/tiktok)
 - [Glassdoor TikTok interviews](https://www.glassdoor.com/Interview/TikTok-Interview-Questions-E2232956.htm)
 - [LeetCode TikTok tagged](https://leetcode.com/company/tiktok/)
+
+---
+
+## The 1 thing to remember
+
+At TikTok, online learning is the default and DIN/DIEN is the lingua franca — the L6+ candidate is the one who derives a contrastive loss on the whiteboard and quantifies scale in QPS, not millions of users.

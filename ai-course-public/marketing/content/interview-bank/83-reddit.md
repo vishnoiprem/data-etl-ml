@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Search, Ranking, Ads)
 - **Tech stack:** Python, Go, Scala, PyTorch, TensorFlow, Cassandra, Postgres, Kafka, Flink, Spark, Kubernetes, BERT, LLama fine-tunes
-- **Comp band:** $200K-$500K (L3-L5); Staff $400K-$900K; L6 Director $700K-$1.4M (Levels.fyi 2026)
+- **Comp band:** $200K-$500K total comp (L3-L5); Staff $400K-$900K total comp; L6 Director $700K-$1.4M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2.5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a subreddit feed with upvote arrows and a vote-confidence curve overlay). Color: Reddit orange (#FF4500). Headline: "Reddit / AI ML Engineer / 2026".
+
+> **TL;DR:** Reddit's loop is medium LeetCode, community-aware ranking, and a system-design round that almost always lands on home feed or comment ranking — they explicitly test whether you understand diversity, Wilson score, and the cost of a popularity trap. The winning candidate speaks community health, knows the upvote-algorithm history, and has an opinion on AI search.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        REDDIT HIRING FUNNEL                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Tech Phone (35%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Bar Raiser Review │
+│          (30%)                                  (60%)           │
+│                                                                  │
+│  Committee ──► Offer (level set here) ──► Team match            │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Reddit's ML org is split between Search (post/comment ranking), Feeds (home feed
 
 ### Q1.3: "Comp + remote"
 **Answer:** Reddit is mostly SF/NYC onsite (3 days/week) for senior roles. Fully-remote is rare. Be clear on your floor and target.
+
+Recruiter screens are fit-focused. The phone screen is where Reddit confirms you can code cleanly and reason about ranking at subreddit scale — diversity, Wilson score, and cold start are the levers they expect you to pull.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -79,6 +98,8 @@ def wordBreak(s, wordDict):
 **Q3.4.2:** "Time you made a model more fair / less biased." STAR.
 **Q3.4.3:** "What subreddit would you build an ML feature for?" — fun question, be specific.
 
+The onsite is where Reddit tests depth — one round is pure ML, and the system-design round will absolutely push you on diversity rerankers and echo-chamber effects. Pre-empt those concerns; the bar raiser is listening for them.
+
 ## Stage 4: Hiring committee
 Reddit's committee is a 4-5 person panel that includes a bar-raiser and the hiring manager. They score on a rubric (1-4) per round; the bar for senior is "3+" on all rounds. L5 (Senior) vs L4 (Mid) is decided here based on scope of past work.
 
@@ -103,3 +124,9 @@ Reddit's offers are competitive with the Bay Area market. RSU refresher is annua
 - [Levels.fyi Reddit](https://www.levels.fyi/companies/reddit)
 - [Glassdoor Reddit interviews](https://www.glassdoor.com/Interview/Reddit-Interview-Questions-E229616.htm)
 - [LeetCode Reddit tagged](https://leetcode.com/company/reddit/)
+
+---
+
+## The 1 thing to remember
+
+Reddit's ranking bar is diversity, not just engagement — if you only optimize for upvotes you'll get a popularity trap, and the L5+ candidate is the one who names that problem before the interviewer does.

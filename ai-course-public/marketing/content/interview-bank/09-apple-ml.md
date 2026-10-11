@@ -1,8 +1,17 @@
 # 9. Apple ML Research
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Apple Foundation Models 3B/100B split on Neural Engine). Color: company brand color as accent (Apple silver + space gray). Headline on image: "Apple ML Research / ML Engineer / 2026".
+
+> **TL;DR:** Apple's loop is 4 stages and rejects ~97% of candidates — the offer-decider is "Why Apple, specifically?" (a techno-behavioral round graded as heavily as coding), where you must name a specific bet, test, and disagreement. The winning candidate signals AFM literacy (3B/100B split, on-device adapter, federated learning), thinks hardware-first (Neural Engine + Metal), and answers the privacy follow-up on every system design.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Managerial round (50%) → Offer
+                                                  └── "Why Apple" round ──┘
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, PyTorch, Core ML, Swift, Metal, Neural Engine
-- **Comp band:** $180K-$900K+ (ICT2-ICT6)
+- **Comp band:** $180K-$900K+ total comp (ICT2-ICT6 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen (60-90 min)** | ML + coding (BERT, audio, LeetCode medium) | 1-2 weeks | ~40% advance |
 | 3. **Virtual onsite (3-5 rounds)** | ML deep-dive → coding → system design → techno-behavioral → optional research talk | 1-2 weeks | ~30% advance |
 | 4. **Managerial round** | "Why Apple" + project defense | 1 week | ~50% advance |
+
+The loop is shorter than the US frontier labs, but the "Why Apple" question is graded as heavily as coding. Most candidates under-prepare it and lose the loop despite strong technical rounds.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -49,6 +60,8 @@ class GaussianNB:
 ```
 On-device adaptation: priors precomputed at training, shipped as a lookup table; inference is just the log-likelihood sum.
 **Tip:** Bayes' theorem + log-trick + Gaussian extension + on-device cost.
+
+The phone screen is a BERT + Gaussian-NB warmup. The onsite is where the privacy follow-up and the AFM (3B/100B) literacy decide the loop — every system design gets a "how would you adapt this for the Neural Engine?" question.
 
 ## Stage 3: Virtual onsite (3-5 rounds)
 
@@ -115,3 +128,9 @@ Apple ML comp is more cash-heavy than RSU-heavy (50-60% base). RSUs vest 4 years
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026)
 - [Levels.fyi — Apple compensation](https://www.levels.fyi/companies/apple/salaries/software-engineer)
 - [Apple Machine Learning Research](https://machinelearning.apple.com/)
+
+---
+
+## The 1 thing to remember
+
+At Apple ML, "Why Apple" is the offer-decider — name a specific on-device bet, a specific test, a specific disagreement, and the AFM (3B/100B) literacy or the loop downgrades you.

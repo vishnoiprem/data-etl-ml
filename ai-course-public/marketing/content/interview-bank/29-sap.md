@@ -1,8 +1,16 @@
 # 29. SAP (Joule / Business Technology Platform)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "SAP / AI JOULE / 2026".
+
+> **TL;DR:** SAP's loop runs through the lens of **business process depth** — every system is a GL, AP, AR, MM, or SD workflow under the hood. The signature product is **Joule**, the AI copilot for SAP BTP, and the winning candidate knows ERP concepts natively and can build RAG that respects row-level authorization in 40+ languages.
+
+```
+Recruiter (55%) → Phone (45%) → Onsite (35%) → Tech Panel (60%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Joule, BTP AI, S/4HANA ML)
 - **Tech stack:** Python, PyTorch, TensorFlow, Java, ABAP (sometimes), HANA, SAP BTP, Kubernetes
-- **Comp band:** $180K-$500K (IC3-IC5); senior crosses $650K+; RSUs + bonus, EUR-equivalent
+- **Comp band:** $180K-$500K total comp (IC3-IC5) | RSUs 4-year, 1-year cliff; senior crosses $650K+
 - **Cumulative pass rate:** ~3-4%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+SAP's loop is global, and the cadence reflects European release cycles — expect a longer calendar than US-based big tech, and a heavy emphasis on cross-cultural collaboration. "Build" is the value they grade hardest: ship iteratively, not in big-bang.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why SAP for AI?"
@@ -26,6 +36,8 @@
 **Tip:** Show enterprise empathy. SAP sells to global Fortune 500s with complex integrations.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens look like any big-tech interview, but the ML round always bends back to *business value*. If your design doesn't translate model accuracy into cycle-time reduction or cash-flow lift, you're speaking the wrong language for SAP.
 
 ### Q2.1: Coding: "Longest substring without repeating characters"
 **Answer:** Sliding window with a set, O(N).
@@ -46,6 +58,8 @@ def lengthOfLongestSubstring(s):
 **Tip:** SAP has a "Business AI" focus — show *business* value, not just model accuracy.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is where ERP depth and multi-language thinking get tested. Joule's design conversation always pulls in ACL filtering and 40+ language coverage — both are first-class concerns, not edge cases.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Product of array except self. O(N) with prefix/suffix.
@@ -89,3 +103,9 @@ Cash + RSUs + bonus. SAP is competitive in Europe (Walldorf, Munich) but lower f
 - [SAP AI Blog](https://blogs.sap.com/tag/artificial-intelligence/)
 - [Joule docs](https://www.sap.com/products/artificial-intelligence/joule.html)
 - [Glassdoor SAP interviews](https://www.glassdoor.com/Interview/SAP-Interview-Questions-E10471.htm)
+
+---
+
+## The 1 thing to remember
+
+At SAP, you have to speak ERP — name Joule, BTP, and S/4HANA unprompted, and show that your models reason over GL, AP, AR, MM, and SD workflows in 40+ languages by default.

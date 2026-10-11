@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer (Medical LLMs)
 - **Tech stack:** Python, PyTorch, Hugging Face Transformers, FastAPI, Postgres, AWS HealthLake, HIPAA-compliant infra
-- **Comp band:** $180K-$380K base + equity (Series B, Paris/NYC)
+- **Comp band:** $180K-$380K total comp (L4-L6: AI Engineer → Staff) | Base + RSUs
 - **Cumulative pass rate:** ~3-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a clinician's silhouette overlaid with a de-identified SOAP-note diff. Color: Nabla teal (#0FB5A6). Headline: "Nabla / AI Medical LLMs / 2026".
+
+> **TL;DR:** Nabla hires AI engineers who treat HIPAA like a first-class constraint, not an afterthought. The signature round is the clinical ML eval — candidates who ace it design safety panels, not just ROUGE scores. The winning candidate has actually talked to a doctor and can defend every "would you redact?" decision.
+
+```
+Recruiter → Phone → Onsite (3 rounds) → Founder/CMO chat → Offer
+```
+
+The funnel rewards clinical empathy. Most strong ML candidates wash out at the founder chat because they can't translate "factuality" into a clinician's lived workflow.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen is mission-first. Expect ethics and triage scenarios before any technical depth.
+
 ### Q1.1: "Why medical AI?"
 **Answer:** "I want to build systems that reduce clinician burnout. The average doctor spends 16 minutes per patient on the EHR, and Nabla's ambient scribe flips that. I'm excited by the 2025 Epic partnership and the multi-tenant de-identification pipeline — that's hard infra to build."
 **Tip:** Show you've read at least one Nabla research blog post and name a clinician you'd actually interview.
@@ -26,6 +38,8 @@
 **Tip:** HIPAA is non-negotiable. A vague answer fails the screen.
 
 ## Stage 2: Technical phone screen
+
+The coding bar is LeetCode easy-to-medium — they're testing judgment on data handling, not algorithm virtuosity.
 
 ### Q2.1: Reverse a linked list.
 **Answer:**
@@ -47,6 +61,8 @@ def reverse(head):
 
 ## Stage 3: Onsite
 
+The onsite balances depth on clinical evaluation, system design on a multi-tenant scribe service, and a behavioral that probes safety mindset.
+
 ### Round 3.1: Coding
 **Q:** Implement a sliding-window word tokenizer for clinical notes with custom abbreviations ("q.d." → "once daily").
 **Answer:** Build a regex tokenizer with a special-cases dict and a fastText fallback for OOV; unit-test on MIMIC-III.
@@ -64,12 +80,16 @@ def reverse(head):
 **Answer:** Use STAR: refused to ship a model whose ROUGE was high but hallucination rate was 18% in private eval; proposed a factuality-weighted score; shipped after it improved by 9 pts.
 
 ## Stage 4: Hiring committee
+
+Three engineers plus a clinician — HIPAA mindset is explicitly screened for, and the bar-raiser owns general engineering rigor.
 A panel of 3 engineers + 1 clinician reviews your system design for safety, the ML round for clinical plausibility, and the bar-raiser for general engineering rigor. They explicitly screen for HIPAA mindset.
 
 ## Stage 5: Offer
 Series B equity refreshers vest over 4 years. They counter-offer aggressively for candidates with Epic/Cerner integration experience.
 
 ## Tips for the Nabla loop
+
+Most candidates over-index on accuracy metrics and under-index on safety. Below is the playbook.
 - Read at least 2 Nabla research blog posts and 1 whitepaper.
 - Memorize HIPAA Safe Harbor vs Expert Determination.
 - Practice SOAP-note and ICD-10 basics.
@@ -86,3 +106,9 @@ Series B equity refreshers vest over 4 years. They counter-offer aggressively fo
 - [Glassdoor — Nabla interviews](https://www.glassdoor.com/Interview/Nabla-Interview-Questions-E3521858.htm)
 - [Nabla research blog](https://www.nabla.com/blog)
 - [Reddit r/MachineLearning — Nabla thread](https://reddit.com/r/MachineLearning)
+
+---
+
+## The 1 thing to remember
+
+Nabla hires AI engineers who treat HIPAA as a first-class design constraint — if you can't defend every redaction and every audit-log decision, you don't pass the founder round.

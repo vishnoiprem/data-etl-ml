@@ -2,8 +2,32 @@
 
 - **Role:** ML Engineer (Perception / Planning)
 - **Tech stack:** C++, Python, PyTorch/JAX, CUDA, TensorFlow, ROS
-- **Comp band:** $250K-$700K (L3-L6)
+- **Comp band:** $250K-$700K total comp (L3-L6) | RSUs 4-year, 1-year cliff (Alphabet GOOG)
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a self-driving sensor stack — a roof-mounted lidar with camera + radar pods fanning into a fused BEV map). Color: Waymo green-blue (#0F9D58) on charcoal. Headline: "Waymo / AI ML Engineer / 2026".
+
+> **TL;DR:** Waymo's loop is safety-first autonomy — every round asks "what could go wrong?" and the design question is almost always a perception or planning pipeline, not a generic web system. The winning candidate treats safety as a meta-rubric, has read the Disengagement Reports, and can derive BEV attention on a whiteboard.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                     WAYMO AUTONOMY STACK                          │
+├──────────────────────────────────────────────────────────────────┤
+│  Cameras + Lidar + Radar                                          │
+│          │                                                        │
+│          ▼                                                        │
+│  ┌────────────────┐    ┌────────────────┐    ┌────────────────┐  │
+│  │   Perception   │───▶│   Prediction   │───▶│   Planning     │  │
+│  │  (BEV / Det)   │    │ (motion model) │    │ (lattice / RL) │  │
+│  └────────────────┘    └────────────────┘    └────────────────┘  │
+│          │                       │                     │          │
+│          ▼                       ▼                     ▼          │
+│      Tracking              Scene graph           Trajectory →     │
+│   (Kalman + Hungarian)   (agents + map)         Controller       │
+│                                                                  │
+│  Closed loop ──▶ Simulation (10M mi/day) ──▶ Safety review       │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds (5 stages)
 
@@ -24,6 +48,8 @@
 ### Q1.2: "Why Waymo, specifically?"
 **Answer:** Specific bet + test + disagreement. "I want to work on the Perception team because the safety bar is 10× higher than consumer AV. The bet: the camera + lidar + radar fusion is the key moat vs. Tesla's vision-only approach. The 1 thing I'd test: whether the bird's-eye-view transformer can replace the per-object detection pipeline for highway driving. The 1 thing I disagree with: I think Waymo is too conservative on the consumer-ride-share pricing — the cost per mile needs to drop 5× to hit mainstream adoption."
 **Tip:** Show you've read the Waymo safety reports + Disengagement Reports (CA DMV).
+
+Waymo's recruiter screen is the easy filter — they're checking comp, location, and team fit (Perception vs Planning vs Simulation). The phone screen is where autonomy starts showing up: expect a BFS or graph problem and a sensor-fusion question that tests whether you actually know the difference between camera, lidar, and radar.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -111,6 +137,8 @@ class KalmanFilter:
 **Answer:** Use STAR. Situation (the product), Task (your role), Action (the specific check you added, e.g., a unit test for an edge case, a manual review of a config change), Result (the issue caught, the metric avoided, the team adoption). Example: "I caught a data race in the inference server that could have caused silent corruption under load. I added a stress test, the bug was caught in CI, and the team adopted the test as the standard pattern."
 **Tip:** Waymo values the safety mindset. Show you think about edge cases, failure modes, and rollback plans.
 
+The onsite is 4-5 rounds across 1-2 days, and the system-design round is the autonomy litmus test: a real-time obstacle pipeline at 30 Hz on 500W, or a 10M-mile simulation platform. The ML deep-dive wants BEV attention derived, not summarized. The behavioral round is a separate safety review — bring STAR stories about catching bugs before they shipped.
+
 ## Stage 4: Hiring committee
 The committee reviews the packet and votes. The safety review is separate: a panel evaluates whether the candidate demonstrates the safety mindset required for autonomy work. ~60% advance.
 
@@ -137,3 +165,9 @@ Cash-heavy comp (Waymo is Alphabet, not a startup). Comp band L3-L6: $250K-$700K
 - [CA DMV Disengagement Reports](https://www.dmv.ca.gov/portal/vehicle-industry-services/autonomous-vehicle-disengagement-reports/) — the public autonomy benchmarks
 - [Waymo Engineering Blog](https://waymo.com/blog/) — the perception, planning, and simulation posts
 - [r/SelfDrivingCars — Waymo interview threads](https://www.reddit.com/r/SelfDrivingCars/)
+
+---
+
+## The 1 thing to remember
+
+At Waymo, the safety mindset is the meta-rubric — the L5+ candidate is the one who names failure modes, rollback plans, and edge cases before the interviewer asks, and treats every metric as a safety metric, not just a product one.

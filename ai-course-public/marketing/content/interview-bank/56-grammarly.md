@@ -1,8 +1,16 @@
 # 56. Grammarly (Anthropic-style AI team)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Grammarly document with inline grammar suggestions, a tone detector, and the Grammarly green palette). Color: Grammarly green (#15C39A on cream). Headline: "Grammarly / AI Writing Engineer / 2026".
+
+> **TL;DR:** Grammarly is a 30M-DAU writing AI with the rare mix of in-house NLP research and production LLM integration; the loop is recruiter → 60 min coding+NLP phone → 4-round onsite → product+eng+research committee → offer, and the signature round is "build a grammar error correction model with BERT vs T5 vs LLM tradeoffs." The winning candidate has shipped an LLM product, knows classical NLP (edit distance, BK-trees) AND transformers, and has taste for writing-AI UX.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (LLM Features / Writing AI)
 - **Tech stack:** Python, TypeScript, React, Kubernetes, Kafka, Postgres, Redis, OpenAI/Anthropic APIs, in-house transformer models, ONNX, Triton
-- **Comp band:** $200K-$420K (mature startup, well-funded)
+- **Comp band:** $200K-$420K total comp (Senior AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -67,7 +75,7 @@ def edit_distance(s1, s2):
 - **Q3.4.2:** "Why writing AI? What excites you about this space?"
 
 ## Stage 4: Hiring committee
-Grammarly's committee is product + engineering + research. They look for: NLP depth (you should know transformers + classical NLP), product engineering skills (you should be able to ship), and a writing-AI passion. Red flags: never having trained a transformer, weak on classical NLP, no product instincts.
+Grammarly's committee is product + engineering + research. They look for: NLP depth (you should know transformers + classical NLP), product engineering skills (you should be able to ship), and a writing-AI passion. Red flags: never having trained a transformer, weak on classical NLP, no product instincts. The committee's bar is unusually high because Grammarly still has research engineers — a candidate who can talk CoNLL-2014 eval numbers and shipping cadence in the same answer is the rare profile they want.
 
 ## Stage 5: Offer
 Base is at the high end ($200K-$300K+ for senior), equity is meaningful (private, growing). Negotiation: equity, sign-on, level.
@@ -90,3 +98,9 @@ Base is at the high end ($200K-$300K+ for senior), equity is meaningful (private
 - [Grammarly AI research](https://www.grammarly.com/research)
 - [Grammarly Glassdoor](https://www.glassdoor.com/Interview/Grammarly-Interview-Questions-E395909.htm)
 - [Levels.fyi Grammarly](https://www.levels.fyi/companies/grammarly)
+
+---
+
+## The 1 thing to remember
+
+Be ready to defend BERT vs T5 vs LLM tradeoffs for grammar error correction in detail — Grammarly is the rare company that still does in-house NLP research, and the candidate who can name CoNLL-2014 / BEA-2019 numbers while defending their production shipping velocity wins the product+eng+research committee.

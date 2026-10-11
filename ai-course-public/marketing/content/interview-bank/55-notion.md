@@ -1,8 +1,16 @@
 # 55. Notion AI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Notion workspace page with the AI Q&A panel overlaid and the Notion black/white palette with AI sparkle). Color: Notion black (#191414 background, #FFFFFF text, #FF6B6B AI accent). Headline: "Notion AI / AI Product Engineer / 2026".
+
+> **TL;DR:** Notion AI ships LLM features to millions of users and the bar is product + AI fluency; the loop is recruiter → 60 min coding+product sense phone → 4-5 round onsite (with Ivan Zhao doing a founder round) → committee → offer, and the signature round is "design Notion AI's workspace Q&A feature end-to-end." The winning candidate is a Notion power user, has shipped an LLM feature to real users, and can defend UX tradeoffs for autocomplete, Q&A, and translator.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (25%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (Product AI / LLM Features)
 - **Tech stack:** Python, TypeScript, React, Node, Postgres, Redis, Kafka, OpenAI/Anthropic APIs, embeddings, vector DBs, LangChain
-- **Comp band:** $200K-$450K (Series A unicorn, very competitive)
+- **Comp band:** $200K-$450K total comp (E3-E7: SWE/AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -70,7 +78,7 @@ class Throttler:
 - **Q3.5.2:** "Where do you see Notion in 5 years?"
 
 ## Stage 4: Hiring committee
-Notion's committee is product + engineering mixed. They look for: product sense (you should be able to talk about UX tradeoffs), technical depth (real LLM feature experience), and founder fit. Red flags: never having shipped to users, weak on product thinking, no genuine Notion usage.
+Notion's committee is product + engineering mixed. They look for: product sense (you should be able to talk about UX tradeoffs), technical depth (real LLM feature experience), and founder fit. Red flags: never having shipped to users, weak on product thinking, no genuine Notion usage. The committee is comfortable rejecting technically strong candidates who can't articulate "why this UX choice, not that one" — product taste is the tiebreaker at the same technical level.
 
 ## Stage 5: Offer
 Base is at the high end ($200K-$300K+ for senior), equity is meaningful (private, high valuation). Negotiation: equity, sign-on, level (Notion uses E3-E7 with E5 ~ senior).
@@ -93,3 +101,9 @@ Base is at the high end ($200K-$300K+ for senior), equity is meaningful (private
 - [Notion AI docs](https://www.notion.so/help/category/notion-ai)
 - [Notion Glassdoor](https://www.glassdoor.com/Interview/Notion-Interview-Questions-E1751948.htm)
 - [Levels.fyi Notion](https://www.levels.fyi/companies/notion)
+
+---
+
+## The 1 thing to remember
+
+Be a Notion power user with a real shipping story — Ivan Zhao does the founder round personally, and the candidate who can name their feature's DAU impact, latency p99, and A/B test result wins, while "I've used Notion for a while" gets politely closed.

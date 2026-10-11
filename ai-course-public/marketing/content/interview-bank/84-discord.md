@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Search, Trust & Safety, Recommendations)
 - **Tech stack:** Python, Rust, Elixir, PyTorch, ScyllaDB, Cassandra, Redis, Kafka, Flink, Kubernetes, Triton
-- **Comp band:** $220K-$600K (IC3-IC5); Staff (IC6) $500K-$1.1M (Levels.fyi 2026)
+- **Comp band:** $220K-$600K total comp (IC3-IC5); Staff (IC6) $500K-$1.1M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a chat thread with a moderation signal overlay and a real-time websocket pulse). Color: Discord blurple (#5865F2). Headline: "Discord / AI ML Engineer / 2026".
+
+> **TL;DR:** Discord's loop is real-time, real-T&S, real-stakes — they care about precision/recall asymmetries in moderation, want you to think about vulnerable users unprompted, and reward candidates who can ship ML into a 200ms user loop. The winning candidate is precise about T&S false-positive costs and has a real-time systems story.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       DISCORD HIRING FUNNEL                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (45%) ──► Tech Phone (30%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► IC Calibration    │
+│          (25%)                                  (55%, values)   │
+│                                                                  │
+│  Committee ──► Offer (IC5 vs IC6 split) ──► Remote-US start      │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Discord's ML org is unique: most of their user-generated content is text (chat),
 
 ### Q1.3: "Location + remote"
 **Answer:** Discord is SF/remote-US. Remote is genuine and well-supported. International is harder.
+
+Discord's recruiter screen is fit-focused, but the phone screen is where the bar shows up — expect a rate limiter or real-time coding problem and an ML question that tests T&S asymmetry. Bring precision/recall intuition and a real-time services story.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -83,6 +102,8 @@ class TokenBucket:
 **Q3.4.2:** "How do you balance user privacy with safety?" — philosophical but real at Discord. Reference end-to-end encryption, data minimization, on-device processing where possible.
 **Q3.4.3:** "Why trust & safety vs ads/recsys?" — be genuine.
 
+The onsite is one day, four rounds, each a different lens. Discord's ML deep-dive round is where trust-and-safety shows up — expect grooming or spam questions, and prepare for the philosophical "what about two 17-year-olds flirting?" pushback. The behavioral round specifically tests empathy and privacy thinking.
+
 ## Stage 4: Hiring committee
 Discord uses IC-level calibration. The bar is high for IC5 (senior) — they want someone who can scope a multi-quarter ML project independently. IC6 (staff) is a separate bar. The committee includes a "values fit" check, which is heavier at Discord than at most companies (they have a strong culture of empathy for users).
 
@@ -107,3 +128,9 @@ Discord is fully remote-US with strong base salary. Equity is competitive (veste
 - [Levels.fyi Discord](https://www.levels.fyi/companies/discord)
 - [Glassdoor Discord interviews](https://www.glassdoor.com/Interview/Discord-Interview-Questions-E950851.htm)
 - [LeetCode Discord tagged](https://leetcode.com/company/discord/)
+
+---
+
+## The 1 thing to remember
+
+At Discord, the moderator's false positive is a real teen friendship — the IC5+ candidate is the one who names that asymmetry unprompted and designs precision-first with human-in-the-loop.

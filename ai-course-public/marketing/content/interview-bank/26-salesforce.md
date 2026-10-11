@@ -1,8 +1,16 @@
 # 26. Salesforce (Einstein / Slack AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "SALESFORCE / AI AGENTFORCE / 2026".
+
+> **TL;DR:** Salesforce's loop tests **enterprise readiness** — multi-tenancy, RAG permission filtering, and 150K-customer scale are non-negotiable framing. The signature product is **Agentforce**, the LLM agent platform for CRM, and the winning candidate shows Ohana warmth alongside sharp technical depth.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Einstein, Slack AI, Agentforce)
 - **Tech stack:** Python, PyTorch, TensorFlow, Apex, Java, Spark, Snowflake, Einstein Platform, Slack APIs
-- **Comp band:** $200K-$650K (MTS-L6); senior crosses $800K+; RSUs vest 4-year
+- **Comp band:** $200K-$650K total comp (MTS-L6) | RSUs 4-year, 1-year cliff; senior crosses $800K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Salesforce's loop is built for the enterprise buyer — every round tests whether you can think at 150K-customer scale. The hiring panel is cross-org, and "Trust" is one of the values they grade, not a vibe.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Salesforce for AI?"
@@ -26,6 +36,8 @@
 **Tip:** Show you understand enterprise pain: permissions, audit logs, PII handling.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens are where Salesforce quietly checks if you understand enterprise pain. If you reach for permissions, audit logs, and PII handling in the ML design, you're already ahead of 70% of candidates.
 
 ### Q2.1: Coding: "Group anagrams"
 **Answer:** Sort each string → tuple key → append to dict.
@@ -44,6 +56,8 @@ def groupAnagrams(strs):
 **Tip:** Salesforce is a data-rich company — emphasize *feature engineering* and *business value*.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is four rounds, often compressed into a single day. Energy management matters: coding, then system design (think Agentforce), then ML deep-dive, then Ohana-flavored behavioral last when you've built rapport.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Merge intervals. Sort by start, then merge.
@@ -87,3 +101,9 @@ Cash + RSUs. Salesforce is competitive but typically below FAANG top-of-band. Ne
 - [Salesforce Engineering Blog](https://engineering.salesforce.com/)
 - [Agentforce docs](https://www.salesforce.com/agentforce/)
 - [Glassdoor Salesforce ML interviews](https://www.glassdoor.com/Interview/Salesforce-Interview-Questions-E11159.htm)
+
+---
+
+## The 1 thing to remember
+
+At Salesforce, the winning answer always draws the multi-tenant boundary first — name Agentforce, Data Cloud, and Slack AI, then show that you think in ACLs, audit logs, and per-customer isolation by reflex.

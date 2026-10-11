@@ -2,8 +2,18 @@
 
 - **Role:** Quantitative Trader / Quantitative Researcher / Quant SWE
 - **Tech stack:** C++ (primary), Python, kdb+, low-latency systems, options pricing
-- **Comp band:** $250K-$800K base + bonus (no public equity; partnership-track)
+- **Comp band:** $250K-$800K total comp (Quant → Senior Quant → Trader-track) | Base + bonus (top of market; no public equity)
 - **Cumulative pass rate:** ~3-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + an options vol surface (SVI fit) with delta-1 hedge arrows on the underlying. Color: Optiver blue (#003366). Headline: "Optiver / Quantitative Trader & Researcher / 2026".
+
+> **TL;DR:** Optiver is the most disciplined options market maker in the world — vol surface, Greeks, and delta-1 hedging are the daily craft. The signature round is the onsite: Black-Scholes derivations, implied vol via Newton-Raphson, and a delta-1 system design. The winning candidate can talk about vol surface arbitrage and show they read Hull cover to cover.
+
+```
+Recruiter → Phone (math) → Onsite (4-5 rounds) → Hiring committee → Offer
+```
+
+The math → C++ → options-progression is the spine. Skip Hull and you don't pass the screen; skip the team-oriented vibe and you don't get the offer.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards options depth. Reference the Optiver Trading Academy and the delta-1 blog series.
+
 ### Q1.1: "Why Optiver?"
 **Answer:** "Optiver is the most disciplined options market maker I know of. The combo of quant research and engineering rigor in options is unmatched, and I want to learn the vol and delta-1 business from people who've been doing it for a decade."
 **Tip:** Reference Optiver's published research (their delta-1 blog series is a good start).
@@ -26,6 +38,8 @@
 **Tip:** Show you've thought about what makes options trading unique.
 
 ## Stage 2: Technical phone screen
+
+The phone tests Black-Scholes fluency and asks for an implied-vol Newton-Raphson implementation. Walk through d1, d2, and vega.
 
 ### Q2.1: A stock is at $100, vol 30%, r = 4%. Value a 6-month ATM straddle.
 **Answer:** Black-Scholes: C = S·N(d1) − K·e^(−rT)·N(d2). With T=0.5, σ=0.3: d1 ≈ 0.2003, d2 ≈ −0.0118; C ≈ P ≈ 9.39, straddle ≈ 18.78.
@@ -48,6 +62,8 @@ def implied_vol(price, S, K, T, r):
 **Tip:** Newton-Raphson; they want closed-form vega.
 
 ## Stage 3: Onsite
+
+Five rounds: symmetry-trick probability, a low-latency order book in C++, a delta-1 system design, a hedging deep-dive, and a behavioral that probes decisions under uncertainty.
 
 ### Round 3.1: Probability
 **Q:** Two iid normal(0, σ^2) variables. P(first > second | first > 0)?
@@ -79,6 +95,8 @@ Panel of senior traders + researchers. They look for: (1) options intuition, (2)
 $250K-$500K base new grad; $500K-$800K+ experienced. Bonus is significant (often 50-100% of base). They pay top of market; little negotiation room.
 
 ## Tips for the Optiver loop
+
+Most candidates over-index on equity vol and under-index on options Greeks in production. Optiver is options-first — show Greeks fluency.
 - Read Optiver's "Trading Academy" articles.
 - Memorize Black-Scholes, BSM, implied vol, Greeks.
 - Practice C++ at a production level.
@@ -95,3 +113,9 @@ $250K-$500K base new grad; $500K-$800K+ experienced. Bonus is significant (often
 - [Levels.fyi — Optiver](https://www.levels.fyi/companies/optiver)
 - [Glassdoor — Optiver](https://www.glassdoor.com/Interview/Optiver-Interview-Questions-E1161490.htm)
 - [Reddit r/quant — Optiver threads](https://reddit.com/r/quant)
+
+---
+
+## The 1 thing to remember
+
+Optiver's math canon is the gate — Heard on the Street, Hull for options and Greeks, and clean vol-surface derivations are not optional, and an end-to-end delta-1 hedging design is the differentiator that pushes offers above band.

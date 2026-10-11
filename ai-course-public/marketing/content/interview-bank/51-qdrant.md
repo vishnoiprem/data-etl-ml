@@ -1,8 +1,16 @@
 # 51. Qdrant
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Qdrant Rust HNSW graph with filter-pushed-down traversal and the Qdrant red palette). Color: Qdrant red (#DC244C on near-black). Headline: "Qdrant / AI Vector DB Rust Engineer / 2026".
+
+> **TL;DR:** Qdrant is the only vector DB written in Rust top to bottom; the loop is recruiter → 60-90 min coding+vector phone (with Rust code) → 4-round onsite (with a Rust deep-dive) → committee → offer, and the signature round is "build an HNSW insert function" plus "how does Qdrant handle filtered search at 100M+ vectors?" The winning candidate has Rust fluency, can read the Qdrant source, and treats the AGPL → Apache 2.0 switch as a wedge worth understanding.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** Software Engineer (Vector Database / Distributed Systems)
 - **Tech stack:** Rust, Python, gRPC, Kubernetes, HNSW, Product Quantization, S3-compatible storage, Prometheus, ClickHouse (for payloads)
-- **Comp band:** $170K-$340K (Berlin-based, well-funded, OSS-first)
+- **Comp band:** $170K-$340K total comp (Senior SWE, Berlin or US remote) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -69,7 +77,7 @@ fn insert(graph: &mut HnswGraph, vec: Vec<f32>, m: usize) {
 - **Q3.4.2:** "Why vector DBs? Why Rust?"
 
 ## Stage 4: Hiring committee
-Qdrant's committee is technical and European (Berlin HQ). They look for: Rust fluency, distributed systems depth, vector indexing knowledge, and OSS love. Red flags: weak on Rust, not knowing what HNSW is, no OSS contributions.
+Qdrant's committee is technical and European (Berlin HQ). They look for: Rust fluency, distributed systems depth, vector indexing knowledge, and OSS love. Red flags: weak on Rust, not knowing what HNSW is, no OSS contributions. The committee is small enough that Andrey Vasnetsov himself often weighs in — a candidate who has read the Qdrant source for fun is a different conversation than one who's just used the Python client.
 
 ## Stage 5: Offer
 Base is competitive for EU (or US remote, $200K-$300K), equity is meaningful (private, growing fast). Negotiation: equity and sign-on (Qdrant recently raised a large round).
@@ -92,3 +100,9 @@ Base is competitive for EU (or US remote, $200K-$300K), equity is meaningful (pr
 - [Qdrant docs](https://qdrant.tech/documentation)
 - [Qdrant GitHub](https://github.com/qdrant/qdrant)
 - [Qdrant Glassdoor](https://www.glassdoor.com/Interview/Qdrant-Interview-Questions-E3508900.htm)
+
+---
+
+## The 1 thing to remember
+
+Be ready to write Rust in the phone screen — Qdrant's signature question is "build an HNSW insert function," and the candidate who can talk SIMD distance kernels, M, ef_construction, and filter-pushed-down traversal in idiomatic Rust is the one the small Berlin committee fights to hire.

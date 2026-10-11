@@ -2,8 +2,18 @@
 
 - **Role:** Quantitative Researcher / Quant SWE
 - **Tech stack:** Python, C++, kdb+, Q, PyTorch, distributed systems, Spark, Slurm
-- **Comp band:** $300K-$1M+ base + bonus (no public equity; "partner" comp)
+- **Comp band:** $300K-$1M+ total comp (Quant → Senior Quant → Partner-track) | Base + bonus (top of market; no public equity)
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + a probability distribution (Gaussian mixture) over a price chart, with sample paths branching out. Color: Two Sigma navy (#0B2545). Headline: "Two Sigma / Quant Researcher & SWE / 2026".
+
+> **TL;DR:** Two Sigma hires people who like math on the board and P&L as the scoreboard — research taste plus engineering rigor. The signature round is the onsite: 4-5 rounds, all math, including Markov chains, sampling, ML derivations, and real-time market data design. The winning candidate has read Heard on the Street, Hull, and the greenbook, and can defend their favorite paper.
+
+```
+Recruiter → Phone (math) → Onsite (4-5 rounds) → Hiring committee → Offer
+```
+
+The math → coding → systems progression is the spine. Skip a step — say, you can code but can't derive a stationary distribution — and you don't pass.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards intellectual honesty and a real reason for going quant. "Money-driven" anti-patterns get cut.
+
 ### Q1.1: "Why Two Sigma?"
 **Answer:** "Two Sigma blends fundamental research with engineering. They ship ML to production at scale, and the partnership model means quants have skin in the game. I want to work where scientific rigor meets real P&L, not where I have to defend an engagement metric."
 **Tip:** Reference specific Two Sigma research papers. They publish a lot, and interviewers check.
@@ -27,6 +39,8 @@
 
 ## Stage 2: Technical phone screen
 
+The phone is probability and combinatorics — coin flips, factorial trailing zeros, problem decomposition.
+
 ### Q2.1: A fair coin is flipped 10 times; what's the probability of exactly 6 heads?
 **Answer:** C(10,6) / 2^10 = 210/1024 ≈ 0.205.
 **Tip:** They want clean combinatorial reasoning.
@@ -36,6 +50,8 @@
 **Tip:** Standard interview question; they care about problem decomposition.
 
 ## Stage 3: Onsite
+
+Four to five rounds: Markov-chain probability, a discrete-sampler coding, logistic-regression derivation, real-time market data system design, and a behavioral that screens for research honesty.
 
 ### Round 3.1: Probability/statistics
 **Q:** You have a Markov chain with transition matrix P. What's the stationary distribution? When does it exist?
@@ -76,6 +92,8 @@ Panel of 4-5 senior quants + 1 partner. They look for: (1) intellectual honesty,
 Comp is partnership-track; signing bonus $50K-$200K. Vesting is unique to each "pod." They pay top of market — never undercut.
 
 ## Tips for the Two Sigma loop
+
+Most candidates under-prep Heard on the Street and Hull. The math canon is the gate; production engineering is the differentiator.
 - Memorize the greenbook (Heard on the Street) probability questions.
 - Practice options pricing derivations (Black-Scholes, Greeks).
 - Read Hull's "Options, Futures, and Other Derivatives" cover to cover.
@@ -92,3 +110,9 @@ Comp is partnership-track; signing bonus $50K-$200K. Vesting is unique to each "
 - [Glassdoor — Two Sigma](https://www.glassdoor.com/Interview/Two-Sigma-Interview-Questions-E859428.htm)
 - [Heard on the Street — quant interview prep](https://www.amazon.com/Heard-Street-Quantitative-Interview/dp/0987122930)
 - [Reddit r/quant — Two Sigma threads](https://reddit.com/r/quant)
+
+---
+
+## The 1 thing to remember
+
+Two Sigma's math canon is the gate — Heard on the Street, Hull, and the greenbook are not optional, and Avellaneda-Stoikov market-making is the differentiator that puts offers above band.

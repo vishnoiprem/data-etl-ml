@@ -1,8 +1,16 @@
 # 50. Chroma
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Chroma embedded + server-mode diagram with a Rust core and the Chroma orange palette). Color: Chroma orange (#FF6E40 on cream). Headline: "Chroma / AI Vector DB Engineer / 2026".
+
+> **TL;DR:** Chroma is the Python-native vector DB aiming to be the SQLite of vector search; the loop is recruiter → 60 min coding+vector phone → 3-4 round onsite (with a founder round) → tight committee → offer, and the signature round is "design a multi-tenant RAG service." The winning candidate has shipped a real RAG app on Chroma, knows the chunking/retrieval/eval tradeoffs, and pairs Python fluency with Rust awareness.
+
+```
+Recruiter → Phone → Onsite (3-4 rounds) → Founder round → Offer
+```
+
 - **Role:** Software Engineer (Vector Database / RAG Tooling)
 - **Tech stack:** Python, Rust, TypeScript, FastAPI, ClickHouse, DuckDB, HNSW, SQLite, Postgres
-- **Comp band:** $180K-$380K (small team, high equity, post-Series A/B)
+- **Comp band:** $180K-$380K total comp (Senior SWE, early-mid) | RSUs/equity 4-year vest (high upside)
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -63,7 +71,7 @@ def chunk(text, window=500, overlap=50):
 - **Q3.4.2:** "Why RAG? What's the next 2 years of vector DBs look like?"
 
 ## Stage 4: Hiring committee
-Chroma is small (~50 people), tight loop. The committee is the founders + 1-2 senior engs. They look for: production Python or Rust chops, RAG/ML practitioner credibility, and DX obsession. Red flags: never having built a RAG app, weak on embeddings/vector search basics.
+Chroma is small (~50 people), tight loop. The committee is the founders + 1-2 senior engs. They look for: production Python or Rust chops, RAG/ML practitioner credibility, and DX obsession. Red flags: never having built a RAG app, weak on embeddings/vector search basics. Because the founders are in the room, "do you actually use Chroma, or are you here because vector DBs are hot?" is the real question — the right answer is a side project URL.
 
 ## Stage 5: Offer
 Base is competitive for the size ($180K-$280K), equity is the lever — Chroma is private, early-mid stage, so equity has real upside. Negotiation: equity grants.
@@ -86,3 +94,9 @@ Base is competitive for the size ($180K-$280K), equity is the lever — Chroma i
 - [Chroma blog](https://www.trychroma.com/blog)
 - [Chroma GitHub](https://github.com/chroma-core/chroma)
 - [Chroma Glassdoor](https://www.glassdoor.com/Interview/Chroma-Interview-Questions-E3508800.htm)
+
+---
+
+## The 1 thing to remember
+
+Ship a real RAG app on Chroma before the phone screen — the founder round asks "what's the next 2 years of vector DBs?" and the candidate who can talk chunking, retrieval eval, and multi-modal RAG with a live demo wins the small (~50-person) committee.

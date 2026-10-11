@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Personalization, Search, Content, Audio)
 - **Tech stack:** Python, Java, Scala, PyTorch, TensorFlow, BigQuery, Cassandra, Kafka, Flink, Kubernetes, TensorFlow Extended (TFX)
-- **Comp band:** $200K-$500K (L4-L6); Staff $400K-$1M; Director $700K-$1.4M (Levels.fyi 2026, Stockholm premium ~20% lower)
+- **Comp band:** $200K-$500K total comp (L4-L6); Staff $400K-$1M total comp; Director $700K-$1.4M total comp (Levels.fyi 2026, Stockholm premium ~20% lower) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a Discover Weekly playlist with audio-embedding waveform and a bandit-arm diagram). Color: Spotify green (#1DB954). Headline: "Spotify / AI ML Engineer / 2026".
+
+> **TL;DR:** Spotify's loop is recsys-heavy — collaborative filtering, contextual bandits, audio embeddings, and cold start for new artists are all in play, and the design round will absolutely push you on long-tail and popularity-bias. The winning candidate is fluent in bandits, has shipped real-time personalization, and treats user joy as a first-class metric.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       SPOTIFY HIRING FUNNEL                       │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (50%) ──► Tech Phone (35%) ──► Onsite       │
+│                                                                  │
+│  Onsite ──► Coding / Design / ML / Values ──► Bandit-Culture     │
+│          (25%)                                  Review (60%)    │
+│                                                                  │
+│  Committee ──► Offer (L6 vs L7 split) ──► Stockholm/NYC match    │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -29,6 +46,8 @@ Spotify's ML org is one of the most respected in industry for recommender system
 
 ### Q1.3: "Location + remote"
 **Answer:** Stockholm, NYC, Boston, SF are core sites. Remote is limited but they have a "Flex" policy for partial remote. Be clear on willingness to relocate to Stockholm for senior roles.
+
+Spotify's recruiter screen rewards candidates who speak diversity and long-tail. The phone screen is where they confirm you can actually build a recsys — collaborative filtering, audio embeddings, and bandit-based cold start are the moves they're listening for.
 
 ## Stage 2: Technical phone screen (60 min)
 
@@ -72,6 +91,8 @@ def twoSum(nums, target):
 **Q3.4.1:** "Spotify's values are 'Innovative, Passionate, Collaborative, Sincere, Playful.' Tell me a story for one." Pick a real one.
 **Q3.4.2:** "Time you had to choose between user joy and business metric." STAR.
 
+The onsite is where the recsys depth gets tested in conversation. The ML deep-dive is almost always Discover Weekly, cold start, or a bandit policy — prepare to defend your exploration rate and decay function. The values round tests whether "user joy" is something you actually optimize for.
+
 ## Stage 4: Hiring committee
 Spotify's committee is a multi-level review with a strong values component (they take "bandit" culture seriously). Senior (L6) requires independent ML project ownership; Staff (L7) requires cross-team influence on the recsys platform. The bar is comparable to FAANG for L6+.
 
@@ -96,3 +117,9 @@ Spotify comp is good but below FAANG for senior roles, especially in Stockholm. 
 - [Levels.fyi Spotify](https://www.levels.fyi/companies/spotify)
 - [Glassdoor Spotify interviews](https://www.glassdoor.com/Interview/Spotify-Interview-Questions-E299551.htm)
 - [LeetCode Spotify tagged](https://leetcode.com/company/spotify/)
+
+---
+
+## The 1 thing to remember
+
+At Spotify, popularity bias is the enemy — the L6+ candidate is the one who designs for the long tail with audio embeddings and bandits, not just for tomorrow's hit.

@@ -1,8 +1,16 @@
 # 59. Hippocratic AI (Healthcare AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Polaris safety starburst around a stethoscope and a nurse icon, in the Hippocratic teal palette). Color: Hippocratic teal (#1F8E84 on cream). Headline: "Hippocratic AI / AI Healthcare Engineer / 2026".
+
+> **TL;DR:** Hippocratic AI builds the safety-constrained Polaris LLM for nurse-role calls; the loop is recruiter → 60-90 min coding+LLM phone → 4-5 round onsite (with a clinical/regulatory round and a Munjal Shah founder round) → high-bar committee with clinicians in the room → offer, and the signature round is "design a clinical decision support system with safety constraints." The winning candidate pairs RAG depth with HIPAA awareness, treats failure modes as a first-class engineering problem, and is humble about AI's role in healthcare.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (25%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (Healthcare LLM / Nurse/Clinician AI)
 - **Tech stack:** Python, PyTorch, OpenAI/Anthropic APIs, in-house fine-tuned models, PEFT/LoRA, RLHF, vLLM, vector DBs, Postgres, Kubernetes
-- **Comp band:** $200K-$450K (well-funded, $3B+ valuation, healthcare AI premium)
+- **Comp band:** $200K-$450K total comp (Senior AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~2-4%
 
 ## Hiring rounds
@@ -67,7 +75,7 @@ def deidentify(text):
 - **Q3.5.2:** "Tell me about a time you built something for a non-technical expert."
 
 ## Stage 4: Hiring committee
-Hippocratic's committee is high-bar and includes clinicians. They look for: (a) LLM/RAG depth, (b) safety-first mindset (you should think about failure modes), (c) healthcare domain curiosity, (d) humility about AI's role in healthcare. Red flags: arrogant about AI replacing clinicians, weak on safety thinking, no healthcare AI exposure.
+Hippocratic's committee is high-bar and includes clinicians. They look for: (a) LLM/RAG depth, (b) safety-first mindset (you should think about failure modes), (c) healthcare domain curiosity, (d) humility about AI's role in healthcare. Red flags: arrogant about AI replacing clinicians, weak on safety thinking, no healthcare AI exposure. The committee is the rare one where a clinically-informed question can sink a technically strong candidate — "have you thought about what happens when the LLM is wrong at 3am?" is a real question, not a thought experiment.
 
 ## Stage 5: Offer
 Base is at the high end ($220K-$320K+ for senior), equity is meaningful (private, high valuation). Negotiation: equity, sign-on, level.
@@ -90,3 +98,9 @@ Base is at the high end ($220K-$320K+ for senior), equity is meaningful (private
 - [Polaris safety paper](https://www.hippocraticai.com/safety)
 - [Hippocratic AI Glassdoor](https://www.glassdoor.com/Interview/Hippocratic-AI-Interview-Questions-E3509600.htm)
 - [Levels.fyi Hippocratic AI](https://www.levels.fyi/companies/hippocratic-ai)
+
+---
+
+## The 1 thing to remember
+
+Be humble about failure modes in the clinical round — Hippocratic's committee includes practicing clinicians, and the candidate who lists safety constraints, escalation paths, and refusal patterns beats the one who brags about model accuracy, because "what does the LLM do at 3am when it's wrong?" is a real engineering question, not a thought experiment.

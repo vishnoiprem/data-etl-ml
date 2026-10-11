@@ -2,8 +2,25 @@
 
 - **Role:** ML Engineer (Timeline Ranking, Search, Ads, T&S)
 - **Tech stack:** Scala, Java, Python, C++, PyTorch, TensorFlow, Flink, Kafka, Manhattan (custom KV), Cassandra
-- **Comp band:** $250K-$700K (L4-L6); Staff (L6) $500K-$1.2M; Director (L7) $800K-$1.6M (Levels.fyi 2026)
+- **Comp band:** $250K-$700K total comp (L4-L6); Staff (L6) $500K-$1.2M total comp; Director (L7) $800K-$1.6M total comp (Levels.fyi 2026) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (a For You feed with adversarial content filter overlays and a Grok LLM badge). Color: X black with #1DA1F2 blue accent. Headline: "Twitter/X / AI ML Engineer / 2026".
+
+> **TL;DR:** X's loop is real-time, adversarial, and civic-stakes — they care about timeline ranking on a bipartite graph, coordinated inauthentic behavior, and the integration of Grok into a live social surface. The winning candidate speaks in impressions-per-day, treats every metric as both engagement and civic, and has a "For You" design ready to defend.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                       X / TWITTER HIRING FUNNEL                  │
+├──────────────────────────────────────────────────────────────────┤
+│  Apply ──► Recruiter (40%) ──► Coding Screen (30%) ──► Onsite    │
+│                                                                  │
+│  Onsite ──► Coding ×2 / Design / ML / Values ──► Tech Bar       │
+│          (25%)                                  Review (55%)    │
+│                                                                  │
+│  Committee ──► Offer (L5 vs L6 split) ──► SF team match          │
+└──────────────────────────────────────────────────────────────────┘
+```
 
 ## Hiring rounds
 
@@ -37,6 +54,8 @@ Twitter/X's loop is one of the most rigorous in consumer ML. Since the 2022 acqu
 
 **Tip:** Twitter's screen is medium-hard. Practice graph + DP.
 
+The coding screen is where most candidates fall off — X's bar is real, and a 60-90 min HackerRank or virtual whiteboard will absolutely include a hard LeetCode. From there, every onsite round is a recsys + adversarial-ML exam; the design round will land on For You timeline, the ML deep-dive on coordinated inauthentic behavior.
+
 ## Stage 3: Onsite (4-5 rounds, 1-2 days)
 
 ### Round 3.1: Coding (2 rounds)
@@ -57,6 +76,8 @@ Twitter/X's loop is one of the most rigorous in consumer ML. Since the 2022 acqu
 **Q3.4.1:** "Time you shipped a feature that failed." STAR — Twitter loves postmortem culture.
 **Q3.4.2:** "Time you had to defend a technical decision." STAR.
 **Q3.4.3:** "How would you improve the X timeline for journalists / creators?" — be specific.
+
+The onsite is dense and the design round is the centerpiece — every interviewer will eventually probe your For You design. Expect the ML deep-dive to land on adversarial content (coordinated inauthentic behavior, bot detection, prompt injection). The behavioral round is a postmortem culture test, not a values vibe check.
 
 ## Stage 4: Hiring committee
 Twitter's committee includes the hiring manager, a senior IC, and a "tech bar" representative. The bar for L5 (Senior) is "ship a 2-quarter ML project independently with good metrics." L6 (Staff) requires cross-team influence. L7 (Director) is rare. Post-acquisition, levels map to E5-E7 in SpaceX.
@@ -82,3 +103,9 @@ Twitter/X comp is at or above FAANG. RSU refresher is performance-based. Negotia
 - [Levels.fyi Twitter](https://www.levels.fyi/companies/twitter)
 - [Glassdoor Twitter interviews](https://www.glassdoor.com/Interview/Twitter-Interview-Questions-E100569.htm)
 - [LeetCode Twitter tagged](https://leetcode.com/company/twitter/)
+
+---
+
+## The 1 thing to remember
+
+At X, every impression is both engagement and civic signal — the L5+ candidate is the one who designs the For You feed as if a journalist and a foreign influence op are both reading it.

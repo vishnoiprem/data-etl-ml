@@ -1,8 +1,17 @@
 # 2. Anthropic
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Constitutional AI safety harness). Color: company brand color as accent (warm clay/terracotta). Headline on image: "Anthropic / AI Engineer / 2026".
+
+> **TL;DR:** Anthropic's loop is 6 stages and ~99% rejection — the signature round is the standalone safety round (separate interviewer, weighted like coding), where you must name a specific safety decision you made and the trade-off you accepted. The winning candidate defends a specific Constitutional AI bet, names the alternative, and explains the open problem in plain English.
+
+```
+Recruiter (60%) → Hiring manager (50%) → Skills (40%) → Final loop (30%) → Committee → Offer
+                                                                       └── safety round ──┘
+```
+
 - **Role:** AI Engineer (Safety)
 - **Tech stack:** Python, PyTorch, Constitutional AI, RLHF, CodeSignal, Rust (perf)
-- **Comp band:** $700K-$1.6M+ (senior SWE-staff+, PPU-heavy)
+- **Comp band:** $700K-$1.6M+ total comp (senior SWE-staff+, PPU-heavy) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1%
 
 ## Hiring rounds
@@ -15,6 +24,8 @@
 | 4. **Skills assessment** | 90-min CodeSignal OR 2-hr CUDA take-home (perf track) | 2 weeks | ~40% advance |
 | 5. **Final loop (5 rounds)** | Coding → system design → ML theory → behavioral → **safety round** | 2-3 weeks | ~30% advance |
 | 6. **Offer** | No negotiation — initial offer is final | — | — |
+
+The loop looks like every other frontier lab on paper, but the safety round is the real differentiator — and it's graded by a separate interviewer, not folded into behavioral. Most candidates under-prepare it.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -80,6 +91,8 @@ class DB:
 **Answer:** Stop deployment immediately. Verify with a held-out eval set the model hasn't seen. If confirmed, treat as a deployment incident: roll back, root-cause the eval gap (data shift, prompt injection, reward hacking), then add the eval case to the red-team suite.
 **Tip:** The safety round is a separate interviewer, not a sub-question.
 
+The phone screen is a coding warmup. The onsite is where the safety bet gets tested in the open — system design goes 2-3× deeper than OpenAI's, and your ML deep-dive needs to name the mechanism, the trade-off, and the open problem.
+
 ## Stage 4: Hiring committee
 
 The committee weighs the safety round as heavily as coding. They look for: (1) a coherent safety narrative — can you name a specific decision you made and the trade-off you accepted, (2) "second-order effects" thinking — can you describe what your system could do wrong, (3) Constitutional AI literacy — can you explain the mechanism, the trade-off, and the open problem in plain English. Committee can downgrade you even if the safety round went well.
@@ -111,3 +124,9 @@ Anthropic does not negotiate salary. "The initial offer is the final offer." PPU
 - [Anqi Silvia — I Collected 20 Real Anthropic Interview Questions](https://medium.com/@anqi.silvia/i-collected-20-real-anthropic-interview-questions-heres-what-you-actually-need-to-prepare-51e7caa9b2a9)
 - [Levels.fyi — Anthropic compensation](https://www.levels.fyi/companies/anthropic/salaries)
 - [Glassdoor — Anthropic Interview Questions (2026)](https://www.glassdoor.com/Interview/Anthropic-Interview-Questions-E8109027.htm)
+
+---
+
+## The 1 thing to remember
+
+At Anthropic, the safety round is a separate interviewer — prepare a specific decision you made, the trade-off you accepted, and the second-order failure mode, or the committee downgrades you no matter how well the coding went.

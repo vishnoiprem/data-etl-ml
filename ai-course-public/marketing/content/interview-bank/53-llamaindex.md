@@ -1,8 +1,16 @@
 # 53. LlamaIndex
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a LlamaIndex query-engine pipeline (retriever → postprocessor → synthesizer) and the LlamaIndex red palette). Color: LlamaIndex red (#A9212C). Headline: "LlamaIndex / AI RAG Framework Engineer / 2026".
+
+> **TL;DR:** LlamaIndex is the purpose-built RAG framework with the cleanest query-engine abstractions; the loop is recruiter → 60-90 min coding+RAG phone → 4-round onsite → committee (Jerry often in the room) → offer, and the signature round is "design a production RAG service for 10M documents." The winning candidate has shipped a multi-source RAG app, knows chunking/recursive/semantic tradeoffs, and can defend LlamaIndex vs LangChain vs Haystack with a specific codebase claim.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (RAG Framework / LLM Infrastructure)
 - **Tech stack:** Python, TypeScript, LlamaIndex, FastAPI, vector DBs (Pinecone, Weaviate, Chroma, Qdrant), Postgres, OpenAI/Anthropic APIs, React (LlamaIndex.TS)
-- **Comp band:** $180K-$380K (Series A/B, well-funded)
+- **Comp band:** $180K-$380K total comp (Senior AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -75,7 +83,7 @@ def split_recursive(text, separators=["\n\n", "\n", ". ", " "], chunk_size=500):
 - **Q3.4.2:** "Why RAG? Why agentic AI?"
 
 ## Stage 4: Hiring committee
-LlamaIndex's committee is technical — Jerry Liu himself often participates. They look for: deep RAG experience (you should know the failure modes), strong production Python or TypeScript skills, and passion for the data-augmented LLM problem. Red flags: never having built a real RAG app, weak on chunking strategies, never having evaluated retrieval.
+LlamaIndex's committee is technical — Jerry Liu himself often participates. They look for: deep RAG experience (you should know the failure modes), strong production Python or TypeScript skills, and passion for the data-augmented LLM problem. Red flags: never having built a real RAG app, weak on chunking strategies, never having evaluated retrieval. Jerry's bar is "have you actually shipped this, or are you a framework tourist?" — a single multi-source RAG project is worth more than five chat-with-PDF demos.
 
 ## Stage 5: Offer
 Base is competitive ($180K-$280K), equity is the lever (private, well-funded). Negotiation: equity refreshers + sign-on.
@@ -98,3 +106,9 @@ Base is competitive ($180K-$280K), equity is the lever (private, well-funded). N
 - [LlamaIndex docs](https://docs.llamaindex.ai)
 - [LlamaIndex GitHub](https://github.com/run-llama/llama_index)
 - [LlamaIndex Glassdoor](https://www.glassdoor.com/Interview/LlamaIndex-Interview-Questions-E3509200.htm)
+
+---
+
+## The 1 thing to remember
+
+Ship a multi-source RAG app (PDFs + Slack + Notion) on LlamaIndex before the phone screen — Jerry personally filters for "have you actually used the framework in anger," and a single eval-numbered RAG project beats five generic chain demos at the committee.

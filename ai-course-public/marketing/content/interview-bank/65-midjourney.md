@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer / Applied Researcher (Image generation)
 - **Tech stack:** PyTorch, JAX, CUDA, Triton, custom diffusion stack, large-scale GPU infra
-- **Comp band:** $250K-$500K base + meaningful equity (privately held, SF-remote)
+- **Comp band:** $250K-$500K total comp (Senior → Staff) | Base + meaningful equity (private, cash-flow positive)
 - **Cumulative pass rate:** ~2-3% (very small, very selective)
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + diffusion latent space visualized as a swirling low-dimensional manifold with denoising arrows. Color: Midjourney violet (#8E5BFF). Headline: "Midjourney / AI Image Generation / 2026".
+
+> **TL;DR:** Midjourney is small, taste-obsessed, and math-strict — the loop tests derivation fluency, not trivia. The signature round is the 90-min phone: derive forward/reverse diffusion, then code a 2D convolution in NumPy. The winning candidate has a portfolio and opinions on V6 vs V7 stylization.
+
+```
+Recruiter → Phone (math + code) → Onsite (3 rounds) → David Holz chat → Offer
+```
+
+The funnel filters for taste AND derivations. Hedge-y answers on either axis get cut, and there's no HR buffer to soften the founder round.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen is taste-first. Expect to be challenged on image-model opinions and pushed back on hedge-y answers.
+
 ### Q1.1: "Why Midjourney over Stability/OpenAI?"
 **Answer:** "I want to work at the only image lab that's been independent and product-led. That pressure-cooker of taste plus research is unique. The V7 launch with consistent character + style refs is the kind of bet I want to be inside."
 **Tip:** Show deep familiarity with each Midjourney version's distinctive choices (v5.2 stylize, v6 natural language, v7 personalization).
@@ -26,6 +38,8 @@
 **Tip:** Have specific opinions. David Holz values taste and pushes back on hedge-y answers.
 
 ## Stage 2: Technical phone screen
+
+The phone tests derivation fluency — they want the math on the board, not terminology recited from memory.
 
 ### Q2.1: Derive the forward and reverse diffusion process.
 **Answer:** Forward: q(x_t | x_{t-1}) = N(x_t; √(1-β_t) x_{t-1}, β_t I). Marginal: q(x_t | x_0) = N(x_t; √(α̅_t) x_0, (1-α̅_t) I) where α̅_t = ∏_{s≤t}(1-β_s). Reverse is a learned Gaussian with mean μ_θ(x_t, t) and (usually fixed) variance σ_t² I, trained by predicting the noise ε. Score-matching equivalence: ∇_x log p_t(x) = -ε_θ(x,t)/σ_t, so noise prediction is score prediction up to scaling.
@@ -46,6 +60,8 @@ def conv2d(x, k):
 **Tip:** They want you to talk about im2col and Winograd for speed.
 
 ## Stage 3: Onsite
+
+The onsite pushes deeper into the U-Net block, the inference serving stack, and a research deep-dive on character consistency.
 
 ### Round 3.1: Coding
 **Q:** Implement a small U-Net downsampling block.
@@ -70,6 +86,8 @@ David Holz is hands-on. He wants to know what you'd build next — and why. He d
 Equity is the in-house norm. Midjourney has historically offered meaningful equity grants because they're private and cash-flow positive.
 
 ## Tips for the Midjourney loop
+
+Most candidates over-prepare LeetCode and under-prepare diffusion derivations. The loop rewards math on the whiteboard.
 - Memorize the math of diffusion and flow matching.
 - Be ready to write CUDA/Triton kernels on a whiteboard.
 - Talk about Midjourney versions with specific dates.
@@ -86,3 +104,9 @@ Equity is the in-house norm. Midjourney has historically offered meaningful equi
 - [Glassdoor — Midjourney](https://www.glassdoor.com/Interview/Midjourney-Interview-Questions.htm)
 - [DDPM paper (Ho et al., 2020)](https://arxiv.org/abs/2006.11239)
 - [Reddit r/StableDiffusion — Midjourney threads](https://reddit.com/r/StableDiffusion)
+
+---
+
+## The 1 thing to remember
+
+Midjourney rewards diffusion and foundation-model depth — if you can't derive the forward process, score-matching equivalence, and classifier-free guidance on a whiteboard, you don't pass the phone screen.

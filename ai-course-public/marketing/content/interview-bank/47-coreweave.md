@@ -1,8 +1,16 @@
 # 47. CoreWeave
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a CoreWeave 25K-GPU cluster floorplan with rack rows, IB spines, and the CoreWeave blue/teal palette). Color: CoreWeave teal (#00D1B2 on near-black). Headline: "CoreWeave / AI Hyperscale GPU Engineer / 2026".
+
+> **TL;DR:** CoreWeave runs one of the largest GPU clouds in the world (25K+ GPUs) and IPO'd in 2025; the loop is recruiter → 60-90 min systems phone → 4-5 round onsite (with a "build a hyperscaler control plane" round) → big-tech-style committee → offer, and the signature round is "deploy a 10K-GPU cluster from scratch." The winning candidate has read the S-1, masters the NVIDIA GPU operator, and can talk to OpenAI/Meta/NVIDIA-level customers as a peer.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** ML Infrastructure Engineer / Cloud SWE / SRE
 - **Tech stack:** Kubernetes, Go, Python, NVIDIA GPU Operator, RDMA/InfiniBand, Arista switching, Terraform, Ansible, Prometheus, Grafana, Kafka, S3-compatible storage
-- **Comp band:** $220K-$450K (late-stage, well-funded, post-IPO)
+- **Comp band:** $220K-$450K total comp (Senior SRE/ML Infra, staff+) | RSUs/equity 4-year vest (post-IPO)
 - **Cumulative pass rate:** ~2-4%
 
 ## Hiring rounds
@@ -80,7 +88,7 @@ class HeteroScheduler:
 - **Q3.5.2:** "Why CoreWeave over a hyperscaler?"
 
 ## Stage 4: Hiring committee
-Structured like a public company now (post-IPO). The committee is more like big-tech. They look for: extreme infra depth, ability to operate at hyperscaler scale, and customer empathy (CoreWeave's customers are very technical — they need engineers who can talk shop).
+Structured like a public company now (post-IPO). The committee is more like big-tech. They look for: extreme infra depth, ability to operate at hyperscaler scale, and customer empathy (CoreWeave's customers are very technical — they need engineers who can talk shop). Post-IPO means committees are slower and more thorough, but the bar is also higher because comp is constrained by the public-company band.
 
 ## Stage 5: Offer
 Base is at the high end ($250K-$350K for senior), equity is post-IPO (RSUs, 4-year vest), and CoreWeave offers significant sign-on to compete with hyperscalers. Negotiation: title and equity refreshers.
@@ -103,3 +111,9 @@ Base is at the high end ($250K-$350K for senior), equity is post-IPO (RSUs, 4-ye
 - [CoreWeave S-1 (IPO filing)](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001769628)
 - [CoreWeave Glassdoor](https://www.glassdoor.com/Interview/CoreWeave-Interview-Questions-E3507800.htm)
 - [Levels.fyi CoreWeave](https://www.levels.fyi/companies/coreweave)
+
+---
+
+## The 1 thing to remember
+
+Read CoreWeave's S-1 filing and have an OSS PR to their K8s GPU operator before the onsite — the post-IPO committee filters for hyperscaler-grade depth, and the candidate who knows the operator internals beats the one who's just read the blog.

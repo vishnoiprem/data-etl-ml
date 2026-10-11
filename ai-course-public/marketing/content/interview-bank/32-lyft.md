@@ -1,8 +1,16 @@
 # 32. Lyft (ML / Pricing / AV)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "LYFT / AI PRICING / 2026".
+
+> **TL;DR:** Lyft's loop is **driver-first** by mission — the signature lens is the ethics of pricing, and the prime-time PR crisis is a real cultural scar. The signature stack is **H3 + Flyte + switchback experiments**, and the winning candidate talks about supply-side empathy before reaching for the model.
+
+```
+Recruiter (55%) → Phone (45%) → Onsite (35%) → Tech Panel (60%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Pricing, Marketplace, AV/Level 5)
 - **Tech stack:** Python, PyTorch, TensorFlow, Scala, Spark, Kafka, Flyte (Lyft's orchestrator), H3 geospatial
-- **Comp band:** $250K-$650K (L4-L6); senior crosses $850K+; RSUs vest 4-year
+- **Comp band:** $250K-$650K total comp (L4-L6) | RSUs 4-year, 1-year cliff; senior crosses $850K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Onsite (4 rounds)** | Coding, system design, ML, behavior | 1-2 days | ~35% advance |
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
+
+Lyft's loop is the most mission-driven of the marketplace companies. Ethics and driver empathy aren't bonus points — they're a primary signal. If your pricing design doesn't reach for fairness caps, you've already lost the round.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -27,6 +37,8 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
+The phone screens look standard, but the ML round always pivots to *supply-side impact* and *ethical constraints*. If you reach for switchback experiments unprompted, you've already cleared the Lyft bar.
+
 ### Q2.1: Coding: "Design a URL shortener"
 **Answer:** Hash (MD5/SHA) → base62 → 7-char code; store in DB with index; optional caching layer.
 **Tip:** System-design-in-coding-format questions. Sometimes a classic LeetCode medium.
@@ -36,6 +48,8 @@
 **Tip:** Lyft's prime-time PR crisis is well-known — they want to know you think about *ethics* of pricing.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and ethics-flavored. Every pricing question is a chance to show driver empathy, and the experimentation-platform system design is Lyft's signature.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Search in rotated sorted array. O(log N) modified binary search.
@@ -79,3 +93,9 @@ Cash + RSUs. Lyft is competitive but below FAANG top-of-band (post-IPO reset). N
 - [Lyft Engineering blog](https://eng.lyft.com/)
 - [Lyft ML papers](https://www.lyft.com/level5/publications)
 - [Flyte GitHub](https://github.com/lyft/flyte)
+
+---
+
+## The 1 thing to remember
+
+At Lyft, "driver-first" is a primary signal — name Flyte, name H3, and reach for fairness caps and switchback experiments before you reach for the model, because ethics of pricing is the cultural scar and the test.

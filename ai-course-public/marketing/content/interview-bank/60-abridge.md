@@ -1,8 +1,16 @@
 # 60. Abridge (Medical AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a real-time medical transcript waveform with speaker turns, SOAP note generation, and the Abridge teal/coral palette). Color: Abridge coral (#FF6F61 on teal #00A39A background). Headline: "Abridge / AI Medical Scribe Engineer / 2026".
+
+> **TL;DR:** Abridge is the medical conversation AI leader with the largest US healthcare deployments and the hardest real-time transcription problem; the loop is recruiter → 60-90 min coding+ML phone → 4-5 round onsite (with a real-time systems round and a Shiv Rao founder round) → high-bar committee with clinicians → offer, and the signature round is "design Abridge's real-time transcription pipeline with sub-500ms partials." The winning candidate has shipped real-time ML in production, knows Whisper/ASR/streaming, and treats clinical workflow curiosity as a first-class signal.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (25%) → Committee (60%) → Offer
+```
+
 - **Role:** AI Engineer (Medical Conversation AI / Scribe)
 - **Tech stack:** Python, PyTorch, Whisper (fine-tuned), LLM APIs, PEFT/LoRA, vLLM, Kubernetes, Postgres, vector DBs, real-time streaming
-- **Comp band:** $200K-$420K (well-funded, $5B+ valuation, healthcare AI premium)
+- **Comp band:** $200K-$420K total comp (Senior AI Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~2-4%
 
 ## Hiring rounds

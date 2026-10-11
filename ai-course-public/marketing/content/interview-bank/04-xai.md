@@ -1,8 +1,17 @@
 # 4. xAI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Memphis data center / 100K-H100 cluster). Color: company brand color as accent (xAI graphite/black + white). Headline on image: "xAI / AI Engineer / 2026".
+
+> **TL;DR:** xAI's loop is the fastest of the frontier labs (1-2 weeks end-to-end) and rejects ~97% of candidates — the signature round is the "speed" round where you scope a 6-month project and name what you'd cut. The winning candidate ships a Rust/cog answer, names the Grok-specific disagreement (open-weights vs. closed), and answers "what would you cut" with specifics, not a Gantt chart.
+
+```
+Recruiter (60%) → Phone (40%) → Onsite (30%) → "Speed" round + committee → Offer
+                                                └── 6-mo ship scope ──┘
+```
+
 - **Role:** AI Engineer
 - **Tech stack:** Python, PyTorch, JAX, CUDA, Triton, Rust (Grok serving)
-- **Comp band:** $200K-$1M+ (L2-L6, cash-heavy)
+- **Comp band:** $200K-$1M+ total comp (L2-L6, cash-heavy) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Technical phone screen** | 1-2 coding + ML fundamentals, fast loop | 1-2 weeks | ~40% advance |
 | 3. **Onsite (4-5 rounds, 1-2 days)** | Coding → ML system design → Grok infra → "speed" round → behavioral | 1-2 days | ~30% advance |
 | 4. **Team match + offer** | Fast turnaround; comp negotiation real | 1 week | — |
+
+xAI runs the shortest loop of any frontier lab — the whole process is 1-2 weeks, and the "speed" round is a separate interviewer, not a sub-question. Most candidates over-polish when the team rewards cuts.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -42,6 +53,8 @@ def sliding_window_attn(Q, K_cache, V_cache, window=512):
 ```
 xAI grades speed and memory: the window size is the memory/compute trade-off; 512 is the Mistral-canonical pick.
 **Tip:** Name the window size, name the memory trade-off.
+
+The phone screen is sliding-window-attention + a coding warmup. The onsite is where the Grok-infra + "speed" round decides whether you ship at xAI's cadence or not.
 
 ## Stage 3: Onsite (4-5 rounds)
 
@@ -105,3 +118,9 @@ xAI comp is more cash-heavy than RSU-heavy. The play: anchor with a competing of
 - [xAI Grok Console](https://console.x.ai/)
 - [Forbes — How France's Mistral Built a $14B AI Empire (Apr 2026)](https://www.forbes.com/sites/iainmartin/2026/04/16/how-frances-mistral-built-a-14-billion-ai-empire-by-not-being-american/)
 - [Levels.fyi — xAI compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At xAI, the "speed" round is the gate — name what you'd cut to ship Grok-3 in 6 months, defend the cut, and signal that you fix in production rather than polish pre-launch.

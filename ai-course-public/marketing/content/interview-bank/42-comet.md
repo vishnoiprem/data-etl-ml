@@ -1,8 +1,16 @@
 # 42. Comet
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Comet's experiment comparison dashboard with a custom panel layout and the comet teal color). Color: Comet teal (#1FB8CD). Headline: "Comet / AI ML Engineer / 2026".
+
+> **TL;DR:** Comet is the underdog experiment tracker that's strongest in LLM eval (Opik); the loop is recruiter → coding+ML phone → 3-4 round onsite → committee → offer, and the signature round is "why Comet over W&B?" The winning candidate has actually run an Opik eval, knows ClickHouse-style OLAP queries, and frames Comet as the "panels + LLM eval" wedge.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** ML Engineer (Experiment Tracking / MLOps)
 - **Tech stack:** Python, TypeScript, React, Go, Postgres, ClickHouse, Redis, Kubernetes, Docker, PyTorch, TensorFlow, LLM eval tooling
-- **Comp band:** $170K-$350K (smaller than W&B, similar structure)
+- **Comp band:** $170K-$350K total comp (Senior ML Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -65,7 +73,7 @@ class StreamingPercentile:
 - **Q3.4.2:** "A customer wants a feature only they need. What do you do?"
 
 ## Stage 4: Hiring committee
-Comet is smaller (~$50M raised), so the committee is tight: usually 3-5 senior engs. They weigh: ML practitioner credibility, coding chops, and "do you actually use Comet?" (A red flag is a candidate who's only used W&B and has no clear opinion on Comet.)
+Comet is smaller (~$50M raised), so the committee is tight: usually 3-5 senior engs. They weigh: ML practitioner credibility, coding chops, and "do you actually use Comet?" (A red flag is a candidate who's only used W&B and has no clear opinion on Comet.) The committee will quietly check whether you shipped something with Opik — it's the most concrete signal that you're not just reciting Comet's marketing.
 
 ## Stage 5: Offer
 Base is slightly below W&B (10-20% lower); equity is the lever — Comet is private, Series B-ish, so equity has real upside if they IPO. Negotiation: push for refreshers and signing bonus.
@@ -88,3 +96,9 @@ Base is slightly below W&B (10-20% lower); equity is the lever — Comet is priv
 - [Opik (Comet's LLM eval product)](https://www.comet.com/opik)
 - [Comet interview reports on Glassdoor](https://www.glassdoor.com/Interview/Comet-Interview-Questions-E2634259.htm)
 - [Levels.fyi Comet](https://www.levels.fyi/companies/comet-ml)
+
+---
+
+## The 1 thing to remember
+
+Use Opik on a real LLM eval before the phone screen — Comet's committee filters for "do you actually use Comet, or are you a W&B tourist?" and that hands-on artifact is the only thing that survives the 3-5 senior eng round.

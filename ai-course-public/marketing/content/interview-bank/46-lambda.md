@@ -1,8 +1,16 @@
 # 46. Lambda Labs (Lambda)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Lambda GPU rack diagram with InfiniBand fat-tree topology and the Lambda red/black color). Color: Lambda red (#D32F2F on near-black). Headline: "Lambda / AI GPU Cloud Engineer / 2026".
+
+> **TL;DR:** Lambda is the cheapest reserved H100/H200 cloud for serious training; the loop is recruiter → coding+infra phone → 4-round onsite (including "design the hyperscaler control plane" in 45 min) → committee → offer, and the signature round is debugging a 1000-GPU run that's 5x slower than expected. The winning candidate knows Slurm + K8s, can talk IB/RDMA/NCCL cold, and brings operator experience at real scale.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** ML Infrastructure Engineer / Cloud Engineer / SRE
 - **Tech stack:** Python, Go, Kubernetes, Slurm, CUDA, NCCL, InfiniBand, Onyx, RDMA, Ansible, Terraform, Prometheus, Grafana
-- **Comp band:** $200K-$400K (well-funded, hyperscaler-style infra)
+- **Comp band:** $200K-$400K total comp (Senior SRE/ML Infra Engineer) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -76,7 +84,7 @@ class ClusterScheduler:
 - **Q3.4.2:** "Why infra? What keeps you up at night about a GPU cluster?"
 
 ## Stage 4: Hiring committee
-Lambda is bigger and more structured than RunPod. The committee is more like a big-tech loop review. They look for: deep infra experience (especially distributed systems + GPU), coding fluency, and operator mindset. Red flags: never having used a real cluster, weak on networking.
+Lambda is bigger and more structured than RunPod. The committee is more like a big-tech loop review. They look for: deep infra experience (especially distributed systems + GPU), coding fluency, and operator mindset. Red flags: never having used a real cluster, weak on networking. The committee is hyperscaler-trained, so vague answers about "I once set up a K8s cluster" are a hard no — they want operators who can name the failure mode, the alert, and the runbook.
 
 ## Stage 5: Offer
 Base is competitive ($200K-$300K for senior eng), equity is moderate (private, well-funded). Negotiation: title, sign-on, and equity refreshers.
@@ -99,3 +107,9 @@ Base is competitive ($200K-$300K for senior eng), equity is moderate (private, w
 - [Lambda Cloud docs](https://docs.lambda.ai)
 - [Lambda Glassdoor](https://www.glassdoor.com/Interview/Lambda-Labs-Interview-Questions-E2721130.htm)
 - [Levels.fyi Lambda](https://www.levels.fyi/companies/lambda-labs)
+
+---
+
+## The 1 thing to remember
+
+Practice the "design the hyperscaler control plane" round before the onsite — it's almost always the system design prompt, and the candidate who walks gang scheduling, topology-aware placement, and IB fat-tree in 45 minutes is the one Lambda fights hyperscalers to hire.

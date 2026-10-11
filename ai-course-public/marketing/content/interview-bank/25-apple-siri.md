@@ -1,8 +1,16 @@
 # 25. Apple (Siri / Apple Intelligence)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "APPLE / AI SIRI / 2026".
+
+> **TL;DR:** Apple hires for *on-device* ML — the constraint is the spec sheet, and the loop tests whether you can ship a model that fits. The signature lens is **privacy as a feature**: every answer gets reframed through on-device, differential privacy, and federated learning. The winning candidate names Core ML and MLX without prompting.
+
+```
+Recruiter (50%) → Phone (35%) → Onsite (30%) → Panel (50%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Siri, Apple Intelligence, Foundation Models)
 - **Tech stack:** Python, Swift (some), PyTorch/JAX, Core ML, MLX (Apple's framework), C++, Objective-C, XCode
-- **Comp band:** $250K-$700K (ICT3-ICT5); senior+ crosses $1M+; RSUs vest 4-year, cash high
+- **Comp band:** $250K-$700K total comp (ICT3-ICT5) | RSUs 4-year, cash high; senior+ crosses $1M+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Onsite (4-5 rounds)** | Coding, ML, system design, deep specialty, behavior | 1-2 days | ~30% advance |
 | 4. **Hiring committee (cross-functional)** | Senior panel, calibration | 2-3 weeks | ~50% advance |
 | 5. **Offer** | Comp negotiation, team match | 1 week | — |
+
+Apple's loop is calibrated for "focus, not breadth" — brag about ONE project shipped deeply, not ten projects shipped shallowly. The committee will ask "is this person a 'yes' for the level?" and only strong hires clear that bar.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -27,6 +37,8 @@
 
 ## Stage 2: Technical phone screens (90 min)
 
+The phone screens test your on-device reflexes — if you don't reach for INT8 quantization, grouped-query attention, or Core ML Tools in your first sentence, the interviewer will. Be specific about size, latency, and battery constraints.
+
 ### Q2.1: Coding — "LRU cache with O(1) get/put"
 **Answer:** Doubly linked list + dict. ~50 lines.
 **Tip:** Apple CS is similar to FAANG — LeetCode mediums. Some roles use Swift.
@@ -36,6 +48,8 @@
 **Tip:** Reference MLX (Apple's ML framework) and Core ML Tools by name.
 
 ## Stage 3: Onsite (4-5 rounds)
+
+The Apple onsite is where "shipped-to-production" gets tested. The specialty round is the killer — it's a deep-dive in your sub-area at a level most candidates underestimate. Confirm the specialty with the recruiter; don't bluff.
 
 ### Round 3.1: Coding (60 min)
 
@@ -114,3 +128,9 @@ Cash + RSUs. Apple cash is competitive but equity is below Meta/Google for senio
 - [Apple Machine Learning Research](https://machinelearning.apple.com/)
 - [Core ML docs](https://developer.apple.com/documentation/coreml)
 - [r/MachineLearning Apple thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Apple, on-device is the frame — every ML answer should naturally reach for quantization, distillation, and battery constraints, because "privacy as a feature" means the model never leaves the device.

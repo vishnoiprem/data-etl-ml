@@ -1,8 +1,17 @@
 # 7. Meta AI (FAIR)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Llama open-weights stack with transformer architecture). Color: company brand color as accent (Meta blue). Headline on image: "Meta AI (FAIR) / Research Engineer / 2026".
+
+> **TL;DR:** Meta's loop runs 5 stages and rejects ~98% of candidates — the offer-decider is the Jedi behavioral round (graded as heavily as coding), where you must defend STAR stories on conflict, failure, and data-influenced decisions. The winning candidate uses interviewer hints, ships a "News Feed hybrid fan-out/fan-in" answer, and treats the AI-assisted coding round as a thinking test, not a typing test.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Team match → Offer
+                                            └── Jedi round (offer-decider) ──┘
+```
+
 - **Role:** Research Engineer
 - **Tech stack:** Python, PyTorch, C++, Llama, FAISS, CoderPad
-- **Comp band:** $250K-$1.2M+ (E4-E7)
+- **Comp band:** $250K-$1.2M+ total comp (E4-E7 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -14,6 +23,8 @@
 | 3. **Onsite (5 rounds in 1 day)** | 2 coding → 1 system design (E5+) → 1 Jedi behavioral → 1 AI-assisted coding | 1-2 days | ~30% advance |
 | 4. **Hiring committee** | Packet → committee vote | 1-2 weeks | ~60% advance |
 | 5. **Team match + offer** | Match to FAIR / GenAI / Reality Labs | 1-3 weeks | — |
+
+The loop looks like every other big-tech onsite on paper, but the Jedi round is graded as heavily as coding — and the E6+ band is wide. The candidate who treats behavioral as a footnote loses the offer.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -46,6 +57,8 @@ def spiral(n):
 ```
 The Meta warmup. Talk out loud while coding; ask for hints when stuck.
 **Tip:** Meta interviewers are "literally trained to give good hints." Use them.
+
+The phone screen is a spiral-matrix warmup. The onsite is where Jedi + AI-assisted coding decide whether you ship at Meta or not. Talk out loud — silence is the failure mode.
 
 ## Stage 3: Onsite (5 rounds)
 
@@ -133,3 +146,9 @@ Comp negotiation is expected — come with a competing offer from OpenAI / Anthr
 - [r/OfferEngineering — Meta Data Engineer Interview (Mar 2026)](https://www.reddit.com/r/OfferEngineering/comments/1s2z2p1/meta_data_engineer_interview_full_loop_questions/)
 - [Levels.fyi — Meta compensation](https://www.levels.fyi/companies/meta/salaries/software-engineer)
 - [Glassdoor — Meta Interview Questions (2026)](https://www.glassdoor.com/Interview/Meta-Interview-Questions-E40772.htm)
+
+---
+
+## The 1 thing to remember
+
+At Meta, the Jedi round is the offer-decider — prep STAR stories on conflict, failure, and data-influenced decisions with the same rigor as coding, or you lose the loop.

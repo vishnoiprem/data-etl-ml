@@ -1,8 +1,16 @@
 # 28. Oracle (OCI AI / Generative AI Service)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "ORACLE / OCI AI / 2026".
+
+> **TL;DR:** Oracle's loop is built for **sovereign cloud** and regulated industries — banks, governments, healthcare — where data never leaves the customer's perimeter. The signature stack is **23ai Vector Search** + **OCI Generative AI Service**, and the winning candidate has shipped on-prem or hybrid and can write Java under pressure.
+
+```
+Recruiter (55%) → Phone (45%) → Onsite (35%) → Tech Panel (60%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (OCI AI Services, Generative AI, Vector Search)
 - **Tech stack:** Python, PyTorch, TensorFlow, Java, OCI (Oracle Cloud), Kubernetes, CUDA, GraalVM
-- **Comp band:** $200K-$600K (IC3-IC5); senior crosses $750K+; RSUs vest 4-year
+- **Comp band:** $200K-$600K total comp (IC3-IC5) | RSUs 4-year, 1-year cliff; senior crosses $750K+
 - **Cumulative pass rate:** ~3-4%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Oracle's loop looks like a standard big-tech interview, but the lens is always "will this work in a regulated customer's environment?" If you can't talk about compliance, on-prem, and audit, you'll get stuck on the first ML design question.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Oracle for AI?"
@@ -26,6 +36,8 @@
 **Tip:** Show you've shipped where data sovereignty matters.
 
 ## Stage 2: Technical phone screens (90 min)
+
+Confirm the language upfront — Java is on the table, and interviewers won't switch mid-round. The ML round expects you to name 23ai Vector Search and Oracle's database heritage unprompted; if you don't, the interviewer will.
 
 ### Q2.1: Coding: "Reverse a linked list in groups of K"
 **Answer:** Iterative with prev/curr/next pointers. O(N) time, O(1) space.
@@ -59,6 +71,8 @@ def reverseKGroup(head, k):
 **Tip:** Reference *23ai Vector Search* and *Oracle Database* by name. Oracle is a database company first.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is where Oracle checks for cloud-infra depth — vector search, multi-tenant serving, on-prem deployment. Java fluency gets tested in the coding round; SQL fluency gets tested in the system design. Both are real signals, not optional.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Implement a thread-safe rate limiter (token bucket).
@@ -102,3 +116,9 @@ Cash + RSUs. Oracle is competitive for cloud roles but typically below FAANG top
 - [Oracle AI Blog](https://blogs.oracle.com/ai-and-datascience/)
 - [Oracle 23ai Vector Search docs](https://www.oracle.com/database/ai-vector-search/)
 - [Glassdoor Oracle ML interviews](https://www.glassdoor.com/Interview/Oracle-Interview-Questions-E1737.htm)
+
+---
+
+## The 1 thing to remember
+
+At Oracle, every answer should bend toward sovereignty — name 23ai Vector Search, the OCI Generative AI Service, and on-prem deployment, because "data never leaves the customer's perimeter" is the whole game.

@@ -1,8 +1,17 @@
 # 12. Replicate
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Cog container with scale-to-zero GPU pool). Color: company brand color as accent (Replicate purple). Headline on image: "Replicate / ML Engineer / 2026".
+
+> **TL;DR:** Replicate's loop runs 4 stages (small team, ~96% reject) — the signature is the Cog take-home (build a real Cog model that runs SDXL via HTTP, not a contrived coding prompt). The winning candidate defends the scale-to-zero + cold-start trade-off, names the queue-depth + GPU-utilization autoscaling signal, and ships the 4-step memory optimization ladder (FP16 → xformers → CPU offload → sharding).
+
+```
+Recruiter (60%) → Take-home (50%) → Onsite (40%) → Reference + offer
+                          └── Cog take-home ──┘
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, Cog (open-source), Docker, FastAPI, Rust, CUDA
-- **Comp band:** $200K-$500K (L3-L6, small team)
+- **Comp band:** $200K-$500K total comp (L3-L6, small team) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~4-5%
 
 ## Hiring rounds
@@ -13,6 +22,8 @@
 | 2. **Take-home / pairing session** | Build a small Cog model | 1-2 weeks | ~50% advance |
 | 3. **Onsite (3-4 rounds, 1 day)** | Coding → Cog / Docker system design → ML deployment → behavioral | 1-2 days | ~40% advance |
 | 4. **Reference + offer** | Comp negotiation real | 1 week | — |
+
+The loop assumes you're already shipping Cog models — the take-home is a real Cog container, not a contrived prompt. Most candidates under-prep Docker fundamentals and lose the loop despite strong ML signal.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -40,6 +51,8 @@ class Predictor(BasePredictor):
 ```
 Replicate grades Cog fluency + Docker fundamentals.
 **Tip:** Cog + Docker is the Replicate stack.
+
+The take-home is a real Cog model. The onsite is the platform-engineering gauntlet — coding, Cog/Docker system design, ML deployment. The candidate who treats it like a generic ML interview loses.
 
 ## Stage 3: Onsite (3-4 rounds)
 
@@ -128,3 +141,9 @@ Replicate comp is base + RSU + sign-on. Cash component is decent; equity is mean
 - [Replicate Docs](https://replicate.com/docs)
 - [Hacker News — Replicate threads](https://news.ycombinator.com/)
 - [Levels.fyi — Replicate compensation](https://www.levels.fyi)
+
+---
+
+## The 1 thing to remember
+
+At Replicate, ship a Cog model before the loop — scale-to-zero + cold-start + queue-depth autoscaling is the bet, and the candidate who only knows PyTorch loses.

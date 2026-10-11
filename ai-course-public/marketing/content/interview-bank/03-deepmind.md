@@ -1,8 +1,17 @@
 # 3. Google DeepMind
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Gemini multiring cluster). Color: company brand color as accent (Google blue). Headline on image: "Google DeepMind / AI Engineer / 2026".
+
+> **TL;DR:** DeepMind's loop runs 5 stages and rejects ~98% of candidates — the signature round is the "broken neural network" ML implementation (90 min, find 3 bugs in a training pipeline that's plateaued). The winning candidate derives MLEs on the whiteboard, names 3 specific ablations they didn't run on their research, and treats "Googliness" as a real signal, not boilerplate.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (25%) → Committee (60%) → Team match → Offer
+                                          └── broken-NN round ──┘
+```
+
 - **Role:** AI Engineer / Research Engineer
 - **Tech stack:** Python, JAX, PyTorch, TensorFlow, CUDA, Colab
-- **Comp band:** $400K-$1.5M+ (L4-L7)
+- **Comp band:** $400K-$1.5M+ total comp (L4-L7 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -14,6 +23,8 @@
 | 3. **Onsite (5 rounds, 1-2 days)** | 2 coding → 1 ML implementation → 1 system design (ML-infra) → 1 Googliness | 1-2 days | ~25% advance |
 | 4. **Hiring committee** | Packet to committee; vote | 1-2 weeks | ~60% advance |
 | 5. **Team match + offer** | Committee pass → team match | 1-2 weeks | — |
+
+The loop is the longest of the frontier labs (4-6 weeks typical), and the math comes back in ways it doesn't at OpenAI or Anthropic. The whiteboard derivations are graded, not the code.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -33,6 +44,8 @@
 
 ### Q2.2: "Why is L2 regularization equivalent to a Gaussian prior?"
 **Answer:** MAP estimate with Gaussian prior p(w) ~ N(0, σ²I) is argmin_w [-log p(D|w) - log p(w)] = argmin_w [NLL + (1/(2σ²)) ||w||²]. That's L2 regularization with λ = 1/(2σ²). Name the prior, derive the equivalence.
+
+The phone screen is a LeetCode + derivation warmup. The onsite is the math+systems gauntlet — broken neural network, ML-infra, research talk defense. Here's where the depth shows up.
 
 ## Stage 3: Onsite (5 rounds)
 
@@ -114,3 +127,9 @@ Google comp is structured: base + RSU + bonus + sign-on. DeepMind total comp is 
 - [Coditioning — Google DeepMind SWE System Design (Jun 2026)](https://www.coditioning.com/blog/4805/google-deepmind-swe-system-design)
 - [Levels.fyi — Google compensation](https://www.levels.fyi/companies/google/salaries/software-engineer)
 - [Deisenroth — Mathematics for Machine Learning](https://mml-book.github.io/)
+
+---
+
+## The 1 thing to remember
+
+At DeepMind, the broken-neural-network round is the gate — find 3 bugs (not 1), name the most-likely first, and verify; the candidate who defends everything loses.

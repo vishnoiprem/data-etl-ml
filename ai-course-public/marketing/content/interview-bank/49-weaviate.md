@@ -1,8 +1,16 @@
 # 49. Weaviate
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual (e.g., a Weaviate sharded vector index with hybrid BM25+vector fusion and the Weaviate green palette). Color: Weaviate green (#00C2A8 on near-black). Headline: "Weaviate / AI Vector DB Engineer / 2026".
+
+> **TL;DR:** Weaviate is the OSS-first vector DB with the cleanest hybrid search story; the loop is recruiter → 60 min coding+vector phone → 4-round onsite → committee → offer, and the signature round is "design a hybrid search system (BM25 + vector) with a cross-encoder reranker." The winning candidate has contributed even a small PR to Weaviate, knows HNSW internals cold, and frames the OSS-BSL choice as a deliberate wedge.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Offer
+```
+
 - **Role:** Software Engineer (Vector Database / Distributed Systems)
 - **Tech stack:** Go, Python, GraphQL, gRPC, Kubernetes, HNSW, IVF, Product Quantization, S3-compatible storage, Prometheus, Jaeger
-- **Comp band:** $180K-$360K (Series C, well-funded, OSS-first)
+- **Comp band:** $180K-$360K total comp (Senior SWE, US remote or Amsterdam) | RSUs/equity 4-year vest
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds
@@ -79,7 +87,7 @@ class LSH:
 - **Q3.4.2:** "Why vector DBs? Why open source?"
 
 ## Stage 4: Hiring committee
-Weaviate is OSS-first, so the committee values: open-source contributions, technical depth on vector indexing, and a real passion for the "semantic search" problem. Red flags: not knowing what product quantization is, never having used Weaviate.
+Weaviate is OSS-first, so the committee values: open-source contributions, technical depth on vector indexing, and a real passion for the "semantic search" problem. Red flags: not knowing what product quantization is, never having used Weaviate. The committee reads your GitHub before the debrief — a PR (even docs or tests) is the cheapest signal you can buy, and the absence of any OSS touch is read as "this person doesn't ship in public."
 
 ## Stage 5: Offer
 Base is competitive for EU ($150K-$250K EUR-equivalent, or US $200K-$300K), equity is meaningful (private, growing). Negotiation: equity refreshers + the EU-style benefits (28 days PTO, etc.).
@@ -102,3 +110,9 @@ Base is competitive for EU ($150K-$250K EUR-equivalent, or US $200K-$300K), equi
 - [Weaviate docs](https://weaviate.io/developers/weaviate)
 - [Weaviate GitHub](https://github.com/weaviate/weaviate)
 - [Weaviate Glassdoor](https://www.glassdoor.com/Interview/Weaviate-Interview-Questions-E3507900.htm)
+
+---
+
+## The 1 thing to remember
+
+Submit a small PR to Weaviate (even docs or a test fix) before the recruiter screen — the OSS-first committee reads your GitHub activity before the debrief, and any green square beats another "I've used both Pinecone and Weaviate" answer.

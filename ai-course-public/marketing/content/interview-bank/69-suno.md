@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer (Music generation)
 - **Tech stack:** PyTorch, JAX, CUDA, Triton, audio DSP (librosa, torchaudio), diffusion + transformer stacks
-- **Comp band:** $200K-$400K base + equity (Series C, Cambridge MA)
+- **Comp band:** $200K-$400K total comp (L5-L7: Senior → Staff) | Base + meaningful equity (Series C)
 - **Cumulative pass rate:** ~3-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + a music spectrogram (mel-scaled, time on x-axis, frequency on y-axis) with denoising arrows overlaid. Color: Suno magenta (#FF4D8B). Headline: "Suno / AI Music Generation / 2026".
+
+> **TL;DR:** Suno hires AI engineers who actually listen to music — the audio bar is set by musicians, not just model benchmarks. The signature round is the STFT implementation and the lyrics+melody conditioning design. The winning candidate has shipped audio projects and can defend an opinion on Suno v4 vs MusicGen.
+
+```
+Recruiter → Phone (math + code) → Onsite (3 rounds) → Founder chat → Offer
+```
+
+The funnel filters for taste AND audio-DSP fluency. Candidates who can derive MFCCs but can't name a song they loved last week don't make it past the founder round.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards music-AI passion. Name a model you admire and explain what they got right.
+
 ### Q1.1: "Why music AI?"
 **Answer:** "Music is the next frontier for generative AI. It's structured, emotional, and the IP questions are fascinating. Suno shipped the first product 10M+ people actually use to make music, and I want to push the audio quality bar higher."
 **Tip:** Reference Suno v4 and Bark. Show you've used both — Suno knows when you're bluffing.
@@ -26,6 +38,8 @@
 **Tip:** Show product intuition. Suno rewards people who can talk about both.
 
 ## Stage 2: Technical phone screen
+
+The phone tests STFT fluency and asks you to design a lyrics+melody conditioning system. Audio DSP is the gate.
 
 ### Q2.1: Implement an STFT in NumPy.
 **Answer:**
@@ -45,6 +59,8 @@ def stft(x, n_fft=2048, hop=512, win=None):
 **Tip:** This is roughly Suno's v4 architecture.
 
 ## Stage 3: Onsite
+
+Three rounds: MFCCs, real-time music generation design, and a music-model evaluation deep-dive.
 
 ### Round 3.1: Coding
 **Q:** Compute MFCCs.
@@ -69,6 +85,8 @@ Mikey Shulman (CEO) often joins. He cares about musical taste and shipping.
 Equity is meaningful; private, well-funded.
 
 ## Tips for the Suno loop
+
+Most candidates over-index on benchmark scores. Suno's bar is set by musicians, so bring taste and a real listening vocabulary.
 - Use Suno v4 before the interview.
 - Memorize STFT, mel spectrogram, vocoder math.
 - Read AudioLDM, MusicGen, Jukebox papers.
@@ -85,3 +103,9 @@ Equity is meaningful; private, well-funded.
 - [Glassdoor — Suno](https://www.glassdoor.com/Interview/Suno-Interview-Questions.htm)
 - [MusicGen paper](https://arxiv.org/abs/2306.05284)
 - [Reddit r/MusicGen — Suno threads](https://reddit.com/r/MusicGen)
+
+---
+
+## The 1 thing to remember
+
+Suno rewards diffusion and foundation-model depth in audio — if you can't derive STFT, mel-spectrograms, and a vocoder pipeline AND show genuine musical taste, you don't pass the founder round.

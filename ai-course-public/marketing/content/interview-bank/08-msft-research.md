@@ -1,8 +1,17 @@
 # 8. Microsoft Research
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (Phi-4 + Azure AI Foundry stack). Color: company brand color as accent (Microsoft blue + slate). Headline on image: "Microsoft Research / Research Engineer / 2026".
+
+> **TL;DR:** MSR's loop runs 5 stages and rejects ~98% of candidates — the signature pattern is the "As Appropriate" behavioral round (Microsoft's framework: Adaptable, Self-aware, Customer-obsessed, Drive for Results), graded as heavily as coding. The winning candidate brings a research artifact, names every Azure service in the system design (AI Search + Semantic Kernel + prompt caching), and anchors comp with a Google/Meta offer.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Committee (60%) → Team match → Offer
+                                            └── "As Appropriate" round ──┘
+```
+
 - **Role:** Research Engineer / Applied Scientist
 - **Tech stack:** Python, PyTorch, .NET, TypeScript, Azure ML, C#/C++
-- **Comp band:** $250K-$1.1M+ (L62-L64)
+- **Comp band:** $250K-$1.1M+ total comp (L62-L64 SWE) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -14,6 +23,8 @@
 | 3. **Onsite (4-5 rounds in 1-2 days)** | 2 coding → 1 system design (Azure) → 1 ML theory → 1 behavioral ("As Appropriate") | 1-2 days | ~30% advance |
 | 4. **Hiring committee** | Packet → committee vote | 1-2 weeks | ~60% advance |
 | 5. **Team match + offer** | Match to MSR / Copilot / Bing / Azure AI | 1-2 weeks | — |
+
+The loop feels conversational — most candidates under-prep the "As Appropriate" framework, and the system design rounds go Azure-first, not generic. Bring a research artifact.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -62,6 +73,8 @@ class BoundedQueue:
             while not self.q: self.cv.wait()
             x = self.q.popleft(); self.cv.notify_all(); return x
 ```
+
+The phone screen is a merge-list warmup. The onsite assumes Azure as the stack — name every service, the trade-off, the migration path. Generic answers lose.
 
 ## Stage 3: Onsite (4-5 rounds)
 
@@ -134,3 +147,9 @@ Microsoft comp negotiates — base + RSU + sign-on + bonus. The play: come with 
 - [r/leetcode — I cracked a Microsoft L63 (Senior) role (Nov 2025)](https://www.reddit.com/r/leetcode/comments/1osm7o9/i_cracked_a_microsoft_l63_senior_role_and_wanted/)
 - [Levels.fyi — Microsoft compensation](https://www.levels.fyi/companies/microsoft/salaries/software-engineer)
 - [Glassdoor — Microsoft Interview Questions (2026)](https://www.glassdoor.com/Interview/Microsoft-Interview-Questions-E1651.htm)
+
+---
+
+## The 1 thing to remember
+
+At Microsoft, prep the "As Appropriate" framework (Adaptable, Self-aware, Customer-obsessed, Drive for Results) like a coding round, anchor comp with a Google offer, and the L63 band opens up.

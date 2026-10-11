@@ -2,8 +2,18 @@
 
 - **Role:** Quantitative Researcher / Quant SWE / Algorithm Engineer
 - **Tech stack:** C++ (heavily!), Python, Rust, kdb+, FPGA, low-latency systems
-- **Comp band:** $300K-$1M+ base + bonus (no public equity; partnership-style)
+- **Comp band:** $300K-$1M+ total comp (Algo Eng → Senior Algo Eng) | Base + bonus (top of market; no public equity)
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + a low-latency order book with cache-line-aligned memory layout, plus a Kalman filter signal trace inset. Color: HRT slate (#2C3E50). Headline: "HRT / Quantitative Researcher & SWE / 2026".
+
+> **TL;DR:** HRT is the firm where math and low-latency C++ meet — research and engineering are not siloed, and the bar reflects that. The signature round is the onsite: a low-latency order book in C++, the Kalman filter update, and Black-Scholes from memory. The winning candidate has shipped performance-critical code and reads the HRT blog for fun.
+
+```
+Recruiter → Phone (math) → Onsite (4-5 rounds) → Hiring committee → Offer
+```
+
+The math → C++ → systems progression is the spine. Candidates who want to "just do ML" get cut at the screen.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards systems enthusiasm. Reference HRT's "Technical Reflections" blog and their FPGA work.
+
 ### Q1.1: "Why HRT?"
 **Answer:** "HRT is the only trading firm that builds its own silicon and writes the lowest-latency C++ in the industry. I want to work where the research and the engineering are both world-class, not where the two are siloed."
 **Tip:** Reference HRT's "Technical Reflections" blog and their FPGA work. Interviewers check.
@@ -26,6 +38,8 @@
 **Tip:** Show genuine excitement for systems work. HRT screens for "I just want to do ML" applicants.
 
 ## Stage 2: Technical phone screen
+
+The phone is combinatorics and C++ fluency. Show alignment awareness and lock-free data-structure chops.
 
 ### Q2.1: You draw 5 cards from a deck. P(royal flush)?
 **Answer:** 4 / C(52,5) = 4 / 2,598,960 ≈ 1.54e-6.
@@ -47,6 +61,8 @@ public:
 **Tip:** They want C++ fluency; mention lock-free variants (moodycamel queue).
 
 ## Stage 3: Onsite
+
+Five rounds: Black-Scholes derivation, low-latency order book in C++, market data feed handler, Kalman filter math, and a behavioral that probes 10x optimization wins.
 
 ### Round 3.1: Probability
 **Q:** A stock is at $100, vol 20% annual, r = 5%. Value a 1-year ATM call.
@@ -78,6 +94,8 @@ Panel of senior quants + engineers. They look for: (1) C++/systems depth, (2) ma
 $300K-$700K base new grad; $500K-$1M+ experienced. Signing $100K-$400K. They pay top of market; little counter-room.
 
 ## Tips for the HRT loop
+
+Most candidates under-prep "Effective Modern C++" and lock-free data structures. HRT's bar is the bar — both axes matter.
 - Practice C++ at the level of "Effective Modern C++."
 - Read the HRT blog — they publish deep technical essays.
 - Memorize options pricing + Kalman filter derivations.
@@ -94,3 +112,9 @@ $300K-$700K base new grad; $500K-$1M+ experienced. Signing $100K-$400K. They pay
 - [Levels.fyi — HRT](https://www.levels.fyi/companies/hudson-river-trading)
 - [Glassdoor — HRT](https://www.glassdoor.com/Interview/Hudson-River-Trading-Interview-Questions-E403132.htm)
 - [Reddit r/quant — HRT threads](https://reddit.com/r/quant)
+
+---
+
+## The 1 thing to remember
+
+HRT's math canon is the gate — Heard on the Street, Hull for options and Greeks, and Kalman filter derivations are not optional, and production C++ at the level of lock-free order books is the differentiator that puts offers above band.

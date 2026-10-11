@@ -1,8 +1,16 @@
 # 22. Amazon (Alexa / Rufus / AWS AI)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "AMAZON / AI APPLIED SCIENTIST / 2026".
+
+> **TL;DR:** Amazon's loop is the most LP-heavy in big tech — 16 Leadership Principles are *scored*, not vibes. The signature round is the **Bar Raiser**, an outside-org interviewer who holds veto power. The winning candidate has 2-3 STAR stories per LP and treats every technical round as if the bar raiser is listening.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Bar Raiser (50%) → Offer
+```
+
 - **Role:** Applied Scientist (L5/L6) for Alexa AI, Rufus, or AWS Bedrock
 - **Tech stack:** Python, PyTorch, JAX, TensorFlow, SageMaker, AWS (S3, EMR, Kinesis, DynamoDB), Java, Spark
-- **Comp band:** $200K-$700K (L5-L7); L7+ crosses $1M+; sign-on and RSUs heavy
+- **Comp band:** $200K-$700K total comp (L5-L7) | RSUs 4-year, sign-on common; L7+ crosses $1M+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -14,6 +22,8 @@
 | 3. **Onsite (4-5 rounds)** | Coding, system design, ML design, leadership principles | 1-2 days | ~30% advance |
 | 4. **Bar raiser + hiring committee** | Cross-org review, "Is this person a bar-raiser?" | 1-3 weeks | ~50% advance |
 | 5. **Offer** | Comp, team match, sign-on negotiation | 1 week | — |
+
+Amazon's loop is longer than most — expect 4-6 weeks from screen to offer, partly because the Bar Raiser round and the hiring committee both take calendar time. The total pass rate is brutal precisely because every stage has its own gate.
 
 ## Stage 1: Recruiter screen (30 min)
 
@@ -27,6 +37,8 @@
 
 ## Stage 2: Technical phone screens (90 min total)
 
+The phone screens are where Amazon quietly filters for the bar-raiser standard. The coding round is medium LeetCode; the ML round is open-ended by design. Both end with a 5-minute "tell me about a project" — interviewers grade your STAR discipline as much as your code.
+
 ### Q2.1: Coding — "Word search in a grid"
 **Answer:** Backtracking with visited set. O(M·N·4^L) where L is the word length. Pruning via trie if many words.
 **Tip:** Expect medium LeetCode. Don't waste time on micro-optimization.
@@ -36,6 +48,8 @@
 **Tip:** Be specific about *which* features, *which* loss, and *how* you handle cold start.
 
 ## Stage 3: Onsite (4-5 rounds)
+
+The onsite is where the LPs get their own dedicated round. Plan accordingly: code fast, design deliberately, and save your best STAR stories for the LP loop — the bar raiser is usually scheduled into one of these rounds.
 
 ### Round 3.1: Coding (60 min)
 
@@ -114,3 +128,9 @@ Base + sign-on + RSUs. Negotiation is real — bring competing offers. The comp 
 - [Amazon Leadership Principles](https://www.amazon.jobs/en/principles)
 - [Glassdoor Amazon Applied Scientist interviews](https://www.glassdoor.com/Interview/Amazon-Applied-Scientist-Interview-Questions-EI_IE6036.0,6_KO7,24.htm)
 - [r/MachineLearning Amazon thread](https://www.reddit.com/r/MachineLearning/)
+
+---
+
+## The 1 thing to remember
+
+At Amazon, "I, not we" is graded — memorize all 16 Leadership Principles and have 2-3 STAR stories per LP ready before you ever talk to a recruiter.

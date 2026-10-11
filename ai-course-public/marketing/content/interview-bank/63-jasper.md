@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer (Marketing LLM applications)
 - **Tech stack:** Python, PyTorch, OpenAI/Anthropic APIs, LangChain, Postgres, Snowflake, AWS
-- **Comp band:** $170K-$350K base + equity (post-IPO, Austin/SF)
+- **Comp band:** $170K-$350K total comp (L4-L6: AI Engineer → Staff) | Base + RSUs
 - **Cumulative pass rate:** ~4-5%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a brand-voice LoRA adapter icon feeding a marketing campaign grid (email, ad, landing page). Color: Jasper orange (#FF6B35). Headline: "Jasper / AI Marketing Platform / 2026".
+
+> **TL;DR:** Jasper's bar shifted post-IPO toward enterprise marketing OS — taste plus metrics, not just model work. The signature round is the take-home: a 4-hour brand-voice fine-tuner with a Gradio demo. The winning candidate has strong opinions on what "good marketing copy" means and can defend A/B-validated copy that beats human baselines.
+
+```
+Recruiter → Take-home + Screen → Onsite (3 rounds) → Hiring manager → Offer
+```
+
+The take-home is the gate. A clean repo, a working demo, and one paragraph of brand-voice eval methodology beats a sprawling half-finished pipeline.
 
 ## Hiring rounds
 
@@ -85,3 +95,9 @@ Post-IPO RSUs vest 25% year 1, then quarterly. They have a hiring bar that dropp
 - [Levels.fyi — Jasper](https://www.levels.fyi/companies/jasper)
 - [Glassdoor — Jasper interviews](https://www.glassdoor.com/Interview/Jasper-Interview-Questions.htm)
 - [Reddit r/cscareerquestions — Jasper thread](https://reddit.com/r/cscareerquestions)
+
+---
+
+## The 1 thing to remember
+
+Jasper hires for taste plus metrics — a clean 4-hour take-home with a working Gradio demo and one paragraph of brand-voice eval methodology beats a sprawling half-finished pipeline every time.

@@ -1,8 +1,16 @@
 # 21. Netflix (ML / Recsys)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "NETFLIX / AI RECSYS / 2026".
+
+> **TL;DR:** Netflix hires fewer than 2% of ML candidates, and the loop is famous for one thing — the **Keeper Test**: "If this person wanted to leave, would I fight to keep them?" Every round quietly grades you on that question. The winning candidate shows end-to-end ownership of a recsys model and articulates offline→online gaps like a scientist.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Panel (60%) → Keeper Test → Offer
+```
+
 - **Role:** Machine Learning Engineer (Personalization / Recsys)
 - **Tech stack:** Python, PyTorch, TensorFlow, Spark, Scala, Kafka, AWS (Netflix OSS: Metaflow, Iceberg, Maestro, Titus), Java
-- **Comp band:** $300K-$900K (L4-L6); senior staff/principal crosses $1M+; equity is heavily RSU-weighted, top-of-market cash
+- **Comp band:** $300K-$900K total comp (L4-L6) | RSUs 4-year, 0% cliff common; senior staff/principal crosses $1M+
 - **Cumulative pass rate:** ~1-2%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee** | Cross-functional panel review (the "panel") | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp conversation, team match | 1 week | — |
 
+The Netflix loop is tight by design — five stages, two days, one decision. Each stage is a filter for the same underlying question: can this person own a model end-to-end inside a "context not control" culture?
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Tell me about your background"
@@ -26,6 +36,8 @@
 **Tip:** Reference a specific Netflix research blog post (e.g., "Artwork Personalization at Netflix").
 
 ## Stage 2: Technical phone screen (60 min)
+
+The phone screen is where Netflix filters out people who can't code cleanly on a whiteboard. Pass this and you're 40% of the way to the onsite — fail it and no amount of recsys brilliance will save you.
 
 ### Q2.1: Coding — "Top-K frequent items in a stream"
 **Answer:** Use a `Counter` with a min-heap of size K, or a `defaultdict(int)` + heapq.nlargest. O(N log K).
@@ -43,6 +55,8 @@ def top_k(stream, k):
 **Tip:** Netflix specifically watches for awareness of *contextual bandits* and *causal* effects of recommendations.
 
 ## Stage 3: Onsite (4 rounds)
+
+Two days, four rounds, one panel. The onsite is graded holistically — no single round sinks you, but two weak rounds will. Plan your energy: coding first, then ML, then design, then behavioral when you're tired.
 
 ### Round 3.1: Coding (60 min)
 
@@ -119,3 +133,9 @@ Cash is top-of-market, RSUs vest 4 years with 0% cliff common, sign-on common. N
 - [Interview101 Netflix MLE guide](https://www.interview101.com/interviews/netflix/machine-learning-engineer)
 - [Netflix Research](https://research.netflix.com/)
 - [r/cscareerquestions Netflix interview thread](https://www.reddit.com/r/cscareerquestions/)
+
+---
+
+## The 1 thing to remember
+
+At Netflix, every round asks the Keeper Test in disguise — so tell the story of a model you owned end-to-end, and be ready to defend every offline-to-online gap you ever shipped.

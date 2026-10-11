@@ -1,8 +1,16 @@
 # 34. DoorDash (ML / Logistics / Ads)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "DOORDASH / AI LOGISTICS / 2026".
+
+> **TL;DR:** DoorDash's loop runs on **operational pressure** — every model has to ship in a 30-minute delivery window with real-time re-dispatch. The signature lens is **two-sided constraints** (dasher supply + consumer demand + restaurant load), and the winning candidate reaches for Hungarian matching and switchback experiments by reflex.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Logistics, Ads Ranking, Search, Discovery)
 - **Tech stack:** Python, PyTorch, TensorFlow, Scala, Kafka, Spark, Flink, Cassandra, Elasticsearch, Kinesis
-- **Comp band:** $250K-$700K (L3-L5); senior crosses $900K+; RSUs + cash, 4-year vest
+- **Comp band:** $250K-$700K total comp (L3-L5) | RSUs 4-year, 1-year cliff + cash; senior crosses $900K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+DoorDash's loop is built for ops-aware engineers — the panel wants to see that you can ship a model that survives contact with the real world. "We win together" is the cultural operating system; show you've partnered with ops teams before.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why DoorDash for ML?"
@@ -26,6 +36,8 @@
 **Tip:** Show you understand marketplace dynamics under constraints.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens lean distributed-systems + real-time — if your solution doesn't reach for streaming and assignment optimization, you're missing the DoorDash frame. The ML round always returns to operational constraints.
 
 ### Q2.1: Coding: "Design a task scheduler"
 **Answer:** Min-heap of (time, task_id) → peek for next. Thread-safe with locks.

@@ -1,8 +1,16 @@
 # 31. Uber (ML Platform / Michelangelo / Dynamic Pricing)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "UBER / AI MICHELANGELO / 2026".
+
+> **TL;DR:** Uber's loop thinks in **two-sided dynamics** — every marketplace model has supply, demand, and a feedback loop the model has to respect. The signature stack is **Michelangelo + H3 geospatial**, and the winning candidate has shipped causal inference and knows switchback experiments inside out.
+
+```
+Recruiter (50%) → Phone (40%) → Onsite (30%) → Tech Panel (55%) → Offer
+```
+
 - **Role:** ML Engineer (Michelangelo, Pricing, Eats Ranking, Autonomous)
 - **Tech stack:** Python, PyTorch, TensorFlow, Go, Java, Spark, Kafka, Michelangelo (Uber's internal ML platform), H3 geospatial
-- **Comp band:** $250K-$700K (L4-L6); senior crosses $900K+; RSUs vest 4-year
+- **Comp band:** $250K-$700K total comp (L4-L6) | RSUs 4-year, 1-year cliff; senior crosses $900K+
 - **Cumulative pass rate:** ~2-3%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~55% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+Uber's loop is built for marketplace thinkers — the ML round always returns to supply, demand, and causal inference. "We build and iterate" is the cultural operating system; if you don't show shipping speed, the panel will notice.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why Uber for ML?"
@@ -26,6 +36,8 @@
 **Tip:** Show you understand marketplace feedback loops — pricing affects supply which affects pricing.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens look standard, but the ML round always pivots to *causal impact* — predictive modeling isn't enough; Uber wants to know how your model would move supply, demand, and rider conversion together.
 
 ### Q2.1: Coding: "Design a rate limiter"
 **Answer:** Token bucket (deque with timestamps) or sliding window counter.
@@ -52,6 +64,8 @@ class RateLimiter:
 **Tip:** Uber ML is *two-sided*. Show you think about supply *and* demand.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and marketplace-flavored. Coding, then system design (often the Michelangelo feature store), then ML deep-dive (often dynamic pricing), then "customer obsession" behavioral last.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: Implement a thread-safe LRU cache (concurrency).
@@ -95,3 +109,9 @@ Cash + RSUs. Uber is competitive with FAANG. Negotiation is real. Team match aft
 - [Uber Engineering blog](https://www.uber.com/blog/engineering/)
 - [Michelangelo paper](https://eng.uber.com/scaling-michelangelo/)
 - [H3 GitHub](https://github.com/uber/h3)
+
+---
+
+## The 1 thing to remember
+
+At Uber, every model is two-sided — name Michelangelo and H3 unprompted, then show that you think in supply, demand, and switchback experiments, because "the marketplace is the system" is the whole Uber frame.

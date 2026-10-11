@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer (Enterprise LLM platform)
 - **Tech stack:** Python, PyTorch, JAX, custom "Palmyra" model stack, FastAPI, Kubernetes, AWS
-- **Comp band:** $200K-$450K base + equity (Series C, SF)
+- **Comp band:** $200K-$450K total comp (L4-L7: AI Engineer → Staff) | Base + RSUs
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a typed-schema graph with constrained-decoding arrows feeding into a Palmyra LLM block. Color: Writer indigo (#5C3DFF). Headline: "Writer / Enterprise LLM Platform / 2026".
+
+> **TL;DR:** Writer's bar is "enterprise-grade AI," which means hallucination controls, IP indemnity, and SOC2 fluency — not raw model chops. The signature round is the system design for a multi-tenant RAG with role-based access. The winning candidate can defend every "no-hallucination" claim with a measurement and a guardrail implementation.
+
+```
+Recruiter → Phone → Onsite (4 rounds) → Hiring committee → Offer
+```
+
+The 4-round onsite is where most offers are made. Candidates who pass are fluent in compliance terms (SOC2, HIPAA, EU AI Act) and have shipped RAG in production at a regulated company.
 
 ## Hiring rounds
 
@@ -89,3 +99,9 @@ Equity refreshers vest over 4 years; base is competitive but ~10% below frontier
 - [Levels.fyi — Writer](https://www.levels.fyi/companies/writer)
 - [Glassdoor — Writer interviews](https://www.glassdoor.com/Interview/Writer-Interview-Questions.htm)
 - [Reddit r/MachineLearning — Writer](https://reddit.com/r/MachineLearning)
+
+---
+
+## The 1 thing to remember
+
+Writer is enterprise-grade AI — every "no-hallucination" claim must be backed by a measurement and a constrained-decoding implementation, not a vibes argument.

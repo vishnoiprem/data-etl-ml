@@ -1,8 +1,16 @@
 # 27. ServiceNow (Now Assist / AI Platform)
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + signature visual. Color: company brand color as accent. Headline on image: "SERVICENOW / AI NOW ASSIST / 2026".
+
+> **TL;DR:** ServiceNow's loop tests whether you can ship AI into *workflows that already exist* — change management, audit, and "human-in-the-loop" are cultural, not optional. The signature product is **Now Assist**, and the winning candidate treats ACL filtering as a first-class concern, not an afterthought.
+
+```
+Recruiter (55%) → Phone (45%) → Onsite (35%) → Tech Panel (60%) → Offer
+```
+
 - **Role:** ML Engineer / Applied Scientist (Now Assist, AI Platform, ITSM AI)
 - **Tech stack:** Python, PyTorch, Java, JavaScript, Now Platform, MySQL, Kafka, Snowflake, LLM providers
-- **Comp band:** $200K-$600K (IC3-IC5); senior crosses $750K+; RSUs vest 4-year
+- **Comp band:** $200K-$600K total comp (IC3-IC5) | RSUs 4-year, 1-year cliff; senior crosses $750K+
 - **Cumulative pass rate:** ~3-4%
 
 ## Hiring rounds
@@ -15,6 +23,8 @@
 | 4. **Hiring committee (Tech Panel)** | Cross-org panel review | 1-2 weeks | ~60% advance |
 | 5. **Offer** | Comp, team match | 1 week | — |
 
+ServiceNow's loop is shorter than the FAANG equivalent and slightly more forgiving on pass rates, but the bar for "enterprise empathy" is real. Every round assumes the customer is a CIO who has to defend the choice in front of a change advisory board.
+
 ## Stage 1: Recruiter screen (30 min)
 
 ### Q1.1: "Why ServiceNow for AI?"
@@ -26,6 +36,8 @@
 **Tip:** Show enterprise empathy — long sales cycles, regulated industries, change advisory boards.
 
 ## Stage 2: Technical phone screens (90 min)
+
+The phone screens feel like a regular big-tech interview — but the ML round always returns to *workflow integration*. If your design doesn't name ACL filtering or human approval for sensitive actions, you're missing the point.
 
 ### Q2.1: Coding: "Binary tree level order traversal"
 **Answer:** BFS with a queue, return list of lists.
@@ -52,6 +64,8 @@ def levelOrder(root):
 **Tip:** ServiceNow loves "human-in-the-loop" — they sell to risk-averse enterprises.
 
 ## Stage 3: Onsite (4 rounds)
+
+The onsite is dense and workflow-flavored — every system design question is really a Now Assist architecture conversation. Plan to draw the multi-tenant boundary early; the interviewer will be watching to see if you reach for it unprompted.
 
 ### Round 3.1: Coding (60 min, 2 questions)
 - Q: LRU cache. O(1) get/put.
@@ -95,3 +109,9 @@ Cash + RSUs. ServiceNow is competitive with FAANG, sometimes above for senior+ d
 - [ServiceNow Engineering Blog](https://engineering.servicenow.com/)
 - [Now Assist docs](https://www.servicenow.com/products/now-assist.html)
 - [Glassdoor ServiceNow interviews](https://www.glassdoor.com/Interview/ServiceNow-Interview-Questions-E403326.htm)
+
+---
+
+## The 1 thing to remember
+
+At ServiceNow, "human-in-the-loop" is a cultural signal — name Now Assist, draw the ACL boundary at retrieval, and show you can ship into workflows without breaking what's already there.

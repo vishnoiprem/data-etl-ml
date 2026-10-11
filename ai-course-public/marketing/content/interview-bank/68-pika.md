@@ -2,8 +2,18 @@
 
 - **Role:** AI Engineer (Video generation)
 - **Tech stack:** PyTorch, CUDA, Triton, custom diffusion stack, distributed training
-- **Comp band:** $200K-$420K base + equity (Series B, Palo Alto)
+- **Comp band:** $200K-$420K total comp (L5-L7: Senior → Staff) | Base + meaningful equity (Series B)
 - **Cumulative pass rate:** ~3-4%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: a Pikaffect icon (e.g., "Melt it") frame-decomposed into scene ingredients, with VAE latent codes under each frame. Color: Pika lavender (#A48BFF). Headline: "Pika / AI Video Effects / 2026".
+
+> **TL;DR:** Pika bets on controllable-edit over raw scale — small models that ship creative tools, not big models that chase benchmarks. The signature round is the ELBO derivation and a 3D GroupNorm implementation. The winning candidate can defend "small controllable models" and has shipped under creative deadline pressure.
+
+```
+Recruiter → Phone (math + code) → Onsite (3 rounds) → Founder chat → Offer
+```
+
+The funnel filters for research generalists. Candidates who can ONLY do math or ONLY ship product get cut — Pika wants both, in one person.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards video-AI passion and taste — be ready to pick a Pikaffect and explain it technically.
+
 ### Q1.1: "Why Pika over Runway/Sora?"
 **Answer:** "Pika's bet is video as a creative canvas. Pikaffects, scene ingredients, lip-sync — every release feels like a creative tool, not just a generator. I want to be on the team that ships that, especially since controllable-edit is a harder product bet than raw scale."
 **Tip:** Reference Pika 2.2 and the recent scene-ingredient model.
@@ -25,6 +37,8 @@
 **Answer:** Pick one (try "Melt it") and explain technically what it does. The honest answer is usually a controlled-edit or sparse-attention approach to a known failure mode. Don't bluff the details.
 
 ## Stage 2: Technical phone screen
+
+The phone tests both derivations (ELBO) and code fluency (GroupNorm). They expect math on the board.
 
 ### Q2.1: Implement GroupNorm.
 **Answer:**
@@ -48,6 +62,8 @@ class GroupNorm(nn.Module):
 **Tip:** This is core to latent video diffusion.
 
 ## Stage 3: Onsite
+
+Three rounds: a sinusoidal-embedding implementation, real-time video inference design, and the scene-ingredients ML deep-dive.
 
 ### Round 3.1: Coding
 **Q:** Implement a sinusoidal timestep embedding.
@@ -82,6 +98,8 @@ Demi Guo (CEO) often joins. She cares about creative democratization.
 Equity is meaningful; private company with strong investor backing.
 
 ## Tips for the Pika loop
+
+Most candidates over-index on scale-only arguments. Pika's bet is the opposite — know why "small controllable models" win on product.
 - Use Pika 2.2 before the interview; bring feedback.
 - Read AnimateDiff and SVD papers.
 - Memorize VAE, ELBO, and diffusion derivations.
@@ -98,3 +116,9 @@ Equity is meaningful; private company with strong investor backing.
 - [Glassdoor — Pika](https://www.glassdoor.com/Interview/Pika-Interview-Questions.htm)
 - [AnimateDiff paper](https://arxiv.org/abs/2307.04785)
 - [Reddit r/StableDiffusion — Pika threads](https://reddit.com/r/StableDiffusion)
+
+---
+
+## The 1 thing to remember
+
+Pika rewards diffusion and foundation-model depth with a creative-bet twist — if you can't derive the ELBO AND defend why small controllable models beat scale-only, you don't pass the founder round.

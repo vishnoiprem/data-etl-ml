@@ -1,8 +1,17 @@
 # 13. Together AI
 
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical (Stripe Press meets MIT Tech Review). Composition: the company name + 1 signature visual from the company's domain (FlashAttention tile-based SRAM + TP-8 NVLink node). Color: company brand color as accent (Together teal). Headline on image: "Together AI / ML Engineer / 2026".
+
+> **TL;DR:** Together's loop runs 4 stages and rejects ~95% of candidates — the signature round is the GPU systems design (TP-8 NVLink node, FlashAttention tile-based SRAM, paged attention with 16-token pages). The winning candidate writes a CUDA reduction on the whiteboard, defends the open-weights + custom-kernels thesis, and disagrees with closed-Enterprise features.
+
+```
+Recruiter (60%) → Phone (40%) → Onsite (30%) → Reference + offer
+                                          └── GPU systems round ──┘
+```
+
 - **Role:** ML Engineer
 - **Tech stack:** Python, PyTorch, CUDA, Triton, vLLM, FlashAttention
-- **Comp band:** $200K-$700K (L3-L6)
+- **Comp band:** $200K-$700K total comp (L3-L6) | RSUs 4-year, 1-year cliff
 - **Cumulative pass rate:** ~3-5%
 
 ## Hiring rounds

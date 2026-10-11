@@ -2,8 +2,18 @@
 
 - **Role:** Quantitative Researcher / Quant SWE / Algorithm Engineer
 - **Tech stack:** C++ (primary), Python, Rust, FPGA, low-latency systems, kdb+
-- **Comp band:** $300K-$900K base + bonus (no public equity; partnership-style)
+- **Comp band:** $300K-$900K total comp (Algo Eng → Senior Algo Eng) | Base + bonus (top of market; no public equity)
 - **Cumulative pass rate:** ~2-3%
+
+> **Hero image spec:** 1400×788 px. Mood: editorial-technical. Composition: company name + a cross-exchange state machine with normalized protocol adapters, latency-arb arrows, and a crypto order book inset. Color: Jump indigo (#1A237E). Headline: "Jump Trading / Quantitative Researcher & SWE / 2026".
+
+> **TL;DR:** Jump runs a tight research loop and moves serious size in crypto and equities — alpha drive plus C++ rigor is the bar. The signature round is the onsite: a C++ order book, an inclusion-exclusion probability puzzle, and a cross-exchange market-making design. The winning candidate has shipped systems that handle real money and can defend a measurable optimization win.
+
+```
+Recruiter → Phone (math) → Onsite (4-5 rounds) → Hiring committee → Offer
+```
+
+The math → C++ → systems progression is the spine. Skip crypto market-microstructure prep and you don't get the offer.
 
 ## Hiring rounds
 
@@ -17,6 +27,8 @@
 
 ## Stage 1: Recruiter screen
 
+The screen rewards alpha drive. Reference Jump Crypto and the prediction markets push, and bring a specific latency or throughput number.
+
 ### Q1.1: "Why Jump?"
 **Answer:** "Jump runs a tight research loop and the firm already moves serious size in crypto and equities. I want to be on the team that's finding alpha across asset classes, especially as the crypto side matures past the retail phase."
 **Tip:** Reference Jump Crypto and the prediction markets push. Mention a specific alpha source you've studied.
@@ -25,6 +37,8 @@
 **Answer:** STAR with a specific latency or throughput number — Jump rewards measurable wins.
 
 ## Stage 2: Technical phone screen
+
+The phone is inclusion-exclusion combinatorics plus a C++ memory-pool implementation. They expect production-quality code.
 
 ### Q2.1: 4 dice are rolled. P(sum is 14)?
 **Answer:** Count compositions of 14 into 4 parts each in [1,6]. By inclusion-exclusion: C(13,3) - 4·C(7,3) + 6·C(1,3) = 286 - 140 + 0 = 146. P = 146/1296 ≈ 0.1127.
@@ -47,6 +61,8 @@ public:
 **Tip:** Show alignment awareness; they care about production code.
 
 ## Stage 3: Onsite
+
+Five rounds: geometric-distribution probability, an order book in C++, cross-exchange crypto market-making design, linear-regression derivation, and a behavioral that probes shipping under extreme time pressure.
 
 ### Round 3.1: Probability
 **Q:** You sample N(0,1) until |x| > 2. Expected number of samples?
@@ -78,6 +94,8 @@ Panel of senior quants + engineers. They look for: (1) C++/systems depth, (2) cr
 $300K-$700K base new grad; $500K-$900K+ experienced. Signing $100K-$400K.
 
 ## Tips for the Jump loop
+
+Most candidates under-prep crypto market microstructure. Jump's crypto bet is a real differentiator — show you've studied it.
 - Practice C++ at a production level.
 - Read "Effective Modern C++" cover to cover.
 - Memorize the linear regression + logistic regression derivations.
@@ -94,3 +112,9 @@ $300K-$700K base new grad; $500K-$900K+ experienced. Signing $100K-$400K.
 - [Levels.fyi — Jump Trading](https://www.levels.fyi/companies/jump-trading)
 - [Glassdoor — Jump Trading](https://www.glassdoor.com/Interview/Jump-Trading-Interview-Questions-E449716.htm)
 - [Reddit r/quant — Jump threads](https://reddit.com/r/quant)
+
+---
+
+## The 1 thing to remember
+
+Jump's math canon is the gate — Heard on the Street, Hull for options, and clean linear/logistic regression derivations are not optional, and a measurable C++ optimization win is the differentiator that pushes offers above band.
