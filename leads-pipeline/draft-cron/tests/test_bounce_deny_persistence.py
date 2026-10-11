@@ -5,7 +5,6 @@ writes are visible to a fresh subprocess (the bug it was meant to fix).
 Run:  python3 -m tests.test_bounce_deny_persistence
 """
 
-import os
 import subprocess
 import sys
 import time
@@ -15,7 +14,13 @@ HERE = Path(__file__).resolve().parent
 DRAFTS = HERE.parent
 sys.path.insert(0, str(DRAFTS))
 
-VENV_PY = os.path.expanduser("/Users/vishnoiprem/PycharmProjects/data-etl-ml/.venv/bin/python")
+# Use the *current* Python interpreter for the subprocess check, not a
+# hard-coded venv path. The previous code pointed at a local-only
+# venv that doesn't exist on CI (the GitHub Actions Ubuntu runner
+# uses /opt/hostedtoolcache/.../python instead), which made the
+# subprocess calls raise FileNotFoundError and the whole test file
+# exit with status 1 — failing the leads-ci job on every push.
+VENV_PY = sys.executable
 
 
 def _fresh_subprocess_count() -> int:
