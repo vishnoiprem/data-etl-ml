@@ -124,8 +124,7 @@ for i in $(seq 1 "$LOOP_MAX"); do
         counts="? ? ? ?"
     fi
     read -r pending_total pending_email pending_enriched bounce_pct <<< "$counts"
-    echo "[$i/$LOOP_MAX] pending=$pending_total  w/email=$pending_email  "
-        "enriched=$pending_enriched  bounce_rate=${bounce_pct}%" | tee -a "$LOG"
+    echo "[$i/$LOOP_MAX] pending=$pending_total  w/email=$pending_email  enriched=$pending_enriched  bounce_rate=${bounce_pct}%" | tee -a "$LOG"
 
     # 4b. Print full report every 10 iterations
     if (( i % 10 == 0 )); then
