@@ -358,3 +358,175 @@ def test_bulk_upsert_tweets_returns_new_count(sqlite_db):
     # Re-bulk same rows → all duplicates
     n2 = db.bulk_upsert_tweets(rows)
     assert n2 == 0
+
+
+# ── global_sentiment_buckets: cross-tag aggregate (Live tab hourly chart) ──
+
+
+def test_global_sentiment_buckets_aggregates_across_symbols(sqlite_db):
+    """Different symbols in the same window roll up to one bucket with
+    counts summed and sentiment averaged across ALL tags."""
+    now = datetime.utcnow().replace(microsecond=0, second=0)
+    base = now - timedelta(minutes=30)
+    base = base - timedelta(minutes=base.minute % 5)
+    # 2 tags, 2 scores each, same window → 1 bucket, n=4, avg=0.5
+    for sym, scores in [("AI", [0.4, 0.6]), ("TSLA", [0.5, 0.5])]:
+        for i, s in enumerate(scores):
+            db.upsert_tweet({
+                "ts": base + timedelta(seconds=10 * (i + 1)),
+                "tweet_id": hash((sym, i)) & 0x7FFFFFFF, "symbol": sym,
+                "text": "x", "author": "a", "likes": 0, "retweets": 0,
+                "followers": 0, "url": "u", "source_adapter": "nitter",
+                "sentiment_score": s,
+            })
+    rows = db.global_sentiment_buckets(minutes=5, hours=1)
+    assert len(rows) == 1
+    assert rows[0]["n"] == 4
+    assert math.isclose(rows[0]["avg_sent"], 0.5, abs_tol=1e-6)
+    assert rows[0]["pos_n"] == 4
+    assert rows[0]["neg_n"] == 0
+
+
+def test_global_sentiment_buckets_splits_pos_neg(sqlite_db):
+    now = datetime.utcnow().replace(microsecond=0)
+    base = now - timedelta(minutes=10)
+    for tid, score in [(1, 0.8), (2, -0.6), (3, 0.0), (4, -0.1), (5, 0.9)]:
+        db.upsert_tweet({
+            "ts": base + timedelta(seconds=tid), "tweet_id": tid,
+            "symbol": "AI", "text": "x", "author": "a",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "nitter", "sentiment_score": score,
+        })
+    rows = db.global_sentiment_buckets(minutes=5, hours=1)
+    assert len(rows) == 1
+    r = rows[0]
+    assert r["n"] == 5
+    # pos_n counts score > 0 (so 0.0 is neutral, not positive)
+    assert r["pos_n"] == 2  # 0.8, 0.9
+    assert r["neg_n"] == 2  # -0.6, -0.1
+    # avg = (0.8 - 0.6 + 0.0 - 0.1 + 0.9) / 5
+    assert math.isclose(r["avg_sent"], 0.2, abs_tol=1e-6)
+
+
+def test_global_sentiment_buckets_excludes_null(sqlite_db):
+    """Unscored tweets (sentiment_score IS NULL) must not contribute."""
+    now = datetime.utcnow().replace(microsecond=0)
+    base = now - timedelta(minutes=5)
+    db.upsert_tweet({
+        "ts": base, "tweet_id": 1, "symbol": "AI", "text": "x",
+        "author": "a", "likes": 0, "retweets": 0, "followers": 0,
+        "url": "u", "source_adapter": "nitter", "sentiment_score": None,
+    })
+    db.upsert_tweet({
+        "ts": base + timedelta(seconds=1), "tweet_id": 2, "symbol": "AI",
+        "text": "x", "author": "a", "likes": 0, "retweets": 0, "followers": 0,
+        "url": "u", "source_adapter": "nitter", "sentiment_score": 0.7,
+    })
+    rows = db.global_sentiment_buckets(minutes=5, hours=1)
+    assert len(rows) == 1
+    assert rows[0]["n"] == 1
+
+
+# ── per_symbol_buckets: per-tag breakdown for the Live tab ─────────────
+
+
+def test_per_symbol_buckets_breaks_out_by_symbol(sqlite_db):
+    """The same time window contains 2 symbols — each gets its own row."""
+    now = datetime.utcnow().replace(microsecond=0, second=0)
+    base = now - timedelta(minutes=30)
+    base = base - timedelta(minutes=base.minute % 5)
+    for sym, score in [("AI", 0.5), ("TSLA", -0.5), ("AI", 0.7), ("TSLA", -0.3)]:
+        tid = abs(hash((sym, score, base.timestamp()))) & 0x7FFFFFFF
+        db.upsert_tweet({
+            "ts": base + timedelta(seconds=tid % 60), "tweet_id": tid,
+            "symbol": sym, "text": "x", "author": "a",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "nitter", "sentiment_score": score,
+        })
+    rows = db.per_symbol_buckets(minutes=5, hours=1)
+    # 1 bucket × 2 symbols = 2 rows
+    assert len(rows) == 2
+    syms = {r["symbol"] for r in rows}
+    assert syms == {"AI", "TSLA"}
+
+
+# ── daily_topic_aggregates: velocity + reach for the top-10 leaderboard ──
+
+
+def test_daily_topic_aggregates_groups_by_day_and_symbol(sqlite_db):
+    """Two symbols, two days → 4 rows. Velocity = today - yesterday
+    (tweet_count delta) for the same symbol."""
+    now = datetime.utcnow()
+    # Day 0 (today) — 5 tweets for AI, 2 for TSLA
+    for tid, sym in [
+        (1, "AI"), (2, "AI"), (3, "AI"), (4, "AI"), (5, "AI"),
+        (6, "TSLA"), (7, "TSLA"),
+    ]:
+        db.upsert_tweet({
+            "ts": now - timedelta(minutes=tid), "tweet_id": tid,
+            "symbol": sym, "text": "x", "author": f"u{tid}",
+            "likes": tid * 10, "retweets": tid, "followers": tid * 100,
+            "url": "u", "source_adapter": "nitter",
+            "sentiment_score": 0.3,
+        })
+    # Day -1 (yesterday) — 1 tweet for AI, 4 for TSLA
+    for tid, sym in [
+        (100, "AI"),
+        (101, "TSLA"), (102, "TSLA"), (103, "TSLA"), (104, "TSLA"),
+    ]:
+        db.upsert_tweet({
+            "ts": now - timedelta(days=1, minutes=tid),
+            "tweet_id": tid, "symbol": sym, "text": "x",
+            "author": f"u{tid}", "likes": 0, "retweets": 0,
+            "followers": 0, "url": "u", "source_adapter": "nitter",
+            "sentiment_score": -0.3,
+        })
+    rows = db.daily_topic_aggregates(days=3, limit=20)
+    by_key = {(r["day"], r["symbol"]): r for r in rows}
+    # Velocity for AI: today(5) - yesterday(1) = +4
+    ai_today = max(d for d, s in by_key if s == "AI")
+    assert by_key[(ai_today, "AI")]["velocity"] == 4
+    assert by_key[(ai_today, "AI")]["tweet_count"] == 5
+    # Velocity for TSLA: today(2) - yesterday(4) = -2
+    assert by_key[(ai_today, "TSLA")]["velocity"] == -2
+
+
+def test_daily_topic_aggregates_reach_is_sum_of_followers(sqlite_db):
+    """`total_reach` is SUM(followers) — proxy for impressions."""
+    now = datetime.utcnow()
+    db.upsert_tweet({
+        "ts": now, "tweet_id": 1, "symbol": "AI", "text": "x", "author": "u1",
+        "likes": 0, "retweets": 0, "followers": 1500, "url": "u",
+        "source_adapter": "nitter", "sentiment_score": 0.1,
+    })
+    db.upsert_tweet({
+        "ts": now, "tweet_id": 2, "symbol": "AI", "text": "x", "author": "u2",
+        "likes": 0, "retweets": 0, "followers": 2500, "url": "u",
+        "source_adapter": "nitter", "sentiment_score": 0.2,
+    })
+    rows = db.daily_topic_aggregates(days=1, limit=10)
+    assert len(rows) == 1
+    assert rows[0]["total_reach"] == 4000
+    assert rows[0]["unique_authors"] == 2
+
+
+def test_daily_topic_aggregates_first_day_has_velocity_eq_today(sqlite_db):
+    """If a symbol has no row for yesterday, velocity = today's count
+    (not 0; a brand-new topic is "all new", which is the max-velocity
+    case for the leaderboard)."""
+    now = datetime.utcnow()
+    for tid in range(3):
+        db.upsert_tweet({
+            "ts": now - timedelta(minutes=tid), "tweet_id": tid,
+            "symbol": "FRESH", "text": "x", "author": f"u{tid}",
+            "likes": 0, "retweets": 0, "followers": 0, "url": "u",
+            "source_adapter": "nitter", "sentiment_score": 0.0,
+        })
+    rows = db.daily_topic_aggregates(days=1, limit=10)
+    fresh = next(r for r in rows if r["symbol"] == "FRESH")
+    assert fresh["velocity"] == 3  # = today's count, no yesterday
+
+
+def test_daily_topic_aggregates_empty_when_no_data(sqlite_db):
+    """No tweets → empty list, no error."""
+    assert db.daily_topic_aggregates(days=1, limit=10) == []
