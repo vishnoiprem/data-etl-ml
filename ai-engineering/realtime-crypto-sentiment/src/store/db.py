@@ -128,15 +128,25 @@ class PaperTrade(Base):
 
 # ── Schema bootstrap ────────────────────────────────────────────────────
 
+# Resolve once: src/store/ → project root
+PROJECT_ROOT = HERE.resolve().parents[1]
+VIEWS_SQL_PATH = PROJECT_ROOT / "db" / "02_views.sql"
+
+
 def init_schema() -> None:
-    """Apply TimescaleDB schema + continuous aggregates.
+    """Apply TimescaleDB schema + continuous aggregates + views.
 
     Safe to call repeatedly (uses IF NOT EXISTS / OR REPLACE).
+    Raises on any read/exec error so the pipeline can fail-fast at boot.
     """
     engine = get_engine()
     if engine.dialect.name == "postgresql":
         schema_sql = (HERE / "schema.sql").read_text()
-        views_sql = (HERE / "..//../db/02_views.sql").read_text()
+        if not VIEWS_SQL_PATH.exists():
+            raise FileNotFoundError(
+                f"expected views SQL at {VIEWS_SQL_PATH}; did you forget to git pull?"
+            )
+        views_sql = VIEWS_SQL_PATH.read_text()
         aggregates_sql = (HERE / "aggregates.sql").read_text()
         with engine.begin() as conn:
             conn.execute(text(schema_sql))
@@ -363,6 +373,46 @@ def recent_price_returns(symbol: str, minutes: int = 5) -> List[float]:
     if len(closes) < 2:
         return []
     return [(closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))]
+
+
+def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> List[dict]:
+    """Return list of {bucket, avg_sentiment, n} aggregated to `minutes`-wide buckets.
+
+    Used by signal generation so the z-score compares a current 5-min mean
+    against a history of *bucket means*, not against the noisy per-tweet
+    distribution.
+    """
+    engine = get_engine()
+    total_minutes = hours * 60
+    with engine.connect() as conn:
+        if engine.dialect.name == "postgresql":
+            rows = conn.execute(
+                text(
+                    f"SELECT time_bucket('{minutes} minutes', ts) AS bucket, "
+                    f"AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                    f"FROM tweets "
+                    f"WHERE symbol=:s AND sentiment_score IS NOT NULL "
+                    f"AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                    f"GROUP BY bucket ORDER BY bucket ASC"
+                ),
+                {"s": symbol, "m": str(total_minutes)},
+            ).fetchall()
+        else:
+            # SQLite: use strftime to round down to the nearest 5-min boundary.
+            # 5-minute boundaries: 00, 05, 10, ..., 55. Divide by 300 seconds and floor.
+            seconds = minutes * 60
+            rows = conn.execute(
+                text(
+                    "SELECT CAST((strftime('%s', ts) / :sec) * :sec AS INTEGER) AS bucket, "
+                    "AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                    "FROM tweets "
+                    "WHERE symbol=:s AND sentiment_score IS NOT NULL "
+                    "AND ts > datetime('now', :m) "
+                    "GROUP BY bucket ORDER BY bucket ASC"
+                ),
+                {"s": symbol, "m": f"-{total_minutes} minutes", "sec": seconds},
+            ).fetchall()
+    return [dict(r._mapping) for r in rows]
 
 
 def insert_paper_trade(t: dict) -> None:

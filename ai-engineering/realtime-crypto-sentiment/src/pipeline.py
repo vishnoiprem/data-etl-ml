@@ -161,20 +161,19 @@ class CryptoPipeline:
                 logger.error(f"signal error for {sym}: {e}")
 
     def _generate_signal_for(self, sym: str) -> None:
-        # 5-min sentiment value (mean of last 5m of scored tweets) and history (24h)
-        tweets_5m = db.fetch_recent_tweets(sym, minutes=5)
-        scored_5m = [t["sentiment_score"] for t in tweets_5m if t["sentiment_score"] is not None]
-        if not scored_5m:
+        # Z-score the current 5-min sentiment mean against a history of
+        # 5-min-bucket means (not raw per-tweet scores), so the std isn't
+        # dominated by per-tweet noise.
+        from src.store.db import sentiment_buckets
+        buckets = sentiment_buckets(
+            sym, minutes=5, hours=settings.signal_lookback_hours,
+        )
+        if len(buckets) < 2:
             return
-        sentiment_value = mean(scored_5m)
-        # History: average sentiment per minute over the lookback (24h)
-        from src.store.db import fetch_recent_tweets as _frt
-        history_rows = _frt(sym, minutes=settings.signal_lookback_hours * 60)
-        history_scores = [r["sentiment_score"] for r in history_rows if r["sentiment_score"] is not None]
-        if len(history_scores) < 2:
-            return
+        sentiment_value = float(buckets[-1]["avg_sent"])
+        history_scores = [float(b["avg_sent"]) for b in buckets]
 
-        # Momentum: 5-min price return vs history of minute-returns over lookback
+        # Momentum: 5-min price return vs history of 5-min returns over lookback
         rets_5m = db.recent_price_returns(sym, minutes=5)
         if not rets_5m:
             return
@@ -265,24 +264,34 @@ class CryptoPipeline:
         try:
             db.init_schema()
         except Exception as e:
-            logger.warning(f"init_schema failed (non-fatal): {e}")
+            # Fatal at boot — running without the schema would silently break every
+            # insert, and the user would see an empty dashboard with no clue why.
+            logger.error(f"init_schema failed (fatal): {e}")
+            raise SystemExit(1) from e
 
         logger.info("pipeline: starting metrics server")
         start_metrics_server()
 
         logger.info("pipeline: scheduling jobs")
+        # max_instances=1, coalesce=True: never run two cycles in parallel.
+        # Without these, a slow FinBERT batch can overlap the next scrape and
+        # double-score the same unscored rows.
         self.scheduler.add_job(self.scrape_tweets, "interval",
                               seconds=settings.scrape_interval_sec, id="scrape",
-                              next_run_time=datetime.utcnow())
+                              next_run_time=datetime.utcnow(),
+                              max_instances=1, coalesce=True)
         self.scheduler.add_job(self.score_batch, "interval",
                               seconds=settings.score_interval_sec, id="score",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=5))
+                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=5),
+                              max_instances=1, coalesce=True)
         self.scheduler.add_job(self.generate_signals, "interval",
                               seconds=settings.signal_interval_sec, id="signals",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=10))
+                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=10),
+                              max_instances=1, coalesce=True)
         self.scheduler.add_job(self.paper_trade, "interval",
                               seconds=settings.trade_interval_sec, id="trader",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=15))
+                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=15),
+                              max_instances=1, coalesce=True)
 
         # Start the WS task in the background
         loop = asyncio.new_event_loop()
@@ -294,14 +303,21 @@ class CryptoPipeline:
         ws_thread.start()
 
         def _handle_signal(signum, frame):
-            logger.info("pipeline: SIGINT, shutting down")
+            # Signal handlers run on the main thread in CPython. We must NOT
+            # call sys.exit() here — APScheduler's main loop catches
+            # SystemExit and the race leaves the WS thread orphaned.
+            # Just shut down the scheduler; the `try/except (KeyboardInterrupt,
+            # SystemExit)` around scheduler.start() will let main() return.
+            logger.info("pipeline: SIGINT/SIGTERM, shutting down")
             self._stop.set()
-            self.scheduler.shutdown(wait=False)
+            try:
+                self.scheduler.shutdown(wait=False)
+            except Exception:
+                pass
             try:
                 loop.call_soon_threadsafe(loop.stop)
             except Exception:
                 pass
-            sys.exit(0)
         signal.signal(signal.SIGINT, _handle_signal)
         signal.signal(signal.SIGTERM, _handle_signal)
 
@@ -310,6 +326,10 @@ class CryptoPipeline:
             self.scheduler.start()
         except (KeyboardInterrupt, SystemExit):
             pass
+
+        # Wait briefly for the WS thread to drain after shutdown.
+        ws_thread.join(timeout=5)
+        logger.info("pipeline: stopped")
 
 
 def main() -> int:

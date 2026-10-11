@@ -169,3 +169,49 @@ def test_metrics_after_round_trip():
     # Win rate based on a single sell position with realized > 0
     assert m["win_rate"] >= 0.0
     assert m["max_drawdown_usd"] >= 0.0
+
+
+def test_metrics_multiple_round_trips_correct_win_rate():
+    """Two round-trips on the same symbol: 1 win + 1 loss → win_rate = 0.5.
+
+    Pre-fix the broker counted Position.realized_pnl > 0 (cumulative) and
+    divided by sell count, giving wrong ratios after >1 round-trip.
+    """
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=0, max_position_pct=20.0)
+    # Round 1: BUY @ 50k, SELL @ 51k → +$win
+    b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    sell1 = b.on_signal(_sig("BTC", "SELL"), price=51_000.0)
+    # Round 2: BUY @ 51k, SELL @ 50k → -$loss
+    b.on_signal(_sig("BTC", "BUY"), price=51_000.0)
+    sell2 = b.on_signal(_sig("BTC", "SELL"), price=50_000.0)
+    m = b.metrics()
+    assert sell1 is not None and sell2 is not None
+    assert sell1.realized_pnl > 0
+    assert sell2.realized_pnl < 0
+    # Per-fill: 1 win / 2 sells = 0.5
+    assert m["win_rate"] == pytest.approx(0.5, abs=1e-6)
+    # pnl_usd = sum of per-fill realized
+    assert m["pnl_usd"] == pytest.approx(sell1.realized_pnl + sell2.realized_pnl, abs=1e-6)
+    # trade_count includes BUYs too
+    assert m["trade_count"] == 4
+
+
+def test_metrics_empty_sells_reports_zero_win_rate():
+    """If only BUYs so far (no SELLs), win_rate should be 0.0, not 1.0 from 0/0 fallback."""
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=0, max_position_pct=10.0)
+    b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    m = b.metrics()
+    assert m["trade_count"] == 1
+    assert m["win_rate"] == 0.0
+    assert m["pnl_usd"] == 0.0
+
+
+def test_fill_realized_pnl_only_on_sell():
+    """BUY fills always have realized_pnl=0; only SELL fills carry PnL."""
+    b = PaperBroker(starting_cash_usd=10_000.0, fee_bps=0, max_position_pct=10.0)
+    buy = b.on_signal(_sig("BTC", "BUY"), price=50_000.0)
+    assert buy is not None
+    assert buy.realized_pnl == 0.0
+    sell = b.on_signal(_sig("BTC", "SELL"), price=51_000.0)
+    assert sell is not None
+    assert sell.realized_pnl > 0

@@ -184,3 +184,35 @@ def test_normalize_query_strips_cashtag():
     assert a._normalize_query("$BTC") == "BTC"
     assert a._normalize_query("#memecoin") == "memecoin"
     assert a._normalize_query("ethereum") == "ethereum"
+
+
+def test_stable_id_is_deterministic_across_runs():
+    """The sha1 fallback must yield the same id on every process start,
+    otherwise (tweet_id, ts) idempotency in db.upsert_tweet is broken."""
+    a1 = NitterMirrorAdapter(mirrors=["x"])
+    a2 = NitterMirrorAdapter(mirrors=["x"])
+    id1 = a1._stable_id("hello world", "alice")
+    id2 = a2._stable_id("hello world", "alice")
+    assert id1 == id2
+    # Different content → different id
+    id3 = a1._stable_id("hello world", "bob")
+    assert id1 != id3
+
+
+def test_stable_id_falls_back_when_no_url():
+    """When a tweet has no status URL, _parse should call _stable_id and still
+    produce a deterministic id."""
+    a = NitterMirrorAdapter(mirrors=["x.test"])
+    html = '''
+    <div class="timeline-item">
+      <div class="fullname">alice</div>
+      <div class="tweet-content">no url here</div>
+      <!-- no .tweet-date at all -->
+      <span class="icon-heart">5</span>
+    </div>
+    '''
+    tweets = a._parse(html, query="x", max_results=5)
+    assert len(tweets) == 1
+    # Id is the sha1 of (author::text) → deterministic
+    expected = a._stable_id("no url here", "alice")
+    assert tweets[0].id == expected

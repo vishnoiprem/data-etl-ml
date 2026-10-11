@@ -19,6 +19,7 @@ Notes:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import re
 import time
 from datetime import datetime, timezone
@@ -82,6 +83,8 @@ class NitterMirrorAdapter(SourceAdapter):
         self.bucket = TokenBucket(rate=1.0, burst=2)
         self._mirror_last_used: Dict[str, float] = {}
         self._mirror_denied_until: Dict[str, float] = {}
+        # Mirror that served the last successful fetch (used for URL rewriting).
+        self._active_mirror: Optional[str] = None
 
     # ── Public API ───────────────────────────────────────────────────
 
@@ -99,6 +102,7 @@ class NitterMirrorAdapter(SourceAdapter):
         for mirror in self._healthy_mirrors():
             try:
                 html = await self._fetch_one(mirror, clean_q)
+                self._active_mirror = mirror
                 return self._parse(html, query, max_results)
             except AdapterError as e:
                 last_err = e
@@ -186,9 +190,10 @@ class NitterMirrorAdapter(SourceAdapter):
         # URL / id
         link_el = item.select_one(".tweet-link, .tweet-date a, a.tweet-link")
         url = link_el["href"] if link_el and link_el.has_attr("href") else ""
-        if url and url.startswith("/"):
-            url = "https://nitter.net" + url
-        tweet_id = self._extract_id(url) or abs(hash(text + author)) % (10**10)
+        # Preserve the mirror we actually scraped from so the URL isn't a 404.
+        if url.startswith("/"):
+            url = f"https://{self._active_mirror or self.mirrors[0]}{url}"
+        tweet_id = self._extract_id(url) or self._stable_id(text, author)
 
         # Stats
         likes = self._parse_stat(item, ".icon-heart, .heart, [data-count-likes]")
@@ -221,6 +226,18 @@ class NitterMirrorAdapter(SourceAdapter):
         # Or just a trailing number
         m = re.search(r"(\d{10,})", url)
         return int(m.group(1)) if m else None
+
+    @staticmethod
+    def _stable_id(text: str, author: str) -> int:
+        """Deterministic id for tweets without a status URL.
+
+        Uses sha1 (process-independent) so the same (text, author) yields
+        the same id across restarts. With this, the (tweet_id, ts) ON CONFLICT
+        idempotency in db.upsert_tweet actually works.
+        """
+        h = hashlib.sha1(f"{author}::{text}".encode("utf-8")).hexdigest()
+        # Take the first 10 hex chars, max 0xFFFFFFFFFF (just under 2^40)
+        return int(h[:10], 16)
 
     @staticmethod
     def _parse_stat(item, selector: str) -> int:

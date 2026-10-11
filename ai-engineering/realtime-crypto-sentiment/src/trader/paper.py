@@ -32,6 +32,7 @@ class Fill:
     fee_usd: float
     cash_after: float
     reason: Optional[str] = None
+    realized_pnl: float = 0.0  # populated on SELL (0 on BUY)
 
 
 @dataclass
@@ -97,7 +98,13 @@ class PaperBroker:
         return sum(1 for p in self.positions.values() if p.qty > 0)
 
     def metrics(self) -> dict:
-        """Compute PnL, win rate, max drawdown, Sharpe."""
+        """Compute PnL, win rate, max drawdown, Sharpe.
+
+        PnL and win-rate are computed from per-Fill `realized_pnl` (populated
+        on every SELL), so the numbers stay correct across multiple
+        round-trips on the same symbol.
+        """
+        sells = [t for t in self.trades if t.side == "SELL"]
         if not self.trades:
             return {
                 "pnl_usd": 0.0,
@@ -106,15 +113,11 @@ class PaperBroker:
                 "sharpe": 0.0,
                 "trade_count": 0,
             }
-        # Realized PnL = sum of (sell - buy_cost) minus fees. We track per-trade realized_pnl
-        # in the Position; total it.
-        realized = sum(p.realized_pnl for p in self.positions.values())
-        # Win rate: percentage of SELL fills where realized PnL > 0
-        # We approximate by counting Position.realized_pnl transitions; if not tracked per
-        # sell, fall back to 0.5 placeholder.
-        wins = sum(1 for p in self.positions.values() if p.realized_pnl > 0)
-        sells = max(1, sum(1 for t in self.trades if t.side == "SELL"))
-        win_rate = wins / sells
+        # Realized PnL = sum of per-fill realized PnL on SELLs
+        realized = sum(t.realized_pnl for t in sells)
+        # Win rate: fraction of SELLs that closed in profit.
+        # If there are no SELLs yet, report 0.0 (not 1.0 from a 0/0 fallback).
+        win_rate = sum(1 for t in sells if t.realized_pnl > 0) / len(sells) if sells else 0.0
 
         # Max drawdown over equity curve
         max_dd = 0.0
@@ -203,6 +206,7 @@ class PaperBroker:
         fill = Fill(
             ts=ts, symbol=symbol, side="SELL", qty=qty, price_usd=price,
             fee_usd=fee, cash_after=self.cash_usd, reason=reason,
+            realized_pnl=realized,
         )
         self.trades.append(fill)
         logger.info(
