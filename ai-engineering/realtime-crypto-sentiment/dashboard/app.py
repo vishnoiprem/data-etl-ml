@@ -102,9 +102,15 @@ def _kpis() -> dict:
 
 
 def _signal_counts() -> pd.DataFrame:
+    if db.get_engine().dialect.name == "postgresql":
+        return _query(
+            "SELECT action, COUNT(*) AS n FROM signals "
+            "WHERE ts > NOW() - INTERVAL '24 hours' "
+            "GROUP BY action ORDER BY n DESC"
+        )
     return _query(
         "SELECT action, COUNT(*) AS n FROM signals "
-        "WHERE ts > NOW() - INTERVAL '24 hours' "
+        "WHERE ts > datetime('now', '-24 hours') "
         "GROUP BY action ORDER BY n DESC"
     )
 
