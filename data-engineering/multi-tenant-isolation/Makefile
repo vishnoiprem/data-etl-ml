@@ -1,7 +1,10 @@
-.PHONY: test smoke
+.PHONY: up test smoke
+
+up:
+	pip install -r requirements.txt
 
 test:
-\tpsql -d postgres -f examples/setup.sql
+	pytest -q
 
 smoke:
-\techo "RLS policy lives in examples/setup.sql"
+	echo "SQL-only stub. See examples/setup.sql for the Postgres RLS schema."
