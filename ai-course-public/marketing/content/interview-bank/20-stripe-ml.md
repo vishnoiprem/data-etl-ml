@@ -152,3 +152,9 @@ Stripe uses flat titles: L1-L3 are SWE, L4+ is Staff. The L4+ bar is Senior Staf
 - [Datavidhya — Stripe Data Engineer Interview Questions & Process (2026)](https://datavidhya.com/blog/stripe-data-engineering-interview-guide/)
 - [Levels.fyi — Stripe compensation](https://www.levels.fyi/companies/stripe/salaries/software-engineer)
 - [Stripe Engineering Blog](https://stripe.com/blog/engineering)
+
+---
+
+## The 1 thing to remember
+
+At Stripe, Bug Squash is the gate — follow the trace, hypothesize, verify; the candidate who tries to understand the whole codebase loses. Idempotency (24h TTL, key-reuse corner case) is the payments-domain pass.
