@@ -107,6 +107,13 @@ Microsoft comp negotiates: base + RSU + sign-on + bonus. The play: come with a c
 > *"The interview felt more like a conversation than a test. The interviewer walked me through their thought process on each problem. I didn't get stuck the way I did at the other companies."*
 > — [r/leetcode — I cracked a Microsoft L63 (Senior) role (Nov 2025)](https://www.reddit.com/r/leetcode/comments/1osm7o9/i_cracked_a_microsoft_l63_senior_role_and_wanted/)
 
+## See also
+
+- [Microsoft Research](./08-msft-research.md) — the research sibling
+- [GitHub](./95-github.md) — Copilot org (Microsoft-owned)
+- [Amazon](./22-amazon.md) — same big-tech applied-science structure
+- [Google Cloud](./23-google-cloud.md) — same cloud-AI competition
+
 ## Sources
 
 - [DataInterview — Microsoft AI Engineer Guide (2026)](https://www.datainterview.com/blog/microsoft-ai-engineer-interview)

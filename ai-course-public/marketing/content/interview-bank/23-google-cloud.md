@@ -131,6 +131,13 @@ Cash + RSUs + target bonus. Negotiation is real and Google typically matches com
 > "Vertex AI loop was 5 rounds, 1 day. The system design was Vector Search + serving at 50K QPS — they pushed me on sharding and re-indexing strategy. The ML deep-dive was on Gemini eval — they wanted to know how I'd prevent eval set contamination. The Googliness round was unexpectedly hard; I told a 'I was wrong' story and got a 'strong hire' from the committee. 6 weeks total to offer."
 > — r/MLQuestions, 2025-09
 
+## See also
+
+- [Amazon](./22-amazon.md) — same cloud-AI competition (AWS)
+- [Microsoft](./16-microsoft.md) — Azure competitor
+- [Snowflake](./93-snowflake.md) — runs on GCP
+- [Datadog](./92-datadog.md) — GCP monitoring adj.
+
 ## Sources
 
 - [Google Cloud Careers](https://cloud.google.com/careers)

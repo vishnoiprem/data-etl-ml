@@ -100,6 +100,13 @@ Base is competitive ($180K-$280K), equity is the lever (private, well-funded). N
 ## Real candidate report
 > "Phone screen was RAG design + coding (recursive chunker). Onsite had 4 rounds including a 'productionize LlamaIndex for 10M docs' round that required knowing caching, async batching, observability. Offer came in 5 days, base $240K + 0.04%." — Levels.fyi, 2025
 
+## See also
+
+- [LangChain](./52-langchain.md) — same LLM framework
+- [Pinecone](./48-pinecone.md) — LlamaIndex's default vector DB
+- [Weaviate](./49-weaviate.md) — LlamaIndex's vector DB partner
+- [Glean](./54-glean.md) — same enterprise RAG
+
 ## Sources
 - [LlamaIndex careers](https://www.llamaindex.ai/careers)
 - [LlamaIndex blog](https://www.llamaindex.ai/blog)

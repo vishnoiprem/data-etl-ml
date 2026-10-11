@@ -95,6 +95,13 @@ Cash + RSUs. Salesforce is competitive but typically below FAANG top-of-band. Ne
 ## Real candidate report
 > "Loop for Agentforce on the Slack AI team. 4 rounds, 1 day. Coding was 2 mediums. System design was a multi-tenant LLM agent platform and they wanted me to talk through per-customer fine-tuning, RAG permission filtering, and an eval harness. ML deep-dive was on fine-tuning with brand safety. Behavioral was 'Ohana' flavored. Offer at MTS-4, ~$420K total. 5 weeks." — r/salesforce, 2025-11
 
+## See also
+
+- [ServiceNow](./27-servicenow.md) — same enterprise SaaS AI
+- [Oracle](./28-oracle.md) — same enterprise-software adj.
+- [SAP](./29-sap.md) — same enterprise-platform
+- [Atlassian](./94-atlassian.md) — same SMB enterprise-software AI
+
 ## Sources
 - [Salesforce Careers](https://www.salesforce.com/careers/)
 - [Levels.fyi Salesforce salaries](https://www.levels.fyi/companies/salesforce/salaries)

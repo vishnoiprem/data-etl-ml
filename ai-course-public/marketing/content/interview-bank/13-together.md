@@ -119,6 +119,13 @@ Together comp is base + RSU + sign-on. Cash component is decent; equity is meani
 > *"Together's interview is GPU-heavy — every system design question assumes the inference context. The 'why Together' answer needs to be about the open-stack thesis: we compete on kernels, not on the model. The candidate who only knows PyTorch loses. CUDA + Triton + FlashAttention is the signal."*
 > — Glassdoor candidate report, paraphrased from 2026 loops
 
+## See also
+
+- [Replicate](./12-replicate.md) — same model-serving category
+- [Hugging Face](./11-huggingface.md) — same OSS community
+- [CoreWeave](./47-coreweave.md) — same GPU cloud infra
+- [Modal](./44-modal.md) — same developer-facing ML compute
+
 ## Sources
 
 - [Together AI](https://www.together.ai/)

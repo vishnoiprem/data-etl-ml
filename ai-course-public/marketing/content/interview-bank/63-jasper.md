@@ -89,6 +89,13 @@ Post-IPO RSUs vest 25% year 1, then quarterly. They have a hiring bar that dropp
 ## Real candidate report
 > "Take-home was to build a brand-voice fine-tuner in 4 hours. Onsite was 3 rounds, all about product thinking and coding. Whole process was 9 days. Got an offer that was below the Levels median but the equity made it interesting." — Glassdoor, ML Engineer, 2025
 
+## See also
+
+- [Copy.ai](./64-copy.md) — direct AI writing competitor
+- [Writer](./62-writer.md) — same enterprise writing
+- [Grammarly](./56-grammarly.md) — same writing AI
+- [Notion](./55-notion.md) — same productivity AI
+
 ## Sources
 - [Jasper careers](https://www.jasper.ai/careers)
 - [Jasper engineering blog](https://www.jasper.ai/blog/category/engineering)

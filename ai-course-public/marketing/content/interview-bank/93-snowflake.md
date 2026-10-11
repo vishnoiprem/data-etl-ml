@@ -172,6 +172,13 @@ Cash + RSU comp. Comp band L3-L6: $250K-$700K. Snowflake comp is RSU-heavy (4-ye
 > "Snowflake's loop is the most data-engineering-focused of the cloud data warehouse companies. The SQL round tested window functions, CTEs, and query optimization. The system design was a feature store + RAG pipeline on Snowflake. The ML round was Cortex AI: chunking, embedding, retrieval, eval. If you've worked on a data warehouse, this is the best-fit company in the space."
 > — r/dataengineering, on the Snowflake loop
 
+## See also
+
+- [Databricks](./19-databricks.md) — direct warehouse competitor
+- [Datadog](./92-datadog.md) — same data-platform SWE
+- [Google Cloud](./23-google-cloud.md) — runs on GCP
+- [Amazon](./22-amazon.md) — runs on AWS
+
 ## Sources
 
 - [Levels.fyi — Snowflake compensation](https://www.levels.fyi/companies/snowflake/salaries/software-engineer)

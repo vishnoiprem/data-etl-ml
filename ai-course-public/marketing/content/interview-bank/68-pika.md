@@ -110,6 +110,13 @@ Most candidates over-index on scale-only arguments. Pika's bet is the opposite �
 ## Real candidate report
 > "Three rounds, math-heavy. They asked me to derive ELBO and implement GroupNorm. Founder round was about creative empathy, not pure research. Got an offer in 8 days." — Glassdoor, AI Engineer, 2025
 
+## See also
+
+- [Runway](./67-runway.md) — direct video-AI competitor
+- [Midjourney](./65-midjourney.md) — same generative media
+- [Stability AI](./66-stability.md) — same image/video
+- [Suno](./69-suno.md) — same generative media (audio)
+
 ## Sources
 - [Pika careers](https://pika.art/careers)
 - [Levels.fyi — Pika](https://www.levels.fyi/companies/pika)

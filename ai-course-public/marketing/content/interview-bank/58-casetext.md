@@ -87,6 +87,12 @@ Base is at the high end ($200K-$300K+ for senior), equity is now TR RSU (4-year 
 ## Real candidate report
 > "Phone screen was document classifier coding + LLM design. Onsite had 4 rounds including a tough RAG round where they asked me to design a citation-aware system end-to-end. The behavioral round was a 'tell me about a time you worked with a non-technical user' — I used my previous job where I built a tool for lawyers. Offer: $220K + TR RSU, 8 days." — Levels.fyi, 2025
 
+## See also
+
+- [Harvey](./57-harvey.md) — direct legal-AI competitor
+- [Anthropic](./02-anthropic.md) — Casetext also uses Claude
+- [Thomson Reuters / Bloomberg](./71-bloomberg.md) — same legal/finance adj.
+
 ## Sources
 - [Casetext/CoCounsel careers](https://www.thomsonreuters.com/en/careers.html)
 - [CoCounsel product](https://www.thomsonreuters.com/en/products/cocounsel.html)

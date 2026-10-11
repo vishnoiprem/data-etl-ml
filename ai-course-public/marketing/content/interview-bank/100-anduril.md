@@ -110,6 +110,13 @@ Anduril comp is below Big Tech for base, but equity is meaningful and the missio
 ## Real candidate report
 > "I interviewed for ML on the perception team. The deep-dive was on detecting and tracking drones in cluttered environments — they pushed on sensor fusion (camera + radar) and the false-positive cost (a false alarm sends a $1M interceptor at a bird). Got L4 offer at $280K base + $500K RSU/4yr, Costa Mesa. They moved equity by $80K on negotiation. The loop was rigorous but the interviewers were mission-driven and friendly." — Blind, 2025
 
+## See also
+
+- [Palantir](./99-palantir.md) — same defense + on-prem
+- [Waymo](./89-waymo.md) — same safety-critical
+- [Amazon](./22-amazon.md) — runs on AWS
+- [NVIDIA Research](./10-nvidia-research.md) — same hardware + sensor fusion
+
 ## Sources
 - [Anduril Engineering Blog](https://www.anduril.com/newsroom/category/engineering/)
 - [Anduril Lattice Platform](https://www.anduril.com/lattice/)

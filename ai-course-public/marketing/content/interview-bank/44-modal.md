@@ -95,6 +95,13 @@ Modal pays top-of-market for senior engineers: $250K-$400K base, meaningful equi
 ## Real candidate report
 > "Phone screen was an hour of systems design — designing Modal's container runtime from scratch. Onsite was 4 rounds in one day: coding (2 mediums), system design (cold start optimization), ML (vLLM serving), founder (Erik asked about my favorite infra paper). 5 day offer, base $260K + 0.04%." — Levels.fyi anonymous, 2025
 
+## See also
+
+- [Anyscale](./43-anyscale.md) — same serverless compute
+- [Replicate](./12-replicate.md) — same serverless ML
+- [RunPod](./45-runpod.md) — same GPU compute
+- [Together AI](./13-together.md) — same ML infra
+
 ## Sources
 - [Modal careers](https://modal.com/careers)
 - [Modal engineering blog](https://modal.com/blog)

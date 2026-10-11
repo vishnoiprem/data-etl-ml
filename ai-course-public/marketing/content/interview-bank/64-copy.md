@@ -80,6 +80,13 @@ Equity vests 4 years 1-year cliff. They pay below market but RSUs have upside.
 ## Real candidate report
 > "Took 2 weeks. Coding was LeetCode medium, system design was their actual product. Got a fair offer. The team is small so I interviewed with the founders." — Glassdoor, AI Engineer, 2025
 
+## See also
+
+- [Jasper](./63-jasper.md) — direct AI writing competitor
+- [Writer](./62-writer.md) — same enterprise writing
+- [LangChain](./52-langchain.md) — same agent framework
+- [Anthropic](./02-anthropic.md) — Copy.ai uses Claude
+
 ## Sources
 - [Copy.ai careers](https://www.copy.ai/careers)
 - [Copy.ai engineering blog](https://www.copy.ai/blog)

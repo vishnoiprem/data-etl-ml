@@ -88,6 +88,12 @@ Most candidates under-prep the teen-safety regulatory landscape. Character takes
 ## Real candidate report
 > "Four rounds, heavy on systems. They asked me to design the serving stack for 10M concurrent users. They wanted Triton/FlashAttention expertise. The team is small, the loop was intense, the offer was very strong." — Levels.fyi, AI Engineer, 2025
 
+## See also
+
+- [Inflection AI](./15-inflection.md) — same consumer-conversational AI
+- [OpenAI](./01-openai.md) — ChatGPT competes
+- [Anthropic](./02-anthropic.md) — same consumer LLM partner
+
 ## Sources
 - [Character.AI careers](https://character.ai/careers)
 - [Character.AI research](https://research.character.ai)

@@ -104,6 +104,12 @@ Figma comp is competitive with Bay Area. RSU is 4-year vest. They negotiate on e
 ## Real candidate report
 > "I interviewed for AI Engineer on Figma Make. The system design was on text-to-UI generation and they wanted me to walk through the data pipeline (design files → JSON) and the renderability checks. The ML deep-dive was on multi-modal model evaluation. Got L4 offer at $340K base + $600K RSU/4yr. They moved base by $25K on negotiation." — Blind, 2025
 
+## See also
+
+- [Canva](./98-canva.md) — direct design-tool competitor
+- [Adobe](./30-adobe.md) — same creative-tool AI
+- [Notion](./55-notion.md) — same productivity AI
+
 ## Sources
 - [Figma Engineering Blog](https://www.figma.com/blog/engineering/)
 - [Figma AI Documentation](https://help.figma.com/hc/en-us/sections/14506167395095-Figma-AI)

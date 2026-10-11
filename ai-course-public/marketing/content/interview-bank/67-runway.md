@@ -102,6 +102,13 @@ Most candidates over-prep on attention math and under-prep on temporal consisten
 ## Real candidate report
 > "Two coding rounds + system design + founder chat. They asked me to implement multi-head attention and design a video inference pipeline. They cared about my creative side projects more than my LeetCode stats." — Glassdoor, Applied Research Engineer, 2025
 
+## See also
+
+- [Pika](./68-pika.md) — direct video-AI competitor
+- [Midjourney](./65-midjourney.md) — same generative media
+- [Stability AI](./66-stability.md) — same image/video
+- [Adobe](./30-adobe.md) — both serve creative pros
+
 ## Sources
 - [Runway careers](https://runwayml.com/careers)
 - [Runway research](https://runwayml.com/research)

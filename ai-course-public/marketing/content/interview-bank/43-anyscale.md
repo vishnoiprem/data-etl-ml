@@ -99,6 +99,14 @@ Anyscale pays near-big-tech for senior engineers ($300K+ all-in for E5). Equity 
 ## Real candidate report
 > "Phone screen asked me to implement a distributed task queue with retries. Onsite was intense: 4 rounds including one where the interviewer (a Ray committer) asked me to design Ray's autoscaler. I had to walk through idle node termination and preemption. Got the offer 5 days later, $310K all-in." — Levels.fyi, 2025
 
+## See also
+
+- [Modal](./44-modal.md) — same serverless compute
+- [RunPod](./45-runpod.md) — same GPU cloud
+- [Lambda Labs](./46-lambda.md) — same GPU cloud
+- [CoreWeave](./47-coreweave.md) — same GPU cloud
+- [Comet](./42-comet.md) — same ML platform
+
 ## Sources
 - [Anyscale careers](https://www.anyscale.com/careers)
 - [Ray documentation](https://docs.ray.io)

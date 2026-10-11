@@ -106,6 +106,13 @@ Most candidates under-prep crypto market microstructure. Jump's crypto bet is a 
 ## Real candidate report
 > "5 rounds, all math and C++. They asked me to implement an order book from scratch, derive logistic regression, and design a cross-exchange system. Offer came in 10 days, $500K base + $300K sign-on." — Levels.fyi, Algorithm Engineer, 2025
 
+## See also
+
+- [HRT](./75-hrt.md) — same prop trading
+- [Citadel](./74-citadel.md) — same prop trading
+- [Optiver](./77-optiver.md) — same market making
+- [Two Sigma](./72-twosigma.md) — same quant + infra
+
 ## Sources
 - [Jump Trading careers](https://www.jumptrading.com/careers)
 - [Jump Crypto](https://www.jumpcrypto.com)

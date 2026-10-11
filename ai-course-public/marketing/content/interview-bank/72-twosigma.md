@@ -104,6 +104,13 @@ Most candidates under-prep Heard on the Street and Hull. The math canon is the g
 ## Real candidate report
 > "5 rounds over 2 days, all math. They asked me to derive the CAPM, implement a discrete sampler, and design a real-time tick system. Onsite lunch with two partners was a soft interview too. Offer was $400K base + $300K sign-on. Whole process was 4 weeks." — Levels.fyi, Quant Researcher, 2025
 
+## See also
+
+- [Jane Street](./73-janestreet.md) — same quant canon
+- [Citadel](./74-citadel.md) — same quant + finance
+- [Bloomberg](./71-bloomberg.md) — same finance adj.
+- [Optiver](./77-optiver.md) — same options vol
+
 ## Sources
 - [Two Sigma careers](https://www.twosigma.com/careers)
 - [Levels.fyi — Two Sigma](https://www.levels.fyi/companies/two-sigma)

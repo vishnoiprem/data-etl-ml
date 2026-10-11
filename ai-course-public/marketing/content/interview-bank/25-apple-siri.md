@@ -121,6 +121,12 @@ Cash + RSUs. Apple cash is competitive but equity is below Meta/Google for senio
 > "Loop for Siri Speech team. 5 rounds in 2 days. The ML deep-dive was on RNN-T and streaming — they pushed me on beam search latency vs greedy. The system design was on-device intent classification. Behavioral was 'craft obsessed' — they asked about a time I obsessed over 1% accuracy. Offer at ICT4, ~$450K total. 4 weeks total."
 > — Blind, 2025-09
 
+## See also
+
+- [Apple (AFM/Siri)](./18-apple.md) — same on-device + craft bar
+- [Apple ML](./09-apple-ml.md) — ML research track
+- [Microsoft](./16-microsoft.md) — same big-tech AI-product
+
 ## Sources
 
 - [Apple Careers](https://www.apple.com/careers/)

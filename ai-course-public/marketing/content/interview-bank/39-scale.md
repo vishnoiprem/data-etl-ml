@@ -98,6 +98,13 @@ Cash + RSUs. Scale is competitive — below FAANG top-of-band but with strong eq
 ## Real candidate report
 > "Loop for SEAL (private model eval). 4 rounds in 1 day. The system design was a confidential benchmark pipeline for a customer's GPT-class model. The ML deep-dive was on building a domain-specific eval set. Behavioral was 'move fast' flavored. Offer at L4, ~$420K total, 4 weeks." — Blind, 2025-09
 
+## See also
+
+- [Labelbox](./40-labelbox.md) — direct data-labeling competitor
+- [Weights & Biases](./41-wandb.md) — same ML tooling category
+- [Comet](./42-comet.md) — same ML platform
+- [Hugging Face](./11-huggingface.md) — same ML data + tooling
+
 ## Sources
 - [Scale AI Careers](https://scale.com/careers)
 - [Levels.fyi Scale AI salaries](https://www.levels.fyi/companies/scale-ai/salaries)

@@ -96,6 +96,13 @@ Base is at the high end ($250K-$350K+), equity is meaningful (private, high valu
 ## Real candidate report
 > "Phone screen was coding (citation extractor) + legal Q&A design. Onsite had 4 rounds including a legal domain round where they asked me to walk through a real M&A use case. I had to know the difference between an LOI and a definitive agreement. Offer: $280K + 0.04% equity, 5 days." — Levels.fyi, 2025
 
+## See also
+
+- [Casetext](./58-casetext.md) — direct legal-AI competitor
+- [Glean](./54-glean.md) — same enterprise RAG adj.
+- [Anthropic](./02-anthropic.md) — Harvey is built on Claude
+- [Hippocratic AI](./59-hippocratic.md) — same vertical-AI
+
 ## Sources
 - [Harvey careers](https://www.harvey.ai/careers)
 - [Harvey engineering blog](https://www.harvey.ai/blog)

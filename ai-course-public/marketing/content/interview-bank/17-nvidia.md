@@ -99,6 +99,12 @@ Committee weighs technical depth (CUDA, system design) + values (innovation, int
 > *"Tests understanding of GPU memory hierarchy and coalescing patterns that are fundamental to NVIDIA's CUDA performance optimization. The interviewer wants to see you reason about memory access patterns at the cache line level."*
 > — [Interview101 — NVIDIA Software Engineer Interview Guide](https://www.interview101.com/interviews/nvidia/software-engineer)
 
+## See also
+
+- [NVIDIA Research](./10-nvidia-research.md) — same company, research org
+- [CoreWeave](./47-coreweave.md) — runs on NVIDIA hardware
+- [Lambda Labs](./46-lambda.md) — same GPU-cloud
+
 ## Sources
 
 - [Interview101 — NVIDIA Software Engineer Interview Guide](https://www.interview101.com/interviews/nvidia/software-engineer)

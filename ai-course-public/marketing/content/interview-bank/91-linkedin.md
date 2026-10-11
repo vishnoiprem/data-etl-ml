@@ -114,6 +114,13 @@ LinkedIn comp is competitive with Bay Area but slightly below top FAANG. RSU is 
 ## Real candidate report
 > "I interviewed for ML on the Feed team. The system design was on feed ranking and they pushed on 'engagement vs professional value' — I had to defend why showing a controversial post might hurt long-term user trust. The ML deep-dive was on cold-start for new users. Got an IC5 offer at $340K base + $700K RSU/4yr. They moved base by $20K and equity by $100K on negotiation." — Blind, 2025
 
+## See also
+
+- [Twitter/X](./90-twitter.md) — same social + feed ML
+- [Reddit](./83-reddit.md) — same community + ML
+- [Microsoft](./16-microsoft.md) — LinkedIn is owned by Microsoft
+- [Salesforce](./26-salesforce.md) — same enterprise SaaS
+
 ## Sources
 - [LinkedIn Engineering Blog](https://engineering.linkedin.com/blog)
 - [LinkedIn AI Blog](https://www.linkedin.com/blog/topic/ai)

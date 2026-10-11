@@ -120,6 +120,13 @@ Roblox is competitive with Bay Area. Base is solid, RSU is 4-year vest with 1-ye
 ## Real candidate report
 > "Loop was 4 rounds + a hiring manager chat. The ML deep-dive was on a kid-safety classifier and they kept asking 'what's the cost of a false positive?' I had to walk through real scenarios where banning a teenager's slang would alienate them. They want engineers who think in tradeoffs, not in pure metrics. Got an L5 offer at $380K base + $800K RSU/4yr. They moved base by $30K on negotiation." — Blind, 2025
 
+## See also
+
+- [Discord](./84-discord.md) — same trust-and-safety ML
+- [Reddit](./83-reddit.md) — same UGC + community
+- [Waymo](./89-waymo.md) — same safety-critical ML
+- [TikTok](./87-tiktok.md) — same UGC + content ML
+
 ## Sources
 - [Roblox Engineering Blog](https://blog.roblox.com/technology/)
 - [Roblox Trust & Safety](https://corp.roblox.com/safety/)

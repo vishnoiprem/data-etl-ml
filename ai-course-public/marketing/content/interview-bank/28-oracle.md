@@ -110,6 +110,13 @@ Cash + RSUs. Oracle is competitive for cloud roles but typically below FAANG top
 ## Real candidate report
 > "Loop for OCI Generative AI. 4 rounds, 1 day. Coding was 1 Java (rate limiter) and 1 Python (Sudoku). The system design was a multi-tenant vector search service over Oracle 23ai. ML deep-dive was fine-tuning for a bank. Behavioral was sales-driven and they asked about a time I partnered with field sales. Offer at IC4, ~$380K total, 5 weeks total." — Blind, 2025-09
 
+## See also
+
+- [Salesforce](./26-salesforce.md) — same enterprise SaaS
+- [ServiceNow](./27-servicenow.md) — same enterprise SaaS AI
+- [SAP](./29-sap.md) — same enterprise-platform
+- [Amazon](./22-amazon.md) — runs on OCI
+
 ## Sources
 - [Oracle Careers](https://www.oracle.com/careers/)
 - [Levels.fyi Oracle salaries](https://www.levels.fyi/companies/oracle/salaries)

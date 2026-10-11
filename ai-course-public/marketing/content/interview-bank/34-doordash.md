@@ -107,6 +107,13 @@ Cash + RSUs. DoorDash is competitive — FAANG-tier for senior+. Negotiation is 
 ## Real candidate report
 > "Loop for Logistics ML. 4 rounds in 1 day. The ML deep-dive was on real-time dispatch and they wanted me to discuss Hungarian matching + dynamic re-dispatch on cancellation. The system design was the streaming pipeline behind dispatch. Behavioral was 'bias for action' flavored. Offer at L4, ~$520K total, 5 weeks." — Blind, 2025-09
 
+## See also
+
+- [Uber](./31-uber.md) — same marketplace ML
+- [Lyft](./32-lyft.md) — same marketplace ML
+- [Airbnb](./33-airbnb.md) — same marketplace ML
+- [Stripe ML](./20-stripe-ml.md) — same data + ML platform
+
 ## Sources
 - [DoorDash Careers](https://careersatdoordash.com/)
 - [Levels.fyi DoorDash salaries](https://www.levels.fyi/companies/doordash/salaries)

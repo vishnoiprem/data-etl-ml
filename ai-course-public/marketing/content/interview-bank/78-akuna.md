@@ -102,6 +102,13 @@ Most candidates treat Akuna as a backup. Authenticity about the firm is the gate
 ## Real candidate report
 > "4 rounds, all math. They asked the 100 prisoners problem, implied vol, and an order book. Akuna was less intense than Jane Street but the math bar was still high. Offer $350K base + 100% bonus for new grad." — Glassdoor, Quant Trader, 2025
 
+## See also
+
+- [Optiver](./77-optiver.md) — direct options MM competitor
+- [Citadel](./74-citadel.md) — same prop trading
+- [Jump Trading](./76-jump.md) — same prop trading
+- [Jane Street](./73-janestreet.md) — same options adj.
+
 ## Sources
 - [Akuna Capital careers](https://akunacapital.com/careers)
 - [Akuna coding challenge](https://akunacapital.com/careers/coding-challenge)

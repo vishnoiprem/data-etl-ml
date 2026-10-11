@@ -101,6 +101,13 @@ Base is competitive ($200K-$300K for senior eng), equity is moderate (private, w
 ## Real candidate report
 > "Two phone screens — one coding (K-way merge + LRU), one systems (design a Slurm cluster for 1000 GPUs). Onsite was 4 rounds. The system design round was the toughest — they wanted me to design the full hyperscaler control plane in 45 minutes. Offer: $250K base, $50K sign-on, equity." — Levels.fyi, 2025
 
+## See also
+
+- [RunPod](./45-runpod.md) — same GPU cloud
+- [CoreWeave](./47-coreweave.md) — same GPU cloud
+- [Anyscale](./43-anyscale.md) — same ML infra
+- [Modal](./44-modal.md) — same serverless compute
+
 ## Sources
 - [Lambda careers](https://lambda.ai/careers)
 - [Lambda engineering blog](https://lambda.ai/blog)

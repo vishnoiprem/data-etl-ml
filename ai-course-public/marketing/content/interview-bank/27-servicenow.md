@@ -103,6 +103,13 @@ Cash + RSUs. ServiceNow is competitive with FAANG, sometimes above for senior+ d
 ## Real candidate report
 > "Loop for Now Assist. 4 rounds in 1 day. The system design was a multi-tenant RAG + agent platform and they pushed me on ACL filtering at retrieval. The ML deep-dive was eval for a customer-service bot. Behavioral was 'Customer Zero' flavored. Offer at IC4, ~$390K total, 4 weeks total. Interviewer quality was high and they asked thoughtful follow-ups." — Blind, 2025-10
 
+## See also
+
+- [Salesforce](./26-salesforce.md) — same enterprise SaaS AI
+- [Oracle](./28-oracle.md) — same enterprise-software
+- [SAP](./29-sap.md) — same enterprise-platform
+- [Atlassian](./94-atlassian.md) — same enterprise SaaS
+
 ## Sources
 - [ServiceNow Careers](https://www.servicenow.com/careers.html)
 - [Levels.fyi ServiceNow salaries](https://www.levels.fyi/companies/servicenow/salaries)

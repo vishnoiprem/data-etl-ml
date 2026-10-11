@@ -103,6 +103,13 @@ Cash + RSUs. Uber is competitive with FAANG. Negotiation is real. Team match aft
 ## Real candidate report
 > "Loop for Michelangelo ML Platform. 4 rounds in 1 day. Coding was 2 mediums (LRU + K-th largest). System design was the Michelangelo feature store with point-in-time joins. ML deep-dive was dynamic pricing and they pushed me on causal vs predictive and supply-side fairness. Behavioral was customer-obsession flavored. Offer at L5, ~$580K total, 5 weeks." — r/MachineLearning, 2025-09
 
+## See also
+
+- [Lyft](./32-lyft.md) — direct competitor
+- [DoorDash](./34-doordash.md) — same marketplace ML
+- [Airbnb](./33-airbnb.md) — same marketplace ML
+- [Uber (Marketplace SWE)](./82-uber-swe.md) — same company, SWE track
+
 ## Sources
 - [Uber Careers](https://www.uber.com/careers/)
 - [Levels.fyi Uber salaries](https://www.levels.fyi/companies/uber/salaries)

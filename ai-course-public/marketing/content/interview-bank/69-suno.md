@@ -97,6 +97,13 @@ Most candidates over-index on benchmark scores. Suno's bar is set by musicians, 
 ## Real candidate report
 > "Math + coding + audio DSP. They asked me to compute MFCCs by hand. Strong music background matters — they want people who actually listen. Offer came in 10 days, equity was great." — Glassdoor, AI Engineer, 2025
 
+## See also
+
+- [Runway](./67-runway.md) — same generative media
+- [Pika](./68-pika.md) — same generative media
+- [Spotify](./86-spotify.md) — music-adjacent
+- [Stability AI](./66-stability.md) — same generative models
+
 ## Sources
 - [Suno careers](https://suno.com/careers)
 - [Levels.fyi — Suno](https://www.levels.fyi/companies/suno)

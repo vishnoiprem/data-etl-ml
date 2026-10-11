@@ -90,6 +90,13 @@ Base is slightly below W&B (10-20% lower); equity is the lever — Comet is priv
 ## Real candidate report
 > "Phone screen was a LeetCode medium (LRU cache variant) plus an LLM eval design question. Onsite was 4 rounds in one day — coding, system design, ML, founder. Founder round was very values-driven (DX, customer obsession). I had used Opik on a side project, and that came up multiple times." — Reddit r/MachineLearning, 2025
 
+## See also
+
+- [Weights & Biases](./41-wandb.md) — same ML experiment-tracking
+- [Scale AI](./39-scale.md) — same ML data tooling
+- [Labelbox](./40-labelbox.md) — same ML data tooling
+- [Anyscale](./43-anyscale.md) — same ML infra
+
 ## Sources
 - [Comet careers](https://www.comet.com/site/careers/)
 - [Comet engineering blog](https://www.comet.com/blog/)

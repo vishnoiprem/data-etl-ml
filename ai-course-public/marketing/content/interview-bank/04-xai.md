@@ -111,6 +111,12 @@ xAI comp is more cash-heavy than RSU-heavy. The play: anchor with a competing of
 > *"xAI moves fast — I had a recruiter screen on Monday, a phone screen on Wednesday, and an onsite the following week. The 'speed' round is real: they ask you to scope a 6-month project and they want specifics, not a Gantt chart. 'What would you cut' is the question, not 'how would you do it perfectly.'"*
 > — Glassdoor candidate report, paraphrased from 2026 loop reports
 
+## See also
+
+- [OpenAI](./01-openai.md) — Grok's product surface overlaps ChatGPT
+- [Anthropic](./02-anthropic.md) — model-training depth
+- [Together AI](./13-together.md) — open-weights infra adjacent
+
 ## Sources
 
 - [xAI — News & Updates](https://x.ai/news)

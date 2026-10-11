@@ -118,6 +118,13 @@ Reddit's offers are competitive with the Bay Area market. RSU refresher is annua
 ## Real candidate report
 > "I interviewed for Search ML. The system design was Reddit's home feed and they pushed hard on the diversity reranker — I initially proposed pure engagement ranking and they asked 'but what about the echo chamber problem?' which I should have preempted. Offer came back as L4 at $290K + $400K RSU/4yr. They were firm on level. Negotiation moved base by $20K but not level." — Reddit r/MachineLearning, 2025
 
+## See also
+
+- [Discord](./84-discord.md) — same community + trust-and-safety
+- [Twitter/X](./90-twitter.md) — same social + ML platform
+- [LinkedIn](./91-linkedin.md) — same social + feed ML
+- [Roblox](./85-roblox.md) — same UGC + trust-and-safety
+
 ## Sources
 - [Reddit Engineering Blog](https://www.reddit.com/r/RedditEng/)
 - [Wilson score on Reddit (downrank early votes)](https://www.reddit.com/r/woahdude/comments/1ampd6/the_new_sorting_algorithm_explained/)

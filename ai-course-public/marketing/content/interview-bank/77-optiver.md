@@ -107,6 +107,13 @@ Most candidates over-index on equity vol and under-index on options Greeks in pr
 ## Real candidate report
 > "5 rounds, all math. They asked me to implement implied vol via Newton-Raphson, derive Black-Scholes, and design a delta-1 hedging system. They also had a trading round. Process was 3 weeks, offer $400K base + 100% bonus target." — Glassdoor, Quantitative Trader, 2025
 
+## See also
+
+- [Two Sigma](./72-twosigma.md) — same quant canon
+- [Citadel](./74-citadel.md) — same options + market making
+- [Jane Street](./73-janestreet.md) — same options adj.
+- [Akuna](./78-akuna.md) — same options market making
+
 ## Sources
 - [Optiver careers](https://optiver.com/working-at-optiver)
 - [Optiver Trading Academy](https://optiver.com/insights/trading-academy)

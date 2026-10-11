@@ -111,6 +111,12 @@ Mistral comp is base + RSU + sign-on. Cash component is high; the Paris cost of 
 > *"The Mistral interview is technically the deepest of the European labs. They asked me to derive rotary positional embeddings on a whiteboard, then to compare sliding-window vs. global attention for a long-context task. The 'why Mistral' answer needs to be specific: open-weights for sovereignty, not 'I like your models.'"*
 > — Glassdoor candidate report, 2026
 
+## See also
+
+- [Cohere](./06-cohere.md) — both enterprise LLM API companies
+- [AI21](./14-ai21.md) — Mamba/SSM partner; same architecture-heavy lens
+- [Together AI](./13-together.md) — open-weights overlap
+
 ## Sources
 
 - [Mistral AI](https://mistral.ai/)

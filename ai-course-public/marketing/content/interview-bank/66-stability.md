@@ -111,6 +111,12 @@ Most candidates under-prep flow matching. The math is the gate, the systems desi
 ## Real candidate report
 > "Three rounds of math, one system design. They asked me to derive the forward diffusion process, implement RMSNorm, and walk through SD3's MMDiT. Offer came in 10 days, equity was lighter than I expected post-restructure." — Levels.fyi, Research Engineer, 2025
 
+## See also
+
+- [Midjourney](./65-midjourney.md) — direct image-AI competitor
+- [Runway](./67-runway.md) — same generative media
+- [Hugging Face](./11-huggingface.md) — Stability's models are on HF
+
 ## Sources
 - [Stability AI careers](https://stability.ai/careers)
 - [Stable Diffusion 3 report](https://stability.ai/news/stable-diffusion-3-research-paper)

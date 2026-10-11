@@ -138,6 +138,12 @@ Hugging Face comp is base + RSU + sign-on. NYC / Paris / SF hubs. Cash component
 > *"Hugging Face's interview is unique — they grade on open-source contribution as much as on ML depth. I brought a printout of my GitHub profile and walked through my top 3 merged PRs. The PR-review round was real — they handed me an actual PR and asked for a code review. The candidate who treats it like a generic ML interview loses."*
 > — Glassdoor candidate report, paraphrased from 2026 loops
 
+## See also
+
+- [Replicate](./12-replicate.md) — both run OSS model inference
+- [Together AI](./13-together.md) — same OSS model-serving
+- [Modal](./44-modal.md) — adjacent infra for ML workloads
+
 ## Sources
 
 - [Hugging Face](https://huggingface.co/)

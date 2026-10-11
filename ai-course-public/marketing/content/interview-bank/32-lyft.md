@@ -87,6 +87,12 @@ Cash + RSUs. Lyft is competitive but below FAANG top-of-band (post-IPO reset). N
 ## Real candidate report
 > "Loop for Lyft Pricing. 4 rounds in 1 day. The system design was the experimentation platform with switchback designs and they pushed on variance reduction. The ML deep-dive was prime-time pricing and I had to discuss fairness constraints and ethical caps. Behavioral was 'uplift others' flavored. Offer at L5, ~$520K total, 5 weeks." — Blind, 2025-10
 
+## See also
+
+- [Uber](./31-uber.md) — direct competitor
+- [DoorDash](./34-doordash.md) — same marketplace ML
+- [Airbnb](./33-airbnb.md) — same marketplace ML
+
 ## Sources
 - [Lyft Careers](https://www.lyft.com/careers)
 - [Levels.fyi Lyft salaries](https://www.levels.fyi/companies/lyft/salaries)

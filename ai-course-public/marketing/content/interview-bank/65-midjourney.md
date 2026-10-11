@@ -98,6 +98,13 @@ Most candidates over-prepare LeetCode and under-prepare diffusion derivations. T
 ## Real candidate report
 > "Three rounds, all deep technical. They wanted me to derive the DDPM forward process and explain classifier-free guidance. Last round was David asking me what I'd build next. Got the offer a week later, equity was substantial." — Levels.fyi, Applied Research Engineer, 2025
 
+## See also
+
+- [Stability AI](./66-stability.md) — direct image-AI competitor
+- [Runway](./67-runway.md) — same generative media
+- [Pika](./68-pika.md) — same video-AI
+- [Adobe](./30-adobe.md) — both serve creative pros
+
 ## Sources
 - [Midjourney careers](https://www.midjourney.com/jobs)
 - [Levels.fyi — Midjourney](https://www.levels.fyi/companies/midjourney)

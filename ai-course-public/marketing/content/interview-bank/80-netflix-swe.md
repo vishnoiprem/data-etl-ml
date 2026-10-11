@@ -93,6 +93,13 @@ Most candidates under-prep behavioral for senior-level judgment. Netflix screens
 ## Real candidate report
 > "5 rounds over 2 days. Coding was 2 mediums, system design was video streaming (ABR, CDN), and behavioral was culture-fit. They explicitly asked 'tell me about a time you had to do something unpopular.' Offer $450K base + $700K RSUs for senior." — Levels.fyi, Senior SWE, 2025
 
+## See also
+
+- [Netflix (ML)](./21-netflix-ml.md) — same company, ML track
+- [Airbnb (Marketplace SWE)](./81-airbnb-swe.md) — same senior SWE loop
+- [Uber (Marketplace SWE)](./82-uber-swe.md) — same senior SWE loop
+- [Stripe (Payments SWE)](./79-stripe-swe.md) — same senior SWE loop
+
 ## Sources
 - [Netflix careers](https://jobs.netflix.com)
 - [Netflix Tech Blog](https://netflixtechblog.com)

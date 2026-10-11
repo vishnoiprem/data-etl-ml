@@ -105,6 +105,13 @@ Base is at big-tech level ($200K-$300K+ for senior), equity is meaningful (priva
 ## Real candidate report
 > "Phone screen was BM25 coding + a system design for an enterprise search backend. Onsite had 4 rounds including a Google-style system design where I had to design the full stack from connector to ranking to LLM reranker. Offer was $260K base + 0.05% equity, 5 day turnaround." — Levels.fyi, 2025
 
+## See also
+
+- [Notion](./55-notion.md) — same enterprise productivity AI
+- [Perplexity](./36-perplexity.md) — same enterprise search
+- [Harvey](./57-harvey.md) — same vertical-AI adj.
+- [Anthropic](./02-anthropic.md) — same enterprise LLM partner
+
 ## Sources
 - [Glean careers](https://www.glean.com/careers)
 - [Glean engineering blog](https://www.glean.com/blog)

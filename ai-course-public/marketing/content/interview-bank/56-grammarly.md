@@ -92,6 +92,13 @@ Base is at the high end ($200K-$300K+ for senior), equity is meaningful (private
 ## Real candidate report
 > "Phone screen was edit-distance + an NLP design question. Onsite had 4 rounds including a tough ML round on grammar error correction (they wanted BERT vs T5 vs LLM tradeoffs in detail). Behavioral was a 'tell me about a feature you shipped' style question. Offer: $230K + 0.04% equity." — Levels.fyi, 2025
 
+## See also
+
+- [Notion](./55-notion.md) — same productivity AI
+- [Writer](./62-writer.md) — same enterprise writing AI
+- [Jasper](./63-jasper.md) — same AI writing
+- [Copy.ai](./64-copy.md) — same AI writing
+
 ## Sources
 - [Grammarly careers](https://www.grammarly.com/careers)
 - [Grammarly engineering blog](https://www.grammarly.com/blog/engineering/)

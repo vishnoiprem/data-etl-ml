@@ -94,6 +94,13 @@ Base is competitive for EU (or US remote, $200K-$300K), equity is meaningful (pr
 ## Real candidate report
 > "Phone screen was 90 minutes — Rust coding (HNSW insert simplified), vector internals, and a system design round on Qdrant's sharded architecture. Onsite had 4 rounds including a Rust-specific deep dive. Offer: 180K EUR base + equity, EU benefits." — Levels.fyi, 2025
 
+## See also
+
+- [Pinecone](./48-pinecone.md) — same vector DB
+- [Weaviate](./49-weaviate.md) — same vector DB
+- [Chroma](./50-chroma.md) — same vector DB
+- [LlamaIndex](./53-llamaindex.md) — uses these vector DBs
+
 ## Sources
 - [Qdrant careers](https://qdrant.tech/careers/)
 - [Qdrant engineering blog](https://qdrant.tech/blog)

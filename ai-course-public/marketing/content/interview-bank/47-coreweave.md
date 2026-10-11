@@ -105,6 +105,13 @@ Base is at the high end ($250K-$350K for senior), equity is post-IPO (RSUs, 4-ye
 ## Real candidate report
 > "Phone screen was a tough K8s + GPU scheduling design. Onsite had 5 rounds including a 'build a hyperscaler control plane' system design that took the full 60 minutes. The ML round asked me to optimize a 100B-param training run. Offer came in 6 days, $280K + 0.02% post-IPO RSU." — Levels.fyi, 2025
 
+## See also
+
+- [Lambda Labs](./46-lambda.md) — same GPU cloud
+- [RunPod](./45-runpod.md) — same GPU cloud
+- [NVIDIA (CUDA)](./17-nvidia.md) — same hardware stack
+- [Anyscale](./43-anyscale.md) — same ML infra
+
 ## Sources
 - [CoreWeave careers](https://www.coreweave.com/careers)
 - [CoreWeave engineering blog](https://www.coreweave.com/blog)

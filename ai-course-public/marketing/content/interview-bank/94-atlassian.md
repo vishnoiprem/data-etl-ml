@@ -117,6 +117,13 @@ Atlassian comp is good but below FAANG. Remote is genuine — they pay in local 
 ## Real candidate report
 > "I interviewed for ML on the Rovo team. The system design was on Rovo's RAG system and they pushed hard on permissions-aware retrieval — Atlassian's customers are enterprise so access control is the #1 risk. The coding round was medium DP. The ML deep-dive was on evaluation — they asked about golden sets, LLM-as-judge, and human eval. Got IC4 offer at $280K base + $400K RSU/4yr, fully remote." — Glassdoor, 2025
 
+## See also
+
+- [GitHub](./95-github.md) — same dev-tools AI
+- [GitLab](./96-gitlab.md) — direct dev-platform competitor
+- [Notion](./55-notion.md) — same productivity AI
+- [Salesforce](./26-salesforce.md) — same enterprise SaaS
+
 ## Sources
 - [Atlassian Engineering Blog](https://www.atlassian.com/engineering)
 - [Atlassian Work Life Blog](https://www.atlassian.com/blog/announcements/rovo)

@@ -109,6 +109,12 @@ NVIDIA comp is base + RSU + sign-on. Total $300K-$1.1M L3-L5. Sign-on is real fo
 > *"Tests understanding of GPU memory hierarchy and coalescing patterns that are fundamental to NVIDIA's CUDA performance optimization. The interviewer wants to see you reason about memory access patterns at the cache line level."*
 > — [Interview101 — NVIDIA Software Engineer Interview Guide](https://www.interview101.com/interviews/nvidia/software-engineer)
 
+## See also
+
+- [NVIDIA (CUDA)](./17-nvidia.md) — the SWE track for the same company
+- [Microsoft Research](./08-msft-research.md) — systems research org
+- [Apple ML](./09-apple-ml.md) — Apple silicon + ML research
+
 ## Sources
 
 - [Interview101 — NVIDIA Software Engineer Interview Guide](https://www.interview101.com/interviews/nvidia/software-engineer)

@@ -129,6 +129,12 @@ Cohere comp is base + RSU + sign-on. Toronto is the primary hub (lower cost of l
 > *"Cohere's loop is RAG-heavy. Every system design question assumes the RAG context. The 'why Cohere' answer needs to be about enterprise: privacy, deployment, on-prem. Generic 'I want to build AGI' answers lose. The 4-layer RAG stack — ingestion, chunking, retrieval, generation — is the canonical answer."*
 > — Glassdoor candidate report, paraphrased from 2026 loops
 
+## See also
+
+- [Mistral](./05-mistral.md) — same enterprise API positioning
+- [AI21](./14-ai21.md) — both train from-scratch models
+- [Anthropic](./02-anthropic.md) — the other safety-first lab
+
 ## Sources
 
 - [Cohere](https://cohere.com/)

@@ -95,6 +95,13 @@ Base is at the high end ($200K-$300K+ for senior), equity is meaningful (private
 ## Real candidate report
 > "Phone screen was autocomplete + rate limiter coding. Onsite had 4 rounds including a product AI round where I had to design a new AI feature end-to-end and walk through UX tradeoffs. The founder round with Ivan was intense — he really pushed on product vision. Offer: $260K + 0.04% equity." — Levels.fyi, 2025
 
+## See also
+
+- [Glean](./54-glean.md) — same enterprise productivity AI
+- [Grammarly](./56-grammarly.md) — same productivity AI
+- [Adobe](./30-adobe.md) — same creator-pro AI
+- [Figma](./97-figma.md) — same productivity AI
+
 ## Sources
 - [Notion careers](https://www.notion.so/careers)
 - [Notion engineering blog](https://www.notion.so/blog/category/engineering)

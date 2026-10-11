@@ -107,6 +107,14 @@ GitHub comp is Microsoft-band: solid base, RSU refresh annually, ESPP. RSU vests
 ## Real candidate report
 > "I interviewed for AI Engineer on Copilot Chat. The system design was on multi-turn coding assistant with file references and RAG over the user's repo. The ML deep-dive was on fine-tuning vs prompting tradeoffs for code. They asked me to whiteboard the eval pipeline. Got IC4 offer at $340K base + $600K RSU/4yr. They moved base by $30K on negotiation." — Blind, 2025
 
+## See also
+
+- [GitLab](./96-gitlab.md) — direct dev-platform competitor
+- [Atlassian](./94-atlassian.md) — same dev-tools AI
+- [OpenAI](./01-openai.md) — GitHub Copilot runs on OpenAI
+- [Anthropic](./02-anthropic.md) — Copilot also uses Claude
+- [Hugging Face](./11-huggingface.md) — same dev-tools AI adj.
+
 ## Sources
 - [GitHub Engineering Blog](https://github.blog/engineering/)
 - [GitHub Copilot Documentation](https://docs.github.com/en/copilot)

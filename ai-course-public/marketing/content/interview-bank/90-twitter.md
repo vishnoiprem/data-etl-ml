@@ -97,6 +97,13 @@ Twitter/X comp is at or above FAANG. RSU refresher is performance-based. Negotia
 ## Real candidate report
 > "Loop was 5 rounds. The For You feed system design was the core — they wanted me to talk about in-network vs out-of-network candidate generation, embedding retrieval, and how you balance engagement with anti-echo-chamber signals. The ML deep-dive was on coordinated inauthentic behavior detection. Got an L5 offer at $380K base + $1M RSU/4yr. They negotiated up by $80K when I had a Meta offer." — Blind, 2025
 
+## See also
+
+- [Reddit](./83-reddit.md) — same social + ML platform
+- [LinkedIn](./91-linkedin.md) — same social + feed ML
+- [Discord](./84-discord.md) — same community + safety
+- [TikTok](./87-tiktok.md) — same social + recsys ML
+
 ## Sources
 - [X Engineering Blog](https://blog.x.com/engineering/)
 - [X Research](https://x.ai/)

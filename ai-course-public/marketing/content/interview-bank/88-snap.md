@@ -113,6 +113,13 @@ Snap comp is solid for the Bay Area but slightly below FAANG. RSU is 4-year vest
 ## Real candidate report
 > "I interviewed for ML on the Camera team. The system design was on AR Lens ranking, and they pushed hard on on-device inference constraints (model size, latency, battery). The ML deep-dive was on multi-modal embeddings (image + text) for Lens retrieval. Got an L5 offer at $320K base + $550K RSU/4yr, LA. Negotiation moved base by $25K but they wouldn't budge on level." — Glassdoor, 2025
 
+## See also
+
+- [TikTok](./87-tiktok.md) — same social + camera ML
+- [Pinterest](./35-pinterest.md) — same visual + recsys ML
+- [Instagram (Meta ML)](./24-meta-ml.md) — same visual + recsys
+- [Discord](./84-discord.md) — same consumer comms ML
+
 ## Sources
 - [Snap Engineering Blog](https://eng.snap.com/)
 - [Snap Research](https://research.snap.com/)

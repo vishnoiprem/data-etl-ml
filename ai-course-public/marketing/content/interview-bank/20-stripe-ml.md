@@ -144,6 +144,13 @@ Stripe uses flat titles: L1-L3 are SWE, L4+ is Staff. The L4+ bar is Senior Staf
 > *"The entire process moves at a breakneck pace with intense information density, leaving zero room for downtime. As a company that 'only cares about doing the right thing,' Stripe holds a high bar on the 'gaps' — the trade-offs you consider but don't take. The interviewer wants to see you articulate the trade-offs even when you don't have time to implement them."*
 > — [Medium — Stripe 2026 New Grad Round 1 VO: In-Depth Interview Guide](https://medium.com/@programhelp/stripe-2026-new-grad-round-1-vo-in-depth-interview-guide-0618ba9be92c)
 
+## See also
+
+- [Stripe (Payments SWE)](./79-stripe-swe.md) — same company, SWE track
+- [Databricks](./19-databricks.md) — same data-platform
+- [Airbnb ML](./33-airbnb.md) — same ML-platform-engineer track
+- [Netflix ML](./21-netflix-ml.md) — same recsys + ML-platform
+
 ## Sources
 
 - [InterviewCoder — Stripe Software Engineer Interview: Process & Prep (2026)](https://www.interviewcoder.co/blog/stripe-software-engineer-interview)

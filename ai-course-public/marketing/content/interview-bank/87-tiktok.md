@@ -124,6 +124,13 @@ TikTok comp is top of market. Base is strong, RSU is generous. They will negotia
 ## Real candidate report
 > "I went through the full loop. Two coding rounds (medium + hard), one system design on For You Page, one ML deep-dive on multi-modal embeddings, one behavioral. The ML deep-dive was the hardest — they asked me to derive the loss function for a contrastive multi-modal model on the whiteboard. Got an L6 offer at $420K base + $1.2M RSU/4yr. They negotiated up on equity when I had a competing FAANG offer." — Blind, 2025
 
+## See also
+
+- [Snap](./88-snap.md) — same social + camera ML
+- [Instagram (Meta ML)](./24-meta-ml.md) — same recsys + ads
+- [Pinterest](./35-pinterest.md) — same visual + recsys ML
+- [Spotify](./86-spotify.md) — same recsys
+
 ## Sources
 - [TikTok Engineering Blog](https://engineering.tiktok.com/)
 - [ByteDance Research](https://www.bytedance.com/en/research)

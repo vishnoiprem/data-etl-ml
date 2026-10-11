@@ -99,6 +99,12 @@ Base is at the high end ($220K-$320K+ for senior), equity is meaningful (private
 ## Real candidate report
 > "Phone screen was transcript chunker coding + clinical note design. Onsite had 4 rounds including a tough system design on the real-time transcription pipeline (latency budget, partial results, EHR integration). The clinical round asked me to walk through a patient visit. Offer: $280K + 0.04% equity, 5 days." — Levels.fyi, 2025
 
+## See also
+
+- [Nabla](./61-nabla.md) — same healthcare AI
+- [Hippocratic AI](./59-hippocratic.md) — same healthcare AI
+- [Anthropic](./02-anthropic.md) — Abridge uses Claude
+
 ## Sources
 - [Abridge careers](https://www.abridge.com/careers)
 - [Abridge engineering blog](https://www.abridge.com/blog)

@@ -109,6 +109,11 @@ Apple ML comp is more cash-heavy than RSU-heavy (50-60% base). RSUs vest 4 years
 > *"I was asked to implement a Naive Bayes classifier from scratch in 30 minutes, then extend it to handle continuous features. The interviewer's first question after I finished was 'how would you adapt this to run on the Neural Engine?' That's the Apple signal — they think about the hardware, not just the algorithm."*
 > — [r/MachineLearning, Apple ML Interview threads (2025-2026)](https://www.reddit.com/r/MachineLearning/)
 
+## See also
+
+- [Apple (Siri/Vision)](./25-apple-siri.md) — same on-device + privacy
+- [Apple ML](./09-apple-ml.md) — the ML research track
+
 ## Sources
 
 - [Prepfully — Apple Machine Learning Engineer Interview Guide (2026)](https://prepfully.com/interview-guides/apple-machine-learning-engineer)

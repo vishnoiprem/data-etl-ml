@@ -111,6 +111,12 @@ GitLab comp is solid for remote work but varies by country. US band is competiti
 ## Real candidate report
 > "Loop was async-first — I had a take-home (design a Duo Chat system in writing), then 3 panel interviews over 2 days via video. The system design was on self-hosted LLM serving, which is GitLab's differentiator. They asked me to walk through GPU scheduling, model caching, and cost attribution. Got IC4 offer at $260K base + $400K RSU/4yr, fully remote US. They moved base by $20K on negotiation." — Blind, 2025
 
+## See also
+
+- [GitHub](./95-github.md) — direct dev-platform competitor
+- [Atlassian](./94-atlassian.md) — same dev-tools AI
+- [OpenAI](./01-openai.md) — GitLab Duo uses OpenAI
+
 ## Sources
 - [GitLab Engineering Blog](https://about.gitlab.com/blog/categories/engineering/)
 - [GitLab Handbook (the famous open handbook)](https://about.gitlab.com/handbook/)

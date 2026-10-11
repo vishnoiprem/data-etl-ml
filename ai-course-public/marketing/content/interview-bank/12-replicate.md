@@ -134,6 +134,12 @@ Replicate comp is base + RSU + sign-on. Cash component is decent; equity is mean
 > *"Replicate's interview is unique — the take-home was a real Cog model. The onsite rounds felt like the platform engineers talking through their actual architecture. The candidate who treats it like a generic ML interview loses. Cog + Docker + cold start is the signal."*
 > — Glassdoor candidate report, paraphrased from 2026 loops
 
+## See also
+
+- [Hugging Face](./11-huggingface.md) — both OSS model platforms
+- [Together AI](./13-together.md) — same open-weights infra
+- [Modal](./44-modal.md) — serverless ML compute
+
 ## Sources
 
 - [Replicate](https://replicate.com/)

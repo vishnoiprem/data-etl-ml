@@ -100,6 +100,12 @@ Most candidates over-index on accuracy metrics and under-index on safety. Below 
 ## Real candidate report
 > "The screen was almost entirely mission/ethics. They asked me to role-play a doctor calling about a hallucinated medication — they wanted to see if I'd be honest vs. hedge. Got the offer after 2 weeks." — Glassdoor, ML Engineer, 2025
 
+## See also
+
+- [Abridge](./60-abridge.md) — same healthcare AI
+- [Hippocratic AI](./59-hippocratic.md) — same healthcare AI
+- [Anthropic](./02-anthropic.md) — healthcare partners use Claude
+
 ## Sources
 - [Nabla careers](https://www.nabla.com/careers)
 - [Levels.fyi — Nabla](https://www.levels.fyi/companies/nabla)

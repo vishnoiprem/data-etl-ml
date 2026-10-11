@@ -104,6 +104,13 @@ Base is competitive for EU ($150K-$250K EUR-equivalent, or US $200K-$300K), equi
 ## Real candidate report
 > "Phone screen was HNSW internals + coding. Onsite 4 rounds including 'design a hybrid search system' that was hard — they really pushed on the recall/latency tradeoff. Offer came in 5 days. Equity grant was higher than expected (0.05%+)." — Levels.fyi anonymous, 2025
 
+## See also
+
+- [Pinecone](./48-pinecone.md) — same vector DB
+- [Chroma](./50-chroma.md) — same vector DB
+- [Qdrant](./51-qdrant.md) — same vector DB
+- [LlamaIndex](./53-llamaindex.md) — uses these vector DBs
+
 ## Sources
 - [Weaviate careers](https://weaviate.io/careers)
 - [Weaviate engineering blog](https://weaviate.io/blog)

@@ -140,6 +140,12 @@ Microsoft comp negotiates — base + RSU + sign-on + bonus. The play: come with 
 > *"I actually failed interviews at Meta, Google, Roblox, Snapchat, and TikTok before this. Microsoft was literally the last company on my interview list. The interview felt more like a conversation than a test. The interviewer walked me through their thought process on each problem."*
 > — [r/leetcode — I cracked a Microsoft L63 (Senior) role (Nov 2025)](https://www.reddit.com/r/leetcode/comments/1osm7o9/i_cracked_a_microsoft_l63_senior_role_and_wanted/)
 
+## See also
+
+- [DeepMind](./03-deepmind.md) — the other big-lab research org
+- [OpenAI](./01-openai.md) — model-research overlap
+- [Microsoft](./16-microsoft.md) — the product org (Azure AI / Copilot)
+
 ## Sources
 
 - [DataInterview — Microsoft AI Engineer Guide (2026)](https://www.datainterview.com/blog/microsoft-ai-engineer-interview)

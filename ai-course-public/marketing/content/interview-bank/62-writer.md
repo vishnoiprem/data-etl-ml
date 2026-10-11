@@ -93,6 +93,13 @@ Equity refreshers vest over 4 years; base is competitive but ~10% below frontier
 ## Real candidate report
 > "I had 4 rounds, two of which were system design for an enterprise AI platform. They asked how I'd handle PII in vector stores. Process took 3 weeks, offer came back above the band after I countered with a competing Anthropic offer." — Levels.fyi, Senior AI Engineer, 2025
 
+## See also
+
+- [Jasper](./63-jasper.md) — same AI writing
+- [Copy.ai](./64-copy.md) — same AI writing
+- [Grammarly](./56-grammarly.md) — same enterprise writing
+- [Notion](./55-notion.md) — same productivity AI
+
 ## Sources
 - [Writer careers](https://writer.com/careers)
 - [Writer Palmyra X 004 report](https://writer.com/engineering)

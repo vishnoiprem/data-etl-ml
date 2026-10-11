@@ -92,6 +92,12 @@ Base is at the high end ($220K-$320K+ for senior), equity is meaningful (private
 ## Real candidate report
 > "Phone screen was de-identifier coding + clinical Q&A design. Onsite had 4 rounds including a clinical domain round where they asked me to walk through a patient call scenario. I had to know HIPAA, escalation, and safety constraints. Offer: $260K + 0.04% equity, 6 days." — Levels.fyi, 2025
 
+## See also
+
+- [Abridge](./60-abridge.md) — same healthcare AI
+- [Nabla](./61-nabla.md) — same healthcare AI
+- [Anthropic](./02-anthropic.md) — safety focus mirrors Hippocratic's
+
 ## Sources
 - [Hippocratic AI careers](https://www.hippocraticai.com/careers)
 - [Hippocratic AI blog](https://www.hippocraticai.com/blog)

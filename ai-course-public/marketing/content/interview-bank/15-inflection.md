@@ -115,6 +115,12 @@ Inflection comp is base + RSU + sign-on. SF / Palo Alto hub. Cash component is d
 > *"Inflection's interview is unique — the safety round is separate, like Anthropic's, but the focus is on emotional safety: detecting distress, preventing sycophancy, calibrated empathy. The 'why Inflection' answer needs to be about emotional intelligence, not capability. The candidate who talks about benchmarks loses."*
 > — Glassdoor candidate report, paraphrased from 2026 loops
 
+## See also
+
+- [Anthropic](./02-anthropic.md) — same safety-first culture
+- [OpenAI](./01-openai.md) — consumer assistant surface
+- [Character.AI](./70-character.md) — same consumer-conversational niche
+
 ## Sources
 
 - [Inflection AI](https://inflection.ai/)

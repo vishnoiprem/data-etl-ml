@@ -87,6 +87,13 @@ Cash + RSUs. Pinterest is competitive but typically below FAANG top-of-band. Neg
 ## Real candidate report
 > "Loop for Home Feed ML. 4 rounds in 1 day. The ML deep-dive was on two-tower retrieval with PinSage-style graph features and they wanted me to discuss random walk sampling and embedding staleness. The system design was embedding serving at 100M+ QPS. Behavioral was 'put pinners first' flavored. Offer at L5, ~$580K total, 4 weeks." — Blind, 2025-08
 
+## See also
+
+- [Snap](./88-snap.md) — same visual + camera ML
+- [TikTok](./87-tiktok.md) — same social + recsys ML
+- [Instagram (Meta ML)](./24-meta-ml.md) — same visual + recsys ML
+- [Netflix ML](./21-netflix-ml.md) — same recsys
+
 ## Sources
 - [Pinterest Careers](https://www.pinterestcareers.com/)
 - [Levels.fyi Pinterest salaries](https://www.levels.fyi/companies/pinterest/salaries)

@@ -96,6 +96,12 @@ Cash + RSUs. Perplexity has grown comp aggressively through 2024-2025. Negotiati
 ## Real candidate report
 > "Loop for Search/RAG team. 4 rounds in 1 day, all in-person at SF. The coding round was a simple RAG implementation. The ML round was on citation accuracy and they wanted me to discuss extractive quote selection and post-hoc verification. The system design was on Pages (article generation). Founders round was 'mission fit' flavored. Offer at L4, ~$520K total, 3 weeks." — Blind, 2025-10
 
+## See also
+
+- [OpenAI](./01-openai.md) — ChatGPT competes with Perplexity
+- [Anthropic](./02-anthropic.md) — same consumer LLM
+- [Glean](./54-glean.md) — same enterprise search + RAG
+
 ## Sources
 - [Perplexity Careers](https://www.perplexity.ai/careers)
 - [Levels.fyi Perplexity salaries](https://www.levels.fyi/companies/perplexity-ai/salaries)

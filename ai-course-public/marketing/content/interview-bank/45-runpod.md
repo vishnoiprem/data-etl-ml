@@ -101,6 +101,13 @@ Base is competitive for the size; equity is moderate (RunPod is private, growing
 ## Real candidate report
 > "Phone screen was K8s + GPU scheduling design. Onsite had a CUDA optimization question (memory coalescing, occupancy) that I barely passed. The founder round was the toughest — they really grill you on why GPU cloud, what you know about the market. Offer: $200K + equity, 5 days." — Reddit r/MachineLearning, 2025
 
+## See also
+
+- [Lambda Labs](./46-lambda.md) — same GPU cloud
+- [CoreWeave](./47-coreweave.md) — same GPU cloud
+- [Modal](./44-modal.md) — same serverless compute
+- [Anyscale](./43-anyscale.md) — same ML infra
+
 ## Sources
 - [RunPod careers](https://www.runpod.io/careers)
 - [RunPod docs](https://docs.runpod.io)

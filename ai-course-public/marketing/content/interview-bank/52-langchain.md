@@ -92,6 +92,13 @@ Base is at the high end ($200K-$300K), equity is meaningful (private, growing fa
 ## Real candidate report
 > "Phone screen was agent loop coding + RAG design. Onsite had a tough 'design LangSmith' round — they really pushed on the trace data model. The behavioral round was easier than expected. Offer: $240K + 0.03% equity, signed in 4 days." — Levels.fyi, 2025
 
+## See also
+
+- [LlamaIndex](./53-llamaindex.md) — same LLM framework
+- [Pinecone](./48-pinecone.md) — LangChain's default vector DB
+- [Anthropic](./02-anthropic.md) — framework builds on Claude
+- [OpenAI](./01-openai.md) — framework builds on GPT
+
 ## Sources
 - [LangChain careers](https://www.langchain.com/careers)
 - [LangChain blog](https://blog.langchain.dev)

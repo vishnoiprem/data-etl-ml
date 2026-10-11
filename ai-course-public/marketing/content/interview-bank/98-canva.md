@@ -104,6 +104,13 @@ Canva comp is solid for Sydney — top of the Australian market. RSU is 4-year v
 ## Real candidate report
 > "I interviewed for AI Engineer on Magic Studio. The system design was on text-to-template and they pushed on the brand-consistency angle — how do you ensure a generated template matches the user's existing brand colors/fonts? Got an IC4 offer at AUD $280K base + $400K RSU/4yr, Sydney. They moved base by AUD $20K on negotiation. The loop was 4 rounds in 2 days, friendly interviewers." — Blind, 2025
 
+## See also
+
+- [Figma](./97-figma.md) — direct design-tool competitor
+- [Adobe](./30-adobe.md) — same creative-tool AI
+- [Notion](./55-notion.md) — same productivity AI
+- [Midjourney](./65-midjourney.md) — same generative media
+
 ## Sources
 - [Canva Engineering Blog](https://www.canva.dev/blog/engineering/)
 - [Canva Design Blog](https://www.canva.com/newsroom/)

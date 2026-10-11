@@ -126,6 +126,13 @@ Cash is top-of-market, RSUs vest 4 years with 0% cliff common, sign-on common. N
 > "I had 5 rounds in 2 days. The take-home was a real recsys problem with a 4-hour cap. The system design was the homepage — they pushed me on the cold-start case for new titles. The behavioral round was 'free & responsible' flavored — I told a story about overruling a PM and they loved it. Offer came in 4 business days, top-of-band."
 > — r/cscareerquestions, 2025-10
 
+## See also
+
+- [Netflix (Streaming SWE)](./80-netflix-swe.md) — same company, SWE track
+- [Stripe ML](./20-stripe-ml.md) — same data-platform ML
+- [Airbnb ML](./33-airbnb.md) — same marketplace ML
+- [Pinterest](./35-pinterest.md) — same recsys + visual ML
+
 ## Sources
 
 - [Netflix Tech Blog](https://netflixtechblog.com/)

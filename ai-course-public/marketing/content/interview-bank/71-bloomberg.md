@@ -97,6 +97,13 @@ Most candidates over-index on academic NLP. Bloomberg's bar is "would a trader t
 ## Real candidate report
 > "Four rounds: 2 coding, 1 system design, 1 ML. System design was a real-time news feed with entity tagging. They asked finance trivia in behavioral — I prepped with Wall Street Prep. Process took 3 weeks, offer was at the top of band." — Glassdoor, Senior ML Engineer, 2025
 
+## See also
+
+- [Two Sigma](./72-twosigma.md) — same quant + finance lens
+- [Citadel](./74-citadel.md) — same quant + finance
+- [Jane Street](./73-janestreet.md) — same quant + finance
+- [Stripe ML](./20-stripe-ml.md) — same fintech data ML
+
 ## Sources
 - [Bloomberg careers](https://www.bloomberg.com/careers)
 - [Bloomberg AI research](https://www.bloomberg.com/company/ai)

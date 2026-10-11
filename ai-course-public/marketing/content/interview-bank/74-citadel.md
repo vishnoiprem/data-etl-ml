@@ -95,6 +95,13 @@ Most candidates over-index on alpha-bragging and under-index on clean derivation
 ## Real candidate report
 > "5 rounds in one day, all math. They asked me to derive the Black-Scholes PDE, implement a hash map, and design an options pricing system. Ken's culture is intense — they want people who've competed and won. Offer was $500K base + $400K sign-on for a new grad PhD." — Levels.fyi, Quant Researcher, 2025
 
+## See also
+
+- [Jane Street](./73-janestreet.md) — same quant + finance
+- [Two Sigma](./72-twosigma.md) — same quant canon
+- [HRT](./75-hrt.md) — same prop trading
+- [Optiver](./77-optiver.md) — same options + market making
+
 ## Sources
 - [Citadel careers](https://www.citadel.com/careers)
 - [Citadel Securities careers](https://www.citadelsecurities.com/careers)

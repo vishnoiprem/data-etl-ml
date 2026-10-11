@@ -119,6 +119,12 @@ Google comp is structured: base + RSU + bonus + sign-on. DeepMind total comp is 
 > *"Interviewed at DeepMind (especially for RE or RS roles) — what should I know? The biggest signal: they care about your ability to defend ablations. They will read your paper 3 times and ask you about the 3 things you didn't test. If you can't name them, you don't pass."*
 > — [r/MachineLearning — Google DeepMind Research Engineer Prep (Jan 2026)](https://www.reddit.com/r/MachineLearning/comments/1q2wiub/d_google_deepmind_research_engineerscientist/)
 
+## See also
+
+- [OpenAI](./01-openai.md) — the "broken-NN" style round is the same calibration problem
+- [Anthropic](./02-anthropic.md) — both lab-research flavored
+- [Microsoft Research](./08-msft-research.md) — sibling research org (Alphabet vs Microsoft)
+
 ## Sources
 
 - [Sundeep Teki — The Ultimate AI Research Scientist Interview Guide (2026)](https://www.sundeepteki.org/advice/the-ultimate-ai-research-scientist-interview-guide-cracking-anthropic-openai-google-deepmind-top-ai-labs-in-2026)

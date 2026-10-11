@@ -90,6 +90,12 @@ Base is competitive with big tech; equity is the upside (W&B is late-stage priva
 ## Real candidate report
 > "Two phone screens, then 4 rounds onsite. Coding was LeetCode medium (LRU cache, sliding window). System design was 'design experiment tracking for 10M runs.' They asked me to compare W&B vs MLflow vs Neptune in detail. I lost points by not knowing Weave. Offer came in 3 days: base $220K + 0.05% equity." — Levels.fyi anonymous, 2025
 
+## See also
+
+- [Comet](./42-comet.md) — same ML experiment-tracking
+- [Scale AI](./39-scale.md) — same ML data tooling
+- [Labelbox](./40-labelbox.md) — same ML data tooling
+
 ## Sources
 - [Weights & Biases careers](https://wandb.ai/site/careers)
 - [W&B engineering blog](https://wandb.ai/wandb/engineering)

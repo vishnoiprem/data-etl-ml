@@ -91,6 +91,13 @@ Cash + RSUs (heavily RSU-weighted). Airbnb is *top-of-market* — competitive wi
 ## Real candidate report
 > "Loop for Search Ranking. 5 rounds in 2 days. The ML deep-dive was on listing embeddings and they wanted me to discuss trip-context windows and update latency trade-offs. The system design was the embeddings pipeline + serving. Behavioral was 'be a host' flavored. Offer at L5, ~$640K total, 4 weeks." — Blind, 2025-11
 
+## See also
+
+- [Uber](./31-uber.md) — same marketplace ML
+- [DoorDash](./34-doordash.md) — same marketplace ML
+- [Airbnb (Marketplace SWE)](./81-airbnb-swe.md) — same company, SWE track
+- [Stripe ML](./20-stripe-ml.md) — same ML-platform-engineer
+
 ## Sources
 - [Airbnb Careers](https://careers.airbnb.com/)
 - [Levels.fyi Airbnb salaries](https://www.levels.fyi/companies/airbnb/salaries)

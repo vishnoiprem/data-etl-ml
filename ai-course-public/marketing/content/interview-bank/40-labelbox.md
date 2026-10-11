@@ -99,6 +99,13 @@ Cash + RSUs. Labelbox is competitive for the size — below FAANG top-of-band. N
 ## Real candidate report
 > "Loop for ML Platform (Annotate + Foundry). 4 rounds in 1 day. The system design was a multi-tenant labeling platform with role-based access. The ML deep-dive was on active learning loops at scale. Behavioral was 'customer first' flavored. Offer at L4, ~$380K total, 4 weeks." — Blind, 2025-08
 
+## See also
+
+- [Scale AI](./39-scale.md) — direct data-labeling competitor
+- [Weights & Biases](./41-wandb.md) — same ML tooling
+- [Comet](./42-comet.md) — same ML platform
+- [Hugging Face](./11-huggingface.md) — same ML data + tooling
+
 ## Sources
 - [Labelbox Careers](https://labelbox.com/careers/)
 - [Levels.fyi Labelbox salaries](https://www.levels.fyi/companies/labelbox/salaries)

@@ -111,6 +111,13 @@ Spotify comp is good but below FAANG for senior roles, especially in Stockholm. 
 ## Real candidate report
 > "I interviewed for ML Engineer on Personalization. The ML deep-dive was on cold-start for new artists and they pushed hard on the bandit policy — I had to be specific about exploration rate, decay, and how to detect exploitation failures. Offer came back as L6 at $380K base + $650K RSU/4yr. Negotiation got me an extra $30K base. Stockholm was a real ask — they offered relocation." — Blind, 2025
 
+## See also
+
+- [Netflix (ML)](./21-netflix-ml.md) — same recsys
+- [TikTok](./87-tiktok.md) — same recsys + audio
+- [Suno](./69-suno.md) — music-AI adj.
+- [Pinterest](./35-pinterest.md) — same recommendation ML
+
 ## Sources
 - [Spotify Research](https://research.atspotify.com/)
 - [Spotify Engineering Blog](https://engineering.atspotify.com/)

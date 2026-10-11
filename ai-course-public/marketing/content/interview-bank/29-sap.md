@@ -97,6 +97,13 @@ Cash + RSUs + bonus. SAP is competitive in Europe (Walldorf, Munich) but lower f
 ## Real candidate report
 > "Loop for Joule (BTP AI). 4 rounds in 1 day, virtual. Coding was 2 mediums. System design was a multi-tenant LLM agent for SAP with RAG over ERP tables and they wanted ACL filtering at the SQL level. ML deep-dive was on fine-tuning for German-language procurement. Behavioral was 'Build' flavored. Offer at IC4, ~$340K total, 6 weeks." — r/sap, 2025-08
 
+## See also
+
+- [Salesforce](./26-salesforce.md) — same enterprise SaaS
+- [ServiceNow](./27-servicenow.md) — same enterprise SaaS AI
+- [Oracle](./28-oracle.md) — same enterprise-software
+- [Atlassian](./94-atlassian.md) — same SMB enterprise
+
 ## Sources
 - [SAP Careers](https://jobs.sap.com/)
 - [Levels.fyi SAP salaries](https://www.levels.fyi/companies/sap/salaries)

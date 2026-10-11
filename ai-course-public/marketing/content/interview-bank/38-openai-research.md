@@ -106,6 +106,13 @@ Cash + RSUs + *profit units* (a unique OpenAI compensation instrument). Total co
 ## Real candidate report
 > "Loop for Research Engineer (Reasoning team). 5 rounds over 2 days, in-person at SF. The research round was 90 min on RL for reasoning and they wanted me to discuss the o1/R1 line of work. The ML round was on RLHF at 100B scale. The systems round was on inference infra for 100M users. Behavioral was mission-fit flavored. Offer at E5, ~$1.1M total (cash + RSUs + profit units), 5 weeks." — r/MLQuestions, 2025-10
 
+## See also
+
+- [OpenAI](./01-openai.md) — the product/applied org
+- [Anthropic](./02-anthropic.md) — both labs have research roles
+- [DeepMind](./03-deepmind.md) — Google sibling
+- [Microsoft Research](./08-msft-research.md) — Microsoft sibling
+
 ## Sources
 - [OpenAI Careers](https://openai.com/careers/)
 - [Levels.fyi OpenAI salaries](https://www.levels.fyi/companies/openai/salaries)

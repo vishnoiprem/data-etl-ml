@@ -117,6 +117,13 @@ Airbnb has a single comp band per level; negotiation is limited. RSUs vest over 
 ## Real candidate report
 > "Onsite had 4 rounds in one day. The system design round was on search ranking and they kept pushing me on offline-to-online metric alignment — I had to be precise about NDCG vs bookings/session. The behavioral round was the hardest, three 30-min STAR questions on conflict, ambiguity, and a time I was wrong. They gave me an L5 offer at $420K base + $600K RSU over 4 years. Negotiation room was tiny." — Glassdoor, L5 SWE offer 2025
 
+## See also
+
+- [Airbnb (ML)](./33-airbnb.md) — same company, ML track
+- [Uber (Marketplace SWE)](./82-uber-swe.md) — same marketplace SWE
+- [Stripe (Payments SWE)](./79-stripe-swe.md) — same senior SWE loop
+- [Netflix (Streaming SWE)](./80-netflix-swe.md) — same senior SWE loop
+
 ## Sources
 - [Airbnb Engineering Blog](https://airbnb.io/)
 - [Airbnb Culture Deck (2014, still referenced)](https://drive.google.com/file/d/0B7s_JyB3CLfuTmhPdmctV1FnNG8/view)

@@ -106,6 +106,13 @@ Most candidates under-prep "Effective Modern C++" and lock-free data structures.
 ## Real candidate report
 > "4 rounds in one day, all math and C++. They asked me to implement a low-latency order book, derive Black-Scholes, and explain false sharing. Their bar is the bar. Got the offer 2 weeks later, $450K base + $300K sign-on for a senior SWE." — Levels.fyi, Algorithm Engineer, 2025
 
+## See also
+
+- [Citadel](./74-citadel.md) — same prop trading
+- [Jump Trading](./76-jump.md) — same prop trading
+- [Two Sigma](./72-twosigma.md) — same quant canon
+- [Optiver](./77-optiver.md) — same options
+
 ## Sources
 - [HRT careers](https://www.hudsonrivertrading.com/careers)
 - [HRT Technical Reflections](https://www.hudsonrivertrading.com/hrtview)

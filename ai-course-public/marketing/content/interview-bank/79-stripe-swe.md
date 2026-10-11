@@ -95,6 +95,13 @@ Most candidates under-prep payment correctness patterns. Stripe's bar is "rigor"
 ## Real candidate report
 > "5 rounds in one day, all technical. Coding was 2 mediums, system design was the payment pipeline (idempotency keys, webhooks, ledger). Behavioral was values-based. Offer $400K base + $500K RSUs for senior. Stripe is the best payments engineering interview I've done." — Levels.fyi, Senior SWE, 2025
 
+## See also
+
+- [Stripe (ML)](./20-stripe-ml.md) — same company, ML track
+- [Datadog](./92-datadog.md) — same payments-adjacent infra
+- [Snowflake](./93-snowflake.md) — same data-platform SWE
+- [Airbnb (Marketplace SWE)](./81-airbnb-swe.md) — same senior SWE loop
+
 ## Sources
 - [Stripe careers](https://stripe.com/jobs)
 - [Stripe engineering blog](https://stripe.com/blog/engineering)

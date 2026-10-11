@@ -158,6 +158,13 @@ Cash-heavy comp (Waymo is Alphabet, not a startup). Comp band L3-L6: $250K-$700K
 > "Waymo's loop is the most safety-focused of the AV companies. Every interviewer asked 'what could go wrong?' and 'how would you test it?' The coding round was a standard LeetCode medium (LRU cache), but the system design was autonomy-specific. The behavioral round is the safety review. If you've never worked in safety-critical systems, prep 3 STAR stories about catching bugs before they shipped."
 > — r/SelfDrivingCars, on the Waymo loop
 
+## See also
+
+- [Aurora / Cruise / Motional] — direct AV competitors (no bank entry, but the field)
+- [Anduril](./100-anduril.md) — same safety-critical + defense
+- [Palantir](./99-palantir.md) — same defense + data platform
+- [Roblox](./85-roblox.md) — same safety-critical ML
+
 ## Sources
 
 - [Levels.fyi — Waymo compensation](https://www.levels.fyi/companies/waymo/salaries/software-engineer)

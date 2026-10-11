@@ -116,6 +116,12 @@ Anthropic does not negotiate salary. "The initial offer is the final offer." PPU
 > *"It's not about finding a clever one-line solution; it's about building a system that can evolve. On persistence level: JSON is human-readable but pickle can handle more complex Python objects."*
 > — [Anqi Silvia, My 2025 Anthropic Software Engineer Interview Experience](https://medium.com/@anqi.silvia/my-2025-anthropic-software-engineer-interview-experience-9fc15cd81a99)
 
+## See also
+
+- [OpenAI](./01-openai.md) — the other top-frontier lab; OpenAI does NOT have a separate safety round
+- [Anthropic Safety](./37-anthropic-safety.md) — the safety org specifically
+- [DeepMind](./03-deepmind.md) — both labs emphasize safety literature
+
 ## Sources
 
 - [Anthropic Constitutional AI paper](https://www.anthropic.com/index/claudes-constitution)

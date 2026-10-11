@@ -129,6 +129,13 @@ Base + RSU refresher every 4 years is the unique perk. RSUs vest annually after 
 ## Real candidate report
 > "I went through 4 rounds in one day. The dispatch design was the heart of it — they wanted me to talk about H3 hexagons, ring search, and how you'd handle 10M drivers with sub-second matching. I got L5a at $350K base + 60K RSUs/yr. They were clear about L5a vs L5b — they said L5b needs 'org-wide influence' which I didn't demonstrate." — Blind post, 2025
 
+## See also
+
+- [Uber (ML)](./31-uber.md) — same company, ML track
+- [Airbnb (Marketplace SWE)](./81-airbnb-swe.md) — same marketplace SWE
+- [Stripe (Payments SWE)](./79-stripe-swe.md) — same senior SWE loop
+- [DoorDash](./34-doordash.md) — same marketplace infra
+
 ## Sources
 - [Uber Engineering Blog](https://www.uber.com/blog/engineering/)
 - [H3: Uber's Hexagonal Hierarchical Spatial Index](https://h3geo.org/)

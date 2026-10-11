@@ -132,6 +132,13 @@ Cash + RSUs. Meta is one of the highest-paying employers in tech. Negotiation is
 > "Loop for GenAI (Llama team). 4 rounds in 1 day + 1 follow-up ML deep-dive. The system design was a Llama serving infra at 1M QPS — they wanted paged attention + continuous batching discussed in detail. The ML round was on RLHF — I had to whiteboard the DPO loss. Got E5 offer at ~$850K total. 5 weeks from screen to offer."
 > — Blind, 2025-10
 
+## See also
+
+- [Meta AI (FAIR)](./07-meta-ai.md) — the research org
+- [Google Cloud](./23-google-cloud.md) — same big-tech ML-platform
+- [TikTok](./87-tiktok.md) — same recsys + ads ML
+- [Pinterest](./35-pinterest.md) — same visual + recsys ML
+
 ## Sources
 
 - [Meta Careers](https://www.metacareers.com/)

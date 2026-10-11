@@ -112,6 +112,14 @@ Palantir comp is high but with a lower base than FAANG and more equity weight. R
 ## Real candidate report
 > "I interviewed for FDE. 5 rounds over 2 days. The deployment round asked me to design a Foundry deployment for a government customer with no internet — they wanted air-gapped architecture, on-prem ML inference, and audit. The behavioral round was on customer pushback. Got an offer at $250K base + $600K RSU/4yr, Denver. They moved equity by $100K on negotiation. The interview prep was the most rigorous I've done — Palantir doesn't apologize for long loops." — Blind, 2025
 
+## See also
+
+- [Anduril](./100-anduril.md) — same defense + on-prem
+- [Databricks](./19-databricks.md) — same data-platform
+- [Snowflake](./93-snowflake.md) — same data-platform
+- [Waymo](./89-waymo.md) — same mission-critical ML
+- [Amazon](./22-amazon.md) — same AWS infra
+
 ## Sources
 - [Palantir Engineering Blog](https://blog.palantir.com/)
 - [Palantir AIP Documentation](https://palantir.com/docs/foundry/aip/overview/)

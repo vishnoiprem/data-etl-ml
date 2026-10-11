@@ -105,6 +105,12 @@ Cash + RSUs. Anthropic is top-of-market for safety roles — competitive with Op
 ## Real candidate report
 > "Loop for Safety Research (alignment team). 5 rounds over 2 days, all in-person. The research round was 90 min on a deception-detection experimental design. The alignment round was on Constitutional AI and value pluralism. The coding was transformer internals + a graph problem. Safety review was intense and they asked about a time I changed my mind on a moral question. Offer at E5, ~$720K total, 6 weeks." — r/MLQuestions, 2025-09
 
+## See also
+
+- [Anthropic](./02-anthropic.md) — the product org; safety is a separate team
+- [OpenAI](./01-openai.md) — OpenAI does NOT have a separate safety org this size
+- [DeepMind](./03-deepmind.md) — both labs have safety teams
+
 ## Sources
 - [Anthropic Careers](https://www.anthropic.com/careers)
 - [Levels.fyi Anthropic salaries](https://www.levels.fyi/companies/anthropic/salaries)

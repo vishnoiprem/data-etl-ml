@@ -149,6 +149,13 @@ Cash + RSU comp. Comp band L3-L6: $200K-$600K. Comp negotiation is real at L4+.
 > "Datadog's loop is the most observability-focused of the monitoring companies. The coding round was standard LeetCode medium (LRU cache). The system design was a metrics pipeline at 10M time series. The ML round was forecasting + anomaly detection on time-series data. The behavioral round tested ownership and scale. If you've worked on monitoring or observability, this is the best-fit company in the space."
 > — r/devops, on the Datadog loop
 
+## See also
+
+- [Snowflake](./93-snowflake.md) — same data-platform
+- [Stripe (Payments SWE)](./79-stripe-swe.md) — same infra SWE
+- [Amazon](./22-amazon.md) — Datadog runs on AWS
+- [Google Cloud](./23-google-cloud.md) — same observability competition
+
 ## Sources
 
 - [Levels.fyi — Datadog compensation](https://www.levels.fyi/companies/datadog/salaries/software-engineer)

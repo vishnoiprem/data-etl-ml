@@ -139,6 +139,12 @@ Comp negotiation is expected — come with a competing offer from OpenAI / Anthr
 > *"Listen for the hints. We are literally trained to give good hints... We want to see you think. The worst thing you can do is stay silent for five minutes and then produce a perfect solution."*
 > — [Meta Official Interview Prep Guide, 2026](https://www.metacareers.com/interview-prep/)
 
+## See also
+
+- [OpenAI](./01-openai.md) — Llama competes with GPT
+- [Anthropic](./02-anthropic.md) — model-safety comparable
+- [Microsoft Research](./08-msft-research.md) — same research-engineer track
+
 ## Sources
 
 - [JobInterviewAt — Facebook Meta Interview Questions: Complete 2026 Guide](https://jobinterviewat.com/facebook-meta-interview-questions/)

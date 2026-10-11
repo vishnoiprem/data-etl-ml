@@ -127,6 +127,12 @@ Databricks comp is base + RSU + sign-on. Total $180K-$1.4M+ L3-L7. The play: anc
 > *"For ML Engineer roles, expect a mix of algorithmic problems and statistics or ML implementation questions. Databricks is unique in that the coding questions often have a 'systems' flavor — they test whether you can write a windowed aggregation, an event-time join, or a streaming pipeline that handles late-arriving data."*
 > — [AIOfferly — Databricks ML Interview Questions (2026)](https://www.aiofferly.com/career-guide/databricks-ml-interview-questions)
 
+## See also
+
+- [Snowflake](./93-snowflake.md) — direct warehouse competitor
+- [Stripe ML](./20-stripe-ml.md) — same data-platform ML lens
+- [Amazon](./22-amazon.md) — AWS competitor
+
 ## Sources
 
 - [AIOfferly — Databricks ML Interview Questions (2026)](https://www.aiofferly.com/career-guide/databricks-ml-interview-questions)

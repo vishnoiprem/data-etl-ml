@@ -101,6 +101,12 @@ Most candidates over-prep options and under-prep OCaml fluency. JS's bar is set 
 ## Real candidate report
 > "The probability phone is brutal — 25 questions in 60 min, escalating in difficulty. I prepped for 6 weeks with Heard on the Street. Onsite had 5 rounds, all math. The culture fit round was the hardest — they want intellectual humility, not alpha-bragging. Got the offer 2 weeks later, $500K base + $300K sign-on." — Levels.fyi, Quantitative Trader, 2025
 
+## See also
+
+- [Two Sigma](./72-twosigma.md) — same quant canon
+- [Citadel](./74-citadel.md) — same quant + finance
+- [Optiver](./77-optiver.md) — same options + market making
+
 ## Sources
 - [Jane Street careers](https://www.janestreet.com/join-jane-street)
 - [Jane Street Tech blog](https://blog.janestreet.com)

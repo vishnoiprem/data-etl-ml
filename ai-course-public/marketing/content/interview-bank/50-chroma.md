@@ -88,6 +88,13 @@ Base is competitive for the size ($180K-$280K), equity is the lever — Chroma i
 ## Real candidate report
 > "Phone screen was RAG internals (chunking, retrieval eval) + coding. Onsite had a 'design a multi-tenant RAG service' round that was tricky. Founder round asked me to design the next 2 years of vector DBs. Offer: $220K + 0.05% equity, 4 days." — Levels.fyi, 2025
 
+## See also
+
+- [Pinecone](./48-pinecone.md) — same vector DB
+- [Weaviate](./49-weaviate.md) — same vector DB
+- [Qdrant](./51-qdrant.md) — same vector DB
+- [LangChain](./52-langchain.md) — uses these vector DBs
+
 ## Sources
 - [Chroma careers](https://www.trychroma.com/careers)
 - [Chroma docs](https://docs.trychroma.com)

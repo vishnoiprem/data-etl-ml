@@ -120,6 +120,12 @@ Apple ML comp is more cash-heavy than RSU-heavy (50-60% base). RSUs vest 4 years
 > *"The 'why Apple' question is the deal-breaker. Generic answers like 'I love the products' fail. You need a specific bet — e.g., I want to work on the on-device LLM for the iPhone because the privacy story is the only sustainable moat against cloud-based AI."*
 > — [r/MachineLearning — Apple ML Interview threads (2025-2026)](https://www.reddit.com/r/MachineLearning/)
 
+## See also
+
+- [Apple (AFM/Siri)](./18-apple.md) — the product SWE track
+- [Apple (Siri/Vision)](./25-apple-siri.md) — on-device + privacy lens
+- [NVIDIA Research](./10-nvidia-research.md) — both do systems + ML research
+
 ## Sources
 
 - [Prepfully — Apple Machine Learning Engineer Interview Guide (2026)](https://prepfully.com/interview-guides/apple-machine-learning-engineer)

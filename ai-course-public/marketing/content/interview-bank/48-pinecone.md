@@ -87,6 +87,13 @@ Base is at the high end ($250K+ for senior), equity is post-Series C/D (private 
 ## Real candidate report
 > "Phone screen was vector DB internals (HNSW vs IVF) + coding (LRU + top-k). Onsite was 4 rounds: coding (k-means), system design (serverless vector DB), vector DB internals (recall vs latency), behavioral. The vector DB round was the toughest — they asked me to derive the HNSW complexity. Offer: $260K + equity." — Levels.fyi, 2025
 
+## See also
+
+- [Weaviate](./49-weaviate.md) — same vector DB
+- [Chroma](./50-chroma.md) — same vector DB
+- [Qdrant](./51-qdrant.md) — same vector DB
+- [LangChain](./52-langchain.md) — uses these vector DBs
+
 ## Sources
 - [Pinecone careers](https://www.pinecone.io/careers)
 - [Pinecone engineering blog](https://www.pinecone.io/blog)

@@ -121,6 +121,13 @@ Base + sign-on + RSUs. Negotiation is real — bring competing offers. The comp 
 > "The ML rounds for Rufus were very applied — they asked me to design retrieval, ranking, and the citation system. The bar raiser was from a totally unrelated org (Logistics). I bombed my first LP story with 'we' and got cut off — switched to 'I' and they bumped me. 5 weeks from screen to offer, ~$580K total comp at L6."
 > — Blind, 2025-08
 
+## See also
+
+- [Microsoft](./16-microsoft.md) — same big-tech applied-science
+- [Google Cloud](./23-google-cloud.md) — same cloud-AI
+- [Apple (AFM/Siri)](./18-apple.md) — same consumer-AI product
+- [Databricks](./19-databricks.md) — runs on AWS
+
 ## Sources
 
 - [Amazon.jobs Applied Science](https://www.amazon.jobs/en/teams/applied-science)

@@ -96,6 +96,13 @@ Cash + RSUs. Adobe is competitive with FAANG, sometimes above for senior+ due to
 ## Real candidate report
 > "Loop for Firefly Services. 4 rounds in 1 day. The ML deep-dive was on LoRA fine-tuning for brand consistency with limited examples and they wanted DreamBooth specifics. The system design was multi-tenant generative AI with content credentials. Behavioral was 'craft' flavored. Offer at IC4, ~$480K total, 4 weeks." — Blind, 2025-10
 
+## See also
+
+- [Figma](./97-figma.md) — same creative-tool AI
+- [Canva](./98-canva.md) — same design-tool AI
+- [Notion](./55-notion.md) — same creator-pro AI
+- [Salesforce](./26-salesforce.md) — same enterprise SaaS
+
 ## Sources
 - [Adobe Careers](https://www.adobe.com/careers.html)
 - [Levels.fyi Adobe salaries](https://www.levels.fyi/companies/adobe/salaries)

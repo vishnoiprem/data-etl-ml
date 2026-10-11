@@ -123,6 +123,13 @@ OpenAI does not negotiate salary in the traditional sense — the offer reflects
 > *"The coding question asked me to implement a directed social graph that supported real-time versioning with snapshot queries. It wasn't a LeetCode hard — it was a small system I'd actually have to build on the job. I extended it three times as the interviewer added requirements. Tests at every step."*
 > — [r/OfferEngineering, OpenAI Senior SWE Interview (Aug 2026)](https://www.reddit.com/r/OfferEngineering/comments/1vdpjty/openai_senior_software_engineer_interview/)
 
+## See also
+
+- [Anthropic](./02-anthropic.md) — the other frontier lab; same model-serving focus, separate safety round
+- [xAI](./04-xai.md) — Grok; smaller team, "speed" round replaces OpenAI's committee
+- [DeepMind](./03-deepmind.md) — same model-research lens, Google-style committee
+- [OpenAI Research](./38-openai-research.md) — if you're targeting the research org specifically
+
 ## Sources
 
 - [OpenAI Official Interview Guide](https://openai.com/interview-guide/)

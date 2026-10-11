@@ -122,6 +122,13 @@ Discord is fully remote-US with strong base salary. Equity is competitive (veste
 ## Real candidate report
 > "I interviewed for Trust & Safety ML. The T&S round asked me to design a grooming detector and they pushed back hard — 'what if two 17-year-olds are flirting, is that grooming?' I had to be specific about thresholds, human review, and the difference between suspicious patterns and normal teen behavior. They were very thoughtful about the social cost of false positives. Offer: IC5 at $400K base + $700K RSU/4yr, fully remote." — Blind, 2025
 
+## See also
+
+- [Reddit](./83-reddit.md) — same community + ML
+- [Roblox](./85-roblox.md) — same trust-and-safety ML
+- [Twitter/X](./90-twitter.md) — same social + safety
+- [Snap](./88-snap.md) — same consumer comms ML
+
 ## Sources
 - [Discord Engineering Blog](https://discord.com/blog/engineering)
 - [Discord Trust & Safety](https://discord.com/safety)
