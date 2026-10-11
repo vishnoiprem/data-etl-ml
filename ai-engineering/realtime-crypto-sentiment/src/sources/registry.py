@@ -61,6 +61,21 @@ class SourceRegistry:
             return "auto"
         return self._active
 
+    def is_healthy(self) -> bool:
+        """True if any configured adapter is reachable. Order checked:
+        Apify (if configured) → Nitter → Syndication (always True).
+
+        Used by healthcheck endpoints / CLI `--check` to surface the
+        pipeline's data-source availability without doing a real fetch.
+        """
+        if self.apify and self.apify.is_healthy():
+            return True
+        if self.nitter.is_healthy():
+            return True
+        # Syndication always reports healthy (it doesn't rate-limit us
+        # in practice); see SyndicationAdapter.is_healthy.
+        return self.syndication.is_healthy()
+
     async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         # 1) Apify (preferred when configured)
         if self.apify and self.apify.is_healthy():

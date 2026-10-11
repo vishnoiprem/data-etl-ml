@@ -82,7 +82,7 @@ def lexicon_score(text: str) -> float:
 # ── Scrape one tag from Nitter ─────────────────────────────────────────
 
 async def scrape_tag(source, tag: str) -> list[dict]:
-    """Returns list of {ts, text, author, likes, retweets, url, tweet_id}.
+    """Returns list of {ts, text, author, likes, retweets, followers, url, tweet_id}.
 
     `source` is a SourceRegistry (auto-fallback across apify/nitter/syndication).
     """
@@ -148,6 +148,10 @@ async def main() -> int:
     await source.close()
 
     # 2) Insert into tweets table
+    # `source_adapter` records which upstream actually served the
+    # tweet (apify/nitter/syndication). Don't hardcode it to "nitter"
+    # — the dashboard's source-debugging UI relies on the real value.
+    used_adapter = source.active if source else "unknown"
     for t in all_tweets:
         db.upsert_tweet({
             "ts": t["ts"],
@@ -157,9 +161,9 @@ async def main() -> int:
             "author": t["author"],
             "likes": t["likes"],
             "retweets": t["retweets"],
-            "followers": 0,
+            "followers": t.get("followers", 0),
             "url": t["url"],
-            "source_adapter": "nitter",
+            "source_adapter": used_adapter,
             "sentiment_score": t["sentiment_score"],
         })
 
@@ -178,16 +182,36 @@ async def main() -> int:
     # 4) Trending tags: extract cashtags/hashtags/keywords from scraped
     #    tweets and write 1-min bucketed counts to trending_tags.
     from src.sources.trending import TagHit
+    from src.sources.base import RawTweet
     tag_hits: list[TagHit] = []
     for t in all_tweets:
-        # Build a minimal "tweet" object for extract_tags_from_tweet
-        class _T:
-            pass
-        obj = _T()
-        obj.text = t["text"]
-        obj.symbol_tags = [t["tag"]]
-        obj.ts = t["ts"]
-        tag_hits.extend(extract_tags_from_tweet(obj, kind=None))
+        # Reconstruct a minimal RawTweet (a TypedDict-style object) so
+        # the trending extractor can read .text / .symbol_tags / .ts
+        # without us sprinkling a dynamic `class _T: pass` here.
+        tweet = RawTweet(
+            id=t["tweet_id"],
+            ts=t["ts"],
+            author=t["author"],
+            text=t["text"],
+            likes=t["likes"],
+            retweets=t["retweets"],
+            followers=t.get("followers", 0),
+            url=t["url"],
+            symbol_tags=[t["tag"]] if t.get("tag") else [],
+        )
+        # `extract_tags_from_tweet` takes a list of keywords as the
+        # 6th positional arg; we don't track a separate keyword list
+        # here (we use `tracked_tags` as search queries, not as a
+        # keyword whitelist), so the extractor returns only cashtags
+        # and hashtags from the tweet body itself.
+        tag_hits.extend(extract_tags_from_tweet(
+            tweet_text=tweet.text,
+            tweet_id=tweet.id,
+            ts=tweet.ts,
+            sentiment=t["sentiment_score"],
+            url=tweet.url,
+            keywords=None,
+        ))
     # Aggregate
     if tag_hits:
         aggregated = aggregate_tags(tag_hits)

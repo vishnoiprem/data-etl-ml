@@ -22,6 +22,11 @@ docker-volumes/
 # TimescaleDB / Postgres local data
 data/
 
+# SQLite databases (test DB, live.db, seed DBs, etc.)
+*.db
+*.sqlite
+*.sqlite3
+
 # Models (downloaded at runtime by FinBERT)
 models/
 *.bin

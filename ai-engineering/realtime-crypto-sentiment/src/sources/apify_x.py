@@ -21,6 +21,13 @@ API:
   GET  /v2/actor-runs/{run_id}/dataset/items → list[tweet]
   Or:   /v2/datasets/{dataset_id}/items
 
+Health check:
+  The adapter calls GET /v2/users/me on first use and caches the
+  result for 5 minutes (configured via `_HEALTH_TTL_SEC` below).
+  Pass `force_check=True` to bypass the cache. The lock guards
+  against the (unlikely) case where two scraper tasks race into
+  `is_healthy()` simultaneously, doubling the /me calls.
+
 Cost model:
   ~$0.0003-0.0005 per tweet on the default Actor. The free tier
   ($5/mo) buys ~12k tweets, plenty for the demo and 5-min polling
@@ -30,6 +37,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import threading
 import time
 from datetime import UTC, datetime
 from typing import Any
@@ -46,6 +54,10 @@ DEFAULT_ACTORS = [
     "apidojo/tweet-scraper",             # ~$0.50/1k, well-tested
     "kaitoeasyapi/twitter-x-scraper",    # alternative
 ]
+
+# How long to cache a successful /v2/users/me liveness check. The token
+# doesn't change at runtime, so a 5-minute window is plenty.
+_HEALTH_TTL_SEC = 300
 
 
 class ApifyXAdapter(SourceAdapter):
@@ -76,6 +88,11 @@ class ApifyXAdapter(SourceAdapter):
         # Token doesn't change at runtime, so 5-min cache is fine.
         self._health_checked_at: float = 0.0
         self._health_ok: bool = False
+        # The cache read-modify-write isn't atomic across threads; under
+        # asyncio (single-thread) the GIL serializes the whole check, but
+        # adding a lock keeps the contract honest if someone later runs
+        # this in a thread pool.
+        self._health_lock = threading.Lock()
 
     # ── Public API ──────────────────────────────────────────────────
 
@@ -86,19 +103,20 @@ class ApifyXAdapter(SourceAdapter):
         """
         if not self.token:
             return False
-        now = time.monotonic()
-        if not force_check and (now - self._health_checked_at) < 300:
+        with self._health_lock:
+            now = time.monotonic()
+            if not force_check and (now - self._health_checked_at) < _HEALTH_TTL_SEC:
+                return self._health_ok
+            try:
+                r = self.session.get(
+                    "https://api.apify.com/v2/users/me", timeout=5
+                )
+                self._health_ok = r.status_code == 200
+            except requests.RequestException as e:
+                logger.debug(f"apify health check failed: {e}")
+                self._health_ok = False
+            self._health_checked_at = now
             return self._health_ok
-        try:
-            r = self.session.get(
-                "https://api.apify.com/v2/users/me", timeout=5
-            )
-            self._health_ok = r.status_code == 200
-        except requests.RequestException as e:
-            logger.debug(f"apify health check failed: {e}")
-            self._health_ok = False
-        self._health_checked_at = now
-        return self._health_ok
 
     async def fetch(self, query: str, max_results: int = 30) -> list[RawTweet]:
         """Run an Actor for one search term, return up to `max_results` tweets.
@@ -112,6 +130,16 @@ class ApifyXAdapter(SourceAdapter):
 
         run_id = await self._start_run(query, max_results)
         items = await self._wait_for_dataset(run_id)
+        if not items:
+            # Don't raise — Apify legitimately returns 0 items for
+            # queries that match nothing (e.g. typos, very-niche
+            # cashtags). Surface a warning so the operator can spot
+            # #1 cold-start issues (no $5 credit) or #2 misconfigured
+            # actor schema without grepping the JSON dump.
+            logger.warning(
+                f"apify run {run_id} returned 0 items for query {query!r} "
+                "— check APIFY_TOKEN credit balance and actor schema"
+            )
         tweets = [self._parse_item(it, query) for it in items if it]
         tweets = [t for t in tweets if t is not None]
         return tweets[:max_results]
@@ -265,29 +293,48 @@ class ApifyXAdapter(SourceAdapter):
                 retweets=retweets,
                 followers=followers,
                 url=url,
-                symbol_tags=[query] if query else [],
+                # `_start_run` strips leading `$`/`#` before sending the
+                # query to Apify; mirror that here so the tag written to
+                # the DB matches the canonical form (BTC, not $BTC).
+                # This keeps the `tweets.symbol` column consistent with
+                # `tracked_tags` and lets the dashboard's per-symbol
+                # joins work without stripping at every read site.
+                symbol_tags=[query.lstrip("$#")] if query else [],
             )
         except (ValueError, TypeError, KeyError) as e:
             logger.debug(f"apify parse skip: {e} on row {it.get('id')}")
             return None
 
 
-def _parse_iso(s: str) -> datetime:
-    """Parse an ISO-8601 string, tolerating trailing 'Z'."""
+def _parse_iso(s: str | None) -> datetime:
+    """Parse an ISO-8601 string into a UTC-aware `datetime`.
+
+    Tolerates a trailing `Z`, common non-ISO layouts, and tz-naive
+    strings. Returns `datetime.now(UTC)` as a safe fallback for
+    unparseable inputs, but logs a debug message so the upstream
+    Actor's bad row format is observable in production.
+    """
+    if not s:
+        return datetime.now(UTC)
     s = s.strip()
     if s.endswith("Z"):
         s = s[:-1] + "+00:00"
     try:
         dt = datetime.fromisoformat(s)
     except ValueError:
-        # Last-ditch: try common date formats
-        for fmt in ("%Y-%m-%d %H:%M:%S", "%a %b %d %H:%M:%S %z %Y", "%Y-%m-%dT%H:%M:%S.%f"):
+        # Last-ditch: try common date formats emitted by X scrapers
+        for fmt in (
+            "%Y-%m-%d %H:%M:%S",
+            "%a %b %d %H:%M:%S %z %Y",
+            "%Y-%m-%dT%H:%M:%S.%f",
+        ):
             try:
                 dt = datetime.strptime(s, fmt)
                 break
             except ValueError:
                 continue
         else:
+            logger.debug(f"apify: unparseable timestamp {s!r}; using now()")
             return datetime.now(UTC)
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=UTC)
