@@ -31,14 +31,13 @@ from __future__ import annotations
 import asyncio
 import os
 import time
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Any
 
 import requests
 from loguru import logger
 
 from src.sources.base import AdapterError, RawTweet, SourceAdapter
-
 
 # Apify X.com scraper Actors. First is the default; the rest are
 # fallbacks if the primary is unavailable or rate-limited.

@@ -19,10 +19,8 @@ What it does:
 from __future__ import annotations
 
 import asyncio
-import os
 import re
 import sys
-import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -30,17 +28,16 @@ PROJECT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT))
 
 # Load .env BEFORE importing settings
-from dotenv import load_dotenv  # noqa: E402
+from dotenv import load_dotenv
+
 load_dotenv(PROJECT / ".env")
 
-from loguru import logger  # noqa: E402
+from loguru import logger
 
-from src.config import settings  # noqa: E402
-from src.sources.apify_x import ApifyXAdapter  # noqa: E402
-from src.sources.nitter_mirror import NitterMirrorAdapter  # noqa: E402
-from src.sources.registry import SourceRegistry  # noqa: E402
-from src.sources.trending import aggregate_tags, extract_tags_from_tweet  # noqa: E402
-from src.store import db  # noqa: E402
+from src.config import settings
+from src.sources.registry import SourceRegistry
+from src.sources.trending import aggregate_tags, extract_tags_from_tweet
+from src.store import db
 
 # ── Lexicon-based sentiment (fast, no model download) ─────────────────
 
@@ -52,18 +49,17 @@ POSITIVE_WORDS = {
     "ath", "high", "higher", "gain", "gains", "growth", "growing", "beat",
     "beats", "outperform", "outperforms", "positive", "upgrade", "upgraded",
     "smash", "smashes", "smart", "innovative", "ship", "shipping", "launch",
-    "launches", "launched", "wow", "fast", "faster", "easy", "winning",
-    "revolutionary", "breakthrough", "huge", "massive", "goated", "best",
+    "launches", "launched", "wow", "fast", "faster", "easy", "revolutionary", "breakthrough", "huge", "massive", "goated",
 }
 NEGATIVE_WORDS = {
     "bearish", "crash", "dump", "sell", "sold", "selling", "weak", "worst",
     "terrible", "bad", "awful", "horrible", "hate", "hated", "garbage",
     "trash", "scam", "rug", "rugged", "rugpull", "down", "lower", "low",
     "loss", "losses", "lose", "loses", "losing", "miss", "missed", "misses",
-    "missed", "negative", "downgrade", "downgraded", "fear", "panic", "fud",
-    "dump", "rekt", "rip", "dead", "dying", "fraud", "fraudulent", "broken",
-    "sucks", "broken", "failing", "fail", "failed", "fails", "wrong", "hurt",
-    "down", "slump", "slumping", "drop", "drops", "dropping", "tank", "tanks",
+    "negative", "downgrade", "downgraded", "fear", "panic", "fud",
+    "rekt", "rip", "dead", "dying", "fraud", "fraudulent", "broken",
+    "sucks", "failing", "fail", "failed", "fails", "wrong", "hurt",
+    "slump", "slumping", "drop", "drops", "dropping", "tank", "tanks",
     "tanking", "tanked", "concern", "concerns", "concerning", "worried",
     "warning", "warns", "warned", "risk", "risky", "danger", "dangerous",
 }
@@ -292,8 +288,8 @@ def print_dashboard(per_tag_counts: dict[str, int], total_tweets: int) -> None:
     print()
     print("=" * 78)
     print(f"  ✓ Live data captured at {datetime.now(UTC).strftime('%H:%M:%S UTC')}")
-    print(f"    Re-run: python live_scrape_once.py")
-    print(f"    Or:     make pipeline (continuous, every 60s)")
+    print("    Re-run: python live_scrape_once.py")
+    print("    Or:     make pipeline (continuous, every 60s)")
     print("=" * 78)
 
 
