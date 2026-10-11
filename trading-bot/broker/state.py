@@ -32,19 +32,21 @@ CREATE TABLE IF NOT EXISTS signals (
     confidence REAL,
     reason     TEXT,
     seen_at    TEXT NOT NULL,
-    PRIMARY KEY (ticker, ts)
+    PRIMARY KEY (ticker, ts),
+    CHECK (action IN ('BUY', 'WATCH'))
 );
 
 CREATE TABLE IF NOT EXISTS decisions (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     ticker      TEXT NOT NULL,
     signal_ts   TEXT NOT NULL,
-    verdict     TEXT NOT NULL,  -- 'BUY' / 'SKIP'
+    verdict     TEXT NOT NULL,  -- 'BUY' / 'SKIP' / 'MANUAL_SELL'
     notional    REAL,           -- dollar amount, only for BUY
     shares      INTEGER,        -- only for BUY
     reason      TEXT,
     decided_at  TEXT NOT NULL,
-    FOREIGN KEY (ticker, signal_ts) REFERENCES signals (ticker, ts)
+    FOREIGN KEY (ticker, signal_ts) REFERENCES signals (ticker, ts),
+    CHECK (verdict IN ('BUY', 'SKIP', 'MANUAL_SELL'))
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_decision_per_signal
@@ -60,11 +62,33 @@ CREATE TABLE IF NOT EXISTS trades (
     notional     REAL NOT NULL,
     filled_at    TEXT NOT NULL,
     broker_id    TEXT,           -- Alpaca order id
-    FOREIGN KEY (decision_id) REFERENCES decisions (id)
+    FOREIGN KEY (decision_id) REFERENCES decisions (id),
+    CHECK (side IN ('BUY', 'SELL')),
+    CHECK (shares > 0),
+    CHECK (fill_price > 0),
+    CHECK (notional > 0)
 );
 
-CREATE INDEX IF NOT EXISTS idx_trades_open
-    ON trades (ticker) WHERE side = 'BUY';
+CREATE INDEX IF NOT EXISTS idx_trades_ticker
+    ON trades (ticker);
+CREATE INDEX IF NOT EXISTS idx_trades_decision
+    ON trades (decision_id);
+
+CREATE TABLE IF NOT EXISTS alerts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticker       TEXT NOT NULL,
+    kind         TEXT NOT NULL,  -- 'price_above' / 'price_below' / 'pct_change' / 'ma_cross'
+    threshold    REAL NOT NULL,
+    note         TEXT,           -- free-form, e.g. "buy the dip"
+    active       INTEGER NOT NULL DEFAULT 1,
+    created_at   TEXT NOT NULL,
+    triggered_at TEXT,           -- set when fired; non-null = done
+    last_price   REAL,           -- last price seen when checked
+    CHECK (kind IN ('price_above', 'price_below', 'pct_change', 'ma_cross')),
+    CHECK (active IN (0, 1))
+);
+
+CREATE INDEX IF NOT EXISTS idx_alerts_active ON alerts (active) WHERE active = 1;
 """
 
 
@@ -102,6 +126,19 @@ class Trade:
     notional: float
     filled_at: str
     broker_id: Optional[str] = None
+
+
+@dataclass
+class Alert:
+    id: int
+    ticker: str
+    kind: str           # 'price_above' | 'price_below' | 'pct_change' | 'ma_cross'
+    threshold: float
+    note: Optional[str]
+    active: bool
+    created_at: str
+    triggered_at: Optional[str]
+    last_price: Optional[float]
 
 
 class State:
@@ -199,23 +236,28 @@ class State:
     def open_positions(self) -> dict[str, dict]:
         """Net open position per ticker.
 
-        Returns {ticker: {shares, avg_cost, total_cost}}. Sells subtract.
+        Returns {ticker: {shares, avg_cost, total_cost}}.
+        avg_cost is the average COST BASIS of remaining BUY shares — sells
+        reduce the share count but never reduce the cost basis. Selling 50
+        of 100 shares bought at $50 leaves avg_cost = $50 (not $30, which
+        is what you'd get if you subtracted sell proceeds).
         """
         with self.cursor() as cur:
             cur.execute(
                 """SELECT ticker,
                           SUM(CASE WHEN side='BUY' THEN shares ELSE -shares END) AS net,
-                          SUM(CASE WHEN side='BUY' THEN notional ELSE -notional END) AS cost
+                          SUM(CASE WHEN side='BUY' THEN notional ELSE 0 END) AS buy_cost
                    FROM trades
                    GROUP BY ticker
                    HAVING net > 0"""
             )
             out: dict[str, dict] = {}
-            for ticker, net, cost in cur.fetchall():
+            for ticker, net, buy_cost in cur.fetchall():
+                net_i = int(net)
                 out[ticker] = {
-                    "shares": int(net),
-                    "total_cost": float(cost),
-                    "avg_cost": float(cost) / int(net) if net else 0.0,
+                    "shares": net_i,
+                    "total_cost": float(buy_cost),
+                    "avg_cost": float(buy_cost) / net_i if net_i else 0.0,
                 }
             return out
 
@@ -229,6 +271,79 @@ class State:
             )
             row = cur.fetchone()
             return Decision(*row) if row else None
+
+    # ---- alerts ----------------------------------------------------------
+    def add_alert(self, ticker: str, kind: str, threshold: float,
+                  note: Optional[str] = None) -> Alert:
+        """Create an active alert. Returns the new Alert row.
+
+        Valid kinds: 'price_above', 'price_below', 'pct_change', 'ma_cross'.
+        Threshold is interpreted per-kind:
+          - price_above / price_below: a price level
+          - pct_change: an absolute percent (e.g. 5.0 = 5%)
+          - ma_cross: 50 or 200 (the MA to watch)
+        """
+        now = datetime.utcnow().isoformat()
+        with self.cursor() as cur:
+            cur.execute(
+                """INSERT INTO alerts
+                   (ticker, kind, threshold, note, active, created_at)
+                   VALUES (?, ?, ?, ?, 1, ?)""",
+                (ticker.upper(), kind, float(threshold), note, now),
+            )
+            new_id = cur.lastrowid
+        return self.get_alert(new_id)  # type: ignore[return-value]
+
+    def get_alert(self, alert_id: int) -> Optional[Alert]:
+        with self.cursor() as cur:
+            cur.execute(
+                """SELECT id, ticker, kind, threshold, note, active,
+                          created_at, triggered_at, last_price
+                   FROM alerts WHERE id=?""",
+                (alert_id,),
+            )
+            row = cur.fetchone()
+            if not row:
+                return None
+            return Alert(
+                id=row[0], ticker=row[1], kind=row[2], threshold=row[3],
+                note=row[4], active=bool(row[5]), created_at=row[6],
+                triggered_at=row[7], last_price=row[8],
+            )
+
+    def list_alerts(self, only_active: bool = True) -> list[Alert]:
+        sql = """SELECT id, ticker, kind, threshold, note, active,
+                        created_at, triggered_at, last_price
+                 FROM alerts"""
+        if only_active:
+            sql += " WHERE active = 1"
+        sql += " ORDER BY id DESC"
+        with self.cursor() as cur:
+            cur.execute(sql)
+            return [Alert(
+                id=r[0], ticker=r[1], kind=r[2], threshold=r[3],
+                note=r[4], active=bool(r[5]), created_at=r[6],
+                triggered_at=r[7], last_price=r[8],
+            ) for r in cur.fetchall()]
+
+    def deactivate_alert(self, alert_id: int) -> bool:
+        """Mark an alert as triggered (active=0, triggered_at=now)."""
+        now = datetime.utcnow().isoformat()
+        with self.cursor() as cur:
+            cur.execute(
+                """UPDATE alerts SET active=0, triggered_at=?
+                   WHERE id=? AND active=1""",
+                (now, alert_id),
+            )
+            return cur.rowcount == 1
+
+    def update_alert_price(self, alert_id: int, last_price: float) -> None:
+        """Update the last_price for an alert (so we can show it in the UI)."""
+        with self.cursor() as cur:
+            cur.execute(
+                "UPDATE alerts SET last_price=? WHERE id=?",
+                (float(last_price), alert_id),
+            )
 
     def close(self) -> None:
         self._conn.close()

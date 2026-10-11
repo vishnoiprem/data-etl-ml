@@ -121,24 +121,28 @@ class SignalWatcher:
 
         We do NOT consult the signal table. We just sell whatever
         shares the user said to sell, from the position we hold.
+        The check is against the BROKER (authoritative) not the state
+        store (cached), so a stale state can't cause over-selling.
         """
-        positions = self.state.open_positions()
-        held = positions.get(ticker, {}).get("shares", 0)
+        held = self.broker.positions().get(ticker, 0)
         if shares > held:
             raise ValueError(
                 f"can't sell {shares} {ticker}, only hold {held}"
             )
         fill = self.broker.sell(ticker, shares)
-        # Record against a synthetic decision so the trade has a
-        # decision_id. We use a 'MANUAL_SELL' verdict with the
-        # current timestamp.
+        # Use datetime.utcnow() with microsecond precision as the synthetic
+        # signal_ts, prefixed with "manual:" so even if a real signal
+        # arrives in the same microsecond they don't clash on the
+        # UNIQUE INDEX (ticker, signal_ts).
+        now = datetime.utcnow()
+        synthetic_ts = f"manual:{now.isoformat()}"
         dec = self.state.record_decision(Decision(
             id=0, ticker=ticker,
-            signal_ts=fill.filled_at,   # synthesize unique key
+            signal_ts=synthetic_ts,
             verdict="MANUAL_SELL",
             notional=None, shares=shares,
             reason="manual sell from Telegram",
-            decided_at=datetime.utcnow().isoformat(),
+            decided_at=now.isoformat(),
         ))
         trade_id = self.state.record_trade(Trade(
             id=0, decision_id=dec.id, ticker=fill.ticker, side=fill.side,
