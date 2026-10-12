@@ -91,6 +91,53 @@ JUNK_EMAIL_RE = re.compile(
 )
 JUNK_COMPANY_RE = re.compile(r"^(?:TestCo|OldCo|DemoCo|SampleCo|FakeCo)[-_]?[a-f0-9]+$", re.I)
 
+# Generic ATS (Applicant Tracking System) email domains. These are
+# addresses that the *platform* uses to route inbound applications
+# — e.g. jobs@workable.com routes all jobs posted on Workable.
+# A cold email sent to one of these will never reach a real human
+# (it bounces, gets auto-replied, or is dropped). Filter them
+# out so we don't waste send budget.
+#
+# Domain match is "domain or any subdomain" — `jobs@mail.workable.com`
+# still matches because the registrable domain is `workable.com`.
+# We do NOT match `workable.com.au` etc. — only the listed exact
+# domains (or any subdomain of them).
+_GENERIC_ATS_DOMAINS = (
+    "workable.com", "ashbyhq.com", "greenhouse.io", "lever.co",
+    "jobvite.com", "hnhiring.com", "bamboohr.com", "smartrecruiters.com",
+    "icims.com", "workday.com",
+)
+_GENERIC_ATS_DOMAIN_RE = re.compile(
+    r"@(?:[A-Za-z0-9.-]*\.)?(?:" + "|".join(re.escape(d) for d in _GENERIC_ATS_DOMAINS) + r")$",
+    re.I,
+)
+
+
+def _is_generic_ats_email(email):
+    """Return True if `email` is a generic ATS-platform address.
+
+    Generic ATS emails are catch-all addresses that route inbound
+    applications through a job board (Workable, Greenhouse, Lever,
+    …). Sending cold email to one of these is wasted budget — the
+    recipient is the platform's auto-responder, not a human.
+
+    Examples that return True:
+        jobs@workable.com
+        recruiter@ashbyhq.com
+        hiring@greenhouse.io
+        anything@mail.workable.com     # subdomain still matches
+        UPPER@WORKABLE.COM             # case-insensitive
+
+    Examples that return False:
+        founder@gmail.com
+        recruiter@bridge.co
+        alice@stripe.com
+        jobs@workable.com.au           # different TLD, not in list
+    """
+    if not email or "@" not in email:
+        return False
+    return bool(_GENERIC_ATS_DOMAIN_RE.search(email))
+
 # Email-prefix candidates for derived recruiter addresses
 EMAIL_PREFIXES = ["careers", "jobs", "talent", "ai-jobs", "hiring", "recruiting", "apply"]
 
@@ -684,6 +731,34 @@ def _parse_pipe_headline(head):
     return split_company_role(head)
 
 
+# Generic-ATS domains: those mailboxes route to the ATS vendor's
+# support team, not a real human at the hiring company. Sending
+# cold outreach to `jobs@workable.com` etc. bounces or lands in
+# the void, so `scrape_hnhiring_remote` filters them out before
+# the row is written. Personal aliases (Gmail, Bridge, …) and the
+# company's own domain pass through.
+_GENERIC_ATS_DOMAINS = (
+    "hnhiring.com",   # the source site itself
+    "ashbyhq.com",    # Ashby ATS
+    "workable.com",   # Workable ATS
+    "greenhouse.io",  # Greenhouse ATS
+    "lever.co",       # Lever ATS
+    "jobvite.com",    # Jobvite ATS
+)
+
+
+def _is_generic_ats_email(email):
+    """True if `email` lives on a known ATS-vendor domain.
+
+    The check is case-insensitive and only looks at the domain
+    portion after the `@`. A Gmail address on the same company's
+    block (e.g. `recruiter@gmail.com`) returns False — we only
+    filter the vendor-domained addresses, not personal aliases.
+    """
+    em_l = email.lower()
+    return em_l.endswith(tuple(f"@{d}" for d in _GENERIC_ATS_DOMAINS))
+
+
 def scrape_hnhiring_remote():
     """Scrape hnhiring.com/locations/remote for senior+ AI/ML/data roles.
 
@@ -777,9 +852,7 @@ def scrape_hnhiring_remote():
         # or lands in the void. Real company emails live on the
         # company's own domain (or a Gmail/Bridge/etc. personal
         # alias), never on the ATS vendor's domain.
-        em_l = em.lower()
-        if em_l.endswith(("@hnhiring.com", "@ashbyhq.com", "@workable.com",
-                          "@greenhouse.io", "@lever.co", "@jobvite.com")):
+        if _is_generic_ats_email(em):
             continue
         out.append({
             "company": co,

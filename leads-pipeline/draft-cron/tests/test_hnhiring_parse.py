@@ -26,7 +26,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent))
 
-from find_more_leads import _parse_pipe_headline  # noqa
+from find_more_leads import _parse_pipe_headline, _is_generic_ats_email  # noqa
 
 
 # (label, input, expected_company, expected_role)
@@ -101,9 +101,54 @@ def test_pipe_parsing():
 
 
 def main():
-    r = test_pipe_parsing()
+    r1 = test_pipe_parsing()
+    r2 = test_ats_filter()
+    r = r1 and r2
     print(f"\n{'✅ ALL PASS' if r else '❌ SOME FAILED'}")
     sys.exit(0 if r else 1)
+
+
+# (label, email, expected_is_generic)
+ATS_CASES = [
+    # Generic ATS — should be filtered
+    ("jobs@workable.com", True),
+    ("recruiter@ashbyhq.com", True),
+    ("hiring@greenhouse.io", True),
+    ("talent@lever.co", True),
+    ("jobs@jobvite.com", True),
+    ("anything@hnhiring.com", True),
+    ("careers@bamboohr.com", True),
+    ("jobs@smartrecruiters.com", True),
+    ("apply@icims.com", True),
+    ("hiring@workday.com", True),
+    ("UPPER@WORKABLE.COM", True),  # case-insensitive
+    # Subdomain still matches: `mail.workable.com` is the
+    # registrable domain `workable.com`.
+    ("jobs@mail.workable.com", True),
+    ("recruiter@eu.lever.co", True),
+    # Personal / company — should pass
+    ("founder@gmail.com", False),
+    ("recruiter@bridge.co", False),
+    ("alice@stripe.com", False),
+    # Different TLD — not in our list
+    ("recruiter@workable.com.au", False),
+    # Empty / malformed
+    ("", False),
+    ("noatsign", False),
+]
+
+
+def test_ats_filter():
+    print("🧪 test_ats_filter")
+    fails = 0
+    for email, want in ATS_CASES:
+        got = _is_generic_ats_email(email)
+        ok = got == want
+        marker = "✅" if ok else "❌"
+        if not ok:
+            fails += 1
+        print(f"  {marker} {email:40s} got={got} want={want}")
+    return fails == 0
 
 
 if __name__ == "__main__":
