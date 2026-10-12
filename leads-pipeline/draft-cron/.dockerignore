@@ -37,6 +37,20 @@ tests/
 *.md
 docs/
 
+# Runtime artifacts — large, regenerable. Without this the image
+# balloons past 1.7 GB (this directory alone is ~776 MB on the
+# maintainer's machine, with 226 docx files).
+.tailored_resumes/
+auto_log.csv
+auto_loop/
+auto_log/
+*.docx             # only those we generate at runtime; source
+                   # resume lives in $RESUME_DIR at run time
+*.tmp
+*.bak
+*~
+.DS_Store
+
 .env
 .env.*
 !.env.example
@@ -58,8 +72,3 @@ env/
 Dockerfile
 .dockerignore
 docker-compose.yml
-
-*.tmp
-*.bak
-*~
-.DS_Store
