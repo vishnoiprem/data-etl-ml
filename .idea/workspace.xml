@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/How-I-Remember-Meta-DE-Stories.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/I'm-a-Senior-Data-Engineering-Leader-ACED-Pitch-to-Meta-L6.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/Retail-Price-Recommendation-Platform-Production-Architecture.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/Retail-Price-Recommendation-Platform-Production-Architecture.pptx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/Tell-Me-About-a-Time-You-Made-a-Mistake-Meta-L6-Deep-Dive.pptx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/Text-to-SQL-for-Retail-Governed-Analytics-Assistant.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/prachub/Text-to-SQL-for-Retail-Governed-Analytics-Assistant.pptx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
