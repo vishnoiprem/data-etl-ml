@@ -5,7 +5,7 @@ PIP    ?= $(PYTHON) -m pip
 
 .PHONY: help install demo stream-1 stream-2 stream-3 stream-4 \
         dashboard simulate-ramp simulate-30d launchkit launchkit-url \
-        launchkit-map-template launchkit-map test clean
+        launchkit-map-template launchkit-map publish-checklist test clean
 
 help:                       ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -49,6 +49,9 @@ launchkit-map-template:     ## write a starter url-map JSON to fill in after pub
 launchkit-map:              ## build kits using a per-product URL map (one URL per product)
 	@if [ -z "$(MAP)" ]; then echo "usage: make launchkit-map MAP=output/url-map.json"; exit 1; fi
 	$(PYTHON) -m src.launchkit --all --url-map "$(MAP)"
+
+publish-checklist:          ## print a copy-paste-ready table for uploading to Gumroad
+	$(PYTHON) scripts/publish_checklist.py
 
 dashboard:                  ## render dashboard from current ledger.db
 	$(PYTHON) -c "import sys; sys.path.insert(0,'src'); from dashboard import print_dashboard; print_dashboard()"

@@ -1,6 +1,6 @@
-# Soc2 For Solo Founders Notion Bundle
+# SOC2 For Solo Founders Notion Bundle
 
-> 10 plug-and-play soc2 for solo founders dashboards.
+> 10 plug-and-play SOC2 dashboards you can clone today.
 
 ## Includes
 - 1 master dashboard (Notion database)

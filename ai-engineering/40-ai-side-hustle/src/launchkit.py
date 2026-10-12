@@ -302,6 +302,21 @@ def build_sales_page(product_dir: Path, buy_url: str | None = None) -> Path:
 _ACRONYMS = {"soc2", "hipaa", "gdpr", "iso", "pci", "saas", "api", "ui", "ux", "ai", "ml"}
 
 
+def _display_title(product_dir: Path) -> str:
+    """Get the smart-titled product name for marketing assets.
+
+    Prefers the `# Title` heading from listing.md (the human-written
+    copy), falls back to a smart-titled version of the directory name.
+    The result has acronyms like SOC2/HIPAA in all caps.
+    """
+    listing = product_dir / "listing.md"
+    if listing.exists():
+        m = re.search(r"^# (.+)$", listing.read_text(), re.M)
+        if m:
+            return _format_title(m.group(1))
+    return _format_title(product_dir.name.replace("-", " "))
+
+
 def _format_title(raw: str) -> str:
     """Title-case a product name while preserving common acronyms.
 
@@ -345,7 +360,7 @@ def _derive_audience(body: str) -> str:
 # ---------------------------------------------------------------- Tweet thread
 
 def build_tweet_thread(product_dir: Path, buy_url: str | None = None) -> Path:
-    title = product_dir.name.replace("-", " ").title()
+    title = _display_title(product_dir)
     thread = f"""\
 1/ I wrote {title} for the people who keep saying "I'll get to it next month."
 
@@ -410,7 +425,7 @@ If it IS for you — what are you waiting for?
 # ---------------------------------------------------------------- Reddit post
 
 def build_reddit_post(product_dir: Path, buy_url: str | None = None) -> Path:
-    title = product_dir.name.replace("-", " ").title()
+    title = _display_title(product_dir)
     post = f"""\
 Title: I wrote a 20-page {title} for solo founders — free excerpt inside
 
@@ -463,7 +478,7 @@ Full version ($19, instant download, 30-day refund):
 # ---------------------------------------------------------------- Email outreach
 
 def build_email_outreach(product_dir: Path, buy_url: str | None = None) -> Path:
-    title = product_dir.name.replace("-", " ").title()
+    title = _display_title(product_dir)
     emails = f"""\
 SUBJECT: Quick guest post idea for {title} readers
 
@@ -555,13 +570,21 @@ LAUNCH_CHECKLIST = """# Launch Checklist for {title}
 
 
 def build_checklist(product_dir: Path) -> Path:
-    title = product_dir.name.replace("-", " ").title()
+    title = _display_title(product_dir)
     listing = product_dir / "listing.md"
     price_match = re.search(r"\*\*\$(\d+)\*\*", listing.read_text()) if listing.exists() else None
     price = price_match.group(1) if price_match else "19"
-    out = product_dir / "launch-checklist.md"
-    out.write_text(LAUNCH_CHECKLIST.format(title=title, price=price))
-    return out
+    checklist = product_dir / "launch-checklist.md"
+    checklist.write_text(LAUNCH_CHECKLIST.format(title=title, price=price))
+
+    # Also write a plain-text / markdown description for Gumroad's
+    # description field, which doesn't accept HTML. Most users prefer
+    # to paste this instead of converting the sales-page.html.
+    if listing.exists():
+        desc = product_dir / "gumroad-description.md"
+        desc.write_text(listing.read_text())
+
+    return checklist
 
 
 # ---------------------------------------------------------------- Entry point
@@ -580,6 +603,11 @@ def build_kit(product_dir: Path, buy_url: str | None = None) -> dict:
     outputs["reddit-post.txt"] = str(build_reddit_post(product_dir, buy_url=buy_url))
     outputs["email-outreach.txt"] = str(build_email_outreach(product_dir, buy_url=buy_url))
     outputs["launch-checklist.md"] = str(build_checklist(product_dir))
+    # gumroad-description.md is also written by build_checklist (if a
+    # listing.md exists). Surface it in the kit for the publish script.
+    desc = product_dir / "gumroad-description.md"
+    if desc.exists():
+        outputs["gumroad-description.md"] = str(desc)
     return outputs
 
 

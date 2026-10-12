@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from launchkit import (
+    _display_title,
     _format_title,
     build_all,
     build_checklist,
@@ -114,8 +115,28 @@ def test_build_kit_returns_all_files(product_dir: Path):
     assert "reddit-post.txt" in kit
     assert "email-outreach.txt" in kit
     assert "launch-checklist.md" in kit
+    assert "gumroad-description.md" in kit  # plain-text listing for Gumroad
     for path in kit.values():
         assert Path(path).exists()
+
+
+def test_build_kit_includes_gumroad_description(product_dir: Path):
+    """The kit should include a plain-text copy of listing.md for Gumroad's
+    description field (which doesn't accept HTML)."""
+    kit = build_kit(product_dir)
+    assert "gumroad-description.md" in kit
+    text = Path(kit["gumroad-description.md"]).read_text()
+    assert "Test Product" in text
+    assert "$19" in text
+
+
+def test_build_kit_omits_gumroad_description_when_no_listing(tmp_path: Path):
+    """If there's no listing.md, the description file should not be created."""
+    d = tmp_path / "products" / "no-listing"
+    d.mkdir(parents=True)
+    (d / "ebook.md").write_text("# No Listing\n\nbody\n")
+    kit = build_kit(d)
+    assert "gumroad-description.md" not in kit
 
 
 def test_build_all_processes_every_product(tmp_path: Path):
@@ -226,6 +247,34 @@ def test_sales_page_does_not_dump_raw_markdown_before_html(product_dir: Path):
     html_pos = text.find("<h2>Who this is for</h2>")
     assert raw_pos == -1, f"raw markdown '## Who this is for' found at {raw_pos} — should be stripped"
     assert html_pos > 0, "rendered <h2> not found in output"
+
+
+# --- _display_title (acronyms in marketing assets) -------------------
+
+def test_display_title_uses_listing_heading(tmp_path: Path):
+    """Marketing assets should use the listing's # heading, not the directory name."""
+    d = tmp_path / "some-bad-slug"
+    d.mkdir()
+    (d / "listing.md").write_text("# HIPAA Compliance for Indie Hackers\n\nbody\n")
+    assert _display_title(d) == "HIPAA Compliance For Indie Hackers"
+
+
+def test_display_title_falls_back_to_dirname(tmp_path: Path):
+    """No listing.md → use the directory name, smart-titled."""
+    d = tmp_path / "soc2-cheatsheet"
+    d.mkdir()
+    assert _display_title(d) == "SOC2 Cheatsheet"
+
+
+def test_tweet_thread_uses_smart_title(tmp_path: Path):
+    """The 'I wrote The Soc2' bug should not happen — it should be 'I wrote The SOC2'."""
+    d = tmp_path / "x"
+    d.mkdir()
+    (d / "listing.md").write_text("# The SOC2 Playbook\n")
+    out = build_tweet_thread(d)
+    text = out.read_text()
+    assert "I wrote The SOC2" in text
+    assert "Soc2" not in text
 
 
 # --- Bug fix: tweet 1 grammar -----------------------------------------

@@ -1,6 +1,6 @@
-# Soc2 For Solo Founders Cheat Sheet (Printable) (Printable)
+# SOC2 For Solo Founders Cheat Sheet (Printable) (Printable)
 
-> Pin it to your wall. Do the soc2 for solo founders thing.
+> Pin it to your wall. Do the SOC2 thing.
 
 ## Layout
 - 1 page, US Letter (8.5" x 11")
