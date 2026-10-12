@@ -1188,6 +1188,16 @@ def insert_leads(leads, dry=False):
         if not co or not em or JUNK_EMAIL_RE.search(em) or JUNK_COMPANY_RE.match(co):
             skipped += 1
             continue
+        # Generic-ATS catch-all addresses (`jobs@workable.com`,
+        # `recruiter@ashbyhq.com`, …) route to the platform's
+        # support team, not a real human. Sending cold email
+        # to one of these is wasted send budget. We already
+        # filter this in scrape_hnhiring_remote, but check
+        # again at insert time so a future scraper that
+        # forgets the filter doesn't pollute the DB.
+        if _is_generic_ats_email(em):
+            skipped += 1
+            continue
         # Per-domain bounce deny
         try:
             dom = em.split("@", 1)[1].lower()
