@@ -692,30 +692,51 @@ def scrape_hnhiring_remote():
         if m:
             co = m.group(1).strip()
             role = m.group(2).strip().rstrip(".") or "Engineer"
-        else:
+        elif " | " in head:
             # First-line "Company (domain) | Role | FT | Remote | $..."
-            first_line = head.split(" | ")[0]
-            # Strip trailing "(domain.com)" hint
-            co_hint = re.sub(r"\s*\([^)]+\)\s*$", "", first_line).strip()
-            # And drop a leading "Location:" or "Technologies:" if present
-            co_hint = re.sub(
-                r"^(?:Location|Technologies|Remote|Stack|Salary|Apply):\s*",
-                "", co_hint, flags=re.I,
-            )
-            if co_hint and len(co_hint) <= 60:
-                co, role = split_company_role(head)
-                if not co or co.lower() in ("unknown", "n/a", ""):
-                    co = co_hint
+            # Pattern: take segment 0 as company, segment 1 as role
+            # (skipping leading noise like "Location:" / "Technologies:")
+            segments = [s.strip() for s in head.split(" | ") if s.strip()]
+            co_hint = ""
+            role_hint = ""
+            for seg in segments[:3]:
+                if re.match(
+                    r"^(?:Location|Technologies|Remote|Stack|Salary|Apply|"
+                    r"Full[-\s]?Time|FT|PT|HYBRID|REMOTE):\s*",
+                    seg, re.I,
+                ):
+                    continue
+                co_hint = re.sub(r"\s*\([^)]+\)\s*$", "", seg).strip()
+                if co_hint and len(co_hint) <= 60:
+                    # Try to take the next non-noise segment as role
+                    idx = segments.index(seg)
+                    if idx + 1 < len(segments):
+                        nxt = segments[idx + 1]
+                        if not re.match(
+                            r"^(?:Location|Remote|FT|PT|Full[-\s]?Time|"
+                            r"\$\d|HYBRID|REMOTE|Apply|Technologies):\s*",
+                            nxt, re.I,
+                        ):
+                            role_hint = nxt
+                    break
+            if co_hint:
+                co, role = co_hint, role_hint or "Engineer"
             else:
                 co, role = split_company_role(head)
+        else:
+            co, role = split_company_role(head)
         if not co or co.lower() in ("unknown", "n/a", ""):
             # Fall back to HN handle as a weak signal
             if user:
                 co = user.title()
+        # Strip trailing punctuation / pipes from sloppy segment splits
+        co = co.rstrip(" |:;,.")
         co_l = co.lower().strip()
         if any(bad in co_l for bad in (
             "ask hn", "show hn", "tell hn", "launch hn",
             "ycombinator", "news.ycombinator", "hn hiring",
+            "location", "technologies", "remote", "full-time", "full time",
+            "senior", "staff", "principal", "lead ",
         )):
             continue
         # Pull first apply link
