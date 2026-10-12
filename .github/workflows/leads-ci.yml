@@ -107,20 +107,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Note: we deliberately do NOT call
-      # `docker/setup-buildx-action@v4` here. The default buildx
-      # driver on GHA runners is `docker-container`, which builds
-      # inside a sidecar container — the resulting image lives
-      # only in the buildx cache and `load: true` /
-      # `outputs: type=docker` is fragile on hosted runners
-      # (we observed the smoke test fail with "image not in
-      # local daemon" on the most recent three runs). Instead we
-      # use buildx's `build` command directly with
-      # `--driver docker` and `--load` — this runs the build on
-      # the host docker daemon, so the image is visible to
-      # `docker images` / `docker run` the moment the step
-      # finishes. Same GHA cache, same build time, no fragile
-      # sidecar round-trip.
       - name: Read version
         id: version
         run: |
@@ -132,16 +118,42 @@ jobs:
           echo "version=${V}" >> "$GITHUB_OUTPUT"
           echo "Using version: ${V}"
 
+      # Build the image with plain `docker build` (no buildx).
+      # This is the most reliable way to put the image into
+      # the host docker daemon on a hosted runner. We tried
+      # four buildx-based patterns before landing here and
+      # each had a different GHA-specific failure mode:
+      #
+      #   1. `docker/build-push-action@v7` with no `load: true`
+      #      → image stuck in buildx cache, `docker run` exited
+      #        125 (no such image in the host daemon).
+      #   2. `docker/build-push-action@v7` with `load: true` →
+      #        same: image not in host daemon after the step.
+      #   3. `setup-buildx-action` with `driver: docker` + cache
+      #        → BuildKit rejected cache-to with "Cache export
+      #        is not supported for the docker driver" (only
+      #        `docker-container` driver supports cache exports).
+      #   4. `docker buildx build --driver docker --load`
+      #        directly → exit 125 from buildx on the GHA
+      #        runner (the version of buildx on the runner
+      #        doesn't accept the `docker` driver name).
+      #
+      # Plain `docker build` bypasses all of that: it runs
+      # BuildKit directly on the host daemon, the resulting
+      # image is visible to `docker images` / `docker run` the
+      # moment the command returns, and it works on every
+      # GHA runner image without driver juggling.
+      #
+      # Trade-off: no `cache-from: type=gha` (only buildx
+      # supports GHA cache as a backend), so every build is
+      # cold — ~30s. The leads-cd workflow is unaffected
+      # (it still uses buildx + cache-to gha).
       - name: Build (no push)
         run: |
           set -euo pipefail
-          docker buildx build \
-            --driver docker \
-            --load \
+          docker build \
             --tag "leads-pipeline:ci-${GITHUB_SHA}" \
             --build-arg "VERSION=${VERSION}" \
-            --cache-from "type=gha" \
-            --cache-to "type=inline" \
             --file leads-pipeline/draft-cron/Dockerfile \
             leads-pipeline/draft-cron
         env:
@@ -155,11 +167,11 @@ jobs:
           # same import path that production healthchecks will use.
           set -e
           echo "Image to test: $IMAGE_TAG"
-          # `docker images` would show an empty result without
-          # `load: true` on the build step (the image lives only
-          # inside the buildx cache). This is a fast sanity
-          # check — if the tag isn't listed here, the next
-          # `docker run` will fail with exit 125.
+          # Sanity check: the previous build step used plain
+          # `docker build` (no buildx), so the image must be in
+          # `docker images` already. If it isn't, something has
+          # gone wrong and the subsequent `docker run` will
+          # fail with exit 125.
           docker images | grep -F "$IMAGE_TAG" || {
             echo "::error::image $IMAGE_TAG not in local daemon"
             docker images
@@ -215,9 +227,11 @@ jobs:
 
       # Re-build locally so this job doesn't need to share the
       # docker daemon with dockerfile-build. ~5s with GHA cache.
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
+      # Uses plain `docker build` for the same reason as the
+      # CD-guard job: buildx is fragile on hosted runners,
+      # plain `docker build` puts the image directly into the
+      # host daemon, and grype (which inspects images from the
+      # daemon) gets the right view.
       - name: Read version
         id: version
         run: |
@@ -229,18 +243,15 @@ jobs:
           echo "version=${V}" >> "$GITHUB_OUTPUT"
 
       - name: Build (no push) for vuln scan
-        uses: docker/build-push-action@v7
-        with:
-          context: leads-pipeline/draft-cron
-          file: leads-pipeline/draft-cron/Dockerfile
-          push: false
-          tags: leads-pipeline:scan-${{ github.sha }}
-          build-args: VERSION=${{ steps.version.outputs.version }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          # Same reason as the CD-guard build: grype scans the
-          # local docker daemon, so the image must be loaded.
-          load: true
+        run: |
+          set -euo pipefail
+          docker build \
+            --tag "leads-pipeline:scan-${GITHUB_SHA}" \
+            --build-arg "VERSION=${VERSION}" \
+            --file leads-pipeline/draft-cron/Dockerfile \
+            leads-pipeline/draft-cron
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Run grype
         uses: anchore/scan-action@v6
