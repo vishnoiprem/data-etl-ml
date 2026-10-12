@@ -32,6 +32,11 @@ Thumbs.db
 *.xlsx
 data/
 
+# Whitelist known JSON config paths that the catch-all *.json would
+# otherwise hide
+!.devcontainer/
+!.vscode/
+
 # Large ML files (kept in LFS for some specific paths; ignored for the rest)
 *.bin
 *.h5
