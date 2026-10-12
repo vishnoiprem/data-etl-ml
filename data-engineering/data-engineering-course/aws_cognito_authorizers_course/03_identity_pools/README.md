@@ -29,3 +29,7 @@ app, an IoT device, or a server-side microservice.
 
 `diagrams/identity_pool_federation.mmd` — flowchart: User → User Pool
 (token) → Identity Pool (assume role) → AWS Service.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -160,3 +160,7 @@ fields @timestamp, @message
 
 Or, more simply, `filter event = "monitor.grew"` to see only the
 successful grows.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

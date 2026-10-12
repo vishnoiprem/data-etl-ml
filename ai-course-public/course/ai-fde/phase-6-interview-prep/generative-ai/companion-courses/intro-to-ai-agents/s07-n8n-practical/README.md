@@ -84,4 +84,13 @@ The pattern that wins interviews is the "n8n implements the same 7 + 5 pattern" 
 ---
 
 **Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -61,3 +61,7 @@ A single run, all metrics, one row. Every run gets a unique id; a run is reprodu
 pip install -r requirements.txt
 make smoke
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

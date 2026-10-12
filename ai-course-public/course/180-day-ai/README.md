@@ -335,4 +335,13 @@ A: Different course, different format. AI Engineer Mastery is a structured 35-ho
 ---
 
 **Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.  

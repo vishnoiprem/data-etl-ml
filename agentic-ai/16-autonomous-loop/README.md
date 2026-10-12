@@ -77,3 +77,7 @@ The first version didn't have a per-tool rate limit. The agent decided it needed
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

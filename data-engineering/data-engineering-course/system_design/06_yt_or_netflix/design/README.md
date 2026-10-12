@@ -348,3 +348,7 @@ warm users, always with a content-based fallback for new uploads.
 - Sample data lives at `system_design/sample_data/videos.jsonl` —
   not loaded automatically; you can use it to seed the service in
   `loadtest.py` (left as an exercise).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

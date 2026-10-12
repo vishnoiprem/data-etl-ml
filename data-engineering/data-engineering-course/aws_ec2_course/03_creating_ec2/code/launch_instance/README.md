@@ -171,3 +171,7 @@ The boto3 default is `MinCount=1, MaxCount=1`, but we set them
 explicitly to make the **single instance** intent obvious. Spot
 fleets and multi-instance launches deliberately use higher values;
 for this script we want exactly one.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

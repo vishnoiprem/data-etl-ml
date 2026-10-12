@@ -66,3 +66,7 @@ python lambda_function/bedrock_lambda.py
 ## Quiz
 
 [`../../quizzes/section_10.md`](../../quizzes/section_10.md) — 10 questions.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -394,3 +394,7 @@ If the prompt produces acceptable output on 4/5 of these, it's ready for real co
 
 **Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own business, courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

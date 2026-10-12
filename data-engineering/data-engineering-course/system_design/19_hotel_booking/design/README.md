@@ -183,3 +183,7 @@ Write — cancel
 | `code/app.py` | Flask HTTP layer with date parsing and metrics |
 | `tests/test_service.py` | Service tests including concurrent-overlap race |
 | `tests/test_app.py` | HTTP tests |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

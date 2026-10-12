@@ -67,3 +67,7 @@ LANGCHAIN_TRACING_V2=true                   # optional — enables LangSmith
 #   --image <your-acr>.azurecr.io/makro-llm-gateway:v1 \
 #   --target-port 8000 \
 #   --ingress external
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

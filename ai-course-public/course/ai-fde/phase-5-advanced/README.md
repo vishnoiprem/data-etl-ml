@@ -124,3 +124,12 @@ A principal FDE's job is to make themselves unnecessary. Phase 5 tests that the 
 
 **Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

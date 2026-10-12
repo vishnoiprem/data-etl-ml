@@ -33,3 +33,7 @@ Time Travel story. Two lectures:
 
 Section 16 is **Types of tables** — permanent, transient, and
 temporary — and the cost / recovery trade-offs of each.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

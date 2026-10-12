@@ -118,3 +118,7 @@ credentials. Total runtime is ~2-3 seconds.
   VPC.
 - The "smart" of the GWLB is not the load balancer itself — it's
   the third-party **appliance** that runs in the target group.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

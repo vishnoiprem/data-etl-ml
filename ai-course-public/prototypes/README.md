@@ -209,4 +209,13 @@ Built for the AIForBiz course business · Tested and working as of [Date]
 ---
 
 **Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.  

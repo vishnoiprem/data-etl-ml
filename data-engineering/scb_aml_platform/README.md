@@ -530,3 +530,7 @@ Dummy Data → Sqoop Ingest → HDFS Raw Zone
 *All data used in this implementation is synthetic.*
 *No real customer, transaction, or personally identifiable information is included.*
 *Built as a portfolio demonstration of the SCB AML platform architecture.*
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

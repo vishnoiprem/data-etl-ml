@@ -76,3 +76,7 @@ cd extension
 ## See also
 
 - [`06-regulated-industry/`](../06-regulated-industry/) — the same shape for server-side, with audit log.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

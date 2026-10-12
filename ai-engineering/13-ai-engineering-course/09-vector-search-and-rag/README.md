@@ -35,3 +35,7 @@ From vector database internals (ANN, HNSW, IVF, PQ) to hybrid search, rerankers,
 ## The Lead Lesson
 
 > **Lesson 1 — [How Does a Vector Database Work?](./01-how-does-a-vector-database-work.md)** — the foundation. Worked example: build a tiny vector DB from scratch in NumPy (brute force → IVF → HNSW) over 100K random vectors, measure latency/recall at each step, and produce the operating-point chart that drives every production decision.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

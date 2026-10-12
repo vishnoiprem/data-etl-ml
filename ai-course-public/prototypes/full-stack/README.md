@@ -55,4 +55,13 @@ You can deploy this in an afternoon. Then replace each piece with real tools (Co
 ---
 
 **Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.  

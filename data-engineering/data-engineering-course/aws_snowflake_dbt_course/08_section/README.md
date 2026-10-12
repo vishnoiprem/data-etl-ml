@@ -28,3 +28,7 @@ the end of this section you'll be comfortable with: sources + dbt packages.
 Section 09 is **Git basics, branching, protected branches, merge conflicts, and PRs — the day-to-day workflow.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -176,3 +176,7 @@ state — L62–L67 are teaching artifacts.
 
 Code MIT. Templates are CC-BY-4.0 for re-use in your own
 projects.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

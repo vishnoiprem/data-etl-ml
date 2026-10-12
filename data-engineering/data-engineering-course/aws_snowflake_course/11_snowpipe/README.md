@@ -58,3 +58,7 @@ text-and-media AI surface in Snowflake. We start with Snowpipe error
 handling, then jump into Cortex AI SQL functions, Cortex Search,
 Cortex Analyst, and a hands-on AI scenario that ties most of it
 together.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

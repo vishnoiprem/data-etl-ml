@@ -35,3 +35,7 @@ OPENAI API KEY =your_api_key_here
    git clone https://github.com/vishnoiprem/data-etl-ml.git
    cd multi-agent
 >>>>>>> 0c080ce127ecfd82cf7910bd8779aa8d00db6d94
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

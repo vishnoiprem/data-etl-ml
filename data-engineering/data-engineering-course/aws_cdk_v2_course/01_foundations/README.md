@@ -24,3 +24,7 @@ skim L01–L02 and focus on L03–L04 for the CDK-specific architecture.
 - Describe the 3 layers of `aws-cdk-lib` and what `constructs` is for
 - Run `cdk --version`, `cdk doctor`, and `cdk bootstrap` against your
   AWS account
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

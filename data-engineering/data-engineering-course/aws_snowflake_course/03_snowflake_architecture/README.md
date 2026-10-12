@@ -51,3 +51,7 @@ Snowflake** (RBAC), the loading methods (`COPY INTO`,
 Snowpipe), **stages**, **file formats**, and the
 **transformations** you can apply during load. By L32 you'll
 have loaded CSV and JSON files end-to-end.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -38,3 +38,7 @@ The query plan *cannot* skip the tenant filter; the database enforces it. A bug 
 # Requires Postgres 14+; see examples/setup.sql
 psql -f examples/setup.sql
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

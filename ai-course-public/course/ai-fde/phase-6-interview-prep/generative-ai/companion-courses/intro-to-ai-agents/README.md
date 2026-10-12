@@ -101,4 +101,13 @@ Total: ~205K words across 65 files. Each lecture is 3-4K words, structured as: F
 ---
 
 **Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.  

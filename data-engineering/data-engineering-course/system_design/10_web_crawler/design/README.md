@@ -127,3 +127,7 @@ In memory:
 - `code/app.py`      – Flask HTTP layer.
 - `tests/test_service.py` – 6+ unit tests.
 - `tests/test_app.py`     – 5+ HTTP tests.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

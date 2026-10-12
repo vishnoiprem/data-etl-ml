@@ -39,3 +39,7 @@ the end of this section you'll be comfortable with: welcome, setup, dbt init.
 Section 02 is **Transactions — we go deeper into the Ethereum dataset, categorize transaction types, and build our first mart.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

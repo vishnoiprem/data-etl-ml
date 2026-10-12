@@ -12,3 +12,7 @@
 > with the Udemy platform) live alongside these Markdown sources. Students
 > who bought the Udemy course can download the PDFs from the course's
 > "Resources" tab.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -100,3 +100,12 @@ A 1.5B-parameter Qwen2.5 base model is **fast** (200-500ms per inference on CPU,
 
 **Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

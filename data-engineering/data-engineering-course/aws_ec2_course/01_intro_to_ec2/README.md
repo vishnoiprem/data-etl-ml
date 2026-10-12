@@ -43,3 +43,7 @@ is **not** designed for.
    proportion.
 5. Then move to section 2 — **EC2 Fundamentals** (L04–L08) — which
    starts the hands-on material.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

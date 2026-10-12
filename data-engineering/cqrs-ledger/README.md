@@ -80,3 +80,7 @@ The 0.00% is the number. The invariant makes drift impossible, not just unlikely
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

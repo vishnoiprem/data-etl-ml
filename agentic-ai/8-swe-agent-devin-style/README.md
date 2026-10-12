@@ -48,3 +48,7 @@ pip install -r requirements.txt
 export GITHUB_TOKEN=...
 python examples/fix_issue.py --repo myorg/myrepo --issue 42
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

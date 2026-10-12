@@ -13,3 +13,7 @@
 
 **Working demo:** `code/create_log_group.py` (idempotent, `--dry-run`)
 + `code/test_create_log_group.py` (5 moto tests).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

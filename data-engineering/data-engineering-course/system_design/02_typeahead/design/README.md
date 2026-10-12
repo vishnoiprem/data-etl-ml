@@ -149,3 +149,7 @@ In production:
 | `tests/test_trie.py` | Trie unit tests. |
 | `tests/test_service.py` | Service-level tests. |
 | `tests/test_app.py` | HTTP-level tests. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

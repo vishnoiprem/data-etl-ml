@@ -143,3 +143,7 @@ play the customer. Repeat.** That's the entire workflow.
 - For the EM-flavored behavioral questions (if you're targeting an
   SA-with-direct-reports role): see `data-engineering-course/em_introduction/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

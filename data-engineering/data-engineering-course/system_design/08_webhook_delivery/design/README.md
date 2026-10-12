@@ -370,3 +370,7 @@ We pick exponential with jitter.
   `start()` and `stop()` methods for clean shutdown (tests don't
   start the loop — they call `dispatch_pending_now()` to drive
   delivery deterministically).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

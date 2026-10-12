@@ -72,3 +72,7 @@ The first version didn't have the consent gate. The agent refunded $40 to a cust
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

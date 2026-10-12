@@ -51,3 +51,7 @@ INVOKE="https://abc123.execute-api.us-east-1.amazonaws.com/prod"
 curl "$INVOKE/test-object"
 curl "$INVOKE/search?key=test-object"
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

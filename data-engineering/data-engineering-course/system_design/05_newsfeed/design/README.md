@@ -201,3 +201,7 @@ and a "trust" signal, not a primary ranker.
 | `tests/test_service.py` | ≥6 unit tests on the service.                              |
 | `tests/test_app.py`   | ≥4 HTTP tests.                                                |
 | `design/README.md`    | This document.                                                |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

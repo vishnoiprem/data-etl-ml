@@ -29,3 +29,7 @@ the end of this section you'll be comfortable with: dbt_project.yml configs.
 Section 08 is **Sources + dbt packages — codegen, dbt_utils, dispatch, audit_helper, and Git-installed packages.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

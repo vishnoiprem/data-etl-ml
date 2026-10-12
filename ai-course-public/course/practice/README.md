@@ -201,3 +201,12 @@ The Markdown and code are the same for all 4 levels. The **architect notes** are
 
 **Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

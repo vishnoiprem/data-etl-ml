@@ -63,3 +63,7 @@ feels obvious instead of magical.
 - `../../README.md` — repo layout and "What you'll build" table.
 - AWS docs: [What is EC2?](https://docs.aws.amazon.com/ec2/) and
   [AWS Nitro System](https://aws.amazon.com/ec2/nitro/).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

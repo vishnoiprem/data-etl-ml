@@ -53,3 +53,7 @@ aws s3 ls
 
 You should see the bucket from the `__main__` block in the S3
 console / `aws s3 ls` output.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

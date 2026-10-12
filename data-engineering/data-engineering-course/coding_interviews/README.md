@@ -91,3 +91,7 @@ python3 -m unittest discover -s coding_interviews/04_arrays/tests -v
 | 14 Dynamic Programming | 10 | 0 | 10 |
 | 15 Mock Interviews | 6 | 0 | 6 |
 | **Totals** | **103** | **15** | **118** |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

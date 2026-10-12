@@ -70,3 +70,7 @@ python3 scripts/run_all_tests.py -v         # verbose
 The script discovers every `<track>/tests/test_*.py` file, runs it
 with `unittest.TextTestRunner`, and prints a per-track summary.
 Exit code is `0` only if every track passes.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

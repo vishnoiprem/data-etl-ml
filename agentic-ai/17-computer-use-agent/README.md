@@ -70,3 +70,7 @@ The 30% failure rate is the deal. For a non-API legacy tool, 70% automation at 4
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

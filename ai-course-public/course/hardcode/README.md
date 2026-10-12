@@ -147,3 +147,12 @@ If you finish a `practice/` lab and want to see "how do I actually ship this?", 
 
 **Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

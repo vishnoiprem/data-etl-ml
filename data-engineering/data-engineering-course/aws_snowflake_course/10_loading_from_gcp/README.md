@@ -45,3 +45,7 @@ downstream `COPY INTO` SQL against any of them.
 Section 11 is **Snowpipe** — the auto-ingest service
 that turns "new file in S3" into "new rows in
 Snowflake" without a manual `COPY INTO` call.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

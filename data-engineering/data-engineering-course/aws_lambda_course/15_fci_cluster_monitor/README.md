@@ -122,3 +122,7 @@ alarms, and idempotent grow logic.
 `assignments/assignment_7_fci_monitor.md` — 8 h graded task: deploy the
 full FCI Cluster Monitor stack, write a CloudFormation template for it,
 and add a Slack notification in addition to SNS.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

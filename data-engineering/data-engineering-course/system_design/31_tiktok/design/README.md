@@ -373,3 +373,7 @@ Persist.
 - The For You cache is a *separate* TTLCache from the metadata
   cache, so we can monitor `foryou_cache_hits` independently and
   tune TTLs separately.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

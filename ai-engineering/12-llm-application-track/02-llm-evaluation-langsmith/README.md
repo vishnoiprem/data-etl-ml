@@ -41,3 +41,7 @@ This is the course most teams skip, then regret. Evaluation is not "vibes and a 
 ## The Lead Lesson
 
 > **Lesson 1 — [Why eval is the moat](./01-why-eval-is-the-moat.md)** — the framing, the failure modes, and a complete CI-gated eval pipeline against a real LangSmith dataset. Includes a worked example that gates a model swap from Haiku → Sonnet behind a 92% exact-match threshold.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

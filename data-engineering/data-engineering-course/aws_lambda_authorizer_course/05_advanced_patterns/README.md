@@ -33,3 +33,7 @@ Authorizer — because not every API needs one.
 - Every lecture follows **Prereqs → Key terms → Lecture → Hands-on →
   Quiz prep → Further reading**.
 - The quiz for this section is in `../quizzes/section_5.md`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

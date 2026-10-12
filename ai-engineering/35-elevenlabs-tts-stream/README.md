@@ -64,3 +64,7 @@ Sub-200ms TTFB streaming TTS. The latency budget is dominated by the first-frame
 pip install -r requirements.txt
 make smoke
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

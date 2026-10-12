@@ -130,3 +130,7 @@ EventBridge, AWS Bedrock (Cohere foundational model), AWS CloudFormation.
 Course material authored by **Prem Vishnoi &lt;pvishnoi@avilx.com&gt;**
 based on the published Udemy curriculum. Code samples are MIT-licensed.
 See `../../LICENSE` for the full text.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

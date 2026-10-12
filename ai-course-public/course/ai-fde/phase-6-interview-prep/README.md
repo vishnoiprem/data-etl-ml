@@ -193,3 +193,12 @@ Phase 1-5 made you a builder. Phase 6 makes you a candidate. The 4-step framewor
 
 **Last updated:** 2026-10-12  
 **License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

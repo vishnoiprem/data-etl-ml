@@ -406,3 +406,7 @@ We pick single.
   does the real work.
 - The `OrderStatus` enum and `ALLOWED_TRANSITIONS` map are the
   state-machine source of truth.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

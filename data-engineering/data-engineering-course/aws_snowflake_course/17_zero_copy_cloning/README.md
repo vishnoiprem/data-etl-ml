@@ -54,3 +54,7 @@ Section 18 is **Data Sharing** — the third Snowflake superpower after
 separation of storage/compute and zero-copy cloning. You'll learn how
 to give another Snowflake account (or a non-Snowflake consumer)
 *read-only* access to your data without copying a single byte.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

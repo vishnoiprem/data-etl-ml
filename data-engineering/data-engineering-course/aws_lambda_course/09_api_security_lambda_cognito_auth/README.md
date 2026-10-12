@@ -106,3 +106,7 @@ the Lambda-based S3 CRUD we built in section 8.
 - AWS Docs — [Control access with Cognito User Pool authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-integrate-with-cognito.html)
 - RFC 7519 — JSON Web Token
 - PyJWT docs — <https://pyjwt.readthedocs.io/>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

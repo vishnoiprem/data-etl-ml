@@ -67,3 +67,7 @@ a Streamlit app.
 Section 13 is **Snowpipe for Azure** — the same pipe story we just
 finished on GCS, but on Azure Blob with an Event Grid notification
 integration.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -22,3 +22,7 @@ security engineer must internalize before they ever call `boto3`:
 By the end of section 1 you should be able to read any "Sign in with
 X" prompt on a third-party app and trace, in your head, exactly which
 protocol is being used and which party holds which token.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

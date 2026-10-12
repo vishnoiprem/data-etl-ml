@@ -67,3 +67,7 @@ A registry with versioning, an eval table per version, download stats, and a lic
 pip install -r requirements.txt
 make smoke
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

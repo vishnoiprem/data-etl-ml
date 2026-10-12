@@ -52,3 +52,7 @@ recovery needs against storage cost.
 Section 15 is **Fail Safe** — the 7-day, non-configurable
 "after Time Travel ends" safety net for permanent tables. We
 also cover the cost trade-off of `DATA_RETENTION_TIME_IN_DAYS`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

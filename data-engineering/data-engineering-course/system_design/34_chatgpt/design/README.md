@@ -201,3 +201,7 @@ Kafka-style log and project to a read store.
 | `code/app.py` | Flask HTTP service; SSE streaming for `/api/conversations/<id>/stream`. |
 | `tests/test_service.py` | Service-level tests (tokenization, validation, completion, streaming). |
 | `tests/test_app.py` | HTTP-level tests using Flask's test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -28,3 +28,7 @@ the end of this section you'll be comfortable with: state: manifest, run results
 Section 18 is **CI pipelines — first pipeline, defer, dbt clone, Slim CI, continuous deployment, and cleanup workflows.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

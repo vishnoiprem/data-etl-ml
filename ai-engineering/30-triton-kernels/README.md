@@ -55,3 +55,7 @@ When PyTorch is too slow and CUDA is too verbose, Triton hits the middle. This i
 pip install -r requirements.txt
 make smoke    # NumPy correctness check
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

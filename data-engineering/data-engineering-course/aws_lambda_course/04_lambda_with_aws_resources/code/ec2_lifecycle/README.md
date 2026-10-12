@@ -58,3 +58,7 @@ pytest test_script.py -v
 The `create` branch will spin up a `t2.micro` in your default VPC.
 Be sure to clean up afterwards (call the `stop` branch then
 terminate the instance manually).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

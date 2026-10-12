@@ -58,3 +58,7 @@ python examples/serve_demo.py
 - Contiguous: 8 concurrent requests on a 24GB GPU, 47% utilization.
 - Paged: 18 concurrent requests on the same 24GB GPU, 81% utilization.
 - Tail latency at p99: 18% lower under paged (less OOM preemption).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

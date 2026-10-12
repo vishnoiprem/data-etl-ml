@@ -55,3 +55,7 @@ Expected: **6 passed**.
 - Every lecture follows **Prereqs → Key terms → Lecture → Hands-on →
   Quiz prep → Further reading**.
 - The quiz for this section is in `../quizzes/section_3.md`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

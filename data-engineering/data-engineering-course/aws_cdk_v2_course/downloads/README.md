@@ -19,3 +19,7 @@ distribution the binary artifacts are added at release time.
 > `03_building_with_cdk/code/`, and
 > `04_appsync_stepfunctions/code/`. Build it with `git archive` from
 > the repo root.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

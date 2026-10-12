@@ -41,3 +41,7 @@ export AWS_REGION=us-east-1
 python create_table_put_items.py
 aws dynamodb list-tables
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

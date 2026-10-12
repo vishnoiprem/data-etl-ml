@@ -180,3 +180,7 @@ Cost per upload = O(followers). Mitigations:
 | `code/app.py` | Flask HTTP service. |
 | `tests/test_service.py` | Service unit tests. |
 | `tests/test_app.py` | HTTP tests. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -54,3 +54,7 @@ pytest -q test_invoke_demo.py
 ```
 
 The tests stub the boto3 Lambda client so no AWS account is needed.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

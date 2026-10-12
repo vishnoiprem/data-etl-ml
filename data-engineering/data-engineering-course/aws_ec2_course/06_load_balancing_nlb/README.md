@@ -77,3 +77,7 @@ python -m pytest test_nlb_create.py -v   # 4 tests, all pass
 You will reuse the same `target group → listener → load balancer`
 trinity for all three. Learning it well in Section 6 means the
 remaining load-balancing sections are 90% review.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

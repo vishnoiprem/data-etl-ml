@@ -153,3 +153,7 @@ testing without a real bucket.
 | `code/app.py` | Flask HTTP API, metrics, health. |
 | `tests/test_service.py` | Group lifecycle, fan-out, media, key rotation. |
 | `tests/test_app.py` | HTTP smoke for full group conversation. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  
