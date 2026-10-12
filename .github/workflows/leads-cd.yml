@@ -118,10 +118,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Read the in-tree VERSION file. If release-please hasn't
-          # created one yet, fall back to the short SHA.
+          # Read the in-tree VERSION file. The `Read version` step
+          # above already falls back to `0.0.0+<sha>` when no
+          # VERSION file exists, so no further fallback is needed
+          # here. (An earlier draft of this line referenced
+          # `steps.version.outputs.value`, which is empty — the step
+          # writes `outputs.version`, not `outputs.value`. The
+          # build would have silently received an empty VERSION
+          # build-arg.)
           build-args: |
-            VERSION=${{ steps.version.outputs.value || format('0.0.0+{0}', github.sha) }}
+            VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false        # SLSA provenance; off to keep build time low
