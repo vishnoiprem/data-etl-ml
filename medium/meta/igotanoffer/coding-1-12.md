@@ -419,12 +419,14 @@ def fmt(s):
     return ''.join(f'{c}{n}' for c, n in zip(dict.fromkeys(srt), groups))
 ```
 
-### Approach 9 — reduce
+### Approach 9 — reduce (track counts explicitly)
 ```python
 from functools import reduce
 def fmt(s):
-    return reduce(lambda acc, c: acc + (f'{c}1' if c not in acc else ''), s, '')
-# (Naive — duplicates handled via replacement; not pure.)
+    def step(acc, c):
+        acc[c] = acc.get(c, 0) + 1
+        return acc
+    return ''.join(f'{c}{n}' for c, n in reduce(step, s, {}).items())
 ```
 
 ### Approach 10 — regex matchall
@@ -615,12 +617,13 @@ def monotonic(a):
 ### Approach 9 — recursive
 ```python
 def monotonic(a):
-    if len(a) <= 1: return True
-    if len(a) == 2: return True
-    inc = a[0] <= a[1] and (monotonic_inc(a) if False else True)
-    # recursive variant: simpler check
-    return (all(a[i] <= a[i+1] for i in range(len(a)-1))) or \
-           (all(a[i] >= a[i+1] for i in range(len(a)-1)))
+    if len(a) <= 2: return True
+    diff = a[1] - a[0]
+    if diff == 0:
+        return monotonic(a[1:])
+    if diff > 0:
+        return all(a[i] <= a[i+1] for i in range(len(a)-1))
+    return all(a[i] >= a[i+1] for i in range(len(a)-1))
 ```
 
 ### Approach 10 — set of directions
@@ -716,7 +719,12 @@ def sym_diff(s1, s2):
 
 ---
 
-## Problem 9 — Count neighbors per node in graph (2D list)
+## Problem 9 — Count pair-membership per person (from 2D list of pairs)
+
+**Input:** `[[2,3],[3,4],[5]]` (each sublist = one group; count how many groups each person appears in).
+**Output:** `{2: 1, 3: 2, 4: 1, 5: 1}`
+
+Note: differs from Problem 1, which counts unique partners. Here we count group membership.
 
 ### Approach 1 — Counter on flattened
 ```python
@@ -1026,106 +1034,130 @@ def _iter_paths(d, prefix=()):
             yield key, v
 ```
 
-### Approach 10 — regex-based path (not pure but creative)
+### Approach 10 — class-based with __missing__
 ```python
-import re
+class FlatDict(dict):
+    def __missing__(self, key):
+        return {}
 def flatten(d, sep='.'):
-    s = str(d)
-    # Not a real solution; flag: do not use this.
-    raise NotImplementedError
+    out = {}
+    def helper(prefix, obj):
+        for k, v in obj.items():
+            new_key = f'{prefix}{sep}{k}' if prefix else k
+            if isinstance(v, dict): helper(new_key, v)
+            else: out[new_key] = v
+    helper('', d)
+    return out
 ```
 
 **Best:** recursive generator — handles arbitrary depth cleanly.
 
 ---
 
-## Problem 12 — Count friends per person from `[[A,B],[A,C],...]`
+## Problem 12 — Directed graph: in-degree and out-degree per node
 
-(Note: undirected, no repeat pairs, ≤2 people per relationship.)
+**Input:** `[[2,3],[3,4],[5,3]]` (each pair = directed edge from A to B).
+**Output:** `{'in': {3: 2, 4: 1}, 'out': {2: 1, 3: 1, 5: 1}}`
 
-### Approach 1 — Counter on flattened
+Differentiates from Problem 1 by being **directed** and returning two separate counts.
+
+### Approach 1 — two Counters
 ```python
 from collections import Counter
-from itertools import chain
-def friend_counts(pairs):
-    return dict(Counter(chain.from_iterable(pairs)))
+def degrees(pairs):
+    out_d = Counter(a for a, _ in pairs)
+    in_d = Counter(b for _, b in pairs)
+    return {'in': dict(in_d), 'out': dict(out_d)}
 ```
 
 ### Approach 2 — defaultdict
 ```python
 from collections import defaultdict
-def friend_counts(pairs):
-    d = defaultdict(int)
+def degrees(pairs):
+    in_d, out_d = defaultdict(int), defaultdict(int)
     for a, b in pairs:
-        d[a] += 1; d[b] += 1
-    return dict(d)
+        out_d[a] += 1
+        in_d[b] += 1
+    return {'in': dict(in_d), 'out': dict(out_d)}
 ```
 
-### Approach 3 — set union + count
+### Approach 3 — dict.get loop
 ```python
-def friend_counts(pairs):
-    people = {p for pair in pairs for p in pair}
-    return {p: sum(p in pair for pair in pairs) for p in people}
-```
-
-### Approach 4 — dict.get loop
-```python
-def friend_counts(pairs):
-    d = {}
+def degrees(pairs):
+    in_d, out_d = {}, {}
     for a, b in pairs:
-        d[a] = d.get(a, 0) + 1
-        d[b] = d.get(b, 0) + 1
-    return d
+        out_d[a] = out_d.get(a, 0) + 1
+        in_d[b] = in_d.get(b, 0) + 1
+    return {'in': in_d, 'out': out_d}
 ```
 
-### Approach 5 — pandas
+### Approach 4 — pandas groupby
 ```python
 import pandas as pd
-def friend_counts(pairs):
-    return pd.Series([p for pair in pairs for p in pair]).value_counts().to_dict()
+def degrees(pairs):
+    df = pd.DataFrame(pairs, columns=['src', 'dst'])
+    return {'in': df['dst'].value_counts().to_dict(),
+            'out': df['src'].value_counts().to_dict()}
 ```
 
-### Approach 6 — numpy bincount
+### Approach 5 — numpy bincount on src and dst
 ```python
 import numpy as np
-def friend_counts(pairs):
-    flat = np.array([p for pair in pairs for p in pair])
-    return dict(zip(*np.unique(flat, return_counts=True)))
+def degrees(pairs):
+    arr = np.array(pairs)
+    out_d = dict(zip(*np.unique(arr[:, 0], return_counts=True)))
+    in_d = dict(zip(*np.unique(arr[:, 1], return_counts=True)))
+    return {'in': {int(k): int(v) for k, v in in_d.items()},
+            'out': {int(k): int(v) for k, v in out_d.items()}}
 ```
 
-### Approach 7 — reduce
+### Approach 6 — reduce
 ```python
 from functools import reduce
-def friend_counts(pairs):
-    return dict(reduce(lambda d, p: {**d, p[0]: d.get(p[0], 0)+1,
-                                            p[1]: d.get(p[1], 0)+1}, pairs, {}))
+def degrees(pairs):
+    def step(acc, edge):
+        a, b = edge
+        acc['out'][a] = acc['out'].get(a, 0) + 1
+        acc['in'][b] = acc['in'].get(b, 0) + 1
+        return acc
+    return reduce(step, pairs, {'in': {}, 'out': {}})
 ```
 
-### Approach 8 — list count
+### Approach 7 — list comprehensions + Counter
 ```python
-def friend_counts(pairs):
-    flat = sum(pairs, [])
-    return {p: flat.count(p) for p in set(flat)}
+from collections import Counter
+def degrees(pairs):
+    srcs = [a for a, _ in pairs]
+    dsts = [b for _, b in pairs]
+    return {'in': dict(Counter(dsts)), 'out': dict(Counter(srcs))}
 ```
 
-### Approach 9 — dict comp + manual
+### Approach 8 — single dict of dicts
 ```python
-def friend_counts(pairs):
+def degrees(pairs):
     d = {}
-    for pair in pairs:
-        for p in pair:
-            d[p] = d.get(p, 0) + 1
+    for a, b in pairs:
+        d.setdefault(a, {'in': 0, 'out': 0})['out'] += 1
+        d.setdefault(b, {'in': 0, 'out': 0})['in'] += 1
     return d
 ```
 
-### Approach 10 — Counter with update
+### Approach 9 — zip + Counter
 ```python
 from collections import Counter
-def friend_counts(pairs):
-    c = Counter()
-    for pair in pairs:
-        c.update(pair)
-    return dict(c)
+def degrees(pairs):
+    srcs, dsts = zip(*pairs) if pairs else ([], [])
+    return {'in': dict(Counter(dsts)), 'out': dict(Counter(srcs))}
 ```
 
-**Best:** Counter (Approach 1) or defaultdict (Approach 2).
+### Approach 10 — pandas melt
+```python
+import pandas as pd
+def degrees(pairs):
+    df = pd.DataFrame(pairs, columns=['src', 'dst'])
+    out_d = df['src'].value_counts().to_dict()
+    in_d = df['dst'].value_counts().to_dict()
+    return {k: {'in': in_d.get(k, 0), 'out': out_d.get(k, 0)} for k in set(out_d) | set(in_d)}
+```
+
+**Best:** two Counters (Approach 1) or defaultdict (Approach 2) — clean and idiomatic.
