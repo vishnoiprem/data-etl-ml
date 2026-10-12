@@ -652,9 +652,11 @@ def scrape_hnhiring_remote():
 
     html = r.text
     # Split on the job list-item wrapper. Each posting is a <li class="job">.
-    # Use a non-greedy match to keep each block small.
+    # Note: the live page emits class="job  " (with trailing whitespace), so
+    # accept any number of spaces. Use a non-greedy match to keep each block
+    # small, but anchor on the literal closing </li> for that block.
     blocks = re.findall(
-        r'<li class="job"[^>]*>(.*?)</li>', html, re.S | re.I
+        r'<li\s+class="job\s*"[^>]*>(.*?)</li>', html, re.S | re.I
     )
     if not blocks:
         print("  [hnhiring] no <li class='job'> blocks found — markup changed?")
@@ -670,7 +672,7 @@ def scrape_hnhiring_remote():
         date_m = re.search(r'class="[^"]*gray[^"]*"[^>]*>(\d{4}-\d{2}-\d{2})',
                            block, re.I)
         post_date = date_m.group(1) if date_m else ""
-        body_m = re.search(r'<div class="body"[^>]*>(.*?)</div>\s*</div>',
+        body_m = re.search(r'<div\s+class="body"\s*[^>]*>(.*?)</div>\s*</div>',
                            block, re.S | re.I)
         body_html = body_m.group(1) if body_m else block
         # Strip remaining tags
