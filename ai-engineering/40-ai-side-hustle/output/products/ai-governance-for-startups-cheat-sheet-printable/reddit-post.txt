@@ -1,42 +1,56 @@
-Title: I wrote a 20-page AI Governance For Startups Cheat Sheet (printable) for solo founders — free excerpt inside
+Title: I wrote AI Governance For Startups Cheat Sheet (printable) (6 pages, $9) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. Pin it to your wall. Do the AI Governance thing.
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is $9 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+## Page 1 — The Four Artifacts (wall poster)
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+**The only four documents an AI startup needs to pass enterprise procurement and survive an EU AI Act audit.**
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+1. **Model card.** One page per model. Intended use, out-of-scope use, training data, eval results, known limitations. Use Google's template.
+2. **Risk tier.** Every model gets a tier 1-4. Tier 3 (automated decisions affecting people) needs a conformity assessment. Tier 4 is prohibited. Most startups should have zero of either.
+3. **Data lineage.** For each model: where did training data come from, when, what consent, how to delete. The most-failed audit item.
+4. **Change log.** Git-style log of every model release: what changed, who approved, what tests, what rollback plan.
 
-Full version ($19, instant download, 30-day refund):
+**If you have these four documents and they're current, you can pass an enterprise security review.** Everything else is decoration.
+
+---
+
+---
+
+**What else is inside (6 sections total):**
+
+- Page 1 — The Four Artifacts (wall poster)
+- Page 2 — The 30-Day Calendar
+- Page 3 — Weekly AI Governance Checklist
+- Page 4 — The Risk Tiering Cheat Sheet
+- Page 5 — The Model Card Skeleton
+- Page 6 — The Bias Test Recipe (run quarterly)
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $9 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($9, instant download, 30-day no-questions refund):
 → https://vishnoiprem.gumroad.com/l/ai-gov-cheatsheet
 
 — Prem

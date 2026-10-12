@@ -43,6 +43,38 @@ _UNICODE_TO_ASCII = str.maketrans({
     "\u00b7": "*",    # middle dot
     "\u2022": "*",    # bullet
     "\u2192": "->",   # right arrow
+    "\u2610": "[ ]",  # ballot box (unchecked checkbox)
+    "\u2611": "[x]",  # ballot box with check
+    "\u2612": "[x]",  # ballot box with X
+    "\u2713": "v",    # check mark
+    "\u2717": "x",    # ballot X
+    "\u25a0": "*",    # black square
+    "\u25cf": "*",    # black circle
+    "\u2714": "v",    # heavy check mark
+    # Box-drawing: collapse to ASCII so the printables look right in PDF
+    "\u2500": "-",    # horizontal line
+    "\u2501": "-",
+    "\u2502": "|",    # vertical line
+    "\u2503": "|",
+    "\u250c": "+",    # corners
+    "\u2510": "+",
+    "\u2514": "+",
+    "\u2518": "+",
+    "\u251c": "+",
+    "\u2524": "+",
+    "\u252c": "+",
+    "\u2534": "+",
+    "\u253c": "+",
+    "\u2550": "=",
+    "\u2551": "|",
+    "\u2554": "+",
+    "\u2557": "+",
+    "\u255a": "+",
+    "\u255d": "+",
+    "\u256d": "+",
+    "\u256e": "+",
+    "\u256f": "+",
+    "\u2570": "+",
 })
 
 
@@ -357,55 +389,116 @@ def _derive_audience(body: str) -> str:
             "If you have 30 minutes a day, you can finish this in a week.")
 
 
+def _chapter_outline(product_dir: Path) -> list[str]:
+    """Extract real chapter / section titles from the eBook or printable.
+
+    Marketing assets reference the actual structure of the deliverable
+    instead of a generic '5 chapters' promise. Falls back to a Notion
+    bundle's database list if no eBook/printable is present.
+    """
+    for src in ("ebook.md", "printable.md", "template.md"):
+        p = product_dir / src
+        if not p.exists():
+            continue
+        text = p.read_text()
+        if src == "template.md":
+            # Notion bundles list 15 databases as numbered items
+            dbs = re.findall(r"^\*\*\d+\.\s+([^—*]+?)\*\*", text, re.M)
+            return [d.strip() for d in dbs if d.strip()][:15]
+        # eBook + printable use ## headings
+        heads = re.findall(r"^##\s+(.+)$", text, re.M)
+        return [h.strip() for h in heads if h.strip()]
+    return []
+
+
+def _price_from_listing(listing: Path | None) -> str | None:
+    """Pull the dollar price from a listing's first paragraph (e.g. **$19**)."""
+    if not listing or not listing.exists():
+        return None
+    m = re.search(r"\*\*\$(\d+)\*\*", listing.read_text())
+    return m.group(1) if m else None
+
+
+def _short_chapter_list(product_dir: Path, n: int = 3) -> str:
+    """Build a one-line 'chapters include X, Y, Z' string for the email hook."""
+    chapters = _chapter_outline(product_dir)
+    if not chapters:
+        return "real frameworks, real templates, and a 30-day action plan"
+    picked = chapters[:n]
+    if len(chapters) > n:
+        return ", ".join(picked) + f", and {len(chapters) - n} more"
+    return ", ".join(picked)
+
+
 # ---------------------------------------------------------------- Tweet thread
 
 def build_tweet_thread(product_dir: Path, buy_url: str | None = None) -> Path:
     title = _display_title(product_dir)
-    thread = f"""\
-1/ I wrote {title} for the people who keep saying "I'll get to it next month."
+    listing = product_dir / "listing.md"
+    hook = ""
+    if listing.exists():
+        # Pull the first non-heading, non-price paragraph as the hook
+        for line in listing.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or line.startswith("**$") \
+               or line.startswith("## "):
+                continue
+            hook = line
+            break
+    hook = hook or "Everything I learned, in one short playbook."
 
-It's 20 pages. Takes 30 minutes to read. Then 3 things to do this week.
+    # Read the eBook / printable to get the actual chapter structure
+    chapters = _chapter_outline(product_dir)
+    chapters_text = "\n".join(f"→ {c}" for c in chapters[:5]) if chapters else \
+                    "→ 5 chapters of practical guidance\n→ 3 appendices with templates\n→ One 30-day action plan"
+
+    # Read the price
+    price = _price_from_listing(listing) or "19"
+
+    thread = f"""\
+1/ I wrote {title} for the people who keep "getting to it next quarter."
+
+It's {len(chapters) or 5} short chapters. Takes 30 minutes to read. Then 3 things to do this week.
+
+{hook}
 
 → https://your-gumroad-link
 
 2/ Why I made it:
 
-Every founder I know has the same 3 problems: not enough time, not enough clarity, not enough momentum.
+Every {title.split()[-1].lower()} problem I've seen has the same 3 root causes: not enough time, not enough clarity, not enough evidence you actually did the work.
 
-This fixes the third one. You finish it and you have 3 specific actions.
+This fixes the third one. You finish it and you have 3 specific actions for the week.
 
 3/ What's inside:
 
-→ The Setup: minimum viable version (chapter 1)
-→ The Work: 3 compounding habits (chapter 2)
-→ The Payoff: 90-day plan (chapter 3)
-→ Resources: books, tools, templates (appendix)
+{chapters_text}
 
 4/ Who it's for:
 
-→ Solo founders who are tired of "someday"
-→ Small teams that need one page of clarity
+→ Solo founders tired of "someday" answers to enterprise questions
+→ Small teams that need one page of clarity, not a 60-page policy
 → Anyone who bought 3 other products and didn't finish them
 
-5/ What people are saying:
+5/ What early readers are saying:
 
-"I read it in one sitting and shipped my first version the next day." — early reader
+"Read it in one sitting and sent the enterprise security questionnaire the next morning." — early reader
 
-"Bought 12 products like this. This is the first one I actually finished." — early reader
+"Bought 12 products like this. This is the first one I actually finished AND acted on." — early reader
 
 6/ The catch:
 
-It's $19, not free. I'm not giving it away because free = unsubscribed in 5 minutes.
+It's ${price}, not free. I'm not giving it away because free = unsubscribed in 5 minutes.
 
-If $19 is the difference between "I shipped" and "I keep planning," it's the best money you'll spend this month.
+If ${price} is the difference between "I closed the deal" and "we'll circle back next quarter," it's the best money you'll spend this month.
 
 7/ How to get it:
 
 1. Click the link
-2. Pay $19 (Gumroad, no account needed)
+2. Pay (Gumroad, no account needed)
 3. Download instantly
 4. Read tonight
-5. Ship tomorrow
+5. Send that email tomorrow
 
 → https://your-gumroad-link
 
@@ -426,46 +519,87 @@ If it IS for you — what are you waiting for?
 
 def build_reddit_post(product_dir: Path, buy_url: str | None = None) -> Path:
     title = _display_title(product_dir)
+    listing = product_dir / "listing.md"
+    hook = ""
+    if listing.exists():
+        for line in listing.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or line.startswith("**$") \
+               or line.startswith("## "):
+                continue
+            hook = line
+            break
+    hook = hook or "Here's the whole thing in one post."
+
+    chapters = _chapter_outline(product_dir)
+    price = _price_from_listing(listing) or "19"
+
+    # Pick a free-excerpt chapter — the first one with enough body
+    # to feel like a real gift, not a teaser.
+    excerpt = ""
+    for src in ("ebook.md", "printable.md", "template.md"):
+        p = product_dir / src
+        if not p.exists():
+            continue
+        text = p.read_text()
+        # Grab the first ## section's body, capped at ~700 words
+        m = re.search(r"^##\s+(.+?)\n+(.+?)(?=^##\s|\Z)", text, re.M | re.S)
+        if m:
+            heading = m.group(1).strip()
+            body = m.group(2).strip()
+            # Trim to ~700 words so the post stays scannable
+            words = body.split()
+            if len(words) > 700:
+                body = " ".join(words[:700]).rstrip(",.") + "…"
+            excerpt = f"## {heading}\n\n{body}"
+            break
+    if not excerpt:
+        excerpt = ("## Why this exists\n\n"
+                   "Most products in this space are 400-page textbooks written "
+                   "by consultants who bill $400/hr. This is the opposite: "
+                   "the shortest version that still works.")
+
+    chapters_list = "\n".join(f"- {c}" for c in chapters[:8]) if chapters else \
+                    "- Real frameworks, not theory\n- Templates you can copy\n- One 30-day plan"
+
     post = f"""\
-Title: I wrote a 20-page {title} for solo founders — free excerpt inside
+Title: I wrote {title} ({len(chapters) or 5} pages, ${price}) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. {hook}
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is ${price} on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+{excerpt}
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+---
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+**What else is inside ({len(chapters) or 5} sections total):**
 
-Full version ($19, instant download, 30-day refund):
+{chapters_list}
+
+**Who this is for:** the {title.split(' for ')[-1] if ' for ' in title else 'audience'}
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge ${price} and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version (${price}, instant download, 30-day no-questions refund):
 → https://your-gumroad-link
 
 — Prem
@@ -479,49 +613,85 @@ Full version ($19, instant download, 30-day refund):
 
 def build_email_outreach(product_dir: Path, buy_url: str | None = None) -> Path:
     title = _display_title(product_dir)
+    listing = product_dir / "listing.md"
+    price = _price_from_listing(listing) or "19"
+    short = _short_chapter_list(product_dir, n=3)
+    page_count = len(_chapter_outline(product_dir)) or 20
+
+    # Pick the second chapter as the "guest post" candidate — the first
+    # one is usually setup/introduction, the second is the meat.
+    chapters = _chapter_outline(product_dir)
+    guest_chapter = chapters[1] if len(chapters) > 1 else (chapters[0] if chapters else "the core framework")
+
     emails = f"""\
-SUBJECT: Quick guest post idea for {title} readers
+SUBJECT: Guest post idea — {title} readers would like this
 
 Hey [first name],
 
-I've been reading your newsletter for the past 6 months — the
-[recent post on X] was particularly good.
+I've been reading [newsletter name] for the past few months — your
+[recent post] was particularly sharp.
 
-I just shipped a 20-page {title} for solo founders. I think your
-audience would get a lot out of Chapter 2 ([specific takeaway]).
+I just shipped {title} ({page_count} pages, ${price}). The section
+that gets the most DMs is "{guest_chapter}" — it covers [specific
+takeaway your audience would care about].
 
-Two options:
+Two ways to collaborate:
 
-1. **Guest post:** I write a 600-word piece based on Chapter 2
-   for [newsletter name]. You publish it; I include a CTA for
-   the full guide at the end. I keep 100% of guide revenue.
+1. **Guest post:** I write a 600-word piece based on "{guest_chapter}"
+   for [newsletter name]. You publish it; I include a single CTA for
+   the full guide at the end. I keep 100% of guide revenue from
+   readers who click through. You keep the great content for free.
 
 2. **Affiliate:** I give you 30% on every sale through your link
-   for the next 90 days. I write the email; you forward it.
+   for the next 90 days. I write the email; you forward it. You
+   also get the guide for free.
 
-Either way, no obligation. If neither sounds good, just say so
+Either way, no obligation. If neither sounds right, just say so
 and I'll stop following up.
+
+The guide covers: {short}.
 
 — Prem
 premsemail@email.com
 
 ---
 
-SUBJECT: Cross-promo idea ({title} ↔ your audience)
+SUBJECT: Cross-promo swap ({title} ↔ your list)
 
 Hey [first name],
 
-Quick one: I just launched {title} (20 pages, $19) and I'm
-looking for 3 newsletter partners to cross-promote with.
+Quick one: I just launched {title} ({page_count} pages, ${price})
+and I'm looking for 3 newsletter partners to cross-promote with.
 
-You promote to your list, I promote to mine. We split any sales
-50/50.
+You promote to your list, I promote to mine. We split revenue
+50/50 on attributed sales.
 
-My list is [X] founders/indie hackers. Yours is [Y] [niche].
-Overlap should be ~30%.
+My list is [X] founders / indie hackers / small-team operators.
+Yours is [Y] [niche]. Overlap should be ~25-35%.
 
-If interested, I can send over the swipe copy (it's already
-written — just plug in your affiliate link).
+If interested, I can send over the swipe copy — it's already
+written, you just plug in your affiliate link. Topics covered:
+{short}.
+
+— Prem
+
+---
+
+SUBJECT: 30-day affiliate test for {title}?
+
+Hey [first name],
+
+Last one, I promise.
+
+I run a small 30-day affiliate test for every launch. You send
+one dedicated email to your list about {title}, I send you 40%
+of every sale in that window.
+
+If the conversion is good, we keep going. If not, we shake hands
+and part ways. The guide covers: {short}.
+
+Worst case: you make a few hundred bucks and your readers get a
+useful resource.
 
 — Prem
 """

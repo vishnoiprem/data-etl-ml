@@ -1,42 +1,59 @@
-Title: I wrote a 20-page The GDPR For Indie Hackers Playbook for solo founders — free excerpt inside
+Title: I wrote The GDPR For Indie Hackers Playbook (9 pages, $19) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. Everything I learned about GDPR for indie hackers in 90 days.
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is $19 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+## Chapter 1 — Why GDPR is a moat, not a tax
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+Most indie hackers treat GDPR like an obligation: something bigcos do to avoid EU fines. The opposite is true for SaaS. Done well, GDPR compliance is the reason an EU enterprise will choose your product over a US competitor who can't sign a Data Processing Agreement. Done badly, it is the reason your EU Stripe payouts get frozen after a single complaint.
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+The reason: every EU customer, every B2B contract with an EU counterparty, and every EU-based VC requires documented GDPR compliance. They want a DPA (Data Processing Agreement). They want to know where the data is stored. They want to know how you handle deletion requests. If your answer is "we'll add it later," you don't get the contract. If your answer is "here's our DPA, our data flow diagram, and our 30-day deletion SLA," you close.
 
-Full version ($19, instant download, 30-day refund):
+The hard part is that this compliance is hard to fake. You either have the documentation, the processes, and the discipline, or you don't, and your EU revenue will reflect that within two quarters.
+
+This playbook is about the discipline. Specifically, the minimum viable version of it that holds up to a real audit and unblocks EU revenue. The framework underneath is GDPR's seven principles (Article 5) plus the lawful bases for processing (Article 6) plus the data subject rights (Articles 15-22). You don't need to memorize these. You need to satisfy them in your product and your contracts.
+
+By the end of this book, you will have a 30-day plan to ship a GDPR-compliant SaaS that holds up to a real audit.
+
+---
+
+---
+
+**What else is inside (9 sections total):**
+
+- Chapter 1 — Why GDPR is a moat, not a tax
+- Chapter 2 — The six documents every SaaS must have
+- Chapter 3 — The 30-day plan to ship GDPR compliance
+- Chapter 4 — The four things that will get you in trouble
+- Chapter 5 — The program that compounds after the first audit
+- Appendix A — Templates and tools
+- Appendix B — The 30-day calendar
+- Appendix C — Resources
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $19 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($19, instant download, 30-day no-questions refund):
 → https://vishnoiprem.gumroad.com/l/gdpr-playbook
 
 — Prem

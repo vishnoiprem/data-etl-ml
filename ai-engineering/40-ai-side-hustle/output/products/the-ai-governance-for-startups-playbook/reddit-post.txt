@@ -1,42 +1,59 @@
-Title: I wrote a 20-page The AI Governance For Startups Playbook for solo founders — free excerpt inside
+Title: I wrote The AI Governance For Startups Playbook (9 pages, $19) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. Everything I learned about ai governance for startups in 90 days.
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is $19 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+## Chapter 1 — Why governance is a feature, not overhead
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+Most AI startups treat governance as a tax: something bigcos do to slow down sales cycles. The opposite is true. Done well, governance is the reason your enterprise deal closes in 60 days instead of 9 months. Done badly, it is the reason your seed round doesn't convert to a Series A when the lead investor asks "how do you handle EU AI Act risk?" and you have nothing to show.
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+The reason: every enterprise buyer, every government RFP, every Series A+ term sheet now asks for evidence of AI governance. They want a model card. They want a risk tier. They want to know where training data came from. They want to know who signed off on the last model release. If your answer to any of these is "we'll get back to you," you lose the deal. If your answer is "here's the doc, here are the test results, here's the change log," you close.
 
-Full version ($19, instant download, 30-day refund):
+The hard part is that this evidence is hard to fake. You either have the discipline to build it into the development loop, or you don't, and your enterprise pipeline will reflect that within two quarters.
+
+This playbook is about the discipline. Specifically, the minimum viable version of it that holds up to a real audit. The framework underneath is the NIST AI Risk Management Framework (AI RMF 1.0, January 2023) plus the EU AI Act risk tiers — the two standards that, between them, cover 80% of what enterprise buyers and regulators are going to ask about.
+
+By the end of this book, you will have a 30-day plan to ship a governance program that survives both.
+
+---
+
+---
+
+**What else is inside (9 sections total):**
+
+- Chapter 1 — Why governance is a feature, not overhead
+- Chapter 2 — The four artifacts every AI startup must have
+- Chapter 3 — The 30-day plan to ship a governance program
+- Chapter 4 — The five things that will get you in trouble
+- Chapter 5 — The governance program that scales
+- Appendix A — Templates
+- Appendix B — EU AI Act risk tiers (summary)
+- Appendix C — Resources
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $19 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($19, instant download, 30-day no-questions refund):
 → https://vishnoiprem.gumroad.com/l/ai-gov-playbook
 
 — Prem

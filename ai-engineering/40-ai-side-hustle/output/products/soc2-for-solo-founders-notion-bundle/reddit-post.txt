@@ -1,42 +1,79 @@
-Title: I wrote a 20-page SOC2 For Solo Founders Notion Bundle for solo founders — free excerpt inside
+Title: I wrote SOC2 For Solo Founders Notion Bundle (15 pages, $29) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. 10 plug-and-play SOC2 dashboards you can clone today.
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is $29 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+## What you get
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+**1. Master Dashboard** — The landing page. Shows every active vendor, every open policy gap, every upcoming audit task, and a green/red status indicator for all 5 controls. One glance = you know where you stand.
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+**2. Policies Database** — All 5 SOC2 policies pre-written and ready to customize (Information Security, Access Control, Change Management, Incident Response, Vendor Management). Each is a Notion page with: scope, owner, last reviewed date, control statements. Add your company name + sign-off, done.
 
-Full version ($19, instant download, 30-day refund):
+**3. Vendor Inventory** — A Notion database with one row per third-party processor. Pre-populated with the 15 most common SaaS vendors (AWS, Stripe, GitHub, OpenAI, etc.) and the SOC2/DPA status field. Add your own vendors, fill in the gap, move on.
+
+**4. Offboarding Checklist Database** — One row per terminated employee with date, name, all the systems they had access to, and a checkbox per system. The Friday reminder bot (template included) flags any row with unchecked boxes 24h after the termination date.
+
+**5. Friday Compliance Review** — A templated Notion page with the 10-item weekly checklist. Duplicate every Friday, walk through it, check the boxes. Auditors can pull the last 52 weeks of these in 5 minutes.
+
+**6. Change Log Database** — One row per code release. Fields: release version, date, PR link, test results, approver, rollback plan. Pre-populated with the format auditors expect.
+
+**7. Incident Log** — Database of every incident and near-miss. Date, type, severity, root cause, mitigation, post-mortem link. The "no incidents" log is as valuable as the "many incidents" log — it shows the program is operational.
+
+**8. Access Review Quarterly** — Templated page for the quarterly 90-minute access review meeting. Lists every employee, every system, every permission. Pre-formatted to disable dormant accounts.
+
+**9. Backup Test Log** — Database of monthly backup restore tests. Date, system, success/fail, restore time, who verified. Auditors love this one.
+
+**10. Penetration Test Tracker** — Database of pen tests. Date, vendor, scope, findings count, remediation status. Auto-flags any test older than 12 months.
+
+**11. Evidence Collection Calendar** — Shows which evidence your compliance platform (Vanta/Drata) needs each week, who owns collecting it, and when it's due. Pre-mapped to the SOC2 controls.
+
+**12. Audit Day Playbook** — A one-page Notion doc with everything you need on audit day: which evidence to pull first, how to navigate the auditor's request list, what to say when you don't know an answer, and the post-audit timeline.
+
+**13. Auditor Question Bank** — 50 of the most common SOC2 audit questions with the answer an auditor expects to hear. Read this the week before your audit so you're not thinking on your feet.
+
+**14. Security Awareness Training Tracker** — Database of every employee, training modules completed, completion date. SOC2 requires annual security training; this is your proof.
+
+**15. Roadmap to Type 2** — A quarterly view of the steps to upgrade from Type 1 to Type 2, with owners and dependencies. Once you ship Type 1, this is your Q1-Q4 plan.
+
+---
+
+---
+
+**What else is inside (15 sections total):**
+
+- Master Dashboard
+- Policies Database
+- Vendor Inventory
+- Offboarding Checklist Database
+- Friday Compliance Review
+- Change Log Database
+- Incident Log
+- Access Review Quarterly
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $29 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($29, instant download, 30-day no-questions refund):
 → https://vishnoiprem.gumroad.com/l/soc2-notion-bundle
 
 — Prem

@@ -1,42 +1,59 @@
-Title: I wrote a 20-page The SOC2 For Solo Founders Playbook for solo founders — free excerpt inside
+Title: I wrote The SOC2 For Solo Founders Playbook (9 pages, $19) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. Everything I learned about soc2 for solo founders in 90 days.
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is $19 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+## Chapter 1 — Why SOC2 is a sales tool, not a tax
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+Most founders treat SOC2 like an obligation: something bigcos do to slow down your sales cycle. The opposite is true. Done well, SOC2 is the reason your enterprise deal closes in 60 days instead of 9 months. Done badly, it is the reason your seed round doesn't convert to a Series A when the lead investor asks for the security questionnaire and you have nothing to show.
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+The reason: every enterprise buyer, every Series A+ term sheet, and every procurement team above 50 employees now asks for SOC2. They want a letter. They want a report. They want to know when your last audit was. If your answer is "we're working on it," you lose the deal. If your answer is "here's our Type 1 report from Q3," you close.
 
-Full version ($19, instant download, 30-day refund):
+The hard part is that this evidence is hard to fake. You either have the discipline to build security into the development loop, or you don't, and your enterprise pipeline will reflect that within two quarters.
+
+This playbook is about the discipline. Specifically, the minimum viable version of it that holds up to a real audit and closes deals. The framework underneath is SOC2 Type 1 (the version you should get first) covering the 5 Trust Service Categories: Security, Availability, Processing Integrity, Confidentiality, and Privacy. You'll cover Security (mandatory) and Availability (what your customers actually care about). Skip the other three for now — they only matter for specific industries.
+
+By the end of this book, you will have a 90-day plan to ship a SOC2-ready program that closes your first enterprise deal.
+
+---
+
+---
+
+**What else is inside (9 sections total):**
+
+- Chapter 1 — Why SOC2 is a sales tool, not a tax
+- Chapter 2 — The five controls every solo founder must have
+- Chapter 3 — The 90-day plan to ship SOC2 Type 1
+- Chapter 4 — The five things that will get you in trouble
+- Chapter 5 — The program that compounds after the first audit
+- Appendix A — Templates
+- Appendix B — The 90-day calendar
+- Appendix C — Resources
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $19 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($19, instant download, 30-day no-questions refund):
 → https://vishnoiprem.gumroad.com/l/soc2-playbook
 
 — Prem

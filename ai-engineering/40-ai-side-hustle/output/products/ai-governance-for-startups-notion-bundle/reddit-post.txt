@@ -1,42 +1,79 @@
-Title: I wrote a 20-page AI Governance For Startups Notion Bundle for solo founders — free excerpt inside
+Title: I wrote AI Governance For Startups Notion Bundle (15 pages, $29) — full Chapter 1 below
 
 Body:
 
 Hey r/[niche],
 
-I posted a few weeks ago about [problem] and got a lot of DMs asking
-for a writeup. I turned the answers into a 20-page guide.
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. 10 plug-and-play AI Governance dashboards you can clone today.
 
-The full thing is $19 on Gumroad, but here's the entire Chapter 1
-free below. If it's useful, the link is at the bottom. If not, no
-hard feelings.
-
----
-
-## Chapter 1 — The Setup
-
-Most people overthink the start. Here's the minimum viable version.
-
-[... 600 words of value ...]
-
-## Chapter 2 — The Work
-
-Three habits that compound...
-
-[the rest is in the paid version, but here's the gist: ...]
+Below is Chapter 1 in full. The rest of the guide is $29 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
 
 ---
 
-**Who this is for:** solo founders, indie hackers, small teams.
+## What you get
 
-**Who this is NOT for:** if you want a 400-page textbook, look elsewhere.
-This is a 20-page kick in the pants.
+**1. Model Inventory Dashboard** — The landing page. Every model in production with: name, owner, risk tier (1-4), last evaluated date, current model card status. Color-coded: green if current, red if anything is older than 90 days.
 
-**Why I charge:** I gave the first version away for free. 90% of
-people who downloaded it never opened it. Charging $19 filters for
-people who are actually going to read it. (This is a known trick.)
+**2. Model Card Database** — One row per model, with the full Google model card template embedded as a Notion page. Fields: intended use, out-of-scope use, training data summary, eval results, known limitations, contact. Clone the template, fill in, ship.
 
-Full version ($19, instant download, 30-day refund):
+**3. Risk Tier Database** — Every model with its EU AI Act + NIST risk tier, the rationale (why this tier), and the conformity assessment status (required for tier 3, prohibited for tier 4). Pre-populated with the risk tier definitions from the EU AI Act.
+
+**4. Data Lineage Database** — One row per (model, dataset) pair. Fields: source, collection date, consent basis, retention period, deletion endpoint, sub-processor. The single most-failed audit item — pre-built so you don't have to invent the schema.
+
+**5. Change Log Database** — One row per model release. Fields: version, date, what changed, who approved, test results, rollback plan. Pre-formatted to match the EU AI Act Article 12 requirements.
+
+**6. Bias Test Log** — Quarterly bias test results. Fields: model, protected attribute, fairness metric, result, mitigation, follow-up date. Pre-built views by quarter, by model, by metric.
+
+**7. Vendor (Sub-Processor) Database** — Every third-party AI provider you use (OpenAI, Anthropic, Hugging Face, etc.) with their SOC2 status, DPA signed date, last review. Pre-populated with the 10 most common AI vendors.
+
+**8. Friday Governance Review** — Templated page with the 8-item weekly checklist. Duplicate every Friday, walk through, check. The auditor can pull 52 weeks of these in 5 minutes.
+
+**9. Incident Log** — Every AI-related incident and near-miss. Date, model, type (bias, hallucination, jailbreak, data leak), severity, mitigation, post-mortem. Required for tier 3; good practice for everything.
+
+**10. Conformity Assessment Templates** — The 30-page conformity assessment template for tier 3 models. Pre-structured per EU AI Act Annex IV. You fill in the model-specific details; the format is done.
+
+**11. Customer-Facing AI Disclosure Database** — Every model that touches customers, with the disclosure language you're using ("AI-powered," "AI-generated," etc.) and the location (UI tooltip, terms of service, marketing page). Required for tier 2 transparency obligations.
+
+**12. Quarterly Access Review** — Templated page for the 90-minute quarterly review. Lists every employee, every model they have access to, every API key they own. Pre-formatted to revoke dormant access.
+
+**13. Bias Audit Calendar** — Shows when each tier 2+ model is due for its next bias test, who owns it, and the test framework (Fairlearn, Aequitas, or custom). Auto-flags any model more than 90 days past due.
+
+**14. EU AI Act Compliance Tracker** — Per-article checklist of every EU AI Act obligation that applies to your products. Pre-mapped to the risk tiers. Auditor can pull this and immediately see your coverage.
+
+**15. Enterprise Security Questionnaire Answer Bank** — 40 of the most common enterprise AI security questions with the answer an enterprise CISO expects to hear. The questions you can't answer are the gaps in your program.
+
+---
+
+---
+
+**What else is inside (15 sections total):**
+
+- Model Inventory Dashboard
+- Model Card Database
+- Risk Tier Database
+- Data Lineage Database
+- Change Log Database
+- Bias Test Log
+- Vendor (Sub-Processor) Database
+- Friday Governance Review
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $29 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($29, instant download, 30-day no-questions refund):
 → https://vishnoiprem.gumroad.com/l/ai-gov-bundle
 
 — Prem

@@ -11,7 +11,7 @@ _9 product(s) ready. Open this file and copy each section into Gumroad._
 | **Name** | `AI Governance For Startups Cheat Sheet (Printable)` |
 | **Price** | `$9` |
 | **URL slug** | `ai-gov-cheatsheet` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/ai-governance-for-startups-cheat-sheet-printable/deliverable.pdf` (1.7 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/ai-governance-for-startups-cheat-sheet-printable/deliverable.pdf` (6.6 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -46,7 +46,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `AI Governance For Startups Notion Bundle` |
 | **Price** | `$29` |
 | **URL slug** | `ai-gov-bundle` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/ai-governance-for-startups-notion-bundle/deliverable.pdf` (1.7 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/ai-governance-for-startups-notion-bundle/deliverable.pdf` (6.1 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -81,7 +81,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `GDPR For Indie Hackers Cheat Sheet (Printable)` |
 | **Price** | `$9` |
 | **URL slug** | `gdpr-cheatsheet` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/gdpr-for-indie-hackers-cheat-sheet-printable/deliverable.pdf` (1.7 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/gdpr-for-indie-hackers-cheat-sheet-printable/deliverable.pdf` (7.0 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -116,7 +116,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `GDPR For Indie Hackers Notion Bundle` |
 | **Price** | `$29` |
 | **URL slug** | `gdpr-bundle` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/gdpr-for-indie-hackers-notion-bundle/deliverable.pdf` (1.7 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/gdpr-for-indie-hackers-notion-bundle/deliverable.pdf` (6.2 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -151,7 +151,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `SOC2 For Solo Founders Cheat Sheet (Printable)` |
 | **Price** | `$9` |
 | **URL slug** | `soc2-cheatsheet` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/soc2-for-solo-founders-cheat-sheet-printable/deliverable.pdf` (1.7 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/soc2-for-solo-founders-cheat-sheet-printable/deliverable.pdf` (6.6 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -186,7 +186,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `SOC2 For Solo Founders Notion Bundle` |
 | **Price** | `$29` |
 | **URL slug** | `soc2-notion-bundle` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/soc2-for-solo-founders-notion-bundle/deliverable.pdf` (1.7 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/soc2-for-solo-founders-notion-bundle/deliverable.pdf` (5.8 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -221,7 +221,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `The AI Governance For Startups Playbook` |
 | **Price** | `$19` |
 | **URL slug** | `ai-gov-playbook` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/the-ai-governance-for-startups-playbook/deliverable.pdf` (7.5 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/the-ai-governance-for-startups-playbook/deliverable.pdf` (10.7 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -256,7 +256,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `The GDPR For Indie Hackers Playbook` |
 | **Price** | `$19` |
 | **URL slug** | `gdpr-playbook` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/the-gdpr-for-indie-hackers-playbook/deliverable.pdf` (7.5 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/the-gdpr-for-indie-hackers-playbook/deliverable.pdf` (10.7 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
@@ -291,7 +291,7 @@ You, if you've been thinking about this for more than 30 seconds.
 | **Name** | `The SOC2 For Solo Founders Playbook` |
 | **Price** | `$19` |
 | **URL slug** | `soc2-playbook` |
-| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/the-soc2-for-solo-founders-playbook/deliverable.pdf` (7.5 KB) |
+| **PDF file** | `/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-engineering/40-ai-side-hustle/output/products/the-soc2-for-solo-founders-playbook/deliverable.pdf` (11.1 KB) |
 
 ### Description (copy everything below this line into the Description field)
 
