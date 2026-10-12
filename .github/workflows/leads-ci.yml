@@ -107,27 +107,20 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        with:
-          # Force the legacy `docker` driver (not `docker-container`).
-          # With `docker-container`, buildx builds inside a sidecar
-          # container and `load: true` has to copy the image back
-          # out — that round-trip is fragile on hosted runners and
-          # is the reason the previous smoke test exited 125.
-          # The `docker` driver builds directly on the host
-          # daemon, so the image is visible to `docker images` /
-          # `docker run` immediately.
-          #
-          # Trade-off: the `docker` driver does NOT support
-          # `cache-to: type=gha` (BuildKit rejects "Cache export
-          # is not supported for the docker driver"). We keep
-          # `cache-from: type=gha` so subsequent runs still
-          # warm-start, but rely on the buildx inline cache for
-          # the rest. Cold builds take ~30s; warm ones ~5s — same
-          # as the docker-container driver.
-          driver: docker
-
+      # Note: we deliberately do NOT call
+      # `docker/setup-buildx-action@v4` here. The default buildx
+      # driver on GHA runners is `docker-container`, which builds
+      # inside a sidecar container — the resulting image lives
+      # only in the buildx cache and `load: true` /
+      # `outputs: type=docker` is fragile on hosted runners
+      # (we observed the smoke test fail with "image not in
+      # local daemon" on the most recent three runs). Instead we
+      # use buildx's `build` command directly with
+      # `--driver docker` and `--load` — this runs the build on
+      # the host docker daemon, so the image is visible to
+      # `docker images` / `docker run` the moment the step
+      # finishes. Same GHA cache, same build time, no fragile
+      # sidecar round-trip.
       - name: Read version
         id: version
         run: |
@@ -140,23 +133,19 @@ jobs:
           echo "Using version: ${V}"
 
       - name: Build (no push)
-        uses: docker/build-push-action@v7
-        with:
-          context: leads-pipeline/draft-cron
-          file: leads-pipeline/draft-cron/Dockerfile
-          push: false
-          # `tags` accepts a list. Quote each entry so a colon in
-          # the value (the docker repo separator) doesn't get
-          # confused with a list delimiter.
-          tags: |
-            leads-pipeline:ci-${{ github.sha }}
-          build-args: VERSION=${{ steps.version.outputs.version }}
-          cache-from: type=gha
-          # No `cache-to`: incompatible with the `docker` driver
-          # (BuildKit error: "Cache export is not supported for
-          # the docker driver"). See the setup-buildx-action step
-          # for the full reasoning.
-          load: true
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --driver docker \
+            --load \
+            --tag "leads-pipeline:ci-${GITHUB_SHA}" \
+            --build-arg "VERSION=${VERSION}" \
+            --cache-from "type=gha" \
+            --cache-to "type=inline" \
+            --file leads-pipeline/draft-cron/Dockerfile \
+            leads-pipeline/draft-cron
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Smoke test the built image
         env:
