@@ -23,7 +23,8 @@ def _short_id() -> str:
 
 
 # ============================================================
-# 50 leads from lead-finder-scout (Oct 11, 2026)
+# 50 leads from lead-finder-scout (Oct 11, 2026) +
+#  5 senior remote AI leads from lead-finder-scout (Oct 12, 2026)
 # Each lead: company, role, jd_text, source_url, source
 # Email is None for all (ATS-gated). We derive a candidate.
 # ============================================================
@@ -76,6 +77,13 @@ LEADS = [
     {"company": "Teneo",                      "role": "AI/ML Engineering Senior Consultant",                       "contact_email": "careers@teneo.com",      "source_url": "https://www.teneo.com/careers/open-positions/", "source": "teneo.com", "jd_text": "Hiring at Consultant and Senior Consultant levels. AI engineer focus. Should understand ML disciplines."},
     {"company": "Bold Metrics",               "role": "Data Engineer | Remote (USA, MN)",                          "contact_email": "careers@boldmetrics.com","source_url": "https://hnhiring.com/locations/remote/months/january-2022", "source": "hnhiring", "jd_text": "Data Engineer. Remote USA/MN. Senior data engineering."},
     {"company": "Pairio",                     "role": "Senior Swift Engineer",                                     "contact_email": "careers@pairio.com",     "source_url": "https://hnhiring.com/search?technologies=ruby&locations=remote", "source": "hnhiring", "jd_text": "AI security focus: prompt injection, data isolation between customers, sensitive data. Senior Swift engineer at AI platform."},
+
+    # === lead-finder-scout Oct 12, 2026 — top 5 senior remote AI/ML/data ===
+    {"company": "Mastra",        "role": "AI Engineer (Open-source agent framework)",     "contact_email": "jobs@ashbyhq.com",          "source_url": "https://jobs.ashbyhq.com/mastra/531a3fe8-556f-4b83-bee7-20374f67f980", "source": "hn_algolia_24h", "jd_text": "Open-source TypeScript framework for building AI agents. Shipped agents and agentic applications into production. Global remote AMER/EMEA. Senior+ AI/agent engineering."},
+    {"company": "Axmed",         "role": "AI Engineer (Agentic Systems)",                  "contact_email": "careers@axmed.com",         "source_url": "https://axmed.teamtailor.com/jobs/8175859-ai-engineer",            "source": "hn_algolia_24h", "jd_text": "Python, LangChain/LangGraph/LlamaIndex/CrewAI, LLM APIs. Healthcare supply-chain procurement agent platform. Regulated industry, global emerging-market rollout."},
+    {"company": "Namespace",     "role": "Engineering Lead (Infra/AI)",                     "contact_email": "hannah@namespacelabs.com",  "source_url": "https://news.ycombinator.com/item?id=49922569",                  "source": "hn_algolia_24h", "jd_text": "Building a global, vertically integrated infra stack (custom server racks, hypervisor, scheduler) to power software development for SpaceXAI, Ramp, Sierra. Senior infra/MLOps."},
+    {"company": "OneChronos",   "role": "Engineering Manager, Data Platform",              "contact_email": "careers@onechronos.com",    "source_url": "https://hnhiring.com/locations/remote",                          "source": "hnhiring_24h",  "jd_text": "$180,000-$250,000. Python, SQL, Rust, TypeScript; Temporal/Airflow/Dagster; Parquet/Arrow. Trading infra firm. Include 'HackerNews' in subject."},
+    {"company": "Manifest",      "role": "Senior Infrastructure Engineer (FedRAMP a plus)", "contact_email": "careers@manifest.com",      "source_url": "https://job-boards.greenhouse.io/manifest/jobs/4399435009",       "source": "hnhiring_24h",  "jd_text": "$150K-$210K + equity. K8s, Terraform/Helm, CI/CD; FedRAMP/air-gapped a plus. US remote. Senior infra engineering with regulated exposure."},
 ]
 
 
