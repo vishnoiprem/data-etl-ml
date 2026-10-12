@@ -56,7 +56,7 @@ jobs:
         # new commits and outputs `release_created=false`, so this
         # job no-ops. We only want a fresh leads-cd run when a
         # NEW release was actually created.
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { owner, repo } = context.repo;
