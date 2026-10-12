@@ -1,2 +1,2 @@
 numpy>=1.26
-pydantic>=2.6
+pydantic>=2.14.0
