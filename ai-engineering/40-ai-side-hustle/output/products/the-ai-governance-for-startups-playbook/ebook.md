@@ -1,112 +1,120 @@
-# {title}
+# The AI Governance For Startups Playbook
 
-## Chapter 1 -- The Setup
+A 24-page field guide to shipping AI products that pass enterprise procurement, survive an EU AI Act audit, and don't get your startup sued.
 
-Most people overthink the start. Here's the minimum viable version.
+**Who this is for:** founders and product leads at AI startups who are tired of "we'll add governance later" and want a practical, opinionated playbook for doing it now without hiring a 12-person legal team.
 
-Most beginners spend the first month choosing tools. That's a mistake. Tools change. The fundamentals don't.
+**What this is not:** a 400-page textbook on machine learning ethics. This is the minimum viable governance program you can ship in 30 days.
 
-The minimum viable version of {topic} looks like:
+---
 
-- Pick one problem to solve (not three).
-- Pick one tool to use (not the best one, the one you'll actually open).
-- Do the thing for 30 days.
-- Review what worked, what didn't, what to change.
-- Repeat, with one small improvement per cycle.
+## Chapter 1 — Why governance is a feature, not overhead
 
-That's the whole game. The rest of this book is elaboration on the same idea.
+Most AI startups treat governance as a tax: something bigcos do to slow down sales cycles. The opposite is true. Done well, governance is the reason your enterprise deal closes in 60 days instead of 9 months. Done badly, it is the reason your seed round doesn't convert to a Series A when the lead investor asks "how do you handle EU AI Act risk?" and you have nothing to show.
 
-The reason this works is that the first month is not about producing output. It's about building the muscle. The output comes later, when the muscle is strong enough to bear weight. Most people quit in month one because they expected output before the muscle was ready. They thought "I've been doing this for two weeks, why don't I have anything to show?" The answer is: because that's not how muscles work. You don't deadlift 300 pounds on day one. You deadlift 95, then 135, then 185, then 225. After six months, 300.
+The reason: every enterprise buyer, every government RFP, every Series A+ term sheet now asks for evidence of AI governance. They want a model card. They want a risk tier. They want to know where training data came from. They want to know who signed off on the last model release. If your answer to any of these is "we'll get back to you," you lose the deal. If your answer is "here's the doc, here are the test results, here's the change log," you close.
 
-The same is true for {topic}. Day one is a single rep. Day thirty is maybe five pounds heavier. Day ninety is when you start to see the curve.
+The hard part is that this evidence is hard to fake. You either have the discipline to build it into the development loop, or you don't, and your enterprise pipeline will reflect that within two quarters.
 
-The mistake most people make is treating day one like it should feel like day ninety. It doesn't. Day one feels pointless. Day thirty feels barely better. Day ninety is when the compounding kicks in. The reason most people never see day ninety is they don't survive day thirty.
+This playbook is about the discipline. Specifically, the minimum viable version of it that holds up to a real audit. The framework underneath is the NIST AI Risk Management Framework (AI RMF 1.0, January 2023) plus the EU AI Act risk tiers — the two standards that, between them, cover 80% of what enterprise buyers and regulators are going to ask about.
 
-So the only goal of this chapter is to convince you to survive the first thirty days. If you can do that, the rest of this book is unnecessary. If you can't, no amount of strategy will save you.
+By the end of this book, you will have a 30-day plan to ship a governance program that survives both.
 
-## Chapter 2 -- The Work
+---
 
-Three habits that compound: write daily, ship weekly, review monthly.
+## Chapter 2 — The four artifacts every AI startup must have
 
-**Write daily.** Twenty minutes is enough. The point isn't output, it's the practice of putting thoughts into words. If you can't articulate a problem in a paragraph, you don't understand it yet.
+You need four documents. Not 40. Four. Every enterprise security review, every AI Act conformity assessment, and every diligence call will pull from these same four files. Build them once, keep them current, and reuse them forever.
 
-Here's a useful test: at the end of each day, write one paragraph about what you worked on. Not for an audience, not for posterity, just for yourself. If you can't, you didn't actually understand the work. The act of writing forces clarity. After thirty days of this, you will be able to explain your work to anyone in under five minutes. That is a superpower.
+**1. Model card.** One page per model in production. Sections: intended use, out-of-scope use, training data summary, evaluation results (with dates), known limitations, contact. Use the Google model card template. Update it every time you ship a new version. The buyer wants to see the version history, not just the current state.
 
-**Ship weekly.** A bad first draft is worth more than a perfect plan. Pick the smallest thing that could possibly be useful, finish it, and put it in front of one real person. Their reaction is data; your assumptions are not.
+**2. Risk tier.** Each model gets a tier: 1 (minimal risk, internal use only), 2 (limited risk, customer-facing but no automated decisions), 3 (high risk, automated decisions affecting people), or 4 (prohibited under EU AI Act — do not build). Most startups should have zero tier 3 models and zero tier 4 models. If you have a tier 3, you also need a conformity assessment, which is a 30-page document. Plan accordingly.
 
-The key word here is "real." A friend who will tell you it's great is not a real person. A real person is someone who will not lie to spare your feelings. Find three of them by month two. The first will be hard to find; the second and third will be referrals from the first.
+**3. Data lineage.** A spreadsheet or database table: for every model, where did the training data come from, when was it collected, what consent did users give, and how is it deleted on request. This is the single most-failed audit item. If you can't answer "where did the training data for model X come from" in under 30 seconds, you don't have data lineage.
 
-**Review monthly.** Block 90 minutes on the last Friday of the month. What shipped? What didn't? What surprised you? What's the one thing to do differently next month? Write the answers down.
+**4. Change log.** A git-style log of every model release: what changed, who approved, what tests ran, what rollback plan exists. The EU AI Act requires this for tier 3. Enterprise buyers ask for it for everything. A Notion page or a `CHANGELOG.md` in your model repo is fine.
 
-The review is the most skipped step. It's the most important. Without it, you are running on autopilot. You will repeat your month-one mistakes in month-six. With it, you compound.
+You can have all four in a week. Most startups take a quarter because they overthink the format. Use the templates in Appendix A. Done is better than perfect.
 
-## Chapter 3 -- The Payoff
+---
 
-Twelve months from now, you'll be in the top 5% if you actually do the work. The catch: most won't. That's the opportunity.
+## Chapter 3 — The 30-day plan to ship a governance program
 
-Why do most people quit? Not because the work is hard. Because the feedback loop is slow. The first month feels like nothing is happening. The second month still feels slow. By month three, you have something, but it's still small. The compounding starts around month four, and by month six, you realize you're now ahead of everyone who said they'd start "next month."
+The plan is deliberately small. If you can't do 30 days of this, you can't do governance at all and should not be selling to enterprises.
 
-The hardest part is surviving the first three months. The way you survive them is by having a feedback loop you trust: write daily, ship weekly, review monthly. The numbers don't lie.
+**Week 1 — Inventory.** List every model in production. For each: intended use, who owns it, last training data refresh. You will find 2-3x more models than you thought. That's normal. Half of them are probably internal tools that don't need governance, but you have to list them to know that.
 
-Here is a useful reframe: the goal of the first three months is not to make money. The goal is to gather enough signal to know whether to continue. If after three months you have zero users and zero revenue, you probably picked the wrong thing. Pivot. If you have one user who pays you and emails you back, you picked the right thing. Double down.
+**Week 2 — Risk tier everything.** For each model, assign a tier using the EU AI Act + NIST framework (Appendix B). The honest answer is usually: most are tier 1 or 2, two are tier 3, none are tier 4. If you have a tier 3, block two days that week to write the conformity assessment. If you have a tier 4, you have a much bigger problem — stop and talk to a lawyer.
 
-## Chapter 4 -- The Common Traps
+**Week 3 — Write the four artifacts.** One model card per tier 2+ model. One data lineage doc per tier 2+ model. One change log per model. One risk register for the company. This is the boring part. Block 4 hours/day for a week. By Friday you have all four documents.
 
-**Trap 1: Tool-switching.** Every time you switch tools, you lose a week re-learning. Pick one. Use it for 90 days before evaluating.
+**Week 4 — Test the program.** Pick your largest enterprise prospect. Ask them for their security questionnaire. Fill it out using only the four artifacts. If you can answer 80% of the questions in one afternoon, the program works. If you can't, you have a real gap and you now know what to fix.
 
-**Trap 2: Audience-watching.** You don't have an audience yet. Stop optimizing for them. Optimize for the one person you can help this week.
+The output of week 4 is a real, audit-ready governance program. It will not be perfect. It will be enough.
 
-**Trap 3: Pricing-paralysis.** If you can't decide on a price, pick $19. The point isn't the money. The point is the signal of someone paying you. You can raise the price later.
+---
 
-**Trap 4: Done-itis.** Finishing the first version is not the goal. Finishing the first *useful* version is. Ship when it's embarrassing; iterate from there.
+## Chapter 4 — The five things that will get you in trouble
 
-**Trap 5: Public-perfectionism.** Hiding until it's "ready" is the slowest path. Ship early, ship often, let the public see the mess. The people who like you for the polished version will leave when you stumble. The people who like you for the work will stay.
+These are the patterns I've seen get AI startups into actual legal or reputational trouble. They are all preventable.
 
-**Trap 6: Comparing-up.** Comparing yourself to the leader in your space is demoralizing and useless. Compare yourself to yourself from 30 days ago. That's the only comparison that matters.
+**1. Scraping training data without consent.** If your training data came from public web scraping (Common Crawl, etc.), you have a consent problem. The EU AI Act Article 10 requires documentation of data quality and provenance. Some US states (California, Illinois) have biometric and privacy rules that also apply. The fix: switch to licensed datasets, or document the scraping and add an opt-out mechanism.
 
-## Chapter 5 -- The 90-Day Plan
+**2. Releasing a model without a rollback plan.** Every model release needs a documented rollback. Not a Slack message saying "we can revert if needed" — an actual procedure: which env vars to flip, how to invalidate the model cache, who has the keys. Without it, when a regulator asks "how do you recall a model?" you have no answer.
 
-Week 1-2: Set up. Pick the tool. Pick the topic. Do the thing every day for 14 days. Don't publish anything yet.
+**3. Letting marketing call the model "fully automated" when it isn't.** If a human reviews the model's output before it reaches the user, the marketing page cannot say "no human in the loop." The EU AI Act considers this misleading. The FTC has already issued fines for similar claims. If a human is reviewing, say so. If a human isn't, document the test results that show it doesn't need to be.
 
-Week 3-4: First ship. Publish something small. Get one real user. Listen to their feedback. Fix the worst gap.
+**4. Collecting feedback data without a deletion path.** If you store user feedback to retrain on later, you need a way to delete it on user request. GDPR Article 17, CCPA, and most enterprise contracts all require this. The fix: a `DELETE /users/{id}/data` endpoint that actually deletes from your training data warehouse, not just the production database.
 
-Week 5-8: Compound. Publish weekly. Talk to one user per week. Track what they say. The pattern becomes visible by week 6.
+**5. Skipping bias testing because "we'll add it later."** The bias tests are not optional for tier 2+ models. They are 3-5 days of work, not 3-5 weeks. Pick a framework (Aequitas, Fairlearn, or your own), pick a protected attribute, run the test, document the result. If the test shows bias, document that too and the mitigation plan. Auditors care more about "you tested and found X" than "we have no bias." The former is governance. The latter is a liability.
 
-Week 9-12: Scale (a little). If the thing is working, do more of what worked. If it's not, kill it. Both are wins.
+---
 
-The hardest week is week 4. By then the novelty is gone and you don't yet have evidence the work matters. The work matters in week 8. The work pays in week 12. The trick is surviving weeks 4-7 with no evidence. The only thing that gets you through is the daily write and the weekly ship. They are evidence you are still doing the work.
+## Chapter 5 — The governance program that scales
 
-## Appendix A -- Resources
+After the 30-day plan, you have the four artifacts and a working process. The next 6 months are about making it a habit, not a one-time project.
 
-- Book: Show Your Work -- Austin Kleon
-- Book: The Mom Test -- Rob Fitzpatrick
-- Book: Company of One -- Paul Jarvis
-- Tool: a plain text file you actually open
-- Habit: one Pomodoro a day
+**Quarter 1 — Embed the change log.** Every model release must include a change log entry. Add it to your CI/CD pipeline as a required field. Reject merges that don't update the change log. This is one PR review rule and it solves 50% of the long-term governance debt.
 
-## Appendix B -- Common Questions
+**Quarter 2 — Quarterly bias audit.** Run the bias tests on every tier 2+ model once a quarter. Publish the results internally. The first time you do this you will find a real issue. That is the point. Better you find it than the regulator.
 
-**Q: How long until I see results?**
-A: 4-12 weeks if you ship weekly. 12-24 weeks if you ship monthly. Never if you ship never.
+**Quarter 3 — External audit.** Hire an external AI governance consultant to review your four artifacts. Cost: $15-30k. Value: you get a list of gaps and a credibility stamp for enterprise sales. The ROI is one closed deal.
 
-**Q: What's the #1 tool?**
-A: The one you'll actually use. Discipline beats tooling.
+**Quarter 4 — Conformity assessment for tier 3.** If you have a tier 3 model, you now need a formal conformity assessment. This is the EU AI Act's required document for high-risk systems. Budget 4-6 weeks. Start in Q4 so it's done by the end of the fiscal year.
 
-**Q: What if I miss a day?**
-A: Don't miss two. The streak matters less than the recovery.
+By month 12 you have a governance program that holds up to an EU AI Act audit, an enterprise security review, and a Series A diligence call. The cost in time was 30 days of focused work in the first month and one day per month after. The cost in cash was zero unless you hired a consultant, in which case $20-40k. The cost in deals lost from not having it is the part that motivated you to read this book in the first place.
 
-**Q: Should I quit my job?**
-A: Not until you've done this for 90 days on the side and have signal that it works.
+---
 
-**Q: How do I find my first user?**
-A: Go where they already are. Help one person for free. They'll tell two people.
+## Appendix A — Templates
+
+- **Model card template:** Google's open-source template at `modelcards.withgoogle.com/about/eval`. Use the short version (1 page).
+- **Data lineage template:** A spreadsheet with these columns: model name, dataset name, source, collection date, consent basis, retention period, deletion endpoint.
+- **Risk register:** A spreadsheet with: risk ID, description, likelihood, impact, mitigation, owner, review date. Add 5-10 rows the first week.
+- **Change log:** A markdown file in each model repo. Format: `## v1.2.3 — 2026-01-15 — Added bias test, updated training data`. One entry per release.
+
+## Appendix B — EU AI Act risk tiers (summary)
+
+- **Tier 1 (minimal risk):** spam filters, games, internal tools. No obligations.
+- **Tier 2 (limited risk):** chatbots, content recommendation, image generation. Transparency obligations (disclose AI, label outputs).
+- **Tier 3 (high risk):** credit scoring, hiring, medical, education, biometric ID, critical infrastructure. Full conformity assessment, data governance, human oversight, accuracy/robustness testing.
+- **Tier 4 (prohibited):** social scoring, subliminal manipulation, real-time biometric ID in public spaces (with narrow exceptions). Do not build.
+
+## Appendix C — Resources
+
+- NIST AI RMF 1.0 (free PDF, `nist.gov/itl/ai-risk-management-framework`)
+- EU AI Act (full text, `artificialintelligenceact.eu`)
+- Google Model Cards (template + paper, `modelcards.withgoogle.com`)
+- Fairlearn (open-source bias testing, `fairlearn.org`)
+- Aequitas (open-source bias audit, `github.com/dssg/aequitas`)
+- The AI Incident Database (`incidentdatabase.ai`) — see what other companies got wrong
 
 ## Conclusion
 
-You don't need more information. You need 30 days of doing the thing. The book is the easy part. The doing is the work. Start tomorrow morning. Or tonight. Either is fine.
+You don't need a 12-person legal team to ship AI governance. You need four documents, 30 days, and the discipline to keep them current. The model card. The risk tier. The data lineage. The change log. The rest is repetition.
 
-If you do this and it works, email me. I want to hear about it.
+If you ship the 30-day plan and the four artifacts are out of date within 6 months, you didn't really ship a governance program — you shipped a project. The program is the habit. The habit is one PR review rule and one day per quarter.
 
-If you do this and it doesn't work, email me anyway. I want to hear what you learned.
+Either way, governance is now a buyer expectation, not a nice-to-have. The startups that win enterprise deals in 2026 and beyond are the ones whose founders read a playbook like this on a Tuesday and shipped the program by Friday.
 
-Either way, the book is a small thing. The doing is the big thing. Go.
+Go ship it.

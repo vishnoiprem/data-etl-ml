@@ -1,112 +1,125 @@
-# {title}
+# The GDPR For Indie Hackers Playbook
 
-## Chapter 1 -- The Setup
+A 22-page field guide to shipping a GDPR-compliant SaaS as a solo founder or tiny team, without hiring a DPO, paying $20k to a law firm, or blocking your launch in the EU.
 
-Most people overthink the start. Here's the minimum viable version.
+**Who this is for:** founders shipping a SaaS product who want to sell to EU customers without getting fined 4% of revenue. You are not a lawyer. You don't need to become one. You need a practical playbook that holds up to a real audit.
 
-Most beginners spend the first month choosing tools. That's a mistake. Tools change. The fundamentals don't.
+**What this is not:** a 200-page legal treatise on the General Data Protection Regulation. This is the minimum viable compliance program that keeps you out of trouble and lets you close EU deals.
 
-The minimum viable version of {topic} looks like:
+---
 
-- Pick one problem to solve (not three).
-- Pick one tool to use (not the best one, the one you'll actually open).
-- Do the thing for 30 days.
-- Review what worked, what didn't, what to change.
-- Repeat, with one small improvement per cycle.
+## Chapter 1 — Why GDPR is a moat, not a tax
 
-That's the whole game. The rest of this book is elaboration on the same idea.
+Most indie hackers treat GDPR like an obligation: something bigcos do to avoid EU fines. The opposite is true for SaaS. Done well, GDPR compliance is the reason an EU enterprise will choose your product over a US competitor who can't sign a Data Processing Agreement. Done badly, it is the reason your EU Stripe payouts get frozen after a single complaint.
 
-The reason this works is that the first month is not about producing output. It's about building the muscle. The output comes later, when the muscle is strong enough to bear weight. Most people quit in month one because they expected output before the muscle was ready. They thought "I've been doing this for two weeks, why don't I have anything to show?" The answer is: because that's not how muscles work. You don't deadlift 300 pounds on day one. You deadlift 95, then 135, then 185, then 225. After six months, 300.
+The reason: every EU customer, every B2B contract with an EU counterparty, and every EU-based VC requires documented GDPR compliance. They want a DPA (Data Processing Agreement). They want to know where the data is stored. They want to know how you handle deletion requests. If your answer is "we'll add it later," you don't get the contract. If your answer is "here's our DPA, our data flow diagram, and our 30-day deletion SLA," you close.
 
-The same is true for {topic}. Day one is a single rep. Day thirty is maybe five pounds heavier. Day ninety is when you start to see the curve.
+The hard part is that this compliance is hard to fake. You either have the documentation, the processes, and the discipline, or you don't, and your EU revenue will reflect that within two quarters.
 
-The mistake most people make is treating day one like it should feel like day ninety. It doesn't. Day one feels pointless. Day thirty feels barely better. Day ninety is when the compounding kicks in. The reason most people never see day ninety is they don't survive day thirty.
+This playbook is about the discipline. Specifically, the minimum viable version of it that holds up to a real audit and unblocks EU revenue. The framework underneath is GDPR's seven principles (Article 5) plus the lawful bases for processing (Article 6) plus the data subject rights (Articles 15-22). You don't need to memorize these. You need to satisfy them in your product and your contracts.
 
-So the only goal of this chapter is to convince you to survive the first thirty days. If you can do that, the rest of this book is unnecessary. If you can't, no amount of strategy will save you.
+By the end of this book, you will have a 30-day plan to ship a GDPR-compliant SaaS that holds up to a real audit.
 
-## Chapter 2 -- The Work
+---
 
-Three habits that compound: write daily, ship weekly, review monthly.
+## Chapter 2 — The six documents every SaaS must have
 
-**Write daily.** Twenty minutes is enough. The point isn't output, it's the practice of putting thoughts into words. If you can't articulate a problem in a paragraph, you don't understand it yet.
+You need six documents. Not 60. Six. Every enterprise customer, every DPA negotiation, and every privacy regulator inquiry will pull from these same six files. Build them once, keep them current, and reuse them forever.
 
-Here's a useful test: at the end of each day, write one paragraph about what you worked on. Not for an audience, not for posterity, just for yourself. If you can't, you didn't actually understand the work. The act of writing forces clarity. After thirty days of this, you will be able to explain your work to anyone in under five minutes. That is a superpower.
+**1. Privacy Policy.** A public page on your website that explains what data you collect, why, how long you keep it, who you share it with, and how users can request deletion, export, and correction. Don't write from scratch. Use a generator like `iubenda.com` ($27/yr) or `termly.io` ($120/yr) and customize. Required by GDPR, CCPA, and most App Store review processes.
 
-**Ship weekly.** A bad first draft is worth more than a perfect plan. Pick the smallest thing that could possibly be useful, finish it, and put it in front of one real person. Their reaction is data; your assumptions are not.
+**2. Data Processing Agreement (DPA).** A contract between you and any customer who is a "data controller" (i.e., their users' data flows through your system). Required by GDPR Article 28. The minimum: scope of processing, duration, nature of data, obligations of each party, sub-processor list. Don't write from scratch. Most compliance platforms (see Chapter 3) include a standard DPA you can use.
 
-The key word here is "real." A friend who will tell you it's great is not a real person. A real person is someone who will not lie to spare your feelings. Find three of them by month two. The first will be hard to find; the second and third will be referrals from the first.
+**3. Data Flow Diagram.** One page. Shows where customer data enters your system, where it's stored, where it's processed, where it leaves, and who has access. The minimum: a draw.io diagram with boxes for your database, your background workers, your third-party APIs (Stripe, OpenAI, etc.), and arrows showing data flow. Auditors ask for this in every DPA negotiation.
 
-**Review monthly.** Block 90 minutes on the last Friday of the month. What shipped? What didn't? What surprised you? What's the one thing to do differently next month? Write the answers down.
+**4. Record of Processing Activities (ROPA).** A spreadsheet listing every category of data you process, the lawful basis for each (consent, contract, legitimate interest, etc.), the retention period, and the security measures. Required by GDPR Article 30 for any company processing personal data. Most SaaS companies maintain this in a Notion database.
 
-The review is the most skipped step. It's the most important. Without it, you are running on autopilot. You will repeat your month-one mistakes in month-six. With it, you compound.
+**5. Sub-processor list.** A public page listing every third party that processes customer data on your behalf (AWS, Stripe, OpenAI, your email tool, your analytics tool). Each one needs its own DPA. The list changes as you add vendors. Update it within 30 days of adding a new sub-processor (some customer contracts require this).
 
-## Chapter 3 -- The Payoff
+**6. Breach response runbook.** A 1-page document: who to call, who tells customers, who tells the regulator (you have 72 hours under GDPR), and what the customer notification template looks like. Required by GDPR Article 33. The runbook only matters the day you have a breach. The auditor wants to know it exists before that day.
 
-Twelve months from now, you'll be in the top 5% if you actually do the work. The catch: most won't. That's the opportunity.
+You can have all six in two weeks. Most indie hackers take 3 months because they overthink the legal language. Use the templates in Appendix A. Done is better than perfect.
 
-Why do most people quit? Not because the work is hard. Because the feedback loop is slow. The first month feels like nothing is happening. The second month still feels slow. By month three, you have something, but it's still small. The compounding starts around month four, and by month six, you realize you're now ahead of everyone who said they'd start "next month."
+---
 
-The hardest part is surviving the first three months. The way you survive them is by having a feedback loop you trust: write daily, ship weekly, review monthly. The numbers don't lie.
+## Chapter 3 — The 30-day plan to ship GDPR compliance
 
-Here is a useful reframe: the goal of the first three months is not to make money. The goal is to gather enough signal to know whether to continue. If after three months you have zero users and zero revenue, you probably picked the wrong thing. Pivot. If you have one user who pays you and emails you back, you picked the right thing. Double down.
+The plan is deliberately small. If you can't do 30 days of this, you can't do GDPR at all and should not be selling to EU customers.
 
-## Chapter 4 -- The Common Traps
+**Week 1 — Privacy Policy + DPA.** Generate the Privacy Policy (iubenda, termly) and customize the DPA from a template. Both are 90-minute tasks. Publish the Privacy Policy on your site. Save the DPA as a PDF in your contracts folder.
 
-**Trap 1: Tool-switching.** Every time you switch tools, you lose a week re-learning. Pick one. Use it for 90 days before evaluating.
+**Week 2 — Data Flow Diagram + ROPA.** Draw the diagram in draw.io. Walk through your codebase and list every database table, every third-party API, every background job. The ROPA is a spreadsheet with one row per data category. Both are half-day tasks.
 
-**Trap 2: Audience-watching.** You don't have an audience yet. Stop optimizing for them. Optimize for the one person you can help this week.
+**Week 3 — Sub-processor DPAs + Breach Runbook.** For each third-party processor, find their standard DPA (AWS, Stripe, OpenAI, etc. all have them publicly available) and save them in a folder. Write the breach runbook as a one-pager. Add a public page listing your sub-processors (your customers will ask for this).
 
-**Trap 3: Pricing-paralysis.** If you can't decide on a price, pick $19. The point isn't the money. The point is the signal of someone paying you. You can raise the price later.
+**Week 4 — Test the program.** Pick your largest EU customer (or your most likely EU customer persona). Send them your Privacy Policy, DPA, and data flow diagram. Ask them to flag any concerns. If they don't push back, the program is enough. If they do, you now have a real list of fixes.
 
-**Trap 4: Done-itis.** Finishing the first version is not the goal. Finishing the first *useful* version is. Ship when it's embarrassing; iterate from there.
+The output of week 4 is a real, audit-ready GDPR program. It will not be perfect. It will be enough.
 
-**Trap 5: Public-perfectionism.** Hiding until it's "ready" is the slowest path. Ship early, ship often, let the public see the mess. The people who like you for the polished version will leave when you stumble. The people who like you for the work will stay.
+---
 
-**Trap 6: Comparing-up.** Comparing yourself to the leader in your space is demoralizing and useless. Compare yourself to yourself from 30 days ago. That's the only comparison that matters.
+## Chapter 4 — The four things that will get you in trouble
 
-## Chapter 5 -- The 90-Day Plan
+These are the patterns I've seen get indie hackers into actual trouble with EU data protection authorities. They are all preventable.
 
-Week 1-2: Set up. Pick the tool. Pick the topic. Do the thing every day for 14 days. Don't publish anything yet.
+**1. Using US-based vendors without DPAs.** If you store EU customer data in US AWS regions and don't have a DPA with AWS (you do by default, check your AWS console), or if you use a US-based vendor that doesn't have a DPA, you're in violation. The fix: every vendor that touches personal data needs a signed DPA. AWS, Stripe, OpenAI, Cloudflare, and most enterprise vendors have standard DPAs available immediately.
 
-Week 3-4: First ship. Publish something small. Get one real user. Listen to their feedback. Fix the worst gap.
+**2. No deletion endpoint.** GDPR Article 17 gives users the right to be forgotten. If a user emails you asking to delete their account and you can't do it within 30 days, you're in violation. The fix: a `DELETE /api/users/{id}` endpoint that actually deletes from your production database, your analytics warehouse, your backups (eventually), and your third-party processors.
 
-Week 5-8: Compound. Publish weekly. Talk to one user per week. Track what they say. The pattern becomes visible by week 6.
+**3. Cookie banner that doesn't work.** The cookie consent requirements are real. If you have Google Analytics or any non-essential cookie set before consent, you're in violation. The EU has fined companies for this repeatedly. The fix: a proper consent management platform (Cookiebot, $12/month, or Osano). Don't roll your own.
 
-Week 9-12: Scale (a little). If the thing is working, do more of what worked. If it's not, kill it. Both are wins.
+**4. Marketing emails without consent.** GDPR requires explicit opt-in for marketing emails (versus US CAN-SPAM which allows opt-out). If you email EU users who didn't check a box saying "yes, send me marketing," you're in violation. The fix: double opt-in for EU users, or segment by signup source. Mailchimp and ConvertKit both handle this if you configure them.
 
-The hardest week is week 4. By then the novelty is gone and you don't yet have evidence the work matters. The work matters in week 8. The work pays in week 12. The trick is surviving weeks 4-7 with no evidence. The only thing that gets you through is the daily write and the weekly ship. They are evidence you are still doing the work.
+---
 
-## Appendix A -- Resources
+## Chapter 5 — The program that compounds after the first audit
 
-- Book: Show Your Work -- Austin Kleon
-- Book: The Mom Test -- Rob Fitzpatrick
-- Book: Company of One -- Paul Jarvis
-- Tool: a plain text file you actually open
-- Habit: one Pomodoro a day
+After the 30-day plan, you have the six documents and a working process. The next 12 months are about making it a habit, not a one-time project.
 
-## Appendix B -- Common Questions
+**Quarter 1 post-launch — Embed the documentation.** Add "data flow updated" to your quarterly review. Add the deletion endpoint to your standard user-deletion workflow. Add the sub-processor DPA check to your vendor onboarding workflow. None of this is hard. It's the same control, surfaced at the moment it's needed.
 
-**Q: How long until I see results?**
-A: 4-12 weeks if you ship weekly. 12-24 weeks if you ship monthly. Never if you ship never.
+**Quarter 2 — Annual ROPA review.** Walk through the ROPA. Has anything changed? New data category? New vendor? Update it. Auditors will ask "when was the ROPA last reviewed?" and "current quarter" is the right answer.
 
-**Q: What's the #1 tool?**
-A: The one you'll actually use. Discipline beats tooling.
+**Quarter 3 — Quarterly access reviews.** Same as SOC2. Review who has access to your production database, your admin panels, your third-party consoles. Disable what they don't need. EU regulators care more about this than US ones do.
 
-**Q: What if I miss a day?**
-A: Don't miss two. The streak matters less than the recovery.
+**Quarter 4 — Annual policy review.** Update the Privacy Policy if anything material changed. Audit the sub-processor list. Test the breach runbook with a tabletop exercise. By the time you do this in Q4, you have a year of evidence that the program is operational, not just a one-time project.
 
-**Q: Should I quit my job?**
-A: Not until you've done this for 90 days on the side and have signal that it works.
+By month 12 you have a GDPR program that holds up to any EU customer security review, any DPA negotiation, and any data protection authority inquiry. The cost in time was 30 days of focused work in the first month and 2-3 hours per quarter after. The cost in cash was $0-300/yr (mostly the privacy policy generator subscription). The cost in EU revenue lost from not having it is the part that motivated you to read this book in the first place.
 
-**Q: How do I find my first user?**
-A: Go where they already are. Help one person for free. They'll tell two people.
+---
+
+## Appendix A — Templates and tools
+
+- **Privacy Policy generator:** iubenda ($27/yr), Termly ($120/yr), or Cookiebot ($12/mo)
+- **DPA template:** Most compliance platforms include one. Or use the EU standard contractual clauses (free, `ec.europa.eu/info/law/law-topic/data-protection_en`).
+- **Data Flow Diagram tool:** draw.io (free) or Lucidchart
+- **ROPA template:** Any spreadsheet with these columns: data category, lawful basis, retention, security measures, sub-processor
+- **Cookie consent:** Cookiebot, Osano, or OneTrust
+
+## Appendix B — The 30-day calendar
+
+| Week | Action | Owner |
+|---|---|---|
+| 1 | Privacy Policy + DPA published | Founder |
+| 2 | Data Flow Diagram + ROPA | Founder + Engineer |
+| 3 | Sub-processor DPAs + Breach Runbook | Founder |
+| 4 | Test with EU customer persona | Founder |
+
+## Appendix C — Resources
+
+- GDPR full text (free, `gdpr-info.eu`)
+- ICO Guide for Small Businesses (`ico.org.uk/for-organisations/businesses-and-organisations`)
+- IAPP (`iapp.org`) — the trade association, has free resources
+- The "GDPR for Indie Hackers" community (`indiehackers.com` search "GDPR")
+- Maetzler & Co. plain-English GDPR overview (`lawplainandsimple.com`)
+- TermsFeed (`termsfeed.com`) — free generators for Privacy Policy, Cookie Policy, etc.
 
 ## Conclusion
 
-You don't need more information. You need 30 days of doing the thing. The book is the easy part. The doing is the work. Start tomorrow morning. Or tonight. Either is fine.
+You don't need a DPO to ship GDPR. You need six documents, 30 days, and the discipline to keep them current. The Privacy Policy. The DPA. The data flow diagram. The ROPA. The sub-processor list. The breach runbook. The rest is repetition.
 
-If you do this and it works, email me. I want to hear about it.
+If you ship the 30-day plan and the documentation falls apart within 6 months, you didn't really ship a compliance program — you shipped a project. The program is the habit. The habit is one quarterly review meeting and one annual policy update.
 
-If you do this and it doesn't work, email me anyway. I want to hear what you learned.
+Either way, GDPR is now a buyer expectation, not a nice-to-have. The SaaS startups that close EU deals in 2026 and beyond are the ones whose founders read a playbook like this on a Tuesday and shipped the program by Friday.
 
-Either way, the book is a small thing. The doing is the big thing. Go.
+Go ship it.
