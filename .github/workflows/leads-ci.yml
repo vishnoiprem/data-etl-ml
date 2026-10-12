@@ -135,6 +135,12 @@ jobs:
           build-args: VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # `load: true` is required so the built image lands in
+          # the local docker daemon rather than staying inside the
+          # buildx cache. Without it, the `docker run` in the next
+          # step can't find the image and exits 125. We're not
+          # pushing, so single-platform is fine.
+          load: true
 
       - name: Smoke test the built image
         env:
@@ -142,9 +148,22 @@ jobs:
         run: |
           # Use the in-image healthcheck script — exercises the
           # same import path that production healthchecks will use.
+          set -e
+          echo "Image to test: $IMAGE_TAG"
+          # `docker images` would show an empty result without
+          # `load: true` on the build step (the image lives only
+          # inside the buildx cache). This is a fast sanity
+          # check — if the tag isn't listed here, the next
+          # `docker run` will fail with exit 125.
+          docker images | grep -F "$IMAGE_TAG" || {
+            echo "::error::image $IMAGE_TAG not in local daemon"
+            docker images
+            exit 1
+          }
           docker run --rm --entrypoint /bin/sh \
             "$IMAGE_TAG" \
             /usr/local/bin/docker-healthcheck.sh
+          echo "smoke test exit=$?"
 
       - name: Image size budget
         env:
@@ -214,6 +233,9 @@ jobs:
           build-args: VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Same reason as the CD-guard build: grype scans the
+          # local docker daemon, so the image must be loaded.
+          load: true
 
       - name: Run grype
         uses: anchore/scan-action@v6
