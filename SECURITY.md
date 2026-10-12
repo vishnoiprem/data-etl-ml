@@ -114,7 +114,18 @@ docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest-v1.2.3
   (downloadable from the `leads-cd` run page, 30-day retention)
 - `org.opencontainers.image.version` label is stamped from the
   in-tree `VERSION` file at build time
-- GHCR's built-in scanner continuously reviews the published tags
+- Every published tag is signed with **cosign keyless** (OIDC +
+  GitHub Actions workload identity). Verify any pull:
+  ```bash
+  cosign verify \
+    --certificate-identity-regexp 'https://github.com/vishnoiprem/data-etl-ml' \
+    --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+    ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
+  ```
+- GHCR's built-in scanner continuously reviews the published tags,
+  and `leads-ci`'s `vuln-scan` job re-runs grype on every PR — so
+  a newly-disclosed CVE in the runtime deps will fail CI within
+  ~24h of disclosure even if no code changed.
 
 ## License & Disclaimer
 
