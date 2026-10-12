@@ -622,6 +622,122 @@ def scrape_hn_algolia_24h():
 
 
 # ============================================================
+# hnhiring.com — static mirror of "Who is hiring" posts filtered to
+# remote roles. Server-rendered HTML (no JS), no auth, ~150 jobs
+# per page. Good complement to scrape_hn_algolia_24h: where Algolia
+# returns 24h, hnhiring.com returns ~30 days of remote roles.
+# ============================================================
+HNHIRING_REMOTE_URL = "https://hnhiring.com/locations/remote"
+
+
+def scrape_hnhiring_remote():
+    """Scrape hnhiring.com/locations/remote for senior+ AI/ML/data roles.
+
+    Page is server-rendered HTML — each posting is a <li class="job">.
+    No auth, no rate limits observed. Returns [] on any failure.
+    """
+    out = []
+    try:
+        r = requests.get(
+            HNHIRING_REMOTE_URL,
+            timeout=15,
+            headers={"User-Agent": "AvilxBot/1.0 (leads-pipeline)"},
+        )
+        if r.status_code != 200:
+            print(f"  [hnhiring] HTTP {r.status_code} — skipping")
+            return out
+    except Exception as e:
+        print(f"  [hnhiring] fetch error: {e}")
+        return out
+
+    html = r.text
+    # Split on the job list-item wrapper. Each posting is a <li class="job">.
+    # Use a non-greedy match to keep each block small.
+    blocks = re.findall(
+        r'<li class="job"[^>]*>(.*?)</li>', html, re.S | re.I
+    )
+    if not blocks:
+        print("  [hnhiring] no <li class='job'> blocks found — markup changed?")
+        return out
+
+    for block in blocks:
+        # Extract: HN handle, date, body text, first external link
+        user_m = re.search(
+            r'<a\s+href="https://news\.ycombinator\.com/user\?id=([^"]+)"',
+            block, re.I,
+        )
+        user = user_m.group(1) if user_m else ""
+        date_m = re.search(r'class="[^"]*gray[^"]*"[^>]*>(\d{4}-\d{2}-\d{2})',
+                           block, re.I)
+        post_date = date_m.group(1) if date_m else ""
+        body_m = re.search(r'<div class="body"[^>]*>(.*?)</div>\s*</div>',
+                           block, re.S | re.I)
+        body_html = body_m.group(1) if body_m else block
+        # Strip remaining tags
+        text = re.sub(r"<[^>]+>", " ", body_html)
+        text = re.sub(r"\s+", " ", text).strip()
+        if not text:
+            continue
+        if not is_senior_eng(text[:200], text):
+            continue
+        # Try the "Foo is hiring X" headline pattern first
+        # (text often starts with "Chronograph (chronograph.pe) | Role | FT | ...")
+        head = text[:200]
+        m = re.match(
+            r"^([A-Z][\w&.'-]+(?:\s+[A-Z][\w&.'-]+)?)\s+is\s+hiring\b(.*)$",
+            head, re.S,
+        )
+        if m:
+            co = m.group(1).strip()
+            role = m.group(2).strip().rstrip(".") or "Engineer"
+        else:
+            # First-line "Company (domain) | Role | FT | Remote | $..."
+            first_line = head.split(" | ")[0]
+            # Strip trailing "(domain.com)" hint
+            co_hint = re.sub(r"\s*\([^)]+\)\s*$", "", first_line).strip()
+            # And drop a leading "Location:" or "Technologies:" if present
+            co_hint = re.sub(
+                r"^(?:Location|Technologies|Remote|Stack|Salary|Apply):\s*",
+                "", co_hint, flags=re.I,
+            )
+            if co_hint and len(co_hint) <= 60:
+                co, role = split_company_role(head)
+                if not co or co.lower() in ("unknown", "n/a", ""):
+                    co = co_hint
+            else:
+                co, role = split_company_role(head)
+        if not co or co.lower() in ("unknown", "n/a", ""):
+            # Fall back to HN handle as a weak signal
+            if user:
+                co = user.title()
+        co_l = co.lower().strip()
+        if any(bad in co_l for bad in (
+            "ask hn", "show hn", "tell hn", "launch hn",
+            "ycombinator", "news.ycombinator", "hn hiring",
+        )):
+            continue
+        # Pull first apply link
+        link_m = re.search(
+            r'<a\s+href="(https?://[^"]+)"', body_html, re.I
+        )
+        apply_url = link_m.group(1) if link_m else HNHIRING_REMOTE_URL
+        em = (extract_email_from_text(text) or
+              derive_email_from_company(co) or
+              derive_email(co, apply_url))
+        if not em:
+            continue
+        out.append({
+            "company": co,
+            "role": role or "Engineer",
+            "contact_email": em,
+            "source_url": apply_url,
+            "source": f"hnhiring_remote_{post_date}" if post_date else "hnhiring_remote",
+            "jd_text": text[:500],
+        })
+    return out
+
+
+# ============================================================
 # X / Twitter (Playwright with stored auth cookies)
 # ============================================================
 # Why Playwright + cookies:
@@ -911,6 +1027,7 @@ SCRAPERS = [
     ("RemoteOK", scrape_remoteok),
     ("HNHiring", scrape_hnhiring),
     ("HN-Algolia-24h", scrape_hn_algolia_24h),
+    ("HNHiring-Remote", scrape_hnhiring_remote),
     ("X.com", scrape_x_com),
     ("YC", scrape_yc_workatastartup),
     ("Wellfound", scrape_wellfound),
