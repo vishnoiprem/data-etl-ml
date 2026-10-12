@@ -7,10 +7,11 @@ publish that wrap the `leads-pipeline/draft-cron` Python package.
 
 | Workflow         | File                                    | Triggers                                   | Purpose |
 |------------------|-----------------------------------------|--------------------------------------------|---------|
-| `leads-ci`       | `.github/workflows/leads-ci.yml`        | push to `main` + 2 active feature branches, PRs to `main` | Run 6 test modules + lint + Dockerfile build (size budget) |
-| `leads-cd`       | `.github/workflows/leads-cd.yml`        | push to `main`, manual dispatch, dispatch from release-please | Build + push image to `ghcr.io` + verify + SBOM |
+| `leads-ci`       | `.github/workflows/leads-ci.yml`        | push to `main` + 2 active feature branches, PRs to `main` | Run 6 test modules + lint + Dockerfile build (size budget) + advisory grype scan |
+| `leads-cd`       | `.github/workflows/leads-cd.yml`        | push to `main`, manual dispatch, dispatch from release-please | Build + push image to `ghcr.io` + verify + SBOM + cosign keyless sign |
 | `release-please` | `.github/workflows/release-please.yml`  | push to `main`                             | Open release PR from conventional commits, re-dispatch leads-cd with semver tag |
 | `pip-audit`      | `.github/workflows/pip-audit.yml`       | changes to `requirements*.txt`, weekly Mon 06:00 UTC, manual dispatch | Security scan, upload SARIF |
+| `codeql`         | `.github/workflows/codeql.yml`          | changes to `leads-pipeline/**`, weekly Mon 06:30 UTC, manual dispatch | CodeQL static analysis on leads-pipeline Python, upload SARIF |
 
 ## `leads-ci`
 
@@ -147,6 +148,19 @@ Weekly Monday 06:00 UTC scan of every `requirements*.txt` in the
 repo, plus on every change to those files. Uploads a SARIF to
 the Code Scanning tab so the security advisories show up inline
 on PRs.
+
+## `codeql`
+
+Weekly Monday 06:30 UTC GitHub CodeQL pass over
+`leads-pipeline/draft-cron/` (the only project in the repo with
+"production-shaped" Python — the rest of the monorepo is
+tutorials + reference impls where false positives would just be
+distractors). Complements `grype` (which only scans the runtime
+deps) by looking at the source itself — SQL injection, unsafe
+deserialisation, weak crypto, etc. Triggers on every change to
+`leads-pipeline/**` and on a separate weekly schedule. Findings
+are uploaded to the Security tab; the build only fails on
+warnings or higher.
 
 ## Dependabot + Renovate
 

@@ -14,6 +14,7 @@
 [![leads-cd](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml)
 [![release-please](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml)
 [![pip-audit](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml/badge.svg)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml)
+[![codeql](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/codeql.yml)
 [![GHCR image](https://img.shields.io/badge/GHCR-ghcr.io%2Fvishnoiprem%2Fdata--etl--ml%2Fleads--pipeline-2496ED?logo=docker&logoColor=white)](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
 [![Made with Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/)

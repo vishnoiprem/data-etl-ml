@@ -1,0 +1,74 @@
+name: codeql
+
+# Static-analysis pass on the leads-pipeline/draft-cron Python
+# code. Complements grype (which only scans runtime deps) by
+# looking at the source itself — SQL injection, unsafe
+# deserialisation, weak crypto, etc.
+#
+# Scoped narrowly to leads-pipeline/draft-cron to keep run
+# time <2 min on PRs (a full CodeQL pass over the whole monorepo
+# would be 8-15 min and noisy; the rest of the repo is
+# tutorials + reference impls where false positives are
+# distractors).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "leads-pipeline/**"
+      - ".github/workflows/codeql.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "leads-pipeline/**"
+  schedule:
+    # Mondays 06:30 UTC, ~30 min after pip-audit's Monday
+    # 06:00 UTC cron so a single weekly-change burst doesn't
+    # collide with other scan jobs.
+    - cron: "30 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF
+
+jobs:
+  analyze:
+    name: Analyze leads-pipeline (Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # Source root scoped to leads-pipeline/draft-cron —
+          # this is the only project with "production-shaped"
+          # Python; the rest of the monorepo is tutorials.
+          sources: leads-pipeline/draft-cron
+          queries: security-extended,security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: leads-pipeline-codeql
+          # Fail the build only on findings that have a clear
+          # security impact. SARIF still includes everything
+          # security-extended surfaces, so this just gates
+          # the red X in the PR.
+          severity: warning
+
+      - name: Upload results
+        if: always() && hashFiles('codeql-database/**/*.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: codeql-database/results.sarif
+          category: leads-pipeline-codeql
+        continue-on-error: true

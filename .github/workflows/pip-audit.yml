@@ -57,6 +57,7 @@ jobs:
           - ai-engineering/05-distributed-inference/requirements.txt
           - ai-engineering/16-graph-rag/requirements.txt
           - ai-engineering/16-graph-rag/requirements-dev.txt
+          - leads-pipeline/draft-cron/requirements.txt
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
