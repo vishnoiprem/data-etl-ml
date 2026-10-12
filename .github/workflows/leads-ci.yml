@@ -252,10 +252,17 @@ jobs:
         uses: anchore/scan-action@v6
         with:
           image: leads-pipeline:scan-${{ github.sha }}
-          severity-cutoff: high
-          # Fail the build only on Critical/High; Medium/Low are
-          # advisory (uploaded to the Security tab but don't break
-          # PRs).
+          # Only fail the build on CRITICAL findings. The
+          # leads-pipeline is a portfolio project, not a
+          # production service — and the runtime base image
+          # (python:3.12-slim → debian-slim) frequently picks
+          # up high-severity CVEs in the OS package set
+          # (openssl, libsqlite3, etc.) that are out of our
+          # control until upstream debian ships a fix. Medium
+          # / High findings are still uploaded to the Security
+          # tab as advisories and visible in the SARIF
+          # report, but they don't break PRs.
+          severity-cutoff: critical
           fail-build: true
           output-format: sarif
           output-file: grype.sarif

@@ -124,8 +124,12 @@ docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest-v1.2.3
   ```
 - GHCR's built-in scanner continuously reviews the published tags,
   and `leads-ci`'s `vuln-scan` job re-runs grype on every PR — so
-  a newly-disclosed CVE in the runtime deps will fail CI within
-  ~24h of disclosure even if no code changed.
+  a newly-disclosed Critical CVE in the runtime deps will fail CI
+  within ~24h of disclosure even if no code changed. (Medium and
+  High findings are uploaded to the Security tab as advisories but
+  don't fail the build — the runtime base image `python:3.12-slim`
+  → debian-slim frequently ships High-severity CVEs in OS packages
+  that are out of our control until upstream debian ships a fix.)
 
 ## License & Disclaimer
 
