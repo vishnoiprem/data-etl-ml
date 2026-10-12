@@ -1,0 +1,65 @@
+# .dockerignore — keep the build context small and the image clean.
+#
+# Why each entry:
+#   __pycache__/ *.pyc *.pyo  — Python bytecode, regenerated on first run
+#   .git/ .github/           — not needed in the image; saves MB
+#   tests/                   — only used by CI, not the runtime
+#   *.csv *.log *.html       — runtime artifacts that may leak dev data
+#   *.json                   — runtime reports (e.g. autopilot_report.json)
+#   docs/ *.md               — docs aren't needed in the image
+#   .env .env.*              — secrets must come from runtime env, not the image
+#   *.sqlite *.db            — local DB files (CI uses Postgres)
+#   .coverage .pytest_cache  — test artifacts
+#   venv .venv/              — local virtualenvs
+#   Dockerfile .dockerignore — don't copy the build config into itself
+#   docker-compose.yml      — that's for local dev, not the image
+#   *.tmp *.bak *~           — editor / build temp files
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+.git/
+.gitignore
+.github/
+
+tests/
+*.test.py
+
+*.csv
+*.log
+*.html
+*.json
+!requirements.txt   # allow JSON if any in the future
+!*.example.json
+
+*.md
+docs/
+
+.env
+.env.*
+!.env.example
+
+*.sqlite
+*.sqlite3
+*.db
+
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+.tox/
+
+venv/
+.venv/
+env/
+
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+*.tmp
+*.bak
+*~
+.DS_Store
