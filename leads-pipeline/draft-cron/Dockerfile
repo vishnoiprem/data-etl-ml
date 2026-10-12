@@ -13,7 +13,7 @@
 # Python version matches leads-ci workflow (3.10/3.11); we use 3.12
 # for the runtime image because it's the latest stable and a
 # superset of the CI test matrix.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 # Sensible Python defaults for containers
 ENV PYTHONDONTWRITEBYTECODE=1 \
