@@ -2064,6 +2064,9 @@ def smallest(n):
 
 ### Approach 10 — reduce
 ```python
+
+
+
 from functools import reduce
 def smallest(n):
     s = str(abs(n))
@@ -2082,6 +2085,66 @@ def smallest(n):
     for c in result:
         out += c
     return int(out)
+
+
+
+23
+def max_consecutive(arr):
+    arr.sort() # O(n log n)
+    max_sum = 0
+    for i in range(len(arr)-1):
+        s = arr[i] + arr[i+1]
+        if s > max_sum:
+            max_sum = s
+    return max_sum
+
+print(max_consecutive([4,2,7,1])) # 11
+print(max_consecutive([5,5,5,5])) # 10
+
+
 ```
 
+
+
+
+
 **Best:** Approach 2 — count zeros + smallest non-zero first. O(n).
+
+
+```
+21
+def smallest_from_digits(digits):
+    digits.sort()
+    if digits[0] == 0 and all(d==0 for d in digits):
+        return 0
+
+    # find first non-zero
+    for i in range(len(digits)):
+        if digits[i]!= 0:
+            # swap it to front
+            digits[0], digits[i] = digits[i], digits[0]
+            break
+
+    # make number
+    return int(''.join(map(str, digits)))
+
+# TEST
+print(smallest_from_digits([0,1,0,2,3])) # 10023
+print(smallest_from_digits([0,0,0,1])) # 1000
+
+def small_num(nums):
+
+    nums.sort()
+
+    for i in range(len(nums)):
+        if nums[i]!=0:
+            nums[0], nums[i] = nums[i],nums[0]
+            break 
+
+    result = ''.join(map(str,nums))
+    return result
+
+print(small_num([0,1,0,2,3])) # 10023
+
+
+```
