@@ -1,11 +1,14 @@
 # 40-ai-side-hustle — minimal deps.
 #
-# Stdlib covers the SQLite ledger and most of the file I/O. The only
-# real third-party dep is pytest. If you wire a real LLM provider,
-# uncomment the matching line.
+# Stdlib covers the SQLite ledger and most of the file I/O. The LLM
+# call is a single HTTP request. The only hard third-party deps are
+# pytest (testing) and fpdf2 (PDF generation for the launch kit).
 
 # Test runner
 pytest>=7.0,<9.0
+
+# PDF generation for the Gumroad launch kit
+fpdf2>=2.7.0,<3.0
 
 # Optional LLM providers (uncomment one)
 # anthropic>=0.30.0   # for AnthropicRouter

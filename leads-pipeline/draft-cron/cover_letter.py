@@ -176,6 +176,123 @@ def render(lead: dict) -> Tuple[str, str, str]:
     return render_subject(lead), render_text_body(lead), render_html_body(lead)
 
 
+# ============================================================
+# Solo-apply mode (Prem personally applies for the role)
+# ============================================================
+# When apply_mode == 'solo', the lead is one Prem wants to apply to
+# himself — not pitch Avilx as a pod. Subject/body shift to a personal
+# application: "I'm Prem, this is why I'm a fit, here's my resume,
+# can we talk?" — no pod mention, no pricing, no "happy to staff aug"
+# language. Resume PDF is still attached by autopilot._pick_resume().
+def render_solo_subject(lead: dict) -> str:
+    """Subject line — Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
+    co = (lead.get("company") or "").strip() or "your team"
+    role = (lead.get("role") or "this role").strip()
+    co_short = co if len(co) <= 20 else co[:17] + "…"
+    role_short = role if len(role) <= 30 else role[:27] + "…"
+    subj = f"{FOUNDER} for {co_short} — {role_short}"
+    if len(subj) > 70:
+        subj = subj[:67] + "…"
+    return subj
+
+
+def render_solo_text_body(lead: dict) -> str:
+    """Plain-text solo-apply cover letter. Prem personally applying."""
+    co = (lead.get("company") or "").strip() or "your team"
+    role = (lead.get("role") or "this role").strip()
+    jd = lead.get("jd_text") or ""
+    stack = _extract_stack_overlap(jd)
+    stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
+    is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
+    remote_phrase = "remote" if is_remote else "global"
+
+    return (
+        f"Hi {co} team,\n\n"
+        f"I'm applying for the {role} role personally — not as a recruiter. "
+        f"I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
+        f"{CLOUD_LIST} plus Huawei, Oracle, and on-prem. Most recent work spans "
+        f"RAG/agentic systems on Databricks, multi-tenant ML platforms, and "
+        f"regulated-industry data (banking, healthcare, MLPS in China).\n\n"
+        f"Stack overlap I noticed in your JD: {stack_str}. I've shipped all of "
+        f"these in production at scale.\n\n"
+        f"Resume attached. Happy to do a 30-min technical screen this week and "
+        f"share 1-2 relevant case studies ({remote_phrase} delivery, async-first, "
+        f"NDA + IP clean).\n\n"
+        f"{FOUNDER}\n"
+        f"({NAME} founder · also available for senior pod engagements)\n"
+        f"Delivery: China · APAC · US · EU | HQ: {HQ}\n"
+        f"{EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
+    )
+
+
+def render_solo_html_body(lead: dict) -> str:
+    """Inline-CSS HTML version of the solo cover letter."""
+    co = (lead.get("company") or "").strip() or "your team"
+    role = (lead.get("role") or "this role").strip()
+    jd = lead.get("jd_text") or ""
+    stack = _extract_stack_overlap(jd)
+    stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
+    is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
+    remote_phrase = "remote" if is_remote else "global"
+    return _SOLO_HTML_TEMPLATE.format(
+        name=FOUNDER, tagline=f"Solo application — {role} at {co}",
+        cloud_list=CLOUD_LIST, hq=HQ, email=EMAIL, whatsapp=WHATSAPP,
+        website=WEBSITE, co=co, role=role, stack_str=stack_str,
+        remote_phrase=remote_phrase, brand=NAME,
+    )
+
+
+_SOLO_HTML_TEMPLATE = """\
+<html><body style="font-family:Helvetica,Arial,sans-serif;color:#111;line-height:1.55;">
+  <div style="max-width:600px;margin:0 auto;padding:24px;">
+    <div style="background:linear-gradient(135deg,#7c2d12,#9a3412);color:#fff;
+                padding:18px 20px;border-radius:10px 10px 0 0;">
+      <div style="font-size:20px;font-weight:600;">{name}.</div>
+      <div style="opacity:.85;font-size:13px;margin-top:2px;">{tagline}</div></div>
+    <div style="border:1px solid #e5e7eb;border-top:0;border-radius:0 0 10px 10px;
+                padding:20px;background:#fff;">
+      <p>Hi {co} team,</p>
+      <p>I'm applying for the <b>{role}</b> role personally — not as a recruiter.
+         I'm {name}, 15+ years shipping AI/data/cloud systems across {cloud_list}
+         plus Huawei, Oracle, and on-prem. Most recent work spans RAG/agentic
+         systems on Databricks, multi-tenant ML platforms, and
+         regulated-industry data (banking, healthcare, MLPS in China).</p>
+      <p>Stack overlap I noticed in your JD: <b>{stack_str}</b>. I've shipped
+         all of these in production at scale.</p>
+      <p>Resume attached. Happy to do a 30-min technical screen this week and
+         share 1-2 relevant case studies ({remote_phrase} delivery, async-first,
+         NDA + IP clean).</p>
+      <p style="margin-top:28px;">— {name}<br/>
+        <span style="color:#6b7280;font-size:13px;">({brand} founder · also
+        available for senior pod engagements)<br/>
+        Delivery: China · APAC · US · EU | HQ: {hq}<br/>
+        {email} | wa.me/{whatsapp} | https://{website}</span></p>
+    </div>
+  </div>
+</body></html>
+"""
+
+
+def render_solo(lead: dict) -> Tuple[str, str, str]:
+    """Convenience: returns (subject, text_body, html_body) for solo mode."""
+    return (
+        render_solo_subject(lead),
+        render_solo_text_body(lead),
+        render_solo_html_body(lead),
+    )
+
+
+def render_for_mode(lead: dict) -> Tuple[str, str, str]:
+    """Dispatch to the right renderer based on lead.apply_mode.
+
+    Defaults to 'pod' (Avilx pod pitch) if unset — preserves current behavior.
+    """
+    mode = (lead.get("apply_mode") or "pod").strip().lower()
+    if mode == "solo":
+        return render_solo(lead)
+    return render(lead)
+
+
 if __name__ == "__main__":
     sample = {
         "company": "Anyscale",

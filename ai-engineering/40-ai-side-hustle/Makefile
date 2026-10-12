@@ -4,7 +4,7 @@ PYTHON ?= python3
 PIP    ?= $(PYTHON) -m pip
 
 .PHONY: help install demo stream-1 stream-2 stream-3 stream-4 \
-        dashboard simulate-ramp simulate-30d test clean
+        dashboard simulate-ramp simulate-30d launchkit test clean
 
 help:                       ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -33,6 +33,9 @@ simulate-ramp:              ## run all streams + inject a 14-day ramp scenario
 
 simulate-30d:               ## run all streams + inject 30 days of synthetic sales
 	$(PYTHON) scripts/run_factory.py --simulate-days 30
+
+launchkit:                  ## build Gumroad launch kits (PDF + sales page + tweets + emails) for all products
+	$(PYTHON) -m src.launchkit --all
 
 dashboard:                  ## render dashboard from current ledger.db
 	$(PYTHON) -c "import sys; sys.path.insert(0,'src'); from dashboard import print_dashboard; print_dashboard()"
