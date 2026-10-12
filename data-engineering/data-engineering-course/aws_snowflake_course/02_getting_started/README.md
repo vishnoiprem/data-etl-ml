@@ -51,3 +51,7 @@ the conceptual three-layer model into the **editions**, the
 monitors** (the credit cap system). By L23 you'll be able to
 estimate the monthly bill for a Snowflake workload and set
 budget guards.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -196,3 +196,7 @@ Enable business users to ask questions in natural language:
 Below is the full working code for all three projects. Each can be demonstrated in an interview setting.
 
 ---
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -69,3 +69,7 @@ styles: console → boto3 → CFN → CDK.
 5. L33–L34 add the API Key + Usage Plan on top of the same stack.
 6. L35 is optional: a 2026 roadmap for agentic AI architects on AWS.
 7. Take the quiz in `../../quizzes/section_8.md`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

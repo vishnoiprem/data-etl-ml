@@ -35,3 +35,7 @@ python3 -m pytest 02_metrics/code/ -v
 ```
 
 5 tests pass against `moto.mock_aws` (no AWS credentials required).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

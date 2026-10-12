@@ -29,3 +29,8 @@ in `Settings → General` on GitHub.
 ## Attribution
 
 Adapted from the [Contributor Covenant, v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+
+---
+
+**Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.

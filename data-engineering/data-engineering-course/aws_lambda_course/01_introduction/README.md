@@ -18,3 +18,7 @@ background).
 By the end of section 1 you should know what the course covers, what you'll
 build, and whether your environment is ready. Section 2 dives into Lambda
 fundamentals.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

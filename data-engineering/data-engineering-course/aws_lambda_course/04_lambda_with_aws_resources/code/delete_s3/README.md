@@ -50,3 +50,7 @@ aws s3 cp /tmp/hello.txt s3://my-demo-bucket-to-delete/hello.txt
 python delete_s3_bucket.py
 aws s3 ls | grep my-demo-bucket-to-delete || echo "bucket is gone"
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

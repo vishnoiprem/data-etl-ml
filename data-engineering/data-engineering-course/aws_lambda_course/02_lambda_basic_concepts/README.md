@@ -28,3 +28,7 @@ console without referring back to the docs.
 | L06 | Lambda Console Walkthrough | 10:38 |
 | L07 | Lambda Execution Role | 4:39 |
 | L08 | Conceptual Understanding Review | — |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

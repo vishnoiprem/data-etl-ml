@@ -138,3 +138,7 @@ aws elbv2 delete-target-group     --target-group-arn  <TG_ARN>
 * **Flow stickiness** — GWLB uses a 5-tuple hash so all packets of a
   flow land on the same appliance instance. This is automatic and is
   discussed in L36.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

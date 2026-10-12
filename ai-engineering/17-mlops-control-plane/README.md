@@ -40,3 +40,7 @@ make api       # uvicorn on :8080
 ## What I learned the hard way
 
 The first version had a `PUT /model/{id}/production` endpoint. That was a footgun — a one-line bug and every model was prod. Replaced with an explicit `PromoteRequest` that takes a model id, a previous-prod id, and a gate result. Now the audit log has a reason for every promotion.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1,5 +1,6 @@
-"""One-shot live scrape: hit a real Nitter mirror, score with a fast
-lexicon-based sentiment, write to SQLite, and print the dashboard.
+"""One-shot live scrape: hit Apify (preferred) or Nitter (fallback),
+score with a fast lexicon-based sentiment, write to SQLite, and print
+a text-mode dashboard.
 
 Why a lexicon (not the 600MB cardiffnlp model)?
 - Cold-start is instant. No 500MB download, no GPU.
@@ -10,19 +11,20 @@ Why a lexicon (not the 600MB cardiffnlp model)?
   this script just overrides it for the demo.
 
 What it does:
-1. Scrapes Nitter for each TRACKED_TAGS tag.
+1. Scrapes each TRACKED_TAGS entry via SourceRegistry (apify → nitter
+   → syndication auto-fallback).
 2. Runs a lexicon-based sentiment scorer on the tweet text.
 3. Writes tweets + per-tag 5-min bucketed sentiment to live.db.
-4. Extracts cashtags/hashtags/keywords and writes trending_tags rows.
-5. Prints a text-mode rendering of all 4 dashboard tabs.
+4. Extracts cashtags/hashtags and writes 1-min bucketed trending_tags rows.
+5. Prints a text-mode rendering of the dashboard's Overview, Sentiment,
+   and Trending tabs (the heavy Paper-PnL and Live tabs are skipped to
+   keep the script output focused on the just-scraped data).
 """
 from __future__ import annotations
 
 import asyncio
-import os
 import re
 import sys
-import time
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -30,17 +32,16 @@ PROJECT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT))
 
 # Load .env BEFORE importing settings
-from dotenv import load_dotenv  # noqa: E402
+from dotenv import load_dotenv
+
 load_dotenv(PROJECT / ".env")
 
-from loguru import logger  # noqa: E402
+from loguru import logger
 
-from src.config import settings  # noqa: E402
-from src.sources.apify_x import ApifyXAdapter  # noqa: E402
-from src.sources.nitter_mirror import NitterMirrorAdapter  # noqa: E402
-from src.sources.registry import SourceRegistry  # noqa: E402
-from src.sources.trending import aggregate_tags, extract_tags_from_tweet  # noqa: E402
-from src.store import db  # noqa: E402
+from src.config import settings
+from src.sources.registry import SourceRegistry
+from src.sources.trending import aggregate_tags, extract_tags_from_tweet
+from src.store import db
 
 # ── Lexicon-based sentiment (fast, no model download) ─────────────────
 
@@ -52,18 +53,17 @@ POSITIVE_WORDS = {
     "ath", "high", "higher", "gain", "gains", "growth", "growing", "beat",
     "beats", "outperform", "outperforms", "positive", "upgrade", "upgraded",
     "smash", "smashes", "smart", "innovative", "ship", "shipping", "launch",
-    "launches", "launched", "wow", "fast", "faster", "easy", "winning",
-    "revolutionary", "breakthrough", "huge", "massive", "goated", "best",
+    "launches", "launched", "wow", "fast", "faster", "easy", "revolutionary", "breakthrough", "huge", "massive", "goated",
 }
 NEGATIVE_WORDS = {
     "bearish", "crash", "dump", "sell", "sold", "selling", "weak", "worst",
     "terrible", "bad", "awful", "horrible", "hate", "hated", "garbage",
     "trash", "scam", "rug", "rugged", "rugpull", "down", "lower", "low",
     "loss", "losses", "lose", "loses", "losing", "miss", "missed", "misses",
-    "missed", "negative", "downgrade", "downgraded", "fear", "panic", "fud",
-    "dump", "rekt", "rip", "dead", "dying", "fraud", "fraudulent", "broken",
-    "sucks", "broken", "failing", "fail", "failed", "fails", "wrong", "hurt",
-    "down", "slump", "slumping", "drop", "drops", "dropping", "tank", "tanks",
+    "negative", "downgrade", "downgraded", "fear", "panic", "fud",
+    "rekt", "rip", "dead", "dying", "fraud", "fraudulent", "broken",
+    "sucks", "failing", "fail", "failed", "fails", "wrong", "hurt",
+    "slump", "slumping", "drop", "drops", "dropping", "tank", "tanks",
     "tanking", "tanked", "concern", "concerns", "concerning", "worried",
     "warning", "warns", "warned", "risk", "risky", "danger", "dangerous",
 }
@@ -86,7 +86,7 @@ def lexicon_score(text: str) -> float:
 # ── Scrape one tag from Nitter ─────────────────────────────────────────
 
 async def scrape_tag(source, tag: str) -> list[dict]:
-    """Returns list of {ts, text, author, likes, retweets, url, tweet_id}.
+    """Returns list of {ts, text, author, likes, retweets, followers, url, tweet_id}.
 
     `source` is a SourceRegistry (auto-fallback across apify/nitter/syndication).
     """
@@ -152,6 +152,10 @@ async def main() -> int:
     await source.close()
 
     # 2) Insert into tweets table
+    # `source_adapter` records which upstream actually served the
+    # tweet (apify/nitter/syndication). Don't hardcode it to "nitter"
+    # — the dashboard's source-debugging UI relies on the real value.
+    used_adapter = source.active if source else "unknown"
     for t in all_tweets:
         db.upsert_tweet({
             "ts": t["ts"],
@@ -161,9 +165,9 @@ async def main() -> int:
             "author": t["author"],
             "likes": t["likes"],
             "retweets": t["retweets"],
-            "followers": 0,
+            "followers": t.get("followers", 0),
             "url": t["url"],
-            "source_adapter": "nitter",
+            "source_adapter": used_adapter,
             "sentiment_score": t["sentiment_score"],
         })
 
@@ -181,18 +185,36 @@ async def main() -> int:
 
     # 4) Trending tags: extract cashtags/hashtags/keywords from scraped
     #    tweets and write 1-min bucketed counts to trending_tags.
-    from src.sources.trending import TagHit
-    tag_hits: list[TagHit] = []
+    from src.sources.base import RawTweet
+    tag_hits = []
     for t in all_tweets:
-        # Build a minimal "tweet" object for extract_tags_from_tweet
-        class _T:
-            pass
-        obj = _T()
-        obj.text = t["text"]
-        obj.symbol_tags = [t["tag"]]
-        obj.ts = t["ts"]
-        for hit in extract_tags_from_tweet(obj, kind=None):
-            tag_hits.append(hit)
+        # Reconstruct a minimal RawTweet (a TypedDict-style object) so
+        # the trending extractor can read .text / .symbol_tags / .ts
+        # without us sprinkling a dynamic `class _T: pass` here.
+        tweet = RawTweet(
+            id=t["tweet_id"],
+            ts=t["ts"],
+            author=t["author"],
+            text=t["text"],
+            likes=t["likes"],
+            retweets=t["retweets"],
+            followers=t.get("followers", 0),
+            url=t["url"],
+            symbol_tags=[t["tag"]] if t.get("tag") else [],
+        )
+        # `extract_tags_from_tweet` takes a list of keywords as the
+        # 6th positional arg; we don't track a separate keyword list
+        # here (we use `tracked_tags` as search queries, not as a
+        # keyword whitelist), so the extractor returns only cashtags
+        # and hashtags from the tweet body itself.
+        tag_hits.extend(extract_tags_from_tweet(
+            tweet_text=tweet.text,
+            tweet_id=tweet.id,
+            ts=tweet.ts,
+            sentiment=t["sentiment_score"],
+            url=tweet.url,
+            keywords=None,
+        ))
     # Aggregate
     if tag_hits:
         aggregated = aggregate_tags(tag_hits)
@@ -292,8 +314,8 @@ def print_dashboard(per_tag_counts: dict[str, int], total_tweets: int) -> None:
     print()
     print("=" * 78)
     print(f"  ✓ Live data captured at {datetime.now(UTC).strftime('%H:%M:%S UTC')}")
-    print(f"    Re-run: python live_scrape_once.py")
-    print(f"    Or:     make pipeline (continuous, every 60s)")
+    print("    Re-run: python live_scrape_once.py")
+    print("    Or:     make pipeline (continuous, every 60s)")
     print("=" * 78)
 
 

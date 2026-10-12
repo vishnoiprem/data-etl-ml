@@ -20,6 +20,7 @@ from datetime import datetime
 from broker.state import State
 from broker.interface import Broker
 from bot.signal_watcher import SignalWatcher
+from bot.alerts import parse_alert_command, check_alerts, _alert_message, _current_price_and_ma
 
 
 log = logging.getLogger("telegram_bot")
@@ -34,6 +35,10 @@ trading-bot commands:
   /analyze TICKER [TICKER ...]  price + MAs + 52w range (up to 5)
   /sell TICKER N  sell N shares (manual exit)
   /panic          sell everything at market
+  /alerts         show active alerts
+  /alerts add TICKER kind threshold [note...]
+                 add an alert (kinds: price_above, price_below, pct_change, ma_cross)
+  /alerts remove N  remove alert by id
 """
 
 
@@ -204,7 +209,11 @@ def render_analyze(a: dict) -> str:
 
 async def run_telegram_bot(state: State, broker: Broker,
                            watcher: SignalWatcher) -> None:
-    """Run the bot. Returns when stopped."""
+    """Run the bot. Returns when stopped.
+
+    Sets up the Telegram command handlers, starts the alert poller
+    in the background, then runs the Telegram polling loop forever.
+    """
     try:
         from telegram import Update  # type: ignore
         from telegram.constants import ParseMode  # type: ignore
@@ -216,6 +225,24 @@ async def run_telegram_bot(state: State, broker: Broker,
 
     token = os.environ["TELEGRAM_BOT_TOKEN"]
     allowed_chat = int(os.environ["TELEGRAM_CHAT_ID"])
+
+    # We need a way for the alert poller to send Telegram messages.
+    # We do that by capturing the bot instance once the app is built
+    # (the Application stores it on app.bot). The poller calls
+    # app.bot.send_message via a closure.
+    app_ref: dict = {}
+
+    async def _send_alert(text: str) -> None:
+        app = app_ref.get("app")
+        if app is None:
+            log.warning("alerts: app not ready, dropping message")
+            return
+        await app.bot.send_message(
+            chat_id=allowed_chat, text=text, parse_mode=ParseMode.HTML,
+        )
+
+    # Start the alert poller concurrently with the bot
+    alert_task = asyncio.create_task(check_alerts(state, _send_alert, poll_seconds=60))
 
     async def _auth_only(func):
         async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -316,7 +343,73 @@ async def run_telegram_bot(state: State, broker: Broker,
                 msgs.append(f"  {ticker}: ERROR {e}")
         await update.message.reply_text("panic sold:\n" + "\n".join(msgs))
 
+    @_auth_only
+    async def cmd_alerts(update, context):
+        args = context.args or []
+        # /alerts (no args) → list
+        if not args or args[0] == "list":
+            alerts = state.list_alerts(only_active=True)
+            if not alerts:
+                await update.message.reply_text(
+                    "no active alerts\n\n"
+                    "add one with:\n"
+                    "  /alerts add TICKER kind threshold [note]\n"
+                    "kinds: price_above, price_below, pct_change, ma_cross"
+                )
+                return
+            lines = ["═══ active alerts ═══",
+                     f"{'id':>3} {'ticker':<6}{'kind':<14}{'threshold':>10}  note"]
+            for a in alerts:
+                thr = (f"${a.threshold:.2f}" if a.kind in ("price_above", "price_below")
+                       else f"{a.threshold:.1f}%" if a.kind == "pct_change"
+                       else f"MA{int(a.threshold)}")
+                note = a.note or ""
+                lines.append(
+                    f"{a.id:>3} {a.ticker:<6}{a.kind:<14}{thr:>10}  {note}"
+                )
+            await update.message.reply_text(
+                f"<pre>{chr(10).join(lines)}</pre>",
+                parse_mode=ParseMode.HTML,
+            )
+            return
+        # /alerts add ...
+        if args[0] == "add":
+            try:
+                ticker, kind, threshold, note = parse_alert_command(
+                    ["alerts"] + args
+                )
+            except ValueError as e:
+                await update.message.reply_text(f"refused: {e}")
+                return
+            a = state.add_alert(ticker, kind, threshold, note or None)
+            await update.message.reply_text(
+                f"✓ alert #{a.id} added: {a.ticker} {a.kind} {a.threshold}"
+                + (f" ({a.note})" if a.note else "")
+            )
+            return
+        # /alerts remove N
+        if args[0] == "remove":
+            try:
+                aid = int(args[1])
+            except (IndexError, ValueError):
+                await update.message.reply_text("usage: /alerts remove N")
+                return
+            ok = state.deactivate_alert(aid)
+            await update.message.reply_text(
+                f"✓ alert #{aid} removed" if ok
+                else f"alert #{aid} not found or already inactive"
+            )
+            return
+        # Unknown subcommand
+        await update.message.reply_text(
+            "usage:\n"
+            "  /alerts              (list)\n"
+            "  /alerts add TICKER kind threshold [note]\n"
+            "  /alerts remove N"
+        )
+
     app = ApplicationBuilder().token(token).build()
+    app_ref["app"] = app  # so the alert poller can find it
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("status", cmd_status))
     app.add_handler(CommandHandler("positions", cmd_positions))
@@ -325,5 +418,13 @@ async def run_telegram_bot(state: State, broker: Broker,
     app.add_handler(CommandHandler("analyze", cmd_analyze))
     app.add_handler(CommandHandler("sell", cmd_sell))
     app.add_handler(CommandHandler("panic", cmd_panic))
+    app.add_handler(CommandHandler("alerts", cmd_alerts))
     log.info("telegram bot running")
-    await app.run_polling()
+    try:
+        await app.run_polling()
+    finally:
+        alert_task.cancel()
+        try:
+            await alert_task
+        except asyncio.CancelledError:
+            pass

@@ -1,5 +1,13 @@
 -- realtime-x-sentiment — convenience views
 -- Author: Prem Vishnoi <pvishnoi@avilx.com>
+--
+-- Plain (non-materialized) views so the dashboard always reads the
+-- latest data. These are small (24h windows over hypertables) and
+-- the indexes in 01_init_timescale.sql keep them cheap:
+--   - latest_signals_per_symbol  ← signals_symbol_ts_idx, signals_action_idx
+--   - top_mentions_24h           ← tweets_scored_ts_idx (NEW partial index)
+--   - paper_pnl_per_trade        ← paper_trades_ts_idx (NEW)
+--   - daily_pnl                  ← paper_trades_ts_idx (NEW)
 
 -- Latest signal per symbol (last 24h)
 CREATE OR REPLACE VIEW latest_signals_per_symbol AS
@@ -37,7 +45,9 @@ SELECT
 FROM paper_trades pt
 ORDER BY pt.ts;
 
--- Daily PnL summary (per symbol)
+-- Daily PnL summary (per symbol) — realised PnL only.
+-- BUY contributes -(qty * price + fee) (cash out),
+-- SELL contributes +(qty * price - fee) (cash in).
 CREATE OR REPLACE VIEW daily_pnl AS
 SELECT
     DATE_TRUNC('day', ts) AS day,

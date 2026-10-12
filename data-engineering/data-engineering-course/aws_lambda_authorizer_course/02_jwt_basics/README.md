@@ -53,3 +53,7 @@ Expected: **5 passed**.
 - The quiz for this section is in `../quizzes/section_2.md`.
 - All code uses **PyJWT 2.8+** and **`cryptography` 42+** for RS256
   and ES256 support.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

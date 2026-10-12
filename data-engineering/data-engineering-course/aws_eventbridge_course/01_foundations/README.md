@@ -40,3 +40,7 @@ have the right mental model for everything that comes next.
 Section 2 is **EventBus Basics** — the first AWS resource we touch.
 We create a custom event bus with `boto3`, attach a resource policy,
 and verify it all with `moto` tests.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

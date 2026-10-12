@@ -85,3 +85,7 @@ limits, timeout. Section 6 (L23–L24) takes the S3 + DynamoDB
 primitives from L13–L18 and wires them into a real
 **S3 → Lambda → DynamoDB** banking pipeline. The handlers you write
 in L13–L15 and L18 are the building blocks.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

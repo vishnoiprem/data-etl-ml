@@ -81,3 +81,7 @@ The Data Vidhya hub lists "Projects for this course are on the way." Until then,
 5. **Multi-Modal Platform** — text + image + audio ingestion → unified embeddings store.
 
 Pick one. Implement it. You have the module notes.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

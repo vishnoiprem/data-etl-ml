@@ -32,3 +32,7 @@ GPUs, TPUs, LPUs, cloud vs on-device, LLM routing, and the canonical system desi
 ## The Lead Lesson
 
 > **Lesson 1 — [How Does a GPU Work for Deep Learning?](./01-how-does-a-gpu-work.md)** — the foundation. Worked example: take the same matrix-multiply kernel, run it on CPU vs GPU, measure the speedup and memory bandwidth, explain where the gap comes from.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

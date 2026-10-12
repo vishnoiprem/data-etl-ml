@@ -122,3 +122,7 @@ timestamp,company,email_to,subject,status,error
 - You want to send from hello@vishnoisoft.com (your own domain)
 
 See `SETUP_MAILGUN.md` for migration path.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

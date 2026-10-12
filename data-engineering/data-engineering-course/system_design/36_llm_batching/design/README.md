@@ -210,3 +210,7 @@ The HTTP layer exposes this as `GET /api/queries/<id>?wait=1&timeout=5`
 | `code/app.py` | Flask HTTP service with long-poll `GET ?wait=1`. |
 | `tests/test_service.py` | Service-level tests (batch_size trigger, window trigger, throughput, flush). |
 | `tests/test_app.py` | HTTP-level tests for the API. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

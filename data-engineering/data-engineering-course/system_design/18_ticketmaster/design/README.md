@@ -183,3 +183,7 @@ Sweeper:
 | `code/app.py` | Flask HTTP layer, metrics, health |
 | `tests/test_service.py` | Service-level tests including the concurrent hold race |
 | `tests/test_app.py` | HTTP-level tests |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -62,3 +62,7 @@ The first version let the LLM override the must-have check. Result: a candidate 
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

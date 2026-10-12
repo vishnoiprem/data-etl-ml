@@ -1,0 +1,56 @@
+# .github/stale.yml — auto-close abandoned issues + PRs.
+#
+# Scope is intentionally narrow: only `kind/question` issues
+# and the "stale" label are eligible. Real bug reports,
+# feature requests, and security disclosures are never
+# auto-closed — those need a human.
+
+# Number of days of inactivity before a previously-active
+# issue is marked stale.
+daysBeforeStale: 60
+# Number of days a stale issue stays open before being closed.
+# Stale issues get a warning comment first; the closer waits
+# 7 days before acting so the author can re-open if needed.
+daysBeforeClose: 7
+
+# Limit to issues (PRs have their own logic below).
+only: issues
+
+# Exempt labels — these never get the `stale` label.
+exemptLabels:
+  - security
+  - pinned
+  - in-progress
+
+# Mark `kind/question` issues stale after 60 days; everything
+# else follows the default. Real questions often go unanswered
+# for a long time and don't necessarily indicate abandonment.
+markComment: >
+  This issue has been automatically marked stale because it
+  hasn't had any activity in the last 60 days. It will be
+  closed in 7 days unless there's new activity. If this is
+  still relevant, just add a comment and the stale label
+  will be removed.
+closeComment: >
+  Closing this issue due to inactivity. If it's still
+  relevant, please open a new issue and link back to this
+  one for context.
+
+# --- PRs: don't auto-close, but warn about long-stale PRs.
+# PRs are a different beast — they may need a long review
+# cycle, and closing them loses the diff. So we mark stale
+# but never auto-close. A human has to either merge, close,
+# or comment.
+pullRequests:
+  daysBeforeStale: 90
+  markComment: >
+    This PR has been automatically marked stale because it
+    hasn't had any activity in the last 90 days. If you're
+    still working on it, just push a commit to clear the
+    stale label. Otherwise, please close it or open a new
+    PR with the latest changes.
+  exemptLabels:
+    - security
+    - pinned
+    - in-progress
+    - blocked

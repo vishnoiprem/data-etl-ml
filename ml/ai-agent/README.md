@@ -10,3 +10,7 @@
 ## Setup
 1. Install requirements: `pip install -r requirements.txt`
 2. Run web server: `uvicorn web.app:app --reload`
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

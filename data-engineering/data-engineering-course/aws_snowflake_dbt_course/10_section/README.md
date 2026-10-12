@@ -25,3 +25,7 @@ the end of this section you'll be comfortable with: python models.
 Section 11 is **Grants — Snowflake behavior, dbt's `grants:` config, post-hooks, and project-level additive grants.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

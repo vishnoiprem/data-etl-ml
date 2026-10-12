@@ -24,3 +24,7 @@ production-ready.
 | File | Topic | Time |
 |---|---|---|
 | `../assignments/assignment_1_multi_stack.md` | Build a `NetworkStack` + `AppStack` pair sharing a VPC | 4–6h |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

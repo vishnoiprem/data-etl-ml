@@ -47,3 +47,7 @@ Section 8 is **Loading from AWS** — clustering (theory +
 practice), the AWS free trial, creating an S3 bucket, the IAM
 policy that grants Snowflake access, and the **storage
 integration object** that ties it all together.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

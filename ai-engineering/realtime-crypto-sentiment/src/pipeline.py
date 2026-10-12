@@ -16,9 +16,10 @@ toy signal for the simulator — not a production price proxy.
 """
 from __future__ import annotations
 
+import asyncio
 import signal
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 
 from apscheduler.schedulers.blocking import BlockingScheduler
 from loguru import logger
@@ -29,7 +30,6 @@ from src.metrics import (
     PIPELINE_ERRORS,
     SCORE_LATENCY,
     SCRAPE_LATENCY,
-    SIGNAL_LATENCY,
     SIGNALS_GENERATED,
     TWEETS_SCORED,
     TWEETS_SCRAPED,
@@ -64,13 +64,17 @@ class SentimentPipeline:
         tags = settings.tracked_tags
         if not tags:
             return
-        # Use a stable rotating index based on minutes since epoch
-        idx = int(datetime.utcnow().timestamp() // settings.scrape_interval_sec) % len(tags)
+        # Use a stable rotating index based on wall-clock minutes since
+        # the epoch, floored to the scrape interval so the same tag is
+        # not picked twice in a row when the scheduler catches up.
+        # Use `datetime.now(UTC)` (not `utcnow()`) so the timestamp is
+        # tz-aware — matches the rest of the pipeline's contract even
+        # though `.timestamp()` is equivalent on both for UTC.
+        idx = int(datetime.now(UTC).timestamp() // settings.scrape_interval_sec) % len(tags)
         tag = tags[idx]
         self._scrape_tag(tag)
 
     def _scrape_tag(self, tag: str) -> None:
-        import asyncio
         asyncio.run(self._scrape_tag_async(tag))
 
     async def _scrape_tag_async(self, tag: str) -> None:
@@ -157,7 +161,6 @@ class SentimentPipeline:
         extract every cashtag/hashtag/keyword, and write 1-min-bucketed counts
         to `trending_tags`. Powers the dashboard's top-10 panel.
         """
-        import asyncio
         queries = settings.trending_queries
         if not queries:
             return
@@ -229,7 +232,9 @@ class SentimentPipeline:
             sentiment_value=sentiment_value,
             sentiment_history=history_scores,
         )
-        SIGNAL_LATENCY.observe(0.0)  # placeholder; full e2e latency not tracked here
+        # End-to-end scrape→signal latency is not currently tracked
+        # here (would need to read the source tweet's ts vs. now()).
+        # The SIGNAL_LATENCY histogram is still defined for future use.
         SIGNALS_GENERATED.labels(action=sig.action).inc()
         try:
             db.insert_signal(sig.to_row())
@@ -298,25 +303,29 @@ class SentimentPipeline:
         # max_instances=1, coalesce=True: never run two cycles in parallel.
         # Without these, a slow sentiment batch can overlap the next scrape and
         # double-score the same unscored rows.
+        # Stagger initial runs so the cascade "scrape → score → signal →
+        # trade" doesn't fight for the DB connection in the first second.
+        from datetime import timedelta as _td
+        boot_now = datetime.now(UTC)
         self.scheduler.add_job(self.scrape_tweets, "interval",
                               seconds=settings.scrape_interval_sec, id="scrape",
-                              next_run_time=datetime.utcnow(),
+                              next_run_time=boot_now,
                               max_instances=1, coalesce=True)
         self.scheduler.add_job(self.score_batch, "interval",
                               seconds=settings.score_interval_sec, id="score",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=5),
+                              next_run_time=boot_now + _td(seconds=5),
                               max_instances=1, coalesce=True)
         self.scheduler.add_job(self.generate_signals, "interval",
                               seconds=settings.signal_interval_sec, id="signals",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=10),
+                              next_run_time=boot_now + _td(seconds=10),
                               max_instances=1, coalesce=True)
         self.scheduler.add_job(self.paper_trade, "interval",
                               seconds=settings.trade_interval_sec, id="trader",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=15),
+                              next_run_time=boot_now + _td(seconds=15),
                               max_instances=1, coalesce=True)
         self.scheduler.add_job(self.scrape_trending, "interval",
                               seconds=settings.scrape_interval_sec, id="trending",
-                              next_run_time=datetime.utcnow() + __import__("datetime").timedelta(seconds=20),
+                              next_run_time=boot_now + _td(seconds=20),
                               max_instances=1, coalesce=True)
 
         def _handle_signal(signum, frame):

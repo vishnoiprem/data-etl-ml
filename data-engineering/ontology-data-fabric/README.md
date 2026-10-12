@@ -42,3 +42,7 @@ A unified object model on top of every source: people, companies, transactions, 
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

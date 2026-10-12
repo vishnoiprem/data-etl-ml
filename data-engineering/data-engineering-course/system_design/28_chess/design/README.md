@@ -138,3 +138,7 @@ create a game, return opponent info to each.
 | `code/app.py` | Flask HTTP API with SSE stream. |
 | `tests/test_service.py` | Per-piece movement, castling, en-passant, check, checkmate, promotion, matchmaking. |
 | `tests/test_app.py` | HTTP smoke for a full game. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

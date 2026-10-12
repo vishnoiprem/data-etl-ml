@@ -70,3 +70,7 @@ These files are intended as a study path and interview reference:
 Every file carries a header noting the source author (Darshil Parmar, Data Vidhya),
 the article title, and the publication date. Content is reproduced without
 editorial wrapping per the user's "Authored Q&A only" instruction.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

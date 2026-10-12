@@ -165,8 +165,9 @@ def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
                 INSERT INTO leads (
                     tracking_id, company, role, contact_email, contact_phone,
                     stack, rate, resume_file, source_url, source,
-                    cover_letter_subject, cover_letter_body, jd_text, status
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    cover_letter_subject, cover_letter_body, jd_text,
+                    apply_mode, status
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 RETURNING id
             """, (
                 tracking_id,
@@ -182,6 +183,11 @@ def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
                 lead.get("cover_letter_subject", ""),
                 lead.get("cover_letter_body", ""),
                 lead.get("jd_text", ""),
+                # apply_mode: default 'pod' (Avilx pod pitch) unless caller
+                # explicitly opts into 'solo' (Prem personally applying).
+                # The DB has a CHECK constraint + DEFAULT 'pod' as a
+                # last-resort guard against bad input.
+                (lead.get("apply_mode") or "pod").strip().lower()[:8],
                 "pending",
             ))
             lead_id = cur.fetchone()["id"]

@@ -53,6 +53,13 @@ BOUNCE_DENY = {
     "codewin.pt", "teneo.com", "boldmetrics.com", "pairio.com",
     "advtravel365.com", "servicelink.com",
 }
+# Persist any additions to state/bounce_deny.json so subprocesses (refine_pipeline,
+# find_clients, backfill_emails) all see the same denylist. See state/bounce_deny_store.py.
+try:
+    from state.bounce_deny_store import BOUNCE_DENY as _PERSISTED_DENY  # noqa: F401
+    BOUNCE_DENY |= _PERSISTED_DENY
+except Exception:
+    pass
 
 # Senior-level filter — INCLUDES CTO/Head of/VP/Director for leadership roles
 JUNIOR_TERMS = re.compile(
@@ -513,6 +520,496 @@ def scrape_hnhiring():
     return out
 
 
+def scrape_hn_algolia_24h():
+    """Scrape HN stories + comments from the last 24h that mention
+    'hiring' alongside AI/ML keywords. Uses the public Algolia HN
+    Search API (no auth). Replaces scrape_hnhiring.com (a JS-only SPA
+    that returns empty for non-browser clients) and Twitter (Nitter
+    is dead, X.com requires paid auth).
+    """
+    import time as _time
+    out = []
+    end_ts = int(_time.time())
+    begin_ts = end_ts - 24 * 3600
+    # Mix of "story" and "comment" queries — many hiring posts are in
+    # comments (e.g. Show HN, Ask HN threads).
+    queries = [
+        ('hiring "machine learning"', 'story'),
+        ('hiring AI engineer', 'story'),
+        ('"we are hiring" AI', 'story'),
+        ('"we are hiring" ML', 'story'),
+        ('hiring AI', 'comment'),
+        ('hiring "machine learning"', 'comment'),
+    ]
+    seen_ids: set[str] = set()
+    base = "https://hn.algolia.com/api/v1/search_by_date"
+    for q, tag in queries:
+        try:
+            r = requests.get(
+                base,
+                params={
+                    "query": q,
+                    "tags": tag,
+                    "numericFilters": f"created_at_i>{begin_ts}",
+                    "hitsPerPage": 30,
+                },
+                timeout=12,
+                headers={"User-Agent": "AvilxBot/1.0 (leads-pipeline)"},
+            )
+            if r.status_code != 200:
+                continue
+            for hit in r.json().get("hits", []):
+                oid = hit.get("objectID", "")
+                if oid in seen_ids:
+                    continue
+                seen_ids.add(oid)
+                title = (hit.get("title") or hit.get("story_title") or "").strip()
+                # For comments, prepend the story title for context
+                if not title and hit.get("story_title"):
+                    title = hit["story_title"]
+                text = hit.get("story_text") or hit.get("comment_text") or title
+                if not is_senior_eng(title, text):
+                    continue
+                # Many HN hiring posts read like "Foo is hiring X engineers"
+                # rather than "X at Foo". Handle that pattern.
+                m = re.match(r"^([A-Z][\w&.'-]+(?:\s+[A-Z][\w&.'-]+)?)\s+is\s+hiring\b(.*)$",
+                             title, re.S)
+                if m:
+                    co = m.group(1).strip()
+                    rest = m.group(2).strip().rstrip(".")
+                    # If the rest is empty, fall back to "Engineer"
+                    role = rest or "Engineer"
+                else:
+                    co, role = split_company_role(title)
+                # Filter out HN-internal noise that gets through the regex
+                if not co or co.lower() in ("unknown", "n/a", ""):
+                    # Try to mine from URL
+                    url = hit.get("url") or hit.get("story_url") or ""
+                    if "://" in url:
+                        host = url.split("/")[2].replace("www.", "")
+                        co = host.split(".")[0].title()
+                co_l = co.lower().strip()
+                if any(bad in co_l for bad in (
+                    "ask hn", "show hn", "tell hn", "launch hn",
+                    "ycombinator", "news.ycombinator", "hn hiring",
+                    "mrbeast", "youtube", "tiktok", "twitter",
+                )):
+                    continue
+                # Drop roles that are clearly questions / news headlines
+                role_l = (role or "").lower()
+                if role_l.startswith(("how ", "what ", "why ", "when ", "where ")):
+                    continue
+                item_url = hit.get("story_url") or hit.get("url") or ""
+                if tag == "comment":
+                    item_url = f"https://news.ycombinator.com/item?id={oid}"
+                # Try multiple email-derivation strategies
+                em = (extract_email_from_text(text) or
+                      derive_email_from_company(co) or
+                      derive_email(co, item_url))
+                if not em:
+                    continue
+                out.append({
+                    "company": co,
+                    "role": role or "Engineer",
+                    "contact_email": em,
+                    "source_url": item_url,
+                    "source": f"hn_algolia_24h_{tag}",
+                    "jd_text": (text or "")[:500],
+                })
+        except Exception as e:
+            print(f"  [HN-Algolia-24h] {q!r}: {e}")
+    return out
+
+
+# ============================================================
+# hnhiring.com — static mirror of "Who is hiring" posts filtered to
+# remote roles. Server-rendered HTML (no JS), no auth, ~150 jobs
+# per page. Good complement to scrape_hn_algolia_24h: where Algolia
+# returns 24h, hnhiring.com returns ~30 days of remote roles.
+# ============================================================
+HNHIRING_REMOTE_URL = "https://hnhiring.com/locations/remote"
+
+
+# Pre-compiled patterns used by the hnhiring parser. Kept at module
+# scope so the test suite can import them and verify the noise
+# filtering directly.
+_HNHIRING_NOISE_PREFIX = re.compile(
+    r"^(?:Location|Technologies|Remote|Stack|Salary|Apply|"
+    r"Full[-\s]?Time|FT|PT|HYBRID|REMOTE):\s*",
+    re.I,
+)
+_HNHIRING_NOISE_PREFIX_ROLE = re.compile(
+    r"^(?:Location|Remote|FT|PT|Full[-\s]?Time|"
+    r"\$\d|HYBRID|REMOTE|Apply|Technologies):\s*",
+    re.I,
+)
+_HNHIRING_PAREN_DOMAIN = re.compile(r"\s*\([^)]+\)\s*$")
+
+
+def _parse_pipe_headline(head):
+    """Parse a `Company (dom) | Role | FT | Remote | $N` headline.
+
+    Returns (company, role). Tries the pipe-separated format first
+    (the most common on hnhiring.com); falls through to
+    `split_company_role` for non-pipe headlines. The noise-prefix
+    segments (`Location:`, `Stack:`, `FT`, `Remote`, …) are skipped
+    so a noisy first segment doesn't get mis-attributed as the
+    company.
+
+    Extracted from `scrape_hnhiring_remote` so the test suite can
+    exercise the parsing without spinning up a real HTTP request.
+    """
+    if " | " not in head:
+        return split_company_role(head)
+    segments = [s.strip() for s in head.split(" | ") if s.strip()]
+    co_hint = ""
+    role_hint = ""
+    for seg in segments[:3]:
+        if _HNHIRING_NOISE_PREFIX.match(seg):
+            continue
+        co_hint = _HNHIRING_PAREN_DOMAIN.sub("", seg).strip()
+        if co_hint and len(co_hint) <= 60:
+            # Try to take the next non-noise segment as role
+            try:
+                idx = segments.index(seg)
+            except ValueError:
+                idx = -1
+            if 0 <= idx < len(segments) - 1:
+                nxt = segments[idx + 1]
+                if not _HNHIRING_NOISE_PREFIX_ROLE.match(nxt):
+                    role_hint = nxt
+            break
+    if co_hint:
+        return co_hint, role_hint or "Engineer"
+    return split_company_role(head)
+
+
+# Generic-ATS domains: those mailboxes route to the ATS vendor's
+# support team, not a real human at the hiring company. Sending
+# cold outreach to `jobs@workable.com` etc. bounces or lands in
+# the void, so `scrape_hnhiring_remote` filters them out before
+# the row is written. Personal aliases (Gmail, Bridge, …) and the
+# company's own domain pass through.
+_GENERIC_ATS_DOMAINS = (
+    "hnhiring.com",        # the source site itself
+    "ashbyhq.com",         # Ashby ATS
+    "workable.com",        # Workable ATS
+    "greenhouse.io",       # Greenhouse ATS
+    "lever.co",            # Lever ATS
+    "jobvite.com",         # Jobvite ATS
+    "bamboohr.com",        # BambooHR ATS
+    "smartrecruiters.com", # SmartRecruiters ATS
+    "icims.com",           # iCIMS ATS
+    "workday.com",         # Workday ATS
+)
+
+
+def _is_generic_ats_email(email):
+    """True if `email` lives on a known ATS-vendor domain.
+
+    The check is case-insensitive and matches the registrable
+    domain or any subdomain (e.g. `jobs@mail.workable.com`
+    still matches because the registrable domain is
+    `workable.com`). We do NOT match `workable.com.au` — only
+    the exact domains listed in `_GENERIC_ATS_DOMAINS`, plus
+    their subdomains.
+
+    A Gmail address on the same company's block
+    (e.g. `recruiter@gmail.com`) returns False — we only filter
+    the vendor-domained addresses, not personal aliases.
+    """
+    if not email or "@" not in email:
+        return False
+    em_l = email.lower()
+    # Split off the local part and walk the domain labels
+    # right-to-left, matching any suffix of length 2 or more
+    # against the known list. e.g. for "jobs@mail.workable.com":
+    #   "workable.com"        → match
+    #   "mail.workable.com"   → would also match if it were listed
+    # For "alice@stripe.com" → "stripe.com" not in list → False.
+    domain = em_l.rsplit("@", 1)[1]
+    parts = domain.split(".")
+    for i in range(len(parts) - 1):
+        candidate = ".".join(parts[i:])
+        if candidate in _GENERIC_ATS_DOMAINS:
+            return True
+    return False
+
+
+def scrape_hnhiring_remote():
+    """Scrape hnhiring.com/locations/remote for senior+ AI/ML/data roles.
+
+    Page is server-rendered HTML — each posting is a <li class="job">.
+    No auth, no rate limits observed. Returns [] on any failure.
+    """
+    out = []
+    try:
+        r = requests.get(
+            HNHIRING_REMOTE_URL,
+            timeout=15,
+            headers={"User-Agent": "AvilxBot/1.0 (leads-pipeline)"},
+        )
+        if r.status_code != 200:
+            print(f"  [hnhiring] HTTP {r.status_code} — skipping")
+            return out
+    except Exception as e:
+        print(f"  [hnhiring] fetch error: {e}")
+        return out
+
+    html = r.text
+    # Split on the job list-item wrapper. Each posting is a <li class="job">.
+    # Note: the live page emits class="job  " (with trailing whitespace), so
+    # accept any number of spaces. Use a non-greedy match to keep each block
+    # small, but anchor on the literal closing </li> for that block.
+    blocks = re.findall(
+        r'<li\s+class="job\s*"[^>]*>(.*?)</li>', html, re.S | re.I
+    )
+    if not blocks:
+        print("  [hnhiring] no <li class='job'> blocks found — markup changed?")
+        return out
+
+    for block in blocks:
+        # Extract: HN handle, date, body text, first external link
+        user_m = re.search(
+            r'<a\s+href="https://news\.ycombinator\.com/user\?id=([^"]+)"',
+            block, re.I,
+        )
+        user = user_m.group(1) if user_m else ""
+        date_m = re.search(r'class="[^"]*gray[^"]*"[^>]*>(\d{4}-\d{2}-\d{2})',
+                           block, re.I)
+        post_date = date_m.group(1) if date_m else ""
+        body_m = re.search(r'<div\s+class="body"\s*[^>]*>(.*?)</div>\s*</div>',
+                           block, re.S | re.I)
+        body_html = body_m.group(1) if body_m else block
+        # Strip remaining tags
+        text = re.sub(r"<[^>]+>", " ", body_html)
+        text = re.sub(r"\s+", " ", text).strip()
+        if not text:
+            continue
+        if not is_senior_eng(text[:200], text):
+            continue
+        # Try the "Foo is hiring X" headline pattern first
+        # (text often starts with "Chronograph (chronograph.pe) | Role | FT | ...")
+        head = text[:200]
+        m = re.match(
+            r"^([A-Z][\w&.'-]+(?:\s+[A-Z][\w&.'-]+)?)\s+is\s+hiring\b(.*)$",
+            head, re.S,
+        )
+        if m:
+            co = m.group(1).strip()
+            role = m.group(2).strip().rstrip(".") or "Engineer"
+        else:
+            co, role = _parse_pipe_headline(head)
+        if not co or co.lower() in ("unknown", "n/a", ""):
+            # Fall back to HN handle as a weak signal
+            if user:
+                co = user.title()
+        # Strip trailing punctuation / pipes from sloppy segment splits
+        co = co.rstrip(" |:;,.")
+        co_l = co.lower().strip()
+        if any(bad in co_l for bad in (
+            "ask hn", "show hn", "tell hn", "launch hn",
+            "ycombinator", "news.ycombinator", "hn hiring",
+            "location", "technologies", "remote", "full-time", "full time",
+            "senior", "staff", "principal", "lead ",
+        )):
+            continue
+        # Pull first apply link
+        link_m = re.search(
+            r'<a\s+href="(https?://[^"]+)"', body_html, re.I
+        )
+        apply_url = link_m.group(1) if link_m else HNHIRING_REMOTE_URL
+        em = (extract_email_from_text(text) or
+              derive_email_from_company(co) or
+              derive_email(co, apply_url))
+        if not em:
+            continue
+        # Skip generic-ATS addresses: those mailboxes route to vendor
+        # support teams, not a hiring manager, so the email bounces
+        # or lands in the void. Real company emails live on the
+        # company's own domain (or a Gmail/Bridge/etc. personal
+        # alias), never on the ATS vendor's domain.
+        if _is_generic_ats_email(em):
+            continue
+        out.append({
+            "company": co,
+            "role": role or "Engineer",
+            "contact_email": em,
+            "source_url": apply_url,
+            "source": f"hnhiring_remote_{post_date}" if post_date else "hnhiring_remote",
+            "jd_text": text[:500],
+        })
+    return out
+
+
+# ============================================================
+# X / Twitter (Playwright with stored auth cookies)
+# ============================================================
+# Why Playwright + cookies:
+#   - X.com returns 403 for unauthenticated requests (verified Dec 2025+)
+#   - All Nitter instances are dead
+#   - The public GraphQL API requires a guest token (now also 403)
+#   - Cookies (auth_token + ct0) let Playwright bypass the login wall
+# Setup:
+#   1. Log into x.com in a real browser
+#   2. Open DevTools → Application → Cookies → https://x.com
+#   3. Export auth_token and ct0 as JSON to state/x_cookies.json
+#      (template: state/x_cookies.example.json)
+#   4. Or set AVILX_X_AUTH_TOKEN and AVILX_X_CT0 env vars
+# Cost: ~3s per page render (Playwright launch overhead is the bottleneck)
+# Reliability: medium — X occasionally rotates ct0; re-export if you get
+#   "Your session has expired" or empty body.
+
+X_COOKIES_PATH = os.getenv(
+    "AVILX_X_COOKIES_PATH",
+    str(Path(__file__).resolve().parent / "state" / "x_cookies.json"),
+)
+
+
+def _load_x_cookies() -> list[dict] | None:
+    """Load X.com auth cookies from file or env. Returns None if missing."""
+    # File first
+    p = Path(X_COOKIES_PATH)
+    if p.exists():
+        try:
+            with open(p) as f:
+                cookies = json.load(f)
+            if isinstance(cookies, list) and cookies:
+                return cookies
+        except Exception as e:
+            print(f"  [X.com] failed to read {p}: {e}")
+    # Env fallback
+    auth = os.getenv("AVILX_X_AUTH_TOKEN")
+    ct0 = os.getenv("AVILX_X_CT0")
+    if auth and ct0:
+        return [
+            {"name": "auth_token", "value": auth, "domain": ".x.com",
+             "path": "/", "expires": -1, "httpOnly": True, "secure": True,
+             "sameSite": "None"},
+            {"name": "ct0", "value": ct0, "domain": ".x.com",
+             "path": "/", "expires": -1, "httpOnly": False, "secure": True,
+             "sameSite": "Lax"},
+        ]
+    return None
+
+
+def scrape_x_com():
+    """Scrape X.com search for hiring posts (last 24h by default).
+
+    Requires auth cookies. If cookies are missing or invalid, returns
+    [] and logs a clear message — does NOT block the loop.
+    """
+    cookies = _load_x_cookies()
+    if not cookies:
+        print("  [X.com] no auth cookies — skipping. Set AVILX_X_AUTH_TOKEN + "
+              "AVILX_X_CT0 or create state/x_cookies.json")
+        return []
+    queries = os.getenv(
+        "AVILX_X_QUERIES",
+        "AI engineer hiring,ML engineer remote,senior AI hiring "
+        "china remote hiring,USA remote AI hiring",
+    ).split(",")
+    queries = [q.strip() for q in queries if q.strip()]
+    out: list[dict] = []
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print("  [X.com] playwright not installed — run: pip install playwright && playwright install chromium")
+        return []
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            ctx = browser.new_context(
+                user_agent=("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/120.0.0.0 Safari/537.36"),
+            )
+            ctx.add_cookies(cookies)
+            page = ctx.new_page()
+            for q in queries:
+                try:
+                    url = ("https://x.com/search?q=" +
+                           requests.utils.quote(q) +
+                           "&src=typed_query&f=live")
+                    page.goto(url, wait_until="domcontentloaded",
+                              timeout=30000)
+                    # Wait up to 12s for tweets to render
+                    try:
+                        page.wait_for_selector(
+                            'article[data-testid="tweet"]', timeout=12000,
+                        )
+                    except Exception:
+                        # No tweets or session expired
+                        body = (page.query_selector("body").inner_text()
+                                if page.query_selector("body") else "")
+                        if not body or "log in" in body.lower():
+                            print(f"  [X.com] {q!r}: session expired or "
+                                  "login wall — refresh cookies")
+                            break
+                        continue
+                    articles = page.query_selector_all(
+                        'article[data-testid="tweet"]')
+                    for art in articles[:25]:
+                        try:
+                            # Tweet text
+                            txt_el = art.query_selector(
+                                '[data-testid="tweetText"]')
+                            text = (txt_el.inner_text() if txt_el else "").strip()
+                            # User handle
+                            user_el = art.query_selector(
+                                '[data-testid="User-Name"]')
+                            user = (user_el.inner_text() if user_el else "").strip()
+                            # Tweet permalink
+                            link_el = art.query_selector(
+                                'a[href*="/status/"]')
+                            link = (link_el.get_attribute("href")
+                                    if link_el else "")
+                            if link and link.startswith("/"):
+                                link = "https://x.com" + link
+                            if not is_senior_eng(text or "", ""):
+                                continue
+                            # Try to extract company + role
+                            m = re.match(
+                                r"^([A-Z][\w&.'-]+(?:\s+[A-Z][\w&.'-]+)?)\s+is\s+hiring\b(.*)$",
+                                text, re.S)
+                            if m:
+                                co = m.group(1).strip()
+                                role = m.group(2).strip().rstrip(".") or "Engineer"
+                            else:
+                                co, role = split_company_role(text)
+                            if not co or co.lower() in ("unknown", "n/a", ""):
+                                # Try to mine from user handle
+                                if user.startswith("@"):
+                                    co = user[1:].title()
+                            co_l = co.lower().strip()
+                            if any(bad in co_l for bad in (
+                                "ask x", "ask twitter", "show x", "show twitter",
+                                "ycombinator", "x corp", "twitter inc",
+                            )):
+                                continue
+                            em = (extract_email_from_text(text) or
+                                  derive_email_from_company(co) or
+                                  derive_email(co, link or ""))
+                            if not em:
+                                continue
+                            out.append({
+                                "company": co,
+                                "role": role or "Engineer",
+                                "contact_email": em,
+                                "source_url": link or url,
+                                "source": "x_com_search",
+                                "jd_text": text[:500],
+                            })
+                        except Exception as e:
+                            print(f"  [X.com] article parse error: {e}")
+                except Exception as e:
+                    print(f"  [X.com] {q!r}: {e}")
+            browser.close()
+    except Exception as e:
+        print(f"  [X.com] playwright error: {e}")
+    return out
+
+
 def scrape_yc_workatastartup():
     out = []
     try:
@@ -634,6 +1131,9 @@ SCRAPERS = [
     ("WWR", scrape_weworkremotely),
     ("RemoteOK", scrape_remoteok),
     ("HNHiring", scrape_hnhiring),
+    ("HN-Algolia-24h", scrape_hn_algolia_24h),
+    ("HNHiring-Remote", scrape_hnhiring_remote),
+    ("X.com", scrape_x_com),
     ("YC", scrape_yc_workatastartup),
     ("Wellfound", scrape_wellfound),
     ("HiringCafe", scrape_hiringcafe),
@@ -644,13 +1144,28 @@ SCRAPERS = [
 # ============================================================
 # DEDUP + INSERT
 # ============================================================
-def short_id(company, role):
-    h = hashlib.md5(f"{company}|{role}".encode()).hexdigest()[:6]
+def short_id(company, role, email=""):
+    """Build a short public tracking id for the email link.
+
+    The id includes the email so two different leads at the same company
+    (e.g. (Anyscale, Senior AI Engineer, careers@) vs (Anyscale, Senior
+    AI Engineer, talent@) — the latter created by _better_email swap)
+    get distinct ids. Without email, both hashes would collide on
+    leads_tracking_id_key and the 2nd insert would error.
+    """
+    h = hashlib.md5(f"{company}|{role}|{email}".encode()).hexdigest()[:6]
     slug = re.sub(r"[^a-z0-9]+", "-", company.lower())[:12].strip("-") or "lead"
     return f"{slug}-{h}"
 
 
 def insert_leads(leads, dry=False):
+    """Insert a batch of leads with role-aware dedup.
+
+    Dedup key: (LOWER(company), LOWER(contact_email), LOWER(role))
+    so the same company+recruiter with a *different* role is treated as
+    a new lead. Empty role still de-dupes on (company, email) to avoid
+    inflating generic backlog rows.
+    """
     from db.lead_store import get_cursor
     inserted = 0
     skipped = 0
@@ -658,17 +1173,29 @@ def insert_leads(leads, dry=False):
     existing = set()
     with get_cursor() as cur:
         cur.execute("""
-            SELECT LOWER(company) AS co, LOWER(contact_email) AS em
+            SELECT LOWER(company) AS co, LOWER(contact_email) AS em,
+                   LOWER(role) AS role
             FROM leads WHERE contact_email IS NOT NULL
         """)
         for r in cur.fetchall():
-            existing.add((r["co"] or "", r["em"] or ""))
+            existing.add((r["co"] or "", r["em"] or "", r["role"] or ""))
 
     seen = set()
     for ld in leads:
         co = (ld.get("company") or "").strip()
         em = (ld.get("contact_email") or "").strip()
+        role = (ld.get("role") or "").strip()
         if not co or not em or JUNK_EMAIL_RE.search(em) or JUNK_COMPANY_RE.match(co):
+            skipped += 1
+            continue
+        # Generic-ATS catch-all addresses (`jobs@workable.com`,
+        # `recruiter@ashbyhq.com`, …) route to the platform's
+        # support team, not a real human. Sending cold email
+        # to one of these is wasted send budget. We already
+        # filter this in scrape_hnhiring_remote, but check
+        # again at insert time so a future scraper that
+        # forgets the filter doesn't pollute the DB.
+        if _is_generic_ats_email(em):
             skipped += 1
             continue
         # Per-domain bounce deny
@@ -680,25 +1207,31 @@ def insert_leads(leads, dry=False):
                 continue
         except Exception:
             pass
-        key = (co.lower(), em.lower())
+        # Role-aware dedup. If role is empty, fall back to (co, em) only.
+        key = (co.lower(), em.lower(), role.lower())
         if key in existing or key in seen:
             skipped += 1
             continue
         if dry:
-            print(f"  [DRY] would insert {co} {em}")
+            print(f"  [DRY] would insert {co} {em} {role[:40]}")
             inserted += 1
+            seen.add(key)
             continue
         try:
-            tid = short_id(co, ld.get("role", ""))
+            tid = short_id(co, role, em)
             with get_cursor() as cur:
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email, source_url,
                          jd_text, source, status, created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
+                    WHERE contact_email IS NOT NULL
+                      AND role IS NOT NULL
+                      AND role != ''
+                    DO NOTHING
                     RETURNING id
-                """, (tid, co[:80], ld.get("role", "")[:120], em,
+                """, (tid, co[:80], role[:120], em,
                       ld.get("source_url", "")[:500],
                       (ld.get("jd_text") or "")[:1500],
                       ld.get("source", "auto")))
@@ -706,7 +1239,7 @@ def insert_leads(leads, dry=False):
             if row:
                 inserted += 1
                 seen.add(key)
-                print(f"  ✅ #{row['id']:3d} {co[:30]:30s} {ld.get('role','')[:50]:50s} {em}")
+                print(f"  ✅ #{row['id']:3d} {co[:30]:30s} {role[:50]:50s} {em}")
             else:
                 skipped += 1
         except Exception as e:

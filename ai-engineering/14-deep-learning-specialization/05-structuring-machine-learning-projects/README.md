@@ -127,3 +127,7 @@ Most ML failures aren't algorithmic. They're **strategic**. The team has a 90% a
 ## Lead lesson
 
 See `01-bias-variance-diagnosis.md` for the worked example: take a 3-layer NN on the cat-classifier, manually diagnose bias vs variance using the train vs dev gap, and apply the right fix (bigger model vs more data vs regularization). This is the decision loop every ML practitioner runs.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

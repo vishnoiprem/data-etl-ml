@@ -81,3 +81,16 @@ The pattern that wins interviews is the "n8n implements the same 7 + 5 pattern" 
 ## Read next
 
 `L7-1-the-n8n-platform.md` — the n8n platform architecture. Workflows, nodes, credentials, executions, and the data flow that connects them.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

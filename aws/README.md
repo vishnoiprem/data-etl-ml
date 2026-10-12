@@ -52,3 +52,7 @@ $ sudo rm /usr/local/bin/aws_completer
 Note if you installed the AWS CLI v2 using the `-b` or `-i` options, you will
 need to remove the installation and the symlinks in the directories you
 specified.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

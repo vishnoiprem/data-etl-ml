@@ -83,3 +83,7 @@ Expected: **4 passed** in under 2 seconds.
   Gateway Load Balancer (GWLB) — which is a Layer 3 appliance
   load balancer used for third-party firewalls and intrusion
   detection.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

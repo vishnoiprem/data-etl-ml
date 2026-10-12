@@ -34,3 +34,7 @@ After the fix: storage savings held, cost dropped 60%, and the nightly job takes
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

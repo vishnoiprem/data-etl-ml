@@ -11,3 +11,7 @@ DataLemur + LeetCode Database → build volume and speed (SQL + Python)
 StrataScratch → switch to Meta-style real questions
 DataDriven.io or Interview Query → data modeling + pipeline thinking
 2–4 paid mocks on Prepfully/Exponent → simulate the real interview
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

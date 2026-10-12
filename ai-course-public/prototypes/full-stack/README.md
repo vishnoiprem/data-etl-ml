@@ -52,3 +52,16 @@ This is the **smallest possible business** that:
 - Tracks everything (admin)
 
 You can deploy this in an afternoon. Then replace each piece with real tools (ConvertKit, Stripe, etc.) as you grow.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

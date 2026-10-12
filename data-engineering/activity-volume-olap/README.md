@@ -33,3 +33,7 @@ Pre-aggregation costs storage and build time. Interactive query costs are domina
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

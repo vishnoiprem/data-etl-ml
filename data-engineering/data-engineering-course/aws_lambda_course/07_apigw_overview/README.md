@@ -69,3 +69,7 @@ L30 will confirm it.
   conceptual — but you will need it from L30 onward.)
 - Familiarity with HTTP basics: methods (GET, POST, PUT, DELETE), status
   codes (200, 400, 401, 500), and headers.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

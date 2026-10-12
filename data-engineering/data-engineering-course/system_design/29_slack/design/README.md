@@ -150,3 +150,7 @@ across terms, return up to N messages sorted by recency.
 | `code/app.py` | Flask HTTP API. |
 | `tests/test_service.py` | Workspace/channel lifecycle, threading, mentions, search. |
 | `tests/test_app.py` | HTTP smoke for posting + searching. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

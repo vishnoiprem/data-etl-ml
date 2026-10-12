@@ -289,3 +289,27 @@ def test_fill_realized_pnl_only_on_sell():
     sell = b.on_signal(_sig("AI", "SELL"), price=51.0)
     assert sell is not None
     assert sell.realized_pnl > 0
+
+
+def test_buy_skipped_when_notional_below_minimum():
+    """If the resulting notional would be <0.01 units, the BUY is
+    skipped (no phantom fills in the trade log). This can happen when
+    price is much higher than equity."""
+    # 100 units of cash, price = 1_000_000 → max_qty_by_cash ≈ 1e-4
+    # → notional ≈ 100, well above 0.01, so this DOES fill.
+    # The floor is meant for *extreme* edge cases.
+    b = PaperBroker(starting_units=0.001, fee_bps=0, max_position_pct=100.0)
+    fill = b.on_signal(_sig("EXPENSIVE", "BUY"), price=1_000_000.0)
+    assert fill is None  # notional = 0.001 < 0.01 floor
+    assert b.positions == {}
+    assert b.trades == []
+
+
+def test_buy_with_huge_price_but_big_equity_still_fills():
+    """Sanity check: the floor doesn't accidentally reject legitimate
+    high-price, high-equity trades."""
+    b = PaperBroker(starting_units=1_000_000.0, fee_bps=0, max_position_pct=10.0)
+    fill = b.on_signal(_sig("BRK", "BUY"), price=1_000_000.0)
+    assert fill is not None
+    # 10% of 1M = 100k notional / 1M price = 0.1 qty
+    assert fill.qty == pytest.approx(0.1, rel=1e-6)

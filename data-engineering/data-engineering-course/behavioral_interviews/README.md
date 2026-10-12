@@ -121,3 +121,7 @@ friend to listen. Repeat.** That's the entire workflow.
 - For system design patterns: see `data-engineering-course/system_design/`.
 - For data engineering foundations: see `data-engineering/data-enginnering-cloudvala/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

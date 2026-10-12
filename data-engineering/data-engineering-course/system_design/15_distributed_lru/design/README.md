@@ -145,3 +145,7 @@ On `get(key)`:
 | `code/app.py` | Flask HTTP service exposing `/api/cache/<key>`. |
 | `tests/test_service.py` | Ring distribution, LRU behavior, peer-fetch counter. |
 | `tests/test_app.py` | HTTP-level tests using Flask test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

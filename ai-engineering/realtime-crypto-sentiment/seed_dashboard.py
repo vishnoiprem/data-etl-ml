@@ -1,10 +1,12 @@
 """Seed a fresh SQLite DB with realistic demo data for the dashboard.
 
-Writes ~6 hours of synthetic-but-plausible data for the 4 dashboard tabs:
-  - tweets (with sentiment scores) for the Sentiment page
+Writes ~7 days of synthetic-but-plausible data for all 5 dashboard tabs:
+  - tweets (with sentiment scores) for the Sentiment + Live pages
   - signals (BUY/SELL/HOLD mix) for the 24h signal-count bar
   - paper_trades + positions (a few round-trips) for the Paper PnL page
   - trending_tags (1-min buckets) for the 🔥 Trending page
+  - 7 days of sparse per-tag tweet history so the Top-10 daily
+    leaderboard has velocity / reach numbers to display
 """
 from __future__ import annotations
 

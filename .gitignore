@@ -2,47 +2,29 @@
 venv/
 .venv/
 .env
- .idea/workspace.xml
+*.env
+*aws.env
+
 # IDE
 .idea/
-
-# Large ML files
-*.pth
-*.safetensors
-*.bin
-*.h5
-*.zip
-*.so
-*.dylib
-*.jar
-*.crc
-*.csv
-*.checkpoint.ipynb
-*.parquet
-*.json
-*.pyc
-*.dylib
-
-
-# Ignore specific file
-# Ignore all .safetensors files
-*.safetensors
-
-# Ignore specific file
-ml/LLM/fine_tuned_gpt2/model.safetensors
-
+.idea/workspace.xml
 
 # Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-.env
-*.env
-
 
 # Jupyter Notebooks
 .ipynb_checkpoints
+*.checkpoint.ipynb
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
 
 # Data files
 *.csv
@@ -50,28 +32,38 @@ __pycache__/
 *.xlsx
 data/
 
-# Logs
-*.log
+# Whitelist known JSON config paths that the catch-all *.json would
+# otherwise hide. The rule below must come AFTER *.json so it wins
+# (git uses last-match-wins for ignore rules).
+!*.json.example
+!*.jsonl.example
+# release-please state files (root of repo)
+!release-please-config.json
+!.release-please-manifest.json
+.devcontainer/
+!.devcontainer/devcontainer.json
+!.devcontainer/post-create.sh
+.vscode/
+!.vscode/
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Environments
-.env
-.venv
-EOL
-.*pth
-
-
-ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
-ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
-*.pth
-*.h5
+# Large ML files (kept in LFS for some specific paths; ignored for the rest)
 *.bin
+*.h5
+*.parquet
+*.so
+*.dylib
+*.jar
+*.crc
 *.zip
+*.pth
+*.safetensors
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
 
-*aws.env
+# Specific LFS-tracked files
+ml/LLM/fine_tuned_gpt2/model.safetensors
+ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
+
 # Interview prep — personal resume extract + weak-spot ledger. Repo is PUBLIC.
 medium/meta/coach/
 .claude/agents/

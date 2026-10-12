@@ -1,4 +1,4 @@
-.PHONY: up test smoke run dashboard check
+.PHONY: up test smoke smoke-alerts smoke-fixes run dashboard check
 
 up:
 	pip install -r requirements.txt
@@ -8,6 +8,12 @@ test:
 
 smoke:
 	python -m bot.smoke
+
+smoke-alerts:
+	python -m bot.alerts_smoke
+
+smoke-fixes:
+	python -m bot.fixes_smoke
 
 run:
 	python -m bot.main

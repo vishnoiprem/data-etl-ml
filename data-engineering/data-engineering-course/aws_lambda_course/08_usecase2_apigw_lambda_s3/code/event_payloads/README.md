@@ -39,3 +39,7 @@ JSON event. The handler returns a JSON object with `statusCode`,
 
 The alternative ("non-proxy" with a mapping template) is covered in
 L32.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -76,3 +76,7 @@ aws lambda add-permission \
   — the lecture that walks through this code.
 - `../../02_jwt_basics/code/jwt_verify.py` — the JWT primitives
   this handler wraps.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

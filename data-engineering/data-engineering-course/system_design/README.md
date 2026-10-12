@@ -150,3 +150,7 @@ on a whiteboard. **That's the target.**
 - For ETL / ML projects, see `data-engineering/scb_aml_platform/`
   and `data-engineering/e-commerce-end-2end/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

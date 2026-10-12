@@ -14,3 +14,7 @@
 
 **Working demo:** `code/subscription_filter.py` (idempotent,
 `--dry-run`) + `code/test_subscription_filter.py` (4 moto tests).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

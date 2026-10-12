@@ -38,3 +38,7 @@ token = jwt.encode(
 )
 print(json.dumps({"authorizationToken": f"Bearer {token}"}))
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

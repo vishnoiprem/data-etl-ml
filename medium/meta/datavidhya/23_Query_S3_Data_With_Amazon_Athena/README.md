@@ -215,3 +215,7 @@ payment-type buckets, top pickup zone `Midtown Center` with the
 highest revenue, three distinct days (2026-08-15 → 2026-08-17), and
 the cash/no-tip invariant (`COUNT(CSH ∩ tip=0) == 4`). The driver and
 pytest suite exercise all five without AWS.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

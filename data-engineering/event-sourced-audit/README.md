@@ -42,3 +42,7 @@ A regulator asks "show me every access to customer X's data in the last 90 days.
 pip install -r requirements.txt
 make demo
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

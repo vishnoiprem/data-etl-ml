@@ -123,3 +123,16 @@ Phase 3 (in `../phase-3-deployment/`) lifts this to: hybrid retrieval (BM25 + de
 Phase 4 (in `../phase-4-capstone/`) takes the Phase 3 service and turns it into a **platform**: MCP for tool use, multi-agent for complex cases, a distilled SLM for cost, a fresh engagement for breadth, plus 5 case studies and a capstone presentation.
 
 Read [`../phase-3-deployment/scenario-lift.md`](../phase-3-deployment/scenario-lift.md) for the Phase 3 lift.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

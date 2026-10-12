@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS leads (
     cover_letter_subject TEXT,
     cover_letter_body    TEXT,
     jd_text         TEXT,
+    apply_mode      TEXT NOT NULL DEFAULT 'pod'
+        CHECK (apply_mode IN ('pod', 'solo')),       -- 'pod' = Avilx pod pitch; 'solo' = Prem personal apply
     status          TEXT NOT NULL DEFAULT 'pending', -- pending | sent_email | failed | replied | bounced | unsubscribed
     sent_at         TIMESTAMPTZ,
     replied_at      TIMESTAMPTZ,
@@ -26,12 +28,21 @@ CREATE TABLE IF NOT EXISTS leads (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Unique only when contact_email is present (URL-apply leads can repeat company)
-CREATE UNIQUE INDEX IF NOT EXISTS leads_company_email_unique
-    ON leads (LOWER(company), LOWER(contact_email))
-    WHERE contact_email IS NOT NULL;
+-- Unique on (company, email, role) — same company+recruiter with a
+-- different role is treated as a new lead. The previous index
+-- (company, email) was too strict: re-scrapes with new role strings
+-- all collided and were silently dropped via ON CONFLICT DO NOTHING.
+-- Migration: DROP INDEX leads_company_email_unique; create this one.
+-- Safe because no existing rows violate the new key (the old key
+-- prevented any such rows from ever being inserted).
+CREATE UNIQUE INDEX IF NOT EXISTS leads_company_email_role_unique
+    ON leads (LOWER(company), LOWER(contact_email), LOWER(role))
+    WHERE contact_email IS NOT NULL
+      AND role IS NOT NULL
+      AND role != '';
 
 CREATE INDEX IF NOT EXISTS leads_status_idx ON leads(status);
+CREATE INDEX IF NOT EXISTS leads_apply_mode_idx ON leads(apply_mode);
 CREATE INDEX IF NOT EXISTS leads_email_idx ON leads(contact_email);
 CREATE INDEX IF NOT EXISTS leads_company_idx ON leads(company);
 CREATE INDEX IF NOT EXISTS leads_tracking_idx ON leads(tracking_id);

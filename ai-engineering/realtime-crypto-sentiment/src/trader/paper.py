@@ -161,6 +161,11 @@ class PaperBroker:
 
     # ── Internals ────────────────────────────────────────────────────
 
+    # Smallest notional we'll attempt to fill at. Below this the position
+    # is effectively a no-op (rounding + fee would leave a sub-1e-10
+    # qty) and just pollutes the trade log with phantom fills.
+    _MIN_NOTIONAL = 0.01  # 0.01 units (e.g. cents worth of equity)
+
     def _buy(self, symbol: str, price: float, ts: datetime, reason: str) -> Fill | None:
         # Position-size cap
         if self.open_position_count() >= self.max_open_positions and self.positions.get(symbol, Position()).qty == 0:
@@ -168,10 +173,17 @@ class PaperBroker:
             return None
         equity = self.equity()
         max_notional = equity * (self.max_position_pct / 100.0)
-        # Cap by available cash too
+        # Cap by available cash too. The `1 + fee_fraction` divisor
+        # pre-pays the fee so the resulting cash balance can never
+        # go negative due to fees. See test_max_position_size_enforced.
         max_qty_by_cash = self.cash / (price * (1 + self.fee_fraction))
         qty = min(max_notional / price, max_qty_by_cash)
-        if qty <= 0:
+        if qty * price < self._MIN_NOTIONAL:
+            # Not enough equity or cash to make a meaningful fill
+            # (e.g. price is 1e6 and equity is 1.0).
+            logger.debug(
+                f"buy({symbol}): notional {qty * price:.6f} < {self._MIN_NOTIONAL}; skipping"
+            )
             return None
         cost = qty * price
         fee = cost * self.fee_fraction

@@ -61,3 +61,7 @@ FSDP (Fully Sharded Data Parallel) splits model parameters, gradients, and optim
 pip install -r requirements.txt
 make smoke
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

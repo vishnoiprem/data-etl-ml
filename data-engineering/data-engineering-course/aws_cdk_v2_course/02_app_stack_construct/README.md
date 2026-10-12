@@ -25,3 +25,7 @@ working `hello-cdk` project.
 | Project | Stack summary | Tests |
 |---|---|---|
 | `code/hello-cdk/` | 1 S3 bucket + `CfnOutput` | 5 Jest assertions on the synthesized template |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

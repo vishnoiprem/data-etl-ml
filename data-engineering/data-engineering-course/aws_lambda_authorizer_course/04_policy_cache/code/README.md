@@ -61,3 +61,7 @@ Expected: **4+ passed**.
 - [`../lecture_scripts/L20_end_to_end.md`](../lecture_scripts/L20_end_to_end.md)
   — the lecture that walks through this code.
 - `../lecture_scripts/L19_lru_cache_ttl.md` — the cache design.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

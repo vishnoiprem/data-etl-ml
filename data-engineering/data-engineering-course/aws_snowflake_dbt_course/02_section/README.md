@@ -27,3 +27,7 @@ the end of this section you'll be comfortable with: transactions: fields, catego
 Section 03 is **Object dependencies and materialization — staging models, table vs view vs incremental vs ephemeral, and the dbt_project.yml precedence rules.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -142,3 +142,7 @@ workflow.
 - For how to *get* the interview in the first place: see
   `data-engineering-course/how_to_get_the_interview/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

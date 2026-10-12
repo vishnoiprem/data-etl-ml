@@ -2,7 +2,7 @@ PY ?= python3
 VENV ?= .venv
 BIN := $(VENV)/bin
 
-.PHONY: help up down logs pipeline dashboard test lint clean shell
+.PHONY: help up down logs pipeline dashboard test lint clean shell healthcheck
 
 help:  ## Show this help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
@@ -27,6 +27,9 @@ test:  ## Run pytest.
 
 lint:  ## Run ruff.
 	$(BIN)/ruff check src tests dashboard
+
+healthcheck:  ## Print data-source + DB reachability (exit 0 if any source is healthy).
+	$(BIN)/python scripts/healthcheck.py
 
 clean:  ## Remove caches and venv.
 	rm -rf .pytest_cache __pycache__ */__pycache__ */*/__pycache__ .ruff_cache

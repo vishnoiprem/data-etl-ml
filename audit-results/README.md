@@ -44,3 +44,7 @@ npm audit --json > ../../audit-results/npm-audit-aws.json
 ## Remediations Already Applied
 
 See `requirements.txt` (root) and `SECURITY.md` for the most recent policy.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

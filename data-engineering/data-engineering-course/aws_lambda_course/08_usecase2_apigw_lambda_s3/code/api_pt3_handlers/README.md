@@ -88,3 +88,7 @@ Three reasons:
 The pattern generalises: if you find yourself adding a third verb
 (`HEAD`, `LIST`, …), keep it in the same handler until the file
 crosses ~150 lines, then extract.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

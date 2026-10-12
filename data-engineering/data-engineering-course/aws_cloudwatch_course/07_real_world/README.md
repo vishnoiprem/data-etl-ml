@@ -16,3 +16,7 @@ This section is a "synthesis" — it ties together everything in
 sections 1–6 into patterns that real teams use. There is no
 section-level code demo, but the `assignments/assignment_1_slo_dashboard.md`
 extends the material into a graded project.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

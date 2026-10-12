@@ -149,3 +149,7 @@ message addressed to that user, deregister on disconnect.
 | `code/app.py` | Flask HTTP API, SSE stream endpoint, metrics. |
 | `tests/test_service.py` | Conversation lifecycle, send/receive, inbox fan-out, presence, ordering. |
 | `tests/test_app.py` | HTTP smoke + SSE subscribe. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

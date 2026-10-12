@@ -28,3 +28,7 @@ By the end of this section you should be able to pick the right table type for a
 ## What comes next
 
 Section 17 is **Zero-Copy Cloning** — arguably the most loved Snowflake feature. We'll clone a whole production table in seconds, with zero extra storage, and then start mutating the clone without touching the source.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

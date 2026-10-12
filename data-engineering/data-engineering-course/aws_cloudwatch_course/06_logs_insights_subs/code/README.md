@@ -35,3 +35,7 @@ python3 -m pytest 06_logs_insights_subs/code/ -v
 ```
 
 4 moto tests pass; no AWS credentials needed.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

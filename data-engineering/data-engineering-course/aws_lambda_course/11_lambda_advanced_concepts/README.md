@@ -61,3 +61,7 @@ the live version.
 
 Every `code/` subfolder has a `README.md` walking you through running
 it end-to-end against your own AWS account.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

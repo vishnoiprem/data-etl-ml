@@ -66,3 +66,7 @@ Streaming token-by-token completion with debounce, prefix cache, and ghost-text 
 pip install -r requirements.txt
 make smoke
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

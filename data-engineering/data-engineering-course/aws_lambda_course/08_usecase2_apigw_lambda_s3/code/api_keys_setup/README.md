@@ -56,3 +56,7 @@ curl -H "x-api-key: $KEY" "$INVOKE_URL/test-object"
   "Effect": "Allow"
 }
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

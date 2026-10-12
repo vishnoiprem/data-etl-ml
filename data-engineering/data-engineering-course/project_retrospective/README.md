@@ -140,3 +140,7 @@ entire workflow.
 - For system design: see
   `data-engineering-course/system_design/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

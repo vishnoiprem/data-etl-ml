@@ -260,3 +260,7 @@ Snyk / CodeQL expect.
 | `code/app.py` | Flask HTTP service. |
 | `tests/test_service.py` | Service-level tests (session, loop, files, command safety). |
 | `tests/test_app.py` | HTTP-level tests for the agentic flow. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

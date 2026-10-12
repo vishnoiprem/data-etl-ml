@@ -67,3 +67,7 @@ same way, in this order so the `ticks` table is populated first:
 * `current_price` is approximated as `MAX(price)` in the latest 1-min
   slide; for exact "last price" semantics a `LAST_VALUE` over an ordered
   window would be required (not supported cleanly in Flink 1.17 TUMBLE).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -17,9 +17,11 @@ endpoint returns the same data as JSON for any external consumer.
 """
 from __future__ import annotations
 import argparse
+import hmac
 import logging
 import os
 import sqlite3
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
@@ -37,8 +39,37 @@ WATCHLIST = ["SOXL", "TQQQ", "NVDA"]
 SECTOR_ETFS = ["SOXX", "QQQ", "SPY", "DIA"]
 FEAR = "^VIX"
 DEFAULT_STATE_DB = "data/state.db"
+CACHE_TTL_SECONDS = 60  # cache yfinance results for 1 minute
 
 ET = timezone(timedelta(hours=-5))  # US/Eastern (no DST handling — close enough)
+
+
+# --------------------------------------------------------------------------- #
+#  TTL cache for yfinance                                                     #
+# --------------------------------------------------------------------------- #
+
+_cache: dict[str, tuple[float, dict]] = {}  # ticker -> (fetched_at, data)
+_cache_lock = threading.Lock()  # fetch_all() uses 8 threads; protect dict
+
+
+def _cache_get(ticker: str) -> dict | None:
+    with _cache_lock:
+        entry = _cache.get(ticker)
+    if entry is None:
+        return None
+    fetched_at, data = entry
+    if time.time() - fetched_at > CACHE_TTL_SECONDS:
+        return None
+    return data
+
+
+def _cache_put(ticker: str, data: dict) -> None:
+    # Don't cache fetches that failed — let the next request retry instead
+    # of pinning a broken state for 60s.
+    if "error" in data and not data.get("price"):
+        return
+    with _cache_lock:
+        _cache[ticker] = (time.time(), data)
 
 
 # --------------------------------------------------------------------------- #
@@ -104,7 +135,15 @@ def _annualized_vol(close: np.ndarray) -> float:
 
 
 def fetch_ticker(ticker: str) -> dict:
-    """Pull a full snapshot for one ticker. Returns dict, never raises."""
+    """Pull a full snapshot for one ticker. Returns dict, never raises.
+
+    Uses an in-process TTL cache to avoid hammering yfinance. The dashboard
+    refreshes every 30s, but we only need fresh data every ~60s for prices
+    (yfinance quotes are 15-min delayed during market hours anyway).
+    """
+    cached = _cache_get(ticker)
+    if cached is not None:
+        return cached
     out: dict = {"ticker": ticker, "ts": time.time()}
     try:
         t = yf.Ticker(ticker)
@@ -182,6 +221,7 @@ def fetch_ticker(ticker: str) -> dict:
             log.debug("history fetch failed for %s: %s", ticker, e)
     except Exception as e:
         out["error"] = str(e)
+    _cache_put(ticker, out)
     return out
 
 
@@ -460,17 +500,35 @@ def create_app(state_db: str = DEFAULT_STATE_DB) -> Flask:
         if not app.config["AUTH_ENABLED"]:
             return None
         from flask import request
-        from functools import wraps
-        # Browser dialog sends Basic auth header on every request
+        # Browser dialog sends Basic auth header on every request.
+        # We use hmac.compare_digest for the comparison so the response
+        # time doesn't leak how many leading characters of the password
+        # the attacker guessed correctly (constant-time compare).
         auth = request.authorization
-        if (not auth
-            or auth.username != app.config["AUTH_USER"]
-            or auth.password != app.config["AUTH_PASSWORD"]):
-            resp = jsonify({"error": "unauthorized"})
-            resp.status_code = 401
-            resp.headers["WWW-Authenticate"] = 'Basic realm="trading-bot"'
-            return resp
+        if not auth:
+            return _unauth()
+        expected_user = app.config["AUTH_USER"]
+        expected_pass = app.config["AUTH_PASSWORD"]
+        # hmac.compare_digest requires equal-length bytes; mismatch
+        # lengths still return False in constant time, but we still
+        # call it for both fields to avoid a length oracle.
+        user_ok = hmac.compare_digest(
+            auth.username.encode("utf-8"),
+            expected_user.encode("utf-8"),
+        )
+        pass_ok = hmac.compare_digest(
+            auth.password.encode("utf-8"),
+            expected_pass.encode("utf-8"),
+        )
+        if not (user_ok and pass_ok):
+            return _unauth()
         return None
+
+    def _unauth():
+        resp = jsonify({"error": "unauthorized"})
+        resp.status_code = 401
+        resp.headers["WWW-Authenticate"] = 'Basic realm="trading-bot"'
+        return resp
 
     @app.route("/")
     def index():
@@ -496,6 +554,27 @@ def create_app(state_db: str = DEFAULT_STATE_DB) -> Flask:
             "tickers": score_all(WATCHLIST),
             "generated_at": datetime.now(ET).strftime("%Y-%m-%d %H:%M:%S ET"),
         })
+
+    @app.route("/api/alerts")
+    def alerts_list():
+        err = _check_auth()
+        if err is not None:
+            return err
+        # Read alerts from the state DB (if it exists)
+        from broker.state import State
+        try:
+            st = State(app.config["STATE_DB"])
+            rows = st.list_alerts(only_active=True)
+            out = [{
+                "id": r.id, "ticker": r.ticker, "kind": r.kind,
+                "threshold": r.threshold, "note": r.note,
+                "last_price": r.last_price,
+                "created_at": r.created_at,
+            } for r in rows]
+        except Exception as e:
+            out = []
+            log.debug("could not read alerts: %s", e)
+        return jsonify({"alerts": out})
 
     return app
 

@@ -76,3 +76,7 @@ python scripts/run_all_tests.py
 ## Quiz
 
 `quizzes/section_5.md` — 10 questions, pass bar **7 / 10**.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

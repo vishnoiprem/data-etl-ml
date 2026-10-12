@@ -173,3 +173,7 @@ The lab's "lab complete" check is: a CSV dropped in `raw/` produces a
 and the bad rows end up in `rejected/` with a reason. `01_process_csv_upload.py`
 asserts exactly that, against the expected CSVs in `data/`. When the driver
 prints `=== All Q14 stages pass ===`, the local mock of the lab is green.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

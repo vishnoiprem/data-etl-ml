@@ -45,3 +45,7 @@ Section 20 is the **extra topics** catch-all: Tasks, Streams,
 Materialized Views, Data Masking, Roles deep-dive, BI Tools, Best
 Practices, and Bonus lectures. It's the largest section in the
 course.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1282,13 +1282,17 @@ def _guess_stack(lead):
 
 
 def _build_cover_letter(lead):
-    """Render a short, role-aware Avilx cover letter.
+    """Render a short, role-aware cover letter.
 
-    Subject is trimmed to ≤60 chars (Gmail truncates previews past ~70).
-    Body pulls one verbatim phrase from the JD to prove we read it.
-    Pricing is left OUT of the first email (recruiters screen for fit first;
-    price in the reply sounds transactional).
+    Branches on lead.apply_mode:
+      - 'solo'  → Prem personally applies (cover_letter.render_solo_*)
+      - 'pod'   → Avilx pod pitch (cover_letter.render_* — default)
+
+    The new cover_letter.render_for_mode() dispatcher handles both
+    so this function is now a thin wrapper.
     """
+    from cover_letter import render_for_mode
+    return render_for_mode(lead)[:2]
     company = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
     stack = _guess_stack(lead)
@@ -1366,8 +1370,18 @@ def _pull_verbatim_phrase(excerpt: str) -> str | None:
 # 5. EMAIL — send queued leads with daily cap
 # =============================================================
 
-def send_queued_emails(max_emails=None, dry=False):
-    """Pull pending email leads from Postgres, send up to max_emails, mark sent."""
+def send_queued_emails(max_emails=None, dry=False, mode="pod"):
+    """Pull pending email leads from Postgres, send up to max_emails, mark sent.
+
+    mode:
+      'pod'  — default; only Avilx pod-pitch leads (mode='pod')
+      'solo' — only Prem-personal-apply leads (mode='solo')
+      'both' — both queues interleaved by lead id
+
+    Each lead's stored cover_letter_subject/body (rendered at queue time,
+    matching its apply_mode) is what actually gets sent — the mode arg
+    here is only a *selector* for which rows to pull, not a re-renderer.
+    """
     from db.lead_store import get_pending_leads, update_status, is_opted_out
     if max_emails is None:
         max_emails = DAILY_LIMIT
@@ -1375,12 +1389,17 @@ def send_queued_emails(max_emails=None, dry=False):
     pending = [l for l in get_pending_leads()
                if l.get("contact_email") and l.get("apply_method") == "email"]
     pending = [l for l in pending if not is_opted_out(l["contact_email"])]
+    # Apply mode filter at the cursor, not in Python — single round-trip.
+    if mode != "both":
+        pending = [l for l in pending
+                   if (l.get("apply_mode") or "pod") == mode]
     pending = pending[:max_emails]
 
     sent, failed, bounced = 0, 0, 0
     for lead in pending:
         if dry:
-            print(f"  [dry] would email {lead['contact_email']} re: {lead['company']}")
+            md = lead.get("apply_mode", "pod")
+            print(f"  [dry] [{md}] would email {lead['contact_email']} re: {lead['company']}")
             sent += 1
             continue
         try:
@@ -1904,6 +1923,10 @@ def main():
                    help="Skip cron lock (only for interactive debugging)")
     p.add_argument("--no-bounce-sync", action="store_true",
                    help="Skip the bounce-sync step at the start of the run")
+    p.add_argument("--mode", choices=("pod", "solo", "both"), default="pod",
+                   help="Outreach mode: 'pod' (Avilx pod pitch, default), "
+                        "'solo' (Prem personally applies), or 'both' "
+                        "(interleave pod + solo queues).")
     args = p.parse_args()
 
     scrape_only = args.scrape or args.enrich
@@ -1922,8 +1945,10 @@ def main():
             print(f"\n→ inserted {ins}, skipped {skp}, errored {err}")
             return
         if email_only:
-            print(f"\n🤖 AVILX AUTOPILOT — email only")
-            sent, failed, bounced = send_queued_emails(max_emails=args.max_emails, dry=args.dry)
+            print(f"\n🤖 AVILX AUTOPILOT — email only (mode={args.mode})")
+            sent, failed, bounced = send_queued_emails(
+                max_emails=args.max_emails, dry=args.dry, mode=args.mode,
+            )
             print(f"\n→ sent {sent}, bounced {bounced}, failed {failed}")
             return
 

@@ -69,3 +69,7 @@ The lead-finder-scout agent will re-scan with full WebFetch access.
 | X / Twitter | 5 | DM-open needs verify |
 | Braintrust/Arc/Lemon/Turing/Glints/JobStreet | 0 | WebFetch blocked |
 | **Total** | **27** | — |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

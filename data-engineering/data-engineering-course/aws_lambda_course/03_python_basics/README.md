@@ -15,3 +15,7 @@ If you already write Python daily, you can skim L09 and focus on L10
 (especially the virtual environment + boto3 client material). If you have
 never written Python before, watch L09 once at 1x and once again while
 typing every example.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  
