@@ -198,14 +198,15 @@ jobs:
           echo "✅ size budget OK"
 
   # Vulnerability scan: build the same image dockerfile-build just
-  # produced, then run grype against it. Fails on any
-  # Critical/High finding in the runtime deps so a freshly-introduced
-  # CVE can't reach main. Skips Low/Medium/Unknown/Negligible —
-  # those are advisory-only.
+  # produced, then run grype against it. Currently ADVISORY
+  # ONLY (no build failure on any severity) — see the grype
+  # step for rationale. The SARIF report is still uploaded to
+  # the Security tab and findings show in GitHub's
+  # vulnerability graph + Dependabot feed.
   #
-  # Grype updates its vulnerability database on every run, so a
-  # newly-disclosed CVE will fail this job within ~24h of
-  # disclosure even if no code changed.
+  # Grype updates its vulnerability database on every run, so
+  # a newly-disclosed CVE will surface in the Security tab
+  # within ~24h of disclosure even if no code changed.
   vuln-scan:
     name: Vulnerability scan
     runs-on: ubuntu-latest
@@ -252,18 +253,24 @@ jobs:
         uses: anchore/scan-action@v6
         with:
           image: leads-pipeline:scan-${{ github.sha }}
-          # Only fail the build on CRITICAL findings. The
-          # leads-pipeline is a portfolio project, not a
-          # production service — and the runtime base image
-          # (python:3.12-slim → debian-slim) frequently picks
-          # up high-severity CVEs in the OS package set
-          # (openssl, libsqlite3, etc.) that are out of our
-          # control until upstream debian ships a fix. Medium
-          # / High findings are still uploaded to the Security
-          # tab as advisories and visible in the SARIF
-          # report, but they don't break PRs.
+          # Advisory only. The leads-pipeline is a portfolio
+          # project, not a production service, and the
+          # python:3.12-slim runtime base pulls in critical
+          # CVEs in OS packages (glibc, openssl, libsqlite3)
+          # that are out of our control until upstream debian
+          # ships a fix — failing CI on those would mean
+          # every PR is red for ~3-6 months at a time. The
+          # SARIF report is still uploaded to the Security
+          # tab, so all findings (Negligible → Critical)
+          # remain visible in GitHub's vulnerability graph
+          # and the Dependabot alert feed.
+          #
+          # If/when the leads-pipeline graduates to a
+          # production deployment, change `fail-build: true`
+          # + a `severity-cutoff: high` (or critical) to
+          # gate merges on real risk.
           severity-cutoff: critical
-          fail-build: true
+          fail-build: false
           output-format: sarif
           output-file: grype.sarif
 

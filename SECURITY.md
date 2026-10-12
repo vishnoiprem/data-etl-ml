@@ -123,13 +123,17 @@ docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest-v1.2.3
     ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
   ```
 - GHCR's built-in scanner continuously reviews the published tags,
-  and `leads-ci`'s `vuln-scan` job re-runs grype on every PR — so
-  a newly-disclosed Critical CVE in the runtime deps will fail CI
-  within ~24h of disclosure even if no code changed. (Medium and
-  High findings are uploaded to the Security tab as advisories but
-  don't fail the build — the runtime base image `python:3.12-slim`
-  → debian-slim frequently ships High-severity CVEs in OS packages
-  that are out of our control until upstream debian ships a fix.)
+  and `leads-ci`'s `vuln-scan` job re-runs grype on every PR and
+  uploads the SARIF to the Security tab. grype is currently
+  **advisory only** (no build failure on any severity) — the
+  `python:3.12-slim` base image frequently ships Critical CVEs in
+  OS packages (glibc, openssl, libsqlite3) that are out of our
+  control until upstream debian ships a fix, so failing CI on
+  those would mean every PR is red for months at a time. The
+  findings still surface in GitHub's vulnerability graph and
+  Dependabot alert feed. If/when the leads-pipeline graduates to
+  a production deployment, flip `fail-build: true` and a sensible
+  `severity-cutoff` to gate merges on real risk.
 
 ## License & Disclaimer
 
