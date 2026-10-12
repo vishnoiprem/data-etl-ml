@@ -790,6 +790,15 @@ It runs end-to-end on synthetic data, has a README with run commands, has
 tests, has at least one observability hook (logging, metrics, or eval), and
 has a clear extension point (not a sealed demo).
 
+**Q: Is this code safe to run? What's the security posture?**
+Repo-wide security policy is in [SECURITY.md](SECURITY.md) and the latest
+audit findings are in [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md).
+The Dependabot digest (top of the GitHub security tab) lists the open
+advisories on the default branch; the audit doc tracks which have been
+fixed in this branch. There are no real customer / transactional / PII
+data committed here — anything in `leads-pipeline/draft-cron/.tailored_resumes/`
+or `.preview/` is git-ignored.
+
 ---
 
 ## Contact
