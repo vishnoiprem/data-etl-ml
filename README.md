@@ -12,6 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![leads-ci](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml)
 [![leads-cd](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml)
+[![release-please](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml)
 [![pip-audit](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml/badge.svg)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml)
 [![GHCR image](https://img.shields.io/badge/GHCR-ghcr.io%2Fvishnoiprem%2Fdata--etl--ml%2Fleads--pipeline-2496ED?logo=docker&logoColor=white)](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
 [![Made with Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
@@ -798,6 +799,11 @@ advisories on the default branch; the audit doc tracks which have been
 fixed in this branch. There are no real customer / transactional / PII
 data committed here — anything in `leads-pipeline/draft-cron/.tailored_resumes/`
 or `.preview/` is git-ignored.
+
+The `leads-pipeline` container image is published to
+[GHCR](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
+on every push to `main`; see [`docs/CI_CD.md`](docs/CI_CD.md) for the
+release flow and image-tag conventions.
 
 ---
 

@@ -1,15 +1,16 @@
 # CI/CD — leads-pipeline
 
-This doc covers the three GitHub Actions workflows and the GHCR
+This doc covers the four GitHub Actions workflows and the GHCR
 publish that wrap the `leads-pipeline/draft-cron` Python package.
 
 ## Workflows at a glance
 
-| Workflow      | File                                | Triggers                                   | Purpose |
-|---------------|-------------------------------------|--------------------------------------------|---------|
-| `leads-ci`    | `.github/workflows/leads-ci.yml`    | push to `main` + 2 active feature branches, PRs to `main` | Run 6 test modules + lint + Dockerfile build |
-| `leads-cd`    | `.github/workflows/leads-cd.yml`    | push to `main`, manual dispatch            | Build + push container image to `ghcr.io` + verify |
-| `pip-audit`   | `.github/workflows/pip-audit.yml`   | changes to `requirements*.txt`, weekly Mon 06:00 UTC, manual dispatch | Security scan, upload SARIF |
+| Workflow         | File                                    | Triggers                                   | Purpose |
+|------------------|-----------------------------------------|--------------------------------------------|---------|
+| `leads-ci`       | `.github/workflows/leads-ci.yml`        | push to `main` + 2 active feature branches, PRs to `main` | Run 6 test modules + lint + Dockerfile build (size budget) |
+| `leads-cd`       | `.github/workflows/leads-cd.yml`        | push to `main`, manual dispatch, dispatch from release-please | Build + push image to `ghcr.io` + verify + SBOM |
+| `release-please` | `.github/workflows/release-please.yml`  | push to `main`                             | Open release PR from conventional commits, re-dispatch leads-cd with semver tag |
+| `pip-audit`      | `.github/workflows/pip-audit.yml`       | changes to `requirements*.txt`, weekly Mon 06:00 UTC, manual dispatch | Security scan, upload SARIF |
 
 ## `leads-ci`
 
@@ -19,10 +20,13 @@ Two jobs:
    6 in-repo test modules in order, runs flake8 on the modified
    source files (advisory only — pre-existing warnings surface in
    the UI as a warning, not a hard failure).
-2. **`dockerfile-build`** — builds the Dockerfile in
-   `leads-pipeline/draft-cron` (without pushing) and smoke-tests
-   the resulting image. This guards the CD workflow: a broken
-   Dockerfile can't reach `main` because the PR will fail.
+2. **`dockerfile-build`** — reads the in-tree
+   `leads-pipeline/draft-cron/VERSION` (falling back to
+   `0.0.0+<sha>`), builds the Dockerfile in
+   `leads-pipeline/draft-cron` (without pushing), smoke-tests the
+   resulting image, and enforces a 300 MB size budget. This guards
+   the CD workflow: a broken Dockerfile or a 2 GB regression
+   can't reach `main` because the PR will fail.
 
 ### Trigger branches
 
@@ -37,15 +41,25 @@ run. Saves runner minutes on rapid iteration.
 
 ## `leads-cd`
 
-Two jobs, sequential:
+Three jobs, mostly parallel after `build-and-push`:
 
-1. **`build-and-push`** — uses `docker/build-push-action@v6` with
+1. **`build-and-push`** — uses `docker/build-push-action@v7` with
    the `metadata-action` to compute the tags. Pushes to
-   `ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline`.
-2. **`verify`** — re-pulls the just-published image and runs a
-   Python smoke test inside it (imports every critical module +
-   prints the runtime UID). If the manifest is broken, the
-   workflow fails before the bad tag is left in GHCR.
+   `ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline`. Reads
+   `VERSION` and passes it as `--build-arg VERSION=…` so the
+   image carries `org.opencontainers.image.version`.
+2. **`verify`** (sequential, after `build-and-push`) — re-pulls
+   the just-published image and runs three checks: the 300 MB
+   size budget, a Python import smoke test (every critical
+   module), and a manifest sanity check (entrypoint must be
+   `python`). Any failure exits the job before the bad tag is
+   left in GHCR.
+3. **`sbom`** (parallel with `verify`) — uses
+   `anchore/sbom-action@v0` to generate an SPDX 2.3 SBOM from
+   the pulled image and uploads it as a workflow artifact
+   (`leads-pipeline-sbom`, 30-day retention). The image itself
+   is not shipped with an embedded SBOM (faster push, smaller
+   layers) — the SBOM is generated downstream per release.
 
 ### Image tags
 
@@ -53,6 +67,7 @@ Two jobs, sequential:
 |---------------------------|-------------------------------------------|
 | push to `main`            | `latest`, `main-<short_sha>`, `<short_sha>` |
 | manual `workflow_dispatch` with `tag_suffix=rc1` | `latest-rc1`, `<short_sha>` |
+| dispatched from release-please with `tag_suffix=v1.2.3` | `latest`, `latest-v1.2.3`, `main-<short_sha>`, `<short_sha>` |
 | other branch              | `<branch>`, `<short_sha>`                  |
 
 ### Concurrency
@@ -93,6 +108,39 @@ docker run --rm \
   dashboard.py
 ```
 
+Or, using the repo's `docker-compose.yml` (one-shot, behind the
+`agent` profile so it doesn't auto-start on a plain `up`):
+
+```bash
+docker compose --profile agent run --rm leads-pipeline
+# override the image tag:
+LEADS_IMAGE=ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:main-abc1234 \
+  docker compose --profile agent run --rm leads-pipeline
+```
+
+## `release-please`
+
+Runs on every push to `main`. Scans conventional commits since
+the last release, computes the next semver, and opens a PR
+`chore(release): release X.Y.Z` that:
+
+- Bumps `leads-pipeline/draft-cron/VERSION` to the new semver.
+- Updates `.release-please-manifest.json` so the next run picks
+  up from the right baseline.
+- Regenerates `CHANGELOG.md` from the conventional-commit history.
+
+When the release PR is merged, release-please creates a GitHub
+release + git tag, then dispatches `leads-cd` with
+`tag_suffix=vX.Y.Z` so the image is republished with a
+`latest-vX.Y.Z` tag (in addition to `latest`).
+
+**Bump policy** (see `release-please-config.json`):
+
+- `fix:` → patch bump
+- `feat:` → minor bump
+- `feat!:` / `BREAKING CHANGE:` footer → major bump
+- `chore:`, `docs:`, `refactor:`, `test:`, `ci:`, `build:`, `style:` → no bump
+
 ## `pip-audit`
 
 Weekly Monday 06:00 UTC scan of every `requirements*.txt` in the
@@ -100,19 +148,26 @@ repo, plus on every change to those files. Uploads a SARIF to
 the Code Scanning tab so the security advisories show up inline
 on PRs.
 
-## Dependabot
+## Dependabot + Renovate
 
-`.github/dependabot.yml` covers three ecosystems:
+The repo runs **both** by design:
 
-- `pip` (root, plus `/leads-pipeline/draft-cron` for the CD
-  manifest)
-- `npm` (TypeScript starters under `agentic-ai/` and `aws/`)
-- `github-actions` (all workflows)
-- `docker` (the new leads-pipeline Dockerfile)
+- **Dependabot** (`.github/dependabot.yml`) — pip + npm +
+  github-actions + docker ecosystems, weekly Monday 09:00 IST.
+  Has the canonical per-ecosystem config and is what opened the
+  original security PRs.
+- **Renovate** (`renovate.json5`) — opt-in via the Renovate
+  GitHub App. Adds:
+  - Automerge for low-risk patch/minor updates in
+    `leads-pipeline/draft-cron/requirements.txt`.
+  - Automerge for github-actions patch updates.
+  - A custom regex manager for inline `pip install foo==X.Y.Z`
+    in any `*.py` or `*.sh` (Dependabot can't see these).
+  - A "Renovate Dashboard" issue listing all open PRs.
 
-Dependabot opens a PR per major-version bump. The `CODEOWNERS`
-file auto-assigns `@vishnoiprem` for review on CI/CD paths so a
-fresh commit to the workflow files won't slip in unreviewed.
+The `CODEOWNERS` file auto-assigns `@vishnoiprem` for review on
+CI/CD paths so a fresh commit to the workflow files won't slip
+in unreviewed.
 
 ## Local reproduction
 
@@ -125,11 +180,14 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt flake8
 # (in another terminal: docker compose up -d postgres)
 PYTHONPATH=. python -m tests.test_dedup_key   # etc.
+make ci          # install + test + lint + docker-build + smoke
 
-# CD build step
-docker build -t leads-pipeline:local leads-pipeline/draft-cron
-docker run --rm --entrypoint python leads-pipeline:local \
-  -c "import db.lead_store, find_more_leads; print('OK')"
+# CD build step (the Makefile passes --build-arg VERSION=...)
+make docker-build
+make docker-run
+
+# Or, on the published image (after a release):
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
 ```
 
 ## Adding a new workflow or changing an existing one
@@ -146,9 +204,15 @@ docker run --rm --entrypoint python leads-pipeline:local \
 - **Remote deploy** — when there's a server to deploy to, add an
   `appleboy/ssh-action` step after the verify job. Needs
   `SSH_HOST` + `SSH_KEY` secrets.
-- **Tag-driven releases** — extend `metadata-action` with
-  `type=semver,pattern={{version}}` to publish a versioned tag
-  (e.g. `1.2.3`) on `v*` git tags.
-- **Renovate instead of Dependabot** — Renovate groups PRs more
-  aggressively and handles docker images better. Migration is a
-  1-file change (`renovate.json5`).
+- **Cosign signature** — sign the published image with
+  `sigstore/cosign-installer` + `cosign sign --yes
+  ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline@<digest>`. Needs
+  a sigstore keypair (or OIDC) configured.
+- **SBOM-driven vuln scan on PRs** — add a `grype` job to
+  leads-ci that reads the generated SBOM and fails the PR on
+  any `Severity >= High` finding. Catches vulns before they
+  reach `main`.
+- **Image diff job** — `container-diff` between the new image
+  and the previous `latest` to surface added/removed packages
+  in the PR description.
+
