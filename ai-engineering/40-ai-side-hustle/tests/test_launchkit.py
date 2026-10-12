@@ -143,3 +143,58 @@ def test_build_kit_resilient_to_partial_product(tmp_path: Path):
     kit = build_kit(d)
     assert "sales-page.html" in kit
     assert Path(kit["sales-page.html"]).exists()
+
+
+def test_buy_url_swaps_into_sales_page(product_dir: Path):
+    """When --url is provided, the sales page CTA points to the real link."""
+    real = "https://example.gumroad.com/l/soc2-playbook"
+    out = build_sales_page(product_dir, buy_url=real)
+    text = out.read_text()
+    assert real in text
+    assert 'href="#buy"' not in text
+
+
+def test_buy_url_swaps_into_tweet_thread(product_dir: Path):
+    real = "https://example.gumroad.com/l/soc2-playbook"
+    out = build_tweet_thread(product_dir, buy_url=real)
+    text = out.read_text()
+    assert real in text
+    assert "your-gumroad-link" not in text
+
+
+def test_buy_url_swaps_into_reddit_post(product_dir: Path):
+    real = "https://example.gumroad.com/l/soc2-playbook"
+    out = build_reddit_post(product_dir, buy_url=real)
+    text = out.read_text()
+    assert real in text
+    assert "your-gumroad-link" not in text
+
+
+def test_buy_url_does_not_break_email_outreach(product_dir: Path):
+    """The cold-email template intentionally has no buy link — adding
+    one would read as spam. Passing --url must not corrupt the email."""
+    real = "https://example.gumroad.com/l/soc2-playbook"
+    out = build_email_outreach(product_dir, buy_url=real)
+    text = out.read_text()
+    # Both SUBJECT: lines must still be present and the template intact
+    assert text.count("SUBJECT:") == 2
+    # No accidental insertion of the URL (no placeholder to swap into)
+    assert real not in text
+
+
+def test_no_buy_url_keeps_placeholder(product_dir: Path):
+    """Without --url, the placeholder stays so it's obvious what to replace."""
+    out = build_tweet_thread(product_dir)
+    text = out.read_text()
+    assert "your-gumroad-link" in text
+
+
+def test_build_kit_threads_url_through_every_asset(product_dir: Path):
+    real = "https://buy.example.com/x"
+    kit = build_kit(product_dir, buy_url=real)
+    # Sales page gets the real URL in its CTA
+    assert real in Path(kit["sales-page.html"]).read_text()
+    # Tweet + reddit have a placeholder that gets swapped
+    for asset in ("tweet-thread.txt", "reddit-post.txt"):
+        assert real in Path(kit[asset]).read_text(), f"missing in {asset}"
+        assert "your-gumroad-link" not in Path(kit[asset]).read_text(), f"placeholder left in {asset}"

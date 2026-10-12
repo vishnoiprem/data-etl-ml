@@ -15,7 +15,8 @@ launch kit forces you to think about promotion upfront.
 
 Usage:
   python -m launchkit output/products/the-soc2-for-solo-founders-playbook
-  python -m launchkit --all  # build kits for every product
+  python -m launchkit --all
+  python -m launchkit --all --url https://yourname.gumroad.com/l/slug
 """
 
 from __future__ import annotations
@@ -53,6 +54,23 @@ def _to_pdf_safe(text: str) -> str:
     (which needs to be bundled), normalize the text.
     """
     return text.translate(_UNICODE_TO_ASCII)
+
+
+# The placeholder URL that ships in every generated asset. When the
+# user provides a real Gumroad link via --url, we swap this out so
+# they don't have to find-and-replace by hand across 6 files.
+DEFAULT_BUY_URL = "https://your-gumroad-link"
+
+
+def _apply_url(text: str, buy_url: str) -> str:
+    """Swap the placeholder URL for the real Gumroad link, if provided.
+
+    If `buy_url` is None or empty, the placeholder stays — better to
+    ship an obvious placeholder than to leave a broken empty link.
+    """
+    if not buy_url:
+        return text
+    return text.replace(DEFAULT_BUY_URL, buy_url)
 
 
 # ---------------------------------------------------------------- PDF
@@ -216,7 +234,7 @@ No. One-time purchase, lifetime access.</p>
 """
 
 
-def build_sales_page(product_dir: Path) -> Path:
+def build_sales_page(product_dir: Path, buy_url: str | None = None) -> Path:
     """Render sales-page.html from listing.md + the product metadata."""
     listing = product_dir / "listing.md"
     if not listing.exists():
@@ -252,6 +270,9 @@ def build_sales_page(product_dir: Path) -> Path:
         audience=_derive_audience(cleaned),
         body=cleaned.strip(),
     )
+    # Swap the placeholder `#buy` anchor for the real URL
+    if buy_url:
+        html = html.replace('href="#buy"', f'href="{buy_url}"')
     out = product_dir / "sales-page.html"
     out.write_text(html)
     return out
@@ -277,7 +298,7 @@ def _derive_audience(body: str) -> str:
 
 # ---------------------------------------------------------------- Tweet thread
 
-def build_tweet_thread(product_dir: Path) -> Path:
+def build_tweet_thread(product_dir: Path, buy_url: str | None = None) -> Path:
     title = product_dir.name.replace("-", " ").title()
     thread = f"""\
 1/ I wrote a {title} for the people who keep saying "I'll get to it next month."
@@ -336,13 +357,13 @@ If it IS for you — what are you waiting for?
 — Prem
 """
     out = product_dir / "tweet-thread.txt"
-    out.write_text(thread)
+    out.write_text(_apply_url(thread, buy_url))
     return out
 
 
 # ---------------------------------------------------------------- Reddit post
 
-def build_reddit_post(product_dir: Path) -> Path:
+def build_reddit_post(product_dir: Path, buy_url: str | None = None) -> Path:
     title = product_dir.name.replace("-", " ").title()
     post = f"""\
 Title: I wrote a 20-page {title} for solo founders — free excerpt inside
@@ -389,13 +410,13 @@ Full version ($19, instant download, 30-day refund):
 — Prem
 """
     out = product_dir / "reddit-post.txt"
-    out.write_text(post)
+    out.write_text(_apply_url(post, buy_url))
     return out
 
 
 # ---------------------------------------------------------------- Email outreach
 
-def build_email_outreach(product_dir: Path) -> Path:
+def build_email_outreach(product_dir: Path, buy_url: str | None = None) -> Path:
     title = product_dir.name.replace("-", " ").title()
     emails = f"""\
 SUBJECT: Quick guest post idea for {title} readers
@@ -444,7 +465,7 @@ written — just plug in your affiliate link).
 — Prem
 """
     out = product_dir / "email-outreach.txt"
-    out.write_text(emails)
+    out.write_text(_apply_url(emails, buy_url))
     return out
 
 
@@ -499,20 +520,24 @@ def build_checklist(product_dir: Path) -> Path:
 
 # ---------------------------------------------------------------- Entry point
 
-def build_kit(product_dir: Path) -> dict:
-    """Build the full launch kit for one product. Returns a summary dict."""
+def build_kit(product_dir: Path, buy_url: str | None = None) -> dict:
+    """Build the full launch kit for one product. Returns a summary dict.
+
+    If `buy_url` is given, the placeholder URL in every text asset is
+    swapped for the real link so the kit is copy-paste ready.
+    """
     outputs: dict[str, str | None] = {}
     pdf = build_pdf(product_dir)
     outputs["deliverable.pdf"] = str(pdf) if pdf else None
-    outputs["sales-page.html"] = str(build_sales_page(product_dir))
-    outputs["tweet-thread.txt"] = str(build_tweet_thread(product_dir))
-    outputs["reddit-post.txt"] = str(build_reddit_post(product_dir))
-    outputs["email-outreach.txt"] = str(build_email_outreach(product_dir))
+    outputs["sales-page.html"] = str(build_sales_page(product_dir, buy_url=buy_url))
+    outputs["tweet-thread.txt"] = str(build_tweet_thread(product_dir, buy_url=buy_url))
+    outputs["reddit-post.txt"] = str(build_reddit_post(product_dir, buy_url=buy_url))
+    outputs["email-outreach.txt"] = str(build_email_outreach(product_dir, buy_url=buy_url))
     outputs["launch-checklist.md"] = str(build_checklist(product_dir))
     return outputs
 
 
-def build_all(output_root: Path) -> list[dict]:
+def build_all(output_root: Path, buy_url: str | None = None) -> list[dict]:
     """Build kits for every product under output_root/products/."""
     products_dir = output_root / "products"
     if not products_dir.exists():
@@ -521,7 +546,7 @@ def build_all(output_root: Path) -> list[dict]:
     for sub in sorted(products_dir.iterdir()):
         if sub.is_dir():
             try:
-                kit = build_kit(sub)
+                kit = build_kit(sub, buy_url=buy_url)
                 results.append({"product": sub.name, "files": kit})
             except Exception as e:
                 results.append({"product": sub.name, "error": str(e)})
@@ -529,20 +554,27 @@ def build_all(output_root: Path) -> list[dict]:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "--all":
-        results = build_all(Path("output"))
+    import argparse
+    parser = argparse.ArgumentParser(description="Build a Gumroad launch kit for one or all products.")
+    parser.add_argument("target", nargs="?", default=None,
+                        help="Path to one product directory (omit if using --all).")
+    parser.add_argument("--all", action="store_true",
+                        help="Build kits for every product under output/products/.")
+    parser.add_argument("--url", default=None,
+                        help="Real Gumroad URL to swap into every asset (replaces the placeholder).")
+    args = parser.parse_args()
+
+    if args.all:
+        results = build_all(Path("output"), buy_url=args.url)
         for r in results:
             if "error" in r:
-                print(f"  ✗ {r['product']}: {r['error']}")
+                print(f"  X {r['product']}: {r['error']}")
             else:
-                print(f"  ✓ {r['product']}: {len(r['files'])} files")
+                print(f"  + {r['product']}: {len(r['files'])} files")
     else:
-        target = Path(sys.argv[1]) if len(sys.argv) > 1 else None
-        if not target:
-            print("usage: python -m launchkit <product_dir>")
-            print("       python -m launchkit --all")
+        if not args.target:
+            parser.print_help()
             raise SystemExit(1)
-        kit = build_kit(target)
+        kit = build_kit(Path(args.target), buy_url=args.url)
         for name, path in kit.items():
-            print(f"  ✓ {name}  →  {path}")
+            print(f"  + {name}  ->  {path}")
