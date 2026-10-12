@@ -41,15 +41,31 @@ class StubRouter:
     name = "stub"
 
     def complete(self, prompt: str, system: str = "", max_tokens: int = 1024) -> str:
-        if "outreach" in prompt.lower() or "cold email" in prompt.lower():
+        # Use the system prompt as the primary signal (most reliable),
+        # then fall back to prompt sniffing. Outreach calls in this project
+        # always pass OUTREACH_SYSTEM; qualify calls don't pass a system.
+        s = (system or "").lower()
+        if "cold-email writer" in s or "outreach" in s or "cold email" in s:
+            return self._stub_outreach(prompt)
+        p = prompt.lower()
+        if "outreach" in p or "cold email" in p or "subject:" in p:
             return self._stub_outreach(prompt)
         return self._stub_qualify_text(prompt)
 
     def json(self, prompt: str, schema_hint: str = "", max_tokens: int = 1024) -> dict:
-        # The stub always returns valid JSON for json() calls
-        if "qualif" in prompt.lower() or "score" in prompt.lower():
+        # The stub always returns valid JSON for json() calls.
+        # Decide intent from the schema_hint first (most reliable), then
+        # fall back to sniffing the prompt for "qualif"/"score" vs
+        # "outreach"/"email".
+        hint = schema_hint.lower()
+        if "score" in hint or "deal_usd" in hint:
             return self._stub_qualify_json(prompt)
-        return {"text": self._stub_outreach(prompt)}
+        p = prompt.lower()
+        if "qualif" in p or "score" in p:
+            return self._stub_qualify_json(prompt)
+        if "outreach" in p or "cold email" in p or "subject:" in p:
+            return {"text": self._stub_outreach(prompt)}
+        return {"text": self._stub_qualify_json(prompt)}
 
     # --- internal stubs ---
     @staticmethod
