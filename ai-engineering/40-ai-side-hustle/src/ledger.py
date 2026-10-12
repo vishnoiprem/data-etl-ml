@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-VALID_STREAMS = ("seo", "saas", "product")
+VALID_STREAMS = ("seo", "saas", "product", "merch")
 
 
 class Ledger:

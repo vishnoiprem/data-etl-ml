@@ -104,4 +104,4 @@ def test_by_day_filters_by_stream(db: Ledger):
 
 
 def test_valid_streams_constant_is_complete():
-    assert set(VALID_STREAMS) == {"seo", "saas", "product"}
+    assert set(VALID_STREAMS) == {"seo", "saas", "product", "merch"}

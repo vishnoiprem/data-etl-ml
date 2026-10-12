@@ -32,6 +32,8 @@ class StubRouter:
             return self._stub_saas_copy(prompt)
         if "ebook author" in s or "nonfiction author" in s or "ebook" in s:
             return self._stub_ebook(prompt)
+        if "merch copywriter" in s or "print-on-demand" in s or "merch" in s:
+            return self._stub_merch_text(prompt)
         if "outreach" in p or "cold email" in p or "subject:" in p:
             return self._stub_saas_copy(prompt)
         return self._stub_generic(prompt)
@@ -40,6 +42,9 @@ class StubRouter:
         hint = schema_hint.lower()
         if "keyword" in hint or "difficulty" in hint:
             return self._stub_keyword_json(prompt)
+        # Merch: schema_hint contains '"merch":'
+        if '"merch"' in hint or "slogan" in hint:
+            return self._stub_merch_json(prompt)
         # The SaaS-idea schema uses the key "ideas"; the schema_hint
         # contains `"ideas":` so check that exact substring.
         if '"ideas"' in hint or ("idea" in hint and "saas" in hint):
@@ -49,6 +54,8 @@ class StubRouter:
         p = prompt.lower()
         if "keyword" in p or "difficulty" in p:
             return self._stub_keyword_json(prompt)
+        if "merch" in p or "slogan" in p:
+            return self._stub_merch_json(prompt)
         if "niche" in p and "idea" in p:
             return self._stub_idea_json(prompt)
         if "topic" in p and "product" in p:
@@ -135,6 +142,34 @@ class StubRouter:
             f"- Tool: a plain text file you actually open\n"
             f"- Habit: one Pomodoro a day\n"
         )
+
+    @staticmethod
+    def _stub_merch_text(prompt: str) -> str:
+        topic = StubRouter._extract(prompt, "Topic") or "your topic"
+        return (
+            f"# {topic} — Merch Concept\n\n"
+            f"Slogan: Ship {topic} or die trying.\n"
+            f"Format: t-shirt, mug, sticker\n"
+            f"Designer brief: Bold sans-serif, single color, "
+            f"icon of a rocket + the slogan below."
+        )
+
+    @staticmethod
+    def _stub_merch_json(prompt: str) -> dict:
+        topic = StubRouter._extract(prompt, "Topic") or "your topic"
+        return {
+            "merch": [
+                {"slogan": f"Powered by {topic}", "format": "t-shirt",
+                 "audience": f"{topic} enthusiasts",
+                 "designer_brief": "Bold retro type, single color, no clipart."},
+                {"slogan": f"{topic.title()} and chillin'", "format": "mug",
+                 "audience": "tech workers",
+                 "designer_brief": "Hand-lettered wordmark, two-color, mug wrap."},
+                {"slogan": f"404: {topic} not found", "format": "sticker",
+                 "audience": "developers",
+                 "designer_brief": "3\" die-cut, glossy vinyl, glitch-style type."},
+            ]
+        }
 
     @staticmethod
     def _stub_generic(prompt: str) -> str:

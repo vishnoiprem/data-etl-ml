@@ -3,16 +3,17 @@
 PYTHON ?= python3
 PIP    ?= $(PYTHON) -m pip
 
-.PHONY: help demo test stream-1 stream-2 stream-3 dashboard clean install
+.PHONY: help install demo stream-1 stream-2 stream-3 stream-4 \
+        dashboard simulate-ramp simulate-30d test clean
 
 help:                       ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 install:                    ## pip install -r requirements.txt
 	$(PIP) install -r requirements.txt
 
-demo:                       ## run all 3 streams + print dashboard
+demo:                       ## run all 4 streams + print dashboard
 	$(PYTHON) scripts/run_factory.py
 
 stream-1:                   ## run only the SEO content engine
@@ -23,6 +24,15 @@ stream-2:                   ## run only the SaaS scaffolder
 
 stream-3:                   ## run only the digital product factory
 	$(PYTHON) scripts/run_factory.py --stream product
+
+stream-4:                   ## run only the print-on-demand merch stream
+	$(PYTHON) scripts/run_factory.py --stream merch
+
+simulate-ramp:              ## run all streams + inject a 14-day ramp scenario
+	$(PYTHON) scripts/run_factory.py --simulate-ramp
+
+simulate-30d:               ## run all streams + inject 30 days of synthetic sales
+	$(PYTHON) scripts/run_factory.py --simulate-days 30
 
 dashboard:                  ## render dashboard from current ledger.db
 	$(PYTHON) -c "import sys; sys.path.insert(0,'src'); from dashboard import print_dashboard; print_dashboard()"
