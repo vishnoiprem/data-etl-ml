@@ -230,3 +230,8 @@ docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
   and the previous `latest` to surface added/removed packages
   in the PR description.
 
+---
+
+**Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.
+

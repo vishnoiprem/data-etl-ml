@@ -244,3 +244,8 @@ updates are already configured (`.github/dependabot.yml`).
 - This is a portfolio / lab repo. None of the vulnerable code paths run in a
   production scenario. Fix Tier 1 + Tier 2 anyway — they're cheap and the
   "vulnerable dependencies" badge is the first thing a reviewer checks.
+
+---
+
+**Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.
