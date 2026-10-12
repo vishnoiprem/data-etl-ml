@@ -1,13 +1,31 @@
 name: leads-ci
 
+# CI for leads-pipeline/draft-cron
+# - Runs the 6 in-repo test modules against a Postgres service
+#   container on a fresh Ubuntu runner
+# - Lints the modified source files
+# - Triggers on push to main + active feature branches, and on PR
+#   to main
+
 on:
   push:
     branches: [main, feature/agent-coding-11oct, feature/auto-pilot-ai-leads-loop]
   pull_request:
     branches: [main]
 
+# Cancel superseded runs on the same ref to save runner minutes on
+# force-pushes. For pushes we cancel; for PRs we also cancel so a
+# reviewer re-triggering doesn't double-bill.
+concurrency:
+  group: leads-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -31,6 +49,7 @@ jobs:
         with:
           python-version: "3.10"
           cache: pip
+          cache-dependency-path: leads-pipeline/draft-cron/requirements.txt
 
       - name: Install dependencies
         run: |
@@ -58,19 +77,52 @@ jobs:
           AVILX_DB_PASSWORD: avilx
         run: |
           cd leads-pipeline/draft-cron
-          PYTHONPATH=. python -m tests.test_dedup_key
-          PYTHONPATH=. python -m tests.test_dedup
-          PYTHONPATH=. python -m tests.test_parser
-          PYTHONPATH=. python -m tests.test_resume_tailor
-          PYTHONPATH=. python -m tests.test_better_email
-          PYTHONPATH=. python -m tests.test_bounce_deny_persistence
+          set -e
+          for t in test_dedup_key test_dedup test_parser test_resume_tailor test_better_email test_bounce_deny_persistence; do
+            echo "===> $t"
+            PYTHONPATH=. python -m tests.$t
+          done
 
-      - name: Lint
+      - name: Lint (advisory)
+        continue-on-error: true
         run: |
           cd leads-pipeline/draft-cron
+          # Advisory only — flake8 reports style issues but does not
+          # fail the build. Promote to a hard failure once the
+          # existing F401/E741/W292 warnings are fixed in a follow-up
+          # commit. Allow E501 (we set 110), W503 (old style), E731.
           flake8 --max-line-length 110 --extend-ignore E501,W503,E731 \
             find_more_leads.py find_clients.py refine_pipeline.py \
             backfill_emails.py cover_letter.py dashboard.py \
             bin/loop_status.py bin/loop_bounce_sync.py \
             state/bounce_deny_store.py \
-            || true
+            resume_tailor.py \
+            || echo "::warning::Lint advisories above — see https://github.com/vishnoiprem/data-etl-ml/issues"
+
+  # Mirror the CD build so a broken Dockerfile can't reach main.
+  # This is the cheapest way to make sure leads-cd will succeed.
+  dockerfile-build:
+    name: Build Dockerfile (CD guard)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: leads-pipeline/draft-cron
+          file: leads-pipeline/draft-cron/Dockerfile
+          push: false
+          tags: leads-pipeline:ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test the built image
+        run: |
+          docker run --rm --entrypoint python \
+            leads-pipeline:ci-${{ github.sha }} \
+            -c "import db.lead_store, find_more_leads, resume_tailor; \
+                print('image smoke test OK; HAVE_DOCX=', resume_tailor.HAVE_DOCX)"

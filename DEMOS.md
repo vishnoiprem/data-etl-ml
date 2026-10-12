@@ -119,4 +119,8 @@ After adding a demo:
 | Architecture diagram | `<project>-architecture.png` |
 | Loom / YouTube thumbnail | `<project>-thumb.png` |
 
+---
+
+**Last updated:** 2026-10-12
+
 All under `docs/assets/`. See `docs/assets/README.md` for full conventions.

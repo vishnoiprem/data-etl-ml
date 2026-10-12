@@ -1,0 +1,157 @@
+name: leads-cd
+
+# Continuous Deployment: build the leads-pipeline container image
+# and publish it to ghcr.io on every push to main. The image is just
+# published — there is no remote deploy step. Pull + run is one
+# line on the target host:
+#
+#   docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
+#   docker run --rm -e AVILX_DB_HOST=... ghcr.io/.../leads-pipeline
+#
+# Tags (managed by docker/metadata-action):
+#   latest                  — only on push to main
+#   main-<short_sha>        — for reproducible deploys
+#   <short_sha>             — for pinning
+#
+# After pushing, the `verify` job re-pulls and smoke-tests the
+# published image. A broken manifest fails the workflow so the tag
+# never silently sits in GHCR.
+#
+# Caching: uses GitHub Actions cache (type=gha) — first build ~30s,
+# subsequent builds ~5s.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Optional tag suffix (e.g. rc1 → latest-rc1)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read        # checkout
+  packages: write       # push to ghcr.io
+
+# Don't kill an in-flight image push mid-upload — a half-pushed
+# image is worse than a slow push.
+concurrency:
+  group: leads-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build + push leads-pipeline image
+    runs-on: ubuntu-latest
+    # Expose the canonical image so the verify job can pull it.
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Show build context size
+        run: |
+          echo "Context size:"
+          du -sh leads-pipeline/draft-cron | head
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline
+          # Flavor so the same workflow can publish 'latest' on main
+          # and a sha-tagged image for any other push (workflow_dispatch
+          # included).
+          flavor: |
+            latest=auto
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.tag_suffix && format('latest-{0}', inputs.tag_suffix) || '' }},enable=${{ inputs.tag_suffix != '' }}
+
+          labels: |
+            org.opencontainers.image.title=leads-pipeline
+            org.opencontainers.image.description=Autopilot for cold-outreach lead generation (scrape → enrich → email → track)
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: leads-pipeline/draft-cron
+          file: leads-pipeline/draft-cron/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false        # SLSA provenance; off to keep build time low
+          sbom: false              # keep the image lean
+
+      - name: Print image references
+        run: |
+          echo "✅ Pushed:"
+          for t in ${{ steps.meta.outputs.tags }}; do
+            echo "  $t"
+          done
+
+  # Re-pull the just-pushed image and smoke test it. Catches the case
+  # where the push succeeded but the manifest is broken (missing
+  # entrypoint, wrong arch, truncated layer).
+  verify:
+    name: Verify published image
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    # Don't run if build-and-push was skipped/cancelled.
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      packages: read
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tag #1 is `latest` on main (or `<ref>` elsewhere) — that's
+      # what consumers will pull. Verify that one specifically.
+      - name: Pull + smoke test
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+        run: |
+          set -e
+          # Pick first tag (typically `latest` or branch ref).
+          IMAGE=$(echo "$TAGS" | awk '{print $1}')
+          echo "Verifying image: $IMAGE"
+          docker pull "$IMAGE"
+
+          # Import every package the runtime needs. If any of these
+          # is missing, the package is broken at install time.
+          docker run --rm --entrypoint python "$IMAGE" - <<'PY'
+          import db.lead_store, find_more_leads, resume_tailor, process_jd_inbox
+          import os
+          print("verified OK")
+          print(f"  uid={os.getuid()}  cwd={os.getcwd()}")
+          print(f"  HAVE_DOCX={resume_tailor.HAVE_DOCX}")
+          # Smoke-check a CLI module too
+          from check_bounces import main as cb_main  # noqa
+          from cover_letter import render as cl_render  # noqa
+          print("  all critical modules importable")
+          PY
+
+          echo "✅ $IMAGE verified — published artifact is healthy"

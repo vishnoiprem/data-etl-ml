@@ -95,3 +95,7 @@ Please **do not** file a public issue. Email the address in the repo
 
 By contributing, you agree that your contributions will be licensed under
 the [MIT License](LICENSE).
+
+---
+
+**Last updated:** 2026-10-12

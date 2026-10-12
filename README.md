@@ -10,6 +10,10 @@
 <div align="left">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![leads-ci](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml)
+[![leads-cd](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml)
+[![pip-audit](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml/badge.svg)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml)
+[![GHCR image](https://img.shields.io/badge/GHCR-ghcr.io%2Fvishnoiprem%2Fdata--etl--ml%2Fleads--pipeline-2496ED?logo=docker&logoColor=white)](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
 [![Made with Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/)
 [![Apache Flink](https://img.shields.io/badge/Apache%20Flink-Streaming-E6526F?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
@@ -816,4 +820,7 @@ rag retrieval augmented generation, langchain, langgraph, multi-agent,
 weaviate, pinecone, vector database, llmops, prompt engineering,
 hive, delta lake, iceberg, dbt, airflow, docker, terraform, mlops,
 anti money laundering, aml, sanctions screening, ofac, fincrime.
--->
+-->---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

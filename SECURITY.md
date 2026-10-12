@@ -71,3 +71,7 @@ This repository contains **no production credentials, secrets, or real keys**. A
 ## License & Disclaimer
 
 This software is provided "as is", without warranty of any kind. See [LICENSE](LICENSE) for full text.
+
+---
+
+**Last updated:** 2026-10-12
