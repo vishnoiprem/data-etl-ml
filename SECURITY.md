@@ -135,6 +135,15 @@ docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest-v1.2.3
   a production deployment, flip `fail-build: true` and a sensible
   `severity-cutoff` to gate merges on real risk.
 
+**Static analysis** — `.github/workflows/codeql.yml` runs
+GitHub's CodeQL on `leads-pipeline/draft-cron/` (the only
+production-shaped Python in the repo) on every change to that
+tree and weekly Mondays 06:30 UTC. Findings (SQL injection,
+unsafe deserialisation, weak crypto, …) upload to the
+Security tab as SARIF under the `leads-pipeline-codeql`
+category. Complements grype, which only inspects the runtime
+deps — CodeQL looks at the source itself.
+
 ## License & Disclaimer
 
 This software is provided "as is", without warranty of any kind. See [LICENSE](LICENSE) for full text.
