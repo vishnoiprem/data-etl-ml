@@ -64,11 +64,9 @@ jobs:
           # security-extended surfaces, so this just gates
           # the red X in the PR.
           severity: warning
-
-      - name: Upload results
-        if: always() && hashFiles('codeql-database/**/*.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: codeql-database/results.sarif
-          category: leads-pipeline-codeql
-        continue-on-error: true
+          # analyze@v3 auto-uploads SARIF (default `upload: always`).
+          # A second manual upload step is unnecessary and the
+          # hard-coded `codeql-database/results.sarif` path doesn't
+          # match where analyze writes to (`../results` relative to
+          # its working dir). The whole upload step has been removed;
+          # analyze handles the SARIF upload itself.
