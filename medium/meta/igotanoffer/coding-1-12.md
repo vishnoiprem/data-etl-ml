@@ -10,6 +10,19 @@ All code uses explicit `for` loops with full step-by-step logic for clarity.
 **Input:** `[[2,3],[3,4],[5]]` (each pair = friendship). Person 5 has no friends.
 **Output:** `{2: 1, 3: 2, 4: 1, 5: 0}`
 
+**Quick runnable example:**
+```python
+def friends(pairs):
+    d = {}
+    for a, b in pairs:
+        d[a] = d.get(a, 0) + 1
+        d[b] = d.get(b, 0) + 1
+    return d
+
+print(friends([[2,3],[3,4],[5]]))
+# {2: 1, 3: 2, 4: 1, 5: 1}
+```
+
 ### Approach 1 — Counter + defaultdict
 ```python
 from collections import defaultdict, Counter
@@ -158,6 +171,19 @@ def friends(pairs):
 
 **Input:** `[1,None,1,2,None]`
 **Output:** `[1,1,1,2,2]`
+
+**Quick runnable example:**
+```python
+def ffill(a):
+    out = list(a)
+    for i in range(1, len(out)):
+        if out[i] is None:
+            out[i] = out[i-1]
+    return out
+
+print(ffill([1,None,1,2,None]))
+# [1, 1, 1, 2, 2]
+```
 
 ### Approach 1 — full index loop with copy
 ```python
@@ -474,6 +500,19 @@ def mismatched(s1, s2):
 **Input:** "mississippi", char "s"
 **Output:** 4
 
+**Quick runnable example:**
+```python
+def count(s, c):
+    n = 0
+    for ch in s:
+        if ch == c:
+            n += 1
+    return n
+
+print(count("mississippi", "s"))
+# 4
+```
+
 ### Approach 1 — str.count
 ```python
 def count(s, c):
@@ -570,6 +609,21 @@ def count(s, c):
 
 **Input:** "aaabbc"
 **Output:** "a3b2c1"
+
+**Quick runnable example:**
+```python
+def fmt(s):
+    d = {}
+    for c in s:
+        d[c] = d.get(c, 0) + 1
+    parts = []
+    for c, n in d.items():
+        parts.append(c + str(n))
+    return ''.join(parts)
+
+print(fmt("aaabbc"))
+# a3b2c1
+```
 
 ### Approach 1 — collections.Counter + join
 ```python
@@ -706,6 +760,25 @@ def fmt(s):
 ---
 
 ## Problem 6 — IP address validation (IPv4)
+
+**Quick runnable example:**
+```python
+def valid_ip(s):
+    parts = s.split('.')
+    if len(parts) != 4:
+        return False
+    for p in parts:
+        if not p.isdigit():
+            return False
+        if len(p) > 1 and p[0] == '0':
+            return False
+        if not (0 <= int(p) <= 255):
+            return False
+    return True
+
+print(valid_ip("192.168.1.1"))  # True
+print(valid_ip("256.0.0.1"))   # False
+```
 
 ### Approach 1 — split + range + length
 ```python
@@ -858,6 +931,23 @@ def valid_ip(s):
 
 **Input:** `[1, 2, 2, 3]` or `[3, 2, 1]`
 **Output:** True / True (monotonically non-decreasing or non-increasing)
+
+**Quick runnable example:**
+```python
+def monotonic(a):
+    inc = True
+    dec = True
+    for i in range(1, len(a)):
+        if a[i] > a[i-1]:
+            dec = False
+        if a[i] < a[i-1]:
+            inc = False
+    return inc or dec
+
+print(monotonic([1, 2, 2, 3]))  # True
+print(monotonic([3, 2, 1]))    # True
+print(monotonic([1, 3, 2]))    # False
+```
 
 ### Approach 1 — two-pass comparison
 ```python
@@ -1013,6 +1103,26 @@ def monotonic(a):
 **Input:** s1 = "apple banana cherry", s2 = "banana date"
 **Output:** `['apple', 'cherry', 'date']`
 
+**Quick runnable example:**
+```python
+def sym_diff(s1, s2):
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
+    out = []
+    for w in a:
+        if w not in sb:
+            out.append(w)
+    for w in b:
+        if w not in sa:
+            out.append(w)
+    return out
+
+print(sym_diff("apple banana cherry", "banana date"))
+# ['apple', 'cherry', 'date']
+```
+
 ### Approach 1 — set symmetric_difference
 ```python
 def sym_diff(s1, s2):
@@ -1158,6 +1268,19 @@ def sym_diff(s1, s2):
 **Input:** `[[2,3],[3,4],[5]]` (each sublist = one group; count how many groups each person appears in).
 **Output:** `{2: 1, 3: 2, 4: 1, 5: 1}`
 
+**Quick runnable example:**
+```python
+def neighbors(graph):
+    d = {}
+    for edge in graph:
+        for n in edge:
+            d[n] = d.get(n, 0) + 1
+    return d
+
+print(neighbors([[2,3],[3,4],[5]]))
+# {2: 1, 3: 2, 4: 1, 5: 1}
+```
+
 Note: differs from Problem 1, which counts unique partners. Here we count group membership.
 
 ### Approach 1 — Counter on flattened
@@ -1302,6 +1425,19 @@ def neighbors(graph):
 **Input:** `{'a': 10, 'b': 20, 'c': 30, 'd': 20}`, n=2
 **Output:** `'b'` (second highest value is 20, smallest key with that value)
 
+**Quick runnable example:**
+```python
+def nth_key(d, n):
+    items = []
+    for k, v in d.items():
+        items.append((k, v))
+    items.sort(key=lambda kv: (-kv[1], kv[0]))
+    return items[n-1][0]
+
+print(nth_key({'a': 10, 'b': 20, 'c': 30, 'd': 20}, 2))
+# b
+```
+
 ### Approach 1 — sort + iterate
 ```python
 def nth_key(d, n):
@@ -1437,6 +1573,27 @@ def nth_key(d, n):
 
 **Input:** `{'a': {'b': 1, 'c': {'d': 2}}}`
 **Output:** `{'a.b': 1, 'a.c.d': 2}`
+
+**Quick runnable example:**
+```python
+def flatten(d, parent_key='', sep='.'):
+    items = {}
+    for k, v in d.items():
+        if parent_key:
+            key = parent_key + sep + k
+        else:
+            key = k
+        if isinstance(v, dict):
+            sub = flatten(v, key, sep=sep)
+            for sk, sv in sub.items():
+                items[sk] = sv
+        else:
+            items[key] = v
+    return items
+
+print(flatten({'a': {'b': 1, 'c': {'d': 2}}}))
+# {'a.b': 1, 'a.c.d': 2}
+```
 
 ### Approach 1 — recursive
 ```python
@@ -1610,6 +1767,20 @@ def flatten(d, sep='.'):
 
 **Input:** `[[2,3],[3,4],[5,3]]` (each pair = directed edge from A to B).
 **Output:** `{'in': {3: 2, 4: 1}, 'out': {2: 1, 3: 1, 5: 1}}`
+
+**Quick runnable example:**
+```python
+def degrees(pairs):
+    in_d = {}
+    out_d = {}
+    for a, b in pairs:
+        out_d[a] = out_d.get(a, 0) + 1
+        in_d[b] = in_d.get(b, 0) + 1
+    return {'in': in_d, 'out': out_d}
+
+print(degrees([[2,3],[3,4],[5,3]]))
+# {'in': {3: 2, 4: 1}, 'out': {2: 1, 3: 1, 5: 1}}
+```
 
 Differentiates from Problem 1 by being **directed** and returning two separate counts.
 
