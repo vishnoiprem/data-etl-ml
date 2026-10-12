@@ -127,28 +127,35 @@ jobs:
           context: leads-pipeline/draft-cron
           file: leads-pipeline/draft-cron/Dockerfile
           push: false
-          tags: leads-pipeline:ci-${{ github.sha }}
+          # `tags` accepts a list. Quote each entry so a colon in
+          # the value (the docker repo separator) doesn't get
+          # confused with a list delimiter.
+          tags: |
+            leads-pipeline:ci-${{ github.sha }}
           build-args: VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Smoke test the built image
+        env:
+          IMAGE_TAG: leads-pipeline:ci-${{ github.sha }}
         run: |
           # Use the in-image healthcheck script — exercises the
           # same import path that production healthchecks will use.
           docker run --rm --entrypoint /bin/sh \
-            leads-pipeline:ci-${{ github.sha }} \
+            "$IMAGE_TAG" \
             /usr/local/bin/docker-healthcheck.sh
 
       - name: Image size budget
         env:
           MAX_MB: 300
+          IMAGE_TAG: leads-pipeline:ci-${{ github.sha }}
         run: |
           # Read the size in bytes from the docker daemon and fail
           # the build if the image is larger than MAX_MB megabytes.
           # Current measured size: ~164 MB. Budget 300 MB so future
           # deps additions have ~2x headroom before failing CI.
-          SIZE_BYTES=$(docker image inspect leads-pipeline:ci-${{ github.sha }} \
+          SIZE_BYTES=$(docker image inspect "$IMAGE_TAG" \
             --format='{{.Size}}')
           SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
           echo "image size: ${SIZE_MB} MB (budget: ${MAX_MB} MB)"
