@@ -25,6 +25,10 @@ HERE       := $(shell pwd)
 PY         ?= $(HERE)/.venv/bin/python
 VENV       := $(HERE)/.venv
 IMAGE      := leads-pipeline:local
+# Read the in-tree VERSION (managed by release-please). Fall back
+# to "0.0.0+local" if the file is missing — e.g. first-time clone
+# before release-please has run.
+VERSION    := $(shell test -f $(HERE)/VERSION && tr -d '[:space:]' < $(HERE)/VERSION || echo 0.0.0+local)
 DB_HOST    ?= localhost
 DB_PORT    ?= 5433
 DB_NAME    ?= avilx_leads
@@ -73,7 +77,8 @@ lint:           ## flake8 the modified source files
 	    echo "::warning::lint advisories (non-fatal)"
 
 docker-build:   ## Build the container image (tag: leads-pipeline:local)
-	docker build -t $(IMAGE) .
+	@echo "Building $(IMAGE) with VERSION=$(VERSION)"
+	docker build --build-arg VERSION=$(VERSION) -t $(IMAGE) .
 
 docker-run:     ## Smoke test the built image
 	docker run --rm --entrypoint python $(IMAGE) \

@@ -110,6 +110,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Read version
+        id: version
+        run: |
+          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          else
+            V="0.0.0+${GITHUB_SHA::7}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${V}"
+
       - name: Build (no push)
         uses: docker/build-push-action@v7
         with:
@@ -117,6 +128,7 @@ jobs:
           file: leads-pipeline/draft-cron/Dockerfile
           push: false
           tags: leads-pipeline:ci-${{ github.sha }}
+          build-args: VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

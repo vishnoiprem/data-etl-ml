@@ -40,6 +40,13 @@ RUN pip install -r /app/requirements.txt
 # Copy the rest of the package
 COPY . /app/draft-cron
 
+# Stamp the version into the image. Updated by release-please on
+# every release. /app/draft-cron/VERSION is a one-line semver that
+# `python -c "open('/app/draft-cron/VERSION').read().strip()"` can
+# read at runtime for telemetry / health endpoints.
+ARG VERSION=0.0.0+unknown
+LABEL org.opencontainers.image.version=${VERSION}
+
 # Non-root user. UID 1001 is conventional for K8s runAsUser.
 RUN groupadd --system --gid 1001 avilx \
     && useradd  --system --uid 1001 --gid avilx \
