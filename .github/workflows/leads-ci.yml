@@ -126,3 +126,23 @@ jobs:
             leads-pipeline:ci-${{ github.sha }} \
             -c "import db.lead_store, find_more_leads, resume_tailor; \
                 print('image smoke test OK; HAVE_DOCX=', resume_tailor.HAVE_DOCX)"
+
+      - name: Image size budget
+        env:
+          MAX_MB: 300
+        run: |
+          # Read the size in bytes from the docker daemon and fail
+          # the build if the image is larger than MAX_MB megabytes.
+          # Current measured size: ~164 MB. Budget 300 MB so future
+          # deps additions have ~2x headroom before failing CI.
+          SIZE_BYTES=$(docker image inspect leads-pipeline:ci-${{ github.sha }} \
+            --format='{{.Size}}')
+          SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
+          echo "image size: ${SIZE_MB} MB (budget: ${MAX_MB} MB)"
+          if [ "${SIZE_MB}" -gt "${MAX_MB}" ]; then
+            echo "::error::image is ${SIZE_MB} MB which exceeds the ${MAX_MB} MB budget."
+            echo "::error::Likely cause: a large file was added to the build context."
+            echo "::error::Check leads-pipeline/draft-cron/.dockerignore first."
+            exit 1
+          fi
+          echo "✅ size budget OK"

@@ -68,6 +68,37 @@ This repository contains **no production credentials, secrets, or real keys**. A
 - Vendored source in `sam-installation/aws-sam-cli-src/` is **not** developed in this repository. Do not modify it directly — pull upstream fixes.
 - GitHub Actions are pinned to major versions (`@v4`); for production hardening, **pin by SHA** rather than version tag.
 
+## Container Image (`leads-pipeline`)
+
+The `leads-pipeline` Docker image is published to
+`ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline` on every push to
+`main` by `.github/workflows/leads-cd.yml`.
+
+**Vulnerabilities in the image** — report via the GitHub Security
+Advisories flow (link above). The CD workflow will pick up the
+patch and publish a new `latest` tag automatically.
+
+**Pulling a patched version:**
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
+```
+
+For reproducibility / supply-chain hardening, pin to a SHA tag:
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:main-abc1234
+```
+
+**Image hardening** (see `leads-pipeline/draft-cron/Dockerfile`):
+
+- Runs as non-root user `avilx` (uid 1001)
+- Uses `python:3.12-slim` base (no compilers, no extra packages)
+- Excludes `.tailored_resumes/`, `*.log`, `*.csv`, `.git/`, `tests/`
+  via `.dockerignore`
+- Capped at 300 MB by the `leads-ci` workflow's size-budget step
+- GHCR's built-in scanner continuously reviews the published tags
+
 ## License & Disclaimer
 
 This software is provided "as is", without warranty of any kind. See [LICENSE](LICENSE) for full text.
