@@ -245,15 +245,35 @@ def build_sales_page(product_dir: Path, buy_url: str | None = None) -> Path:
 
     # Extract title from the first # heading
     title_match = re.search(r"^# (.+)$", body_md, re.M)
-    title = title_match.group(1) if title_match else product_dir.name.replace("-", " ").title()
+    raw_title = title_match.group(1) if title_match else product_dir.name.replace("-", " ").title()
+    title = _format_title(raw_title)
 
     # Extract price from "$XX" pattern
     price_match = re.search(r"\*\*\$(\d+)\*\*", body_md)
     price = price_match.group(1) if price_match else "19"
 
-    # Strip the title/price lines (we render them ourselves)
+    # Strip the title/price lines (we render them ourselves) AND the
+    # tagline paragraph that follows them — otherwise the body below
+    # duplicates what the template already rendered in <p class="tagline">.
     cleaned = re.sub(r"^# .+$", "", body_md, count=1, flags=re.M)
     cleaned = re.sub(r"\*\*\$\d+\*\*", "", cleaned, count=1)
+    # Capture the audience BEFORE we strip the "Who this is for" section —
+    # we need it to feed the template's own <h2>Who this is for</h2> block.
+    audience = _derive_audience(cleaned)
+    # Remove the lead paragraph if it matches the tagline (so the body
+    # doesn't repeat the subtitle already shown above the price).
+    tagline = _derive_tagline(cleaned)
+    if tagline:
+        paragraphs = [p for p in re.split(r"\n\s*\n", cleaned) if p.strip()]
+        if paragraphs and paragraphs[0].strip().lower() == tagline.strip().lower():
+            cleaned = cleaned.replace(paragraphs[0], "", 1).lstrip("\n")
+    # The template renders its own "What you get", "Who this is for",
+    # and "FAQ" sections, so strip any duplicate from the listing body.
+    # Also strip trailing config noise like "page_count: 20".
+    cleaned = re.sub(
+        r"^## (What you get|Who this is for|FAQ)\s*\n.*?(?=\n## |\Z)",
+        "", cleaned, flags=re.S | re.M)
+    cleaned = re.sub(r"^[a-z_]+:\s*\d+\s*$", "", cleaned, flags=re.M)
 
     # Detect format and page count from listing
     fmt_match = re.search(r"page_count[^0-9]*(\d+)", listing.read_text() if listing.exists() else "")
@@ -263,11 +283,11 @@ def build_sales_page(product_dir: Path, buy_url: str | None = None) -> Path:
 
     html = SALES_PAGE_TEMPLATE.format(
         title=title,
-        tagline=_derive_tagline(cleaned),
+        tagline=tagline,
         price=price,
         format=fmt,
         page_count=page_count,
-        audience=_derive_audience(cleaned),
+        audience=audience,
         body=cleaned.strip(),
     )
     # Swap the placeholder `#buy` anchor for the real URL
@@ -276,6 +296,32 @@ def build_sales_page(product_dir: Path, buy_url: str | None = None) -> Path:
     out = product_dir / "sales-page.html"
     out.write_text(html)
     return out
+
+
+# All-caps acronyms that should stay uppercase when title-casing
+_ACRONYMS = {"soc2", "hipaa", "gdpr", "iso", "pci", "saas", "api", "ui", "ux", "ai", "ml"}
+
+
+def _format_title(raw: str) -> str:
+    """Title-case a product name while preserving common acronyms.
+
+    'the soc2 for solo founders playbook'
+        -> 'The SOC2 for Solo Founders Playbook'
+    'hipaa compliance for indie hackers'
+        -> 'HIPAA Compliance for Indie Hackers'
+    """
+    words = raw.split()
+    out = []
+    for w in words:
+        # Strip simple punctuation for the lookup, restore it after
+        bare = w.strip(".,:;()[]")
+        prefix = w[: len(w) - len(w.lstrip(".,:;()[]"))]
+        suffix = w[len(w.rstrip(".,:;()[]")) :]
+        if bare.lower() in _ACRONYMS:
+            out.append(prefix + bare.upper() + suffix)
+        else:
+            out.append(w.capitalize())
+    return " ".join(out)
 
 
 def _derive_tagline(body: str) -> str:
@@ -301,7 +347,7 @@ def _derive_audience(body: str) -> str:
 def build_tweet_thread(product_dir: Path, buy_url: str | None = None) -> Path:
     title = product_dir.name.replace("-", " ").title()
     thread = f"""\
-1/ I wrote a {title} for the people who keep saying "I'll get to it next month."
+1/ I wrote {title} for the people who keep saying "I'll get to it next month."
 
 It's 20 pages. Takes 30 minutes to read. Then 3 things to do this week.
 
@@ -537,24 +583,71 @@ def build_kit(product_dir: Path, buy_url: str | None = None) -> dict:
     return outputs
 
 
-def build_all(output_root: Path, buy_url: str | None = None) -> list[dict]:
-    """Build kits for every product under output_root/products/."""
+def build_all(output_root: Path, buy_url: str | None = None,
+             url_map: dict[str, str] | None = None) -> list[dict]:
+    """Build kits for every product under output_root/products/.
+
+    URL resolution order (per product):
+      1. `url_map[product_dir.name]` if a per-product URL was provided
+      2. `buy_url` (the global default) as fallback
+      3. None — placeholder stays in the asset
+
+    `url_map` lets the user point each product at its own Gumroad slug
+    once published: {"the-soc2-playbook": "https://.../l/soc2",
+                    "the-hipaa-bundle":  "https://.../l/hipaa"}.
+    """
     products_dir = output_root / "products"
     if not products_dir.exists():
         return []
     results: list[dict] = []
     for sub in sorted(products_dir.iterdir()):
         if sub.is_dir():
+            # Per-product URL wins; global default is the fallback.
+            # `None` (key missing) → use global. `""` (key present, empty)
+            # → "I haven't published this one yet" → keep the placeholder.
+            if url_map is not None and sub.name in url_map:
+                per_product = url_map[sub.name]
+                effective_url = per_product if per_product else None
+            else:
+                effective_url = buy_url
             try:
-                kit = build_kit(sub, buy_url=buy_url)
-                results.append({"product": sub.name, "files": kit})
+                kit = build_kit(sub, buy_url=effective_url)
+                results.append({
+                    "product": sub.name,
+                    "url": effective_url,
+                    "files": kit,
+                })
             except Exception as e:
                 results.append({"product": sub.name, "error": str(e)})
     return results
 
 
+def _load_url_map(path: Path) -> dict[str, str]:
+    """Load a JSON file mapping product slug -> Gumroad URL.
+
+    Expected format:
+        {
+          "the-soc2-for-solo-founders-playbook":
+              "https://vishnoiprem.gumroad.com/l/soc2-playbook",
+          "soc2-for-solo-founders-cheat-sheet-printable":
+              "https://vishnoiprem.gumroad.com/l/soc2-cheatsheet"
+        }
+
+    Missing file -> empty dict. Malformed JSON -> raise with context.
+    """
+    if not path.exists():
+        return {}
+    import json
+    data = json.loads(path.read_text())
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: expected a JSON object of slug -> URL")
+    # Coerce keys to strings (in case the user wrote integers) and validate values
+    return {str(k): str(v) for k, v in data.items()}
+
+
 if __name__ == "__main__":  # pragma: no cover
     import argparse
+    import json
     parser = argparse.ArgumentParser(description="Build a Gumroad launch kit for one or all products.")
     parser.add_argument("target", nargs="?", default=None,
                         help="Path to one product directory (omit if using --all).")
@@ -562,10 +655,33 @@ if __name__ == "__main__":  # pragma: no cover
                         help="Build kits for every product under output/products/.")
     parser.add_argument("--url", default=None,
                         help="Real Gumroad URL to swap into every asset (replaces the placeholder).")
+    parser.add_argument("--url-map", default=None,
+                        help="Path to a JSON file mapping product-slug -> Gumroad URL. "
+                             "Per-product URLs override --url for matched products.")
+    parser.add_argument("--write-url-template", default=None, metavar="PATH",
+                        help="Write a starter url-map JSON for every product under output/products/, "
+                             "then exit. Fill in the real Gumroad slugs and re-run with --url-map.")
     args = parser.parse_args()
 
+    if args.write_url_template:
+        # Bootstrap a JSON map: {"<slug>": ""} for every product.
+        # User fills in the real URLs and re-runs.
+        products_dir = Path("output") / "products"
+        template: dict[str, str] = {}
+        if products_dir.exists():
+            for sub in sorted(products_dir.iterdir()):
+                if sub.is_dir():
+                    template[sub.name] = ""
+        Path(args.write_url_template).write_text(json.dumps(template, indent=2) + "\n")
+        print(f"  + wrote {args.write_url_template} with {len(template)} product(s)")
+        print(f"  → fill in the URLs and re-run:")
+        print(f"     make launchkit-map MAP={args.write_url_template}")
+        raise SystemExit(0)
+
+    url_map = _load_url_map(Path(args.url_map)) if args.url_map else None
+
     if args.all:
-        results = build_all(Path("output"), buy_url=args.url)
+        results = build_all(Path("output"), buy_url=args.url, url_map=url_map)
         for r in results:
             if "error" in r:
                 print(f"  X {r['product']}: {r['error']}")

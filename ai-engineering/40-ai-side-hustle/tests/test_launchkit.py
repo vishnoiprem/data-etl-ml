@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from launchkit import (
+    _format_title,
     build_all,
     build_checklist,
     build_email_outreach,
@@ -189,6 +190,56 @@ def test_no_buy_url_keeps_placeholder(product_dir: Path):
     assert "your-gumroad-link" in text
 
 
+# --- _format_title (acronym preservation) ----------------------------
+
+def test_format_title_preserves_acronyms():
+    assert _format_title("the soc2 for solo founders playbook") == "The SOC2 For Solo Founders Playbook"
+    assert _format_title("hipaa compliance") == "HIPAA Compliance"
+    assert _format_title("gdpr and ai governance") == "GDPR And AI Governance"
+
+
+def test_format_title_handles_punctuation():
+    assert _format_title("soc2, hipaa, gdpr, oh my") == "SOC2, HIPAA, GDPR, Oh My"
+
+
+# --- Bug fix: sales page should not repeat the tagline in the body ---
+
+def test_sales_page_does_not_duplicate_tagline_in_body(product_dir: Path):
+    """The lead paragraph (tagline) must not appear twice in the rendered HTML."""
+    out = build_sales_page(product_dir)
+    text = out.read_text()
+    # The fixture listing has "Test hook." as the first non-heading
+    # paragraph. It should appear in <p class="tagline"> but NOT also
+    # as a duplicate paragraph in the body.
+    tagline_count = text.count("Test hook.")
+    assert tagline_count == 1, f"tagline 'Test hook.' appeared {tagline_count} times — should be 1"
+
+
+def test_sales_page_does_not_dump_raw_markdown_before_html(product_dir: Path):
+    """The old bug was that the cleaned listing body was rendered BOTH
+    raw (as text) AND as HTML. Confirm the raw markdown ('## Heading')
+    doesn't appear before the rendered <h2> tag."""
+    out = build_sales_page(product_dir)
+    text = out.read_text()
+    # Find positions of raw markdown and rendered HTML for "Who this is for"
+    raw_pos = text.find("## Who this is for")
+    html_pos = text.find("<h2>Who this is for</h2>")
+    assert raw_pos == -1, f"raw markdown '## Who this is for' found at {raw_pos} — should be stripped"
+    assert html_pos > 0, "rendered <h2> not found in output"
+
+
+# --- Bug fix: tweet 1 grammar -----------------------------------------
+
+def test_tweet_thread_no_double_article(product_dir: Path):
+    out = build_tweet_thread(product_dir)
+    text = out.read_text()
+    # The first tweet shouldn't read "I wrote a The XYZ" — that's a broken article.
+    first_tweet = text.split("\n\n")[0]
+    assert "I wrote a The" not in first_tweet
+    # It should still start with "I wrote"
+    assert first_tweet.startswith("1/ I wrote ")
+
+
 def test_build_kit_threads_url_through_every_asset(product_dir: Path):
     real = "https://buy.example.com/x"
     kit = build_kit(product_dir, buy_url=real)
@@ -198,3 +249,78 @@ def test_build_kit_threads_url_through_every_asset(product_dir: Path):
     for asset in ("tweet-thread.txt", "reddit-post.txt"):
         assert real in Path(kit[asset]).read_text(), f"missing in {asset}"
         assert "your-gumroad-link" not in Path(kit[asset]).read_text(), f"placeholder left in {asset}"
+
+
+# --- per-product URL map ----------------------------------------------
+
+def test_url_map_overrides_global_url(tmp_path: Path):
+    """A per-product URL wins; the global --url is the fallback."""
+    products = tmp_path / "products"
+    (products / "product-a").mkdir(parents=True)
+    (products / "product-a" / "ebook.md").write_text("# A\n\nbody\n")
+    (products / "product-a" / "listing.md").write_text("# A\n\n**$9**\n")
+    (products / "product-b").mkdir(parents=True)
+    (products / "product-b" / "ebook.md").write_text("# B\n\nbody\n")
+    (products / "product-b" / "listing.md").write_text("# B\n\n**$9**\n")
+
+    url_map = {"product-a": "https://store.example.com/l/specific-a"}
+    results = build_all(tmp_path,
+                        buy_url="https://store.example.com/l/storefront",
+                        url_map=url_map)
+    by_name = {r["product"]: r for r in results}
+
+    # product-a got the specific URL, recorded in the result
+    assert by_name["product-a"]["url"] == "https://store.example.com/l/specific-a"
+    a_thread = Path(by_name["product-a"]["files"]["tweet-thread.txt"]).read_text()
+    assert "specific-a" in a_thread
+    assert "storefront" not in a_thread
+
+    # product-b fell back to the global --url
+    assert by_name["product-b"]["url"] == "https://store.example.com/l/storefront"
+    b_thread = Path(by_name["product-b"]["files"]["tweet-thread.txt"]).read_text()
+    assert "storefront" in b_thread
+
+
+def test_url_map_empty_value_keeps_placeholder(tmp_path: Path):
+    """An empty string in url_map means 'I haven't published this one yet' — keep the placeholder."""
+    products = tmp_path / "products"
+    (products / "unpublished").mkdir(parents=True)
+    (products / "unpublished" / "ebook.md").write_text("# U\n\nbody\n")
+    (products / "unpublished" / "listing.md").write_text("# U\n\n**$9**\n")
+
+    url_map = {"unpublished": ""}  # explicit empty
+    results = build_all(tmp_path, buy_url="https://store.example.com/l/x", url_map=url_map)
+    thread = Path(results[0]["files"]["tweet-thread.txt"]).read_text()
+    # Empty string is falsy → effective URL is None → placeholder stays
+    assert "your-gumroad-link" in thread
+    assert "store.example.com" not in thread
+
+
+def test_load_url_map_reads_json(tmp_path: Path):
+    import json
+    from launchkit import _load_url_map
+    p = tmp_path / "urls.json"
+    p.write_text(json.dumps({
+        "alpha": "https://x.gumroad.com/l/alpha",
+        "beta":  "https://x.gumroad.com/l/beta",
+    }))
+    m = _load_url_map(p)
+    assert m == {
+        "alpha": "https://x.gumroad.com/l/alpha",
+        "beta":  "https://x.gumroad.com/l/beta",
+    }
+
+
+def test_load_url_map_missing_file_returns_empty(tmp_path: Path):
+    from launchkit import _load_url_map
+    assert _load_url_map(tmp_path / "nope.json") == {}
+
+
+def test_load_url_map_rejects_non_object(tmp_path: Path):
+    import json
+    from launchkit import _load_url_map
+    p = tmp_path / "bad.json"
+    p.write_text(json.dumps(["not", "a", "dict"]))
+    import pytest
+    with pytest.raises(ValueError, match="expected a JSON object"):
+        _load_url_map(p)
