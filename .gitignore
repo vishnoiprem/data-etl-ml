@@ -33,8 +33,14 @@ Thumbs.db
 data/
 
 # Whitelist known JSON config paths that the catch-all *.json would
-# otherwise hide
-!.devcontainer/
+# otherwise hide. The rule below must come AFTER *.json so it wins
+# (git uses last-match-wins for ignore rules).
+!*.json.example
+!*.jsonl.example
+.devcontainer/
+!.devcontainer/devcontainer.json
+!.devcontainer/post-create.sh
+.vscode/
 !.vscode/
 
 # Large ML files (kept in LFS for some specific paths; ignored for the rest)
