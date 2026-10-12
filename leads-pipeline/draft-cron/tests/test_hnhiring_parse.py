@@ -100,15 +100,7 @@ def test_pipe_parsing():
     return fails == 0
 
 
-def main():
-    r1 = test_pipe_parsing()
-    r2 = test_ats_filter()
-    r = r1 and r2
-    print(f"\n{'✅ ALL PASS' if r else '❌ SOME FAILED'}")
-    sys.exit(0 if r else 1)
-
-
-# (label, email, expected_is_generic)
+# (email, expected_is_generic)
 ATS_CASES = [
     # Generic ATS — should be filtered
     ("jobs@workable.com", True),
@@ -149,6 +141,14 @@ def test_ats_filter():
             fails += 1
         print(f"  {marker} {email:40s} got={got} want={want}")
     return fails == 0
+
+
+def main():
+    r1 = test_pipe_parsing()
+    r2 = test_ats_filter()
+    r = r1 and r2
+    print(f"\n{'✅ ALL PASS' if r else '❌ SOME FAILED'}")
+    sys.exit(0 if r else 1)
 
 
 if __name__ == "__main__":
