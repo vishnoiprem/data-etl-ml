@@ -630,6 +630,60 @@ def scrape_hn_algolia_24h():
 HNHIRING_REMOTE_URL = "https://hnhiring.com/locations/remote"
 
 
+# Pre-compiled patterns used by the hnhiring parser. Kept at module
+# scope so the test suite can import them and verify the noise
+# filtering directly.
+_HNHIRING_NOISE_PREFIX = re.compile(
+    r"^(?:Location|Technologies|Remote|Stack|Salary|Apply|"
+    r"Full[-\s]?Time|FT|PT|HYBRID|REMOTE):\s*",
+    re.I,
+)
+_HNHIRING_NOISE_PREFIX_ROLE = re.compile(
+    r"^(?:Location|Remote|FT|PT|Full[-\s]?Time|"
+    r"\$\d|HYBRID|REMOTE|Apply|Technologies):\s*",
+    re.I,
+)
+_HNHIRING_PAREN_DOMAIN = re.compile(r"\s*\([^)]+\)\s*$")
+
+
+def _parse_pipe_headline(head):
+    """Parse a `Company (dom) | Role | FT | Remote | $N` headline.
+
+    Returns (company, role). Tries the pipe-separated format first
+    (the most common on hnhiring.com); falls through to
+    `split_company_role` for non-pipe headlines. The noise-prefix
+    segments (`Location:`, `Stack:`, `FT`, `Remote`, …) are skipped
+    so a noisy first segment doesn't get mis-attributed as the
+    company.
+
+    Extracted from `scrape_hnhiring_remote` so the test suite can
+    exercise the parsing without spinning up a real HTTP request.
+    """
+    if " | " not in head:
+        return split_company_role(head)
+    segments = [s.strip() for s in head.split(" | ") if s.strip()]
+    co_hint = ""
+    role_hint = ""
+    for seg in segments[:3]:
+        if _HNHIRING_NOISE_PREFIX.match(seg):
+            continue
+        co_hint = _HNHIRING_PAREN_DOMAIN.sub("", seg).strip()
+        if co_hint and len(co_hint) <= 60:
+            # Try to take the next non-noise segment as role
+            try:
+                idx = segments.index(seg)
+            except ValueError:
+                idx = -1
+            if 0 <= idx < len(segments) - 1:
+                nxt = segments[idx + 1]
+                if not _HNHIRING_NOISE_PREFIX_ROLE.match(nxt):
+                    role_hint = nxt
+            break
+    if co_hint:
+        return co_hint, role_hint or "Engineer"
+    return split_company_role(head)
+
+
 def scrape_hnhiring_remote():
     """Scrape hnhiring.com/locations/remote for senior+ AI/ML/data roles.
 
@@ -692,39 +746,8 @@ def scrape_hnhiring_remote():
         if m:
             co = m.group(1).strip()
             role = m.group(2).strip().rstrip(".") or "Engineer"
-        elif " | " in head:
-            # First-line "Company (domain) | Role | FT | Remote | $..."
-            # Pattern: take segment 0 as company, segment 1 as role
-            # (skipping leading noise like "Location:" / "Technologies:")
-            segments = [s.strip() for s in head.split(" | ") if s.strip()]
-            co_hint = ""
-            role_hint = ""
-            for seg in segments[:3]:
-                if re.match(
-                    r"^(?:Location|Technologies|Remote|Stack|Salary|Apply|"
-                    r"Full[-\s]?Time|FT|PT|HYBRID|REMOTE):\s*",
-                    seg, re.I,
-                ):
-                    continue
-                co_hint = re.sub(r"\s*\([^)]+\)\s*$", "", seg).strip()
-                if co_hint and len(co_hint) <= 60:
-                    # Try to take the next non-noise segment as role
-                    idx = segments.index(seg)
-                    if idx + 1 < len(segments):
-                        nxt = segments[idx + 1]
-                        if not re.match(
-                            r"^(?:Location|Remote|FT|PT|Full[-\s]?Time|"
-                            r"\$\d|HYBRID|REMOTE|Apply|Technologies):\s*",
-                            nxt, re.I,
-                        ):
-                            role_hint = nxt
-                    break
-            if co_hint:
-                co, role = co_hint, role_hint or "Engineer"
-            else:
-                co, role = split_company_role(head)
         else:
-            co, role = split_company_role(head)
+            co, role = _parse_pipe_headline(head)
         if not co or co.lower() in ("unknown", "n/a", ""):
             # Fall back to HN handle as a weak signal
             if user:
@@ -748,6 +771,15 @@ def scrape_hnhiring_remote():
               derive_email_from_company(co) or
               derive_email(co, apply_url))
         if not em:
+            continue
+        # Skip generic-ATS addresses: those mailboxes route to vendor
+        # support teams, not a hiring manager, so the email bounces
+        # or lands in the void. Real company emails live on the
+        # company's own domain (or a Gmail/Bridge/etc. personal
+        # alias), never on the ATS vendor's domain.
+        em_l = em.lower()
+        if em_l.endswith(("@hnhiring.com", "@ashbyhq.com", "@workable.com",
+                          "@greenhouse.io", "@lever.co", "@jobvite.com")):
             continue
         out.append({
             "company": co,
