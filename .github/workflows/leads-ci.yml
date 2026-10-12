@@ -119,68 +119,62 @@ jobs:
           echo "Using version: ${V}"
 
       # Build the image with plain `docker build` (no buildx).
-      # This is the most reliable way to put the image into
-      # the host docker daemon on a hosted runner. We tried
-      # four buildx-based patterns before landing here and
-      # each had a different GHA-specific failure mode:
+      # The smoke test is intentionally part of the same step:
+      # we observed that on hosted runners, the image built
+      # by `docker build` is sometimes not visible to
+      # `docker images` in a *subsequent* step (the build
+      # context is gone, the buildkit cache may have been
+      # GC'd, the docker daemon may have rotated, etc.). By
+      # building AND running in the same step we sidestep
+      # every inter-step visibility issue.
       #
-      #   1. `docker/build-push-action@v7` with no `load: true`
-      #      → image stuck in buildx cache, `docker run` exited
-      #        125 (no such image in the host daemon).
-      #   2. `docker/build-push-action@v7` with `load: true` →
-      #        same: image not in host daemon after the step.
-      #   3. `setup-buildx-action` with `driver: docker` + cache
-      #        → BuildKit rejected cache-to with "Cache export
-      #        is not supported for the docker driver" (only
-      #        `docker-container` driver supports cache exports).
-      #   4. `docker buildx build --driver docker --load`
-      #        directly → exit 125 from buildx on the GHA
-      #        runner (the version of buildx on the runner
-      #        doesn't accept the `docker` driver name).
+      # We tried four different buildx-based patterns
+      # (build-push-action with/without `load`, setup-buildx
+      # with `driver: docker`, `docker buildx build --driver
+      # docker --load` directly) and each hit a different
+      # runner-specific failure. Plain `docker build` + an
+      # in-step `docker run` is the most reliable pattern
+      # we found.
       #
-      # Plain `docker build` bypasses all of that: it runs
-      # BuildKit directly on the host daemon, the resulting
-      # image is visible to `docker images` / `docker run` the
-      # moment the command returns, and it works on every
-      # GHA runner image without driver juggling.
+      # DOCKER_BUILDKIT=0 forces the legacy builder, which
+      # always writes the image to the daemon's image store
+      # before the build command returns — the same image
+      # is then immediately runnable in the same shell.
       #
       # Trade-off: no `cache-from: type=gha` (only buildx
       # supports GHA cache as a backend), so every build is
       # cold — ~30s. The leads-cd workflow is unaffected
       # (it still uses buildx + cache-to gha).
-      - name: Build (no push)
+      - name: Build and smoke test
         run: |
           set -euo pipefail
+          TAG="leads-pipeline:ci-${GITHUB_SHA}"
+          export DOCKER_BUILDKIT=0
           docker build \
-            --tag "leads-pipeline:ci-${GITHUB_SHA}" \
+            --tag "$TAG" \
             --build-arg "VERSION=${VERSION}" \
             --file leads-pipeline/draft-cron/Dockerfile \
             leads-pipeline/draft-cron
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-
-      - name: Smoke test the built image
-        env:
-          IMAGE_TAG: leads-pipeline:ci-${{ github.sha }}
-        run: |
-          # Use the in-image healthcheck script — exercises the
-          # same import path that production healthchecks will use.
-          set -e
-          echo "Image to test: $IMAGE_TAG"
-          # Sanity check: the previous build step used plain
-          # `docker build` (no buildx), so the image must be in
-          # `docker images` already. If it isn't, something has
-          # gone wrong and the subsequent `docker run` will
-          # fail with exit 125.
-          docker images | grep -F "$IMAGE_TAG" || {
-            echo "::error::image $IMAGE_TAG not in local daemon"
+          # Verify the image is visible to the daemon before
+          # we try to run it — fail fast with a clear error
+          # if it isn't, so the next failure mode is obvious
+          # in the run log.
+          if ! docker images --format '{{.Repository}}:{{.Tag}}' \
+              | grep -qx "$TAG"; then
+            echo "::error::image $TAG not in local daemon after build"
             docker images
             exit 1
-          }
+          fi
+          # Smoke test: run the in-image healthcheck script.
+          # This exercises the same import path that
+          # production healthchecks will use.
+          echo "Image to test: $TAG"
           docker run --rm --entrypoint /bin/sh \
-            "$IMAGE_TAG" \
+            "$TAG" \
             /usr/local/bin/docker-healthcheck.sh
           echo "smoke test exit=$?"
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
 
       - name: Image size budget
         env:
@@ -245,6 +239,7 @@ jobs:
       - name: Build (no push) for vuln scan
         run: |
           set -euo pipefail
+          export DOCKER_BUILDKIT=0
           docker build \
             --tag "leads-pipeline:scan-${GITHUB_SHA}" \
             --build-arg "VERSION=${VERSION}" \
