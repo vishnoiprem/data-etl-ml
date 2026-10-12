@@ -102,13 +102,13 @@ def friends(pairs):
 **Input:** `[1,None,1,2,None]`
 **Output:** `[1,1,1,2,2]`
 
-### Approach 1 — iterative carry
+### Approach 1 — full index loop with copy
 ```python
 def ffill(a):
-    last, out = None, []
-    for x in a:
-        last = x if x is not None else last
-        out.append(x if x is not None else last)
+    out = list(a)
+    for i in range(1, len(out)):
+        if out[i] is None:
+            out[i] = out[i-1]
     return out
 ```
 
