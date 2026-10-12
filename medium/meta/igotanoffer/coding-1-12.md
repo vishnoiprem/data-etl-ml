@@ -299,6 +299,28 @@ def ffill(a):
 **Input:** s1 = "Firstly this is the first string", s2 = "Next is the second string"
 **Output:** `['Firstly', 'this', 'first', 'Next', 'second']`
 
+**Quick runnable example:**
+```python
+def mismatched(s1, s2):
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
+    out = []
+    for w in a:
+        if w not in sb:
+            out.append(w)
+    for w in b:
+        if w not in sa:
+            out.append(w)
+    return out
+
+s1 = "Firstly this is the first string"
+s2 = "Next is the second string"
+print(mismatched(s1, s2))
+# ['Firstly', 'this', 'first', 'Next', 'second']
+```
+
 ### Approach 1 — set symmetric difference
 ```python
 def mismatched(s1, s2):

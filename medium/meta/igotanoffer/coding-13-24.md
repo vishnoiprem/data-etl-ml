@@ -1082,8 +1082,7 @@ def most_freq(books):
         for r in rs:
             flat_list.append(r)
     arr = np.array(flat_list)
-    as_list = arr.tolist()
-    c = Counter(as_list)
+    c = Counter(arr.tolist())
     top = c.most_common(1)
     if not top:
         return None
