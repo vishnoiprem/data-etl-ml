@@ -33,3 +33,4 @@ Adapted from the [Contributor Covenant, v2.1](https://www.contributor-covenant.o
 ---
 
 **Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.

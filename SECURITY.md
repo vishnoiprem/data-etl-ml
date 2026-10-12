@@ -151,3 +151,4 @@ This software is provided "as is", without warranty of any kind. See [LICENSE](L
 ---
 
 **Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.
