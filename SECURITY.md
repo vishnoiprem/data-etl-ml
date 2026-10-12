@@ -72,7 +72,11 @@ This repository contains **no production credentials, secrets, or real keys**. A
 
 The `leads-pipeline` Docker image is published to
 `ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline` on every push to
-`main` by `.github/workflows/leads-cd.yml`.
+`main` by `.github/workflows/leads-cd.yml`. A separate
+`release-please` workflow drives semver releases (see
+`.github/workflows/release-please.yml`); when a release PR is
+merged, `leads-cd` is re-dispatched with a `latest-vX.Y.Z` tag so
+production consumers can pin to a specific release.
 
 **Vulnerabilities in the image** — report via the GitHub Security
 Advisories flow (link above). The CD workflow will pick up the
@@ -90,6 +94,12 @@ For reproducibility / supply-chain hardening, pin to a SHA tag:
 docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:main-abc1234
 ```
 
+For a semver-pinned version (post-release-please):
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest-v1.2.3
+```
+
 **Image hardening** (see `leads-pipeline/draft-cron/Dockerfile`):
 
 - Runs as non-root user `avilx` (uid 1001)
@@ -97,6 +107,13 @@ docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:main-abc1234
 - Excludes `.tailored_resumes/`, `*.log`, `*.csv`, `.git/`, `tests/`
   via `.dockerignore`
 - Capped at 300 MB by the `leads-ci` workflow's size-budget step
+- `leads-cd`'s `verify` job re-pulls the published image and runs
+  a Python import smoke test, so a broken manifest can't silently
+  land in GHCR
+- Each release ships an SPDX 2.3 SBOM as a workflow artifact
+  (downloadable from the `leads-cd` run page, 30-day retention)
+- `org.opencontainers.image.version` label is stamped from the
+  in-tree `VERSION` file at build time
 - GHCR's built-in scanner continuously reviews the published tags
 
 ## License & Disclaimer

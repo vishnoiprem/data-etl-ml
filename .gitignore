@@ -37,6 +37,9 @@ data/
 # (git uses last-match-wins for ignore rules).
 !*.json.example
 !*.jsonl.example
+# release-please state files (root of repo)
+!release-please-config.json
+!.release-please-manifest.json
 .devcontainer/
 !.devcontainer/devcontainer.json
 !.devcontainer/post-create.sh
