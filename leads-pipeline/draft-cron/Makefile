@@ -51,7 +51,7 @@ LINT_FILES := \
     state/bounce_deny_store.py \
     resume_tailor.py
 
-.PHONY: help install schema test lint docker-build docker-run docker-shell ci clean
+.PHONY: help install schema test lint docker-build docker-run docker-shell docker-healthcheck ci clean
 
 help:           ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -84,10 +84,18 @@ docker-run:     ## Smoke test the built image
 	docker run --rm --entrypoint python $(IMAGE) \
 	    -c "import db.lead_store, find_more_leads, resume_tailor; print('OK; HAVE_DOCX=', resume_tailor.HAVE_DOCX)"
 
+docker-healthcheck:  ## Run the in-image healthcheck script
+	@echo "Running healthcheck against $(IMAGE)"
+	docker run --rm --entrypoint /bin/sh \
+	    -e AVILX_DB_HOST=$(DB_HOST) -e AVILX_DB_PORT=$(DB_PORT) \
+	    $(IMAGE) /usr/local/bin/docker-healthcheck.sh \
+	    && echo "✅ healthcheck OK" \
+	    || (echo "::error::healthcheck failed"; exit 1)
+
 docker-shell:   ## Open a shell in the built image
 	docker run --rm -it --entrypoint bash $(IMAGE)
 
-ci: install lint test docker-build docker-run   ## Run every CI step locally
+ci: install lint test docker-build docker-run docker-healthcheck   ## Run every CI step locally
 	@echo ""
 	@echo "✅ local CI simulation passed"
 	@echo "   Next: git push to trigger the real leads-ci workflow"

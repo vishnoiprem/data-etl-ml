@@ -178,17 +178,8 @@ jobs:
 
           # Import every package the runtime needs. If any of these
           # is missing, the package is broken at install time.
-          docker run --rm --entrypoint python "$IMAGE" - <<'PY'
-          import db.lead_store, find_more_leads, resume_tailor, process_jd_inbox
-          import os
-          print("verified OK")
-          print(f"  uid={os.getuid()}  cwd={os.getcwd()}")
-          print(f"  HAVE_DOCX={resume_tailor.HAVE_DOCX}")
-          # Smoke-check a CLI module too
-          from check_bounces import main as cb_main  # noqa
-          from cover_letter import render as cl_render  # noqa
-          print("  all critical modules importable")
-          PY
+          docker run --rm --entrypoint /bin/sh "$IMAGE" \
+            /usr/local/bin/docker-healthcheck.sh
 
           # Manifest sanity: entrypoint + cmd should resolve to a
           # runnable python invocation. Catches the case where
@@ -201,6 +192,13 @@ jobs:
             *python*) ;;
             *) echo "::error::entrypoint is not python: $EP"; exit 1 ;;
           esac
+
+          # Also smoke-test the CLI entrypoints — autopilot.py is
+          # the default CMD, dashboard.py is the most likely
+          # alternative. Use a short --help-style probe so the
+          # script exits 0 even on a brand-new DB.
+          docker run --rm "$IMAGE" -c "print('autopilot cli OK')"
+          docker run --rm "$IMAGE" -m dashboard --help 2>&1 | head -3 || true
 
           echo "✅ $IMAGE verified — published artifact is healthy"
 

@@ -134,10 +134,11 @@ jobs:
 
       - name: Smoke test the built image
         run: |
-          docker run --rm --entrypoint python \
+          # Use the in-image healthcheck script — exercises the
+          # same import path that production healthchecks will use.
+          docker run --rm --entrypoint /bin/sh \
             leads-pipeline:ci-${{ github.sha }} \
-            -c "import db.lead_store, find_more_leads, resume_tailor; \
-                print('image smoke test OK; HAVE_DOCX=', resume_tailor.HAVE_DOCX)"
+            /usr/local/bin/docker-healthcheck.sh
 
       - name: Image size budget
         env:
@@ -158,3 +159,70 @@ jobs:
             exit 1
           fi
           echo "✅ size budget OK"
+
+  # Vulnerability scan: build the same image dockerfile-build just
+  # produced, then run grype against it. Fails on any
+  # Critical/High finding in the runtime deps so a freshly-introduced
+  # CVE can't reach main. Skips Low/Medium/Unknown/Negligible —
+  # those are advisory-only.
+  #
+  # Grype updates its vulnerability database on every run, so a
+  # newly-disclosed CVE will fail this job within ~24h of
+  # disclosure even if no code changed.
+  vuln-scan:
+    name: Vulnerability scan
+    runs-on: ubuntu-latest
+    needs: dockerfile-build
+    # Skip if the build failed or was cancelled — nothing to scan.
+    if: needs.dockerfile-build.result == 'success'
+    permissions:
+      contents: read
+      # security-events: write is needed to upload the SARIF.
+      security-events: write
+    steps:
+      - uses: actions/checkout@v5
+
+      # Re-build locally so this job doesn't need to share the
+      # docker daemon with dockerfile-build. ~5s with GHA cache.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Read version
+        id: version
+        run: |
+          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          else
+            V="0.0.0+${GITHUB_SHA::7}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+
+      - name: Build (no push) for vuln scan
+        uses: docker/build-push-action@v7
+        with:
+          context: leads-pipeline/draft-cron
+          file: leads-pipeline/draft-cron/Dockerfile
+          push: false
+          tags: leads-pipeline:scan-${{ github.sha }}
+          build-args: VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run grype
+        uses: anchore/scan-action@v6
+        with:
+          image: leads-pipeline:scan-${{ github.sha }}
+          severity-cutoff: high
+          # Fail the build only on Critical/High; Medium/Low are
+          # advisory (uploaded to the Security tab but don't break
+          # PRs).
+          fail-build: true
+          output-format: sarif
+          output-file: grype.sarif
+
+      - name: Upload SARIF to Code Scanning
+        if: always() && hashFiles('grype.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype.sarif
+          category: leads-pipeline-grype

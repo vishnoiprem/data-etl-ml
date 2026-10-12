@@ -54,13 +54,18 @@ RUN groupadd --system --gid 1001 avilx \
                 avilx \
     && mkdir -p /home/avilx \
     && chown -R avilx:avilx /app /home/avilx
+
+# Healthcheck: install + chmod BEFORE the USER switch so we
+# don't have to be root to mark the script executable.
+COPY docker-healthcheck.sh /usr/local/bin/docker-healthcheck.sh
+RUN chmod 0755 /usr/local/bin/docker-healthcheck.sh \
+    && chown avilx:avilx /usr/local/bin/docker-healthcheck.sh
+
 USER avilx
 WORKDIR /app/draft-cron
 
-# Healthcheck: autopilot writes to /tmp/auto_loop.pid or stdout;
-# the simplest check is "python can still import the package".
 HEALTHCHECK --interval=5m --timeout=10s --start-period=30s --retries=3 \
-    CMD python -c "import db.lead_store, find_more_leads, resume_tailor" || exit 1
+    CMD /usr/local/bin/docker-healthcheck.sh || exit 1
 
 # Run one autopilot pass by default. Override CMD to run other
 # entrypoints (dashboard.py, daily_report.py, db_cli.py, etc.).
