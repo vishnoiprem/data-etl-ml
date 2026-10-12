@@ -109,6 +109,16 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          # Force the legacy `docker` driver (not `docker-container`).
+          # With `docker-container`, buildx builds inside a sidecar
+          # container and `load: true` has to copy the image back
+          # out — that round-trip is fragile on hosted runners and
+          # is the reason the previous smoke test exited 125.
+          # The `docker` driver builds directly on the host
+          # daemon, so the image is visible to `docker images` /
+          # `docker run` immediately.
+          driver: docker
 
       - name: Read version
         id: version
