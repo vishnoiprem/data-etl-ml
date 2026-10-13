@@ -16,6 +16,11 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 
+try:
+    from cover_letter import render_for_mode as _render_for_mode
+except Exception:  # pragma: no cover
+    _render_for_mode = None
+
 
 def _short_id() -> str:
     """Generate a short, URL-safe tracking id like 'dremio-3k9a'."""
@@ -184,6 +189,22 @@ def main():
         # build a short tracking id like 'dremio-3k9a'
         slug = re.sub(r"[^a-z0-9]+", "-", co.lower())[:12].strip("-") or "lead"
         tid = f"{slug}-{_short_id()}"
+        # Render cover letter at insert time so the lead has a real
+        # [Avilx Pod Pitch] subject + personalized body. Without this
+        # the lead row stores NULL cover_letter_* and _send_one falls
+        # back to "Avilx × {company}", which lacks the mode prefix.
+        if _render_for_mode is not None:
+            try:
+                _subj, _body = _render_for_mode({
+                    "company": co,
+                    "role": role,
+                    "jd_text": lead.get("jd_text", "") or "",
+                    "apply_mode": "pitch_pod",
+                })
+            except Exception:
+                _subj, _body = "", ""
+        else:
+            _subj, _body = "", ""
         try:
             with ls.get_cursor() as cur:
                 # Target the partial unique index on (company, email,
@@ -194,9 +215,11 @@ def main():
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email,
                          source_url, jd_text, source, status, apply_mode,
+                         cover_letter_subject, cover_letter_body,
                          created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending',
-                            'pitch_pod', NOW(), NOW())
+                            'pitch_pod', %s, %s,
+                            NOW(), NOW())
                     ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
                     WHERE contact_email IS NOT NULL
                       AND role IS NOT NULL
@@ -206,6 +229,7 @@ def main():
                 """, (
                     tid, co, role, em,
                     lead["source_url"], lead["jd_text"], lead["source"],
+                    _subj, _body,
                 ))
                 row = cur.fetchone()
             if row:

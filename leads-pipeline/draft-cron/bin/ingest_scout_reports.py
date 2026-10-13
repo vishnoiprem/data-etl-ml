@@ -30,6 +30,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(HERE))
 
+try:
+    from cover_letter import render_for_mode as _render_for_mode
+except Exception:  # pragma: no cover
+    _render_for_mode = None
+
 WATCH_DIRS = [
     Path("/tmp"),
     Path("/private/tmp"),
@@ -96,14 +101,32 @@ def _ingest_one(path: Path) -> tuple[int, int]:
         # Derive short id
         slug = re.sub(r"[^a-z0-9]+", "-", co.lower())[:12].strip("-") or "lead"
         tid = f"{slug}-{secrets.token_hex(3)}"
+        # Render cover letter at insert time so the lead row has a real
+        # [Personal Application] subject prefix (scout leads use
+        # apply_personal mode). Without this _send_one falls back to
+        # the generic "Avilx × {company}" subject.
+        if _render_for_mode is not None:
+            try:
+                _subj, _body = _render_for_mode({
+                    "company": co,
+                    "role": role,
+                    "jd_text": ld.get("jd_text", "") or "",
+                    "apply_mode": "apply_personal",
+                })
+            except Exception:
+                _subj, _body = "", ""
+        else:
+            _subj, _body = "", ""
         try:
             with get_cursor() as cur:
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email,
                          source_url, jd_text, source, apply_mode, status,
+                         cover_letter_subject, cover_letter_body,
                          created_at, updated_at)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,'apply_personal','pending',
+                            %s,%s,
                             NOW(), NOW())
                     ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
                     WHERE contact_email IS NOT NULL
@@ -116,6 +139,7 @@ def _ingest_one(path: Path) -> tuple[int, int]:
                     ld.get("source_url", ""),
                     (ld.get("jd_text", "") or "")[:500],
                     ld.get("source", "scout_agent"),
+                    _subj, _body,
                 ))
                 row = cur.fetchone()
             if row:
