@@ -1,4 +1,9 @@
-# data-enginnering-cloudvala
+# data-engineering-cloudvala
+
+> **Note (2026-10-13):** This directory was previously named
+> `data-enginnering-cloudvala` (a typo: "enginnering" instead of
+> "engineering"). It has been renamed to fix the typo. The
+> contents are unchanged.
 
 Data Engineering interview-prep and study-path reference material.
 Owner: cloudvala / avilex.

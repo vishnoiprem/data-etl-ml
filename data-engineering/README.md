@@ -9,6 +9,11 @@ runnable pipeline — not a slide, not a tutorial trace. If you've ever had to
 defend "how would you build the ledger at Stripe, the data lake at Netflix, or
 the AML platform at a global bank," the answers live here.
 
+> 🧭 **Looking for a curated tour by audience?** See
+> [DIRECTORY.md](./DIRECTORY.md) — three pre-built paths (bank-audit
+> client, senior-DE hiring manager, course student) that walk the
+> directory in 5–7 clicks each.
+
 ---
 
 ## What's in this directory
