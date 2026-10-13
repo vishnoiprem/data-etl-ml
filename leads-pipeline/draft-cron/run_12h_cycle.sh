@@ -23,14 +23,16 @@ CYCLE=0
 
 echo "=== 12h send cycle started $(date) — ends ~$(date -r $END_TS 2>/dev/null || date) ===" | tee -a "$LOG"
 echo "    cadence: every ${SLEEP_MIN}min, $PER_BATCH emails per batch" | tee -a "$LOG"
+echo "    modes:   even cycles = pitch_pod (Avilx), odd = apply_personal (Prem)" | tee -a "$LOG"
 
 while [[ $(date +%s) -lt $END_TS ]]; do
     CYCLE=$((CYCLE + 1))
-    # Alternate: even cycles = pod, odd = solo. Keeps both queues draining.
+    # Alternate: even cycles = pitch_pod, odd = apply_personal. Keeps both
+    # queues draining so neither mode starves while the other dominates.
     if (( CYCLE % 2 == 0 )); then
-        MODE="pod"
+        MODE="pitch_pod"
     else
-        MODE="solo"
+        MODE="apply_personal"
     fi
     echo "" | tee -a "$LOG"
     echo "[cycle $CYCLE / ~$((HOURS * 60 / SLEEP_MIN))] $(date) — mode=$MODE, batch=$PER_BATCH" | tee -a "$LOG"

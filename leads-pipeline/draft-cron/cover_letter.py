@@ -81,12 +81,12 @@ def _trim(s: str, n: int) -> str:
 
 
 def render_subject(lead: dict) -> str:
-    """Subject line — Avilx for {company} — {role}, trimmed to ≤70 chars."""
+    """Subject line — [Avilx Pod Pitch] Avilx for {company} — {role}, trimmed to ≤70 chars."""
     co = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
-    co_short = co if len(co) <= 25 else co[:22] + "…"
-    role_short = role if len(role) <= 30 else role[:27] + "…"
-    subj = f"{NAME} for {co_short} — {role_short}"
+    co_short = co if len(co) <= 18 else co[:15] + "…"
+    role_short = role if len(role) <= 25 else role[:22] + "…"
+    subj = f"[Avilx Pod Pitch] {NAME} for {co_short} — {role_short}"
     if len(subj) > 70:
         subj = subj[:67] + "…"
     return subj
@@ -185,13 +185,15 @@ def render(lead: dict) -> Tuple[str, str, str]:
 # can we talk?" — no pod mention, no pricing, no "happy to staff aug"
 # language. Resume PDF is still attached by autopilot._pick_resume().
 def render_solo_subject(lead: dict) -> str:
-    """Subject line — Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
+    """Subject line — [Personal Application] Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
     co = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
     co_short = co if len(co) <= 20 else co[:17] + "…"
     role_short = role if len(role) <= 30 else role[:27] + "…"
-    subj = f"{FOUNDER} for {co_short} — {role_short}"
+    subj = f"[Personal Application] {FOUNDER} for {co_short} — {role_short}"
     if len(subj) > 70:
+        # Trim from the middle — keep the [Personal Application] prefix intact
+        # so the mode is still visible in the inbox
         subj = subj[:67] + "…"
     return subj
 

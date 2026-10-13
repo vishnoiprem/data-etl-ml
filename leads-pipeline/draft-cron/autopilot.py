@@ -1398,10 +1398,15 @@ def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
     pending = pending[:max_emails]
 
     sent, failed, bounced = 0, 0, 0
+    _MODE_LABELS = {
+        "pitch_pod": "POD-PITCH",
+        "apply_personal": "APPLY-PERSONAL",
+    }
     for lead in pending:
         if dry:
-            md = lead.get("apply_mode", "pod")
-            print(f"  [dry] [{md}] would email {lead['contact_email']} re: {lead['company']}")
+            md = lead.get("apply_mode", "pitch_pod")
+            label = _MODE_LABELS.get(md, md.upper())
+            print(f"  [dry] [{label}] would email {lead['contact_email']} re: {lead['company']}")
             sent += 1
             continue
         try:
