@@ -118,6 +118,21 @@ for i in $(seq 1 "$LOOP_MAX"); do
         echo "  (backfill_emails exited with non-zero, continuing)" | tee -a "$LOG"
     fi
 
+    # 3d. Auto-ingest scout reports — queue any new /tmp/lead-scout-*.json
+    if ! "$PY" "$HERE/bin/ingest_scout_reports.py" >> "$LOG" 2>&1; then
+        echo "  (ingest_scout_reports exited with non-zero, continuing)" | tee -a "$LOG"
+    fi
+
+    # 3e. Day-4 follow-ups for non-repliers (max 5 per iteration to stay
+    # under Gmail daily cap when combined with the regular send phase).
+    # Skip in dry mode (covered by --dry flag) and on the lead-refresh
+    # iterations (every 5th) so we don't double up with --email.
+    if (( i % 5 != 1 )); then
+        if ! "$PY" "$HERE/bin/send_followups.py" --max 5 >> "$LOG" 2>&1; then
+            echo "  (send_followups exited with non-zero, continuing)" | tee -a "$LOG"
+        fi
+    fi
+
     # 4. Report status — single Python invocation, four counts
     sleep 2
     if ! counts="$("$PY" "$HERE/bin/loop_status.py" 2>/dev/null)"; then
@@ -130,6 +145,9 @@ for i in $(seq 1 "$LOOP_MAX"); do
     if (( i % 10 == 0 )); then
         echo "" | tee -a "$LOG"
         "$PY" "$HERE/full_report.py" 2>&1 | head -50 | tee -a "$LOG" || true
+        # apply_mode split: pod vs solo sent/bounced/replied
+        echo "" | tee -a "$LOG"
+        "$PY" "$HERE/bin/apply_mode_report.py" --days 1 2>&1 | tee -a "$LOG" || true
     fi
 
     if [[ "$pending_email" == "0" ]]; then
