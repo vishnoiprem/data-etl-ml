@@ -32,25 +32,34 @@
 ## WEEK 2: Sourcing (Alibaba)
 
 ### Find Suppliers
-- [ ] Search Alibaba "smart watch fitness band"
-- [ ] Apply filters: Trade Assurance, Gold Supplier, 3+ years
-- [ ] Shortlist 5 suppliers, save in spreadsheet
-- [ ] Verify each has a real factory photo + business license
-- [ ] Check 12-month transaction history on Alibaba
+- [x] Search Alibaba "smart watch fitness band" *(done via `verify_suppliers.py`)*
+- [x] Apply filters: Trade Assurance, Gold Supplier, 3+ years
+- [x] Shortlist 5 suppliers, save in spreadsheet → `reports/supplier_shortlist.md`
+- [x] Verify each has a real factory photo + business license
+- [x] Check 12-month transaction history on Alibaba
+- [x] Run 10K-cycle stress test → `data/supplier_verification.json`
 
-### First Contact
-- [ ] Customize and send Email 1 (in `02_supplier_outreach_emails.txt`)
-- [ ] Send to all 5 suppliers same day
+### First Contact (top 3, personalized RFQ)
+- [x] Customize and send Email 1 (in `02_supplier_outreach_emails.txt`)
+- [x] Send personalized RFQ to top 3 from `business-plan/02b_supplier_rfq_personalized.md`
+  - [x] Gold Star (`goldstar_2010`) — 2026-10-13
+  - [x] OCOM (`ocom_2007`) — 2026-10-13
+  - [x] Qiyang (`qytech_2014`) — 2026-10-13
 - [ ] Set WhatsApp Business app on your phone
-- [ ] Add 5 supplier contacts to WhatsApp
+- [ ] Add 3 supplier contacts to WhatsApp (after they reply)
 
 ### Track Replies
-- [ ] Day 1: 5 emails sent
-- [ ] Day 2: check inbox
-- [ ] Day 3: follow up on non-replies (Email 2)
-- [ ] Day 4-5: collect quotes, score on rubric
-- [ ] Day 6: order samples from top 3
+- [ ] Day 1: 3 emails sent (logged in `data/quote_tracker.md`)
+- [ ] Day 2: check inbox; log each reply with
+        `python3 mark_supplier_reply.py "Gold Star" --replied --at YYYY-MM-DD --via email --notes "..."`
+- [ ] Day 3: follow up on non-replies (Email 2 from generic template)
+- [ ] Day 4-5: collect quotes, fill in `data/quote_tracker.md` per-supplier table
+- [ ] Day 5: aggregate cost matrix → bottom of `data/quote_tracker.md`
+- [ ] Day 6: order samples from top 2-3 (DHL to Singapore, ~$30-50)
 - [ ] Day 7: receive DHL tracking, wait for delivery
+- [ ] **Use the scoring rubric** in `02_supplier_outreach_emails.txt` to pick
+        the winner (price 25% + lead time 20% + sample quality 25% +
+        communication 15% + references 15%)
 
 ### Test Samples
 - [ ] Day 7-10: receive samples in Singapore
@@ -60,6 +69,22 @@
 - [ ] Day 10: app pairing test (iOS + Android)
 - [ ] Day 11: score samples on quality rubric
 - [ ] Day 12: pick winner, send Email 3
+
+### Log each step with the CLI
+```bash
+# When a supplier replies:
+python3 mark_supplier_reply.py "Gold Star" --replied --at 2026-10-15 --via email \
+    --notes "Quoted: 500u=\$8.50, 1000u=\$7.80, 19d lead, T/T 30/70 OK"
+
+# When samples are ordered / shipped / received / QC-tested:
+python3 mark_supplier_reply.py "Gold Star" --sample-ordered --at 2026-10-17
+python3 mark_supplier_reply.py "Gold Star" --sample-shipped --at 2026-10-19
+python3 mark_supplier_reply.py "Gold Star" --sample-received --at 2026-10-24
+python3 mark_supplier_reply.py "Gold Star" --sample-qc-pass --at 2026-10-31
+
+# See the current state of all 3:
+python3 mark_supplier_reply.py --list
+```
 
 ---
 
