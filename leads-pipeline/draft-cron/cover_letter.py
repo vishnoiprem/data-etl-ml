@@ -285,12 +285,24 @@ def render_solo(lead: dict) -> Tuple[str, str, str]:
 def render_for_mode(lead: dict) -> Tuple[str, str, str]:
     """Dispatch to the right renderer based on lead.apply_mode.
 
-    Defaults to 'pod' (Avilx pod pitch) if unset — preserves current behavior.
+    Modes:
+      'pitch_pod'       → Avilx company pitch (render_*) — default
+      'apply_personal'  → Prem personally applies for the role (render_solo_*)
+
+    Unknown / unset values fall through to 'pitch_pod' for backward
+    compatibility with leads created before the apply_mode column existed.
     """
-    mode = (lead.get("apply_mode") or "pod").strip().lower()
-    if mode == "solo":
+    mode = (lead.get("apply_mode") or "pitch_pod").strip().lower()
+    if mode == "apply_personal":
         return render_solo(lead)
     return render(lead)
+
+
+# Public mode constants for callers that want to set the column explicitly
+# (avoids typo-driven bugs like 'soloo' / 'soulo' silently becoming 'pod')
+MODE_PITCH_POD = "pitch_pod"
+MODE_APPLY_PERSONAL = "apply_personal"
+
 
 
 if __name__ == "__main__":

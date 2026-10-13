@@ -1285,10 +1285,10 @@ def _build_cover_letter(lead):
     """Render a short, role-aware cover letter.
 
     Branches on lead.apply_mode:
-      - 'solo'  → Prem personally applies (cover_letter.render_solo_*)
-      - 'pod'   → Avilx pod pitch (cover_letter.render_* — default)
+      - 'apply_personal' → Prem personally applies (cover_letter.render_solo_*)
+      - 'pitch_pod'      → Avilx pod pitch (cover_letter.render_* — default)
 
-    The new cover_letter.render_for_mode() dispatcher handles both
+    The cover_letter.render_for_mode() dispatcher handles both
     so this function is now a thin wrapper.
     """
     from cover_letter import render_for_mode
@@ -1370,13 +1370,15 @@ def _pull_verbatim_phrase(excerpt: str) -> str | None:
 # 5. EMAIL — send queued leads with daily cap
 # =============================================================
 
-def send_queued_emails(max_emails=None, dry=False, mode="pod"):
+def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
     """Pull pending email leads from Postgres, send up to max_emails, mark sent.
 
     mode:
-      'pod'  — default; only Avilx pod-pitch leads (mode='pod')
-      'solo' — only Prem-personal-apply leads (mode='solo')
-      'both' — both queues interleaved by lead id
+      'pitch_pod'      — default; only Avilx-pod-pitch leads
+                         (column value 'pitch_pod')
+      'apply_personal' — only Prem-personal-apply leads
+                         (column value 'apply_personal')
+      'both'           — both queues interleaved by lead id
 
     Each lead's stored cover_letter_subject/body (rendered at queue time,
     matching its apply_mode) is what actually gets sent — the mode arg
@@ -1392,7 +1394,7 @@ def send_queued_emails(max_emails=None, dry=False, mode="pod"):
     # Apply mode filter at the cursor, not in Python — single round-trip.
     if mode != "both":
         pending = [l for l in pending
-                   if (l.get("apply_mode") or "pod") == mode]
+                   if (l.get("apply_mode") or "pitch_pod") == mode]
     pending = pending[:max_emails]
 
     sent, failed, bounced = 0, 0, 0
@@ -1923,10 +1925,14 @@ def main():
                    help="Skip cron lock (only for interactive debugging)")
     p.add_argument("--no-bounce-sync", action="store_true",
                    help="Skip the bounce-sync step at the start of the run")
-    p.add_argument("--mode", choices=("pod", "solo", "both"), default="pod",
-                   help="Outreach mode: 'pod' (Avilx pod pitch, default), "
-                        "'solo' (Prem personally applies), or 'both' "
-                        "(interleave pod + solo queues).")
+    p.add_argument("--mode",
+                   choices=("pitch_pod", "apply_personal", "both"),
+                   default="pitch_pod",
+                   help="Outreach mode: 'pitch_pod' (Avilx sells a senior "
+                        "engineering pod to the company — default), "
+                        "'apply_personal' (Prem personally applies for the "
+                        "role, with his own resume), or 'both' (interleave "
+                        "both queues).")
     args = p.parse_args()
 
     scrape_only = args.scrape or args.enrich

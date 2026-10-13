@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS leads (
     cover_letter_subject TEXT,
     cover_letter_body    TEXT,
     jd_text         TEXT,
-    apply_mode      TEXT NOT NULL DEFAULT 'pod'
-        CHECK (apply_mode IN ('pod', 'solo')),       -- 'pod' = Avilx pod pitch; 'solo' = Prem personal apply
+    apply_mode      TEXT NOT NULL DEFAULT 'pitch_pod'
+        CHECK (apply_mode IN ('pitch_pod', 'apply_personal')),  -- 'pitch_pod' = Avilx pod pitch; 'apply_personal' = Prem personal apply
     status          TEXT NOT NULL DEFAULT 'pending', -- pending | sent_email | failed | replied | bounced | unsubscribed
     sent_at         TIMESTAMPTZ,
     replied_at      TIMESTAMPTZ,
