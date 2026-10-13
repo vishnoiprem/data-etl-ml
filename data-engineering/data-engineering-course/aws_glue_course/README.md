@@ -77,3 +77,7 @@ The 3 role plays are L57 in Section 8, plus 2 referenced in `assignments/`.
 - **Title:** AWS Glue - The Complete Masterclass
 - **Instructor:** pvishnoi (Prem Vishnoi)
 - **Contact:** pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -231,3 +231,7 @@ python python/fatigue_scorer.py --user-id user_42
 6. **A/B testing reuse** — same assignment service, same statistical engine
 7. **Real-time dashboard** — 5-min rollup window via Flink → Iceberg → Trino
 8. **Cost story** — SMS tracking is expensive; only attribute high-value events
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

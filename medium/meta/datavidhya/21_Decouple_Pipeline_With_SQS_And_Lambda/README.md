@@ -204,3 +204,7 @@ Lambda (visible in CloudWatch), and 2 poison messages parked in the
 DLQ after exactly 4 receives. The driver asserts both outcomes in
 pure Python; the pytest suite isolates each invariant (batching,
 redrive, validation) for fast feedback.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

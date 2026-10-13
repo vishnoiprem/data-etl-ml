@@ -131,10 +131,18 @@ See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full document.
 
 - **Lesson labs** — [`../../practice/level-5-agents/`](../../practice/level-5-agents/) covers every agent technique this starter uses
 - **Codebook** — [`../../workbooks/ai-engineer-codebook.md`](../../workbooks/ai-engineer-codebook.md) § 5 covers ReAct, plan-and-execute, LangGraph
-- **Exercises** — [`../../workbooks/exercises/section-5-agents-exercises.md`](../../workbooks/exercises/exercises/section-5-agents-exercises.md) extends what you build here
+- **Exercises** — [`../../workbooks/exercises/section-5-agents-exercises.md`](../../workbooks/exercises/section-5-agents-exercises.md) extends what you build here
 
 ---
 
-## License
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
 
-MIT — use freely in your own products.
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

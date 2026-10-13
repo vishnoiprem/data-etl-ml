@@ -276,3 +276,7 @@ what makes a *normal* author's tweet cheap.
 | `code/app.py`     | Flask HTTP service. |
 | `tests/test_service.py` | Unit tests for the service (incl. celebrity hybrid, retweets). |
 | `tests/test_app.py`     | HTTP tests via Flask test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

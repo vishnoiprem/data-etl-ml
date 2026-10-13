@@ -59,3 +59,7 @@ The unglamorous problem every market-data desk solves twice: the same instrument
 pip install -r requirements.txt
 make smoke    # registers AAPL, resolves from 6 IDs, simulates ticker change
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -29,3 +29,7 @@ By the end of section 2 you'll be able to read the script
 top-to-bottom, understand every `boto3` call, and modify it for your
 own app's user pool (different password policy, MFA, hosted UI
 domain, etc.).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

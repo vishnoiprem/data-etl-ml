@@ -48,3 +48,55 @@ pip install -r requirements.txt
 export GITHUB_TOKEN=...
 python examples/fix_issue.py --repo myorg/myrepo --issue 42
 ```
+
+---
+
+## What this is NOT
+
+- **Not Devin.** Devin is a closed product with a
+  long-context frontier model, a hosted sandbox, and
+  a UX. This is the *shape* of a Devin-like agent —
+  planner + executor + tester + recovery — sized for
+  one engineer to run against their own repos. The
+  frontier-model + hosted-sandbox + UI are a
+  separate, much larger, problem.
+- **Not a production engineering tool.** The 3-of-5
+  SWE-bench-lite result is honest. The two failures
+  (long-context retrieval across many files) are
+  the same failure mode that production
+  code-modification agents hit. The fix is the
+  Tree-sitter + vector-store retrieval layer, not a
+  bigger model.
+- **Not a CI replacement.** CI is *deterministic* —
+  given the same code, it returns the same result.
+  The agent is *probabilistic* — same issue, two
+  runs, two different PRs. Use CI for the test
+  gate; use the agent to *produce* the PR that
+  CI gates.
+- **Not a security boundary.** The agent pushes to
+  a new branch and leaves the PR in `draft:`. That's
+  the only safety net. If you let it commit to
+  `main`, you have given an LLM write access to
+  production.
+
+---
+
+## Related directories
+
+- [`../9-terminal-agent-claude-code/`](../9-terminal-agent-claude-code/) —
+  the terminal-side cousin: agent in the shell,
+  same planner / executor / tester pattern.
+- [`../10-ide-agent-cursor-style/`](../10-ide-agent-cursor-style/) —
+  the IDE-side cousin: agent in the editor, scoped
+  to the current file and project.
+- [`../11-general-agent-manus-style/`](../11-general-agent-manus-style/) —
+  the general-purpose cousin: agent that can do
+  anything the tools expose, not just code.
+- [`../16-autonomous-loop/`](../16-autonomous-loop/) —
+  the bounded-loop + budget + retry pattern that
+  the executor loop in this build is a variant of.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

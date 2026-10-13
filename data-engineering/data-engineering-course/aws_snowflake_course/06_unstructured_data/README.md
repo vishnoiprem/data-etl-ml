@@ -46,3 +46,7 @@ Section 7 is **Performance optimization** — we swap JSON for
 introduce dedicated virtual warehouses, walk through **scale up
 vs scale out**, and explain the three caches Snowflake uses to
 make the same query faster the second time you run it.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

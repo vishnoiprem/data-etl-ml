@@ -89,3 +89,7 @@ See `code/README.md` for the full walkthrough.
 
 Course material authored by **Prem Vishnoi <pvishnoi@avilx.com>**. Code
 samples are MIT-licensed.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

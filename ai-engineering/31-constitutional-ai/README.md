@@ -66,3 +66,57 @@ Self-critique + revision, the Anthropic way. A principle set, a judge that score
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not RLHF.** Constitutional AI replaces the
+  human-rater step with a *principle-based judge*
+  (RLAIF — RL from AI Feedback). The training
+  pipeline is different; the result is similar
+  (a model that's better aligned to a written
+  policy). Use CAI when the policy is stable and
+  documentable; use RLHF when the policy is too
+  nuanced to write down.
+- **Not a substitute for a red-team.** The
+  constitution is what you tell the model; the
+  red-team is what you measure. They must be
+  *independent sets* — measuring on the same
+  constitution the model was trained against
+  measures memorization, not safety.
+- **Not safe-by-default.** "Be helpful" is not
+  enforceable. A constitution of 5 vague
+  principles produces a model that is no safer
+  than the base. The constitution has to be
+  specific (the worked example: "Don't provide
+  instructions for violent wrongdoing").
+- **Not free.** Each critique-revise round is a
+  model call; 2-4 rounds per response = 2-4x the
+  inference cost. For high-volume serving, the
+  cost matters. For low-volume, high-stakes
+  use, the cost is the right trade.
+
+---
+
+## Related directories
+
+- [`../28-rlhf-dpo-train/`](../28-rlhf-dpo-train/) —
+  the human-feedback alignment training; the
+  alternative to CAI when the policy can't be
+  written down.
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework that measures the
+  before/after on the red-team suite.
+- [`../37-frontier-research-pipeline/`](../37-frontier-research-pipeline/) —
+  the research pipeline that ablation-tests
+  different constitution sizes / phrasings.
+- [`../04-fm-evaluation/`](../04-fm-evaluation/) —
+  the broader eval framework that includes
+  safety benchmarks (BBQ, HarmBench) in
+  addition to capability ones.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

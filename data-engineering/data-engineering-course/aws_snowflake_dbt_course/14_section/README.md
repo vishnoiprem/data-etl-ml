@@ -25,3 +25,7 @@ the end of this section you'll be comfortable with: versions.
 Section 15 is **Model access — groups, private vs protected models, and the fraud domain example.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

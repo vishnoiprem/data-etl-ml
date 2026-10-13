@@ -211,7 +211,14 @@ PREFIX_HINTS = {
 
 def _better_email(lead):
     """If the lead's current email is a generic careers@ on a known domain
-    that prefers a different prefix, suggest a better one."""
+    that prefers a different prefix, suggest a better one.
+
+    Returns None if the *target* domain is in BOUNCE_DENY or any lead at
+    that domain has status='bounced' — swapping to a dead address is
+    strictly worse than leaving the lead alone.
+    """
+    from state.bounce_deny_store import BOUNCE_DENY as _PERSISTED_DENY
+
     em = (lead.get("contact_email") or "").lower()
     if "@" not in em:
         return None
@@ -221,63 +228,50 @@ def _better_email(lead):
     new_prefix = PREFIX_HINTS[domain]
     if prefix == new_prefix:
         return None
-    # Don't replace if the lead was already marked bounced for this domain
-    return f"{new_prefix}@{domain}"
+    target = f"{new_prefix}@{domain}"
+
+    # Hard guard: never swap to a known-bad domain
+    if domain in _PERSISTED_DENY:
+        return None
+    # DB guard: if any lead with this domain bounced, don't recreate
+    # that address. Cache the result in-process for the rest of the run.
+    if not hasattr(_better_email, "_bounced_domain_cache"):
+        _better_email._bounced_domain_cache = set()
+    cache = _better_email._bounced_domain_cache
+    if domain in cache:
+        return None
+    from db.lead_store import get_cursor
+    try:
+        with get_cursor() as cur:
+            cur.execute("""
+                SELECT 1 FROM leads
+                WHERE SPLIT_PART(LOWER(contact_email), '@', 2) = %s
+                  AND status = 'bounced'
+                LIMIT 1
+            """, (domain,))
+            if cur.fetchone():
+                cache.add(domain)
+                return None
+    except Exception:
+        # DB hiccup — be conservative and don't swap
+        return None
+    return target
 
 
 def _make_cover_letter(lead):
-    """Write a 4-paragraph Avilx cover letter tailored to this lead."""
-    co = lead.get("company", "").strip() or "your team"
-    role = lead.get("role", "").strip() or "this role"
-    jd = lead.get("jd_text", "") or ""
+    """Write a 4-paragraph Avilx cover letter tailored to this lead.
 
-    # Try to identify stack overlap from the JD
-    stack_overlap = _extract_stack_overlap(jd)
-    stack_str = ", ".join(stack_overlap[:8]) if stack_overlap else "the stack in your JD"
-
-    return (
-        f"Hi {co} team,\n\n"
-        f"Saw the {role} role — stack and scope look like a strong match. Quick context if useful: I'm Prem, I run Avilx (avilx.com), a global Build·Deploy·Engineers pod out of Ha Noi. 6-20 senior engineers, AI/Data/ML/Cloud, **Databricks Champion** team, 7+ clouds (AWS · Azure · GCP · Tencent · Alibaba), 8+ yrs avg, regulated-industry work.\n\n"
-        f"Stack overlap I noticed: {stack_str}.\n\n"
-        f"If your timeline is tight, happy to run a 4-week pilot pod or staff-aug a senior — 2-week kickoff, remote delivery, NDA + IP clean. 15-min call this week worth it?\n\n"
-        f"Prem Vishnoi\n"
-        f"Avilx — Global Build · Deploy · Engineers\n"
-        f"(AI · Data · ML · Cloud · Databricks · 7+ clouds)\n"
-        f"Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam\n"
-        f"hello@avilx.com | wa.me/6592716405 | https://avilx.com"
-    )
+    Delegates to cover_letter.py so any edit there shows up everywhere
+    (autopilot, refine_pipeline, tests, preview).
+    """
+    from cover_letter import render_text_body
+    return render_text_body(lead)
 
 
 def _extract_stack_overlap(jd):
     """Pull a list of recognizable tech terms from a JD for the cover letter."""
-    if not jd:
-        return []
-    candidates = re.findall(
-        r"\b(python|java|golang|go\b|rust|c\+\+|typescript|javascript|"
-        r"react|node|next\.?js|django|fastapi|flask|spring|"
-        r"kubernetes|k8s|docker|terraform|ansible|helm|"
-        r"aws|azure|gcp|tencent|alibaba|cloudflare|"
-        r"spark|hadoop|kafka|flink|airflow|dagster|prefect|"
-        r"snowflake|databricks|bigquery|redshift|postgres|mysql|"
-        r"dbt|elt|etl|olap|oltp|iceberg|delta|parquet|avro|"
-        r"pytorch|tensorflow|llm|rag|genai|agent|"
-        r"mlops|scikit|sklearn|pandas|numpy|"
-        r"openai|anthropic|claude|gemini|mistral|llama|hugging|"
-        r"vector|embedding|faiss|qdrant|weaviate|pinecone|chroma|"
-        r"ci/cd|devops|sre|observability|prometheus|grafana|"
-        r"microservices|grpc|rest|graphql|api|"
-        r"data engineering|ml engineering|backend|platform)\b",
-        jd, re.I,
-    )
-    # Lowercase, dedup, preserve order
-    seen = set()
-    out = []
-    for c in candidates:
-        cl = c.lower()
-        if cl not in seen:
-            seen.add(cl)
-            out.append(cl)
-    return out
+    from cover_letter import _extract_stack_overlap as _impl
+    return _impl(jd)
 
 
 def find_more_leads(verbose=True):
@@ -287,11 +281,16 @@ def find_more_leads(verbose=True):
     p = HERE / "find_more_leads.py"
     if not p.exists():
         return
-    r = subprocess.run(
-        [sys.executable, str(p)],
-        cwd=str(HERE),
-        capture_output=True, text=True, timeout=180,
-    )
+    try:
+        r = subprocess.run(
+            [sys.executable, str(p)],
+            cwd=str(HERE),
+            capture_output=True, text=True, timeout=180,
+        )
+    except subprocess.TimeoutExpired:
+        if verbose:
+            print(f"    [find_more_leads] timeout after 180s — skipping")
+        return
     if verbose and r.returncode == 0:
         # tail summary line
         for line in r.stdout.splitlines()[-3:]:
@@ -307,11 +306,16 @@ def find_more_clients(verbose=True):
     p = HERE / "find_clients.py"
     if not p.exists():
         return
-    r = subprocess.run(
-        [sys.executable, str(p)],
-        cwd=str(HERE),
-        capture_output=True, text=True, timeout=180,
-    )
+    try:
+        r = subprocess.run(
+            [sys.executable, str(p)],
+            cwd=str(HERE),
+            capture_output=True, text=True, timeout=180,
+        )
+    except subprocess.TimeoutExpired:
+        if verbose:
+            print(f"    [find_clients] timeout after 180s — skipping")
+        return
     if verbose and r.returncode == 0:
         for line in r.stdout.splitlines()[-3:]:
             print(f"    {line}")
@@ -320,11 +324,11 @@ def find_more_clients(verbose=True):
 
 
 def dedup_and_deny(verbose=True):
-    """Auto-derive the bounce deny list from actual bounces in DB.
-    Mutates find_more_leads.BOUNCE_DENY in-place so subsequent
-    derive_email_from_company() calls skip bounced domains."""
+    """Auto-derive the bounce deny list from actual bounces in DB and
+    persist it to state/bounce_deny.json so subprocesses (find_more_leads,
+    find_clients, backfill_emails) see the same denylist."""
     from db.lead_store import get_cursor
-    import find_more_leads as fml
+    from state.bounce_deny_store import BOUNCE_DENY, add as deny_add
     added = 0
     with get_cursor() as cur:
         cur.execute("""
@@ -334,12 +338,19 @@ def dedup_and_deny(verbose=True):
             GROUP BY 1 HAVING COUNT(*) >= 1
         """)
         for r in cur.fetchall():
-            dom = r["domain"]
-            if dom and dom not in fml.BOUNCE_DENY:
-                fml.BOUNCE_DENY.add(dom)
-                added += 1
+            dom = (r["domain"] or "").lower()
+            if dom and dom not in BOUNCE_DENY:
+                if deny_add(dom):
+                    added += 1
+    # Also keep the legacy in-memory BOUNCE_DENY in find_more_leads
+    # in sync so the same process doesn't have to reload.
+    try:
+        import find_more_leads as fml
+        fml.BOUNCE_DENY |= BOUNCE_DENY
+    except Exception:
+        pass
     if verbose:
-        print(f"  [deny] bounce deny list now has {len(fml.BOUNCE_DENY)} domains (+{added})")
+        print(f"  [deny] bounce deny list now has {len(BOUNCE_DENY)} domains (+{added})")
 
 
 def main():

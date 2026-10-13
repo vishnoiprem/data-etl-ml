@@ -35,3 +35,7 @@ the end of this section you'll be comfortable with: managing data pipelines — 
 Section 19 is **Tests, snapshots, microbatch, advanced topics, and the final exam cheat sheet.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

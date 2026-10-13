@@ -85,3 +85,7 @@ Each course folder contains:
 - Some high-school statistics
 
 If you're shaky on linear algebra or calculus, do the "Matrix calculus for deep learning" warm-up at the top of Course 1 before moving on.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

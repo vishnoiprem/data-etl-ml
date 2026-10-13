@@ -94,3 +94,16 @@
 | 5. "How do you handle a model upgrade?" | "3 layers: (1) version pinning in config, (2) eval set on the new model (block the upgrade if it drops > 0.05), (3) gradual rollout (10% → 50% → 100% over 1 week). The eval set is the contract." |
 
 **Memorize these 5.** They're the Q&A for 80% of GenAI follow-ups.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

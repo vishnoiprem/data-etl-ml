@@ -165,3 +165,7 @@ Write — check-out
 | `code/app.py` | Flask HTTP layer with metrics |
 | `tests/test_service.py` | Service tests including concurrent check-in race |
 | `tests/test_app.py` | HTTP tests |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

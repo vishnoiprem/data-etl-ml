@@ -75,3 +75,7 @@ Section 3 is **Rules + Event Patterns** — the matching logic that
 decides which events on a bus trigger which targets. We introduce
 the JSON-predicate event pattern language and write the
 `put_rule.py` demo.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

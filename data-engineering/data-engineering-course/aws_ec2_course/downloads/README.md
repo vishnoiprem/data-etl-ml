@@ -13,3 +13,7 @@
 
 If you have an active enrollment, download the latest versions from the
 Udemy course page.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

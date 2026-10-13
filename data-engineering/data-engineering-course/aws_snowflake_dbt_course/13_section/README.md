@@ -26,3 +26,7 @@ the end of this section you'll be comfortable with: environments + contracts.
 Section 14 is **Versions — `latest_version` views, deprecation_date, and the `bypass_version_check` flag.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

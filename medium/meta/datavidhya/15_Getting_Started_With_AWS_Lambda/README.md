@@ -137,3 +137,7 @@ event, returns the expected response, and the LOG lines appear in
 CloudWatch. The driver and pytest here exercise the first three
 sub-steps without AWS; deploying and reading CloudWatch are documented
 above for the local SAM command and `sam logs`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

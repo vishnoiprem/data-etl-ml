@@ -194,3 +194,7 @@ deletion at 365d, AND the log bucket has the example log file, AND
 the log records include at least one 200 and one 403. The driver and
 the pytest suite exercise all three without AWS. The shell scripts are
 the manual-run equivalent for the live account.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

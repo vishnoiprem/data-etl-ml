@@ -70,3 +70,7 @@ python attach_to_api.py
 
 See `../event_payloads/` for sample events, or use the L37 lecture
 smoke test script to mint a JWT and call the API.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

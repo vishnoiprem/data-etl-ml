@@ -236,3 +236,7 @@ client sees the error on the next call.
 | `code/app.py` | Flask HTTP service with SSE audio stream. |
 | `tests/test_service.py` | Service-level tests (mock STT/LLM/TTS, full pipeline, transcript, outbox). |
 | `tests/test_app.py` | HTTP-level tests using Flask's test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

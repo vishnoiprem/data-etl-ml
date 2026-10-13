@@ -238,6 +238,7 @@ You have both emails now — Leadership (Scope/Influence/Leadership + AI) and Te
   4. “How did you mentor someone while giving them ownership?” 
   5. “When multiple engineers contributed, how did you recognize their work?” 
   6. “Tell me about a failure you owned and what changed afterward.”
+---
 
-
-
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

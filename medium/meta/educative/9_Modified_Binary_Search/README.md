@@ -181,3 +181,7 @@ Use these. They signal you've seen the pattern before.
 
 After #7, you should be able to solve most "Modified Binary Search" problems
 in under 25 minutes.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

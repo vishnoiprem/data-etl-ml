@@ -65,3 +65,7 @@ dbt run --project-dir dbt_project --target dev
 dbt test --project-dir dbt_project
 dbt build --project-dir dbt_project --select state:modified+
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

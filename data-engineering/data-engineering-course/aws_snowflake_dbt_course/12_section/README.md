@@ -24,3 +24,7 @@ the end of this section you'll be comfortable with: practice quiz — developing
 Section 13 is **Environments + contracts — codegen-driven schema enforcement and the subtleties of contract behavior.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

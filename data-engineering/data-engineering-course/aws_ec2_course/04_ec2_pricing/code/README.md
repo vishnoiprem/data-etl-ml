@@ -77,3 +77,7 @@ The `pricing` API only has `us-east-1` as an endpoint regardless of where the pr
 - No support for the Capacity Blocks feature for short-term ML/HPC reservation.
 - No regional variation — every region uses the same `PRICING` table.
 - Spot price is a constant fraction of on-demand by default. Real spot prices are time-varying; for real workloads, query the `ec2` API's `describe_spot_price_history` instead.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

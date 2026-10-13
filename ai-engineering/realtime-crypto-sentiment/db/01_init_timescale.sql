@@ -26,6 +26,12 @@ SELECT create_hypertable('tweets', 'ts',
     chunk_time_interval => INTERVAL '1 day',
     if_not_exists => TRUE);
 CREATE INDEX IF NOT EXISTS tweets_symbol_ts_idx ON tweets (symbol, ts DESC);
+-- Partial index for the Live tab's bucketed-sentiment queries
+-- (global_sentiment_buckets, per_symbol_buckets in src/store/db.py).
+-- Scans only scored rows, ordered newest-first.
+CREATE INDEX IF NOT EXISTS tweets_scored_ts_idx
+    ON tweets (ts DESC) WHERE sentiment_score IS NOT NULL;
+-- Tiny index for the unscored-row backfill scanner.
 CREATE INDEX IF NOT EXISTS tweets_unscored_idx ON tweets (ts) WHERE sentiment_score IS NULL;
 
 ALTER TABLE tweets SET (
@@ -82,6 +88,9 @@ SELECT create_hypertable('paper_trades', 'ts',
     chunk_time_interval => INTERVAL '7 days',
     if_not_exists => TRUE);
 CREATE INDEX IF NOT EXISTS paper_trades_symbol_idx ON paper_trades (symbol, ts DESC);
+-- Supports the `paper_pnl_per_trade` view (ORDER BY ts) and the
+-- `daily_pnl` view (GROUP BY DATE_TRUNC('day', ts), symbol).
+CREATE INDEX IF NOT EXISTS paper_trades_ts_idx ON paper_trades (ts DESC);
 
 SELECT add_retention_policy('paper_trades', INTERVAL '365 days', if_not_exists => TRUE);
 

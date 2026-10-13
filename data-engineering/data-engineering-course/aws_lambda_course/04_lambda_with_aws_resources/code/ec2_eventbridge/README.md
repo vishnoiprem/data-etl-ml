@@ -106,3 +106,7 @@ pytest test_script.py -v
 The tests assert the wrapper's event-shape normalization. They do
 not (and cannot, without a richer `moto` shim) assert the schedule
 fires.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

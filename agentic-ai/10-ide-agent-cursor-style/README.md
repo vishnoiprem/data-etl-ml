@@ -59,3 +59,49 @@ pip install -r requirements.txt
 make index
 make query
 ```
+
+---
+
+## What this is NOT
+
+- **Not Cursor.** Cursor is a closed IDE product with
+  a frontier model behind it, a hosted index service,
+  and a polished UI. This is the *symbol-level
+  retrieval* + *inline-edit* + *refactor* shape,
+  built with primitives you can swap (Tree-sitter +
+  any embedding model + any agent loop).
+- **Not a code search tool.** The index returns
+  *symbols* the agent will edit, not search results
+  a human will read. The unit, the embedding, and
+  the consumer are different from a human-facing
+  search tool.
+- **Not a model implementation.** The retrieval
+  layer is a retrieval layer; the model that *uses*
+  it lives in the agent loop. Swap the model
+  (Claude → local → open-source), keep the index.
+- **Not a magic productivity boost.** The 4-5x
+  precision on symbol-level vs file-level is real,
+  but it requires a *precomputed index*. A repo
+  that's never been indexed falls back to file-level
+  retrieval (the slower, less precise path). The
+  win only exists for indexed repos.
+
+---
+
+## Related directories
+
+- [`../8-swe-agent-devin-style/`](../8-swe-agent-devin-style/) —
+  the cousin that operates at the *repo* level
+  (open an issue → produce a PR). The index is
+  similar; the agent loop is more autonomous.
+- [`../9-terminal-agent-claude-code/`](../9-terminal-agent-claude-code/) —
+  the terminal-side cousin (no IDE, same index,
+  shell-bound tools).
+- [`../11-general-agent-manus-style/`](../11-general-agent-manus-style/) —
+  the general-purpose cousin that can do anything
+  the tools expose, not just IDE work.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

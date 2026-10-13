@@ -56,3 +56,7 @@ recap**, **`VALIDATION_MODE`** (dry-run), **`RETURN_FAILED_ONLY`**,
 **`TRUNCATECOLUMNS` + `FORCE` + load history**. By L40
 you'll be able to debug a failing load end-to-end and
 recover gracefully from partial failures.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

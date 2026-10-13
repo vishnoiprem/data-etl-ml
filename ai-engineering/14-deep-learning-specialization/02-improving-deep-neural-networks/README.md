@@ -76,3 +76,7 @@ The gap between "the network learns" and "the network works well in production."
 ## Lead lesson
 
 See `01-regularization-and-dropout.md` for the full worked example: take a 3-layer network on the "French football jerseys" / "cats" dataset, see it overfit, then apply L2 regularization and dropout to fix it. Measure train and dev accuracy before/after.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

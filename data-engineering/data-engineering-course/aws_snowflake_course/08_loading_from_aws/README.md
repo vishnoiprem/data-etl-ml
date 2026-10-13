@@ -44,3 +44,7 @@ Snowflake storage integration that reads from S3.
 Section 9 is **Loading from Azure** — the same pattern,
 with Azure Blob Storage, an Azure AD app, and the
 `STORAGE INTEGRATION` for Azure.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

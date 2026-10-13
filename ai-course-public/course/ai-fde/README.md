@@ -156,8 +156,19 @@ By the end of the course you should be able to answer YES to all 5:
 If you answered NO to any of those, you haven't finished your job. Go back to the phase that teaches it.
 
 ---
-
-**Last updated:** 2026-10-09
 **Length:** ~9 weeks full-time, ~16 weeks part-time
 **Cost:** $0 (everything runs with the mock LLM backend, no API key needed)
 **Goal:** You finish and you can put "AI FDE" on your LinkedIn.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

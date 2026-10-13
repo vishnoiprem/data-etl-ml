@@ -84,3 +84,7 @@ A Lambda function `s3_to_dynamodb_lambda` that:
 
 `quizzes/section_6.md` — 10 questions on S3 event notifications, Lambda IAM,
 DynamoDB write semantics and idempotency.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

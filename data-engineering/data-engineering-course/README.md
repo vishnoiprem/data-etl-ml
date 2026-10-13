@@ -290,3 +290,7 @@ Each course has its own `README.md`, `SYLLABUS.md`, `DIRECTORY.md`,
 - **1,000+ files** of design docs, working code, fixtures, and tests
 - **Authored by Prem Vishnoi** · <https://medium.com/@premvishnoi>
 - **Directory map:** see [DIRECTORY.md](DIRECTORY.md) for the one-page structure overview
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

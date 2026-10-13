@@ -55,3 +55,7 @@ and `iss` claims.
 See the L39 lecture script (`lecture_scripts/L39_cognito_authorizer_hands_on.md`)
 section 5 for the boto3 snippet that creates the `COGNITO_USER_POOLS`
 authorizer and patches the `GET /items` method.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

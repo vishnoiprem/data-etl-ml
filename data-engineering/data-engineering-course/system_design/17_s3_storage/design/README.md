@@ -183,3 +183,7 @@ Multipart:
 | `code/app.py` | Flask HTTP service with path-based dispatch. |
 | `tests/test_service.py` | PUT/GET/HEAD, versions, multipart, prefix listing. |
 | `tests/test_app.py` | HTTP-level tests using Flask test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

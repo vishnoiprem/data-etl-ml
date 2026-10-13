@@ -14,3 +14,7 @@
 
 **Working demo:** `code/put_metric_alarm.py` (idempotent, `--dry-run`)
 + `code/test_put_metric_alarm.py` (5 moto tests).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

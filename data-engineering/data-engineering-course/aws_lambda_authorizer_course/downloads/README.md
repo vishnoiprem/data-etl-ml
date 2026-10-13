@@ -16,3 +16,7 @@ the repo locally.
 > The placeholders are intentionally empty files. If you'd like to
 > redistribute the real files in this repo, drop them in here with the
 > same names and the lecture links will resolve.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

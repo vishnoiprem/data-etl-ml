@@ -111,3 +111,16 @@ The 9 modules teach the framework. The 10th module shows you what the framework 
 **Each company tests a different signature round.** A complete FDE prep covers all 13.
 
 **General prep gets you past the resume screen. Company-specific prep gets you past the onsite.**
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

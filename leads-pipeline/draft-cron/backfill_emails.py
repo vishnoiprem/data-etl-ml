@@ -21,10 +21,14 @@ sys.path.insert(0, str(HERE))
 def backfill(verbose=False, limit=500):
     from db.lead_store import get_cursor
     from find_more_leads import derive_email_from_company, BOUNCE_DENY
+    from state.bounce_deny_store import BOUNCE_DENY as PERSISTED_DENY
     from refine_pipeline import dedup_and_deny
 
-    # First, refresh BOUNCE_DENY from current bounced leads
+    # First, refresh BOUNCE_DENY from current bounced leads (idempotent)
     dedup_and_deny(verbose=verbose)
+
+    # The PERSISTED_DENY covers anything added since this process started.
+    effective_deny = BOUNCE_DENY | PERSISTED_DENY
 
     count_updated = 0
     count_skipped_no_match = 0
@@ -70,7 +74,7 @@ def backfill(verbose=False, limit=500):
         # derive_email_from_company already checks BOUNCE_DENY but
         # we double-check here just in case the map was updated.
         domain = em.split("@", 1)[1].lower()
-        if domain in BOUNCE_DENY:
+        if domain in effective_deny:
             count_skipped_bounce_deny += 1
             continue
         # Check collision: same (company, email) on a different lead

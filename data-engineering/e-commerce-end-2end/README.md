@@ -382,3 +382,7 @@ python ml/warehouse_optimization/models/warehouse_optimizer.py
 | Reviews | ~800 |
 | User events (clickstream) | 10,000 |
 | Vouchers | 7 |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

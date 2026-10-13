@@ -105,3 +105,7 @@ aws lambda delete-function --function-name usecase2-token-authorizer
 The integration Lambda and S3 bucket are reused in sections 12
 (CDK) and 13 (CloudFormation) — leave them in place if you intend
 to do those sections next.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

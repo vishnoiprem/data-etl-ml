@@ -7,9 +7,23 @@
 >
 > 74 world-top reference patterns in the tables below. If you've used the system at Netflix, Stripe, Anthropic, Databricks, Bloomberg, or OpenAI, I can defend how I'd build it, run it, and cost it.
 
+> 💸 **Looking for a working AI revenue system, not just code?** Start with
+> [`ai-engineering/40-ai-side-hustle/`](ai-engineering/40-ai-side-hustle/) —
+> a self-contained 4-stream AI revenue factory (SEO content, micro-SaaS
+> scaffold, digital products, print-on-demand merch) that runs in
+> offline-stub mode so you can see the whole pipeline in 5 minutes.
+> That's the headline project. The 40+ projects below are the
+> infrastructure that backs it.
+
 <div align="left">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![leads-ci](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml)
+[![leads-cd](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml)
+[![release-please](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml)
+[![pip-audit](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml/badge.svg)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml)
+[![codeql](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/codeql.yml)
+[![GHCR image](https://img.shields.io/badge/GHCR-ghcr.io%2Fvishnoiprem%2Fdata--etl--ml%2Fleads--pipeline-2496ED?logo=docker&logoColor=white)](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
 [![Made with Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/)
 [![Apache Flink](https://img.shields.io/badge/Apache%20Flink-Streaming-E6526F?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
@@ -546,6 +560,21 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 - **Writing / articles** → see [Writing & Interview Prep](#-writing--interview-prep) and `medium/`.
 - **Resume assets** → `Resume/`.
 
+### Top-level entry points (read me first if you land in a subdirectory)
+
+| Directory | What's inside | Read |
+|-----------|---------------|------|
+| `data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](data-engineering/README.md) |
+| `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](ai-engineering/README.md) |
+| `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](agentic-ai/README.md) |
+| `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](ml/README.md) |
+| `realtime-stock-pipeline/` | Kafka + Flink + Postgres + Grafana reference build | [realtime-stock-pipeline/README.md](realtime-stock-pipeline/README.md) |
+| `leads-pipeline/` | Cold-email + AI resume tailoring pipeline (the side hustle) | [leads-pipeline/README.md](leads-pipeline/README.md) |
+| `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
+| `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
+| `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
+| `postgress_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgress_cdc_kafka/README.md](postgress_cdc_kafka/README.md) |
+
 ---
 
 ## Repository Layout (Recommended)
@@ -786,6 +815,20 @@ It runs end-to-end on synthetic data, has a README with run commands, has
 tests, has at least one observability hook (logging, metrics, or eval), and
 has a clear extension point (not a sealed demo).
 
+**Q: Is this code safe to run? What's the security posture?**
+Repo-wide security policy is in [SECURITY.md](SECURITY.md) and the latest
+audit findings are in [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md).
+The Dependabot digest (top of the GitHub security tab) lists the open
+advisories on the default branch; the audit doc tracks which have been
+fixed in this branch. There are no real customer / transactional / PII
+data committed here — anything in `leads-pipeline/draft-cron/.tailored_resumes/`
+or `.preview/` is git-ignored.
+
+The `leads-pipeline` container image is published to
+[GHCR](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
+on every push to `main`; see [`docs/CI_CD.md`](docs/CI_CD.md) for the
+release flow and image-tag conventions.
+
 ---
 
 ## Contact
@@ -816,4 +859,7 @@ rag retrieval augmented generation, langchain, langgraph, multi-agent,
 weaviate, pinecone, vector database, llmops, prompt engineering,
 hive, delta lake, iceberg, dbt, airflow, docker, terraform, mlops,
 anti money laundering, aml, sanctions screening, ofac, fincrime.
--->
+-->---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

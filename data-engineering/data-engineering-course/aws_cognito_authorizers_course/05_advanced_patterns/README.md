@@ -14,3 +14,7 @@ you can run for years without incident:
 
 By the end of section 5 you'll be able to talk to a 100-person
 engineering org about Cognito without anyone rolling their eyes.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

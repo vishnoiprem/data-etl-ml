@@ -99,3 +99,7 @@ this section and start at L79.**
 Authored by **Prem Vishnoi <pvishnoi@avilx.com>** based on the
 published Udemy curriculum. Code samples are MIT-licensed.
 See `../../LICENSE` for the full text.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

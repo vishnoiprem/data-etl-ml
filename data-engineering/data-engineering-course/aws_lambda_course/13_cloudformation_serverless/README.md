@@ -98,3 +98,7 @@ Each template is valid YAML (2-space indent) and passes
 ## Quiz
 
 `quizzes/section_13.md` — 10 questions, hidden answers.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

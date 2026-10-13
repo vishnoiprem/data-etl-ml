@@ -27,3 +27,7 @@ the end of this section you'll be comfortable with: model access.
 Section 16 is **Debugging — dbt logs, debug flags, runtime/compilation/database errors, and distinguishing dbt Core from data-platform issues.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

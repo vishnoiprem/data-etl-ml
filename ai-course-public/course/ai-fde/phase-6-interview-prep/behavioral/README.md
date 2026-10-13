@@ -137,3 +137,16 @@ If your background is SWE-only (no customer-facing title), use the "transferable
 | 5. Made myself unnecessary | Engagement 10: principal handoff | 3 next FDEs, 10/10 at 90 days |
 
 **Memorize these 5.** They're the answers to 80% of FDE behavioral questions.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -369,21 +369,33 @@ def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> list[di
     Used by signal generation so the z-score compares a current 5-min mean
     against a history of *bucket means*, not against the noisy per-tweet
     distribution.
+
+    NOTE: `minutes` is intentionally interpolated into the Postgres
+    `time_bucket(...)` string because the function requires a literal
+    interval. Callers must pass an int (this is enforced at the type
+    level by the function signature; no user input is ever passed here).
     """
     engine = get_engine()
     total_minutes = hours * 60
+    if engine.dialect.name == "postgresql":
+        # Defensive: hard-cap to keep a typo from producing a giant query.
+        # Postgres time_bucket accepts integer minutes up to ~35791394
+        # (about 68 years); 1 day = 1440 is the realistic ceiling.
+        if not (1 <= int(minutes) <= 1440 * 30):
+            raise ValueError(f"minutes out of safe range: {minutes!r}")
     with engine.connect() as conn:
         if engine.dialect.name == "postgresql":
             rows = conn.execute(
                 text(
-                    f"SELECT time_bucket('{minutes} minutes', ts) AS bucket, "
-                    f"AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
-                    f"FROM tweets "
-                    f"WHERE symbol=:s AND sentiment_score IS NOT NULL "
-                    f"AND ts > NOW() - (:m || ' minutes')::INTERVAL "
-                    f"GROUP BY bucket ORDER BY bucket ASC"
+                    "SELECT time_bucket(:bucket_width, ts) AS bucket, "
+                    "AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                    "FROM tweets "
+                    "WHERE symbol=:s AND sentiment_score IS NOT NULL "
+                    "AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                    "GROUP BY bucket ORDER BY bucket ASC"
                 ),
-                {"s": symbol, "m": str(total_minutes)},
+                {"bucket_width": f"{minutes} minutes", "s": symbol,
+                 "m": str(total_minutes)},
             ).fetchall()
         else:
             # SQLite: use strftime to round down to the nearest 5-min boundary.
@@ -403,29 +415,50 @@ def sentiment_buckets(symbol: str, minutes: int = 5, hours: int = 24) -> list[di
     return [dict(r._mapping) for r in rows]
 
 
+def _validate_bucket_minutes(minutes: int) -> int:
+    """Sanity-check a `minutes` bucket width before we interpolate it
+    into the `time_bucket(:w, ts)` SQL. Bounds:
+      - >= 1: a 0-width bucket is meaningless
+      - <= 1440*30 (≈30 days): anything larger is a typo
+    """
+    minutes = int(minutes)
+    if not 1 <= minutes <= 1440 * 30:
+        raise ValueError(f"bucket minutes out of safe range [1, {1440*30}]: {minutes!r}")
+    return minutes
+
+
 def global_sentiment_buckets(minutes: int, hours: int) -> list[dict]:
     """Cross-tag sentiment aggregation: one row per `minutes`-wide bucket,
     averaged across ALL symbols. Used by the 'Live' tab to chart the
     macro hourly / daily sentiment trend.
 
     Returns: list of {bucket, avg_sent, n, pos_n, neg_n}.
+
+    Note: we deliberately do NOT use the `tweets_1h` / `tweets_1d`
+    continuous aggregates here, because the pre-aggregates don't
+    track the positive/negative breakdown this function returns.
+    The per-symbol helper `per_symbol_buckets` does use the
+    pre-aggregates for the same reason `time_bucket(:w, ts)` is
+    fine when no pos/neg split is needed.
     """
+    minutes = _validate_bucket_minutes(minutes)
     engine = get_engine()
     total_minutes = hours * 60
     with engine.connect() as conn:
         if engine.dialect.name == "postgresql":
             rows = conn.execute(
                 text(
-                    f"SELECT time_bucket('{minutes} minutes', ts) AS bucket, "
-                    f"AVG(sentiment_score) AS avg_sent, COUNT(*) AS n, "
-                    f"SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END) AS pos_n, "
-                    f"SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS neg_n "
-                    f"FROM tweets "
-                    f"WHERE sentiment_score IS NOT NULL "
-                    f"AND ts > NOW() - (:m || ' minutes')::INTERVAL "
-                    f"GROUP BY bucket ORDER BY bucket ASC"
+                    "SELECT time_bucket(:bucket_width, ts) AS bucket, "
+                    "AVG(sentiment_score) AS avg_sent, COUNT(*) AS n, "
+                    "SUM(CASE WHEN sentiment_score > 0 THEN 1 ELSE 0 END) AS pos_n, "
+                    "SUM(CASE WHEN sentiment_score < 0 THEN 1 ELSE 0 END) AS neg_n "
+                    "FROM tweets "
+                    "WHERE sentiment_score IS NOT NULL "
+                    "AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                    "GROUP BY bucket ORDER BY bucket ASC"
                 ),
-                {"m": str(total_minutes)},
+                {"bucket_width": f"{minutes} minutes",
+                 "m": str(total_minutes)},
             ).fetchall()
         else:
             seconds = minutes * 60
@@ -450,22 +483,50 @@ def per_symbol_buckets(minutes: int, hours: int) -> list[dict]:
     'Live' tab can show per-tag hourly/daily lines on one chart.
 
     Returns: list of {bucket, symbol, avg_sent, n}.
+
+    On Postgres, when the requested width matches a pre-aggregated
+    continuous aggregate (60min → tweets_1h, 1day → tweets_1d) we
+    read from the aggregate table instead of scanning `tweets` —
+    these tables are kept up to date by a 15-min/1-hour refresh
+    policy and are dramatically faster on a 90-day-retention
+    hypertable. Other widths (5 min, 15 min, etc.) still scan
+    `tweets` directly.
     """
+    minutes = _validate_bucket_minutes(minutes)
     engine = get_engine()
     total_minutes = hours * 60
     with engine.connect() as conn:
         if engine.dialect.name == "postgresql":
-            rows = conn.execute(
-                text(
-                    f"SELECT time_bucket('{minutes} minutes', ts) AS bucket, "
-                    f"symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
-                    f"FROM tweets "
-                    f"WHERE sentiment_score IS NOT NULL "
-                    f"AND ts > NOW() - (:m || ' minutes')::INTERVAL "
-                    f"GROUP BY bucket, symbol ORDER BY bucket ASC"
-                ),
-                {"m": str(total_minutes)},
-            ).fetchall()
+            # Fast-path: read from the pre-aggregated continuous
+            # aggregate when the requested bucket width is exactly 1h
+            # or 1d. The aggregates only carry avg_sentiment + counts
+            # (no pos/neg breakdown) which is fine for per-symbol
+            # line charts.
+            agg_table = _agg_table_for_minutes(minutes)
+            if agg_table is not None:
+                rows = conn.execute(
+                    text(
+                        f"SELECT bucket, symbol, avg_sentiment AS avg_sent, "
+                        f"tweet_count AS n "
+                        f"FROM {agg_table} "
+                        f"WHERE bucket > NOW() - (:m || ' minutes')::INTERVAL "
+                        f"ORDER BY bucket ASC"
+                    ),
+                    {"m": str(total_minutes)},
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    text(
+                        "SELECT time_bucket(:bucket_width, ts) AS bucket, "
+                        "symbol, AVG(sentiment_score) AS avg_sent, COUNT(*) AS n "
+                        "FROM tweets "
+                        "WHERE sentiment_score IS NOT NULL "
+                        "AND ts > NOW() - (:m || ' minutes')::INTERVAL "
+                        "GROUP BY bucket, symbol ORDER BY bucket ASC"
+                    ),
+                    {"bucket_width": f"{minutes} minutes",
+                     "m": str(total_minutes)},
+                ).fetchall()
         else:
             seconds = minutes * 60
             rows = conn.execute(
@@ -480,6 +541,23 @@ def per_symbol_buckets(minutes: int, hours: int) -> list[dict]:
                 {"m": f"-{total_minutes} minutes", "sec": seconds},
             ).fetchall()
     return [dict(r._mapping) for r in rows]
+
+
+def _agg_table_for_minutes(minutes: int) -> str | None:
+    """Map a bucket width in minutes to a TimescaleDB continuous
+    aggregate table that pre-computes that exact width. Returns None
+    when no pre-aggregate matches (callers should fall back to a
+    live `time_bucket` scan).
+
+    The aggregates are created in `src/store/aggregates.sql`:
+        tweets_1h  → 60-min buckets, refreshed every 15 min
+        tweets_1d  → 1-day buckets, refreshed every 1 hour
+    """
+    if minutes == 60:
+        return "tweets_1h"
+    if minutes == 60 * 24:
+        return "tweets_1d"
+    return None
 
 
 def daily_topic_aggregates(days: int, limit: int = 10) -> list[dict]:
@@ -539,15 +617,13 @@ def daily_topic_aggregates(days: int, limit: int = 10) -> list[dict]:
                 ),
                 {"d": f"-{days} days"},
             ).fetchall()
-    # Compute velocity in Python (cheaper than another SQL pass)
+    # Compute velocity in Python (cheaper than another SQL pass).
+    # `day` is an integer day-number, so (day, symbol) -> (day-1, symbol)
+    # is exactly "yesterday's bucket for the same topic" — no need to
+    # worry about month/year rollovers (epoch days are monotonic).
     by_day_symbol: dict[tuple[int, str], dict] = {
         (r._mapping["day"], r._mapping["symbol"]): dict(r._mapping) for r in rows
     }
-    today_keys = set()
-    for r in rows:
-        m = dict(r._mapping)
-        if m["day"] == max(b["day"] for b in by_day_symbol.values()):
-            today_keys.add((m["day"], m["symbol"]))
     for k, row in by_day_symbol.items():
         prev = by_day_symbol.get((k[0] - 1, k[1]))
         row["velocity"] = (row["tweet_count"] - prev["tweet_count"]) if prev else row["tweet_count"]

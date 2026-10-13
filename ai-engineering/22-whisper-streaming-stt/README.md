@@ -47,3 +47,53 @@ pip install -r requirements.txt
 make up
 python examples/stream_mic.py
 ```
+
+---
+
+## What this is NOT
+
+- **Not a real-time conversation AI.** This is
+  *transcription* — turning audio into text. The
+  conversational agent that takes the transcript and
+  acts on it lives elsewhere (see the agent builds
+  in [`../../agentic-ai/`](../../agentic-ai/)).
+- **Not a batch transcriber.** The streaming
+  architecture (200ms hop, VAD-driven finalize) is
+  optimized for *live* use. For 30-minute files you
+  want the batch shape — see the `faster-whisper`
+  batch mode that ships 2x faster at 2x lower WER
+  than streaming on clean audio.
+- **Not Whisper-API-on-OpenAI.** The model is
+  self-hosted (`faster-whisper` with CTranslate2
+  quantization). For the OpenAI Whisper API the
+  streaming UX is different (you have to handle
+  chunking yourself; the API is request-response,
+  not streaming).
+- **Not translation.** Whisper can translate, but
+  this build is STT-only. Adding translation doubles
+  the model size and the WER cost; only worth it
+  if the use case is multilingual.
+
+---
+
+## Related directories
+
+- [`../../agentic-ai/5-amazon-transcribe/`](../../agentic-ai/5-amazon-transcribe/) —
+  the AWS-managed cousin: Transcribe + Comprehend
+  PII + Polly redaction. Same shape, vendor lock-in.
+- [`../../agentic-ai/ai-agent/`](../../agentic-ai/ai-agent/) —
+  Synapse, a multi-agent system that *consumes* a
+  transcript (the Publisher agent renders the daily
+  brief from text).
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the "one model, one container, one endpoint"
+  pattern that this streaming service is a
+  specialized variant of.
+- [`../21-sdxl-image-service/`](../21-sdxl-image-service/) —
+  the GPU-pool + queue + batching patterns that
+  translate directly to the audio side.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

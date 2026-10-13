@@ -29,3 +29,7 @@ Modern LLMs add tricks on top of the basic Transformer: MoE for cheaper inferenc
 ## The Lead Lesson
 
 > **Lesson 1 — [Evolution of LLM Architecture](./01-evolution-of-llm-architecture.md)** — the 10,000-foot view. Worked example: build a tiny Mixture-of-Experts model from the dense baseline, measure the FLOPs and active-parameter savings, and visualize the routing decisions.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

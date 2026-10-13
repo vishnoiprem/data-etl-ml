@@ -136,3 +136,16 @@
 | 5. "How did you hand it off?" | "Engagement 5 + 10. The 5-question test for the customer, the 10-question test for the next FDE. 6 weeks of structured KT, 2 weeks of shadow operation, 2 weeks of independent operation with the FDE on standby. 3 next FDEs, 10/10 at 90 days." |
 
 **Memorize these 5.** They're the Q&A for 80% of project deep dives.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

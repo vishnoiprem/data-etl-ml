@@ -207,3 +207,16 @@ mentions.
 - [`../../phase-2-core-build/service/retrieval_v2.py`](../../../phase-2-core-build/service/retrieval_v2.py) — the hybrid retriever the drafter uses (not the dispatcher — the dispatcher uses the MCP server's `tracker.lookup` instead)
 - [`../03-distilled-slm/`](../03-distilled-slm/) — the project that fine-tunes a 1.5B model on Mei's drafts (could replace the MeiAgent's mock-LLM behavior in production)
 - [`../04-ai-data-analyst/`](../04-ai-data-analyst/) — the fresh-engagement project (different customer, different security model)
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

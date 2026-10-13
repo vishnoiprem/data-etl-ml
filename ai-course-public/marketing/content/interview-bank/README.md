@@ -255,3 +255,16 @@ Every company file in this bank follows the same editorial template, so the bank
 ---
 
 *End of index. 100 files below. ~50,000-80,000 words total.*
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

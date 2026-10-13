@@ -62,3 +62,7 @@ combining data from several sources into one logical dataset.
 Section 19 is **Data Sampling** — a small section that shows you how
 to pull statistically valid subsets out of huge tables for testing,
 dev, and ML training.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

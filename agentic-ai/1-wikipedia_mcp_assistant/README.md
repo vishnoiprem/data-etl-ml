@@ -120,3 +120,7 @@ User
 4. Ambiguous topics return suggestions instead of silently choosing a page.
 5. `sys.executable` ensures the client starts the server with the same Python
    virtual environment.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -62,3 +62,53 @@ Reproducible ML research: dataset versioning, training infra that actually scale
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not a replacement for W&B / MLflow.** This is
+  the *principle* (run_id = sha(config | data |
+  code)) that W&B / MLflow / Neptune implement with
+  vendor services. Use those in production; use
+  this to understand what they're doing.
+- **Not bit-exact reproducibility by default.** GPU
+  reductions are non-deterministic; even with
+  `torch.manual_seed(42)` the loss curve will
+  drift. The "three SHAs" pattern gives
+  *reproducibility from the same code*; it does
+  not give *numerical reproducibility across
+  hardware*. Decide up-front which you need.
+- **Not a notebook workflow.** The README is
+  honest: "config in code, not in notebooks."
+  A sweep spec in a YAML / Python file is
+  reviewable and version-controlled. The same
+  sweep in a notebook is a personal artifact,
+  not a research artifact.
+- **Not inference.** The pipeline is for training
+  + ablation. For inference serving patterns, see
+  the build at [`../18-paged-attention-serving/`](../18-paged-attention-serving/).
+
+---
+
+## Related directories
+
+- [`../33-mlflow-tracker/`](../33-mlflow-tracker/) —
+  the experiment-tracking layer that this build's
+  `RunRecord` lands in.
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework that scores each `RunConfig`
+  in the sweep; without eval, the sweep just
+  produces loss curves.
+- [`../29-fsdp-flash-train/`](../29-fsdp-flash-train/) —
+  the distributed-training patterns that the
+  frontier-scale runs need.
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the deployment + canary + rollback patterns
+  that consume the `RunRecord` to decide whether
+  to ship a model.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

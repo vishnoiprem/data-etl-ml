@@ -203,3 +203,7 @@ the article for re-rendering.
 | `code/app.py` | Flask HTTP service exposing the API, /metrics, /health. |
 | `tests/test_service.py` | Service-level tests (10 tests covering ingest, retrieval, auto-reply, follow-ups). |
 | `tests/test_app.py` | HTTP-level tests using Flask's test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

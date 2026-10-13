@@ -96,3 +96,7 @@ Same harness pattern from Module 11:
 - `examples/` — sample run traces
 
 See `01-the-agent-loop.md` for the full worked example walkthrough.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

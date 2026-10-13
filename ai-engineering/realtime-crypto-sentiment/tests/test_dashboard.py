@@ -6,8 +6,8 @@ These verify that every dashboard query function works on SQLite, not just
 on Postgres. The production dashboard uses TimescaleDB, but local dev /
 CI uses SQLite via `override_engine()`.
 
-After the crypto-removal refactor the dashboard has 4 tabs (no Prices
-tab) and 4 page functions (Overview, Sentiment, Paper PnL, Trending).
+After the crypto-removal + Tab-5 additions the dashboard has 5 tabs and
+5 page functions: Overview, Sentiment, Paper PnL, 🔥 Trending, 📡 Live.
 """
 
 from __future__ import annotations
@@ -177,6 +177,7 @@ def test_dashboard_import_does_not_crash(seeded_db):
     assert hasattr(app, "page_sentiment")
     assert hasattr(app, "page_paper_pnl")
     assert hasattr(app, "page_trending")
+    assert hasattr(app, "page_live")  # Tab 5 added in this iteration
     # The Prices tab is gone
     assert not hasattr(app, "page_prices_signals")
 
@@ -227,3 +228,27 @@ def test_page_trending_renders_end_to_end(seeded_db):
     on SQLite (no TimescaleDB-only syntax)."""
     app = _import_dashboard()
     app.page_trending()
+
+
+def test_page_live_renders_end_to_end(seeded_db):
+    """Tab 5 (Live) renders hourly + daily aggregates. The cached
+    `_global_buckets` / `_per_symbol_buckets_df` / `_daily_topics`
+    helpers are exercised by the page render — verify the whole call
+    path doesn't crash on SQLite."""
+    app = _import_dashboard()
+    app.page_live()
+
+
+def test_live_daily_topics_helper_returns_dataframe(seeded_db):
+    """`_daily_topics` is the Tab 5 'Top-10 trending topics' data
+    source. With only the seeded tweets it should return an empty
+    DataFrame (no day-1 data covers the last-7-day window) but with
+    the right columns."""
+    app = _import_dashboard()
+    df = app._daily_topics(days=7, limit=50)
+    assert isinstance(df, pd.DataFrame)
+    # Columns are populated even on empty result
+    expected = {"day", "symbol", "tweet_count", "unique_authors", "total_likes",
+                "total_retweets", "total_reach", "avg_sentiment", "pos_count",
+                "neg_count", "velocity"}
+    assert expected.issubset(set(df.columns))

@@ -30,3 +30,7 @@ the end of this section you'll be comfortable with: debugging.
 Section 17 is **State — manifest, run_results, the `state:new` selector, result-based selectors, dbt retry, and combining state+result.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

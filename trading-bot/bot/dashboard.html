@@ -229,6 +229,26 @@
     color: var(--muted);
   }
   .meta-row span strong { color: var(--text); }
+
+  /* === Alerts sidebar === */
+  .alert-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .alert-row .muted { color: var(--muted); }
+  .alert-row code {
+    background: var(--border);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
 </style>
 </head>
 <body>
@@ -253,6 +273,12 @@
       <h2>analysis · why buy · why wait · verdict</h2>
       <div class="analysis-grid" id="analysis-grid">
         <div class="empty">loading…</div>
+      </div>
+    </section>
+    <section>
+      <h2>active alerts <span style="font-weight:400;text-transform:none;letter-spacing:0">— managed via /alerts in Telegram</span></h2>
+      <div id="alerts-body">
+        <div class="empty">no alerts — add one with <code>/alerts add TICKER kind threshold note</code> in Telegram</div>
       </div>
     </section>
   </div>
@@ -317,6 +343,15 @@ const fmt = (x, dp = 2) => x == null ? "—" : Number(x).toLocaleString(
 const fmtMoney = x => x == null ? "—" : "$" + fmt(x);
 const sign = x => x >= 0 ? "+" : "";
 const cls = (x) => x > 0 ? "up" : x < 0 ? "down" : "neutral";
+// HTML-escape user-supplied strings (ticker, name, alert note) before
+// injecting into innerHTML. The server doesn't sanitize, and a malicious
+// note (e.g. "<img onerror=...>") would otherwise run on render.
+const esc = (s) => String(s ?? "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;")
+  .replace(/'/g, "&#39;");
 
 async function fetchJSON(url) {
   const r = await fetch(url);
@@ -368,27 +403,27 @@ function renderMarketHeader(snap) {
 function renderAnalysis(analysis) {
   const cards = analysis.tickers.map(t => {
     if (t.verdict === "NO_DATA") {
-      return `<div class="analysis-card"><div class="empty">${t.ticker}: no data</div></div>`;
+      return `<div class="analysis-card"><div class="empty">${esc(t.ticker)}: no data</div></div>`;
     }
     const v = t.verdict.toLowerCase();
     const chgClass = t.change_pct >= 0 ? "up" : "down";
     const bull = t.bull.length
-      ? t.bull.map(x => `<li class="bull">${x}</li>`).join("")
+      ? t.bull.map(x => `<li class="bull">${esc(x)}</li>`).join("")
       : `<li class="empty">no bull signals</li>`;
     const bear = t.bear.length
-      ? t.bear.map(x => `<li class="bear">${x}</li>`).join("")
+      ? t.bear.map(x => `<li class="bear">${esc(x)}</li>`).join("")
       : `<li class="empty">no bear signals — clean setup</li>`;
     const L = t.levels;
     return `<div class="analysis-card">
       <div class="header">
         <div class="ticker-info">
-          <div class="tk">${t.ticker}</div>
-          <div class="nm">${t.name || ""}</div>
+          <div class="tk">${esc(t.ticker)}</div>
+          <div class="nm">${esc(t.name || "")}</div>
           <div class="px">${fmtMoney(t.price)}</div>
           <div class="ch ${chgClass}">${sign(t.change_pct)}${fmt(t.change_pct)}% today</div>
         </div>
         <div class="verdict">
-          <div class="vbadge badge ${v}">${t.verdict}</div>
+          <div class="vbadge badge ${v}">${esc(t.verdict)}</div>
           <div class="sc">bull ${t.score[0]} · bear ${t.score[1]}</div>
         </div>
       </div>
@@ -439,7 +474,7 @@ function renderAnalysis(analysis) {
 function renderWatchlist(snap) {
   const rows = snap.watchlist.map(t => {
     if (t.error) {
-      return `<tr><td colspan="9" class="empty">${t.ticker}: ${t.error}</td></tr>`;
+      return `<tr><td colspan="9" class="empty">${esc(t.ticker)}: ${esc(t.error)}</td></tr>`;
     }
     const rsi = t.rsi14 != null ? fmt(t.rsi14, 0) : "—";
     const rsiClass = t.rsi14 > 70 ? "up" : t.rsi14 < 30 ? "down" : "neutral";
@@ -449,8 +484,8 @@ function renderWatchlist(snap) {
     const bbColor = bbPos === "upper" ? "up" : bbPos === "lower" ? "down" : "neutral";
     return `<tr>
       <td>
-        <div class="ticker">${t.ticker}</div>
-        <div class="name">${t.name || ""}</div>
+        <div class="ticker">${esc(t.ticker)}</div>
+        <div class="name">${esc(t.name || "")}</div>
       </td>
       <td><b>${fmtMoney(t.price)}</b></td>
       <td class="${cls(t.change)}">
@@ -483,7 +518,7 @@ function renderPositions(snap) {
   const rows = p.positions.map(x => {
     const pnlClass = x.pnl >= 0 ? "up" : "down";
     return `<tr>
-      <td class="ticker">${x.ticker}</td>
+      <td class="ticker">${esc(x.ticker)}</td>
       <td>${x.shares}</td>
       <td>${fmtMoney(x.avg_cost)}</td>
       <td>${fmtMoney(x.current_price)}</td>
@@ -512,6 +547,37 @@ function renderPositions(snap) {
       </tfoot>
     </table>
   `;
+}
+
+function renderAlerts(alertsData) {
+  const rows = alertsData.alerts || [];
+  if (rows.length === 0) {
+    $("alerts-body").innerHTML =
+      '<div class="empty">no active alerts — add one with <code>/alerts add TICKER kind threshold note</code> in Telegram</div>';
+    return;
+  }
+  const html = rows.map(a => {
+    let thr;
+    if (a.kind === "price_above" || a.kind === "price_below") {
+      thr = `$${fmt(a.threshold)}`;
+    } else if (a.kind === "pct_change") {
+      thr = `${fmt(a.threshold, 1)}%`;
+    } else if (a.kind === "ma_cross") {
+      thr = `MA${fmt(a.threshold, 0)}`;
+    } else {
+      thr = fmt(a.threshold);
+    }
+    const lastPx = a.last_price != null ? `now $${fmt(a.last_price)}` : "";
+    return `<div class="alert-row">
+      <span class="badge buy">#${a.id}</span>
+      <b>${esc(a.ticker)}</b>
+      <span class="muted">${esc(a.kind)}</span>
+      <b>${thr}</b>
+      ${a.note ? `<span class="muted">— ${esc(a.note)}</span>` : ""}
+      <span class="muted" style="margin-left:auto">${lastPx}</span>
+    </div>`;
+  }).join("");
+  $("alerts-body").innerHTML = html;
 }
 
 function renderMarket(snap) {
@@ -550,7 +616,7 @@ function renderMarket(snap) {
   $("sector-grid").innerHTML = items.map(t => {
     const c = cls(t.change);
     return `<div class="stat">
-      <div class="label">${t.ticker}</div>
+      <div class="label">${esc(t.ticker)}</div>
       <div class="value">${fmtMoney(t.price)}</div>
       <div class="sub ${c}">${sign(t.change)}${fmt(t.change_pct)}%</div>
     </div>`;
@@ -560,15 +626,17 @@ function renderMarket(snap) {
 // ---- main loop --------------------------------------------------------------
 async function refresh() {
   try {
-    const [snap, analysis] = await Promise.all([
+    const [snap, analysis, alerts] = await Promise.all([
       fetchJSON("/api/snapshot"),
       fetchJSON("/api/analysis"),
+      fetchJSON("/api/alerts").catch(() => ({ alerts: [] })),
     ]);
     renderMarketHeader(snap);
     renderAnalysis(analysis);
     renderWatchlist(snap);
     renderPositions(snap);
     renderMarket(snap);
+    renderAlerts(alerts);
     $("last-update").textContent = analysis.generated_at;
   } catch (e) {
     $("clock").textContent = "error: " + e.message;

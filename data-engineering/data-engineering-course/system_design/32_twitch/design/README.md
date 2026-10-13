@@ -392,3 +392,7 @@ Cap.
   Redis Streams or NATS would make it horizontally scalable.
 - Viewer heartbeats and the in-memory `viewers:<stream_id>` map
   are the source of truth for "live" state.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

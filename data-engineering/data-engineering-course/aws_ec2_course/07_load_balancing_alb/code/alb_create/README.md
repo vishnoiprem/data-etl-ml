@@ -104,3 +104,7 @@ The lecture L35 walks through two failure modes:
 Both paths are useful. The moto path is what the unit tests
 implicitly exercise; the AWS path is the canonical
 "unhealthy-target" demo.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

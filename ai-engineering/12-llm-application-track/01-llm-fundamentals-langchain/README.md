@@ -53,3 +53,7 @@ The lead lesson's worked example builds a **support-ticket triage chain** that:
 - Costs ~$0.0008 per ticket at scale
 
 That single chain touches every concept in the course. Read it first; the other lessons fill in the why.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

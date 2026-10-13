@@ -62,3 +62,16 @@ The lecture is short on purpose. The AI-agent round is a 60-second pitch + a 30-
 `L10-1-ai-agents-for-trading-workflows.md` — what an AI agent is in 2026 + the 5 trading workflows + 5 guardrails + 30-day build plan + 12-workflow extension. The 50-line TradingAgent class. The 8-section template (FDE framing → In 60 seconds → 3 things → Concept → Pattern → Code → Production → Cross-references → 3 questions → Read next).
 
 For the Substack-friendly version of this lecture, see `marketing/content/articles/2026-10-ai-agents-for-trading-workflows.md`. The blog post is the same content in operator voice (~3,000 words); the lecture is the same content in FDE-study voice (~3,900 words).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

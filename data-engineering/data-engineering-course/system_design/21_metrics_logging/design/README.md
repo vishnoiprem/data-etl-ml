@@ -120,3 +120,7 @@ kv["logs:index"] -> [seq, ...]    # linear list of log keys for full scan
 - `code/app.py` — Flask app exposing the API + `/metrics` + `/health`.
 - `tests/test_service.py` — service-layer unit tests.
 - `tests/test_app.py` — HTTP-level tests.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

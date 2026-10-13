@@ -30,3 +30,7 @@ the end of this section you'll be comfortable with: object dependencies, staging
 Section 04 is **Practice quiz — materializations — a checkpoint to confirm you've internalized table/view/incremental/ephemeral.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

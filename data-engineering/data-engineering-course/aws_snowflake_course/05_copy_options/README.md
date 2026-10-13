@@ -61,3 +61,7 @@ flat CSV/JSON to **semi-structured JSON with nested arrays
 and objects**, and the **`LATERAL FLATTEN` pattern** for
 unnesting. By L49 you'll be able to load and parse any
 JSON shape into a relational model.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

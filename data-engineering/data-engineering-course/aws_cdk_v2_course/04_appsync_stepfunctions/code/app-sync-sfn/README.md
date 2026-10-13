@@ -54,3 +54,7 @@ npx cdk destroy
   `LambdaInvoke`.
 - For EventBridge wiring (L19), see the lecture script — it adds a
   `Rule` that targets the state machine on a schedule.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

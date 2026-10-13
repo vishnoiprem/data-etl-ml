@@ -226,3 +226,7 @@ pre-signed S3 URL.
 | `code/app.py` | Flask HTTP service with raw-binary PUT for chunks. |
 | `tests/test_service.py` | Service-level tests (validation, resume, complete, abort, integrity). |
 | `tests/test_app.py` | HTTP-level tests covering the full upload flow + status + metrics. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

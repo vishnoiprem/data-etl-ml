@@ -63,3 +63,7 @@ By the end of Module 5 you can:
 ```
 
 The DE work is the entire horizontal axis: ingest, parse, chunk, embed, upsert, refresh, ACL, eval. The LLM is one box in the middle.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  
