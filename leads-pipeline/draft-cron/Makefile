@@ -43,6 +43,7 @@ TEST_MODULES := \
     test_resume_tailor \
     test_better_email \
     test_bounce_deny_persistence \
+    test_backfill_cover_letters \
     test_mark_reply
 
 LINT_FILES := \

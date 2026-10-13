@@ -118,6 +118,14 @@ for i in $(seq 1 "$LOOP_MAX"); do
         echo "  (backfill_emails exited with non-zero, continuing)" | tee -a "$LOG"
     fi
 
+    # 3c2. Backfill cover letters — re-render [Avilx Pod Pitch] / [Personal Application]
+    # subjects for any lead whose cover_letter_subject is NULL/empty.
+    # Idempotent and cheap; a safety net for any insert path that forgets
+    # to render at insert time.
+    if ! "$PY" "$HERE/bin/backfill_cover_letters.py" --limit 200 >> "$LOG" 2>&1; then
+        echo "  (backfill_cover_letters exited with non-zero, continuing)" | tee -a "$LOG"
+    fi
+
     # 3d. Auto-ingest scout reports — queue any new /tmp/lead-scout-*.json
     if ! "$PY" "$HERE/bin/ingest_scout_reports.py" >> "$LOG" 2>&1; then
         echo "  (ingest_scout_reports exited with non-zero, continuing)" | tee -a "$LOG"
