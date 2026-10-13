@@ -2,6 +2,15 @@
 # auto_loop.sh — runs autopilot up to N times (default 100), re-finds leads
 # in between, never asks for confirmation. Auto mode = on.
 #
+# ⚠️  POST-THROTTLE RECOVERY (Oct 14, 2026)
+# Prem's Gmail account was put on hold by Google for 27.3% bounce rate
+# in 24h. The recovery config below enforces conservative caps until
+# the account is fully restored. Override only after 7+ days of clean
+# track record.
+#   RECOVERY_DAILY_LIMIT=3    (was DAILY_LIMIT=10)
+#   RECOVERY_HOURLY_LIMIT=2
+#   AVILX_FRESHNESS_HOURS=24  (only touch last-24h leads)
+#
 # Usage:
 #   ./auto_loop.sh                 # 100 iterations
 #   ./auto_loop.sh 50              # 50 iterations
@@ -22,6 +31,13 @@ fi
 
 # Allow PY override from the environment.
 PY="${AVILX_PY_OVERRIDE:-$PY}"
+
+# Post-throttle recovery: low caps until Gmail lifts the hold.
+# Operators can override by setting these env vars before launching.
+export RECOVERY_DAILY_LIMIT="${RECOVERY_DAILY_LIMIT:-3}"
+export RECOVERY_HOURLY_LIMIT="${RECOVERY_HOURLY_LIMIT:-2}"
+export AVILX_FRESHNESS_HOURS="${AVILX_FRESHNESS_HOURS:-24}"
+export AVILX_TAIL_LOG_HOURS="${AVILX_TAIL_LOG_HOURS:-24}"
 
 LOOP_MAX="${1:-${LOOP_MAX:-100}}"
 LOOP_SLEEP="${LOOP_SLEEP:-90}"

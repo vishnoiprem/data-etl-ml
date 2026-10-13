@@ -44,6 +44,7 @@ TEST_MODULES := \
     test_better_email \
     test_bounce_deny_persistence \
     test_backfill_cover_letters \
+    test_pre_send_guards \
     test_mark_reply
 
 LINT_FILES := \
