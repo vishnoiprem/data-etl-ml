@@ -32,6 +32,8 @@ repos:
         exclude: |
           (?x)^(
             leads-pipeline/draft-cron/.*\.html
+            realtime-stock-pipeline/trade-finder/logs/.*\.stdout
+            realtime-stock-pipeline/trade-finder/reports/email_.*\.txt
           )$
       - id: mixed-line-ending
         args: ["--fix=lf"]
