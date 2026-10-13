@@ -552,6 +552,21 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 - **Writing / articles** → see [Writing & Interview Prep](#-writing--interview-prep) and `medium/`.
 - **Resume assets** → `Resume/`.
 
+### Top-level entry points (read me first if you land in a subdirectory)
+
+| Directory | What's inside | Read |
+|-----------|---------------|------|
+| `data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](data-engineering/README.md) |
+| `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](ai-engineering/README.md) |
+| `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](agentic-ai/README.md) |
+| `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](ml/README.md) |
+| `realtime-stock-pipeline/` | Kafka + Flink + Postgres + Grafana reference build | [realtime-stock-pipeline/README.md](realtime-stock-pipeline/README.md) |
+| `leads-pipeline/` | Cold-email + AI resume tailoring pipeline (the side hustle) | [leads-pipeline/README.md](leads-pipeline/README.md) |
+| `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
+| `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
+| `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
+| `postgress_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgress_cdc_kafka/README.md](postgress_cdc_kafka/README.md) |
+
 ---
 
 ## Repository Layout (Recommended)
