@@ -59,38 +59,60 @@ a `start_*_job` + `get_*_job` API.
 
 ---
 
-## ⚠️ Security warning — read this first
+## ⚠️ Security — rotation event (2026-10-13)
 
-`app.py` and `Amazon_Polly.py` contain **hardcoded AWS
-credentials** (`aws_access_key_id = "AKIASEXCXLFDMUEP3TJI"`
-and the matching secret access key). These are not
-placeholders; they are the kind of value that gets pushed
-to GitHub by accident and then revoked by AWS within
-hours.
+**This directory used to contain hardcoded AWS credentials
+(`AKIASEXCXLFDMUEP3TJI` and the matching 40-char secret) in
+`app.py`, `Amazon_Polly.py`, and the React widget
+`AudioRecorder.jsx`. Those values are no longer in source.**
 
-If you forked this repo from the public `vishnoiprem/data-etl-ml`
-repo, **assume these keys are already compromised** and:
+What changed in this commit:
 
-1. **Revoke the keys immediately** in the AWS IAM console
-   (IAM → Users → Security credentials → Delete).
+1. **`app.py` and `Amazon_Polly.py`** now read credentials from
+   `os.environ["AWS_ACCESS_KEY_ID"]` and
+   `os.environ["AWS_SECRET_ACCESS_KEY"]`. If the env vars are
+   unset, the script raises a `RuntimeError` with a clear
+   message rather than silently using a hardcoded value.
+2. **`AudioRecorder.jsx`** (browser-side code) no longer
+   contains any AWS credential. It now uses a presigned-URL
+   handoff: the browser calls a backend endpoint
+   (`/api/presigned-upload`) which mints a 5–15 min S3 URL
+   using the backend's IAM role. The browser uses the URL,
+   no credentials in JS. (The backend endpoint is out of
+   scope for this educational widget; until it ships, the
+   widget is read-only.)
+3. **`.env.example`** documents the env vars the scripts need.
+   The real `.env` is gitignored.
+4. **`tests/test_no_hardcoded_aws_keys.py`** is a regression
+   test that scans the 3 source files for the `AKIA[0-9A-Z]{16}`
+   pattern and the 40-char base64 secret pattern. If anyone
+   re-introduces a hardcoded key, this test fails on the next
+   CI run. It also asserts that `app.py` and `Amazon_Polly.py`
+   raise a clear `RuntimeError` if the env vars are missing.
+
+**If you forked this repo from the public
+`vishnoiprem/data-etl-ml` repo, assume the original
+hardcoded keys (the ones that used to be in `app.py`)
+are compromised and:**
+
+1. **Revoke the old keys in the AWS IAM console**
+   (IAM → Users → Security credentials → Delete the access key
+   that matches `AKIA...REDACTED`).
 2. **Audit CloudTrail** for the access key's last 90 days of
-   activity. Look for `us-east-1` Transcribe / Polly /
-   S3 calls you don't recognize.
-3. **Replace with a real auth path.** The right pattern is
-   one of:
-   - **Lambda execution role** (no keys at all; the role's
-     IAM policy grants the permissions).
-   - **IAM role assumed via `sts:AssumeRole`** from an EC2
-     instance profile or an ECS task role.
-   - **AWS Secrets Manager / SSM Parameter Store** if you
-     really need long-lived keys (and you almost never do
-     for this use case).
-4. **Add a pre-commit hook** to block future AWS keys from
-   being committed. The [`detect-secrets`](https://github.com/Yelp/detect-secrets)
-   tool catches the `AKIA[0-9A-Z]{16}` pattern.
+   activity. Look for `us-east-1` Transcribe / Polly / S3
+   calls you don't recognize.
+3. **Generate new keys** for a fresh IAM user with
+   `AmazonTranscribeFullAccess` + `AmazonPollyFullAccess` (or
+   a tighter least-privilege policy). Put the new values in
+   your local `.env` file (copy `.env.example`).
 
-These keys are kept in the source as-is for the historical
-record of the project. **Do not run the code as-is.**
+**Going forward:** add a pre-commit hook to block future AWS
+keys from being committed. The
+[`detect-secrets`](https://github.com/Yelp/detect-secrets) tool
+catches the `AKIA[0-9A-Z]{16}` pattern and integrates with
+pre-commit. The regression test in `tests/` is a belt-and-
+suspenders backup for the case where the pre-commit hook is
+skipped.
 
 ---
 
@@ -98,7 +120,13 @@ record of the project. **Do not run the code as-is.**
 
 ```bash
 # 1. Set up a real auth path
-aws configure  # or use an IAM role
+#    a) Create a new IAM user + access key (see Security section above)
+#    b) Copy .env.example to .env and fill in the new key + secret
+cp .env.example .env
+#    c) Edit .env with the new values (do NOT commit .env)
+$EDITOR .env
+#    d) Source .env into your shell
+set -a; source .env; set +a
 
 # 2. Create the S3 bucket
 aws s3 mb s3://transcription-bucket-prem --region us-east-1
@@ -113,6 +141,19 @@ sam local invoke TranscribeFunction --event events/event.json
 # 5. Read the transcription result
 aws transcribe list-transcription-jobs --status Completed
 ```
+
+If you run `python3 app.py` without the env vars set, you'll
+now see:
+
+```
+RuntimeError: AWS_ACCESS_KEY_ID is not set. The previous
+version of this file hardcoded an AWS access key in source —
+that key has been rotated and the new value must be supplied
+via environment. Set it in your shell or in a .env file (see
+.env.example).
+```
+
+That's the intended failure mode. Do not silence it.
 
 The reference doesn't include `template.yaml` or `events/`
 because the project was extracted from a different repo
