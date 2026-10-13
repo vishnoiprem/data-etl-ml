@@ -59,6 +59,49 @@ Apache-2.0-licensed open-weights models, self-hosted, with the two features that
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not a vLLM replacement.** vLLM ships prefix-cache
+  + continuous batching + PagedAttention out of the
+  box. This directory is the *principles* — the
+  prefix-cache + budget-guard pattern, stripped down
+  to ~50 lines for clarity. Use vLLM in production;
+  build with this to understand what's happening.
+- **Not a closed-weights model.** This is the
+  self-hosting pattern (Apache-2.0 weights, Mistral /
+  Llama / Qwen). For closed-weights APIs
+  (Claude / GPT-4 / Gemini), the prefix-cache and
+  budget-guard are the provider's responsibility.
+- **Not a training platform.** Inference only.
+  Training / fine-tuning lives in
+  [`../25-deepseek-moe-train/`](../25-deepseek-moe-train/)
+  and [`../28-rlhf-dpo-train/`](../28-rlhf-dpo-train/).
+- **Not a multi-tenant platform out of the box.**
+  The token-budget guard is *per-request*, not
+  *per-tenant*. For per-team quotas and priorities,
+  see [`../38-multi-tenant-inference/`](../38-multi-tenant-inference/).
+
+---
+
+## Related directories
+
+- [`../18-paged-attention-serving/`](../18-paged-attention-serving/) —
+  the KV-cache paging pattern that the prefix-cache
+  builds on top of.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the inference service layer that the
+  prefix-cache + budget-guard plug into.
+- [`../38-multi-tenant-inference/`](../38-multi-tenant-inference/) —
+  the per-tenant cost / quota layer that builds on
+  top of the per-request budget guard.
+- [`../24-vertex-style-platform/`](../24-vertex-style-platform/) —
+  the multi-backend gateway that can route between
+  this self-hosted model and a closed-weights API
+  with a fallback chain.
+
 ---
 
 **Last updated:** 2026-10-12  

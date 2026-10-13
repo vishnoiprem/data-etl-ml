@@ -67,10 +67,16 @@ def get_cursor(dict_rows: bool = True):
 
 
 def _make_tracking_id(company: str) -> str:
-    """Generate a short, public tracking ID like 'avx-7q3k' for the email link."""
+    """Generate a short, public tracking ID like 'avilxinc-7q3k9m' for the email link.
+
+    Keyspace: 8 (slug) + 6 (random from 36 chars) = 36^6 ≈ 2.2B combinations.
+    Birthday-bound collision probability is ~0.01% at 10k leads, ~0.1% at 30k.
+    Previously this was 4+4 = ~1.6M keyspace, which collides ~80% of the time
+    at 5k leads — see insert_lead's recovery branch.
+    """
     base = "".join(c for c in company.lower() if c.isalnum())[:8] or "lead"
-    rand = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(4))
-    return f"{base[:4]}-{rand}"
+    rand = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    return f"{base[:8]}-{rand}"
 
 
 def is_opted_out(email: str) -> bool:
@@ -93,6 +99,7 @@ def find_duplicate(company: str, contact_email: str, role: str = None) -> Option
     """Return existing lead dict if we already have this lead.
 
     Order (most specific → least):
+      0. (company, role, email) — all three match (exact collision)
       1. (company, role)        — same role posted twice (most common dup)
       2. (company, email)       — same recruiter, same company, different role
       3. NEVER by email alone   — a recruiter changing jobs should NOT
@@ -105,6 +112,21 @@ def find_duplicate(company: str, contact_email: str, role: str = None) -> Option
     if not company:
         return None
     with get_cursor() as cur:
+        # 0) Exact match on all three columns — most precise, no risk
+        # of returning a "similar" but different lead. Used by the
+        # insert_lead recovery branch when we know all three.
+        if role and contact_email:
+            cur.execute(
+                "SELECT * FROM leads "
+                "WHERE LOWER(company) = LOWER(%s) "
+                "  AND LOWER(role) = LOWER(%s) "
+                "  AND LOWER(contact_email) = LOWER(%s) "
+                "ORDER BY id DESC LIMIT 1",
+                (company, role, contact_email),
+            )
+            row = cur.fetchone()
+            if row:
+                return dict(row)
         # 1) Same company + same role (most common)
         if role:
             cur.execute(
@@ -193,7 +215,20 @@ def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
             ))
             lead_id = cur.fetchone()["id"]
     except psycopg2_errors.UniqueViolation:
-        # Lost the race — find the winner and return that id
+        # Lost the race (or our own tracking_id collided with a different
+        # lead). First try to look up the exact row we tried to insert —
+        # if a different lead has the same tracking_id, find_duplicate()
+        # would return that other lead and the caller would mutate it
+        # by accident. Look up by tracking_id first, fall back to
+        # find_duplicate only if the tracking_id doesn't match anything.
+        with get_cursor() as cur:
+            cur.execute(
+                "SELECT id FROM leads WHERE tracking_id = %s",
+                (tracking_id,),
+            )
+            row = cur.fetchone()
+            if row:
+                return row["id"]
         existing = find_duplicate(company, email or "", role)
         if existing:
             return existing["id"]

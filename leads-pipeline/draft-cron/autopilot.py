@@ -1102,14 +1102,29 @@ def scrape_all():
     if use_parallel:
         with ThreadPoolExecutor(max_workers=len(SCRAPERS)) as pool:
             futures = {pool.submit(fn): name for name, fn in SCRAPERS}
-            for fut in as_completed(futures, timeout=timeout + 30):
-                name = futures[fut]
-                try:
-                    found = fut.result(timeout=timeout)
-                    print(f"  scrape.{name}: {len(found)} candidates")
-                    all_leads.extend(found)
-                except Exception as e:
-                    print(f"  scrape.{name} error: {type(e).__name__}: {str(e)[:80]}")
+            # Track unfinished futures so we can cancel them if the
+            # overall timeout fires. Without this, a stuck Playwright
+            # Chromium browser (used by scrape_x_com) outlives the
+            # Python process and becomes an orphan.
+            unfinished = set(futures)
+            try:
+                for fut in as_completed(futures, timeout=timeout + 30):
+                    unfinished.discard(fut)
+                    name = futures[fut]
+                    try:
+                        found = fut.result(timeout=timeout)
+                        print(f"  scrape.{name}: {len(found)} candidates")
+                        all_leads.extend(found)
+                    except Exception as e:
+                        print(f"  scrape.{name} error: {type(e).__name__}: {str(e)[:80]}")
+            except (TimeoutError, Exception) as e:
+                if str(e) == "" or "TimeoutError" in type(e).__name__:
+                    print(f"  scrape: overall timeout — cancelling "
+                          f"{len(unfinished)} unfinished scraper(s)")
+                else:
+                    print(f"  scrape: loop error: {type(e).__name__}: {str(e)[:80]}")
+            for fut in unfinished:
+                fut.cancel()
     else:
         for name, fn in SCRAPERS:
             try:
@@ -1397,11 +1412,19 @@ def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
     # This is the cheapest way to drop the bounce rate — SMTP RCPT TO
     # validation won't help (Gmail accepts anything) and full SMTP
     # probe-per-lead adds 1-2s per send.
+    #
+    # Match by REGISTERED domain (last 2 labels), not full domain —
+    # otherwise jobs@mail.workable.com would slip past a denylist
+    # entry for "workable.com". The find_more_leads scraper uses the
+    # same extraction (see _bounce_denied_domain there).
+    def _reg_domain(addr: str) -> str:
+        dom = addr.split("@", 1)[-1].lower()
+        return ".".join(dom.split(".")[-2:]) if "." in dom else dom
     try:
         from state.bounce_deny_store import BOUNCE_DENY
         before = len(pending)
         pending = [l for l in pending
-                   if l["contact_email"].split("@", 1)[-1].lower() not in BOUNCE_DENY]
+                   if _reg_domain(l["contact_email"]) not in BOUNCE_DENY]
         skipped_bounce = before - len(pending)
         if skipped_bounce:
             print(f"  [bounce-deny] skipped {skipped_bounce} leads on denylisted domains")
@@ -1468,15 +1491,30 @@ def _pick_resume(lead) -> Optional[Path]:
         print(f"    ⚠️  resume_tailor failed for lead {lead.get('id')}: {e}",
               file=sys.stderr)
 
-    # 2) Lead's stored resume_file
+    # 2) Lead's stored resume_file. Defense-in-depth: refuse any
+    # path that resolves outside RESUME_DIR. resume_file comes from
+    # the leads table; today only trusted writers set it, but a
+    # future migration / backfill / compromised credentials could
+    # set it to /etc/passwd and exfiltrate via email attachment.
     rf = lead.get("resume_file")
     if rf:
-        p = RESUME_DIR / rf
-        if p.exists():
-            return p
-        # Sometimes resume_file is an absolute path
-        if Path(rf).exists():
-            return Path(rf)
+        try:
+            resume_root = RESUME_DIR.resolve()
+            # First try RESUME_DIR / rf (the common case)
+            p = (RESUME_DIR / rf).resolve()
+            if p.is_relative_to(resume_root) and p.exists():
+                return p
+            # If rf is an absolute path inside RESUME_DIR, accept it
+            p_abs = Path(rf).resolve()
+            if p_abs.is_relative_to(resume_root) and p_abs.exists():
+                return p_abs
+            # Path is outside RESUME_DIR — refuse silently rather
+            # than crash, so a single bad row doesn't break the loop.
+            import sys as _sys
+            print(f"    ⚠️  resume_file outside RESUME_DIR, skipping: {rf}",
+                  file=_sys.stderr)
+        except (OSError, ValueError):
+            pass
 
     # 3) Default fallback
     for name in ("Prem_Resume_2026.pdf", "Pv_Cv_Data_Ai_2026.pdf",
