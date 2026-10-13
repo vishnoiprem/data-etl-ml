@@ -11,7 +11,7 @@
 
 ## TL;DR
 
-Across 3 commits (`e48cd572`, `cd89ac6a`, and the critical #9 follow-up), **12 real issues were fixed**. The code is generally well-structured (parameterized SQL, advisory locks, atomic file writes, env-driven config). **4 issues remain deferred** because they need product decisions or are architectural changes:
+Across 5 commits (`e48cd572`, `cd89ac6a`, `640c260d`, `0d0c9c34`, plus the earlier gitignore), **12+ real issues were fixed and the test suite now passes 24/24** (it was 7/24 failing at the start of this session). The code is generally well-structured (parameterized SQL, advisory locks, atomic file writes, env-driven config). **4 issues remain deferred** because they need product decisions or are architectural changes:
 - #10: `BOUNCE_DENY` reload behavior
 - #11: scraper size cap / allowlist
 - #15: connection pooling
