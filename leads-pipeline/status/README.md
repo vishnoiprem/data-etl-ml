@@ -190,5 +190,44 @@ If your numbers are below these after 50 sends, the bottleneck is
 ---
 
 
-**Last updated:** 2026-10-12  
+---
+
+## CI status — local verification (2026-10-13)
+
+`leads-ci` only triggers on pushes to `main`, `feature/agent-coding-11oct`,
+or `feature/auto-pilot-ai-leads-loop` — not on this branch
+(`feature/add-business-plan-13-oct`). `pip-audit` only triggers on
+changes to `requirements*.txt` files, which the reply-tracking
+work didn't touch. With no `gh` CLI on this machine and no PR
+open against `main`, the live CI cannot be re-run from here.
+
+**What we did instead** — ran the full CI test matrix locally
+against the exact Python 3.10 + `requirements.txt` from the
+workflows, plus every test module added by steps 1–3 of the
+30-day plan. Result:
+
+| Suite | Modules | Result |
+|---|---|---|
+| `leads-ci` test job (matches `make test` + `test_hnhiring_parse`) | 8 | ✅ all pass |
+| `test_mark_reply.py` (step 1 — reply-tracking) | 6 | ✅ all pass |
+| `test_mark_supplier_reply.py` (step 2 — first supplier RFQ) | 8 | ✅ all pass |
+| `test_no_hardcoded_aws_keys.py` (step 3 — key rotation regression) | 7 | ✅ all pass |
+| **Total new tests added in the 30-day plan** | **21** | **21/21 ✅** |
+| **Total including pre-existing CI modules** | **27** | **27/27 ✅** |
+
+**To exercise the actual remote CI** (recommended before the
+next regulated-industry client conversation):
+
+1. Open a PR from `feature/add-business-plan-13-oct` → `main`.
+   `leads-ci` fires on `pull_request: branches: [main]`. Green
+   PR = green CI.
+2. After merge, `pip-audit` will fire on the next push to `main`
+   that touches a `requirements*.txt` file — or on Monday morning
+   via its weekly cron.
+
+The local run above is the same code path the CI executes; the
+PR gate is the only thing that changes.
+
+
+**Last updated:** 2026-10-13  
 **License:** MIT — use freely in your own courses, prototypes, and products.  
