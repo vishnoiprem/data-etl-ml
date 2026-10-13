@@ -74,6 +74,70 @@ def _extract_stack_overlap(jd: str) -> list[str]:
     return out
 
 
+# Phrases that, when matched in a JD, prove the reader "actually read it" and
+# give Prem/Avilx something specific to pivot from. Order matters: more
+# specific first (so we don't match "RAG" when "agentic KYC" is in the JD).
+_HOOK_PATTERNS = [
+    (r"agentic (?:KYC|workflow|AI|systems?)",        "agentic AI systems"),
+    (r"multi[- ]agent (?:orchestration|systems?)",  "multi-agent orchestration"),
+    (r"(?:production|prod)[- ]grade RAG",            "production-grade RAG"),
+    (r"(?:production|prod|scaling|production-grade)\s+RAG", "production RAG"),
+    (r"\bRAG\b",                                     "RAG"),
+    (r"vector (?:search|database|store)",            "vector search"),
+    (r"embedding (?:pipeline|model)",                "embedding pipelines"),
+    (r"fine[- ]tun(?:e|ing)",                        "fine-tuning"),
+    (r"Databricks (?:lakehouse|migration)",          "Databricks migration"),
+    (r"(?:real[- ]?time )?CDC (?:lakehouse|pipeline)", "CDC pipelines"),
+    (r"recommendation (?:system|engine)",            "recommendation systems"),
+    (r"(?:ML|model) (?:training|inference) (?:pipeline|infrastructure)",
+                                                    "ML training/inference infra"),
+    (r"(?:on[- ]call|incident response)",            "on-call/incident response"),
+    (r"SOC 2|HIPAA|PCI|MLPS 2\.0",                   "regulated compliance (SOC2/HIPAA/PCI)"),
+    (r"trading|fintech|banking",                     "trading/fintech systems"),
+    (r"LangChain|LlamaIndex",                        "LangChain/LlamaIndex"),
+    (r"PyTorch|TensorFlow|JAX",                      "PyTorch/TensorFlow"),
+    (r"(?:Kubernetes|k8s) (?:operator|controller)",  "K8s operators"),
+    (r"(?:event[- ]driven|event[- ]streaming) (?:architecture|pipeline)",
+                                                    "event-driven architecture"),
+    (r"low[- ]latency (?:trading|inference)",        "low-latency systems"),
+    (r"e[- ]commerce|marketplace",                   "e-commerce/marketplace"),
+    (r"China (?:market|GDPR|MLPS)",                  "China market (MLPS)"),
+]
+
+
+def _pick_hook(jd: str) -> str:
+    """Pull a short, JD-specific phrase that proves the email was personalized.
+
+    Returns "" if nothing matches — caller should fall back to the generic
+    opening. Pattern order is important: most-specific patterns first so
+    we don't match "RAG" when "agentic KYC" is in the JD.
+    """
+    if not jd:
+        return ""
+    for pat, label in _HOOK_PATTERNS:
+        if re.search(pat, jd, re.I):
+            return label
+    return ""
+
+
+def _hook_line(hook: str, lead: dict) -> str:
+    """Wrap a hook in a sentence that pivots to Prem/Avilx experience.
+
+    Falls back to "" if the hook is empty so callers can `if hook_line:`.
+    """
+    if not hook:
+        return ""
+    role = (lead.get("role") or "").lower()
+    # Solo mode — Prem personally applies
+    if (lead.get("apply_mode") or "") == "apply_personal":
+        return (f"That {hook} angle is exactly the work I do most often — "
+                f"I've shipped it in production at scale. ")
+    # Pod mode — Avilx pitches a pod
+    return (f"Re the {hook} angle: that's core to our pod's recent work — "
+            f"we've stood up production {hook} for several clients in 2026. ")
+
+
+
 def _trim(s: str, n: int) -> str:
     if len(s) <= n:
         return s
@@ -99,11 +163,12 @@ def render_text_body(lead: dict) -> str:
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
     stack_str = ", ".join(stack[:8]) if stack else "the stack in your JD"
+    hook = _hook_line(_pick_hook(jd), lead)
 
     return (
         f"Hi {co} team,\n\n"
         f"Saw the {role} role — stack and scope look like a strong match. "
-        f"Quick context if useful: I'm {FOUNDER}, I run {NAME} ({WEBSITE}), a "
+        f"{hook}Quick context if useful: I'm {FOUNDER}, I run {NAME} ({WEBSITE}), a "
         f"global {TAGLINE} pod out of {HQ}. 6-20 senior engineers, "
         f"AI/Data/ML/Cloud, **Databricks Champion** team, 7+ clouds ({CLOUD_LIST}), "
         f"8+ yrs avg, regulated-industry work.\n\n"
@@ -207,11 +272,12 @@ def render_solo_text_body(lead: dict) -> str:
     stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
+    hook = _hook_line(_pick_hook(jd), lead)
 
     return (
         f"Hi {co} team,\n\n"
         f"I'm applying for the {role} role personally — not as a recruiter. "
-        f"I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
+        f"{hook}I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
         f"{CLOUD_LIST} plus Huawei, Oracle, and on-prem. Most recent work spans "
         f"RAG/agentic systems on Databricks, multi-tenant ML platforms, and "
         f"regulated-industry data (banking, healthcare, MLPS in China).\n\n"

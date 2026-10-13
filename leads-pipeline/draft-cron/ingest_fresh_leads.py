@@ -148,6 +148,11 @@ def main():
         tid = f"{slug}-{_short_id()}"
         try:
             with ls.get_cursor() as cur:
+                # Target the partial unique index on (company, email, role)
+                # so we DON'T silently skip on tracking_id collisions
+                # (which would lose a real lead). Same rationale as the
+                # matching fix in find_more_leads.py — no WHERE clause
+                # to stay portable across PG 9.5–11+.
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email,
@@ -155,7 +160,8 @@ def main():
                          created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending',
                             NOW(), NOW())
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
+                    DO NOTHING
                     RETURNING id
                 """, (
                     tid, co, role, em,

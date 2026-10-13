@@ -1221,15 +1221,19 @@ def insert_leads(leads, dry=False):
         try:
             tid = short_id(co, role, em)
             with get_cursor() as cur:
+                # ON CONFLICT targets the partial unique index
+                # `leads_company_email_role_unique` (defined in db/schema.sql).
+                # We deliberately omit the `WHERE <pred>` clause that
+                # ON CONFLICT supports on PG 11+ — the partial index
+                # itself already enforces the predicate, and dropping
+                # the WHERE makes this statement portable to PG 9.5/10
+                # where ON CONFLICT (cols) WHERE pred is not supported.
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email, source_url,
                          jd_text, source, status, created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
                     ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
-                    WHERE contact_email IS NOT NULL
-                      AND role IS NOT NULL
-                      AND role != ''
                     DO NOTHING
                     RETURNING id
                 """, (tid, co[:80], role[:120], em,

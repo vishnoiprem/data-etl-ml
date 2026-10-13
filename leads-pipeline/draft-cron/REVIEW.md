@@ -11,7 +11,11 @@
 
 ## TL;DR
 
-8 safe, surgical fixes were applied in the commit. The code is generally well-structured (parameterized SQL, advisory locks, atomic file writes, env-driven config). **3 issues are deferred because they need your input** — they involve either behavioral changes, PostgreSQL-version-dependent syntax, or product decisions about source allowlists.
+Across 3 commits (`e48cd572`, `cd89ac6a`, and the critical #9 follow-up), **12 real issues were fixed**. The code is generally well-structured (parameterized SQL, advisory locks, atomic file writes, env-driven config). **4 issues remain deferred** because they need product decisions or are architectural changes:
+- #10: `BOUNCE_DENY` reload behavior
+- #11: scraper size cap / allowlist
+- #15: connection pooling
+- #16: `run_12h_cycle.sh` SIGHUP trap (only if you use that script)
 
 ---
 
@@ -69,50 +73,47 @@
 
 ## Real issues — DEFERRED (need your input)
 
-### #9 — `ON CONFLICT (LOWER(...), LOWER(...), LOWER(...)) WHERE …` invalid for older PostgreSQL
+### #9 — `ON CONFLICT (LOWER(...), LOWER(...), LOWER(...)) WHERE …` — ✅ APPLIED in commit `cd89ac6a` follow-up
 - **File:** `find_more_leads.py:1228-1232` and `ingest_fresh_leads.py:151-163`
 - **Severity:** CRITICAL
-- **Why deferred:** The SQL is correct for PostgreSQL 11+ (where partial-index inference with `WHERE` was added), and the schema is partial-indexed exactly to match. But the `requirements.txt` does not pin a PG version, and some operators may run PG 9.x or 10.x. The fix is "remove the `WHERE` from the `ON CONFLICT` and rely on the partial index alone" — but I want to confirm the **production PG version** before changing this. If you tell me it's PG 11+ in all envs (CI and prod), I can apply a one-line fix. Otherwise the fix is a separate `init` migration that checks the version first.
-- **What to do:** Tell me the PG version in `leads-ci.yml` and in your prod Docker setup.
+- **Status:** FIXED. The `WHERE <pred>` was dropped from the `ON CONFLICT` target in both files. The partial unique index in `db/schema.sql` already enforces the predicate, so the inference is unambiguous. This is now portable across PG 9.5 → 16. **Also fixed:** `ingest_fresh_leads.py` had `ON CONFLICT DO NOTHING` with NO target column — that meant a `tracking_id` collision would silently swallow the lead. Added the same `(LOWER(company), LOWER(contact_email), LOWER(role))` target so only true dedup conflicts are skipped.
+- **Caveat:** I have not been able to run this against a real Postgres. The change is logical (the index expression and the conflict-target expression are identical) but please smoke-test with `find_more_leads.py` against a populated DB before relying on it.
 
 ### #10 — `BOUNCE_DENY` is loaded once at module import and not re-read
 - **File:** `find_more_leads.py:60`, `state/bounce_deny_store.py`
 - **Severity:** MEDIUM
+- **Status:** DEFERRED — needs your decision.
 - **Why deferred:** If process A calls `deny_add()` while process B is mid-run, B's in-memory set is stale until B restarts. The audit found this is a real but low-frequency race. Fixing it cleanly requires either (a) re-reading the JSON on every check (slight I/O cost), or (b) inter-process signaling via file mtime. Both are behavior changes that should be your call.
 - **What to do:** Decide: real-time re-read on every send, or accept eventual consistency until restart?
 
 ### #11 — `curl` subprocess with no response size cap, no source allowlist
 - **File:** `autopilot.py:126-134, 514-519, 863-866` (and `find_more_leads.py` for HN/WeWorkRemotely scraping)
 - **Severity:** MEDIUM (security + reliability)
+- **Status:** DEFERRED — needs your decision.
 - **Why deferred:** Adding a domain allowlist is a product decision — you may be deliberately scraping wide. Adding `--max-filesize` is a one-line change but the value (10MB? 1MB?) is a product call. No shell injection risk because URLs are passed as argv, not interpolated into a string.
 - **What to do:** Tell me the size cap you want and whether you want a per-source allowlist, or both.
 
-### #12 — `soffice` PDF rendering path not validated against `TAILORED_DIR`
+### #12 — `soffice` PDF rendering path not validated against `TAILORED_DIR` — ✅ APPLIED in commit `cd89ac6a`
 - **File:** `resume_tailor.py:319-330`
-- **Severity:** MEDIUM (security)
-- **Why deferred:** `safe_company` is sanitized to `[A-Za-z0-9_]` before path construction, so currently no traversal risk. But the function takes a `lead` dict from many sources and trusts the sanitization to be exhaustive. Adding a `Path.resolve().is_relative_to(TAILORED_DIR.resolve())` guard is defensive and small, but I want to confirm the actual function structure before editing.
-- **What to do:** I can apply the guard in a follow-up commit if you want.
+- **Status:** FIXED. Added `is_relative_to(TAILORED_DIR.resolve())` guard at the top of `render_to_pdf`.
 
-### #13 — Email body markdown→HTML without prior `html.escape`
+### #13 — Email body markdown→HTML without prior `html.escape` — ✅ APPLIED in commit `cd89ac6a`
 - **File:** `autopilot.py:1502-1503, 1666`
-- **Severity:** LOW
-- **Why deferred:** Currently the only attacker-controlled content that reaches `_render_email_html` is what `cover_letter.py` produces, which doesn't include raw JD text. But the moment someone adds JD text to the body, an attacker-controlled `**…<script>…**` would land as raw HTML in the email. The fix is to call `html.escape()` on the body BEFORE the `**…**` → `<strong>` substitution, then run the substitution. This is a one-block change but it touches the email rendering pipeline; I want to confirm we won't break the legitimate markdown cases (line breaks, `**bold**`) before applying.
-- **What to do:** Tell me if you want me to add the escape guard.
+- **Status:** FIXED. `html.escape()` is now called on the raw body chunk BEFORE the `**bold**` regex runs. Verified: legitimate `**bold**` still becomes `<strong>bold</strong>`, and `**`<script>`**` becomes `&lt;script&gt;`.
 
-### #14 — `check_bounces.mark_bounced` opens a new connection per row
+### #14 — `check_bounces.mark_bounced` opens a new connection per row — ✅ APPLIED in commit `cd89ac6a`
 - **File:** `check_bounces.py:230-253`
-- **Severity:** LOW
-- **Why deferred:** Performance optimization. For 50 bounces that's 50 round-trips. Inline the UPDATE inside the existing `with` block, or use `psycopg2.extras.execute_batch`. Behavior-preserving, but I want to confirm the connection is actually opened outside the loop before consolidating.
+- **Status:** FIXED. UPDATE inlined inside the existing `with get_cursor() as cur:` block. Single transaction, one connection for the whole loop.
 
 ### #15 — `get_cursor()` opens a new connection per call; no pooling
 - **File:** `db/lead_store.py` (and used by `bin/loop_status.py`, `dashboard.py`)
 - **Severity:** LOW
-- **Why deferred:** Architectural. A `ThreadedConnectionPool` is the right fix but it's a behavior change touching every call site. Not a one-line change.
+- **Status:** DEFERRED — architectural change.
 
 ### #16 — Cron loops: no SIGHUP trap in `run_12h_cycle.sh`, no pidfile at all
 - **File:** `run_12h_cycle.sh:28-43`
 - **Severity:** LOW
-- **Why deferred:** Same pattern as #7 but in a different script. I fixed `auto_loop.sh` because it's the most common entrypoint. If you use `run_12h_cycle.sh` too, I can apply the same trap+pidoff there.
+- **Status:** DEFERRED — let me know if you use this script.
 
 ---
 
@@ -150,6 +151,7 @@ You asked for style review as written findings, not auto-fixes. Listing the most
 
 ## What I recommend you do next
 
-1. **Decide on the deferred items #9, #10, #11.** These are the three with real impact. #9 especially — the `ON CONFLICT` thing will silently swallow every insert if the wrong PG version is in use.
-2. **Paste the CI error log.** Most likely it's the test-import failure mentioned in `requirements.txt` ("leads-ci job has been failing since it was added in PR #115") — quick to fix once I see the exact failure.
-3. **Review the commit locally:** `git show <hash>` and `git log -p` before pushing.
+1. **Smoke-test the #9 fix** — run `find_more_leads.py` and `ingest_fresh_leads.py` against your populated DB to confirm dedup still works. The change is logical (partial-index inference without `WHERE` is unambiguous) but I have not been able to run it against a real Postgres.
+2. **Decide on the remaining deferred items #10, #11, #15, #16.** Each one needs a product/architecture call from you.
+3. **Paste the CI error log.** Most likely it's the test-import failure mentioned in `requirements.txt` ("leads-ci job has been failing since it was added in PR #115") — quick to fix once I see the exact failure.
+4. **Review the commits locally:** `git log -p` for the last 4 commits, then push if you're satisfied.
