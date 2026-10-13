@@ -47,8 +47,15 @@ def cron_lock(name: str, _conn=None):
     The lock auto-releases when the connection closes (even on crash).
     """
     if not HAVE_PG:
-        # DB unavailable → fail-open with a warning
-        yield True
+        # DB unavailable → fail-CLOSED. Previously this yielded True,
+        # which let overlapping cron runs both enter the email-send
+        # phase and double-send. Better to refuse than to send twice.
+        print(
+            "cron_lock: psycopg2 unavailable — refusing to run without "
+            "advisory lock to avoid double-send",
+            file=sys.stderr,
+        )
+        yield False
         return
 
     key = _name_to_key(name)

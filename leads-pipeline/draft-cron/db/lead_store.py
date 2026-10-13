@@ -303,7 +303,15 @@ def cli():
     elif cmd == "init":
         with get_cursor(dict_rows=False) as cur:
             with open(os.path.join(os.path.dirname(__file__), "schema.sql")) as f:
-                cur.execute(f.read())
+                sql = f.read()
+            # psycopg2's execute() cannot run multi-statement strings
+            # (the schema file has CREATE TABLE + CREATE INDEX + a plpgsql
+            # trigger function with $$...$$ body). Split on `;\n` and run
+            # each non-empty statement separately.
+            for stmt in sql.split(";\n"):
+                s = stmt.strip()
+                if s:
+                    cur.execute(s)
         print("✅ Schema applied")
     elif cmd == "test":
         try:

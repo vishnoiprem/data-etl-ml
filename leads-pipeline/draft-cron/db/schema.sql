@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS leads (
 -- Migration: DROP INDEX leads_company_email_unique; create this one.
 -- Safe because no existing rows violate the new key (the old key
 -- prevented any such rows from ever being inserted).
+DROP INDEX IF EXISTS leads_company_email_unique;
 CREATE UNIQUE INDEX IF NOT EXISTS leads_company_email_role_unique
     ON leads (LOWER(company), LOWER(contact_email), LOWER(role))
     WHERE contact_email IS NOT NULL

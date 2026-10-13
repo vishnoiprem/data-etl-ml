@@ -72,7 +72,7 @@ if [[ -f "$PIDFILE" ]] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
 fi
 
 echo $$ > "$PIDFILE"
-trap 'rm -f "$PIDFILE"; stop_loop' EXIT INT TERM
+trap 'rm -f "$PIDFILE"; stop_loop' EXIT INT TERM HUP
 
 echo "=== AUTO LOOP STARTED $(date) — up to $LOOP_MAX iterations, ${LOOP_SLEEP}s sleep ===" | tee -a "$LOG"
 echo "    PY=$PY" | tee -a "$LOG"

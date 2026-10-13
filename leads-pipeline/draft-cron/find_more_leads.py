@@ -30,6 +30,7 @@ from urllib.parse import urlparse, urljoin
 
 import requests
 from html import unescape
+import traceback
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
@@ -111,7 +112,7 @@ SOURCES = {
     },
     "hnhiring": {
         "type": "rss",
-        "url": "httpshnhiring.com/rss".replace("httpshnhiring", "https://hnhiring"),
+        "url": "https://hnhiring.com/rss",
     },
     "workatastartup": {
         "type": "rss",
@@ -1245,6 +1246,18 @@ def insert_leads(leads, dry=False):
         except Exception as e:
             errs += 1
             print(f"  ❌ {co[:30]} {e}")
+            # Log full traceback so silent SQL/DB regressions are visible.
+            # Without this, a broken ON CONFLICT or schema mismatch would
+            # just look like a flood of one-line errors and the operator
+            # would have no way to see the underlying cause.
+            try:
+                _err_log = HERE / "queue_errors.log"
+                with open(_err_log, "a") as _ef:
+                    _ef.write(f"[{datetime.now().isoformat()}] {co!r} {em!r}\n")
+                    _ef.write(traceback.format_exc())
+                    _ef.write("\n")
+            except Exception:
+                pass
     return inserted, skipped, errs
 
 

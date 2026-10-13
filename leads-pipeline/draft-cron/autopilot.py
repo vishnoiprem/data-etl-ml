@@ -1391,6 +1391,23 @@ def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
     pending = [l for l in get_pending_leads()
                if l.get("contact_email") and l.get("apply_method") == "email"]
     pending = [l for l in pending if not is_opted_out(l["contact_email"])]
+    # BOUNCE_DENY filter: skip any email whose domain has bounced before
+    # (e.g. careers@<X> for companies without a real careers mailbox).
+    # This is the cheapest way to drop the bounce rate — SMTP RCPT TO
+    # validation won't help (Gmail accepts anything) and full SMTP
+    # probe-per-lead adds 1-2s per send.
+    try:
+        from state.bounce_deny_store import BOUNCE_DENY
+        before = len(pending)
+        pending = [l for l in pending
+                   if l["contact_email"].split("@", 1)[-1].lower() not in BOUNCE_DENY]
+        skipped_bounce = before - len(pending)
+        if skipped_bounce:
+            print(f"  [bounce-deny] skipped {skipped_bounce} leads on denylisted domains")
+    except Exception as e:
+        # If the deny store is missing/broken, fail open — better to send
+        # a few extra emails than to silently block all sends.
+        print(f"  [bounce-deny] warn: {e}")
     # Apply mode filter at the cursor, not in Python — single round-trip.
     if mode != "both":
         pending = [l for l in pending
@@ -1912,8 +1929,15 @@ def run_pipeline(args):
         report["email"] = {"sent": sent, "failed": failed, "bounced": bounced}
         print(f"  → sent {sent}, bounced {bounced}, failed {failed}")
     report["finished_at"] = datetime.now().isoformat()
-    with open(REPORT_FILE, "w") as f:
+    # Atomic write: dump to .tmp, fsync, then rename. Prevents a
+    # half-written JSON file from breaking the next run's parser if
+    # the process is killed mid-write.
+    _tmp = REPORT_FILE.with_suffix(".tmp")
+    with open(_tmp, "w") as f:
         json.dump(report, f, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(_tmp, REPORT_FILE)
     print(f"\n✅ Report → {REPORT_FILE}")
     return report
 

@@ -148,7 +148,7 @@ def _imap_login():
             "GMAIL_ADDRESS / SMTP_PASSWORD not set in .env "
             "(IMAP and SMTP share the same App Password)"
         )
-    M = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+    M = imaplib.IMAP4_SSL("imap.gmail.com", 993, timeout=20)
     M.login(user, pw)
     return M
 
