@@ -1,6 +1,26 @@
 -- Avilx leads tracking schema
 -- Stores every email we send with phone/contact info for dedup + tracking.
 
+-- Migration: bring legacy 'pod' default up to the new 'pitch_pod' value.
+-- The original column was created with DEFAULT 'pod', but the CHECK
+-- constraint (added later) requires 'pitch_pod' or 'apply_personal'.
+-- Any INSERT that didn't specify apply_mode was therefore guaranteed
+-- to fail with a CHECK violation. This idempotent ALTER brings existing
+-- databases up to date so the default matches the schema.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'leads'
+          AND column_name = 'apply_mode'
+          AND column_default LIKE '%pod%'
+          AND column_default NOT LIKE '%pitch_pod%'
+    ) THEN
+        ALTER TABLE leads ALTER COLUMN apply_mode SET DEFAULT 'pitch_pod';
+    END IF;
+END
+$$;
+
 CREATE TABLE IF NOT EXISTS leads (
     id              SERIAL PRIMARY KEY,
     tracking_id     TEXT UNIQUE NOT NULL,           -- short public ID for the email link
