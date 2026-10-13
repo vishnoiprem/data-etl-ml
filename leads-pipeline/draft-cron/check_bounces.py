@@ -227,6 +227,10 @@ def mark_bounced(bounce_map: dict, dry: bool = False) -> dict:
     counts = {"matched": 0, "marked": 0, "already_bounced": 0, "unknown": 0}
     if not bounce_map:
         return counts
+    # Single cursor, single transaction: SELECT to identify the lead,
+    # then UPDATE in-place. Previously this called update_status()
+    # inside the loop, which opened a new connection per row. For an
+    # inbox with 50 bounces that was 50 round-trips.
     with get_cursor() as cur:
         for email_addr, reason in bounce_map.items():
             cur.execute(
@@ -246,7 +250,10 @@ def mark_bounced(bounce_map: dict, dry: bool = False) -> dict:
             if dry:
                 counts["marked"] += 1
                 continue
-            update_status(row["id"], "bounced", error=f"Bounce: {reason}")
+            cur.execute(
+                "UPDATE leads SET status = %s, last_error = %s WHERE id = %s",
+                ("bounced", f"Bounce: {reason}", row["id"]),
+            )
             counts["marked"] += 1
             print(f"  🚫 lead #{row['id']:>3}  {row['company'][:25]:25s}  "
                   f"{email_addr:30s}  → bounced  ({reason[:60]})")

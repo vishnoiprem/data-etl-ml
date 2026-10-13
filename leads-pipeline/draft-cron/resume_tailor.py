@@ -333,6 +333,18 @@ def _rerank_skills(doc, priority_keywords: List[str]):
 
 def render_to_pdf(docx_path: Path) -> Optional[Path]:
     """Convert docx to PDF using LibreOffice CLI. Returns the PDF path."""
+    # Defensive: refuse to invoke soffice on a path that escapes the
+    # tailored-resumes dir. Currently safe_company is sanitized to
+    # [A-Za-z0-9_], but this guard is cheap and makes the contract
+    # explicit for any future caller that passes a different path.
+    try:
+        tailored_root = TAILORED_DIR.resolve()
+        docx_resolved = docx_path.resolve()
+        if not docx_resolved.is_relative_to(tailored_root):
+            print(f"  ⚠️  render_to_pdf: refusing path outside TAILORED_DIR: {docx_resolved}")
+            return None
+    except (OSError, ValueError):
+        return None
     try:
         out = subprocess.run(
             ["soffice", "--headless", "--convert-to", "pdf",

@@ -41,6 +41,7 @@ import ssl
 import argparse
 import subprocess
 import urllib.parse
+import html as _html
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -1516,7 +1517,12 @@ def _render_email_html(lead: dict) -> str:
             continue
         if "Prem Vishnoi" in chunk and "Avilx" in chunk and len(chunk) < 600:
             continue
-        html_chunk = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", chunk)
+        # Escape HTML FIRST so any < > & in the raw body become
+        # entities. The **bold** regex below still works because ** is
+        # not escaped, and the <strong> tags we add are then real tags,
+        # not user-controlled.
+        html_chunk = _html.escape(chunk, quote=False)
+        html_chunk = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", html_chunk)
         html_chunk = html_chunk.replace("\n", "<br>")
         paragraphs.append(f"<p>{html_chunk}</p>")
 
