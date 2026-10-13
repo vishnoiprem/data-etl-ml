@@ -95,6 +95,17 @@ JUNK_EMAIL_RE = re.compile(
 JUNK_COMPANY_RE = re.compile(
     r"^(?:TestCo|OldCo|DemoCo|SampleCo|FakeCo)[-_]?[a-f0-9]+$", re.I
 )
+# Generic ATS / no-recruiter inboxes: mailing these is wasted because no
+# human reads careers@ or jobs@ — it goes straight to a Workday/Greenhouse
+# upload queue and gets auto-acknowledged (or auto-rejected) without ever
+# being read. We only filter on the LOCAL part of the email so a
+# legitimate "alex@careers.sequoia.com" still passes.
+ATS_INBOX_RE = re.compile(
+    r"^(?:careers|jobs|talent|recruiting|recruitment|hr|hello|hiring|"
+    r"apply|applications?|no-reply|noreply|donotreply|privacy|support|info|"
+    r"contact|admin|press|partnerships|sales|marketing)@",
+    re.I,
+)
 
 
 def is_junk(lead: dict) -> bool:
@@ -106,7 +117,29 @@ def is_junk(lead: dict) -> bool:
         return True
     if "test" in co.lower() and len(co) < 12:
         return True
+    if em and ATS_INBOX_RE.match(em):
+        # Generic ATS inbox: filter out unless the domain looks like a
+        # small-company founder-style address (rare, but e.g.
+        # careers@early-stage-startup.io). Heuristic: the company name
+        # is < 25 chars and not on the public-companies blocklist.
+        return True
     return False
+
+
+# Public companies where the careers@ inbox is virtually never read by a
+# human and ATS uploads are the only realistic application path. These
+# should not be cold-pitched even if their email is technically valid —
+# the pod model only works with a real contact.
+_ATS_BLACKLIST = {
+    "airbnb", "snowflake", "scale ai", "anthropic", "mistral ai",
+    "perplexity", "cohere", "hugging face", "jetbrains", "samsara",
+    "prudential financial", "toptal", "tether operations limited",
+}
+
+
+def is_ats_giant(lead: dict) -> bool:
+    co = (lead.get("company") or "").strip().lower()
+    return co in _ATS_BLACKLIST
 
 
 def main():
@@ -128,6 +161,7 @@ def main():
     inserted = 0
     skipped_dup = 0
     skipped_junk = 0
+    skipped_ats = 0
     errors = 0
     queue_seen = set()
     for lead in LEADS:
@@ -138,6 +172,10 @@ def main():
         if key in existing_keys or key in queue_seen:
             skipped_dup += 1
             print(f"  ⏭  DUP   {co[:30]:30s} {em}")
+            continue
+        if is_ats_giant(lead):
+            skipped_ats += 1
+            print(f"  ⏭  ATS   {co[:30]:30s} (careers-only inbox, no human reads it)")
             continue
         if is_junk(lead):
             skipped_junk += 1
@@ -182,7 +220,7 @@ def main():
             print(f"  ❌ ERR   {co[:30]:30s} {e}")
 
     print()
-    print(f"📊 Summary: inserted={inserted}, dup={skipped_dup}, junk={skipped_junk}, errors={errors}")
+    print(f"📊 Summary: inserted={inserted}, dup={skipped_dup}, ats={skipped_ats}, junk={skipped_junk}, errors={errors}")
     return 0
 
 

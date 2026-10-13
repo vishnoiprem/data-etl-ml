@@ -159,7 +159,13 @@ def _record_followup(lead_id: int, subject: str) -> None:
 
 
 def _pick_followups(days: int, mode: str, max_n: int) -> list[dict]:
-    """Find leads eligible for follow-up."""
+    """Find leads eligible for follow-up.
+
+    Excludes addresses that have opted out or are in the bounce-deny list.
+    Same exclusion autopilot applies on the first send; otherwise we
+    would re-mail a recipient who already told us (or their server)
+    to stop.
+    """
     with ls.get_cursor() as cur:
         cur.execute("""
             SELECT id, company, role, contact_email, jd_text,
@@ -169,6 +175,7 @@ def _pick_followups(days: int, mode: str, max_n: int) -> list[dict]:
               AND sent_at < NOW() - (%s || ' days')::INTERVAL
               AND contact_email IS NOT NULL
               AND apply_method = 'email'
+              AND LOWER(contact_email) NOT IN (SELECT email FROM opt_outs)
             ORDER BY sent_at ASC
             LIMIT %s
         """, (str(days), max_n * 4))  # over-fetch for mode filter
@@ -176,6 +183,15 @@ def _pick_followups(days: int, mode: str, max_n: int) -> list[dict]:
     if mode != "both":
         rows = [l for l in rows
                 if (l.get("apply_mode") or "pitch_pod") == mode]
+    # Also drop anyone on the bounce-deny set (loaded by autopilot at
+    # import). This catches domains that bounced hard but were never
+    # marked `bounced` in the DB.
+    try:
+        from state.bounce_deny_store import BOUNCE_DENY
+        rows = [l for l in rows
+                if l.get("contact_email") and l["contact_email"].lower() not in BOUNCE_DENY]
+    except Exception:
+        pass
     return rows[:max_n]
 
 

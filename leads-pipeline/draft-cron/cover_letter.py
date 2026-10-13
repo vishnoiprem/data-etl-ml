@@ -61,7 +61,13 @@ STACK_RE = re.compile(
 
 
 def _extract_stack_overlap(jd: str) -> list[str]:
-    """Pull a list of recognizable tech terms from a JD, in order, dedup."""
+    """Pull a list of recognizable tech terms from a JD, in order, dedup.
+
+    Hard-capped at 16 terms so a JD that happens to mention the entire
+    stack (e.g. an aggregator job post) doesn't produce an unbounded
+    list that overflows the rendered email. The renderer slices to 8
+    anyway, but a 200-term internal list wastes CPU on regex matches.
+    """
     if not jd:
         return []
     seen = set()
@@ -71,6 +77,8 @@ def _extract_stack_overlap(jd: str) -> list[str]:
         if term not in seen:
             seen.add(term)
             out.append(term)
+            if len(out) >= 16:
+                break
     return out
 
 
@@ -142,6 +150,20 @@ def _trim(s: str, n: int) -> str:
     if len(s) <= n:
         return s
     return s[: n - 1] + "…"
+
+
+def _render_template(template: str, values: dict) -> str:
+    """Substitute `{key}` placeholders in `template` with values from `values`.
+
+    Unlike str.format, this is safe with values that contain literal `{` or `}`:
+    we do a single-pass replace so the value text is never re-interpreted as
+    format syntax. Missing keys are left as-is so a typo is visible rather
+    than raising KeyError.
+    """
+    out = template
+    for k, v in values.items():
+        out = out.replace("{" + k + "}", "" if v is None else str(v))
+    return out
 
 
 def render_subject(lead: dict) -> str:
@@ -222,18 +244,11 @@ def render_html_body(lead: dict) -> str:
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
     stack_str = ", ".join(stack[:8]) if stack else "the stack in your JD"
-    return _HTML_TEMPLATE.format(
-        name=NAME,
-        tagline=TAGLINE,
-        company=co,
-        role=role,
-        founder=FOUNDER,
-        website=WEBSITE,
-        hq=HQ,
-        stack_str=stack_str,
-        email=EMAIL,
-        whatsapp=WHATSAPP,
-    )
+    return _render_template(_HTML_TEMPLATE, dict(
+        name=NAME, tagline=TAGLINE, company=co, role=role,
+        founder=FOUNDER, website=WEBSITE, hq=HQ, stack_str=stack_str,
+        email=EMAIL, whatsapp=WHATSAPP,
+    ))
 
 
 def render(lead: dict) -> Tuple[str, str, str]:
@@ -302,12 +317,12 @@ def render_solo_html_body(lead: dict) -> str:
     stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
-    return _SOLO_HTML_TEMPLATE.format(
+    return _render_template(_SOLO_HTML_TEMPLATE, dict(
         name=FOUNDER, tagline=f"Solo application — {role} at {co}",
         cloud_list=CLOUD_LIST, hq=HQ, email=EMAIL, whatsapp=WHATSAPP,
         website=WEBSITE, co=co, role=role, stack_str=stack_str,
         remote_phrase=remote_phrase, brand=NAME,
-    )
+    ))
 
 
 _SOLO_HTML_TEMPLATE = """\

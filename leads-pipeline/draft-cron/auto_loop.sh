@@ -10,7 +10,7 @@
 #   REFINE_ONLY=1 ./auto_loop.sh   # no email sends (Gmail cooldown)
 #   ./auto_loop.sh stop            # stop the running loop
 
-set -eo pipefail
+set -euo pipefail
 cd "$(dirname "$0")"
 HERE="$(pwd)"
 

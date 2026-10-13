@@ -85,8 +85,12 @@ def _ingest_one(path: Path) -> tuple[int, int]:
         em = (ld.get("contact_email") or "").strip()
         if not co or not role:
             continue
+        # In-app dedup: (company, email) — same as the DB index for the
+        # common case. Leads without an email are also allowed through
+        # (and won't conflict at the DB level since the partial index
+        # requires contact_email IS NOT NULL).
         key = (co.lower(), em.lower())
-        if key in existing:
+        if em and key in existing:
             skipped += 1
             continue
         # Derive short id
@@ -101,7 +105,11 @@ def _ingest_one(path: Path) -> tuple[int, int]:
                          created_at, updated_at)
                     VALUES (%s,%s,%s,%s,%s,%s,%s,'apply_personal','pending',
                             NOW(), NOW())
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
+                    WHERE contact_email IS NOT NULL
+                      AND role IS NOT NULL
+                      AND role != ''
+                    DO NOTHING
                     RETURNING id
                 """, (
                     tid, co, role, em or None,
@@ -112,6 +120,8 @@ def _ingest_one(path: Path) -> tuple[int, int]:
                 row = cur.fetchone()
             if row:
                 inserted += 1
+                if em:
+                    existing.add(key)
                 existing.add(key)
                 print(f"    ✅ {co[:30]:30s} {role[:35]:35s} {em or '(no email)'}")
         except Exception as e:
