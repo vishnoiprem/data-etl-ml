@@ -7,6 +7,14 @@
 >
 > 74 world-top reference patterns in the tables below. If you've used the system at Netflix, Stripe, Anthropic, Databricks, Bloomberg, or OpenAI, I can defend how I'd build it, run it, and cost it.
 
+> 💸 **Looking for a working AI revenue system, not just code?** Start with
+> [`ai-engineering/40-ai-side-hustle/`](ai-engineering/40-ai-side-hustle/) —
+> a self-contained 4-stream AI revenue factory (SEO content, micro-SaaS
+> scaffold, digital products, print-on-demand merch) that runs in
+> offline-stub mode so you can see the whole pipeline in 5 minutes.
+> That's the headline project. The 40+ projects below are the
+> infrastructure that backs it.
+
 <div align="left">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
