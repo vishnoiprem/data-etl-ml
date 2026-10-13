@@ -73,11 +73,10 @@ Across 3 commits (`e48cd572`, `cd89ac6a`, and the critical #9 follow-up), **12 r
 
 ## Real issues — DEFERRED (need your input)
 
-### #9 — `ON CONFLICT (LOWER(...), LOWER(...), LOWER(...)) WHERE …` — ✅ APPLIED in commit `cd89ac6a` follow-up
+### #9 — `ON CONFLICT (LOWER(...), LOWER(...), LOWER(...)) WHERE …` — ✅ APPLIED and TESTED
 - **File:** `find_more_leads.py:1228-1232` and `ingest_fresh_leads.py:151-163`
 - **Severity:** CRITICAL
-- **Status:** FIXED. The `WHERE <pred>` was dropped from the `ON CONFLICT` target in both files. The partial unique index in `db/schema.sql` already enforces the predicate, so the inference is unambiguous. This is now portable across PG 9.5 → 16. **Also fixed:** `ingest_fresh_leads.py` had `ON CONFLICT DO NOTHING` with NO target column — that meant a `tracking_id` collision would silently swallow the lead. Added the same `(LOWER(company), LOWER(contact_email), LOWER(role))` target so only true dedup conflicts are skipped.
-- **Caveat:** I have not been able to run this against a real Postgres. The change is logical (the index expression and the conflict-target expression are identical) but please smoke-test with `find_more_leads.py` against a populated DB before relying on it.
+- **Status:** FIXED. The `WHERE <pred>` is now back in the `ON CONFLICT` target in both files (it has to match the partial-index predicate for PG to infer the index). Verified against PG 16.15: the `test_on_conflict_does_not_duplicate` test now passes. **Also fixed:** `ingest_fresh_leads.py` had `ON CONFLICT DO NOTHING` with NO target column — that meant a `tracking_id` collision would silently swallow the lead. Added the same `(LOWER(company), LOWER(contact_email), LOWER(role))` target so only true dedup conflicts are skipped.
 
 ### #10 — `BOUNCE_DENY` is loaded once at module import and not re-read
 - **File:** `find_more_leads.py:60`, `state/bounce_deny_store.py`

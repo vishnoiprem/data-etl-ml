@@ -65,9 +65,9 @@ def test_better_email_skips_db_bounced_domain():
         cur.execute("""
             INSERT INTO leads (tracking_id, company, role, contact_email, source,
                                source_url, jd_text, status, sent_at,
-                               created_at, updated_at)
+                               apply_mode, created_at, updated_at)
             VALUES ('test-be', 'FakeBounceCo', 'Eng', %s, 'test',
-                    '', '', 'bounced', NOW(), NOW(), NOW())
+                    '', '', 'bounced', NOW(), 'pitch_pod', NOW(), NOW())
             RETURNING id
         """, (f"noreply@{target}",))
         fake_id = cur.fetchone()["id"]

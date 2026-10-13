@@ -183,11 +183,12 @@ def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
                 lead.get("cover_letter_subject", ""),
                 lead.get("cover_letter_body", ""),
                 lead.get("jd_text", ""),
-                # apply_mode: default 'pod' (Avilx pod pitch) unless caller
-                # explicitly opts into 'solo' (Prem personally applying).
-                # The DB has a CHECK constraint + DEFAULT 'pod' as a
-                # last-resort guard against bad input.
-                (lead.get("apply_mode") or "pod").strip().lower()[:8],
+                # apply_mode: default 'pitch_pod' (Avilx pod pitch)
+                # unless the caller explicitly opts into 'apply_personal'
+                # (Prem personally applying). The DB has a CHECK
+                # constraint accepting only these two values, plus a
+                # DEFAULT 'pitch_pod' as a last-resort guard.
+                (lead.get("apply_mode") or "pitch_pod").strip().lower()[:16],
                 "pending",
             ))
             lead_id = cur.fetchone()["id"]

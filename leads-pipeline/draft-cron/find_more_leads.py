@@ -1223,17 +1223,22 @@ def insert_leads(leads, dry=False):
             with get_cursor() as cur:
                 # ON CONFLICT targets the partial unique index
                 # `leads_company_email_role_unique` (defined in db/schema.sql).
-                # We deliberately omit the `WHERE <pred>` clause that
-                # ON CONFLICT supports on PG 11+ — the partial index
-                # itself already enforces the predicate, and dropping
-                # the WHERE makes this statement portable to PG 9.5/10
-                # where ON CONFLICT (cols) WHERE pred is not supported.
+                # The WHERE predicate MUST match the index's predicate
+                # for PG to infer the right index — without it, you get
+                # "there is no unique or exclusion constraint matching
+                # the ON CONFLICT specification". This syntax requires
+                # PG 11+; older versions would need a different dedup
+                # approach (e.g. pre-SELECT only, no ON CONFLICT).
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email, source_url,
-                         jd_text, source, status, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
+                         jd_text, source, status, apply_mode, created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', 'pitch_pod',
+                            NOW(), NOW())
                     ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
+                    WHERE contact_email IS NOT NULL
+                      AND role IS NOT NULL
+                      AND role != ''
                     DO NOTHING
                     RETURNING id
                 """, (tid, co[:80], role[:120], em,
