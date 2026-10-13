@@ -1,4 +1,9 @@
-# data-enginnering-cloudvala
+# data-engineering-cloudvala
+
+> **Note (2026-10-13):** This directory was previously named
+> `data-enginnering-cloudvala` (a typo: "enginnering" instead of
+> "engineering"). It has been renamed to fix the typo. The
+> contents are unchanged.
 
 Data Engineering interview-prep and study-path reference material.
 Owner: cloudvala / avilex.
@@ -70,6 +75,53 @@ These files are intended as a study path and interview reference:
 Every file carries a header noting the source author (Darshil Parmar, Data Vidhya),
 the article title, and the publication date. Content is reproduced without
 editorial wrapping per the user's "Authored Q&A only" instruction.
+
+---
+
+## What this is NOT
+
+- **Not an original work.** Every article body in
+  this directory is reproduced verbatim from
+  Darshil Parmar's [Data Vidhya](https://datavidhya.com/).
+  The value here is the *curation* (which articles
+  go together, in what order, with what Q&A drill),
+  not the authorship.
+- **Not a substitute for hands-on practice.** Q&A
+  drilling builds recognition; building a real
+  pipeline from scratch builds the engineering
+  judgment. Use this for the interview; use the
+  project directories in the parent `data-engineering/`
+  for the engineering.
+- **Not vendor-neutral.** The Azure, AWS, Snowflake,
+  dbt, and Kafka tracks are vendor-specific by
+  design. The DE Foundations track is the most
+  portable; the rest are reference patterns for
+  *that* cloud or tool.
+- **Not the latest syllabus.** Darshil's content
+  evolves; this directory is a snapshot as of
+  2026-10. For current outlines, the
+  [Data Vidhya](https://datavidhya.com/) site is
+  the source of truth.
+
+---
+
+## Related directories
+
+- [`../`](../) — the parent `data-engineering/`
+  directory. The 18 production-shaped projects
+  here are the *engineering* counterpart to the
+  *interview prep* in this directory.
+- [`../postgress_cdc_kafka/`](../postgress_cdc_kafka/) —
+  the Kafka reference that pairs with the
+  `kafka_fundamentals` curriculum.
+- [`../keystone-iceberg-ops/`](../keystone-iceberg-ops/) —
+  the data-warehouse ops reference that pairs
+  with the `data_warehousing` learning plan.
+- [`../scb_aml_platform/`](../scb_aml_platform/) —
+  the production-shaped AML build; the
+  `de_system_design` curriculum's "real system"
+  case study.
+
 ---
 
 **Last updated:** 2026-10-12  

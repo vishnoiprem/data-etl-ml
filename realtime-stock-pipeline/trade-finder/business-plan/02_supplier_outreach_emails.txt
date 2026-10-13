@@ -1,0 +1,240 @@
+================================================================
+  SUPPLIER OUTREACH EMAILS — Copy-paste ready (5 messages)    |
+================================================================
+
+INSTRUCTIONS:
+1. Find 5 Alibaba suppliers (search "smart watch fitness band"
+   + Trade Assurance + Gold Supplier + 3+ years)
+2. Open a Gmail, set up a signature with your SG company name
+3. Send each message below to one supplier (subject customized)
+4. Wait 24-48h for replies, score on the rubric in section 4.1
+5. Reply to top 3, order samples
+
+================================================================
+EMAIL 1: INITIAL OUTREACH (Day 1)
+================================================================
+
+To: [supplier-1 Alibaba contact email]
+Subject: Bulk order — Smart Fitness Band (UK Amazon FBA, 500u MOQ)
+
+Hi,
+
+I'm setting up a UK Amazon FBA business and need a long-term
+supplier for smart fitness bands. My company is registered in
+Singapore (UEN pending — will share once engaged).
+
+Initial order: 500 units, with monthly reorders of 1,000-2,000
+units projected over the next 12 months.
+
+TARGET SPECIFICATIONS:
+- Heart rate monitor + SpO2 (blood oxygen)
+- 1.47" HD colour touchscreen
+- IP68 waterproof (swim-proof)
+- 7-day battery life
+- Magnetic charging (USB-C cable included)
+- 100+ sport modes
+- Sleep tracking + step counter
+- Notifications: WhatsApp, SMS, calls (iOS + Android app)
+- CE / RoHS / UKCA certified (mandatory for UK market)
+- Branded retail gift box (OEM with my logo OK)
+
+PLEASE QUOTE:
+1. FOB Shenzhen price per unit at:
+   - 100 units (sample order)
+   - 500 units (first bulk)
+   - 1,000 units (reorder level)
+   - 5,000 units (annual level)
+2. Sample cost (1-3 units) + DHL shipping to Singapore
+3. Lead time from PO to FOB Shenzhen:
+   - 100 units
+   - 500 units
+4. Payment terms: T/T 30% deposit, 70% on B/L copy preferred
+5. Can you support custom branding (my logo on box + watch face)?
+6. 3 trade references from UK, EU, or US Amazon sellers
+7. CE / RoHS / UKCA certificates (PDF copies)
+
+I will place 1 sample order to verify quality before committing
+to the 500-unit bulk order. Looking for a partner, not just a
+supplier.
+
+Please reply in English. Thank you.
+
+Best regards,
+[Your Name]
+Director, Nordic SG Pte Ltd
+WhatsApp: +XX-XXXX-XXXX
+Email: you@yourdomain.com
+
+
+================================================================
+EMAIL 2: FOLLOW-UP (Day 3, if no reply)
+================================================================
+
+To: [supplier-1]
+Subject: Re: Bulk order — Smart Fitness Band
+
+Hi,
+
+Just following up on my enquiry from 2 days ago. Quick check:
+did you receive my RFQ for the smart fitness band, 500u MOQ?
+
+If you're too busy to quote, no problem — but a quick
+"not interested" would be appreciated so I can move on to
+your competitors.
+
+Thank you,
+[Your Name]
+
+
+================================================================
+EMAIL 3: SUPPLIER SHORTLIST REPLY (Day 5-7, after samples)
+================================================================
+
+To: [top 3 finalists]
+Subject: Re: Bulk order — Smart Fitness Band — Sample results
+
+Hi [Supplier contact name],
+
+Thank you for the samples. I've completed 7 days of testing:
+
+[Choose one based on actual results]
+- GREAT: "Your samples passed all 3 tests: battery, waterproof,
+  app pairing. I'd like to proceed to a 100-unit order to verify
+  production consistency before scaling to 500."
+- OK: "Battery and pairing are good. Some concerns about [specific
+  issue]. Can you share your QC process for this in production?"
+- REJECT: "Unfortunately the samples didn't meet our quality bar
+  for [reason]. Thank you for your time — I'll keep your details
+  for future reference."
+
+[If proceeding:]
+Next steps:
+1. Please send a Pro-forma Invoice for 100 units, FOB Shenzhen
+2. Production lead time in business days
+3. Confirm payment terms (T/T 30/70 standard)
+4. 1st order 100u, 2nd order 500u (60 days later), 3rd order 1000u
+5. Do you offer OEM/ODM with my logo on box and watch face?
+   MOQ for custom branding?
+6. Can you provide CE, RoHS, UKCA certificates (PDF)?
+
+I'll wire the 30% deposit once we agree on PI.
+
+Best,
+[Your Name]
+
+
+================================================================
+EMAIL 4: NEGOTIATION (Day 8, if price is too high)
+================================================================
+
+To: [chosen supplier]
+Subject: Re: Bulk order — Smart Fitness Band — Final pricing
+
+Hi [Name],
+
+Thank you for the Pro-forma Invoice. The pricing is close but
+I need to ask for one more adjustment to make this viable:
+
+- Your 100u price: US$XX.XX
+- Your 500u price: US$XX.XX
+- Your 1000u price: US$XX.XX
+
+For comparison, I've quoted 4 other suppliers in Shenzhen and
+Guangzhou. The median price for the same spec is US$XX.XX at
+1000 units. To match my budget, I need to land at US$XX.XX per
+unit at 500u.
+
+Could you meet me at US$XX.XX? In return:
+- I will commit to 3 reorder cycles of 1,000+ units each over
+  the next 6 months (3,000+ units guaranteed)
+- I will give you a 5-star Alibaba review + video testimonial
+- I will refer 2-3 friends in my Amazon seller network to you
+
+This is a long-term partnership opportunity, not a one-off PO.
+
+Let me know your best price by EOD [date]. If we can agree, I
+will wire the 30% deposit tomorrow.
+
+Best,
+[Your Name]
+
+
+================================================================
+EMAIL 5: PO CONFIRMATION (Day 9, after price agreement)
+================================================================
+
+To: [chosen supplier]
+Subject: PO #001 — Smart Fitness Band, 100 units — Proceeding
+
+Hi [Name],
+
+Great, we have a deal. Please find the order details below.
+
+PURCHASE ORDER #001
+==================
+Buyer:    Nordic SG Pte Ltd (UEN: XXXXXXXK)
+Seller:   [Supplier company name] ([Alibaba link])
+Product:  Smart Fitness Band (model [XYZ])
+Quantity: 100 units
+Unit price: US$XX.XX FOB Shenzhen
+Total:    US$X,XXX.XX
+Incoterm: FOB Shenzhen (Yantian Port)
+Packaging: Individual retail gift box; 50 units per master carton
+Branding:  [My logo] on box + watch face (OEM confirmed)
+Certs:    CE, RoHS, UKCA certificates to be enclosed with shipment
+
+Lead time: 21 days from deposit receipt
+Payment:   T/T 30% deposit today (US$XXX.XX)
+           T/T 70% balance on B/L copy (US$XXX.XX)
+
+Shipping: Sea freight via [forwarder name] — please coordinate
+          with my forwarder [forwarder contact]
+Documents: Commercial invoice, packing list, B/L, COO, certs
+
+Inspection: I'll engage QIMA (qima.com) for a pre-shipment
+            inspection at your factory 3 days before ship date.
+            Please confirm factory access.
+
+Please confirm acceptance by return email. I'll wire the deposit
+today.
+
+Best,
+[Your Name]
+Nordic SG Pte Ltd
+
+================================================================
+SCORING RUBRIC (use for replies in your tracking sheet)
+================================================================
+
+After all 5 suppliers reply, score on:
+
+Criteria              | Weight | Sup1 | Sup2 | Sup3 | Sup4 | Sup5
+----------------------|--------|------|------|------|------|------
+Price (lower=better)  |  25%   |  /10 |  /10 |  /10 |  /10 |  /10
+Lead time             |  20%   |  /10 |  /10 |  /10 |  /10 |  /10
+Sample quality        |  25%   |  /10 |  /10 |  /10 |  /10 |  /10
+Communication         |  15%   |  /10 |  /10 |  /10 |  /10 |  /10
+References verified   |  15%   |  /10 |  /10 |  /10 |  /10 |  /10
+                      |--------|------|------|------|------|------
+TOTAL                 | 100%   |      |      |      |      |
+
+Pick the highest score. If two are within 1 point, choose the
+one with better communication (signal of long-term reliability).
+
+================================================================
+TEMPLATE CUSTOMIZATION CHECKLIST
+================================================================
+
+Before sending, replace these in EACH email:
+[ ] [Your Name]
+[ ] [Your WhatsApp with country code]
+[ ] [Your email]
+[ ] [Your domain if you have one]
+[ ] [Your UEN once you have it]
+[ ] [Your Alibaba contact's name in Email 3+]
+[ ] [Price quotes once received]
+[ ] [Supplier company name in Email 5]
+[ ] [Forwarder details]
+[ ] [Date in Email 4]
+
+================================================================

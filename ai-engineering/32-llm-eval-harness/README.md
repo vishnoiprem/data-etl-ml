@@ -61,6 +61,52 @@ A single run, all metrics, one row. Every run gets a unique id; a run is reprodu
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not an LLM-as-judge replacement.** The
+  `rubric_pass` (must_contain / must_not_contain) and
+  `exact_match` metrics work for tasks with a
+  defensible right answer. For subjective tasks
+  (creative writing, open-ended chat), LLM-as-judge
+  is the right tool, and it needs its own calibration
+  to be reliable.
+- **Not an offline-only harness.** The pattern
+  generalizes to online eval (log interactions →
+  run metrics on a sampled subset → write back to
+  the same `RunRecord` schema). The shape is the
+  same; the cadence is different.
+- **Not a model leaderboard.** A `RunRecord` is
+  one model + one prompt + one eval set at one
+  temperature. A leaderboard is many `RunRecord`s
+  cross-referenced; that's a different artifact.
+- **Not a substitute for human review.** The harness
+  catches regressions and validates versions. It
+  doesn't tell you whether the model is *useful*
+  in production. The two are different questions;
+  use both.
+
+---
+
+## Related directories
+
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the deployment + canary + rollback patterns that
+  consume the `RunRecord` to decide whether to
+  promote a model.
+- [`../19-rerank-service/`](../19-rerank-service/) —
+  the rerank eval that this harness can measure
+  (retriever recall, reranker lift).
+- [`../28-rlhf-dpo-train/`](../28-rlhf-dpo-train/) —
+  the alignment training that this harness scores
+  (the SFT → DPO progress, the preference
+  margin).
+- [`../33-mlflow-tracker/`](../33-mlflow-tracker/) —
+  the experiment-tracking integration; the
+  `RunRecord` lands in MLflow / W&B as a run.
+
 ---
 
 **Last updated:** 2026-10-12  

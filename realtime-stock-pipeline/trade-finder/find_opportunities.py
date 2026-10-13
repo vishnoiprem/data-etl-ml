@@ -186,6 +186,38 @@ PRODUCTS: list[dict] = [
     {"name": "stainless steel straw",  "cat": "lifestyle",   "kg": 0.05,
      "src": {"CN": 0.40, "IN": 0.50, "VN": 0.42, "TR": 0.55, "MX": 0.60, "BD": 0.45, "ID": 0.48, "TH": 0.50},
      "dst": {"US": 4.0, "DE": 5.0, "UK": 4.5, "AU": 6.0, "JP": 5.5, "CA": 5.0, "AE": 4.5}},
+
+    # -------- HIGH-TICKET — bigger per-unit margin, slower turnover --------
+    {"name": "cordless hair dryer ionic", "cat": "beauty-tech", "kg": 0.80,
+     "src": {"CN": 18.0, "IN": 22.0, "VN": 20.0, "TR": 24.0, "MX": 26.0, "BD": 21.0, "ID": 22.0, "TH": 23.0},
+     "dst": {"US": 89.0, "DE": 105.0, "UK": 100.0, "AU": 125.0, "JP": 115.0, "CA": 110.0, "AE": 95.0}},
+    {"name": "robotic vacuum cleaner",    "cat": "home-tech",   "kg": 4.50,
+     "src": {"CN": 85.0, "IN": 95.0, "VN": 90.0, "TR": 100.0, "MX": 110.0, "BD": 92.0, "ID": 95.0, "TH": 96.0},
+     "dst": {"US": 320.0, "DE": 380.0, "UK": 360.0, "AU": 440.0, "JP": 410.0, "CA": 390.0, "AE": 340.0}},
+    {"name": "air fryer 5L",              "cat": "kitchen-tech","kg": 5.20,
+     "src": {"CN": 32.0, "IN": 38.0, "VN": 34.0, "TR": 40.0, "MX": 44.0, "BD": 36.0, "ID": 37.0, "TH": 38.0},
+     "dst": {"US": 120.0, "DE": 140.0, "UK": 135.0, "AU": 165.0, "JP": 150.0, "CA": 145.0, "AE": 130.0}},
+    {"name": "electric scooter foldable", "cat": "mobility",    "kg": 14.0,
+     "src": {"CN": 180.0, "IN": 210.0, "VN": 195.0, "TR": 220.0, "MX": 240.0, "BD": 200.0, "ID": 205.0, "TH": 210.0},
+     "dst": {"US": 580.0, "DE": 680.0, "UK": 650.0, "AU": 790.0, "JP": 720.0, "CA": 690.0, "AE": 620.0}},
+    {"name": "smartwatch fitness band",   "cat": "wearables",   "kg": 0.15,
+     "src": {"CN": 9.0, "IN": 11.0, "VN": 10.0, "TR": 12.0, "MX": 13.0, "BD": 10.0, "ID": 10.5, "TH": 11.0},
+     "dst": {"US": 49.0, "DE": 58.0, "UK": 55.0, "AU": 68.0, "JP": 62.0, "CA": 58.0, "AE": 52.0}},
+    {"name": "4k action camera",          "cat": "electronics", "kg": 0.30,
+     "src": {"CN": 28.0, "IN": 33.0, "VN": 30.0, "TR": 35.0, "MX": 38.0, "BD": 31.0, "ID": 32.0, "TH": 33.0},
+     "dst": {"US": 110.0, "DE": 130.0, "UK": 125.0, "AU": 150.0, "JP": 138.0, "CA": 132.0, "AE": 118.0}},
+    {"name": "noise-cancelling headphones","cat": "audio",      "kg": 0.45,
+     "src": {"CN": 24.0, "IN": 28.0, "VN": 26.0, "TR": 30.0, "MX": 33.0, "BD": 27.0, "ID": 28.0, "TH": 29.0},
+     "dst": {"US": 95.0, "DE": 115.0, "UK": 110.0, "AU": 130.0, "JP": 122.0, "CA": 115.0, "AE": 100.0}},
+    {"name": "mini projector 1080p",      "cat": "electronics", "kg": 1.30,
+     "src": {"CN": 55.0, "IN": 65.0, "VN": 60.0, "TR": 70.0, "MX": 75.0, "BD": 62.0, "ID": 64.0, "TH": 65.0},
+     "dst": {"US": 180.0, "DE": 215.0, "UK": 205.0, "AU": 245.0, "JP": 225.0, "CA": 215.0, "AE": 195.0}},
+    {"name": "electric toothbrush sonic", "cat": "beauty-tech", "kg": 0.25,
+     "src": {"CN": 8.0, "IN": 10.0, "VN": 9.0, "TR": 11.0, "MX": 12.0, "BD": 9.5, "ID": 9.8, "TH": 10.0},
+     "dst": {"US": 39.0, "DE": 47.0, "UK": 45.0, "AU": 55.0, "JP": 50.0, "CA": 47.0, "AE": 42.0}},
+    {"name": "portable power station 300Wh", "cat": "energy",   "kg": 4.00,
+     "src": {"CN": 95.0, "IN": 110.0, "VN": 100.0, "TR": 115.0, "MX": 125.0, "BD": 105.0, "ID": 108.0, "TH": 110.0},
+     "dst": {"US": 320.0, "DE": 380.0, "UK": 365.0, "AU": 440.0, "JP": 405.0, "CA": 385.0, "AE": 340.0}},
 ]
 
 
@@ -234,6 +266,9 @@ class Opportunity:
     platform: str
     # scoring
     score: float = 0.0
+    rich_score: float = 0.0   # rich-fast: $ per unit × turnover × 1/capital
+    units_for_10k: int = 0    # units to sell for $10K profit
+    capital_for_500u: float = 0.0  # capital needed for a 500-unit batch
     # "service lead" — angle: you're offering to source this for the
     # destination-side seller, or to broker a deal.
     lead_angle: str = "sourcing"
@@ -299,6 +334,11 @@ def _build_opportunities(fx: dict[str, float]) -> list[Opportunity]:
                     markup_x=markup,
                     platform=platform,
                 )
+                # Rich-fast metrics
+                # units to clear $10K profit
+                opp.units_for_10k = int(10000 / max(margin, 0.10)) if margin > 0 else 99_999
+                # capital for a 500-unit batch (landed cost × 500)
+                opp.capital_for_500u = round(landed * 500, 2)
                 out.append(opp)
     return out
 
@@ -311,10 +351,31 @@ def _score(o: Opportunity) -> float:
     return round(0.60 * margin_component + 0.25 * markup_component + 0.15 * weight_penalty, 4)
 
 
+def _rich_score(o: Opportunity) -> float:
+    """Rich-fast score: maximize dollars-per-unit * turnover, minimize capital.
+
+    Tuned for "I want to make $10K from this in <3 months":
+      - 50% absolute margin per unit (you want $$, not %)
+      - 30% inverse capital requirement (low capital = high velocity)
+      - 20% margin% (still need it to be profitable)
+
+    Normalized so a "rich score" of 1.0 means a home run.
+    """
+    if o.margin_usd <= 0:
+        return 0.0
+    # Normalize: $50/unit is excellent, $5 is meh
+    margin_component = min(o.margin_usd / 50.0, 1.0)
+    # Lower capital = higher score; $5K for 500u is excellent
+    cap_score = max(0.0, 1.0 - (o.capital_for_500u / 25000.0))
+    pct_score = max(0.0, min(o.margin_pct, 1.0))
+    return round(0.50 * margin_component + 0.30 * cap_score + 0.20 * pct_score, 4)
+
+
 def _filter_and_rank(opps: list[Opportunity], min_margin: float = 0.35) -> list[Opportunity]:
     """Keep only profitable routes (margin >= min_margin)."""
     for o in opps:
         o.score = _score(o)
+        o.rich_score = _rich_score(o)
     qualified = [o for o in opps if o.margin_pct >= min_margin and o.margin_usd > 0]
     qualified.sort(key=lambda o: -o.score)
     return qualified
@@ -346,6 +407,12 @@ def _write_ranked_json(opps: list[Opportunity], fx: dict[str, float]) -> None:
         "fx_base": "USD",
         "fx_rates": {k: round(v, 4) for k, v in fx.items()},
         "top_opportunities": [asdict(o) for o in opps[:30]],
+        # NEW: rich-fast leaderboard — sorted by absolute $/unit × low capital
+        "rich_fast_top": [asdict(o) for o in sorted(opps, key=lambda o: -o.rich_score)[:15]],
+        "rich_fast_meta": {
+            "sort": "rich_score (50% $/unit, 30% low capital, 20% margin%)",
+            "n_routes_scored": len(opps),
+        },
     }
     RANKED_JSON.write_text(json.dumps(payload, indent=2, default=str))
 
@@ -353,31 +420,47 @@ def _write_ranked_json(opps: list[Opportunity], fx: dict[str, float]) -> None:
 def _write_markdown_report(opps: list[Opportunity], fx: dict[str, float]) -> Path:
     today = datetime.now().strftime("%Y-%m-%d")
     path = REPORTS_DIR / f"{today}.md"
-    n_total = len(PRODUCTS) * 8 * 7  # rough upper bound
+    n_total = sum(len(p["src"]) * len(p["dst"]) for p in PRODUCTS)
     lines = [
         f"# Trade Opportunities — {today}",
         "",
-        f"- **Qualified routes (margin ≥ 35%):** {len(opps)} of ~{n_total} total combinations",
-        f"- **FX base:** USD",
-        f"- **Source:** live static + 5% drift simulation (replace with scraper for production)",
+        f"- **Qualified routes (margin ≥ 35%):** {len(opps)} of {n_total} total combinations",
+        f"- **Products in universe:** {len(PRODUCTS)}",
+        f"- **FX base:** USD (live + 5-7% drift simulation)",
         "",
-        "## Top 20 by composite score",
+        "## 💰 RICH-FAST LEADERBOARD — best dollars-per-unit × low capital",
+        "*Sort: 50% $/unit margin, 30% capital efficiency, 20% margin%*",
         "",
-        "| # | Product | Cat | Route | Src $ | Dst $ | Ship | Tariff | Fee | Landed | Margin | Markup | Score |",
-        "|---|---------|-----|-------|-------|-------|------|--------|-----|--------|--------|--------|-------|",
+        "| # | Product | Route | $/unit | Margin% | Capital (500u) | Profit (500u) | Units→$10K | Rich Score |",
+        "|---|---------|-------|-------:|--------:|---------------:|--------------:|-----------:|-----------:|",
+    ]
+    rich_sorted = sorted(opps, key=lambda o: -o.rich_score)[:15]
+    for i, o in enumerate(rich_sorted, 1):
+        lines.append(
+            f"| {i} | {o.product} | {o.source_country}→{o.dest_country} | "
+            f"${o.margin_usd:.2f} | {o.margin_pct*100:.1f}% | "
+            f"${o.capital_for_500u:,.0f} | ${o.margin_usd*500:,.0f} | "
+            f"{o.units_for_10k:,} | {o.rich_score:.3f} |"
+        )
+
+    lines += [
+        "",
+        "## Top 20 by composite score (margin + markup + weight)",
+        "",
+        "| # | Product | Cat | Route | Src $ | Dst $ | Landed | Margin | Markup | Score |",
+        "|---|---------|-----|-------|-------|-------|--------|--------|--------|-------|",
     ]
     for i, o in enumerate(opps[:20], 1):
         lines.append(
             f"| {i} | {o.product} | {o.category} | {o.source_country}→{o.dest_country} | "
-            f"{o.source_unit_usd:.2f} | {o.dest_price_usd:.2f} | {o.shipping_usd:.2f} | "
-            f"{o.tariff_usd:.2f} | {o.platform_fee_usd:.2f} | {o.landed_cost_usd:.2f} | "
+            f"{o.source_unit_usd:.2f} | {o.dest_price_usd:.2f} | {o.landed_cost_usd:.2f} | "
             f"{o.margin_pct*100:.1f}% | {o.markup_x:.2f}x | {o.score:.3f} |"
         )
     lines += [
         "",
         "## By category",
         "",
-        "| Category | n | avg margin | best route |",
+        "| Category | n | avg margin | best $/unit |",
         "|----------|---|-----------|-----------|",
     ]
     by_cat: dict[str, list[Opportunity]] = {}
@@ -385,10 +468,26 @@ def _write_markdown_report(opps: list[Opportunity], fx: dict[str, float]) -> Pat
         by_cat.setdefault(o.category, []).append(o)
     for cat, items in sorted(by_cat.items(), key=lambda kv: -len(kv[1])):
         avg = sum(o.margin_pct for o in items) / len(items)
-        best = max(items, key=lambda o: o.score)
+        best = max(items, key=lambda o: o.margin_usd)
         lines.append(
-            f"| {cat} | {len(items)} | {avg*100:.1f}% | {best.product} {best.source_country}→{best.dest_country} ({best.margin_pct*100:.1f}%) |"
+            f"| {cat} | {len(items)} | {avg*100:.1f}% | ${best.margin_usd:.0f}/u ({best.product} {best.source_country}→{best.dest_country}) |"
         )
+
+    # Bottom-line action summary
+    lines += [
+        "",
+        "## 🎯 What to do TODAY",
+        "",
+    ]
+    if rich_sorted:
+        top = rich_sorted[0]
+        lines += [
+            f"**Highest rich_score:** {top.product} {top.source_country}→{top.dest_country}",
+            f"  - ${top.margin_usd:.2f} margin per unit ({top.margin_pct*100:.0f}%)",
+            f"  - {top.units_for_10k:,} units = $10,000 profit",
+            f"  - Capital needed for 500 units: ${top.capital_for_500u:,.0f}",
+            f"  - Sells on {top.platform} in {COUNTRY_META[top.dest_country]['name']}",
+        ]
     path.write_text("\n".join(lines))
     return path
 
@@ -401,7 +500,7 @@ def _write_outreach_emails(opps: list[Opportunity]) -> list[Path]:
         src_name = COUNTRY_META[o.source_country]["name"]
         dst_name = COUNTRY_META[o.dest_country]["name"]
         body = (
-            f"Subject: {o.product.title()} sourcing — {o.margin_pct*100:.0f}% margin, {src_name} → {dst_name}\n"
+            f"Subject: {o.product.title()} sourcing — ${o.margin_usd:.0f}/unit margin, {o.margin_pct*100:.0f}%, {src_name} → {dst_name}\n"
             f"\n"
             f"Hi [First Name],\n"
             f"\n"
@@ -416,6 +515,12 @@ def _write_outreach_emails(opps: list[Opportunity]) -> list[Path]:
             f"  • Platform fees (~{(o.platform_fee_usd/o.dest_price_usd)*100:.0f}%):    -${o.platform_fee_usd:.2f}\n"
             f"  • Net margin per unit:         ${o.margin_usd:.2f} ({o.margin_pct*100:.0f}%)\n"
             f"\n"
+            f"Get rich math:\n"
+            f"  • Capital for 500-unit batch:  ${o.capital_for_500u:,.0f}\n"
+            f"  • Profit on 500 units:         ${o.margin_usd * 500:,.0f}\n"
+            f"  • Units to hit $10K profit:    {o.units_for_10k:,}\n"
+            f"\n"
+            f"Logistics:\n"
             f"  • Min order: 200 units (sample) / 1000+ units (production)\n"
             f"  • Lead time: 14-21 days door-to-door\n"
             f"  • Payment: 30% deposit, 70% on B/L copy\n"

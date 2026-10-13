@@ -13,6 +13,33 @@ import re
 from typing import Protocol
 
 
+# All-caps acronyms that should stay uppercase when title-casing.
+# Without this, "soc2 for solo founders" -> "Soc2 For Solo Founders"
+# (wrong) instead of "SOC2 for Solo Founders" (right).
+_ACRONYMS = {"soc2", "hipaa", "gdpr", "iso", "pci", "saas", "api", "ui", "ux",
+             "ai", "ml", "cto", "ceo", "cfo", "vp", "seo", "roi", "kpi"}
+
+
+def _smart_title(text: str) -> str:
+    """Title-case while preserving common acronyms.
+
+    'soc2 for solo founders playbook' -> 'SOC2 for Solo Founders Playbook'
+    'hipaa compliance for indie hackers' -> 'HIPAA Compliance for Indie Hackers'
+
+    Used wherever `topic.title()` would otherwise produce ugly output.
+    """
+    out = []
+    for w in text.split():
+        bare = w.strip(".,:;()[]'\"")
+        prefix = w[: len(w) - len(w.lstrip(".,:;()[]'\""))]
+        suffix = w[len(w.rstrip(".,:;()[]'\"")) :]
+        if bare.lower() in _ACRONYMS:
+            out.append(prefix + bare.upper() + suffix)
+        else:
+            out.append(w.capitalize())
+    return " ".join(out)
+
+
 class LLMRouter(Protocol):
     def complete(self, prompt: str, system: str = "", max_tokens: int = 1024) -> str: ...
     def json(self, prompt: str, schema_hint: str = "", max_tokens: int = 1024) -> dict: ...
@@ -245,7 +272,8 @@ class StubRouter:
     @staticmethod
     def _stub_ebook(prompt: str) -> str:
         """A 5-chapter eBook stub. ~1,500 words / ~5 pages."""
-        title = StubRouter._extract(prompt, "Title") or "The Short Guide"
+        raw_title = StubRouter._extract(prompt, "Title") or "The Short Guide"
+        title = _smart_title(raw_title)
         topic = StubRouter._extract(prompt, "Topic") or "the work"
         return _LONG_EBOOK_TEMPLATE.format(title=title, topic=topic)
 
@@ -319,14 +347,17 @@ class StubRouter:
     @staticmethod
     def _stub_product_json(prompt: str) -> dict:
         topic = StubRouter._extract(prompt, "Topic") or "productivity"
+        title = _smart_title(topic)
+        # Short topic for hooks so we don't repeat "for solo founders" 3x
+        short = _smart_title(topic.split(" for ")[0]) if " for " in topic else title
         return {
             "products": [
-                {"title": f"The {topic.title()} Playbook", "format": "ebook",
-                 "price_usd": 19, "page_count": 42, "hook": f"Everything I learned about {topic} in 90 days."},
-                {"title": f"{topic.title()} Notion Bundle", "format": "template",
-                 "price_usd": 12, "page_count": 0, "hook": f"10 plug-and-play {topic} dashboards."},
-                {"title": f"{topic.title()} Cheat Sheet (Printable)", "format": "printable",
-                 "price_usd": 7, "page_count": 4, "hook": f"Pin it to your wall. Do the {topic} thing."},
+                {"title": f"The {title} Playbook", "format": "ebook",
+                 "price_usd": 19, "page_count": 24, "hook": f"Everything I learned about {topic} in 90 days."},
+                {"title": f"{title} Notion Bundle", "format": "template",
+                 "price_usd": 29, "page_count": 15, "hook": f"10 plug-and-play {short} dashboards you can clone today."},
+                {"title": f"{title} Cheat Sheet (Printable)", "format": "printable",
+                 "price_usd": 9, "page_count": 6, "hook": f"Pin it to your wall. Do the {short} thing."},
             ]
         }
 

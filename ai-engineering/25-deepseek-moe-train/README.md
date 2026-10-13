@@ -62,6 +62,56 @@ Mixture-of-Experts at the trillion-parameter scale, with the load-balancing loss
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not DeepSeek-V3.** DeepSeek-V3 is a 671B-param
+  model trained on 14.8T tokens with 256 routed
+  experts + 1 shared, top-8 routing, FP8 mixed
+  precision, and multi-month training on 2048
+  H800s. This is the *routing + load-balance loss*
+  pattern in 100 lines of NumPy. The scaling
+  realities (expert parallelism, FP8, multi-month
+  runs) are not in the toy.
+- **Not a dense-model replacement.** MoE is cheaper
+  at inference (only the active params fire per
+  token) but more expensive in training (the
+  routing + aux loss + expert parallelism). Use
+  MoE when the inference cost is the binding
+  constraint; use dense when the training cost is.
+- **Not a free lunch on quality.** The active params
+  per token (37B for DeepSeek-V3) is what determines
+  the model's expressiveness. A 671B MoE is roughly
+  equivalent to a ~37B dense model on quality, not
+  a ~600B dense model.
+- **Not single-GPU serving.** Without expert
+  parallelism, the whole model has to fit on one
+  GPU. For 256 experts × 2.6B each, that's a
+  non-starter. Plan for multi-GPU serving from
+  day one.
+
+---
+
+## Related directories
+
+- [`../29-fsdp-flash-train/`](../29-fsdp-flash-train/) —
+  the distributed-training patterns (FSDP +
+  FlashAttention) that MoE training builds on
+  top of. Expert parallelism is a separate
+  axis.
+- [`../30-triton-kernels/`](../30-triton-kernels/) —
+  the kernel-level optimizations (fused routing,
+  grouped GEMM) that MoE inference needs for
+  the per-expert compute.
+- [`../18-paged-attention-serving/`](../18-paged-attention-serving/) —
+  the per-GPU efficiency pattern; MoE serving
+  extends it with per-expert KV cache management.
+- [`../28-rlhf-dpo-train/`](../28-rlhf-dpo-train/) —
+  the alignment training that applies to MoE
+  models the same way it does to dense ones.
+
 ---
 
 **Last updated:** 2026-10-12  

@@ -1,6 +1,26 @@
 -- Avilx leads tracking schema
 -- Stores every email we send with phone/contact info for dedup + tracking.
 
+-- Migration: bring legacy 'pod' default up to the new 'pitch_pod' value.
+-- The original column was created with DEFAULT 'pod', but the CHECK
+-- constraint (added later) requires 'pitch_pod' or 'apply_personal'.
+-- Any INSERT that didn't specify apply_mode was therefore guaranteed
+-- to fail with a CHECK violation. This idempotent ALTER brings existing
+-- databases up to date so the default matches the schema.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'leads'
+          AND column_name = 'apply_mode'
+          AND column_default LIKE '%pod%'
+          AND column_default NOT LIKE '%pitch_pod%'
+    ) THEN
+        ALTER TABLE leads ALTER COLUMN apply_mode SET DEFAULT 'pitch_pod';
+    END IF;
+END
+$$;
+
 CREATE TABLE IF NOT EXISTS leads (
     id              SERIAL PRIMARY KEY,
     tracking_id     TEXT UNIQUE NOT NULL,           -- short public ID for the email link
@@ -17,8 +37,8 @@ CREATE TABLE IF NOT EXISTS leads (
     cover_letter_subject TEXT,
     cover_letter_body    TEXT,
     jd_text         TEXT,
-    apply_mode      TEXT NOT NULL DEFAULT 'pod'
-        CHECK (apply_mode IN ('pod', 'solo')),       -- 'pod' = Avilx pod pitch; 'solo' = Prem personal apply
+    apply_mode      TEXT NOT NULL DEFAULT 'pitch_pod'
+        CHECK (apply_mode IN ('pitch_pod', 'apply_personal')),  -- 'pitch_pod' = Avilx pod pitch; 'apply_personal' = Prem personal apply
     status          TEXT NOT NULL DEFAULT 'pending', -- pending | sent_email | failed | replied | bounced | unsubscribed
     sent_at         TIMESTAMPTZ,
     replied_at      TIMESTAMPTZ,
@@ -35,6 +55,7 @@ CREATE TABLE IF NOT EXISTS leads (
 -- Migration: DROP INDEX leads_company_email_unique; create this one.
 -- Safe because no existing rows violate the new key (the old key
 -- prevented any such rows from ever being inserted).
+DROP INDEX IF EXISTS leads_company_email_unique;
 CREATE UNIQUE INDEX IF NOT EXISTS leads_company_email_role_unique
     ON leads (LOWER(company), LOWER(contact_email), LOWER(role))
     WHERE contact_email IS NOT NULL

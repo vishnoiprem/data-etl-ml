@@ -77,6 +77,52 @@ The first version didn't have a per-tool rate limit. The agent decided it needed
 pip install -r requirements.txt
 make demo
 ```
+
+---
+
+## What this is NOT
+
+- **Not AutoGPT.** AutoGPT is the original viral
+  demo; this build is the *same shape* with the
+  guardrails that AutoGPT didn't have. Step budget,
+  cost budget, allowlist, schema validator, kill
+  switch — every one of these is a lesson learned
+  from running an unconstrained agent.
+- **Not a product.** The README is honest: "useful
+  as a research harness; less useful as a product."
+  An autonomous loop on a research task is great;
+  on a production task, the failure modes (drift,
+  hallucinated tools, runaway cost) are still real.
+- **Not magic.** The "5 fewer tasks completed"
+  number is the cost of the guardrails. An
+  unconstrained agent attempts more; a constrained
+  agent *finishes* more. The trade is in the
+  completion rate, not the attempt rate.
+- **Not a substitute for the kill switch.** The
+  HTTP endpoint at port 9100 is the *only* way to
+  stop the agent from the outside. If you deploy
+  this without a network route to the kill switch,
+  the only options are SSH + kill, or pulling the
+  power.
+
+---
+
+## Related directories
+
+- [`../11-general-agent-manus-style/`](../11-general-agent-manus-style/) —
+  the general-purpose cousin: same shape, but
+  bounded to short tasks (5-20 steps, $0.50) instead
+  of long-running.
+- [`../8-swe-agent-devin-style/`](../8-swe-agent-devin-style/) —
+  the SWE cousin: same planner-executor shape,
+  scoped to code + a sandbox.
+- [`../9-terminal-agent-claude-code/`](../9-terminal-agent-claude-code/) —
+  the terminal cousin: same shape, TUI front-end.
+- [`../15-multi-agent-debate/`](../15-multi-agent-debate/) —
+  the verifier pattern; useful for the
+  "did this step actually work?" check that the
+  validator here does in a single LLM call.
+
 ---
 
 **Last updated:** 2026-10-12  

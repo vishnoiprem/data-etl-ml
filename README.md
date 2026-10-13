@@ -7,6 +7,14 @@
 >
 > 74 world-top reference patterns in the tables below. If you've used the system at Netflix, Stripe, Anthropic, Databricks, Bloomberg, or OpenAI, I can defend how I'd build it, run it, and cost it.
 
+> 💸 **Looking for a working AI revenue system, not just code?** Start with
+> [`ai-engineering/40-ai-side-hustle/`](ai-engineering/40-ai-side-hustle/) —
+> a self-contained 4-stream AI revenue factory (SEO content, micro-SaaS
+> scaffold, digital products, print-on-demand merch) that runs in
+> offline-stub mode so you can see the whole pipeline in 5 minutes.
+> That's the headline project. The 40+ projects below are the
+> infrastructure that backs it.
+
 <div align="left">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -551,6 +559,21 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 - **Course / learning path** → browse [Labs & Learning Tracks](#-at-a-glance--headline-projects) or `ai-engineering/13-ai-engineering-course/`.
 - **Writing / articles** → see [Writing & Interview Prep](#-writing--interview-prep) and `medium/`.
 - **Resume assets** → `Resume/`.
+
+### Top-level entry points (read me first if you land in a subdirectory)
+
+| Directory | What's inside | Read |
+|-----------|---------------|------|
+| `data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](data-engineering/README.md) |
+| `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](ai-engineering/README.md) |
+| `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](agentic-ai/README.md) |
+| `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](ml/README.md) |
+| `realtime-stock-pipeline/` | Kafka + Flink + Postgres + Grafana reference build | [realtime-stock-pipeline/README.md](realtime-stock-pipeline/README.md) |
+| `leads-pipeline/` | Cold-email + AI resume tailoring pipeline (the side hustle) | [leads-pipeline/README.md](leads-pipeline/README.md) |
+| `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
+| `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
+| `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
+| `postgress_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgress_cdc_kafka/README.md](postgress_cdc_kafka/README.md) |
 
 ---
 

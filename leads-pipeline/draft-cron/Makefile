@@ -42,16 +42,19 @@ TEST_MODULES := \
     test_parser \
     test_resume_tailor \
     test_better_email \
-    test_bounce_deny_persistence
+    test_bounce_deny_persistence \
+    test_backfill_cover_letters \
+    test_mark_reply
 
 LINT_FILES := \
     find_more_leads.py find_clients.py refine_pipeline.py \
     backfill_emails.py cover_letter.py dashboard.py \
     bin/loop_status.py bin/loop_bounce_sync.py \
+    bin/mark_reply.py bin/reply_metrics.py \
     state/bounce_deny_store.py \
     resume_tailor.py
 
-.PHONY: help install schema test lint docker-build docker-run docker-shell docker-healthcheck ci clean
+.PHONY: help install schema test lint reply metrics docker-build docker-run docker-shell docker-healthcheck ci clean
 
 help:           ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -94,6 +97,21 @@ docker-healthcheck:  ## Run the in-image healthcheck script
 
 docker-shell:   ## Open a shell in the built image
 	docker run --rm -it --entrypoint bash $(IMAGE)
+
+reply:          ## Mark a reply / meeting: make reply Q="Tailscale" REPLIED=1 AT=2026-10-12 VIA=email
+	@if [ -z "$(Q)" ]; then echo "Usage: make reply Q=\"<company-substring>\" [REPLIED=1] [MEETING=1] [AT=YYYY-MM-DD] [VIA=email|x_dm|linkedin|platform|inbound|other] [NOTES='...']"; exit 1; fi
+	$(PY) bin/mark_reply.py "$(Q)" \
+	    $(if $(REPLIED),--replied) \
+	    $(if $(MEETING),--meeting) \
+	    $(if $(AT),--at $(AT)) \
+	    $(if $(VIA),--via $(VIA)) \
+	    $(if $(NOTES),--notes "$(NOTES)")
+
+reply-list:     ## Show the reply state of every lead in the most recent drop
+	$(PY) bin/mark_reply.py --list
+
+metrics:        ## Weekly reply / conversion KPIs (override DAYS=N for a longer window)
+	$(PY) bin/reply_metrics.py $(if $(DAYS),--days $(DAYS)) $(if $(CHANNEL),--by-channel) $(if $(JSON),--json)
 
 ci: install lint test docker-build docker-run docker-healthcheck   ## Run every CI step locally
 	@echo ""
