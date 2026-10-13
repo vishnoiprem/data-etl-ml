@@ -62,9 +62,11 @@ a `start_*_job` + `get_*_job` API.
 ## ⚠️ Security — rotation event (2026-10-13)
 
 **This directory used to contain hardcoded AWS credentials
-(`AKIASEXCXLFDMUEP3TJI` and the matching 40-char secret) in
-`app.py`, `Amazon_Polly.py`, and the React widget
-`AudioRecorder.jsx`. Those values are no longer in source.**
+(the previous commit's app.py had an `AKIA…` access key + a
+matching 40-char secret). Those values are no longer in source,
+and the literal key is not repeated here in case the README
+is exported / scraped / cached elsewhere — only the prefix
+`AKIA` is referenced below, never the rotated value.**
 
 What changed in this commit:
 

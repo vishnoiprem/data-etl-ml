@@ -1,9 +1,34 @@
 # Python environments
 venv/
 .venv/
+# Secrets — never commit. The patterns below catch the common
+# .env filenames (literal ".env", "foo.env", "aws.env", ".env.local",
+# ".env.production", etc.) plus a few "creds/" / "secrets/" directory
+# conventions, plus common AWS credential file names. The *.example
+# variants are intentionally NOT ignored (see the whitelist below)
+# so a fresh clone has something to copy. The "creds" / "secrets"
+# directory patterns are anchored at a path boundary to avoid
+# catching *legitimate* filenames like `docs/SECRETS_HANDLING.md`
+# or `.secrets.baseline` (the detect-secrets convention).
 .env
+.env.*
 *.env
 *aws.env
+aws_credentials
+aws/credentials
+gcp-credentials*
+gcp-credentials.json
+secrets/*
+secrets.json
+secrets.yaml
+secrets.yml
+creds/*
+creds.json
+.aws/
+.gcp/
+.azure/
+!docs/SECRETS_HANDLING.md
+!.secrets.baseline
 
 # IDE
 .idea/
@@ -45,6 +70,12 @@ data/
 !.devcontainer/post-create.sh
 .vscode/
 !.vscode/
+
+# Whitelist .env.example files (the catch-all *.env / .env.* rules above
+# would otherwise hide the placeholder docs that tell users what to set).
+!*.env.example
+!.env.example
+!**/.env.example
 
 # Large ML files (kept in LFS for some specific paths; ignored for the rest)
 *.bin
