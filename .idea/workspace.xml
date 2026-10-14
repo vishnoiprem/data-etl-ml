@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/medium/meta/data-Architecture/600M-Events-a-Day-—-Tiered-Storage-&amp;-Serving-Architecture.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/data-Architecture/600M-Events-a-Day-—-Tiered-Storage-&amp;-Serving-Architecture.pptx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/meta-ai/Meta_L6_CTWA_Mock_Working_PySpark_SQL_Python.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/medium/meta/meta-ai/meta-mock-coding-round-1.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/medium/meta/meta-ai/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/medium/meta/meta-ai/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
