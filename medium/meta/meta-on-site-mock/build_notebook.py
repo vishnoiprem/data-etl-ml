@@ -44,6 +44,16 @@ cell_order = [
     ("round5_intro", "md"),
     ("vector_db_intro", "md"),
     ("code:cell_07_vector_db.py", "code"),
+    ("benchmark_intro", "md"),
+    ("code:cell_08_benchmark.py", "code"),
+    ("hybrid_intro", "md"),
+    ("code:cell_09_hybrid.py", "code"),
+    ("drift_intro", "md"),
+    ("code:cell_10_drift.py", "code"),
+    ("reranker_intro", "md"),
+    ("code:cell_11_reranker.py", "code"),
+    ("streaming_intro", "md"),
+    ("code:cell_12_streaming.py", "code"),
     ("footer", "md"),
 ]
 
