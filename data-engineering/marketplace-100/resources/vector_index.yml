@@ -1,0 +1,33 @@
+# Vector Search index — backs the agent's `query_history` tool.
+#
+# This resource is created via the databricks-vectorsearch SDK
+# (the DAB doesn't have a first-class vector_search_index
+# resource as of writing). Provision it with:
+#
+#   python3 -c "
+#   from databricks.vector_search.client import VectorSearchClient
+#   vsc = VectorSearchClient()
+#   vsc.create_delta_sync_index(
+#     endpoint_name='m100_history_endpoint',
+#     index_name='marketplace_100.agents.history_index',
+#     source_table='marketplace_100.agents.iterations',
+#     pipeline_type='TRIGGERED',
+#     primary_key='iter_no',
+#     embedding_source_column='summary',
+#   )
+#   "
+#
+# Then the agent's `query_history` tool can call
+# `vsc.get_index(...).similarity_search(query, k=5)` instead of
+# the local numpy index.
+#
+# We keep the local numpy index as the smoke-test path; the
+# Databricks Vector Search path is the production deployment.
+
+name: m100_history_endpoint
+endpoint_type: STANDARD
+description: >-
+  Vector Search endpoint for the agent's `query_history` tool.
+  In production, this is what the agent's tool calls hit; in
+  the smoke test, the local numpy index in .m100_history/
+  stands in.

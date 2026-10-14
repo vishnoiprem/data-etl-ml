@@ -6,17 +6,47 @@
 
 ---
 
+# TABLE OF CONTENTS
+
+| § | Section |
+|---|---------|
+| A | Elevator Pitches (30s / 60s / 2min) |
+| B | Panel Q&A Opener |
+| C | First 1:1 Reception Opener |
+| D | Post-Event Follow-up Templates (LinkedIn, Email, Value Drop) |
+| E | One-Page Cheat Sheet (print on index card) |
+| F | 13 Numbers to Memorise |
+| G | "People to Find" Target List |
+| H | Dress + What to Pack |
+| I | Pre-Event Research (45 min) + Rehearsal (30 min) |
+| J | Vietnamese Phrases — Basic (7 essentials) |
+| K | Hour-by-Hour Oct 23 Timeline |
+| L | The 2 Sentences That Must Stick |
+| M | Pre-Event "Looking Forward" Email (send Oct 22) |
+| N | Vietnamese Phrases — Extended (greetings, compliments, role, closing) |
+| O | Expanded Thank-You Email Scenarios |
+| P | 6 More Panel Q&A STAR Answers |
+| Q | Handling Tough Moments (5 scripts) |
+| R | Conversation Depth Cheat (4-layer framework) |
+| S | LinkedIn Profile Quick-Fix |
+| T | 30-Day Post-Event Plan |
+
+---
+
 # SECTION A — ELEVATOR PITCHES (3 versions)
 
 ## A1. 30-second pitch (casual reception intro)
+
 > "I'm Prem — I lead data and AI platform engineering. Most recently I built the Databricks lakehouse that runs an eight-billion-dollar retail business across three countries, before that I was at Lazada running the data platform for Southeast Asia's largest e-commerce business, and my career started in regulated banking — Standard Chartered, DBS. I'm here because Techcombank looks like the exact place where both halves of my career meet. And I'm personally very interested in how you're approaching the data lakehouse build."
 
 ## A2. 60-second pitch (panel Q&A opener or senior-leader follow-up)
+
 > "I'm Prem Vishnoi, fifteen years across banking and consumer internet. My career started in regulated banking — I built AML and compliance data platforms at Standard Chartered across fifteen-plus countries, and I worked at DBS before that. Then I moved to consumer-internet scale: Lazada, where I led data engineering for Southeast Asia's largest e-commerce business, and now Makro, where I own the data and AI platform for an eight-billion-dollar omnichannel business across three countries — about thirty people, a three-million-dollar budget, a Databricks lakehouse doing ten billion rows a day.
 >
 > Techcombank is the intersection I've spent my career on: regulated financial data done at consumer-internet scale, in the most interesting retail-banking market in ASEAN. The Director of Data Engineering role is exactly where I'm most useful — closer to the build, in the engine room, shipping the lakehouse that the bank's published data and AI strategy depends on. That's why I'm here."
 
 ## A3. 2-minute pitch (1:1 with a senior leader at the reception)
+
 > [First 30 seconds = A1 above, then:]
 >
 > "What I am most proud of from the last two years is taking an organisation that had no unified data platform — three legacy warehouses, manual reconciliation, a five-day month-end close — and building, with a team I scaled from eight to thirty, a Databricks lakehouse that today processes ten billion rows a day and has cut that close to two hours. We took forty percent out of the cloud spend while volumes grew. We put a Text-to-SQL GenAI platform in production on top of the governed data layer. We have fifty-plus executive dashboards in use by the CEO, CFO, COO. That is the same muscle I want to bring to Techcombank.
@@ -165,9 +195,9 @@ Then **ask for their card or offer yours** (have cards in inner left pocket).
 │  PREM — TECHCOMBANK ROADSHOW — OCT 23, 2026                 │
 │  4 candidates → 1 hire. Be the most prepared, not loudest.  │
 ├─────────────────────────────────────────────────────────────┤
-│  MY NUMBERS (memorise):                                    │
+│  MY NUMBERS (memorise):                                     │
 │   • 10B rows/day at Makro lakehouse                         │
-│   • 5d → 2h month-end close                                │
+│   • 5d → 2h month-end close                                 │
 │   • 40% cloud cost takeout (volumes grew)                   │
 │   • 30 ICs, $3M budget, team scaled 8→30                    │
 │   • 50+ exec dashboards in production                       │
@@ -177,8 +207,8 @@ Then **ask for their card or offer yours** (have cards in inner left pocket).
 │   • TRC holder — HCMC in 30 days                            │
 ├─────────────────────────────────────────────────────────────┤
 │  MY 3-PART THESIS:                                          │
-│   1. Started in banking (SCB, DBS) → went consumer (Lazada, │
-│      Makro) → Techcombank is the convergence                │
+│   1. Banking (SCB, DBS) → Consumer (Lazada, Makro) →        │
+│      Techcombank is the convergence                         │
 │   2. I'm the delivery leader, not the strategy deck         │
 │   3. The Director band = closer to the build = where I'm    │
 │      most useful right now                                  │
@@ -322,7 +352,7 @@ At the reception, you have ~100 minutes (19:20–21:00). You cannot talk to ever
 
 ---
 
-# SECTION J — VIETNAMESE PHRASES (if needed)
+# SECTION J — VIETNAMESE PHRASES (basic — 7 essentials)
 
 Use these only if a senior leader switches to Vietnamese with you. Don't force it.
 
@@ -337,6 +367,8 @@ Use these only if a senior leader switches to Vietnamese with you. Don't force i
 | Goodbye, see you again | Chào tạm biệt, hẹn gặp lại | chow tam bee-et, hen yap lie |
 
 > ⚠️ **Rule:** If you're not confident, smile and say in English: *"My Vietnamese is still improving — I'd love to keep learning."* This is more graceful than a mispronounced sentence to a senior leader.
+
+> 📌 **For an extended Vietnamese phrasebook (greetings, compliments, role-specific phrases, graceful escape), see Section N.**
 
 ---
 
@@ -373,6 +405,333 @@ If you walk out and they remember nothing else, these are the two sentences that
 
 ---
 
+# SECTION M — PRE-EVENT "LOOKING FORWARD" EMAIL (send Oct 22)
+
+## M1. To the recruiter / HR contact (always send)
+
+> **Subject:** Looking forward to tomorrow — Prem Vishnoi
+>
+> Hi [First name],
+>
+> Quick note to say I'm looking forward to the Overseas Talent Roadshow tomorrow evening at PARKROYAL Marina Bay. The agenda is well-thought-out — the strategy spotlight and the panel discussion in particular will be a useful window into how the team is thinking about data and AI in 2026.
+>
+> I'll be there from 18:00 onwards. If it would be useful to do a quick five-minute introduction at any point during the reception, I'm easy to find — happy to wear [something distinctive: a particular tie / pocket square / lapel pin] so you can spot me.
+>
+> Safe travels to the team.
+>
+> Best,
+> Prem
+> +65 [your Singapore number if you have one]
+
+**Why send this:**
+- ✅ You'll be **the only candidate who did**
+- ✅ Signals preparation + respect for their time
+- ✅ Makes the recruiter's job easier (they're managing 4 people)
+- ✅ Easy "win" that takes 3 minutes to write
+
+## M2. To a panelist you already know or have been in touch with (optional)
+
+> **Subject:** See you tomorrow
+>
+> Hi [First name],
+>
+> Looking forward to meeting properly tomorrow at the roadshow. I appreciated the earlier conversations on [briefly reference the topic].
+>
+> I'll be at the reception from 19:20 — happy to continue the discussion on [the topic] if useful.
+>
+> Best,
+> Prem
+
+---
+
+# SECTION N — VIETNAMESE PHRASES (extended — use only if senior leader switches to Vietnamese)
+
+> ⚠️ **Rule of thumb:** Use Vietnamese only if they initiate in Vietnamese. Otherwise English is the right default — Techcombank's senior leadership operates in English. A mispronounced phrase to a CDO costs more than no Vietnamese at all.
+
+## N1. Greetings & respect
+
+| English | Vietnamese | Pronunciation | When to use |
+|---|---|---|---|
+| Hello (formal) | Xin chào | sin chow | Always safe |
+| Nice to meet you (male senior) | Rất vui được gặp anh | rat voy duhku yap an | With a male senior leader |
+| Nice to meet you (female senior) | Rất vui được gặp chị | rat voy duhku yap chee | With a female senior leader |
+| Honour to meet you | Rất vinh dự | rat vinh yuh | When introduced to CEO/CDO level |
+| How are you? | Anh/chị có khỏe không? | an/chee kaw khway khong | Small talk opener |
+
+## N2. Compliments & respect for Techcombank
+
+| English | Vietnamese | Pronunciation | When to use |
+|---|---|---|---|
+| I admire Techcombank's strategy | Tôi rất ngưỡng mộ chiến lược của Techcombank | toy rat nungung maw chyen luwku kwa Techcombank | When praising the bank |
+| I respect the digital transformation | Tôi rất ngưỡng mộ quá trình chuyển đổi số | toy rat nungung maw gwah ching chwen doy show | When praising tech strategy |
+| The team has done impressive work | Đội ngũ đã làm việc rất ấn tượng | doy ngoo da lam vyek rat an tuwng | When praising execution |
+| I'm impressed by TCB ChatB@nk | Tôi ấn tượng với TCB ChatB@nk | toy an tuwng vuy TCB ChatB@nk | When referencing the GenAI chatbot |
+
+## N3. Role-related
+
+| English | Vietnamese | Pronunciation | When to use |
+|---|---|---|---|
+| I lead the data platform | Tôi phụ trách nền tảng dữ liệu | toy foo trach nen tang yuh lyew | Describing your role |
+| I build data platforms | Tôi xây dựng nền tảng dữ liệu | toy say yung nen tang yuh lyew | Describing your craft |
+| I'd love to contribute | Tôi rất muốn được đóng góp | toy rat moong duhku dung gop | Expressing intent |
+| I look forward to working together | Rất mong được hợp tác | rat mong duhku hop tack | Closing line |
+
+## N4. Closing lines
+
+| English | Vietnamese | Pronunciation | When to use |
+|---|---|---|---|
+| Thank you for your time | Cảm ơn anh/chị đã dành thời gian | gam urn an/chee daa yung tyi gun | Always |
+| I look forward to staying in touch | Rất mong được giữ liên lạc | rat mong duhku yuh lee-en lack | At end of 1:1 |
+| Goodbye (formal) | Chào tạm biệt | chow tam bee-et | When leaving |
+| See you again | Hẹn gặp lại | hen yap lie | When leaving, optimistic |
+| Wishing you good health | Chúc anh/chị sức khỏe | chook an/chee sook khway | Warm, traditional closing |
+
+## N5. The graceful escape (if you don't know a Vietnamese word)
+
+> *"Xin lỗi, tiếng Việt của tôi vẫn đang học — tôi có thể nói tiếng Anh được không?"*
+> (sin loy, tyeng vyet kwa toy vun dang hawk — toy kaw thay noy tyeng ayn duhku khong?)
+>
+> Translation: "Sorry, my Vietnamese is still being learned — may I speak in English?"
+
+This is **graceful, honest, and shows respect** — far better than a mispronounced sentence to a senior leader.
+
+---
+
+# SECTION O — EXPANDED THANK-YOU EMAIL SCENARIOS
+
+## O1. To a panelist who challenged you in the Q&A
+
+> **Subject:** Thank you, [First name] — your question on [topic]
+>
+> Hi [First name],
+>
+> Thank you for your question at the roadshow on [topic — e.g., 'how I'd handle the SBV residency frame within a multi-country data estate']. It's a question I've thought about carefully — and your framing of [paraphrase their angle] sharpened my own thinking.
+>
+> My current view, for what it's worth: [1–2 sentences of thoughtful follow-up, not a sales pitch. E.g., 'I'd treat residency as a first-class architectural constraint, not a checklist item — the lakehouse design encodes where personal data can physically live and who can reach it, with policy attached to the tag rather than to four thousand individually maintained grants.']
+>
+> I'd welcome the chance to continue the conversation. Please don't hesitate to reach out.
+>
+> Best,
+> Prem
+
+**Why this works:** You didn't dodge the challenge. You thanked them, paraphrased their angle, and added value. This is **the highest-leverage thank-you email** you can send.
+
+## O2. To a recruiter who facilitated the event
+
+> **Subject:** Thank you for last night
+>
+> Hi [First name],
+>
+> Thank you for the warm welcome last night and for organising the Overseas Talent Roadshow so thoughtfully. The format — strategy spotlight, panel Q&A, and reception — was much more useful than a one-on-one interview would have been, because it let me see the team in action and have substantive conversations with several of the leaders.
+>
+> A few observations from the night:
+> 1. [Specific thing from the strategy spotlight — e.g., 'The framing of "data and AI as the core driver of customer experience" maps directly to how I think about platform engineering.']
+> 2. [Specific thing from the panel — e.g., 'The discussion on the [topic] made clear that the team is thinking seriously about the [architecture / governance / scale] trade-offs.']
+> 3. [A question or note — e.g., 'I'd love to understand the next steps in the process and the expected timeline for a decision.']
+>
+> Thank you again. I am genuinely excited about the Director, Data Engineering role and the chance to be part of Techcombank's next chapter.
+>
+> Best,
+> Prem
+
+## O3. To another shortlisted candidate (if you had a warm exchange)
+
+> **Subject:** Good to meet you
+>
+> Hi [First name],
+>
+> It was a real pleasure meeting you at the roadshow last night. I especially appreciated [one specific thing — e.g., 'your take on the personalisation roadmap' / 'the war story you shared about scaling a data team in [country]'].
+>
+> Whatever happens with this shortlist, I'd love to stay in touch. Our worlds clearly overlap quite a bit, and I suspect we'll end up in the same rooms again at some point in the ASEAN data community.
+>
+> LinkedIn invite incoming.
+>
+> Best,
+> Prem
+
+**Why this matters:** Even if you don't get this job, the 3 other candidates may be future colleagues, future hires, future clients, or future investors. **The mature move is to build the relationship regardless of outcome.**
+
+---
+
+# SECTION P — QUESTIONS YOU MIGHT BE ASKED — EXTENDED ANSWERS (60–90 sec each)
+
+> Memorise the **bolded opening sentence** of each. Deliver the rest conversationally.
+
+## P1. "Walk me through your career and why each move."
+
+> "**My career is two halves of the same story.** I started in regulated banking — DBS first, then Standard Chartered, where I built AML and compliance data platforms across fifteen-plus countries. I learned the discipline of audit-defensible data: lineage, access control, regulator-defensible reporting.
+>
+> Then I moved to consumer-internet scale — PayPal, Lazada, and now Makro — because I wanted to take that discipline and apply it at ten-million-user scale. At Lazada I ran data engineering for Southeast Asia's largest e-commerce business, and at Makro I own the data and AI platform for an eight-billion-dollar omnichannel business across three countries.
+>
+> The pattern in every role has been the same: **inherit mess, build platform, deliver business outcome, leave a team that can run it without me.**
+>
+> Techcombank is the role where both halves of that career come back together. The Director of Data Engineering here is exactly the intersection I've been building toward."
+
+## P2. "What's your management style?"
+
+> "**I hire adults, I set context, I clear blockers, I get out of the way.** I'm not the smartest person on any of my teams and I never pretend to be. My job is to make the people around me successful.
+>
+> Concretely: I run a weekly one-on-one that's about their priorities, not mine. I do code review on every architectural decision. I run an architecture review board for anything cross-squad. I publish decision records so the team can disagree and commit.
+>
+> I'm direct. I give feedback in private, praise in public. I don't do surprises in performance reviews. And I have a rule: **if a senior engineer is stuck, I drop everything to unblock them — because the cost of a stuck senior engineer compounds by the hour.**"
+
+## P3. "What's a project that failed and what did you learn?"
+
+> "**My biggest failure was underestimating the FinOps motion in year one of a cloud migration.** I built a beautiful Databricks lakehouse, I was proud of the architecture — and I had not yet built the cost telemetry, the tagging discipline, or the per-domain chargeback. Six months in, the cloud bill was 60% higher than it should have been for the workload we were running.
+>
+> The fix took three months. The lesson took longer.
+>
+> **Today, FinOps is a month-three activity, not a month-nine activity.** Cost telemetry is in the platform on day one. Tagging is enforced in the deployment pipeline. Chargeback to business domains is published monthly. The CFO gets a one-pager.
+>
+> The lesson more broadly: **a beautiful architecture you cannot afford is not a beautiful architecture.** I now treat cost as a non-functional requirement with the same rigour as availability and security. That is a lesson I wish I'd learned in a cheaper classroom."
+
+## P4. "How do you handle conflict with a peer (e.g., a tribe lead who wants to bypass the platform)?"
+
+> "**Conflict is a signal, not a problem.** When a tribe lead wants to bypass the platform, it usually means one of two things: the platform is too slow, or the platform is too opinionated. Both are my fault, not theirs.
+>
+> My approach is to do three things in parallel.
+>
+> **One — listen first.** Why do they need to bypass? What's the deadline? What's the actual constraint? Most 'I need to go around the platform' requests are pressure-test cases that the platform should actually handle but doesn't yet.
+>
+> **Two — negotiate in good faith.** If the answer is 'we need this in three days and the platform team will take three weeks', I'll either find a fast path or personally unblock it. I will not be precious about the platform if the platform is the problem.
+>
+> **Three — write the rule after, not before.** Once we've handled the immediate need, I document the decision: what was the right call, what does the platform need to change, who's accountable. Then the next request doesn't have to be a fight.
+>
+> **What I never do:** publicly call out a peer for bypassing. The tribe lead is a peer, not a subordinate. Public call-outs poison the working relationship for a year. I save the hard conversations for one-on-ones."
+
+## P5. "How do you keep up with the pace of change in data/AI?"
+
+> "**Three habits, all cheap.**
+>
+> **One — a weekly reading hour, protected.** Mostly arXiv, the major lab blogs (Anthropic, OpenAI, Google DeepMind, Mistral), a few Substacks, and the Databricks/Snowflake/Confluent engineering blogs. I keep a running notes file.
+>
+> **Two — one conversation a fortnight with a peer outside my current employer.** Other data leaders, ML platform leads, CDOs at peer banks. The single highest-ROI professional habit I have.
+>
+> **Three — I build things.** Side projects, Kaggle, hackathons, small internal tools. If I haven't shipped something with a new tool in the last quarter, I'm not qualified to ask my team to use it.
+>
+> **For GenAI specifically:** I think the pace is genuinely unprecedented and the right response is humility, not expertise. Nobody has shipped at scale yet. The right question is not 'which LLM' — it's 'what is the highest-value workflow that becomes possible when text becomes a first-class data type'. That's the question I bring to the team."
+
+## P6. "What questions do you have for us?"
+
+> "Yes, three — and they're the same three I ask every leadership team.
+>
+> **One — what is the one decision the data platform is currently blocking, that if unblocked would unlock the most business value in the next twelve months?** I want to know the choke point, because that's where I'd start.
+>
+> **Two — what is the one cultural habit I would need to change to make the platform successful?** In a bank, the technology is rarely the limiting factor — the operating model is. I want to know what that is *before* I take the job, not after.
+>
+> **Three — what's the one thing the data team has tried in the last eighteen months that didn't work, and what did you learn from it?** Past failures are the best predictor of where the new leader will spend their political capital."
+
+---
+
+# SECTION Q — HANDLING TOUGH MOMENTS
+
+## Q1. If they ask something you don't know
+
+**Don't say:** "I don't know."
+**Don't say:** "I'll have to get back to you on that." (weak)
+
+**Do say:**
+> "That's a fair question — and honestly I don't have a confident answer yet. **What I do know is [one related thing you DO know], and what I'd want to do is [one concrete next step] before I gave you a number. Can I follow up with you on that this week?**"
+
+This is honest, forward-moving, and signals that you **don't bullshit**.
+
+## Q2. If they push back on a claim
+
+> "**That's a fair push — let me sharpen my answer.** [Then re-state your point more precisely, in 1–2 sentences.] **But your point is taken — I'll want to validate that with [data / a specific person / a recent case study] before I'd stake a big decision on it.**"
+
+**Never dig in when you're wrong.** Acknowledging a good point in real time is **the most senior behaviour you can demonstrate.**
+
+## Q3. If another candidate is dominating the conversation
+
+**Don't try to out-shout them.** Instead:
+
+- Wait for the moderator to open the floor more broadly
+- Stand and make eye contact with the moderator, not the other candidate
+- Open with: "Building on that — I want to take it in a slightly different direction…"
+- Or, after the session, approach the candidate warmly: *"That was a sharp point on [topic] — would love to swap notes on it sometime."* Mature, disarming, remembered.
+
+## Q4. If you realise mid-answer that you're rambling
+
+**Recovery phrase:**
+> "Let me come back to the point — the short version is [1-sentence summary]."
+
+This is graceful. Most candidates just keep talking. Cutting yourself off crisply is a Director-level behaviour.
+
+## Q5. If a senior leader asks a politically loaded question
+
+(e.g., "What do you really think of [a public figure / a public strategy / a competitor]?")
+
+> "**I think the more useful question is [pivot to the operational / technical / business angle].** [Then answer that.]"
+
+**Never take the bait on personality / politics / public criticism.** Always pivot to the work.
+
+---
+
+# SECTION R — CONVERSATION DEPTH CHEAT (for the reception)
+
+When you're in a 1:1, the best conversations have **4 layers**. Move through them deliberately:
+
+| Layer | Example | When to move on |
+|---|---|---|
+| **1. Surface** | "What brought you to Techcombank?" "How long have you been here?" | After ~2 min — they will often move this themselves |
+| **2. Insight** | "What's the most interesting part of the data work right now?" "What surprised you about the bank?" | When they're leaning in, making eye contact, asking you back |
+| **3. Tension** | "What's the hardest part?" "Where is the platform not yet delivering?" "What would you change if you could?" | When they've said something vulnerable or real |
+| **4. Vision** | "Where do you want the data function to be in two years?" "What would success look like for you personally?" | Reserved for the warmest exchanges — only with 1–2 people |
+
+**Rule:** You don't need to reach Layer 4 with everyone. Two Layer-3 conversations beat eight Layer-1 conversations. **Depth wins.**
+
+---
+
+# SECTION S — LINKEDIN PROFILE QUICK-FIX (do tonight)
+
+Before Oct 23, make these 3 changes to your LinkedIn. Takes 10 min. Big payoff.
+
+## S1. Headline (220 char max)
+
+**Current:** (whatever it is)
+**Change to:**
+
+> Data & AI Platform Engineering Leader | Databricks Lakehouse at $8B scale | Ex-Standard Chartered (AML, 15+ countries), Lazada | Vietnam TRC holder | Open to Director-level opportunities in ASEAN banking
+
+## S2. About section (first 3 lines matter most — visible in search results)
+
+> I lead data and AI platform engineering. Most recently I built the Databricks lakehouse that runs an eight-billion-dollar retail business across three countries, taking month-end close from five days to two hours, taking forty percent out of cloud spend, and putting a Text-to-SQL GenAI platform in production. Before that I led data engineering for Southeast Asia's largest e-commerce business. My career started in regulated banking — Standard Chartered, DBS — and the through-line has been the same: inherit the mess, build the platform, deliver the business outcome.
+>
+> Looking to land a Director-level data engineering role in ASEAN banking, ideally in Vietnam. Vietnamese TRC holder — I can be on the ground in Ho Chi Minh City inside 30 days.
+
+## S3. Featured section — pin one thing
+
+If you have (or can quickly write) a Medium post on the Makro lakehouse, **pin it as Featured**. If not, pin your GitHub with a clean README that shows your architectural taste. The Featured section is what shows up when a panelist clicks your profile after the reception.
+
+---
+
+# SECTION T — 30-DAY POST-EVENT PLAN
+
+## T1. If they move to a final-round interview
+
+- [ ] Re-read this entire pack
+- [ ] Identify 2–3 specific people you met at the roadshow
+- [ ] Send a "looking forward to the next conversation" note to each
+- [ ] Prep for a deeper technical round using TECHNICAL_ROUND_QA.md
+- [ ] Prep for a deeper culture-fit round using P1–P6 above
+
+## T2. If they make you an offer
+
+- [ ] Ask for 48 hours minimum
+- [ ] Negotiate: base, bonus, equity, sign-on, relocation, visa support, TRC fast-track
+- [ ] Confirm: reporting line, scope, team size, budget authority
+- [ ] Confirm: start date (you're TRC holder, 30 days is realistic)
+- [ ] Get the offer in writing before resigning anywhere
+
+## T3. If they don't move forward
+
+- [ ] Send a graceful note to the recruiter: *"Thank you for the opportunity. I enjoyed the event and would welcome the chance to be considered for future roles. Please keep me on your talent network."*
+- [ ] Connect on LinkedIn with everyone you had a substantive conversation with
+- [ ] Stay in the bank's orbit — ASEAN banking talent network is small; the next role may be 12 months from now
+- [ ] Keep the 3 other candidates in your network — one of them may be your next colleague
+
+---
+
 # 🎯 FINAL REMINDERS
 
 1. **Be the most prepared, not the loudest.** Three other people will be loud. You'll win by being the most specific.
@@ -381,6 +740,10 @@ If you walk out and they remember nothing else, these are the two sentences that
 4. **Close every loop.** If you say "I'll send you the link", send it within 24 hours. Three of the four candidates won't.
 5. **Breathe.** You are one of four. You have done the work. They invited you for a reason. Trust the prep.
 
----
+**The single thing that decides the night is not the answer to any one question. It's whether the panel walks away thinking: *"Prem is the one who gets it — and Prem is the one I want in the room when things get hard."***
+
+That is a posture, not a script. Hold the posture. The script follows.
 
 **You have everything. Go land it.** 🚀
+
+— End of PREM_PREP_PACK_OCT23.md —
