@@ -1,0 +1,127 @@
+[
+  {
+    "id": "header",
+    "type": "markdown",
+    "source": "# Meta L6 AI-Native DE On-Site Mock - Working Code + Theory\n\n**Purpose:** Hands-on reference for the 5 on-site rounds. Each cell is runnable.\n\n**Rounds:**\n1. Greet (15m) - pitch\n2. AI-Native DE Full Stack (60m) - modeling, RAG design, MMR code, eval SQL\n3. Sr Tech Design (60m) - PYMK feed with anti-hallucination\n4. Full Stack (60m) - trace reviewer tool\n5. Sr Ownership (30m) - behavioral\n\n**L6 cheat sheet keywords to drop in every answer:**\n`end-to-end` . `versioned prompts` . `grounded generation` . `eval dataset` . `shadow index` . `bounded fanout` . `idempotent` . `SLO` . `LLM-as-judge`\n"
+  },
+  {
+    "id": "round2_q1_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 2 - Q1: Data Modeling for AI-Native RAG\n\n**What they test:** Can you design a production schema for a RAG system with GDPR, chunk versioning, and feedback loops?\n\n**Why this schema:**\n- `documents` is source-of-truth, with `is_deleted` tombstone (GDPR requires soft delete + async purge, NOT hard delete from `traces` for 30 days)\n- `chunks` is the actual data model - `(doc_id, chunk_hash, embedding_model_version)` UNIQUE prevents duplicate work when re-embedding\n- `embeddings` is SEPARATE - vector(1536) = 6KB/row, expensive to scan; split lets you run analytics on `chunks` without loading vectors\n- `prompts` is versioned like code - NEVER edit in place (you lose the ability to A/B test or roll back)\n- `traces` is a FACT TABLE - partition by day, 1B rows/day at Meta scale\n- `feedback` is the gold dataset - `corrected_answer IS NOT NULL` = labeled eval data\n"
+  },
+  {
+    "id": "round2_q1_schema",
+    "type": "code",
+    "source": "schema_sql = '''\n-- 1. Source of truth (with GDPR tombstone)\nCREATE TABLE documents (\n    doc_id        UUID PRIMARY KEY,\n    source        VARCHAR(50),\n    uri           TEXT,\n    owner_id      UUID,\n    chunk_strategy VARCHAR(50),\n    ingested_at   TIMESTAMP,\n    is_deleted    BOOLEAN DEFAULT FALSE,\n    hash          VARCHAR(64)\n);\n\n-- 2. Chunks = your data model\nCREATE TABLE chunks (\n    chunk_id                UUID PRIMARY KEY,\n    doc_id                  UUID REFERENCES documents(doc_id),\n    chunk_index             INT,\n    text                    TEXT,\n    token_count             INT,\n    embedding_model_version VARCHAR(50),\n    chunk_hash              VARCHAR(64),\n    created_at              TIMESTAMP,\n    UNIQUE (doc_id, chunk_hash, embedding_model_version),\n    INDEX idx_model_version (embedding_model_version)\n);\n\n-- 3. Embeddings SEPARATE (vector column = 6KB/row)\nCREATE TABLE embeddings (\n    chunk_id      UUID PRIMARY KEY REFERENCES chunks(chunk_id),\n    embedding     vector(1536),\n    model_version VARCHAR(50),\n    created_at    TIMESTAMP\n);\n\n-- 4. Versioned prompts (NEVER edit in place)\nCREATE TABLE prompts (\n    prompt_id       UUID PRIMARY KEY,\n    prompt_template TEXT,\n    version         INT,\n    created_at      TIMESTAMP\n);\n\n-- 5. Traces = fact table, 1B rows/day at Meta scale\nCREATE TABLE traces (\n    trace_id            UUID,\n    user_id             UUID,\n    query               TEXT,\n    retrieved_chunk_ids UUID[],\n    prompt_version      INT REFERENCES prompts(version),\n    response            TEXT,\n    latency_ms          INT,\n    cost_tokens         INT,\n    created_at          TIMESTAMP,\n    PRIMARY KEY (trace_id, created_at)\n) PARTITION BY RANGE (created_at);\n\n-- 6. Feedback = gold dataset for offline eval\nCREATE TABLE feedback (\n    feedback_id      UUID PRIMARY KEY,\n    trace_id         UUID,\n    rating           TEXT CHECK (rating IN ('thumbs_up', 'thumbs_down')),\n    corrected_answer TEXT,\n    created_at       TIMESTAMP\n);\n'''\nprint(schema_sql)\n"
+  },
+  {
+    "id": "round2_q1_talking_points",
+    "type": "markdown",
+    "source": "**L6 talking points to say out loud while drawing this:**\n1. \"Chunking IS a modeling decision - different docs need different splitters. I store `chunk_strategy` on `documents`.\"\n2. \"GDPR: I tombstone `documents.is_deleted=TRUE`, then an async purge job deletes from `embeddings` and calls vector DB delete. I keep `traces` for 30 days for abuse investigation.\"\n3. \"Embeddings as separate table because `vector(1536)` is 6KB/row. If I store them inline with chunks, every analytics query loads the full vector.\"\n4. \"Prompts are versioned like code. If I edit prompt_v3 in place, I lose the ability to A/B test or roll back when satisfaction drops.\"\n5. \"Traces is partitioned by day - at Meta scale, 1B rows/day, you cannot query unpartitioned. Drop old partitions after 30 days, not DELETE rows.\"\n6. \"Feedback table is the eval set. `SELECT * FROM feedback WHERE corrected_answer IS NOT NULL` is labeled data I replay new prompts against before shipping.\"\n"
+  },
+  {
+    "id": "round2_q2_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 2 - Q2: RAG Pipeline Design (10M docs, <500ms p95, 5min freshness)\n\n**What they test:** Can you design for scale, freshness, AND cost?\n\n**Why this architecture (Lambda for RAG):**\n- **Online path** (freshness): Kafka + Flink CDC -> invalidate Qdrant ID + upsert new chunks. Full reindex is too slow for 10M docs.\n- **Offline path** (scale): Spark batch for backfill at 5k RPS - re-embed 10M docs in ~30 min\n- **Serving path** (latency): hybrid search (BM25 + vector) -> reranker (cross-encoder) -> Top 8 -> LLM. BM25 catches exact-match (names, IDs) that vector misses.\n- **Cost control**: skip embedding for low-quality docs (>5k tokens, low info score). 30% of repeat queries -> cache query embeddings in Redis.\n"
+  },
+  {
+    "id": "round2_q2_talking_points",
+    "type": "markdown",
+    "source": "**L6 phrases to drop:**\n- \"Lambda for RAG: offline batch backfill + online incremental freshness = best of both\"\n- \"Hybrid search: BM25 + vector. Vector misses exact matches (employee IDs, product SKUs). Reranker cross-encoder is in the serving path, not the indexing path - too slow for indexing.\"\n- \"Cache query embeddings in Redis - repeat queries are 30% of traffic at Meta scale, saves embedding cost\"\n- \"Skip embedding for low-quality docs (>5k tokens, low info score via TF-IDF heuristic) - cost control without hurting quality\"\n- \"Idempotent via chunk_hash - if hash unchanged, skip re-embed. Versioning via embedding_model_version - old chunks stay valid until you re-embed them.\"\n"
+  },
+  {
+    "id": "round2_q3_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 2 - Q3: MMR Rerank Coding (the actual whiteboard question)\n\n**What they test:** Can you implement a real algo under pressure, not just describe it?\n\n**Why MMR:** Standard vector search returns redundant chunks (e.g., 5 chunks from the same section). MMR = Maximal Marginal Relevance - balances **relevance** vs **diversity** so you get 8 chunks that cover different aspects, not duplicates of the same one.\n\n**The formula:**\n```\nMMR(d) = LAMBDA * sim(d, query) - (1-LAMBDA) * max[sim(d, d_selected)]\n         ^                          ^\n     relevance               diversity penalty\n```\n- LAMBDA=0.7 -> favor relevance (default)\n- LAMBDA=0.3 -> favor diversity (when chunks are very similar)\n"
+  },
+  {
+    "id": "round2_q3_talking_points",
+    "type": "markdown",
+    "source": "**L6 line to say while coding:**\n\n> \"In prod, I would never code this from scratch - Qdrant has built-in MMR, or I would use Cohere Rerank API. This is the algo behind it though, and interviewers want to see I understand the math. Complexity is O(k*N*D), fine for k=8, N=50. If N=10k+, I would use approximate MMR via HNSW.\"\n"
+  },
+  {
+    "id": "round2_q4_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 2 - Q4: SQL - Measure RAG Quality\n\n**What they test:** Can you write analytics SQL on the schema you just designed? Do you know which KPIs matter for RAG?\n\n**The 3 RAG KPIs:**\n1. **Satisfaction** = thumbs_up / total (with NULL feedback excluded)\n2. **p95 latency** = PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms)\n3. **Cost** = SUM(cost_tokens) per day (every LLM call has $$ cost)\n\n**Why GROUP BY day, not user:** Aggregating by day gives you a time series for dashboards (Grafana). Per-user is for cohort analysis, not daily monitoring.\n"
+  },
+  {
+    "id": "round3_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 3 - Sr Tech Design: People-You-May-Know Feed with AI Summaries\n\n**What they test:** Can you design a system that DOESN'T HALLUCINATE at Meta scale?\n\n**The 3-layer anti-hallucination architecture:**\n```\nLayer 1: GRAPH (offline)\n   friendships SCD2 -> Spark GraphX -> pymk_candidates\n\nLayer 2: REASONS (offline, NO free LLM generation)\n   candidate_reasons with TEMPLATE + evidence_json\n   LLM only FILLS template with grounded evidence\n\nLayer 3: SERVING (online)\n   API -> merge offline candidates + Redis live mutuals + privacy check\n   NO LLM at request time - reasons are pre-computed\n```\n\n**Why this design:**\n- **SCD2 on friendships** = time travel. \"Users who were friends 6 months ago\" is a valid query for recency scoring.\n- **Bounded fanout** = skip users with >5k friends. A user with 10k friends generates 10k squared = 100M writes per friend-add.\n- **Grounded generation only** = the prompt MUST include `evidence_json` and the instruction \"use ONLY provided evidence\". No evidence -> output \"unknown\".\n- **No LLM in serving path** = serving path is just a Redis lookup + template fill. LLM only runs offline for candidate_reasons pre-computation.\n"
+  },
+  {
+    "id": "round3_talking_points",
+    "type": "markdown",
+    "source": "**L6 talking points:**\n1. \"Friendships SCD2 lets me answer 'who was this user's friend 6 months ago' - needed for recency-aware PYMK ranking.\"\n2. \"Bounded fanout: I skip events for users with >5000 friends. A celebrity with 50k friends would generate 2.5B writes per friend-add. That's not a system, that's a DDoS.\"\n3. \"Grounded generation prompt: 'Use ONLY facts present in evidence_json. If not present, output unknown.' No free LLM in serving path - that is how you get hallucinations at 2am.\"\n4. \"Reasons are pre-computed offline by the LLM using evidence_json. Serving path is just a Redis lookup + template substitution. P99 latency stays under 200ms.\"\n5. \"Privacy: I check the `blocks` table in the API gateway BEFORE returning. A user who blocked the candidate must never see them in PYMK, even if they share 50 mutuals.\"\n6. \"LLM-as-judge: nightly job samples 1000 reasons, checks if every claim is grounded in evidence_json. If >1% fail, alert + investigate the evidence pipeline.\"\n"
+  },
+  {
+    "id": "round4_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 4 - Full Stack: Build RAG Trace Reviewer Tool\n\n**What they test:** Can you SHIP a working internal tool fast? They want SPEED + API design, not auth or full CRUD.\n\n**The 3-end-point minimum viable tool:**\n- `GET /traces?day=...&prompt_version=...&cursor=...&limit=50`\n- `POST /feedback {trace_id, rating, corrected_answer}`\n- `GET /traces/{trace_id}` for detail view\n\n**Why cursor pagination, not OFFSET:**\n- OFFSET 1000 LIMIT 50 = scan 1050 rows, throw away 1000. At 1B rows/day, this kills the DB.\n- Cursor `WHERE trace_id < last_id ORDER BY created_at DESC LIMIT 50` = index seek, O(log n).\n- Same UX for the user (infinite scroll), 1000x faster backend.\n"
+  },
+  {
+    "id": "round4_talking_points",
+    "type": "markdown",
+    "source": "**L6 talking points while coding:**\n1. \"Cursor pagination, not OFFSET. OFFSET scans O(n) rows, cursor is an index seek.\"\n2. \"Filter by `prompt_version` from day 1 - you will need it for A/B analysis tomorrow.\"\n3. \"Optimistic UI on feedback - update the UI immediately, rollback if the server fails. Users hate waiting for a network round-trip on a thumbs up.\"\n4. \"Virtualized list (react-window) - 1k rows will tank React if I render naively. FixedSizeList only mounts visible rows.\"\n5. \"POST /feedback writes to a sync queue, not directly to the DB. The 30% feedback rate would saturate Postgres if synchronous. Async batch insert every 5 sec.\"\n6. \"Cap limit at 200. I have seen a teammate pass limit=10000 and bring down a staging cluster.\"\n"
+  },
+  {
+    "id": "round5_intro",
+    "type": "markdown",
+    "source": "---\n\n## ROUND 5 - Sr Ownership (Behavioral, 30m)\n\n**What they test:** L6 != \"I helped\". L6 = \"I owned end-to-end, defined the metric, and prevented recurrence.\"\n\n**The L6 STAR upgrade:**\n```\nL4 STAR:  S/T/A/R as described in job ad\nL5 STAR:  S/T/A/R with my specific actions\nL6 STAR:  S/T/A/R + METRIC + PREVENTION\n                              ^           ^\n                          quantified    runbook/SLO\n                          outcome       you left behind\n```\n\n### Q1: Owned a broken pipeline no one wanted\n\n**L6 ANSWER:**\n> **S:** RAG p95 latency went from 400ms to 2.5s after we upgraded the embedding model.\n>\n> **T:** No owner. On-call was getting paged at 2am. Leadership wanted answers.\n>\n> **A:** I owned it end-to-end:\n> 1. Rolled back the index to v1 to stop the bleeding - 10 min MTTR\n> 2. Found root cause: smaller batch size caused Qdrant HNSW graph fragmentation\n> 3. Built a dashboard: `embedding_drift_by_model_version` + `p95_by_version`\n> 4. Wrote a runbook: how to roll back, how to detect drift, on-call playbook\n> 5. Added an alert: p95 > 1s for 5 min pages on-call\n>\n> **R:** Latency back to 380ms. New SLO: p95 < 500ms. My dashboard is now the team's standard. Zero similar incidents in 6 months.\n\n**L6 keywords:** owned, rolled back, root cause, dashboard, runbook, SLO, prevented recurrence.\n\n### Q2: DE vs ML team conflict on data quality\n\n**L6 ANSWER:**\n> \"I proposed a **data contract**:\n> - ML team defines the **gold dataset schema** (what 'good data' looks like)\n> - DE team guarantees **freshness SLA** (data lands within 5 min of source)\n> - DE team guarantees **schema SLA** (no breaking changes without notice)\n>\n> I wrote the contract as JSON, added **Great Expectations checks** in the pipeline that fail the DAG if contract breaks. Both teams now have measurable SLAs. Conflict resolved with metrics, not opinions.\"\n\n### Q3: Vague problem \"Make RAG better\"\n\n**L6 ANSWER:**\n> \"First, I defined 'better' - I refused to optimize without a metric.\n>\n> 1. **Defined the metric:** satisfaction = thumbs_up / total, weighted by latency\n> 2. **Built the eval set:** mined `feedback.corrected_answer` from prod, got 2k labeled examples\n> 3. **Hypothesized:** chunk size 512 + reranker > current 256 no reranker\n> 4. **Ran A/B:** 12% satisfaction lift, +50ms latency (acceptable)\n> 5. **Shipped it** with monitoring and rollback plan\n>\n> The key was refusing to start work without a measurable definition of success.\"\n\n**L6 keywords:** defined metric, eval set, A/B test, shipped, monitored.\n"
+  },
+  {
+    "id": "vector_db_intro",
+    "type": "markdown",
+    "source": "---\n\n## VECTOR DB DEMO (SQLite + sqlite-vec = pgvector equivalent)\n\n**What this proves:** The exact same RAG schema and KNN queries run on pgvector in production. We use sqlite-vec here for portability - same SQL syntax for `float[N]` columns, same KNN semantics with `vec_distance_cosine` and `WHERE embedding MATCH ?`.\n\n**What the demo does (4 parts):**\n1. **KNN vector search** - 'When was the company started?' -> returns Meta history chunks in correct order\n2. **GDPR tombstone** - user_dave deletes account, async purge cascades through chunks + embeddings\n3. **Dual-write re-embed** - new model version writes to a shadow vec0 index, prod keeps v1\n4. **Analytics SQL** - satisfaction + latency by prompt_version (A/B test)\n\n**Why this matters for the interview:** You can say 'I built this schema, KNN retrieves Top 3 in this order, GDPR works, re-embed is dual-write, A/B SQL gives us the eval signal.' That is the full L6 data model in <300 lines.\n"
+  },
+  {
+    "id": "benchmark_intro",
+    "type": "markdown",
+    "source": "---\n\n## BENCHMARK: Bulk insert 10k + KNN latency at scale\n\n**What they ask:** 'Does this scale to 10M / 1B?' You need NUMBERS, not hand-waving.\n\n**What this cell proves:**\n1. **Bulk insert via `executemany`** is the production way (300k+ rows/sec)\n2. **KNN p95 at 10k scale = sub-millisecond** (way under 500ms budget)\n3. **Brute force scales linearly** - 10k is fine, 10M is 800ms (breaks SLO)\n4. **HNSW is sub-linear** - that's why pgvector/Qdrant use it by default\n\n**L6 talking point when they ask about 1B scale:**\n- Brute force at 1B = 80 SECONDS (totally broken)\n- HNSW at 1B = ~50ms p95 (works)\n- The crossover where you NEED HNSW: ~1M vectors\n- Beyond 100M: shard the index by user_id hash\n"
+  },
+  {
+    "id": "hybrid_intro",
+    "type": "markdown",
+    "source": "---\n\n## HYBRID SEARCH: BM25 + Vector + RRF\n\n**What this proves:**\n- Vector search misses EXACT matches (employee IDs, SKUs, acronyms)\n- BM25 misses SEMANTIC matches (paraphrases, synonyms)\n- Reciprocal Rank Fusion (RRF) combines both with no weight tuning\n- Latency cost: ~1ms extra in serving path\n\n**The RRF formula:**\n```\nscore(d) = SUM(1 / (k + rank(d)))\n```\nk=60 is from the original Cormack et al. 2009 paper.\n\n**L6 talking point:** 'Vector only is fine for natural-language queries, but real users type IDs and SKUs. Hybrid adds 1ms for 20-30% recall gain.'\n"
+  },
+  {
+    "id": "drift_intro",
+    "type": "markdown",
+    "source": "---\n\n## EMBEDDING DRIFT DETECTION\n\n**Why this matters:** When you upgrade embedding models (ada-002 -> text-embedding-3-large), the new vectors live in a DIFFERENT space. Mixing them silently breaks retrieval.\n\n**Three detection methods:**\n1. **Sample-based** (cheap, online): Re-embed 100 random chunks, measure cross-similarity\n2. **KS test** (rigorous, offline): Distribution shift test on cross-similarity\n3. **Time-series** (prod): Monitor query-embedding similarity distribution daily\n\n**L6 talking point:** 'Mean cross-sim < 0.85 means the new model is incompatible. Re-embed is mandatory, dual-write + shadow for 7 days, then cutover. Never in-place.'\n"
+  },
+  {
+    "id": "reranker_intro",
+    "type": "markdown",
+    "source": "---\n\n## RERANKER BENCHMARK: vector-only vs vector + cross-encoder\n\n**What this proves:**\n- Vector search Top 50 -> cross-encoder rerank -> Top 8 gives best precision\n- Cross-encoder costs ~5-150ms per pair depending on hardware\n- GPU-batched cross-encoder fits in the 500ms latency budget\n- Skip rerank for queries with <4 candidates\n\n**L6 talking point:** 'Rerank adds 50ms for +20% precision@8. LLM generation (400ms) dominates anyway, so marginal cost is tiny vs quality win.'\n"
+  },
+  {
+    "id": "streaming_intro",
+    "type": "markdown",
+    "source": "---\n\n## STREAMING INSERT: Kafka -> consumer -> vector DB\n\n**Four guarantees I need:**\n1. **At-least-once delivery:** Kafka delivers duplicates. Idempotency key = (doc_id, chunk_hash, model_version) UNIQUE constraint filters dupes.\n2. **Poison message handling:** 1% of messages will be malformed. DLQ catches them. Alert on DLQ depth > 100.\n3. **Backpressure:** If consumer is slower than producer, batch inserts (5x throughput) or scale consumer horizontally.\n4. **Replay from offset:** If consumer crashes, replay from last committed offset. Idempotency ensures no duplicates.\n\n**L6 talking point:** 'The UNIQUE constraint is the safety net. Idempotency without DB-level enforcement is wishful thinking.'\n"
+  },
+  {
+    "id": "footer",
+    "type": "markdown",
+    "source": "---\n\n## How to Use This Notebook\n\n1. **Run all cells** (Cell > Run All) - verifies MMR algorithm, SQL queries, A/B test all work\n2. **Modify the MMR lambda** - try lambda=0.3 to see how diversity changes the output\n3. **Modify the SQL** - try GROUP BY user_id instead of day to see cohort analysis\n4. **Read META_L6_STUDY_GUIDE.md** for the theory and L6 answer scripts\n5. **Say \"start round 2\"** to begin live mock mode with me as interviewer\n\n## Files in This Folder\n- `meta_l6_onsite_mock.ipynb` - this notebook (runnable)\n- `META_L6_STUDY_GUIDE.md` - theory + scripts\n- `cells/` - source files for each cell\n- `build_notebook.py` - script to rebuild this notebook from cells/\n"
+  },
+  {
+    "id": "timeseries_intro",
+    "type": "markdown",
+    "source": "---\n\n## TIME-SERIES AGGREGATION: Grafana dashboards on 1B traces/day\n\n**The problem:** Naive dashboard queries scan the raw traces table. At Meta scale, that's 1B rows/day. A single 5-min dashboard tile takes 5 seconds and costs $5 in compute.\n\n**The solution:** Pre-aggregated rollups. Flink computes 5-min tumbling windows continuously, stores them in ClickHouse, Grafana reads the rollup table directly.\n\n**Key concepts:**\n- **Tumbling window:** fixed-size, non-overlapping (5-min buckets for steady state)\n- **Hopping window:** sliding window, recomputed at hop interval (5-min window, 1-min hop = moving average)\n- **Watermark:** handle late-arriving data with allowed lateness (60s typical)\n- **Pre-aggregation:** 288 buckets/day * 3 prompt versions = 864 rows/day vs 1B raw rows\n\n**At Meta scale:** 5000x faster, 250x cheaper. Without rollups, dashboards cost $50k/month in compute. With rollups, $200/month.\n"
+  },
+  {
+    "id": "migration_intro",
+    "type": "markdown",
+    "source": "---\n\n## ZERO-DOWNTIME SCHEMA MIGRATION: expand-and-contract\n\n**The cardinal sin:** `ALTER TABLE chunks ADD COLUMN x TEXT DEFAULT 'y'` on a 1B row table. That rewrites the entire table. 30+ minutes of ACCESS EXCLUSIVE lock. Every reader and writer blocked.\n\n**The right way: expand-and-contract (5 steps):**\n\n1. **EXPAND** (ms): `ALTER TABLE ADD COLUMN x TEXT` (nullable, NO default). PG 11+ does this as metadata-only.\n2. **DUAL-WRITE** (0ms): App code now writes to BOTH old and new columns. Deploy in 1 hour.\n3. **BACKFILL** (hours-days): Spark job in batches of 10k. Throttle to avoid replica lag.\n4. **SWITCH READS** (0ms): App code reads from new column. Deploy in 1 hour.\n5. **CONTRACT** (after 30-day bake): `ALTER TABLE DROP COLUMN old_col`. The bake period catches any rollbacks.\n\n**Total downtime: ZERO.** Total time: 2 weeks (most is the 30-day bake).\n\n**Worst case:** vector dimension change (1536 -> 3072). Backfill requires re-embedding 1B chunks = 11 days of Spark. Plan the bake period accordingly.\n"
+  },
+  {
+    "id": "tracing_intro",
+    "type": "markdown",
+    "source": "---\n\n## DISTRIBUTED TRACING: debugging the LLM call graph\n\n**Why this matters:** LLM apps are distributed systems. A single RAG query has 5-6 distinct phases, each with different latency characteristics and failure modes. Without tracing, you're guessing where the slow / expensive / broken step is.\n\n**The trace structure:**\n```\nrag_query (root, ~461ms)\n\u251c\u2500\u2500 preprocess.query     ~  2ms   (query normalization)\n\u251c\u2500\u2500 retrieve.vector      ~ 25ms   (KNN over 1M vectors)\n\u251c\u2500\u2500 rerank.cross_enc     ~ 80ms   (slowest step, cross-encoder)\n\u251c\u2500\u2500 prompt.build         ~  1ms   (template + context)\n\u251c\u2500\u2500 llm.generate         ~350ms   (the big one, TTFT + tokens)\n\u2514\u2500\u2500 postprocess.format   ~  3ms\n```\n\n**Each span tags:** model name, token counts, cost, candidate count, status. Spans feed into Jaeger/Tempo. SLO alerts fire on p95 > 1s.\n\n**Cost attribution** (the same spans): LLM is 95% of cost, embedding 3%, rerank 2%. Without spans, you can't optimize what you can't measure.\n"
+  },
+  {
+    "id": "cost_intro",
+    "type": "markdown",
+    "source": "---\n\n## LLM COST CALCULATOR: the budget tool every L6 builds\n\n**The numbers (RAG query, 3K input + 300 output tokens):**\n- gemini-1.5-flash: $0.0003/query\n- gpt-4o-mini: $0.0006/query\n- llama-3.3-70b (Together): $0.002/query\n- gpt-4o: $0.011/query\n- claude-sonnet-4.5: $0.014/query\n\n**At Meta scale (10B queries/day):**\n- gpt-4o-mini: $2.2B/year\n- gpt-4o: $40B/year\n- **Model choice is a 13x cost multiplier**\n\n**Four levers, in order of impact:**\n1. **Model selection** (13x cost range) - cheap model for easy queries, expensive for hard\n2. **Prompt cache** (30-50% savings at 50% hit rate) - 90% off cached tokens\n3. **Token optimization** (2x improvement) - shrink context, compress prompt, cap output\n4. **Self-host break-even** (~50M queries/day) - below = API cheaper, above = self-host Llama\n\n**The interviewer wants to see you think about $ as a first-class concern**, not an afterthought. Cost is a feature.\n"
+  }
+]

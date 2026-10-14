@@ -54,6 +54,14 @@ cell_order = [
     ("code:cell_11_reranker.py", "code"),
     ("streaming_intro", "md"),
     ("code:cell_12_streaming.py", "code"),
+    ("timeseries_intro", "md"),
+    ("code:cell_13_timeseries.py", "code"),
+    ("migration_intro", "md"),
+    ("code:cell_14_migration.py", "code"),
+    ("tracing_intro", "md"),
+    ("code:cell_15_opentelemetry.py", "code"),
+    ("cost_intro", "md"),
+    ("code:cell_16_cost_calculator.py", "code"),
     ("footer", "md"),
 ]
 
