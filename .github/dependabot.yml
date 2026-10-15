@@ -217,6 +217,32 @@ updates:
       prefix: "chore(ml)"
       include: "scope"
 
+  # ai-course-public (NEW: 2026-10-15 — added to address 645-alert backlog)
+  - package-ecosystem: "pip"
+    directory: "/ai-course-public"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "ai-course-public"
+    commit-message:
+      prefix: "chore(course)"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns: ["*"]
+      python-minor-and-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
   # ⚠ Vendored AWS SAM CLI source — DISABLED.
   # Pull upstream fixes from https://github.com/aws/aws-sam-cli instead.
 
