@@ -370,9 +370,10 @@ def test_recall_at_k_partial() -> None:
 
 def test_drift_eval_returns_bounded_cosine() -> None:
     """drift_eval reports cosine values in [-1, +1]."""
-    v1 = model_v1()
-    v2 = model_v2()
-    d = drift_eval(v1, v2, SAMPLE_DOCS)
+    # Use models of the same dim for drift eval (cross-dim drift is undefined).
+    a = model_v1(dim=16)
+    b = model_v2(dim=16)
+    d = drift_eval(a, b, SAMPLE_DOCS)
     assert -1.0 <= d["mean_cosine_same_text"] <= 1.0
     assert d["n_docs"] == float(len(SAMPLE_DOCS))
 
@@ -399,14 +400,17 @@ def test_dual_index_query_works() -> None:
     """DualIndex.query returns results and a source model id."""
     v1 = model_v1()
     v2 = model_v2()
+    docs = [Doc("a", "alpha text about topic X"), Doc("b", "beta text about topic Y")]
+    p_ids, p_mat = embed_corpus(v1, docs)
+    s_ids, s_mat = embed_corpus(v2, docs)
     di = DualIndex(
         primary_model=v1,
-        primary_ids=["a", "b"], primary_matrix=np.eye(2, dtype=np.float32),
+        primary_ids=p_ids, primary_matrix=p_mat,
         secondary_model=v2,
-        secondary_ids=["a", "b"], secondary_matrix=np.eye(2, dtype=np.float32),
+        secondary_ids=s_ids, secondary_matrix=s_mat,
         secondary_traffic_share=0.0,
     )
-    results, source = di.query("a", k=1)
+    results, source = di.query("alpha", k=1)
     assert len(results) == 1
     assert source in (v1.model_id, v2.model_id)
 
