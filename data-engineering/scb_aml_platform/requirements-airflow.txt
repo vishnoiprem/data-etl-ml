@@ -34,7 +34,7 @@ tornado==6.5.9
 marshmallow==3.26.2
 msgpack==1.2.1
 pyasn1==0.6.4
-cryptography==46.0.5
+cryptography==50.0.2
 filelock==3.20.3
 wheel==0.46.2
 oauthlib==4.0.0
