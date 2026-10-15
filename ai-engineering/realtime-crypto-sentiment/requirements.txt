@@ -40,7 +40,7 @@ beautifulsoup4==4.12.3
 lxml==6.1.0
 websockets==13.1
 transformers==5.10.0
-torch==2.8.0
+torch==2.9.0
 numpy==1.26.4
 pandas==2.2.3
 streamlit==1.54.0
