@@ -41,6 +41,7 @@ def test_cursor_pagination_walks_all_rows(client, seed):
 
 
 def test_invalid_cursor_returns_400(client, seed):
+    # invalid cursor must yield 400 (bad request)
     r = client.get("/traces?cursor=garbage!!!")
     assert r.status_code == 400
 
