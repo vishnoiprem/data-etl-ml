@@ -33,7 +33,7 @@ joblib==1.2.0
 fastapi==0.129.0
 uvicorn[standard]==0.23.2
 websockets==15.0.1
-python-multipart==0.0.20
+python-multipart==0.0.31
 
 # ── Azure SDK ─────────────────────────────────────────────────
 azure-storage-blob==12.19.0
