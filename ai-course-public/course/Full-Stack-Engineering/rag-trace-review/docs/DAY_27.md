@@ -1,6 +1,8 @@
 # Day 27 — Algorithms: Arrays, Strings, and Hash Maps
 **Module 21** | Total: 90 min (10 + 20 + 30 + 20 + 20)
 
+> **Read first:** `docs/ALGORITHMS_PRIMER.md` for the 60-min framework, Big-O cheat sheet, and the 50 most-asked problems list.
+
 ---
 
 ## 1. Simple explanation (10 min)

@@ -131,8 +131,9 @@ def lca_bst(root: Optional[Node], p: int, q: int) -> Optional[int]:
 
 ## 4. Debugging & tests (20 min)
 
-### Bug 1: validate_bst doesn't allow duplicates
-**Fix:** be specific. `<` strict (no dupes) or `<=` (dupes on one side).
+### Bug 1: validate_bst doesn't account for duplicates
+**Symptom:** depends on the problem statement. LeetCode's "Validate BST" requires strict inequality (no duplicates). Other versions allow duplicates on one side.
+**Fix:** be explicit in the code. Use `<` strict (no dupes) or `<=` (dupes on left). Ask the interviewer which they want.
 
 ### Bug 2: level order skips null children
 **Symptom:** missing leaves in the output.
