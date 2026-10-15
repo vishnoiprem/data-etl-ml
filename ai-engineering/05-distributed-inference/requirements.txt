@@ -1,5 +1,5 @@
 -r ../shared/requirements.txt
-numpy==1.26.4
+numpy==2.5.4
 
 # ── Tier 1 security overrides (must match root)
 # See docs/SECURITY_AUDIT.md
