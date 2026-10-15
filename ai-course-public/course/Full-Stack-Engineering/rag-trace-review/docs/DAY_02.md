@@ -1,45 +1,72 @@
 # Day 2 — JavaScript and TypeScript
-## Time: 90 min
+**Module 2** | Total: 90 min (10 + 20 + 30 + 20 + 20)
 
-## 1. Analogy (10 min)
-JavaScript is a giant box of LEGO. You can snap pieces in any order, and if you make a typo the box doesn't complain. **TypeScript is the same LEGO box with labels on every piece** — the lid won't close unless everything matches.
+---
 
-## 2. Technical concept (20 min)
-JS is **dynamic and weakly typed** — variables can hold anything and change types mid-program. TS adds a **static type system** that runs at compile time. TS never changes runtime behavior; it just catches mistakes before the code ships.
+## 1. Simple explanation (10 min)
+
+**Analogy for a 12-year-old:**
+JavaScript is a giant box of LEGO. You can snap pieces in any order, and if you make a typo the box doesn't complain.
+**TypeScript is the same LEGO box with labels on every piece** — the lid won't close until everything matches.
+
+So you spend a few more seconds building, but you don't accidentally stick a wheel on the roof.
+
+---
+
+## 2. Technical concepts (20 min)
+
+**JS = dynamic + weakly typed.** Variables can hold anything and change types mid-program. TS adds a **static type system** that runs at compile time. TS never changes runtime behavior; it just catches mistakes before shipping.
 
 ```ts
 // JS
 function add(a, b) { return a + b; }
-add(1, "2");   // "12"  — surprise!
+add(1, "2");   // "12" — surprise!
 
 // TS
 function add(a: number, b: number): number { return a + b; }
 add(1, "2");   // compile error
 ```
 
-### The type system
-- **Primitives:** `string`, `number`, `boolean`, `null`, `undefined`
-- **Arrays:** `number[]` or `Array<number>`
-- **Objects:** `{ name: string; age: number }`
-- **Unions:** `string | null`
-- **Generics:** `<T>(items: T[]): T`
-- **Discriminated unions:** `{ kind: "ok"; data } | { kind: "error"; err }`
+### Core types
+- Primitives: `string`, `number`, `boolean`, `null`, `undefined`, `bigint`, `symbol`
+- Arrays: `number[]` or `Array<number>`
+- Objects: `{ name: string; age: number }`
+- Unions: `string | null`
+- Generics: `<T>(items: T[]): T`
+- Discriminated unions: `{ kind: "ok"; data } | { kind: "err"; err }`
 
-## 3. Why this problem exists
-Bugs in dynamic languages only surface at runtime, often in production. TS moves those errors to the editor, where the cost of fixing is zero.
-
-## 4. Frontend/backend data flow
-Frontend sends `Promise<TracePage>`; backend returns that exact shape. We define the contract once in `frontend/src/types/index.ts` and the compiler enforces every consumer.
-
-## 5. Complete runnable example
-**File: `frontend/src/lib/sum.ts`**
+### Map / filter / reduce
 ```ts
+[1, 2, 3].map(n => n * 2);    // [2, 4, 6]
+[1, 2, 3].filter(n => n > 1); // [2, 3]
+[1, 2, 3].reduce((a, n) => a + n, 0); // 6
+```
+
+### Promises + async/await
+```ts
+const r = await fetch('/traces');
+const body: TracePage = await r.json();
+```
+
+### Null handling
+- `T | null` is the explicit "may be missing".
+- Use `??` for default values, `?.` for safe access.
+- `!` (non-null assertion) is a code smell.
+
+---
+
+## 3. Coding (30 min)
+
+Create `frontend/src/lib/sum.ts` and `frontend/src/lib/sum.test.ts`.
+
+```ts
+// sum.ts
 export function sum(nums: number[]): number {
   return nums.reduce((acc, n) => acc + n, 0);
 }
 ```
-**File: `frontend/src/lib/sum.test.ts`**
 ```ts
+// sum.test.ts
 import { describe, it, expect } from 'vitest';
 import { sum } from './sum';
 describe('sum', () => {
@@ -49,46 +76,96 @@ describe('sum', () => {
 });
 ```
 
-## 6. Line-by-line
-- `export function` — ES module syntax, makes it importable.
-- `nums: number[]` — TS type. `[]` is a shortcut for `Array<number>`.
-- `reduce((acc, n) => acc + n, 0)` — `0` is the initial value. Without it, the empty array would throw.
+**Run:** `cd frontend && npm install && npm test`
 
-## 7. Sample I/O
+**Expected:** `3 passed`
+
+### Sample I/O
 | Input | Output |
 |---|---|
 | `[]` | `0` |
-| `[1,2,3]` | `6` |
-| `[-1,1]` | `0` |
+| `[1, 2, 3]` | `6` |
+| `[-1, 1]` | `0` |
 
-## 8. Common bugs
-- **Type coercion:** `"5" - 1 === 4` (subtraction coerces, addition concatenates).
-- **`undefined` vs `null`:** pick one convention; we use `null = "intentionally empty"`.
-- **Async forgetting await:** `await Promise.all([fetchA(), fetchB()])` is the cure.
+### Line-by-line
+- `export` — ES module syntax.
+- `nums: number[]` — TS type.
+- `reduce` — accumulator + current + initial value.
 
-## 9. Tests
-3 cases above, plus an edge case:
-```ts
-it('handles large arrays', () => {
-  const big = Array.from({length:1_000_000}, (_,i)=>i);
-  expect(sum(big)).toBe(499_999_500_000);
-});
-```
+---
 
-## 10. Performance
-`reduce` is O(n); fine for 1M. For 100M+ use a loop. For concurrent I/O use `Promise.all`.
+## 4. Debugging & tests (20 min)
 
-## 11. Five Meta-style interview Q&As
-1. **What's `unknown` vs `any`?** `any` opts out of types; `unknown` is type-safe (you must narrow).
-2. **What is structural typing?** TS cares about the *shape*, not the name. Two types with the same fields are assignable.
-3. **What is a discriminated union?** A union of objects with a common literal tag.
-4. **What is a generic?** A type placeholder — like a function for types.
-5. **What is `as const`?** Tells TS to infer literal types so `'v1.0'` stays `'v1.0'`, not `string`.
+### Bug 1: Type coercion surprise
+`"5" - 1 === 4` (subtraction coerces), `"5" + 1 === "51"` (addition concatenates).
+**Fix:** parse with `Number()` or `parseInt`.
 
-## 12. Coding assignment
-Write `percentile(nums: number[], p: number): number` that returns the p-th percentile (0–100). Handle empty arrays and out-of-range p.
+### Bug 2: `undefined` vs `null`
+Pick one convention. We use `null = intentionally empty`. Configure `tsconfig` with `"strictNullChecks": true`.
 
-## 13. Solution + rubric
+### Bug 3: forgetting `await`
+`const data = fetch(...)` gives a Promise, not the data. Always `await` or `.then()`.
+
+### Bug 4: tests don't run
+**Cause:** missing `vitest` in `package.json`.
+**Fix:** `npm install -D vitest`.
+
+---
+
+## 5. Mock interview practice (20 min)
+
+**Q1 — "What's `unknown` vs `any`?"**
+> `any` opts out of types. `unknown` is type-safe: you must narrow with `typeof` or `instanceof` before use.
+
+**Q2 — "What is structural typing?"**
+> TS cares about the *shape*, not the name. Two types with the same fields are assignable.
+
+**Q3 — "What is a discriminated union?"**
+> A union of object types sharing a literal tag. Lets the compiler narrow via `if (x.kind === 'ok')`.
+
+**Q4 — "What is a generic?"**
+> A type parameter — like a function for types. Example: `function first<T>(arr: T[]): T | undefined`.
+
+**Q5 — "What does `as const` do?"**
+> Tells TS to infer literal types so `'v1.0'` stays `'v1.0'`, not `string`.
+
+---
+
+## 6. Success criteria check
+- [ ] I can write a typed function with primitives, arrays, unions.
+- [ ] I can write a generic.
+- [ ] I can write a discriminated union.
+- [ ] I can run a Vitest test and read failures.
+- [ ] I can avoid the 4 common bugs above.
+
+## 7. Grade yourself 0–10
+| Area | Score |
+|---|---|
+| Correctness | /10 |
+| Code quality | /10 |
+| Debugging | /10 |
+| API design | /10 |
+| Frontend implementation | /10 |
+| Performance | /10 |
+| Testing | /10 |
+| Communication | /10 |
+| **Total** | **/80** |
+
+Pass: ≥ 56/80. Aim: ≥ 64/80.
+
+---
+
+## 8. Coding assignment
+**Implement `percentile(nums: number[], p: number): number`** returning the p-th percentile (0–100). Handle empty arrays and out-of-range p.
+
+### Rubric (0–10)
+- 0: doesn't compile
+- 4: works for happy path
+- 6: handles empty + range
+- 8: sorts defensively (no in-place mutation)
+- 10: linear interpolation between adjacent samples
+
+### Solution
 ```ts
 export function percentile(nums: number[], p: number): number {
   if (nums.length === 0) throw new Error('empty');
@@ -98,10 +175,5 @@ export function percentile(nums: number[], p: number): number {
   return sorted[idx];
 }
 ```
-- 0: doesn't compile
-- 4: works for happy path
-- 6: handles empty + range
-- 8: sorts defensively (no in-place mutation)
-- 10: linear interpolation between adjacent samples
 
 **Time: 90 min**

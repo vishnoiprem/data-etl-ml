@@ -1,81 +1,164 @@
 # Day 5 — SQL and Persistence
+**Module 5** | Total: 90 min (10 + 20 + 30 + 20 + 20)
 
-## 1. Analogy
-A database is a **filing cabinet**. Each drawer is a table. Each folder is a row. The **index** is the label on the front of each drawer so you can find a folder without flipping through every page.
+---
 
-## 2. Technical concept
+## 1. Simple explanation (10 min)
+
+**Analogy for a 12-year-old:**
+A database is a **filing cabinet**.
+- Each drawer is a table.
+- Each folder is a row.
+- The **index** is the label on the front of each drawer so you can find a folder without flipping every page.
+
+Without indexes, every search flips through the whole cabinet. With indexes, you jump straight to the drawer.
+
+---
+
+## 2. Technical concepts (20 min)
+
 SQL is a **declarative language**: you say *what* you want, not *how*. The query planner picks the strategy.
 
 ### Indexes
-- A B-tree index speeds up equality and range queries.
-- A composite index helps queries that filter/sort on its leading columns.
-- An index is a **copy** of the data, sorted differently — it's not free (write cost).
+- B-tree index: speeds up equality and range.
+- Composite index: matches queries that filter/sort on its leading columns.
+- An index is a **copy** of the data, sorted differently — writes pay for it.
 
-### Transactions
-ACID: **A**tomic, **C**onsistent, **I**solated, **D**urable. SQLite's default mode is autocommit-ish; we use `conn.commit()` explicitly.
+### Transactions (ACID)
+Atomic, Consistent, Isolated, Durable. SQLite default is autocommit-ish; we use explicit `conn.commit()`.
 
 ### Parameterized queries
-Always use `?` placeholders. String concatenation is **SQL injection**.
+Always use `?` placeholders. String concatenation = SQL injection.
 
-## 3. Why this problem exists
-Without indexes, every query is a full table scan. Without transactions, partial writes corrupt data. Without parameterization, attackers steal the database.
+### Connection management
+Open, do work, commit-or-rollback, close. Use a context manager.
 
-## 4. Data flow
-API → SQL with placeholders → SQLite planner → B-tree lookup → rows → Pydantic → JSON → client
+---
 
-## 5. Example
+## 3. Coding (30 min)
+
+Open `backend/app/database.py` and read `init_db()`. Add an extra index that supports the day filter:
+
 ```python
-with db_cursor(commit=True) as cur:
-    cur.execute(
-        "INSERT INTO traces(trace_id, created_at, prompt_version, user_query, prompt, retrieved_chunks, model_response, citations, token_usage, latency_ms) VALUES (?,?,?,?,?,?,?,?,?,?)",
-        (tid, ts, pv, q, p, rc, mr, cits, tu, lat),
-    )
+cur.execute(
+    "CREATE INDEX IF NOT EXISTS idx_traces_day "
+    "ON traces(substr(created_at, 1, 10))"
+)
 ```
 
-## 6. Line-by-line
-- `?` placeholders. The DB driver escapes the values for us.
-- `commit=True` flushes the transaction.
+Then write a function `count_by_prompt_version() -> list[dict]` in `backend/app/routes/traces.py`:
 
-## 7. I/O
-- Insert returns `cursor.lastrowid`.
-- `SELECT *` returns all rows; for huge tables use `LIMIT`.
-
-## 8. Bugs
-- **N+1** — looping a query for each row. Use `IN (?, ?, ?)`.
-- **Wrong index** — query uses `idx_latency` instead of the composite. Check with `EXPLAIN QUERY PLAN`.
-- **Timezone confusion** — store UTC, format on display.
-
-## 9. Tests
 ```python
-def test_index_used():
-    plan = cur.execute("EXPLAIN QUERY PLAN SELECT * FROM traces ORDER BY created_at DESC, trace_id DESC LIMIT 50").fetchall()
-    assert "idx_traces_created_id" in str(plan)
+@router.get("/stats/by-prompt-version")
+def stats_by_pv():
+    with db_cursor() as cur:
+        rows = cur.execute(
+            "SELECT prompt_version, COUNT(*) AS c, "
+            "AVG(latency_ms) AS avg_latency "
+            "FROM traces GROUP BY prompt_version"
+        ).fetchall()
+    return [dict(r) for r in rows]
 ```
 
-## 10. Performance
-- Index lookup O(log n) vs full scan O(n).
-- `journal_mode=WAL` lets readers and writers not block.
-- `EXPLAIN` your slow queries.
-
-## 11. Five Q&As
-1. **What's a composite index?** An index on multiple columns.
-2. **What is WAL?** Write-Ahead Log — readers see the snapshot at start; writers append.
-3. **Why `ON CONFLICT`?** Idempotent upsert.
-4. **What's the difference between `WHERE` and `HAVING`?** WHERE filters rows; HAVING filters groups.
-5. **When to denormalize?** When reads vastly outnumber writes and joins are hot.
-
-## 12. Coding assignment
-Add a `status='error'` index and write a query that counts errors per prompt_version.
-
-## 13. Solution
-```python
-cur.execute("CREATE INDEX IF NOT EXISTS idx_traces_status_pv ON traces(status, prompt_version)")
-cur.execute("SELECT prompt_version, COUNT(*) FROM traces WHERE status='error' GROUP BY prompt_version")
+### Sample I/O
+```bash
+curl http://localhost:8000/traces/stats/by-prompt-version
+# [{"prompt_version":"v1.0","c":2512,"avg_latency":1200.4}, ...]
 ```
+
+### Line-by-line
+- `GROUP BY prompt_version` — one row per version.
+- `AVG(latency_ms)` — aggregate function. SQLite returns a float.
+- `dict(r)` — convert `sqlite3.Row` to a JSON-able dict.
+
+---
+
+## 4. Debugging & tests (20 min)
+
+### Bug 1: N+1
+```python
+for tid in ids:
+    cur.execute("SELECT * FROM traces WHERE trace_id=?", (tid,))
+```
+**Fix:** `WHERE trace_id IN (?, ?, ?)`.
+
+### Bug 2: Wrong index used
+**Fix:** `EXPLAIN QUERY PLAN` and look for `SCAN` vs `SEARCH ... USING INDEX`.
+
+### Bug 3: Timezone confusion
+Store UTC, format on display.
+
+### Test
+```python
+def test_stats_by_pv(client, seed):
+    r = client.get("/traces/stats/by-prompt-version")
+    body = r.json()
+    assert {b["prompt_version"] for b in body} == {"v1.0", "v1.1", "v1.2"}
+    assert all(b["c"] > 0 for b in body)
+```
+
+---
+
+## 5. Mock interview practice (20 min)
+
+**Q1 — "What's a composite index?"**
+> An index on multiple columns. Order matters.
+
+**Q2 — "What is WAL?"**
+> Write-Ahead Log. Readers see a snapshot; writers append.
+
+**Q3 — "Why ON CONFLICT?"**
+> Idempotent upsert — INSERT or UPDATE on conflict.
+
+**Q4 — "WHERE vs HAVING?"**
+> WHERE filters rows; HAVING filters groups.
+
+**Q5 — "When do you denormalize?"**
+> When reads vastly outnumber writes and joins are hot.
+
+---
+
+## 6. Success criteria check
+- [ ] I can read and write a parameterized query.
+- [ ] I can use `EXPLAIN QUERY PLAN`.
+- [ ] I can write a GROUP BY.
+- [ ] I can manage a connection safely.
+- [ ] I can write a test for a query.
+
+## 7. Grade yourself 0–10
+| Area | Score |
+|---|---|
+| Correctness | /10 |
+| Code quality | /10 |
+| Debugging | /10 |
+| API design | /10 |
+| Frontend implementation | /10 |
+| Performance | /10 |
+| Testing | /10 |
+| Communication | /10 |
+| **Total** | **/80** |
+
+## 8. Coding assignment
+**Add `GET /traces/stats/errors` returning error counts per prompt version.**
+
+### Rubric (0–10)
 - 0: doesn't run
 - 4: returns counts
-- 6: uses index
-- 8: includes v1.0, v1.1, v1.2, v2.0 even when count=0
-- 10: returns P95 latency per version
+- 6: filters status='error'
+- 8: indexed
+- 10: returns P95 latency per version for errors only
+
+### Solution
+```python
+@router.get("/stats/errors")
+def error_stats():
+    with db_cursor() as cur:
+        rows = cur.execute(
+            "SELECT prompt_version, COUNT(*) AS c "
+            "FROM traces WHERE status='error' "
+            "GROUP BY prompt_version"
+        ).fetchall()
+    return [dict(r) for r in rows]
+```
 
 **Time: 90 min**
