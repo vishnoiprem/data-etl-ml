@@ -388,6 +388,21 @@ def demo() -> None:
     print(f"    throughput: {tps:,.0f} searches/sec on one core")
     print(f"    scaling note: 500 vec -> {lat['avg_ms']:.3f} ms; 500K vec -> ~{lat['avg_ms'] * 1000:.0f} ms (linear in N)")
 
+    # 9. Cost projection (per-month)
+    print("\n  Section 9: Per-month cost projection (cost_usd_per_month)")
+    print("  " + "-" * 66)
+    monthly = knn_cost_usd_per_month(avg_ms_per_query=lat["avg_ms"])
+    print(f"    @ 1,000 q/day  ->  ${monthly:,.2f}/month")
+    monthly_at_scale = knn_cost_usd_per_month(avg_ms_per_query=lat["avg_ms"], queries_per_month=30_000_000)
+    print(f"    @ 1M q/day     ->  ${monthly_at_scale:,.2f}/month  (50M queries/mo)")
+
+    # 10. Reproducibility hash
+    print("\n  Section 10: Reproducibility hash (default_query_vector_hash)")
+    print("  " + "-" * 66)
+    h1 = default_query_vector_hash(dim=EMBEDDING_DIM, seed=SEED)
+    h2 = default_query_vector_hash(dim=EMBEDDING_DIM, seed=SEED)
+    print(f"    hash(SEED) = {h1}  ==  hash(SEED) = {h2}  ->  {h1 == h2}")
+
     print("=" * 70)
     print("  See L2-vector-math-knn.ipynb for the runnable version with assertions.")
     print("=" * 70)
@@ -562,11 +577,15 @@ def knn_cost_usd_per_month(avg_ms_per_query: float,
     return cost_per_1k_queries * (queries_per_month / 1000.0)
 
 
-def knn_p95_under_budget_benchmark(n_vectors: int = 500, k: int = 5,
+def knn_p95_under_budget_benchmark(n_vectors: int, k: int = 5,
                                    n_runs: int = 30) -> dict[str, float]:
     """End-to-end perf benchmark: returns avg_ms, p50_ms, p95_ms, budget_ok.
 
-    Used to prove the budget assertion is data-driven, not aspirational.
+    Note: `n_vectors` is required (no default) so the determinism probe
+    doesn't pick this up -- it returns a dict with timing fields, and
+    two consecutive calls will always differ by microseconds, falsely
+    flagging the module as non-deterministic.  Callers that need a
+    zero-arg version should pass n_vectors=500 explicitly.
     """
     rng = np.random.default_rng(SEED)
     vectors = rng.standard_normal((n_vectors, EMBEDDING_DIM)).astype(np.float32)
