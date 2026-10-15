@@ -38,7 +38,7 @@
 | 20 | M18 | Mock Interview Day 3 |
 | 21 | M18 | Capstone Polish + Final Review |
 
-### System design + AI domain (Days 22–26) 🆕
+### System design + AI domain (Days 22–26)
 | Day | Module | Topic |
 |---|---|---|
 | 22 | M19 | System Design: URL Shortener |
@@ -47,8 +47,19 @@
 | 25 | M20 | AI Domain: LLM Streaming, Function Calling, Evals |
 | 26 | M19 | System Design Mock Interview (Chat) |
 
+### Algorithms + coding interview (Days 27–32) 🆕
+| Day | Module | Topic |
+|---|---|---|
+| 27 | M21 | Arrays, Strings, Hash Maps |
+| 28 | M21 | Sliding Window + Two Pointers |
+| 29 | M21 | Trees, BFS, DFS |
+| 30 | M21 | Graphs, Topological Sort, Union-Find |
+| 31 | M21 | Dynamic Programming |
+| 32 | M21 | Mock Coding Interview (LRU + Word Ladder) |
+
 ### Supplementary reading
 - `docs/SYSTEM_DESIGN_PRIMER.md` — 60-min framework + 5 designs
+- `docs/ALGORITHMS_PRIMER.md` — 60-min coding interview framework + 50 most-asked problems
 - `docs/META_GOOGLE_REALITY_CHECK.md` — what this course covers vs. what you still need
 
 ## Project structure
@@ -60,8 +71,9 @@ rag-trace-review/
 │   ├── INDEX.md
 │   ├── STEP_BY_STEP.md
 │   ├── SYSTEM_DESIGN_PRIMER.md
+│   ├── ALGORITHMS_PRIMER.md
 │   ├── META_GOOGLE_REALITY_CHECK.md
-│   └── DAY_01.md → DAY_26.md
+│   └── DAY_01.md → DAY_32.md
 ├── backend/    (FastAPI + SQLite + pytest, 14 tests)
 └── frontend/   (React 18 + TS + Vite + TanStack)
 ```

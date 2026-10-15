@@ -106,8 +106,8 @@ But it does NOT have:
 | Cursor pagination | 10/10 | None — you can teach this |
 | Optimistic UI | 9/10 | Edge cases under flaky networks |
 | Virtualization | 9/10 | Variable row heights, scroll restoration |
-| System design | 2/10 | **Months of study** |
-| Algorithms | 1/10 | **100+ LeetCode** |
+| System design | 4/10 | **Months of study** (Days 22–26 cover the framework; needs depth) |
+| Algorithms | 4/10 | **100+ LeetCode** (Days 27–32 cover 12 patterns + 50 problems) |
 | Behavioral | 0/10 | **Separate prep** |
 | AI domain | 4/10 | Vector DBs, evals, cost |
 
