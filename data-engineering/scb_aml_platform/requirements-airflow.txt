@@ -1,21 +1,27 @@
 # SCB AML Platform — Airflow Dependencies (separate install)
 #
-# apache-airflow 2.7.3 requires sqlalchemy<2.0, which conflicts with the
-# main requirements.txt. Install this in a SEPARATE virtual environment
-# dedicated to the Airflow scheduler/webserver.
+# Airflow is installed in a SEPARATE virtualenv because:
+#   1. Airflow's pin on Flask/Jinja2/SQLAlchemy versions clashes
+#      with the main platform's pinned deps.
+#   2. Airflow's scheduler is a long-running daemon — keeping it
+#      isolated reduces blast radius if the main env is rebuilt.
 #
-# Setup:
+# Setup (Airflow 3.x):
 #   python -m venv venv-airflow
 #   source venv-airflow/bin/activate
 #   pip install -r requirements-airflow.txt
 #   export AIRFLOW_HOME=~/airflow
-#   airflow db init
-#   cp orchestration/airflow_dag.py ~/airflow/dags/
-#   airflow webserver --port 8080 &
+#   airflow db migrate
+#   cp orchestration/airflow_dag.py $AIRFLOW_HOME/dags/
+#   airflow api-server --port 8080 &   # 3.x: API server (was webserver)
 #   airflow scheduler &
+#
+# Note: airflow_dag.py uses try/except imports so it still parses
+# outside an Airflow env, but it WILL NOT run the pipeline without
+# Apache Airflow installed.
 
 apache-airflow==3.3.2
-sqlalchemy==1.4.52
+sqlalchemy==2.0.36
 pandas==2.0.3
 loguru==0.7.2
 

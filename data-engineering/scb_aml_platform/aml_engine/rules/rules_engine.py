@@ -18,7 +18,7 @@ Each rule returns a list of RuleAlert records.
 
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -53,12 +53,12 @@ class RuleAlert:
     country_code: str
     trigger_value: float = 0.0
     trigger_unit: str = ""
-    created_date: str = field(default_factory=lambda: datetime.utcnow().strftime("%Y-%m-%d"))
+    created_date: str = field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     status: str = "open"
 
 
 def _make_alert_id(rule_id: str, customer_id: str) -> str:
-    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     return f"ALT_{rule_id}_{customer_id[:8]}_{ts}"
 
 
