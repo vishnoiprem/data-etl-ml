@@ -105,10 +105,12 @@ def fake_embed(text: str, dim: int = EMBEDDING_DIM) -> np.ndarray:
 
 
 def l2_norm(v: np.ndarray) -> float:
+    """L2 (Euclidean) norm: sqrt(sum(v_i^2)).  0.0 for the zero vector."""
     return float(np.sqrt(np.sum(v * v)))
 
 
 def cosine_sim(a: np.ndarray, b: np.ndarray) -> float:
+    """Cosine similarity in [-1, +1].  Returns 0.0 if either input is zero."""
     na, nb = l2_norm(a), l2_norm(b)
     if na == 0 or nb == 0:
         return 0.0
@@ -248,6 +250,7 @@ SAMPLE_DOCS: list[dict] = [
 # =================================================================
 
 def demo() -> None:
+    """End-to-end walkthrough: 7 sections, prints banners + numbers + ASCII arch."""
     print("=" * 70)
     print(f"  {LESSON_NUMBER}  --  AI-Native Data Engineering 101")
     print("=" * 70)

@@ -125,23 +125,38 @@ def _run_demo(mod) -> tuple[bool, str, list[str]]:
     return ok, buf.getvalue(), errors
 
 
+def _local_public_fns(mod):
+    """Public functions defined IN the lesson module (not imported)."""
+    lesson_module = getattr(mod, "__file__", None)
+    out = []
+    for n, fn in inspect.getmembers(mod, inspect.isfunction):
+        if n.startswith("_") or n.startswith("test_"):
+            continue
+        # filter out imported symbols: their __module__ != lesson name
+        try:
+            if lesson_module and hasattr(fn, "__code__") and fn.__code__.co_filename != lesson_module:
+                continue
+        except (AttributeError, TypeError):
+            continue
+        out.append((n, fn))
+    return out
+
+
 def _has_type_hints(mod) -> int:
-    """Score 0-10 based on % of public functions with type hints."""
-    public = [fn for n, fn in inspect.getmembers(mod, inspect.isfunction)
-              if not n.startswith("_") and not n.startswith("test_")]
+    """Score 0-10 based on % of lesson-defined public functions with type hints."""
+    public = _local_public_fns(mod)
     if not public:
         return 0
-    hinted = sum(1 for fn in public if fn.__annotations__ and fn.__annotations__ != {})
+    hinted = sum(1 for _, fn in public if fn.__annotations__ and fn.__annotations__ != {})
     return int(round(hinted / len(public) * 10))
 
 
 def _has_docstrings(mod) -> int:
-    """Score 0-10 based on % of public functions with docstrings."""
-    public = [fn for n, fn in inspect.getmembers(mod, inspect.isfunction)
-              if not n.startswith("_") and not n.startswith("test_")]
+    """Score 0-10 based on % of lesson-defined public functions with docstrings."""
+    public = _local_public_fns(mod)
     if not public:
         return 0
-    with_doc = sum(1 for fn in public if (fn.__doc__ or "").strip())
+    with_doc = sum(1 for _, fn in public if (fn.__doc__ or "").strip())
     return int(round(with_doc / len(public) * 10))
 
 
