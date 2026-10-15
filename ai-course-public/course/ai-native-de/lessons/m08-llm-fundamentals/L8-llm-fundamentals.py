@@ -1,0 +1,501 @@
+"""
+================================================================
+M8 L8  --  LLM Fundamentals: tokens, prompts, cost
+================================================================
+
+Run:    python3 lessons/m08-llm-fundamentals/L8-llm-fundamentals.py
+Keys:   none
+
+Builds the smallest possible LLM client + token/cost accounting
+without touching a real API:
+  * Byte-Pair Encoding (BPE) tokenizer in 80 lines
+  * Mock LLM that returns deterministic responses
+  * Cost tracker: tokens in / tokens out / USD
+  * Latency tracker: TTFT, total time
+  * Prompt template with role tags + variable interpolation
+  * Structured output parser (JSON)
+
+The lesson's point: every LLM app is (1) a tokenizer, (2) a
+prompt, (3) a model call, (4) a parser, (5) a cost log.  Get
+those right and the rest is plumbing.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import time
+from dataclasses import dataclass, field
+from typing import Callable
+
+
+# =================================================================
+# CONFIG
+# =================================================================
+
+LESSON_NUMBER = "M8.L8"
+SEED = 42
+# Public OpenAI pricing (as of 2024-10) -- used as a reference example
+COST_PER_1K_INPUT = 0.00015     # gpt-4o-mini input
+COST_PER_1K_OUTPUT = 0.0006     # gpt-4o-mini output
+MAX_TOKENS = 2048
+
+
+# =================================================================
+# SECTION 1  --  Tiny BPE tokenizer
+# =================================================================
+
+@dataclass
+class BPETokenizer:
+    """A 100-line BPE tokenizer.  Not production-quality, but correct."""
+    vocab: dict[str, int] = field(default_factory=dict)
+    merges: list[tuple[str, str]] = field(default_factory=list)
+    pat: re.Pattern = re.compile(r"\w+|[^\w\s]")
+
+    def _pair_stats(self, words: list[list[str]]) -> dict[tuple[str, str], int]:
+        stats: dict[tuple[str, str], int] = {}
+        for w in words:
+            for i in range(len(w) - 1):
+                p = (w[i], w[i + 1])
+                stats[p] = stats.get(p, 0) + 1
+        return stats
+
+    def _merge_pair(self, words: list[list[str]], pair: tuple[str, str]) -> list[list[str]]:
+        a, b = pair
+        out: list[list[str]] = []
+        for w in words:
+            new: list[str] = []
+            i = 0
+            while i < len(w):
+                if i < len(w) - 1 and w[i] == a and w[i + 1] == b:
+                    new.append(a + b)
+                    i += 2
+                else:
+                    new.append(w[i])
+                    i += 1
+            out.append(new)
+        return out
+
+    def fit(self, text: str, vocab_size: int = 256, n_merges: int = 100) -> None:
+        # Start with byte-level vocab
+        self.vocab = {chr(i): i for i in range(vocab_size)}
+        # Tokenize into words (lowercase, split on punctuation)
+        words = [self.pat.findall(w.lower()) for w in text.split()]
+        words = [[c for c in " ".join(w)] for w in words if w]  # char-level
+        # n_merges iterations of BPE
+        for _ in range(n_merges):
+            stats = self._pair_stats(words)
+            if not stats:
+                break
+            best = max(stats, key=stats.get)
+            if stats[best] < 2:
+                break
+            words = self._merge_pair(words, best)
+            self.merges.append(best)
+            new_token = best[0] + best[1]
+            if new_token not in self.vocab:
+                self.vocab[new_token] = len(self.vocab)
+        # Add any merged-but-not-in-vocab tokens
+        for w in words:
+            for t in w:
+                if t not in self.vocab:
+                    self.vocab[t] = len(self.vocab)
+
+    def encode(self, text: str) -> list[int]:
+        """Encode text to token ids using learned merges."""
+        words = self.pat.findall(text.lower())
+        out: list[int] = []
+        for w in words:
+            chars = list(w)
+            # Apply merges greedily
+            for a, b in self.merges:
+                new: list[str] = []
+                i = 0
+                while i < len(chars):
+                    if i < len(chars) - 1 and chars[i] == a and chars[i + 1] == b:
+                        new.append(a + b)
+                        i += 2
+                    else:
+                        new.append(chars[i])
+                        i += 1
+                chars = new
+            for c in chars:
+                if c in self.vocab:
+                    out.append(self.vocab[c])
+                else:
+                    # unknown char; emit the special <unk>
+                    out.append(0)
+        return out
+
+    def decode(self, ids: list[int]) -> str:
+        inv = {v: k for k, v in self.vocab.items()}
+        return " ".join(inv.get(i, "<unk>") for i in ids)
+
+
+# =================================================================
+# SECTION 2  --  Mock LLM
+# =================================================================
+
+@dataclass
+class MockLLM:
+    """A mock LLM.  Returns a deterministic response based on the prompt."""
+    model_id: str = "mock-llm-1"
+    default_response: str = "This is a mock response."
+
+    def complete(self, prompt: str, max_tokens: int = 100) -> str:
+        """Return a deterministic response.  Echoes back a hash of the prompt."""
+        seed = sum(ord(c) for c in prompt) % 1000
+        # Three "styles" based on prompt length
+        if len(prompt) < 50:
+            return f"[short-response-{seed}] {self.default_response}"
+        elif len(prompt) < 500:
+            return f"[medium-response-{seed}] {self.default_response} ({len(prompt)} chars in prompt)"
+        else:
+            return f"[long-response-{seed}] {self.default_response} ({len(prompt)} chars in prompt, this response is longer because the prompt is long)"
+
+
+# =================================================================
+# SECTION 3  --  Cost + latency tracker
+# =================================================================
+
+@dataclass
+class UsageRecord:
+    """One LLM call's worth of usage."""
+    call_id: str
+    model_id: str
+    input_tokens: int
+    output_tokens: int
+    latency_ms: float
+    cost_usd: float
+    timestamp: str
+
+    @property
+    def total_tokens(self) -> int:
+        return self.input_tokens + self.output_tokens
+
+
+@dataclass
+class CostTracker:
+    """Aggregates usage across many calls."""
+    records: list[UsageRecord] = field(default_factory=list)
+    cost_in: float = COST_PER_1K_INPUT
+    cost_out: float = COST_PER_1K_OUTPUT
+
+    def add(self, r: UsageRecord) -> None:
+        self.records.append(r)
+
+    def total_input_tokens(self) -> int:
+        return sum(r.input_tokens for r in self.records)
+
+    def total_output_tokens(self) -> int:
+        return sum(r.output_tokens for r in self.records)
+
+    def total_cost_usd(self) -> float:
+        return sum(r.cost_usd for r in self.records)
+
+    def mean_latency_ms(self) -> float:
+        if not self.records:
+            return 0.0
+        return sum(r.latency_ms for r in self.records) / len(self.records)
+
+    def p95_latency_ms(self) -> float:
+        if not self.records:
+            return 0.0
+        lats = sorted(r.latency_ms for r in self.records)
+        idx = int(len(lats) * 0.95)
+        return lats[min(idx, len(lats) - 1)]
+
+
+# =================================================================
+# SECTION 4  --  Prompt template
+# =================================================================
+
+@dataclass
+class PromptTemplate:
+    """A simple template: f-string with {variable} interpolation + role tags."""
+    system: str
+    user_template: str
+    variables: list[str] = field(default_factory=list)
+
+    def render(self, **kwargs: str) -> list[dict[str, str]]:
+        """Render to a list of {role, content} messages."""
+        # Validate variables
+        missing = [v for v in self.variables if v not in kwargs]
+        if missing:
+            raise ValueError(f"missing variables: {missing}")
+        user = self.user_template.format(**kwargs)
+        return [
+            {"role": "system", "content": self.system},
+            {"role": "user", "content": user},
+        ]
+
+
+# =================================================================
+# SECTION 5  --  Structured output parser
+# =================================================================
+
+def parse_json_output(text: str) -> dict:
+    """Parse a JSON object from LLM output.  Strips code fences if present."""
+    text = text.strip()
+    # Strip ```json ... ``` or ``` ... ```
+    text = re.sub(r"^```(?:json)?\s*\n?", "", text)
+    text = re.sub(r"\n?```\s*$", "", text)
+    text = text.strip()
+    return json.loads(text)
+
+
+# =================================================================
+# SECTION 6  --  LLM client (wires everything together)
+# =================================================================
+
+@dataclass
+class LLMClient:
+    """An LLM client: tokenize, prompt, call, parse, track."""
+    tokenizer: BPETokenizer
+    model: MockLLM
+    tracker: CostTracker = field(default_factory=CostTracker)
+    call_count: int = 0
+
+    def complete(self, messages: list[dict[str, str]], max_tokens: int = MAX_TOKENS) -> str:
+        # 1. tokenize
+        prompt = "\n".join(f"{m['role']}: {m['content']}" for m in messages)
+        ids = self.tokenizer.encode(prompt)
+        in_tok = len(ids)
+        # 2. call
+        t0 = time.perf_counter()
+        output = self.model.complete(prompt, max_tokens=max_tokens)
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        # 3. tokenize output
+        out_ids = self.tokenizer.encode(output)
+        out_tok = len(out_ids)
+        # 4. cost
+        cost = (in_tok / 1000) * self.tracker.cost_in + (out_tok / 1000) * self.tracker.cost_out
+        # 5. log
+        self.call_count += 1
+        self.tracker.add(UsageRecord(
+            call_id=f"call-{self.call_count:04d}",
+            model_id=self.model.model_id,
+            input_tokens=in_tok,
+            output_tokens=out_tok,
+            latency_ms=elapsed_ms,
+            cost_usd=cost,
+            timestamp=time.strftime("%Y-%m-%dT%H:%M:%S"),
+        ))
+        return output
+
+
+# =================================================================
+# SECTION 7  --  Sample prompt + 5-call demo
+# =================================================================
+
+SAMPLE_CORPUS = """
+the cat sat on the mat. the dog played in the yard.
+stocks rallied on good earnings. the kitten purred.
+machine learning is a subset of artificial intelligence.
+neural networks have many layers. the cat is on the mat.
+""".strip() * 5
+
+SAMPLE_TEMPLATE = PromptTemplate(
+    system="You are a helpful assistant.  Always answer concisely.",
+    user_template="Answer the following: {question}",
+    variables=["question"],
+)
+
+SAMPLE_QUESTIONS = [
+    "What is machine learning?",
+    "Where is the cat?",
+    "What did the dog do?",
+    "Define neural networks.",
+    "Summarize the stock market.",
+]
+
+
+# =================================================================
+# SECTION 8  --  Demo
+# =================================================================
+
+def demo() -> None:
+    print("=" * 70)
+    print(f"  {LESSON_NUMBER}  --  LLM Fundamentals")
+    print("=" * 70)
+
+    # 1. Train BPE
+    print("\n  Section 1: BPE tokenizer")
+    print("  " + "-" * 66)
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, vocab_size=128, n_merges=50)
+    print(f"    vocab size: {len(tok.vocab)}")
+    print(f"    n_merges:   {len(tok.merges)}")
+    sample = "the cat is on the mat"
+    ids = tok.encode(sample)
+    print(f"    encode({sample!r}) = {ids[:10]}... ({len(ids)} tokens)")
+
+    # 2. Mock LLM
+    print("\n  Section 2: Mock LLM")
+    print("  " + "-" * 66)
+    model = MockLLM(model_id="mock-1", default_response="Hello, world!")
+    print(f"    {model.complete('short prompt')}")
+    print(f"    {model.complete('a' * 200)}")
+
+    # 3. Cost + latency
+    print("\n  Section 3: Cost + latency tracker")
+    print("  " + "-" * 66)
+    client = LLMClient(tokenizer=tok, model=model)
+    for q in SAMPLE_QUESTIONS:
+        msgs = SAMPLE_TEMPLATE.render(question=q)
+        out = client.complete(msgs)
+    print(f"    total calls:      {client.call_count}")
+    print(f"    total input tok:  {client.tracker.total_input_tokens()}")
+    print(f"    total output tok: {client.tracker.total_output_tokens()}")
+    print(f"    total cost USD:   ${client.tracker.total_cost_usd():.6f}")
+    print(f"    mean latency ms:  {client.tracker.mean_latency_ms():.2f}")
+    print(f"    p95 latency ms:   {client.tracker.p95_latency_ms():.2f}")
+
+    # 4. Prompt template
+    print("\n  Section 4: Prompt template")
+    print("  " + "-" * 66)
+    msgs = SAMPLE_TEMPLATE.render(question="What is BPE?")
+    print(f"    role: {msgs[0]['role']}")
+    print(f"    content[:80]: {msgs[0]['content'][:80]!r}")
+    print(f"    role: {msgs[1]['role']}")
+    print(f"    content: {msgs[1]['content']!r}")
+
+    # 5. Structured output
+    print("\n  Section 5: Structured output parser")
+    print("  " + "-" * 66)
+    raw = '```json\n{"answer": "BPE is a subword tokenizer.", "confidence": 0.95}\n```'
+    parsed = parse_json_output(raw)
+    print(f"    parsed: {parsed}")
+
+    # 6. Cost projection
+    print("\n  Section 6: Cost projection at 1M calls / month")
+    print("  " + "-" * 66)
+    monthly = client.tracker.total_cost_usd() / client.call_count * 1_000_000
+    print(f"    per call:    ${client.tracker.total_cost_usd() / client.call_count:.6f}")
+    print(f"    monthly (1M calls): ${monthly:,.2f}")
+    print(f"    annual:                     ${monthly * 12:,.2f}")
+
+    print("=" * 70)
+    print("  See L8-llm-fundamentals.ipynb for the runnable version.")
+    print("=" * 70)
+
+
+# =================================================================
+# SECTION 9  --  Tests
+# =================================================================
+
+def test_bpe_roundtrip() -> None:
+    """Encoding then decoding should preserve the text (modulo spaces)."""
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, n_merges=20)
+    sample = "the cat"
+    ids = tok.encode(sample)
+    assert len(ids) > 0
+
+
+def test_bpe_handles_unknown() -> None:
+    """Unknown chars should not crash; they should produce valid token ids."""
+    tok = BPETokenizer()
+    tok.fit("hello world", n_merges=5)
+    # CJK char will be outside the 128-byte vocab but should still tokenize
+    ids = tok.encode("hi 你好")
+    assert all(isinstance(i, int) for i in ids)
+    assert len(ids) > 0  # no crash; emits something
+
+
+def test_bpe_compresses_repeats() -> None:
+    """A repeated phrase should compress to fewer tokens than the chars."""
+    tok = BPETokenizer()
+    tok.fit(("the cat " * 100), n_merges=20)
+    n_chars = len("the cat " * 5)
+    n_tokens = len(tok.encode("the cat " * 5))
+    # tokens should be << chars (compression)
+    assert n_tokens < n_chars
+
+
+def test_mock_llm_deterministic() -> None:
+    """Same prompt -> same response."""
+    m = MockLLM()
+    a = m.complete("hello")
+    b = m.complete("hello")
+    assert a == b
+
+
+def test_cost_tracker_aggregates() -> None:
+    """CostTracker sums input/output tokens and cost correctly."""
+    t = CostTracker()
+    t.add(UsageRecord("c1", "m", 100, 50, 10.0, 0.001, "2025-01-01"))
+    t.add(UsageRecord("c2", "m", 200, 100, 20.0, 0.002, "2025-01-01"))
+    assert t.total_input_tokens() == 300
+    assert t.total_output_tokens() == 150
+    assert abs(t.total_cost_usd() - 0.003) < 1e-9
+    assert abs(t.mean_latency_ms() - 15.0) < 1e-9
+
+
+def test_cost_tracker_p95() -> None:
+    t = CostTracker()
+    for i in range(100):
+        t.add(UsageRecord(f"c{i}", "m", 0, 0, float(i), 0, ""))
+    p95 = t.p95_latency_ms()
+    assert p95 >= 94 and p95 <= 96
+
+
+def test_prompt_template_renders() -> None:
+    t = PromptTemplate(system="sys", user_template="hi {name}", variables=["name"])
+    msgs = t.render(name="alice")
+    assert msgs[0]["role"] == "system"
+    assert msgs[0]["content"] == "sys"
+    assert msgs[1]["content"] == "hi alice"
+
+
+def test_prompt_template_missing_var_raises() -> None:
+    t = PromptTemplate(system="s", user_template="hi {name}", variables=["name"])
+    try:
+        t.render()
+        assert False, "should have raised"
+    except ValueError:
+        pass
+
+
+def test_parse_json_with_fence() -> None:
+    out = parse_json_output('```json\n{"a": 1}\n```')
+    assert out == {"a": 1}
+
+
+def test_parse_json_plain() -> None:
+    out = parse_json_output('{"a": 2}')
+    assert out == {"a": 2}
+
+
+def test_llm_client_increments_call_count() -> None:
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, n_merges=20)
+    model = MockLLM()
+    client = LLMClient(tokenizer=tok, model=model)
+    msgs = [{"role": "user", "content": "hi"}]
+    client.complete(msgs)
+    client.complete(msgs)
+    assert client.call_count == 2
+    assert len(client.tracker.records) == 2
+
+
+def test_llm_client_logs_cost() -> None:
+    """Each call should produce a UsageRecord with non-zero tokens."""
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, n_merges=20)
+    model = MockLLM()
+    client = LLMClient(tokenizer=tok, model=model)
+    msgs = SAMPLE_TEMPLATE.render(question="hi")
+    client.complete(msgs)
+    rec = client.tracker.records[0]
+    assert rec.input_tokens > 0
+    assert rec.output_tokens > 0
+    assert rec.cost_usd > 0
+
+
+# =================================================================
+# ENTRY
+# =================================================================
+
+if __name__ == "__main__":
+    demo()

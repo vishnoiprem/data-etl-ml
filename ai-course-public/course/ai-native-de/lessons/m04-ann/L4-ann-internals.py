@@ -123,13 +123,14 @@ class PQLiteIndex:
     codes: np.ndarray        # shape (N, n_subq) int32
 
     def search(self, vectors: np.ndarray, ids: list[str], q: np.ndarray, k: int) -> list[tuple[str, float]]:
-        # Compute distance table: (n_subq, k) -- for each sub-vector, distance to each centroid
+        # Compute distance table: (n_subq, k_centroids) -- for each sub-vector, distance to each centroid
         sub_qs = q.reshape(self.n_subq, self.sub_dim)
-        # distances: shape (n_subq, k)
+        # distances: shape (n_subq, k_centroids)
         dists = np.linalg.norm(self.codebooks - sub_qs[:, None, :], axis=2)
-        # score per vector: sum over sub-vectors of dists[sub, code[i, sub]]
-        # vectorized: codes (N, n_subq) -> (N, n_subq), dists indexed
-        per_sub = dists[self.codes, np.arange(self.n_subq)[None, :]]  # (N, n_subq)
+        # For each vector i and each sub-vector s, look up dists[s, codes[i, s]]
+        # codes is (N, n_subq), dists is (n_subq, k_centroids)
+        # per_sub[i, s] = dists[s, codes[i, s]] -- advanced indexing
+        per_sub = dists[np.arange(self.n_subq)[None, :], self.codes]  # shape (N, n_subq)
         scores = -per_sub.sum(axis=1)
         order = np.argsort(-scores)[:k]
         return [(ids[i], float(scores[i])) for i in order]
@@ -205,26 +206,25 @@ class HNSWLiteIndex:
         # start at entry
         current = self.entry
         visited: set[int] = {current}
-        # priority queue of (-score, idx)
-        heap: list[tuple[float, int]] = [(-float(self.vectors[current] @ q), current)]
-        # best list (min-heap of -score = max-heap of score)
-        best: list[tuple[float, int]] = []
-        heapq.heappush(best, (float(self.vectors[current] @ q), current))
-        # expand until ef_search candidates visited
+        s_cur = float(self.vectors[current] @ q)
+        # heap: max-heap of score (use negative for heapq)
+        heap: list[tuple[float, int]] = [(-s_cur, current)]
+        # best list: min-heap of score, capped at ef_search
+        best: list[tuple[float, int]] = [(s_cur, current)]
         expanded = 0
         while heap and expanded < self.ef_search:
             neg_s, idx = heapq.heappop(heap)
-            s = -neg_s
             for n in self.graph[idx]:
                 if n in visited:
                     continue
                 visited.add(n)
                 s_n = float(self.vectors[n] @ q)
-                if len(best) < self.ef_search or s_n > -best[0][0]:
-                    heapq.heappush(heap, (-s_n, n))
-                    heapq.heappush(best, (-s_n, n))
-                    if len(best) > self.ef_search:
-                        heapq.heappop(best)
+                # candidate list: always expand; if we have room, push; else push only if better than worst
+                heapq.heappush(heap, (-s_n, n))
+                if len(best) < self.ef_search:
+                    heapq.heappush(best, (s_n, n))
+                elif s_n > best[0][0]:
+                    heapq.heappushpop(best, (s_n, n))
             expanded += 1
         # return top-k by score
         sorted_best = sorted(best, key=lambda x: -x[0])[:k]
