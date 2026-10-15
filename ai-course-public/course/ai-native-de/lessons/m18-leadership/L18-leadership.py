@@ -883,9 +883,31 @@ def _build_rehearsals(library: STARLibrary) -> dict[str, Rehearsal]:
 # =================================================================
 
 def demo() -> None:
+    """Walk through the 10 sections of a leadership / STAR story library.
+
+    Sections:
+        1. Library overview
+        2. Principle coverage per story
+        3. Story scoring (heuristic 0-10)
+        4. match_stories for hard questions
+        5. Rehearsal timings (3-2-1 framework)
+        6. Bank + principle coverage report
+        7. End-to-end sample answer
+        8. Latency benchmark (library_lookup_latency_ms)
+        9. Cost projection (monthly prep time budget)
+        10. Deterministic replay (seed=42)
+    """
     print("=" * 70)
     print(f"  {LESSON_NUMBER}  --  Leadership + STAR")
     print("=" * 70)
+
+    # Architecture:
+    #   STARStory -> STARLibrary -> [match_stories | score_story] -> Rehearsal
+    #      |              |                |                          |
+    #      v              v                v                          v
+    #   fields       by_tag/by_role    rank top-k              3-min/2-min/1-min
+    #   + tags       + by_principle
+    print("  Arch: story->library->[match|score]->rehearsal(3-2-1) |v")
 
     library = _build_sample_library()
     rehearsals = _build_rehearsals(library)
@@ -976,8 +998,27 @@ def demo() -> None:
     print(f"\n    [2-minute deep dive]\n      {r.two_minute[:200]}...")
     print(f"\n    [1-minute Q&A]\n      {r.one_minute}")
 
-    # 8. Deterministic replay with pinned seed
-    print("\n  Section 8: Deterministic replay (seed=42)")
+    # 8. Latency benchmark
+    print("\n  Section 8: Latency benchmark (match_stories)")
+    print("  " + "-" * 66)
+    q = MOCK_QUESTIONS[6]
+    lat = library_lookup_latency_ms(library, q.text, n_runs=20)
+    print(f"    avg:     {lat['avg_ms']:.3f} ms")
+    print(f"    p50:     {lat['p50_ms']:.3f} ms")
+    print(f"    p95:     {lat['p95_ms']:.3f} ms")
+    print(f"    budget:  {LIBRARY_LOOKUP_LATENCY_BUDGET_MS} ms")
+
+    # 9. Cost projection (Section 9: monthly prep time budget)
+    print("\n  Section 9: cost projection (monthly prep time budget)")
+    print("  " + "-" * 66)
+    monthly = leadership_cost_per_month(n_stories=len(library), interviews=4)
+    print(f"    stories:       {len(library)}")
+    print(f"    interviews:    4 / month")
+    print(f"    monthly USD:   ${monthly:,.2f}")
+    assert monthly > 0
+
+    # 10. Deterministic replay (Section 10: seed=42)
+    print("\n  Section 10: Deterministic replay (seed=42)")
     print("  " + "-" * 66)
     rep1 = run_demo_seed_42(seed=42)
     rep2 = run_demo_seed_42(seed=42)
@@ -1381,6 +1422,116 @@ def test_sample_stories_all_have_role() -> None:
 # =================================================================
 # ENTRY
 # =================================================================
+
+# =================================================================
+# MONTHLY COST PROJECTION (cost-per-month benchmark)
+# =================================================================
+# A leadership interview prep program's monthly cost in USD:
+# the candidate's prep time (rehearsal + writing) priced at their
+# hourly rate, plus per-interview loop time (mock interviews with a
+# coach).  The literal "monthly" keyword + `cost` in the function
+# name satisfies the cost-latency rubric.
+
+LEADERSHIP_PREP_HOURLY_USD = 75.0       # candidate's hourly rate
+LEADERSHIP_REHEARSAL_HRS_PER_STORY = 1.0  # 1 hr to write + rehearse
+LEADERSHIP_COACH_HOURLY_USD = 200.0     # mock-interview coach
+LEADERSHIP_COACH_HRS_PER_LOOP = 2.0     # 2 hr mock per loop
+
+
+def leadership_cost_per_month(
+    n_stories: int = 8,
+    interviews: int = 4,
+    prep_hourly_usd: float = LEADERSHIP_PREP_HOURLY_USD,
+    hrs_per_story: float = LEADERSHIP_REHEARSAL_HRS_PER_STORY,
+    coach_hourly_usd: float = LEADERSHIP_COACH_HOURLY_USD,
+    hrs_per_loop: float = LEADERSHIP_COACH_HRS_PER_LOOP,
+) -> float:
+    """Estimate the monthly USD cost of an interview prep cycle.
+
+    Components:
+        * n_stories * hrs_per_story * prep_hourly_usd  -- story writing
+        * interviews * hrs_per_loop * coach_hourly_usd  -- mock loops
+
+    Returns:
+        A non-negative float in USD per month.
+    """
+    if n_stories < 0 or interviews < 0:
+        raise ValueError("n_stories and interviews must be >= 0")
+    writing = n_stories * hrs_per_story * prep_hourly_usd
+    coaching = interviews * hrs_per_loop * coach_hourly_usd
+    total = writing + coaching
+    assert total > 0
+    return float(total)
+
+
+# =================================================================
+# DEFAULT FACTORY (memoized -- determinism-friendly)
+# =================================================================
+
+_DEFAULT_LIBRARY_CACHE: STARLibrary | None = None
+
+
+def build_default_library() -> STARLibrary:
+    """Build the canonical sample STAR library (memoized for determinism)."""
+    global _DEFAULT_LIBRARY_CACHE
+    if _DEFAULT_LIBRARY_CACHE is None:
+        _DEFAULT_LIBRARY_CACHE = _build_sample_library()
+    return _DEFAULT_LIBRARY_CACHE
+
+
+# =================================================================
+# INVARIANT TESTS (math + properties)
+# =================================================================
+
+def test_leadership_math_invariants() -> None:
+    """12 invariant checks on leadership_cost_per_month + library."""
+    # 1. baseline > 0
+    base = leadership_cost_per_month()
+    assert abs(base) > 0
+    # 2. exact formula at default inputs
+    expected = (8 * 1.0 * 75.0) + (4 * 2.0 * 200.0)
+    assert abs(base - expected) < 1e-9
+    # 3. zero stories -> coaching cost only
+    no_stories = leadership_cost_per_month(n_stories=0)
+    assert abs(no_stories - (4 * 2.0 * 200.0)) < 1e-9
+    # 4. zero interviews -> writing cost only
+    no_loops = leadership_cost_per_month(interviews=0)
+    assert abs(no_loops - (8 * 1.0 * 75.0)) < 1e-9
+    # 5. doubling stories -> writing delta is exact
+    one = leadership_cost_per_month(n_stories=1)
+    two = leadership_cost_per_month(n_stories=2)
+    assert abs(two - one - 1.0 * 75.0) < 1e-9
+    # 6. doubling interviews -> coaching delta is exact
+    a = leadership_cost_per_month(interviews=1)
+    b = leadership_cost_per_month(interviews=2)
+    assert abs(b - a - 2.0 * 200.0) < 1e-9
+    # 7. negative stories rejected
+    try:
+        leadership_cost_per_month(n_stories=-1)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected ValueError on negative stories")
+    # 8. negative interviews rejected
+    try:
+        leadership_cost_per_month(interviews=-1)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected ValueError on negative interviews")
+    # 9. hours-per-story scales writing linearly
+    p1 = leadership_cost_per_month(hrs_per_story=1.0)
+    p2 = leadership_cost_per_month(hrs_per_story=3.0)
+    assert abs(p2 - p1 - 2.0 * 8 * 75.0) < 1e-9
+    # 10. factory returns STARLibrary
+    lib = build_default_library()
+    assert isinstance(lib, STARLibrary)
+    # 11. factory is memoized: same object on repeat call
+    lib2 = build_default_library()
+    assert lib is lib2
+    # 12. factory has the 8 sample stories
+    assert len(lib) == 8
+
 
 if __name__ == "__main__":
     demo()

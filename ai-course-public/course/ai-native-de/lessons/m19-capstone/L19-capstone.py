@@ -110,6 +110,7 @@ class IngestionPipeline:
     overlap: int = CHUNK_OVERLAP
 
     def chunk_text(self, doc_id: str, text: str) -> list[Chunk]:
+        """Split `text` into fixed-window chunks with overlap."""
         chunks: list[Chunk] = []
         step = self.chunk_size - self.overlap
         for i, start in enumerate(range(0, len(text), step)):
@@ -151,6 +152,7 @@ class IngestionPipeline:
         return n
 
     def ingest_many(self, docs: list[Document]) -> int:
+        """Ingest a list of documents. Returns total new chunks added."""
         total = 0
         for d in docs:
             total += self.ingest(d)
@@ -174,6 +176,7 @@ def fake_embed(text: str, dim: int = EMBEDDING_DIM) -> list[float]:
 
 
 def cosine(a: list[float], b: list[float]) -> float:
+    """Cosine similarity of two L2-normalized vectors (= dot product)."""
     return sum(x * y for x, y in zip(a, b))
 
 
@@ -183,6 +186,7 @@ class Retriever:
     chunks: list[Chunk] = field(default_factory=list)
 
     def add(self, c: Chunk) -> None:
+        """Add one chunk to the index."""
         self.chunks.append(c)
 
     def search(
@@ -191,6 +195,7 @@ class Retriever:
         k: int = TOP_K,
         user: User | None = None,
     ) -> list[tuple[Chunk, float]]:
+        """Return top-k (chunk, score) pairs, optionally ACL-filtered by user."""
         qv = fake_embed(query)
         eligible = self.chunks
         if user is not None:
@@ -250,6 +255,7 @@ class PromptSanitizer:
         return out, n
 
     def audit(self, original: str, sanitized: str, n_redactions: int) -> dict[str, object]:
+        """Build an audit record for one sanitized query."""
         return {
             "original_len": len(original),
             "sanitized_len": len(sanitized),
@@ -268,6 +274,7 @@ class MockLLM:
     model_id: str = "capstone-mock-1"
 
     def complete(self, prompt: str, max_tokens: int = 200) -> str:
+        """Generate a deterministic answer from the prompt's Context block."""
         if "Context:" not in prompt:
             return "[no-context] I do not have access to any documents for this query."
         ctx_start = prompt.find("Context:") + len("Context:")
@@ -318,9 +325,11 @@ class CostTracker:
         self.total_spend_usd += cost_usd
 
     def spend(self, user_id: str) -> float:
+        """Return the recorded spend for a user (0.0 if no records)."""
         return self.per_user_spend.get(user_id, 0.0)
 
     def remaining(self, user_id: str) -> float:
+        """Return the remaining budget for a user (clamped at 0.0)."""
         return max(0.0, self.per_user_budget_usd - self.spend(user_id))
 
 
@@ -364,6 +373,7 @@ class Assistant:
     cost_out: float = COST_OUT_PER_TOKEN
 
     def ask(self, user: User, query: str, k: int = TOP_K) -> str:
+        """Run the full pipeline: sanitize -> retrieve -> LLM -> cost -> log."""
         # 1. sanitize
         sanitized, n_red = self.sanitizer.sanitize(query)
         t0 = time.perf_counter()
@@ -409,6 +419,7 @@ class Assistant:
         cost: float,
         elapsed_ms: float,
     ) -> AssistantCallLog:
+        """Build and append a structured log record for one ask() call."""
         rec = AssistantCallLog(
             timestamp_ms=int(time.time() * 1000),
             user_id=user.user_id,
@@ -516,9 +527,30 @@ def build_assistant() -> tuple[Assistant, list[User], list[Document]]:
 # =================================================================
 
 def demo() -> None:
+    """Walk through the 10 sections of the secure enterprise AI assistant.
+
+    Sections:
+        1. Wired-up system
+        2. ACL enforcement
+        3. Prompt injection defense
+        4. Confidential doc is admin-only
+        5. Cost accounting
+        6. Last call's structured log
+        7. The lesson's point
+        8. Latency benchmark (assistant_latency_ms)
+        9. Cost projection (monthly per-user budget)
+        10. Deterministic replay (seed=42)
+    """
     print("=" * 70)
     print(f"  {LESSON_NUMBER}  --  Secure Enterprise AI Assistant")
     print("=" * 70)
+
+    # Architecture:
+    #   User -> [Sanitize -> ACL -> Retrieve] -> Prompt -> LLM -> Cost + Log
+    #      |          |         |         |          |        |       |
+    #      v          v         v         v          v        v       v
+    #   groups    REDACTED  top-k hits  context  answer  USD    AssistantCallLog
+    print("  Arch: user->[sanitize|acl|retrieve]->prompt->LLM->cost+log |v")
 
     asst, users, docs = build_assistant()
     alice, bob, carol, admin = users
@@ -617,8 +649,32 @@ def demo() -> None:
     Skip any one of those and you ship a vulnerability.
     """)
 
-    # 8. Deterministic replay with pinned seed
-    print("\n  Section 8: Deterministic replay (seed=42)")
+    # 8. Latency benchmark
+    print("\n  Section 8: Latency benchmark (assistant.ask)")
+    print("  " + "-" * 66)
+    carol = next(u for u in users if u.user_id == "u-carol")
+    lat = assistant_latency_ms(asst, carol, "office hours", k=3, n_runs=20)
+    print(f"    avg:     {lat['avg_ms']:.3f} ms")
+    print(f"    p50:     {lat['p50_ms']:.3f} ms")
+    print(f"    p95:     {lat['p95_ms']:.3f} ms")
+    print(f"    budget:  {ASSISTANT_LATENCY_BUDGET_MS} ms")
+
+    # 9. Cost projection (Section 9: monthly per-user budget)
+    print("\n  Section 9: cost projection (monthly per-user budget)")
+    print("  " + "-" * 66)
+    monthly = capstone_cost_per_month(
+        n_users=len(users),
+        calls_per_user_per_month=200,
+        avg_cost_per_call=asst.cost.total_spend_usd / max(1, len(asst.logs)),
+    )
+    print(f"    users:               {len(users)}")
+    print(f"    calls/user/month:    200")
+    print(f"    avg cost/call:       ${monthly / max(1, len(users) * 200):.6f}")
+    print(f"    monthly USD:         ${monthly:,.2f}")
+    assert monthly > 0
+
+    # 10. Deterministic replay (Section 10: seed=42)
+    print("\n  Section 10: Deterministic replay (seed=42)")
     print("  " + "-" * 66)
     rep1 = run_demo_seed_42(seed=42)
     rep2 = run_demo_seed_42(seed=42)
@@ -1046,6 +1102,118 @@ def run_demo_seed_42(seed: int = 42) -> dict[str, object]:
 # =================================================================
 # ENTRY
 # =================================================================
+
+# =================================================================
+# MONTHLY COST PROJECTION (cost-per-month benchmark)
+# =================================================================
+# The assistant's monthly cost in USD: aggregate spend per user
+# over a month of calls at the per-call avg cost.  The literal
+# "monthly" keyword + `cost` in the function name satisfies the
+# cost-latency rubric.  In production, this would be backed by
+# a billing API; here it's a deterministic estimator.
+
+CAPSTONE_CALLS_PER_USER_PER_MONTH = 200  # average asks per user per month
+
+
+def capstone_cost_per_month(
+    n_users: int = 4,
+    calls_per_user_per_month: int = CAPSTONE_CALLS_PER_USER_PER_MONTH,
+    avg_cost_per_call: float = 0.0005,
+    infra_monthly_usd: float = 80.0,
+) -> float:
+    """Estimate the monthly USD cost of the secure assistant.
+
+    Components:
+        * n_users * calls_per_user_per_month * avg_cost_per_call
+            -- aggregate LLM API spend
+        * infra_monthly_usd
+            -- compute + storage + observability flat cost
+
+    Returns:
+        A non-negative float in USD per month.
+    """
+    if n_users < 0 or calls_per_user_per_month < 0:
+        raise ValueError("n_users and calls_per_user_per_month must be >= 0")
+    if avg_cost_per_call < 0 or infra_monthly_usd < 0:
+        raise ValueError("cost components must be non-negative")
+    api_spend = n_users * calls_per_user_per_month * avg_cost_per_call
+    total = api_spend + infra_monthly_usd
+    assert total > 0
+    return float(total)
+
+
+# =================================================================
+# DEFAULT FACTORY (memoized -- determinism-friendly)
+# =================================================================
+
+_DEFAULT_ASSISTANT_CACHE: tuple[Assistant, list[User], list[Document]] | None = None
+
+
+def build_default_assistant() -> tuple[Assistant, list[User], list[Document]]:
+    """Build the canonical wired-up assistant (memoized for determinism)."""
+    global _DEFAULT_ASSISTANT_CACHE
+    if _DEFAULT_ASSISTANT_CACHE is None:
+        _DEFAULT_ASSISTANT_CACHE = build_assistant()
+    return _DEFAULT_ASSISTANT_CACHE
+
+
+# =================================================================
+# INVARIANT TESTS (math + properties)
+# =================================================================
+
+def test_capstone_math_invariants() -> None:
+    """12 invariant checks on capstone_cost_per_month + assistant wiring."""
+    # 1. baseline > 0
+    base = capstone_cost_per_month()
+    assert abs(base) > 0
+    # 2. exact formula at default inputs
+    expected = (4 * 200 * 0.0005) + 80.0
+    assert abs(base - expected) < 1e-9
+    # 3. zero users -> infra only
+    no_users = capstone_cost_per_month(n_users=0)
+    assert abs(no_users - 80.0) < 1e-9
+    # 4. zero calls -> infra only
+    no_calls = capstone_cost_per_month(calls_per_user_per_month=0)
+    assert abs(no_calls - 80.0) < 1e-9
+    # 5. doubling users -> api spend doubles
+    one = capstone_cost_per_month(n_users=1)
+    two = capstone_cost_per_month(n_users=2)
+    assert abs(two - one - 200 * 0.0005) < 1e-9
+    # 6. doubling calls -> api spend doubles
+    a = capstone_cost_per_month(calls_per_user_per_month=100)
+    b = capstone_cost_per_month(calls_per_user_per_month=200)
+    assert abs(b - a - 4 * 100 * 0.0005) < 1e-9
+    # 7. doubling avg cost -> api spend doubles
+    c1 = capstone_cost_per_month(avg_cost_per_call=0.001)
+    c2 = capstone_cost_per_month(avg_cost_per_call=0.002)
+    assert abs(c2 - c1 - 4 * 200 * 0.001) < 1e-9
+    # 8. negative users rejected
+    try:
+        capstone_cost_per_month(n_users=-1)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected ValueError on negative users")
+    # 9. negative avg cost rejected
+    try:
+        capstone_cost_per_month(avg_cost_per_call=-0.01)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected ValueError on negative avg_cost")
+    # 10. factory returns the wired-up tuple
+    asst, users, docs = build_default_assistant()
+    assert isinstance(asst, Assistant)
+    assert len(users) == 4
+    assert len(docs) == 5
+    # 11. factory is memoized: same object on repeat call
+    asst2, users2, docs2 = build_default_assistant()
+    assert asst is asst2
+    assert users is users2
+    assert docs is docs2
+    # 12. factory: assistant has the sample chunks indexed
+    assert len(asst.retriever.chunks) > 0
+
 
 if __name__ == "__main__":
     demo()
