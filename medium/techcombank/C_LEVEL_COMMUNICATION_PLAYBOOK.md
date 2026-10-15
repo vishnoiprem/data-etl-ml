@@ -5,6 +5,18 @@
 
 ---
 
+# TABLE OF CONTENTS
+
+| Part | Section | What's in it |
+|---|---|---|
+| **1** | How to talk to C-level | 7 rules, 5-min conversation structure, 4 loves/4 hates, personality-by-personality framing, 5 magic phrases |
+| **2** | KPIs every C-level tracks | Universal 4 + CEO / CFO / CTO / CRO / CHRO / Compliance / CDO / your line manager |
+| **3** | 5 KPI metrics for your first 90 days | What you'd measure if hired |
+| **4** | Pocket cheat sheet | Print this on index card |
+| **5** | 3 answers you must have ready | If they ask you back: KPIs / board / 12-month success |
+
+---
+
 # PART 1: HOW TO TALK TO C-LEVEL EXECUTIVES
 
 ## 1.1 The 7 C-Level Communication Rules

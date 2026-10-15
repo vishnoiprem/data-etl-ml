@@ -13,9 +13,7 @@
 | 2 | `TECHCOMBANK_DEEP_DIVE.md` | The bank itself: history, strategy, business, data/AI, leadership, business plan, competition, regulation | Tonight (40 min) |
 | 3 | `BATTLE_CARD_ROADSHOW_2026.md` | Strategic battle card: 12 panel Q&A, networking tactics, risks, checklist | Oct 22 (45 min) |
 | 4 | `PREM_PREP_PACK_OCT23.md` | Execution pack: pitches, openers, follow-ups, cheat sheet, scripts | Oct 22 (30 min) |
-| 5 | `TECHCOMBANK_REVENUE_BUSINESS_PLAN.md` | NEW — how Techcombank makes money, business priorities, 5-yr roadmap | Tonight (15 min) |
-| 6 | `TECHCOMBANK_LEADERSHIP_MAP.md` | NEW — every leader, what they care about, what to ask them | Oct 22 (15 min) |
-| 7 | `C_SUITE_QUESTIONS_AND_ANSWERS.md` | NEW — questions to ask CEO/CFO/CIO/CRO/CHRO + answer-back frameworks | Tonight (10 min) |
+| 5 | `C_LEVEL_COMMUNICATION_PLAYBOOK.md` | How to talk to C-level, KPIs each exec tracks, 5 magic phrases, pocket cheat sheet | Tonight (20 min) |
 
 **Source materials (do not edit, reference only):**
 - `Director, Data Engineering (40000058).pdf` — The job description

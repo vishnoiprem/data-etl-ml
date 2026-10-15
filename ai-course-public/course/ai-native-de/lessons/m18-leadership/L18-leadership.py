@@ -1255,13 +1255,22 @@ def library_lookup_latency_ms(
     n_runs: int = 50,
     seed: int = 42,
 ) -> dict[str, float]:
-    """Time `lib.match_stories(query)` over n_runs.  Reports avg / p50 / p95 in ms."""
+    """Time `match_stories(q, lib)` over n_runs.  Reports avg / p50 / p95 in ms.
+
+    `query` is a plain string; we wrap it in a generic MockQuestion
+    so the module-level `match_stories(q, lib)` can be timed.
+    """
+    q = MockQuestion(
+        text=query,
+        keywords=tuple(query.lower().split()),
+        principle=LeadershipPrinciple.EXECUTION,
+    )
     for _ in range(3):
-        _ = lib.match_stories(query)
+        _ = match_stories(q, lib)
     samples_ms: list[float] = []
     for _ in range(n_runs):
         t0 = time.perf_counter()
-        _ = lib.match_stories(query)
+        _ = match_stories(q, lib)
         samples_ms.append((time.perf_counter() - t0) * 1000.0)
     samples_ms.sort()
     return {
@@ -1304,19 +1313,9 @@ def test_library_lookup_latency_under_budget() -> None:
     lib = STARLibrary()
     for s in SAMPLE_STORIES:
         lib.add(s)
-    q = MockQuestion(
-        text="RAG system launch", keywords=["rag", "system"],
-        principle=LeadershipPrinciple.EXECUTION,
-    )
-    for _ in range(3):
-        _ = match_stories(q, lib)
-    samples_ms: list[float] = []
-    for _ in range(20):
-        t0 = time.perf_counter()
-        _ = match_stories(q, lib)
-        samples_ms.append((time.perf_counter() - t0) * 1000.0)
-    avg_ms = sum(samples_ms) / len(samples_ms)
-    assert avg_ms < LIBRARY_LOOKUP_LATENCY_BUDGET_MS * 10  # generous bound
+    s = library_lookup_latency_ms(lib, "RAG system launch", n_runs=20)
+    assert s["n_runs"] == 20.0
+    assert s["avg_ms"] < LIBRARY_LOOKUP_LATENCY_BUDGET_MS * 10  # generous bound
 
 
 def test_run_demo_seed_42_is_deterministic() -> None:
