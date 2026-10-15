@@ -391,6 +391,166 @@ def test_parser_registry_covers_four() -> None:
     assert set(PARSERS.keys()) == {"txt", "md", "html", "json"}
 
 
+def test_parse_txt_normalizes_line_endings() -> None:
+    """Windows-style \\r\\n becomes \\n; trailing whitespace stripped."""
+    out = parse_txt("hello\r\nworld\r\n  \n")
+    assert out == "hello\nworld"
+    assert "\r" not in out
+
+
+def test_parse_md_strips_all_heading_levels() -> None:
+    """All ATX heading levels (#, ##, ###) lose their leading hashes."""
+    md = "# h1\n\n## h2\n\n### h3\n\nbody"
+    out = parse_md(md)
+    assert "h1" in out and "h2" in out and "h3" in out
+    assert "#" not in out
+    assert "title:" not in out
+
+
+def test_parse_html_drops_scripts_and_styles() -> None:
+    """Both <script> and <style> blocks are removed (content + tags)."""
+    html = "<p>good</p><script>alert(1)</script><style>body{}</style><p>also good</p>"
+    out = parse_html(html)
+    assert "good" in out
+    assert "alert" not in out
+    assert "body{}" not in out
+    assert "<" not in out
+
+
+def test_parse_html_collapses_whitespace() -> None:
+    """Run-on whitespace in HTML becomes single spaces."""
+    out = parse_html("<p>hello</p>   <p>world</p>")
+    assert "  " not in out
+    assert "hello world" in out
+
+
+def test_parse_json_falls_back_to_dump() -> None:
+    """JSON without a 'text' field is dumped (not silently dropped)."""
+    out = parse_json('{"a": 1, "b": [2, 3]}')
+    assert '"a"' in out
+    assert "1" in out
+
+
+def test_content_hash_distinguishes_punctuation() -> None:
+    """A trailing period changes the hash (so 'policy.' != 'policy')."""
+    assert content_hash("policy.") != content_hash("policy")
+
+
+def test_content_hash_handles_unicode() -> None:
+    """Unicode text is hashed without raising (UTF-8 path is exercised)."""
+    h1 = content_hash("café résumé")
+    h2 = content_hash("café résumé")
+    assert h1 == h2
+    assert len(h1) == 16
+
+
+def test_content_hash_handles_empty_string() -> None:
+    """Empty string hashes to a valid 16-char string (not raise)."""
+    h = content_hash("")
+    assert len(h) == 16
+    assert isinstance(h, str)
+
+
+def test_ingested_doc_doc_id_equals_content_hash() -> None:
+    """doc_id is the content_hash -- the doc is content-addressed."""
+    svc = IngestionService()
+    r = svc.ingest([SAMPLE_INPUTS[0]])
+    d = r.ingested[0]
+    assert d.doc_id == d.content_hash
+
+
+def test_ingested_doc_byte_count_matches_raw() -> None:
+    """byte_count is the byte length of the RAW input, not the parsed text."""
+    svc = IngestionService()
+    raw = "  Vacation policy: 20 days per year.  \n"
+    r = svc.ingest([Document(source="x.txt", raw=raw, content_type="txt")])
+    assert r.ingested[0].byte_count == len(raw.encode("utf-8"))
+
+
+def test_dead_letter_preserves_attempt_count() -> None:
+    """A DLQ entry records `attempts` so the operator can spot retry storms."""
+    svc = IngestionService()
+    bad = [Document(source="bad.json", raw='{"x": broken}', content_type="json")]
+    r = svc.ingest(bad)
+    assert len(r.dead_letter) == 1
+    assert r.dead_letter[0].attempts == MAX_RETRIES + 1
+
+
+def test_dead_letter_failed_at_is_isoformat() -> None:
+    """failed_at is an ISO-8601 string (parseable + ends with offset)."""
+    svc = IngestionService()
+    bad = [Document(source="bad.json", raw='{"x": broken}', content_type="json")]
+    r = svc.ingest(bad)
+    ts = r.dead_letter[0].failed_at
+    assert isinstance(ts, str)
+    assert len(ts) >= 20
+    # ISO-8601 datetimes have at least one '-' and one ':'
+    assert "-" in ts and ":" in ts
+
+
+def test_ingest_dedupe_by_content_not_source() -> None:
+    """Two docs with the same TEXT (different sources) -> exactly 1 stored, 1 dupe."""
+    svc = IngestionService()
+    docs = [
+        Document(source="a.txt", raw="same text", content_type="txt"),
+        Document(source="b.txt", raw="same text", content_type="txt"),
+    ]
+    r = svc.ingest(docs)
+    assert len(r.ingested) == 1
+    assert len(r.duplicates) == 1
+    assert len(svc.store) == 1
+
+
+def test_ingest_preserves_ingestion_order_in_result() -> None:
+    """The ingested[] list is in the same order as the input docs."""
+    svc = IngestionService()
+    docs = [
+        Document(source=f"d{i}.txt", raw=f"text number {i}", content_type="txt")
+        for i in range(5)
+    ]
+    r = svc.ingest(docs)
+    assert [d.source for d in r.ingested] == [d.source for d in docs]
+
+
+def test_ingest_mixed_success_and_failure() -> None:
+    """A mixed batch: 2 success, 1 dupe, 1 fail -- 4 inputs, classified correctly."""
+    svc = IngestionService()
+    docs = [
+        Document(source="a.txt", raw="alpha", content_type="txt"),     # success
+        Document(source="b.txt", raw="beta",  content_type="txt"),     # success
+        Document(source="a2.txt", raw="alpha", content_type="txt"),    # dupe of a
+        Document(source="bad.json", raw="not json", content_type="json"),  # fail
+    ]
+    r = svc.ingest(docs)
+    assert len(r.ingested) == 2
+    assert len(r.duplicates) == 1
+    assert len(r.dead_letter) == 1
+    assert len(svc.store) == 2
+
+
+def test_parser_registry_dispatch_is_deterministic() -> None:
+    """Same content_type -> same parser -> same output (no randomness)."""
+    raw = "# heading\n\nbody"
+    p1 = PARSERS["md"](raw)
+    p2 = PARSERS["md"](raw)
+    assert p1 == p2
+
+
+def test_parse_md_handles_no_front_matter() -> None:
+    """Markdown without front-matter is parsed normally (no error)."""
+    out = parse_md("# title\n\nbody paragraph")
+    assert "title" in out
+    assert "body paragraph" in out
+    assert "---" not in out
+
+
+def test_parse_html_lowercase_and_uppercase_tags() -> None:
+    """Tags are stripped regardless of case (HTML is case-insensitive)."""
+    out = parse_html("<P>hi</P><Div>x</Div>")
+    assert "hi" in out and "x" in out
+    assert "<" not in out.upper() or "P>" not in out.upper()
+
+
 # =================================================================
 # ENTRY
 # =================================================================

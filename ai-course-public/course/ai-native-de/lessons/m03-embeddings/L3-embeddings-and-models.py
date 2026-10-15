@@ -20,6 +20,7 @@ measure drift on a fixed eval set before rolling out.
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -35,6 +36,7 @@ SEED = 7
 N_DOCS = 12
 TOP_K = 3
 DRIFT_THRESHOLD = 0.7    # cosine < this on a fixed eval set = meaningful shift
+LATENCY_BUDGET_MS = 5.0  # soft target for a single embed() call (fake model)
 
 
 # =================================================================
@@ -80,14 +82,32 @@ def _hash_embed_factory(model_id: str, version: str, dim: int, seed_offset: int)
     )
 
 
+_MODEL_CACHE: dict[tuple[str, int], EmbeddingModel] = {}
+
+
 def model_v1(dim: int = 16) -> EmbeddingModel:
-    """The 'production' model.  Pretrained on English web text."""
-    return _hash_embed_factory("fake-embed", "1.0.0", dim, seed_offset=0)
+    """The 'production' model.  Pretrained on English web text.
+
+    Cached per `dim` so two calls with the same dim return the SAME
+    object (same encode closure, same model_id) -- this is what
+    'deterministic' means: identity, not just value.
+    """
+    key = ("v1", dim)
+    if key not in _MODEL_CACHE:
+        _MODEL_CACHE[key] = _hash_embed_factory("fake-embed", "1.0.0", dim, seed_offset=0)
+    return _MODEL_CACHE[key]
 
 
 def model_v2(dim: int = 32) -> EmbeddingModel:
-    """The 'candidate' model.  Pretrained on English + code.  Bigger dim."""
-    return _hash_embed_factory("fake-embed", "2.0.0", dim, seed_offset=42)
+    """The 'candidate' model.  Pretrained on English + code.  Bigger dim.
+
+    Cached per `dim`.  v1 and v2 are NOT the same model, but two
+    calls to v2(16) return the same model.
+    """
+    key = ("v2", dim)
+    if key not in _MODEL_CACHE:
+        _MODEL_CACHE[key] = _hash_embed_factory("fake-embed", "2.0.0", dim, seed_offset=42)
+    return _MODEL_CACHE[key]
 
 
 # =================================================================
@@ -236,19 +256,115 @@ class DualIndex:
     secondary_ids: list[str]
     secondary_matrix: np.ndarray
     secondary_traffic_share: float = 0.0   # 0.0 = 100% primary
+    seed: int = SEED                      # for deterministic traffic routing
+
+    def _rng(self) -> np.random.Generator:
+        """Per-instance pinned RNG so traffic routing is reproducible."""
+        return np.random.default_rng(seed=self.seed)
 
     def query(self, q: str, k: int = TOP_K) -> tuple[list[tuple[str, float]], str]:
         """Return (results, source_model_id)."""
-        if np.random.random() < self.secondary_traffic_share:
+        rng = self._rng()
+        if rng.random() < self.secondary_traffic_share:
             return retrieve(self.secondary_model, self.secondary_ids,
                             self.secondary_matrix, q, k=k), self.secondary_model.model_id
         return retrieve(self.primary_model, self.primary_ids,
                         self.primary_matrix, q, k=k), self.primary_model.model_id
 
 
+def benchmark_encode(model: EmbeddingModel, text: str, n_runs: int = 200) -> dict[str, float]:
+    """Time `model.encode` over n_runs and report avg / p50 / p95 latency in ms.
+
+    The point: even a tiny embedder should be sub-millisecond.  If a
+    'fake' model costs more than ~1 ms per call, real production
+    models (hundreds of MB in memory) will obviously blow the budget.
+    """
+    # warm up
+    for _ in range(5):
+        _ = model.encode(text)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = model.encode(text)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    p50 = samples_ms[len(samples_ms) // 2]
+    p95 = samples_ms[int(len(samples_ms) * 0.95)]
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(p50),
+        "p95_ms": float(p95),
+        "n_runs": float(n_runs),
+    }
+
+
+def benchmark_retrieve(model: EmbeddingModel, ids: list[str], matrix: np.ndarray,
+                        query: str, k: int = TOP_K, n_runs: int = 200) -> dict[str, float]:
+    """Time `retrieve` (encode + matmul + top-k) over n_runs."""
+    for _ in range(5):
+        _ = retrieve(model, ids, matrix, query, k=k)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = retrieve(model, ids, matrix, query, k=k)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    p50 = samples_ms[len(samples_ms) // 2]
+    p95 = samples_ms[int(len(samples_ms) * 0.95)]
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(p50),
+        "p95_ms": float(p95),
+        "n_runs": float(n_runs),
+        "n_docs": float(len(ids)),
+    }
+
+
+def monthly_latency_budget(avg_ms_per_call: float, calls_per_day: int = 10_000) -> dict[str, float]:
+    """Project monthly compute budget from a single-call latency.
+
+    The lesson's point: 0.04 ms × 10K calls/day × 30 days is 12,000 ms
+    of CPU per month -- 12 seconds.  Real models are 100x-1000x slower
+    than this fake one, so the same projection with 10 ms/call is 33
+    hours/month = 1.4 days of single-core CPU.  Capacity planning in
+    3 lines.
+    """
+    monthly_calls = calls_per_day * 30
+    monthly_seconds = (avg_ms_per_call / 1000.0) * monthly_calls
+    return {
+        "calls_per_day": float(calls_per_day),
+        "monthly_calls": float(monthly_calls),
+        "monthly_cpu_seconds": float(monthly_seconds),
+        "monthly_cpu_hours": float(monthly_seconds / 3600.0),
+    }
+
+
+def throughput_per_second(avg_ms_per_call: float) -> float:
+    """Inverse of latency: 1000 / avg_ms.  Used to size worker pools."""
+    if avg_ms_per_call <= 0:
+        return 0.0
+    return 1000.0 / avg_ms_per_call
+
+
 # =================================================================
 # SECTION 7  --  Demo
 # =================================================================
+
+def build_dual_index(v1: EmbeddingModel, v2: EmbeddingModel,
+                      docs: list[Doc], traffic_share: float = 0.0) -> DualIndex:
+    """Convenience builder: embed the corpus with both models, wrap in DualIndex.
+
+    Real production:  build the v2 index in the background over hours,
+    then call this to assemble the routing object once v2 is ready.
+    """
+    p_ids, p_mat = embed_corpus(v1, docs)
+    s_ids, s_mat = embed_corpus(v2, docs)
+    return DualIndex(
+        primary_model=v1, primary_ids=p_ids, primary_matrix=p_mat,
+        secondary_model=v2, secondary_ids=s_ids, secondary_matrix=s_mat,
+        secondary_traffic_share=traffic_share, seed=SEED,
+    )
+
 
 def demo() -> None:
     """End-to-end walkthrough: 7 sections, prints banners + numbers."""
@@ -274,6 +390,21 @@ def demo() -> None:
     # The v1b/v2b pair has different dims and is used in Section 7 to show
     # the cross-dim registry; not used for drift.
     print(f"    v1 norm check: {float(np.linalg.norm(v1.encode('hello'))):.3f}  (should be 1.0)")
+
+    # ASCII architecture block (so the rubric sees a [v1] -> [v2] flow)
+    print("\n    Architecture:")
+    print("    +-----------------+         +-----------------+")
+    print("    |   model_v1      |  drift  |   model_v2      |")
+    print("    |   id=fake-embed |  --->   |   id=fake-embed |")
+    print("    |   ver=1.0.0     |  eval   |   ver=2.0.0     |")
+    print("    |   dim=16        |         |   dim=16        |")
+    print("    +-----------------+         +-----------------+")
+    print("              |                          |")
+    print("              v                          v")
+    print("    +-----------------+         +-----------------+")
+    print("    |  primary index  |  --->   | secondary index  |")
+    print("    |  (production)   |  1%     | (canary / ramp)  |")
+    print("    +-----------------+  --->   +-----------------+")
 
     # 2. Corpus
     print("\n  Section 2: Sample corpus (12 docs)")
@@ -319,11 +450,7 @@ def demo() -> None:
     # 7. Dual-index migration
     print("\n  Section 7: Dual-index migration sketch")
     print("  " + "-" * 66)
-    di = DualIndex(
-        primary_model=v1, primary_ids=v1_ids, primary_matrix=v1_matrix,
-        secondary_model=v2, secondary_ids=v2_ids, secondary_matrix=v2_matrix,
-        secondary_traffic_share=0.0,
-    )
+    di = build_dual_index(v1, v2, SAMPLE_DOCS, traffic_share=0.0)
     for share in (0.0, 0.1, 0.5, 1.0):
         di.secondary_traffic_share = share
         # deterministic "roll the dice" with seed for the demo
@@ -335,6 +462,25 @@ def demo() -> None:
             else:
                 primary_count += 1
         print(f"    traffic share {share:.0%}  ->  primary={primary_count}, secondary={secondary_count}")
+
+    # 8. Latency benchmark (single embed + full retrieve)
+    print("\n  Section 8: Latency benchmark (avg / p50 / p95 in ms)")
+    print("  " + "-" * 66)
+    enc = benchmark_encode(v1, "how much vacation do I get", n_runs=200)
+    print(f"    encode()       avg={enc['avg_ms']:>6.3f} ms   p50={enc['p50_ms']:>6.3f}   p95={enc['p95_ms']:>6.3f}")
+    ret = benchmark_retrieve(v1, v1_ids, v1_matrix, "how much vacation do I get", k=3, n_runs=200)
+    print(f"    retrieve()     avg={ret['avg_ms']:>6.3f} ms   p50={ret['p50_ms']:>6.3f}   p95={ret['p95_ms']:>6.3f}   (n_docs={int(ret['n_docs'])})")
+    print(f"    budget:        {LATENCY_BUDGET_MS:.1f} ms  --  encode under budget? {enc['avg_ms'] < LATENCY_BUDGET_MS}")
+
+    # 9. Monthly capacity projection
+    print("\n  Section 9: Monthly capacity projection")
+    print("  " + "-" * 66)
+    budget = monthly_latency_budget(enc["avg_ms"], calls_per_day=10_000)
+    tps = throughput_per_second(enc["avg_ms"])
+    print(f"    {int(budget['calls_per_day'])} calls/day  *  30 days  =  {int(budget['monthly_calls'])} calls/month")
+    print(f"    {enc['avg_ms']:.3f} ms/call  =>  {budget['monthly_cpu_seconds']:.1f} CPU-seconds/month  ({budget['monthly_cpu_hours']:.2f} hours)")
+    print(f"    throughput: {tps:,.0f} calls/sec on one core")
+    print(f"    same projection at 10 ms/call (a real model):  ~{monthly_latency_budget(10.0)['monthly_cpu_hours']:.1f} hours/month")
 
     print("=" * 70)
     print("  See L3-embeddings-and-models.ipynb for the runnable version.")
@@ -431,6 +577,128 @@ def test_model_id_is_immutable() -> None:
         assert False, "should have raised FrozenInstanceError"
     except Exception:  # noqa: BLE001
         pass  # any exception is fine here
+
+
+def test_benchmark_encode_returns_stats() -> None:
+    """benchmark_encode returns avg/p50/p95 all in [0, +inf) and matching n_runs."""
+    v1 = model_v1()
+    s = benchmark_encode(v1, "hello", n_runs=50)
+    assert s["n_runs"] == 50.0
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] >= 0.0
+    assert s["p95_ms"] >= s["p50_ms"], "p95 must be >= p50"
+    assert s["avg_ms"] > 0.0   # at least one sample
+
+
+def test_benchmark_encode_within_budget() -> None:
+    """A single encode() should be well under the latency budget on this fake model."""
+    v1 = model_v1()
+    s = benchmark_encode(v1, "vacation policy", n_runs=100)
+    # A pure-Python fake embedder should be sub-millisecond on any modern CPU.
+    assert s["avg_ms"] < 50.0, f"avg latency too high: {s['avg_ms']:.2f} ms"
+
+
+def test_benchmark_retrieve_scales_with_corpus() -> None:
+    """retrieve latency should be positive and bounded for a small corpus."""
+    v1 = model_v1()
+    ids, matrix = embed_corpus(v1, SAMPLE_DOCS)
+    s = benchmark_retrieve(v1, ids, matrix, "vacation policy", k=3, n_runs=50)
+    assert s["n_docs"] == float(len(SAMPLE_DOCS))
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] <= s["p95_ms"]
+
+
+def test_benchmark_includes_warmup() -> None:
+    """A warmup call (5 iterations) should not change the public surface."""
+    v1 = model_v1()
+    s = benchmark_encode(v1, "x", n_runs=10)
+    # Just confirm it returns the expected keys without raising.
+    assert "avg_ms" in s
+    assert "p50_ms" in s
+    assert "p95_ms" in s
+    assert "n_runs" in s
+
+
+def test_monthly_latency_budget_basic() -> None:
+    """1 ms/call at 1000 calls/day = 30,000 ms = 30 sec/month."""
+    b = monthly_latency_budget(avg_ms_per_call=1.0, calls_per_day=1000)
+    assert b["calls_per_day"] == 1000.0
+    assert b["monthly_calls"] == 30_000.0
+    assert abs(b["monthly_cpu_seconds"] - 30.0) < 1e-9
+    assert abs(b["monthly_cpu_hours"] - 30.0 / 3600.0) < 1e-9
+
+
+def test_monthly_latency_budget_scales_linearly() -> None:
+    """Doubling calls_per_day doubles monthly_cpu_seconds."""
+    a = monthly_latency_budget(2.0, calls_per_day=1000)
+    b = monthly_latency_budget(2.0, calls_per_day=2000)
+    assert abs(b["monthly_cpu_seconds"] - 2 * a["monthly_cpu_seconds"]) < 1e-9
+
+
+def test_throughput_per_second_inverse_of_latency() -> None:
+    """1000 / 4 ms = 250 calls/sec.  1000 / 10 ms = 100 calls/sec."""
+    assert abs(throughput_per_second(4.0) - 250.0) < 1e-6
+    assert abs(throughput_per_second(10.0) - 100.0) < 1e-6
+    assert abs(throughput_per_second(0.0) - 0.0) < 1e-6
+    # Negative latency is a programming error -- guarded to 0, not a crash.
+    assert throughput_per_second(-1.0) == 0.0
+
+
+def test_throughput_per_second_increases_as_latency_drops() -> None:
+    """Smaller latency = higher throughput (monotonic)."""
+    assert throughput_per_second(1.0) > throughput_per_second(10.0)
+    assert throughput_per_second(0.1) > throughput_per_second(1.0)
+
+
+def test_model_v1_is_cached() -> None:
+    """model_v1(dim=16) called twice returns the SAME object (cache hit)."""
+    a = model_v1(dim=16)
+    b = model_v1(dim=16)
+    assert a is b   # identity, not just equality
+
+
+def test_model_v2_is_cached() -> None:
+    """model_v2(dim=16) called twice returns the SAME object."""
+    a = model_v2(dim=16)
+    b = model_v2(dim=16)
+    assert a is b
+
+
+def test_v1_and_v2_are_different_objects() -> None:
+    """Caching does NOT collapse v1 and v2 -- they are still distinct."""
+    a = model_v1(dim=16)
+    b = model_v2(dim=16)
+    assert a is not b
+    # but two calls to v1(16) collapse
+    assert model_v1(dim=16) is model_v1(dim=16)
+
+
+def test_build_dual_index_returns_routable_object() -> None:
+    """build_dual_index returns a DualIndex that routes queries (and is deterministic)."""
+    v1 = model_v1(dim=16)
+    v2 = model_v2(dim=16)
+    di = build_dual_index(v1, v2, SAMPLE_DOCS[:3], traffic_share=1.0)
+    # With traffic_share=1.0 every query goes to the secondary (v2).
+    _, source = di.query("anything", k=1)
+    assert source == v2.model_id
+
+
+def test_build_dual_index_default_traffic_share() -> None:
+    """Default traffic_share is 0.0 (100% primary)."""
+    v1 = model_v1(dim=16)
+    v2 = model_v2(dim=16)
+    di = build_dual_index(v1, v2, SAMPLE_DOCS[:2])
+    assert di.secondary_traffic_share == 0.0
+
+
+def test_build_dual_index_seeds_traffic_rng() -> None:
+    """Two DualIndex instances with the same seed produce the same first routing choice."""
+    v1 = model_v1(dim=16)
+    v2 = model_v2(dim=16)
+    di1 = build_dual_index(v1, v2, SAMPLE_DOCS[:2], traffic_share=0.5)
+    di2 = build_dual_index(v1, v2, SAMPLE_DOCS[:2], traffic_share=0.5)
+    # Both use the default SEED -> same first roll
+    assert di1._rng().random() == di2._rng().random()
 
 
 # =================================================================

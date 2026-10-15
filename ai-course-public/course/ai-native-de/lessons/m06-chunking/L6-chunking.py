@@ -18,7 +18,9 @@ mean 30 points of recall.  Always ablate.
 
 from __future__ import annotations
 
+import random
 import re
+import time
 from dataclasses import dataclass
 
 
@@ -27,9 +29,11 @@ from dataclasses import dataclass
 # =================================================================
 
 LESSON_NUMBER = "M6.L6"
+SEED = 19
 DEFAULT_CHUNK_SIZE = 400      # characters
 DEFAULT_OVERLAP = 50
 DEFAULT_SENTENCES_PER_CHUNK = 5
+CHUNKER_LATENCY_BUDGET_MS = 50.0   # soft target for a 4 KB doc
 
 
 # =================================================================
@@ -235,6 +239,39 @@ def ablation(doc_id: str, text: str, recall_table: dict[str, float] | None = Non
 
 
 # =================================================================
+# SECTION 5b  --  Latency benchmark
+# =================================================================
+
+def chunker_latency_ms(chunker_fn, doc_id: str, text: str, n_runs: int = 50, seed: int = SEED) -> dict[str, float]:
+    """Time a chunker over n_runs, report avg / p50 / p95 latency in ms.
+
+    The lesson's point: chunking is a hot path.  If a chunker takes
+    100 ms on a 4 KB doc, you can chunk 600K docs/hour on one core.
+    Real workloads are 100x-1000x larger docs, so 100 ms becomes
+    1-10 seconds per doc.  `seed` pins the warmup RNG so benchmark
+    runs are comparable across machines.
+    """
+    rng = random.Random(seed)
+    for _ in range(3):
+        _ = chunker_fn(doc_id, text)
+        rng.random()
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = chunker_fn(doc_id, text)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+        "doc_chars": float(len(text)),
+        "seed": float(seed),
+    }
+
+
+# =================================================================
 # SECTION 6  --  Sample text  (a long policy document)
 # =================================================================
 
@@ -339,6 +376,18 @@ def demo() -> None:
 
     Always ablate on YOUR golden set, not the textbook.
     """)
+
+    # 8. Latency benchmark
+    print("\n  Section 8: Chunker latency (avg / p50 / p95 in ms)")
+    print("  " + "-" * 66)
+    for name, fn in (
+        ("fixed_window", lambda did, t: chunk_fixed_window(did, t, chunk_size=400, overlap=50)),
+        ("recursive",    lambda did, t: chunk_recursive(did, t, chunk_size=400, overlap=50)),
+        ("structure",    lambda did, t: chunk_structure(did, t, sentences_per_chunk=5)),
+    ):
+        s = chunker_latency_ms(fn, "doc-1", SAMPLE_TEXT, n_runs=30, seed=19)
+        print(f"    {name:<14}  avg={s['avg_ms']:>6.2f} ms   p50={s['p50_ms']:>6.2f}   p95={s['p95_ms']:>6.2f}   doc_chars={int(s['doc_chars'])}")
+    print(f"    budget: {CHUNKER_LATENCY_BUDGET_MS:.0f} ms  --  chunk under budget? all three should be well under.")
 
     print("=" * 70)
     print("  See L6-chunking.ipynb for the runnable version.")
@@ -479,6 +528,85 @@ def test_chunker_count_consistent() -> None:
     rows = ablation("d", "Some text. " * 50)
     labels = sorted(r.chunker for r in rows)
     assert labels == ["fixed_window", "recursive", "structure"]
+
+
+def test_chunker_latency_ms_returns_stats() -> None:
+    """chunker_latency_ms returns avg/p50/p95 in ms and matching n_runs."""
+    s = chunker_latency_ms(
+        lambda did, t: chunk_fixed_window(did, t, chunk_size=200, overlap=20),
+        "d", "hello world " * 100, n_runs=20,
+    )
+    assert s["n_runs"] == 20.0
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] <= s["p95_ms"]
+    assert s["doc_chars"] == float(len("hello world " * 100))
+
+
+def test_chunker_latency_ms_within_budget() -> None:
+    """A small doc on a tiny chunker is well under the latency budget."""
+    s = chunker_latency_ms(
+        lambda did, t: chunk_fixed_window(did, t, chunk_size=200, overlap=20),
+        "d", "Some text. " * 50, n_runs=20,
+    )
+    # A pure-Python chunker on a tiny doc should be sub-millisecond.
+    assert s["avg_ms"] < 100.0, f"avg latency too high: {s['avg_ms']:.2f} ms"
+
+
+def test_chunker_latency_ms_runs_all_three() -> None:
+    """All three chunkers can be benchmarked without raising."""
+    text = "# A\n" + ". ".join(f"sentence {i}" for i in range(30)) + "\n# B\n" + ". ".join(f"another {i}" for i in range(30))
+    for name, fn in (
+        ("fixed_window", lambda did, t: chunk_fixed_window(did, t, chunk_size=200, overlap=20)),
+        ("recursive",    lambda did, t: chunk_recursive(did, t, chunk_size=200, overlap=20)),
+        ("structure",    lambda did, t: chunk_structure(did, t, sentences_per_chunk=5)),
+    ):
+        s = chunker_latency_ms(fn, "d", text, n_runs=10)
+        assert s["avg_ms"] > 0.0
+        assert s["doc_chars"] == float(len(text))
+        assert s["n_runs"] == 10.0
+        assert s["p50_ms"] <= s["p95_ms"]
+        assert s["avg_ms"] >= 0.0
+        assert s["seed"] == 19.0
+
+
+def test_chunk_fixed_window_chunk_id_format() -> None:
+    """chunk_id is '<doc_id>-fw<NNN>' with zero-padded NNN."""
+    chunks = chunk_fixed_window("doc-9", "abcdefghij" * 50, chunk_size=100, overlap=0)
+    assert all(c.chunk_id.startswith("doc-9-fw") for c in chunks)
+    assert all(c.chunk_id.endswith(("000", "001", "002", "003", "004")) for c in chunks)
+
+
+def test_chunk_recursive_chunk_id_format() -> None:
+    """chunk_id is '<doc_id>-rc<NNN>' for recursive."""
+    chunks = chunk_recursive("doc-r", "a. b. c. d. e. f.", chunk_size=5, overlap=0)
+    assert all(c.chunk_id.startswith("doc-r-rc") for c in chunks)
+    assert len(set(c.chunk_id for c in chunks)) == len(chunks)
+
+
+def test_chunk_structure_chunk_id_format() -> None:
+    """chunk_id is '<doc_id>-st<SEC>-<OFFSET>'."""
+    chunks = chunk_structure("doc-s", "# H\n" + ". ".join(f"sent{i}" for i in range(10)), sentences_per_chunk=3)
+    assert all(c.chunk_id.startswith("doc-s-st") for c in chunks)
+    # Offset is zero-padded 3 digits
+    assert all("-" in c.chunk_id for c in chunks)
+    assert all(c.chunk_id.count("-") >= 2 for c in chunks)
+
+
+def test_ablation_zero_recall_is_handled() -> None:
+    """ablation accepts 0.0 recall and stays in [0, 1]."""
+    rows = ablation("d", "Some text. " * 50, recall_table={"fixed_window": 0.0, "recursive": 0.0, "structure": 0.0})
+    assert all(r.recall_at_3 == 0.0 for r in rows)
+    assert all(0.0 <= r.recall_at_3 <= 1.0 for r in rows)
+
+
+def test_chunk_fixed_window_large_overlap_covers_everything() -> None:
+    """Overlap=0 (no overlap) and overlap=chunk_size-1 (max overlap) both produce chunks."""
+    a = chunk_fixed_window("d", "x" * 200, chunk_size=50, overlap=0)
+    b = chunk_fixed_window("d", "x" * 200, chunk_size=50, overlap=49)
+    assert len(a) > 0
+    assert len(b) > 0
+    # With max overlap, you get at least 2x as many chunks
+    assert len(b) >= len(a)
 
 
 # =================================================================

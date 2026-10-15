@@ -20,8 +20,10 @@ RAGAS gives you the rubric; the golden set is your job.
 
 from __future__ import annotations
 
+import random
 import re
 import statistics
+import time
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -234,6 +236,37 @@ def detect_regressions(
 
 
 # =================================================================
+# SECTION 5b  --  Latency benchmark
+# =================================================================
+
+def evaluate_latency_ms(judge: MockJudge, golden: GoldenSet, n_runs: int = 20, seed: int = SEED) -> dict[str, float]:
+    """Time `evaluate_rag` over n_runs.  Reports avg / p50 / p95 in ms.
+
+    The lesson's point: evaluation is offline but not free.  A 100-example
+    golden set at 5 ms/example = 0.5 seconds; 10K examples = 50 seconds.
+    Real LLM-as-judge evals are 100x-1000x slower (network + tokens).
+    """
+    rng = random.Random(seed)
+    for _ in range(3):
+        _ = evaluate_rag(judge, golden)
+        rng.random()
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = evaluate_rag(judge, golden)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+        "n_examples": float(len(golden.examples)),
+        "seed": float(seed),
+    }
+
+
+# =================================================================
 # SECTION 6  --  Sample golden set + mock RAG
 # =================================================================
 
@@ -398,6 +431,15 @@ def demo() -> None:
     alerts = detect_regressions(fake_baseline, m, threshold=0.05)
     for a in alerts:
         print(f"    {a}")
+
+    # 7. Latency benchmark
+    print("\n  Section 7: Evaluation latency (avg / p50 / p95 in ms)")
+    print("  " + "-" * 66)
+    judge = MockJudge()
+    lat = evaluate_latency_ms(judge, GOLDEN_SET, n_runs=20, seed=17)
+    print(f"    n_examples={int(lat['n_examples'])}  n_runs={int(lat['n_runs'])}")
+    print(f"    avg={lat['avg_ms']:>6.2f} ms   p50={lat['p50_ms']:>6.2f}   p95={lat['p95_ms']:>6.2f}")
+    print(f"    seed={int(lat['seed'])}  --  evaluations/hour on one core ~ {3600_000 / max(lat['avg_ms'], 0.01):,.0f}")
 
     print("=" * 70)
     print("  See L10-evaluation-ragas.ipynb for the runnable version.")
