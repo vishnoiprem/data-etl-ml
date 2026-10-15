@@ -16,7 +16,7 @@ azure-identity==1.16.1
 azure-keyvault-secrets==4.7.0
 
 # Utilities
-requests==2.33.0
+requests==2.34.2
 tqdm==4.67.3
 
 # ML & NLP (for RAG)
