@@ -15,6 +15,8 @@ export function useInfiniteTraces(filters: TraceFilters) {
   });
 }
 
+type Snapshot = [readonly unknown[], { pages: TracePage[]; pageParams: unknown[] } | undefined];
+
 export function useSubmitFeedback() {
   const qc = useQueryClient();
   return useMutation({
@@ -24,10 +26,10 @@ export function useSubmitFeedback() {
       await qc.cancelQueries({ queryKey: TRACES_KEY });
       const snapshots = qc.getQueriesData<{ pages: TracePage[]; pageParams: unknown[] }>({
         queryKey: TRACES_KEY,
-      });
+      }) as Snapshot[];
       snapshots.forEach(([key, data]) => {
         if (!data) return;
-        const next = {
+        qc.setQueryData(key, {
           ...data,
           pages: data.pages.map((p) => ({
             ...p,
@@ -35,14 +37,16 @@ export function useSubmitFeedback() {
               t.trace_id === id ? { ...t, feedback: rating } : t
             ),
           })),
-        };
-        qc.setQueryData(key, next);
+        });
       });
       return { snapshots };
     },
     onError: (_e, _v, ctx) => {
-      ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data));
+      ctx?.snapshots.forEach(([key, data]) => {
+        if (data) qc.setQueryData(key, data);
+      });
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: TRACES_KEY }),
+    // No onSettled invalidate: the optimistic state is already correct; the
+    // server is the source of truth only on errors (which we rolled back).
   });
 }

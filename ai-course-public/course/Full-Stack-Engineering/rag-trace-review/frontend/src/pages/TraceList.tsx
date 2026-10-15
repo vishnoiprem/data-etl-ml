@@ -3,7 +3,7 @@ import { useInfiniteTraces, useSubmitFeedback } from '../hooks/useInfiniteTraces
 import { TraceTable } from '../components/TraceRow';
 import { FilterBar } from '../components/FilterBar';
 import { TraceDetail } from './TraceDetail';
-import type { TraceFilters, TraceSummary } from '../types';
+import type { Rating, TraceFilters, TraceSummary } from '../types';
 
 export function TraceList() {
   const [filters, setFilters] = useState<TraceFilters>({});
@@ -24,16 +24,8 @@ export function TraceList() {
     [data]
   );
 
-  function handleRowClick(id: string) {
-    setSelected(id);
-  }
-
-  async function optimisticRate(id: string, rating: 'up' | 'down') {
-    try {
-      await submit.mutateAsync({ id, rating });
-    } catch {
-      // rollback handled by hook
-    }
+  function rate(id: string, rating: Rating) {
+    submit.mutate({ id, rating });
   }
 
   return (
@@ -43,10 +35,10 @@ export function TraceList() {
         <FilterBar initial={filters} onChange={setFilters} />
         {isLoading && <div className="p-4">Loading…</div>}
         {isError && (
-          <div className="p-4 text-red-600">{(error as Error).message}</div>
+          <div className="p-4 text-red-600" role="alert">{(error as Error).message}</div>
         )}
         <div className="mt-2">
-          <TraceTable rows={rows} onSelect={handleRowClick} selectedId={selected ?? undefined} />
+          <TraceTable rows={rows} onSelect={setSelected} selectedId={selected ?? undefined} />
         </div>
         <div className="flex gap-2 items-center mt-2">
           <button
@@ -63,14 +55,18 @@ export function TraceList() {
         {selected && (
           <div className="mt-2 flex gap-2">
             <button
-              onClick={() => optimisticRate(selected, 'up')}
+              onClick={() => rate(selected, 'up')}
+              disabled={submit.isPending}
               className="px-2 py-1 border rounded"
+              aria-label="Thumbs up"
             >
               👍
             </button>
             <button
-              onClick={() => optimisticRate(selected, 'down')}
+              onClick={() => rate(selected, 'down')}
+              disabled={submit.isPending}
               className="px-2 py-1 border rounded"
+              aria-label="Thumbs down"
             >
               👎
             </button>

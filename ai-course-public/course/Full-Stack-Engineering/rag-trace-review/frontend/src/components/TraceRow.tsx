@@ -8,12 +8,14 @@ interface Props {
   selectedId?: string;
 }
 
+const ESTIMATE_SIZE = 44;
+
 export function TraceTable({ rows, onSelect, selectedId }: Props) {
   const parentRef = useRef<HTMLDivElement>(null);
   const virt = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 44,
+    estimateSize: ESTIMATE_SIZE,
     overscan: 8,
   });
 
@@ -50,7 +52,11 @@ export function TraceTable({ rows, onSelect, selectedId }: Props) {
             return (
               <tr
                 key={t.trace_id}
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelect(t.trace_id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(t.trace_id); }}
+                aria-selected={selectedId === t.trace_id}
                 style={{
                   position: 'absolute',
                   top: 0,

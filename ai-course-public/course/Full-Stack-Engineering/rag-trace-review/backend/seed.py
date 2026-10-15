@@ -80,12 +80,8 @@ def main(n: int = 10_000) -> None:
             rows,
         )
         cur.executemany(
-            "INSERT OR REPLACE INTO feedback(trace_id, rating, note, created_at) VALUES (?,?,?,?)",
+            "INSERT INTO feedback(trace_id, rating, note, created_at) VALUES (?,?,?,?)",
             feedbacks,
-        )
-        cur.executemany(
-            "UPDATE traces SET feedback = ? WHERE trace_id = ?",
-            [(r, t) for (t, r, _, _) in feedbacks],
         )
     print(f"Inserted {n} traces and {len(feedbacks)} feedback rows.")
 

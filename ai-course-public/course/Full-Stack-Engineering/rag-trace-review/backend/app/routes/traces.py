@@ -93,10 +93,13 @@ def list_traces(
 
 @router.get("/{trace_id}", response_model=TraceDetail)
 def get_trace(trace_id: str):
+    cols = "trace_id, created_at, prompt_version, user_query, prompt, retrieved_chunks, model_response, citations, token_usage, latency_ms, status, feedback"
     with db_cursor() as cur:
-        row = cur.execute("SELECT * FROM traces WHERE trace_id = ?", (trace_id,)).fetchone()
+        row = cur.execute(
+            f"SELECT {cols} FROM traces WHERE trace_id = ?", (trace_id,)
+        ).fetchone()
     if not row:
-        raise HTTPException(status_code=404, detail="Trace not found")
+        raise HTTPException(status_code=404, detail=f"Trace not found: {trace_id}")
     d = dict(row)
     d["retrieved_chunks"] = [RetrievedChunk(**c) for c in json.loads(d["retrieved_chunks"])]
     d["citations"] = [Citation(**c) for c in json.loads(d["citations"])]

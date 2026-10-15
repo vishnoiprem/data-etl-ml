@@ -13,20 +13,22 @@ router = APIRouter(prefix="/traces", tags=["feedback"])
 def submit_feedback(trace_id: str, body: FeedbackIn):
     now = datetime.now(timezone.utc).isoformat()
     with db_cursor(commit=True) as cur:
-        exists = cur.execute("SELECT 1 FROM traces WHERE trace_id = ?", (trace_id,)).fetchone()
-        if not exists:
-            raise HTTPException(status_code=404, detail=f"Trace not found: {trace_id}")
+        # Single round-trip: only insert if the trace exists. If 0 rows changed,
+        # the trace_id is unknown and we surface a 404.
         cur.execute(
             """
             INSERT INTO feedback(trace_id, rating, note, created_at)
-            VALUES (?, ?, ?, ?)
+            SELECT ?, ?, ?, ?
+            WHERE EXISTS (SELECT 1 FROM traces WHERE trace_id = ?)
             ON CONFLICT(trace_id) DO UPDATE SET
                 rating=excluded.rating,
                 note=excluded.note,
                 created_at=excluded.created_at
             """,
-            (trace_id, body.rating, body.note, now),
+            (trace_id, body.rating, body.note, now, trace_id),
         )
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail=f"Trace not found: {trace_id}")
         cur.execute(
             "UPDATE traces SET feedback = ? WHERE trace_id = ?",
             (body.rating, trace_id),

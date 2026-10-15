@@ -1,32 +1,28 @@
-import { useQuery } from '@tanstack/react-query';
-import { fetchTrace, submitFeedback } from '../api/client';
-import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchTrace } from '../api/client';
+import { useSubmitFeedback } from '../hooks/useInfiniteTraces';
+import type { Rating } from '../types';
 
 interface Props {
   traceId: string;
 }
 
 export function TraceDetail({ traceId }: Props) {
+  const qc = useQueryClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ['trace', traceId],
     queryFn: ({ signal }) => fetchTrace(traceId, signal),
     enabled: !!traceId,
   });
-  const [busy, setBusy] = useState<'up' | 'down' | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const submit = useSubmitFeedback();
+  const busy = submit.isPending;
+  const err = submit.error ? submit.error.message : null;
 
-  async function rate(rating: 'up' | 'down') {
-    setErr(null);
-    setBusy(rating);
-    try {
-      await submitFeedback(traceId, rating);
-      // soft reload
-      window.location.reload();
-    } catch (e) {
-      setErr((e as Error).message);
-    } finally {
-      setBusy(null);
-    }
+  function rate(rating: Rating) {
+    submit.mutate(
+      { id: traceId, rating },
+      { onSuccess: () => qc.invalidateQueries({ queryKey: ['trace', traceId] }) },
+    );
   }
 
   if (isLoading) return <div className="p-4">Loading trace…</div>;
@@ -45,22 +41,24 @@ export function TraceDetail({ traceId }: Props) {
         </div>
         <div className="flex gap-2">
           <button
-            disabled={busy !== null}
+            disabled={busy}
             onClick={() => rate('up')}
             className="px-3 py-1 border rounded hover:bg-green-50"
+            aria-label="Thumbs up"
           >
             👍 Up
           </button>
           <button
-            disabled={busy !== null}
+            disabled={busy}
             onClick={() => rate('down')}
             className="px-3 py-1 border rounded hover:bg-red-50"
+            aria-label="Thumbs down"
           >
             👎 Down
           </button>
         </div>
       </div>
-      {err && <div className="text-red-600 text-sm">{err}</div>}
+      {err && <div className="text-red-600 text-sm" role="alert">{err}</div>}
       <section>
         <h3 className="font-semibold">User query</h3>
         <p className="bg-gray-50 p-2 rounded">{data.user_query}</p>
