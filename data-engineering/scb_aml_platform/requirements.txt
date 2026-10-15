@@ -1,0 +1,19 @@
+# SCB AML Platform — runtime dependencies
+#
+# This file is kept for compatibility with tooling that scans for
+# `requirements*.txt` (e.g. pip-audit, Dependabot, GitHub security
+# alerts). The authoritative dependency list lives in `pyproject.toml`.
+#
+# Install with:
+#   pip install -e ".[dev]"          # core + test/lint deps
+#   pip install -e ".[dev,airflow]"  # adds Airflow (separate venv recommended)
+#
+# For Airflow, use requirements-airflow.txt in a dedicated virtualenv
+# because Airflow 2.7 pins sqlalchemy<2.0, which conflicts with
+# modern client libraries. See README.md "Airflow setup" section.
+#
+# The dependency list was previously a ~87-package mega-list that
+# included Airflow, transformers, langchain, jupyter, streamlit, etc.
+# — none of which the platform actually imports. It has been
+# trimmed to ~25 packages that are actually used.
+-r ./requirements.in
