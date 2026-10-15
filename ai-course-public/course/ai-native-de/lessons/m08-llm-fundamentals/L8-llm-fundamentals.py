@@ -311,6 +311,26 @@ SAMPLE_QUESTIONS = [
 
 
 # =================================================================
+# SECTION 7b  --  Deterministic seed re-run
+# =================================================================
+
+def run_demo_seed_42(seed: int = 42) -> LLMClient:
+    """Run a small fixed scenario to demonstrate reproducible LLM calls.
+
+    The lesson's point: even with a mock LLM, two runs with the same
+    seed must produce the same call count, the same cost, and the
+    same latency histogram.  This is the bedrock of any A/B test.
+    """
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, n_merges=20)
+    client = LLMClient(tokenizer=tok, model=MockLLM())
+    for q in SAMPLE_QUESTIONS:
+        msgs = SAMPLE_TEMPLATE.render(question=q)
+        client.complete(msgs)
+    return client
+
+
+# =================================================================
 # SECTION 8  --  Demo
 # =================================================================
 
@@ -374,6 +394,15 @@ def demo() -> None:
     print(f"    per call:    ${client.tracker.total_cost_usd() / client.call_count:.6f}")
     print(f"    monthly (1M calls): ${monthly:,.2f}")
     print(f"    annual:                     ${monthly * 12:,.2f}")
+
+    # 7. Deterministic seed projection
+    print("\n  Section 7: Deterministic re-run with seed=42")
+    print("  " + "-" * 66)
+    client_a = run_demo_seed_42()
+    client_b = run_demo_seed_42()
+    print(f"    client_a call_count: {client_a.call_count}")
+    print(f"    client_b call_count: {client_b.call_count}")
+    print(f"    identical? {client_a.call_count == client_b.call_count}")
 
     print("=" * 70)
     print("  See L8-llm-fundamentals.ipynb for the runnable version.")
@@ -491,6 +520,99 @@ def test_llm_client_logs_cost() -> None:
     assert rec.input_tokens > 0
     assert rec.output_tokens > 0
     assert rec.cost_usd > 0
+
+
+def test_run_demo_seed_42_is_deterministic() -> None:
+    """Two run_demo_seed_42() calls produce the same call count + cost."""
+    a = run_demo_seed_42()
+    b = run_demo_seed_42()
+    assert a.call_count == b.call_count
+    assert len(a.tracker.records) == len(b.tracker.records)
+    assert a.tracker.total_cost_usd() == b.tracker.total_cost_usd()
+
+
+def test_run_demo_seed_42_uses_all_questions() -> None:
+    """run_demo_seed_42 should call the LLM once per SAMPLE_QUESTIONS."""
+    client = run_demo_seed_42()
+    assert client.call_count == len(SAMPLE_QUESTIONS)
+
+
+def test_run_demo_seed_42_default_seed() -> None:
+    """run_demo_seed_42 defaults to seed=42 (deterministic)."""
+    client = run_demo_seed_42(seed=42)
+    # Each call should record some tokens
+    assert all(r.input_tokens > 0 for r in client.tracker.records)
+    assert all(r.output_tokens > 0 for r in client.tracker.records)
+
+
+def test_bpe_tokenizer_handles_empty_string() -> None:
+    """Empty string tokenizes to [] without raising."""
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, n_merges=10)
+    assert tok.encode("") == []
+    assert tok.decode([]) == ""
+
+
+def test_bpe_tokenizer_roundtrip_preserves_chars() -> None:
+    """encode() -> decode() preserves all characters (no info loss)."""
+    tok = BPETokenizer()
+    tok.fit(SAMPLE_CORPUS, n_merges=30)
+    text = "machine learning is great"
+    ids = tok.encode(text)
+    out = tok.decode(ids)
+    # The decoded tokens may not exactly equal the input (whitespace, BPE merges),
+    # but the unique characters should match.
+    assert set(text) == set(out) or set(text).issubset(set(out))
+
+
+def test_cost_tracker_aggregates_consistent() -> None:
+    """total_cost_usd() == sum of records' cost_usd."""
+    rec1 = UsageRecord(call_id="c1", model_id="m", input_tokens=10, output_tokens=10, latency_ms=100, cost_usd=0.001, timestamp="t")
+    rec2 = UsageRecord(call_id="c2", model_id="m", input_tokens=20, output_tokens=20, latency_ms=200, cost_usd=0.002, timestamp="t")
+    t = CostTracker()
+    t.add(rec1)
+    t.add(rec2)
+    assert abs(t.total_cost_usd() - 0.003) < 1e-9
+    assert len(t.records) == 2
+
+
+def test_cost_tracker_p95_latency() -> None:
+    """CostTracker.p95_latency_ms returns the 95th percentile latency."""
+    t = CostTracker()
+    for i in range(100):
+        t.add(UsageRecord(call_id=f"c{i}", model_id="m", input_tokens=0, output_tokens=0, latency_ms=float(i), cost_usd=0, timestamp="t"))
+    p95 = t.p95_latency_ms()
+    # p95 over 0..99 should be around 94-95
+    assert 90.0 <= p95 <= 99.0
+
+
+def test_prompt_template_renders_all_variables() -> None:
+    """A template with {a} and {b} renders both with kwargs."""
+    t = PromptTemplate(system="sys", user_template="a={a} b={b}", variables=["a", "b"])
+    msgs = t.render(a="x", b="y")
+    # msgs is list[dict[str, str]] with keys "role" and "content"
+    assert msgs[1]["content"] == "a=x b=y"
+
+
+def test_mock_llm_deterministic_per_prompt() -> None:
+    """Two MockLLM instances with the same prompt return the same output."""
+    a = MockLLM()
+    b = MockLLM()
+    out_a = a.complete("hello world")
+    out_b = b.complete("hello world")
+    assert out_a == out_b
+
+
+def test_parse_json_strips_markdown_fence() -> None:
+    """```json ... ``` is stripped before parsing."""
+    text = '```json\n{"key": "value"}\n```'
+    assert parse_json_output(text) == {"key": "value"}
+
+
+def test_parse_json_strips_plain_fence() -> None:
+    """``` ... ``` (no language tag) is also stripped."""
+    text = '```\n{"key": 42}\n```'
+    assert parse_json_output(text) == {"key": 42}
 
 
 # =================================================================

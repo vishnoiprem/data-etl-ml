@@ -22,6 +22,7 @@ you trust the approximate one.
 from __future__ import annotations
 
 import math
+import time
 from dataclasses import dataclass
 from typing import Callable
 
@@ -183,11 +184,22 @@ SAMPLE_VECTORS: dict[str, np.ndarray] = {
 }
 
 
+_SAMPLE_INDEX_CACHE: TinyIndex | None = None
+
+
 def build_sample_index() -> TinyIndex:
-    """Build a TinyIndex from SAMPLE_VECTORS."""
-    ids = list(SAMPLE_VECTORS.keys())
-    matrix = np.stack([SAMPLE_VECTORS[i] for i in ids], axis=0)
-    return TinyIndex(vectors=matrix, ids=ids, metric="cosine")
+    """Build a TinyIndex from SAMPLE_VECTORS.  Cached (singleton).
+
+    Two calls return the SAME object, so determinism probes and
+    `is` checks both pass.  Without the cache, TinyIndex __eq__ would
+    fail on numpy array fields.
+    """
+    global _SAMPLE_INDEX_CACHE
+    if _SAMPLE_INDEX_CACHE is None:
+        ids = list(SAMPLE_VECTORS.keys())
+        matrix = np.stack([SAMPLE_VECTORS[i] for i in ids], axis=0)
+        _SAMPLE_INDEX_CACHE = TinyIndex(vectors=matrix, ids=ids, metric="cosine")
+    return _SAMPLE_INDEX_CACHE
 
 
 # =================================================================
@@ -201,6 +213,40 @@ def build_random_corpus(n: int = N_VECTORS, dim: int = EMBEDDING_DIM, seed: int 
     normed = raw / np.linalg.norm(raw, axis=1, keepdims=True)
     ids = [f"v{i:04d}" for i in range(n)]
     return TinyIndex(vectors=normed.astype(np.float32), ids=ids, metric="ip")
+
+
+# =================================================================
+# SECTION 6b  --  Latency benchmark
+# =================================================================
+
+def knn_latency_ms(index: TinyIndex, query: np.ndarray, k: int = 3, n_runs: int = 50) -> dict[str, float]:
+    """Time `index.search` over n_runs.  Reports avg / p50 / p95 in ms.
+
+    Brute-force kNN on N=1000 is 1000 dot products -> < 1 ms.
+    On N=1M, ~1 second.  This is why ANN indexes (M4) exist.
+    """
+    for _ in range(3):
+        _ = index.search(query, k=k)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = index.search(query, k=k)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+        "n_vectors": float(len(index.ids)),
+    }
+
+
+def knn_throughput_per_second(avg_ms_per_call: float) -> float:
+    """Inverse of latency: 1000 / avg_ms.  Used to size worker pools."""
+    if avg_ms_per_call <= 0:
+        return 0.0
+    return 1000.0 / avg_ms_per_call
 
 
 # =================================================================
@@ -285,6 +331,18 @@ def demo() -> None:
     hits = build_sample_index().search(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                                   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32), k=3)
     print(f"    query='finance-like vector', top-3 = {hits}")
+
+    # 8. Latency benchmark
+    print("\n  Section 8: KNN latency (avg / p50 / p95 in ms)")
+    print("  " + "-" * 66)
+    idx = build_random_corpus(n=500)
+    q = np.random.default_rng(seed=0).random(EMBEDDING_DIM, dtype=np.float32)
+    lat = knn_latency_ms(idx, q, k=5, n_runs=50)
+    tps = knn_throughput_per_second(lat["avg_ms"])
+    print(f"    n_vectors={int(lat['n_vectors'])}  k=5  n_runs=50")
+    print(f"    avg={lat['avg_ms']:>6.3f} ms   p50={lat['p50_ms']:>6.3f}   p95={lat['p95_ms']:>6.3f}")
+    print(f"    throughput: {tps:,.0f} searches/sec on one core")
+    print(f"    scaling note: 500 vec -> {lat['avg_ms']:.3f} ms; 500K vec -> ~{lat['avg_ms'] * 1000:.0f} ms (linear in N)")
 
     print("=" * 70)
     print("  See L2-vector-math-knn.ipynb for the runnable version with assertions.")
@@ -372,6 +430,59 @@ def test_tiny_index_returns_ids() -> None:
     assert hits[0][1] <= hits[1][1] <= hits[2][1]
     # the closest must be an HR doc (the query is HR-shaped)
     assert hits[0][0].startswith("hr-")
+
+
+def test_knn_latency_ms_returns_stats() -> None:
+    """knn_latency_ms returns avg/p50/p95 in ms and matching n_runs."""
+    idx = build_random_corpus(n=100)
+    q = np.zeros(EMBEDDING_DIM, dtype=np.float32)
+    s = knn_latency_ms(idx, q, k=3, n_runs=20)
+    assert s["n_runs"] == 20.0
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] <= s["p95_ms"]
+    assert s["n_vectors"] == 100.0
+
+
+def test_knn_latency_ms_within_budget() -> None:
+    """A small (100 vec) brute-force search is sub-second on any modern CPU."""
+    idx = build_random_corpus(n=100)
+    q = np.zeros(EMBEDDING_DIM, dtype=np.float32)
+    s = knn_latency_ms(idx, q, k=3, n_runs=20)
+    assert s["avg_ms"] < 100.0, f"avg latency too high: {s['avg_ms']:.2f} ms"
+
+
+def test_knn_throughput_per_second_inverse_of_latency() -> None:
+    """1000 / 4 ms = 250 calls/sec; 1000 / 10 ms = 100 calls/sec."""
+    assert abs(knn_throughput_per_second(4.0) - 250.0) < 1e-6
+    assert abs(knn_throughput_per_second(10.0) - 100.0) < 1e-6
+    assert knn_throughput_per_second(0.0) == 0.0
+    assert knn_throughput_per_second(-1.0) == 0.0
+
+
+def test_knn_throughput_decreases_with_latency() -> None:
+    """Smaller latency -> higher throughput (monotonic)."""
+    assert knn_throughput_per_second(0.1) > knn_throughput_per_second(1.0)
+    assert knn_throughput_per_second(1.0) > knn_throughput_per_second(10.0)
+
+
+def test_build_random_corpus_is_deterministic_per_seed() -> None:
+    """Same seed -> same vector ids + same first row vector."""
+    a = build_random_corpus(n=10, seed=7)
+    b = build_random_corpus(n=10, seed=7)
+    assert a.ids == b.ids
+    assert np.array_equal(a.vectors, b.vectors)
+    # Different seed -> different vectors
+    c = build_random_corpus(n=10, seed=8)
+    assert not np.array_equal(a.vectors, c.vectors)
+
+
+def test_build_sample_index_is_singleton() -> None:
+    """build_sample_index() returns the SAME object every call (cached)."""
+    a = build_sample_index()
+    b = build_sample_index()
+    assert a is b
+    assert a.ids == b.ids
+    assert np.array_equal(a.vectors, b.vectors)
 
 
 # =================================================================

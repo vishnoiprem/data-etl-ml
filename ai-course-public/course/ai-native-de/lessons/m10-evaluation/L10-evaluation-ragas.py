@@ -620,6 +620,68 @@ def test_regression_alert_str_format() -> None:
     assert "REGRESSION" in s
 
 
+def test_evaluate_latency_ms_returns_stats() -> None:
+    """evaluate_latency_ms returns avg/p50/p95 in ms and matching n_runs."""
+    judge = MockJudge()
+    s = evaluate_latency_ms(judge, GOLDEN_SET, n_runs=10, seed=17)
+    assert s["n_runs"] == 10.0
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] <= s["p95_ms"]
+    assert s["seed"] == 17.0
+    assert s["n_examples"] == float(len(GOLDEN_SET.examples))
+
+
+def test_evaluate_latency_ms_within_budget() -> None:
+    """Mock-judge eval of 5 golden examples is well under 1 second."""
+    judge = MockJudge()
+    s = evaluate_latency_ms(judge, GOLDEN_SET, n_runs=10, seed=17)
+    # Mock judge in Python should be sub-second on any modern CPU.
+    assert s["avg_ms"] < 1000.0, f"avg latency too high: {s['avg_ms']:.2f} ms"
+
+
+def test_evaluate_latency_ms_is_deterministic_per_seed() -> None:
+    """Same seed -> same first sample ordering (deterministic warmup)."""
+    judge1 = MockJudge()
+    judge2 = MockJudge()
+    s1 = evaluate_latency_ms(judge1, GOLDEN_SET, n_runs=10, seed=42)
+    s2 = evaluate_latency_ms(judge2, GOLDEN_SET, n_runs=10, seed=42)
+    # The structure is deterministic but raw ms samples can vary;
+    # what we can verify deterministically is that 'seed' is echoed.
+    assert s1["seed"] == s2["seed"] == 42.0
+    assert s1["n_examples"] == s2["n_examples"]
+
+
+def test_detect_regressions_handles_equal_metrics() -> None:
+    """When current == baseline, delta == 0 and the alert is non-regressive."""
+    base = RAGASScores(faithfulness=0.9, answer_relevancy=0.8, context_recall=0.7)
+    alerts = detect_regressions(base, base, threshold=0.05)
+    assert len(alerts) == 3
+    for a in alerts:
+        assert a.delta == 0.0
+        # Equal metrics don't trigger a regression alert (callers filter |delta| > threshold)
+        assert a.baseline == a.current
+
+
+def test_detect_regressions_strict_threshold() -> None:
+    """threshold=0.0 catches any movement."""
+    base = RAGASScores(faithfulness=0.9, answer_relevancy=0.8, context_recall=0.7)
+    cur  = RAGASScores(faithfulness=0.91, answer_relevancy=0.79, context_recall=0.71)
+    alerts = detect_regressions(base, cur, threshold=0.0)
+    assert all(a.delta != 0.0 for a in alerts)
+
+
+def test_detect_regressions_returns_correct_count() -> None:
+    """3 alerts -- one per RAGAS metric."""
+    alerts = detect_regressions(
+        RAGASScores(0.8, 0.8, 0.8),
+        RAGASScores(0.7, 0.7, 0.7),
+        threshold=0.05,
+    )
+    assert len(alerts) == 3
+    metrics = sorted(a.metric for a in alerts)
+    assert metrics == ["answer_relevancy", "context_recall", "faithfulness"]
+
+
 # =================================================================
 # ENTRY
 # =================================================================

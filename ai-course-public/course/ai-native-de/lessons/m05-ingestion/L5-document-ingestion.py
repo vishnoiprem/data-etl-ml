@@ -35,6 +35,7 @@ from typing import Callable
 LESSON_NUMBER = "M5.L5"
 SEED = 0
 MAX_RETRIES = 2
+INGEST_LATENCY_BUDGET_MS = 100.0   # soft target for a 1 KB doc
 
 
 # =================================================================
@@ -192,7 +193,7 @@ class IngestionService:
             result.ingested.append(parsed)
         return result
 
-    def _ingest_with_retry(self, doc: Document) -> IngestedDoc:
+    def _ingest_with_retry(self, doc: Document, seed: int = SEED) -> IngestedDoc:
         last_err: Exception | None = None
         for attempt in range(MAX_RETRIES + 1):
             try:
@@ -219,6 +220,43 @@ SAMPLE_INPUTS: list[Document] = [
     # unknown content type
     Document(source="weird.xyz",      raw="binary data",                                                 content_type="xyz"),
 ]
+
+
+# =================================================================
+# SECTION 6b  --  Latency benchmark
+# =================================================================
+
+def ingest_latency_ms(svc: IngestionService, docs: list[Document], n_runs: int = 20,
+                       seed: int = SEED) -> dict[str, float]:
+    """Time `svc.ingest(docs)` over n_runs.  Reports avg / p50 / p95 in ms.
+
+    The lesson's point: ingestion is the front door.  A 1 KB doc at
+    0.5 ms = 2K docs/sec on one core.  Real documents are larger
+    and the per-doc cost is dominated by tokenization + storage.
+    """
+    for _ in range(3):
+        _ = svc.ingest(docs)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = svc.ingest(docs)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+        "n_docs": float(len(docs)),
+        "seed": float(seed),
+    }
+
+
+def ingest_throughput_per_second(avg_ms_per_call: float, batch_size: int = 1) -> float:
+    """Inverse of latency scaled by batch: (1000 / avg_ms) * batch_size."""
+    if avg_ms_per_call <= 0:
+        return 0.0
+    return (1000.0 / avg_ms_per_call) * batch_size
 
 
 # =================================================================
@@ -301,6 +339,17 @@ def demo() -> None:
     print(f"    store size after  re-ingest: {after}  (should be equal)")
     print(f"    duplicates detected:         {len(r2.duplicates)}")
     print(f"    new docs ingested:           {len(r2.ingested)}  (should be 0)")
+
+    # 8. Latency benchmark
+    print("\n  Section 8: Ingestion latency (avg / p50 / p95 in ms)")
+    print("  " + "-" * 66)
+    svc4 = IngestionService()
+    lat = ingest_latency_ms(svc4, SAMPLE_INPUTS, n_runs=20, seed=0)
+    tps = ingest_throughput_per_second(lat["avg_ms"], batch_size=len(SAMPLE_INPUTS))
+    print(f"    n_docs={int(lat['n_docs'])}  n_runs=20")
+    print(f"    avg={lat['avg_ms']:>6.2f} ms   p50={lat['p50_ms']:>6.2f}   p95={lat['p95_ms']:>6.2f}")
+    print(f"    throughput: ~{tps:,.0f} docs/sec on one core")
+    print(f"    budget: {INGEST_LATENCY_BUDGET_MS:.0f} ms  --  7 mixed docs under budget? {lat['avg_ms'] < INGEST_LATENCY_BUDGET_MS}")
 
     print("=" * 70)
     print("  See L5-document-ingestion.ipynb for the runnable version.")
@@ -549,6 +598,33 @@ def test_parse_html_lowercase_and_uppercase_tags() -> None:
     out = parse_html("<P>hi</P><Div>x</Div>")
     assert "hi" in out and "x" in out
     assert "<" not in out.upper() or "P>" not in out.upper()
+
+
+def test_ingest_latency_ms_returns_stats() -> None:
+    """ingest_latency_ms returns avg/p50/p95 in ms and matching n_runs."""
+    svc = IngestionService()
+    s = ingest_latency_ms(svc, SAMPLE_INPUTS, n_runs=10, seed=0)
+    assert s["n_runs"] == 10.0
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] <= s["p95_ms"]
+    assert s["n_docs"] == float(len(SAMPLE_INPUTS))
+    assert s["seed"] == 0.0
+
+
+def test_ingest_latency_ms_within_budget() -> None:
+    """7 mixed-content docs ingested well under 1 second on any modern CPU."""
+    svc = IngestionService()
+    s = ingest_latency_ms(svc, SAMPLE_INPUTS, n_runs=10, seed=0)
+    assert s["avg_ms"] < 1000.0, f"avg latency too high: {s['avg_ms']:.2f} ms"
+
+
+def test_ingest_throughput_per_second_scales_with_batch() -> None:
+    """batch_size multiplies throughput linearly."""
+    base = ingest_throughput_per_second(10.0, batch_size=1)
+    bigger = ingest_throughput_per_second(10.0, batch_size=10)
+    assert abs(bigger - 10 * base) < 1e-6
+    assert ingest_throughput_per_second(0.0) == 0.0
+    assert ingest_throughput_per_second(-1.0) == 0.0
 
 
 # =================================================================

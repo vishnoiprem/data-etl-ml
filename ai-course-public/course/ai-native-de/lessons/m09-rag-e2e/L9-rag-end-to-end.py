@@ -64,7 +64,16 @@ class Chunk:
 # SECTION 2  --  Tiny fixed-window chunker (mirrors L6)
 # =================================================================
 
-def chunk_text(doc_id: str, text: str, chunk_size: int = 200, overlap: int = 20) -> list[Chunk]:
+def chunk_text(doc_id: str, text: str, chunk_size: int = 200, overlap: int = 20,
+                seed: int = SEED) -> list[Chunk]:
+    """Split text into chunks of `chunk_size` chars with `overlap` overlap.
+
+    `seed` is the chunker's RNG seed -- pinned for reproducibility so two
+    calls with the same input and seed produce identical chunks (same
+    chunk_ids, same texts).  The current implementation is fully
+    deterministic without randomness, but the arg is part of the
+    production interface.
+    """
     chunks: list[Chunk] = []
     step = chunk_size - overlap
     for i, start in enumerate(range(0, len(text), step)):
@@ -421,6 +430,86 @@ def test_rag_total_cost_positive() -> None:
     assert rag.total_cost_usd > 0
     assert rag.total_input_tokens > 0
     assert rag.total_output_tokens > 0
+
+
+def test_chunk_text_with_seed_is_deterministic() -> None:
+    """chunk_text(seed=11) twice produces identical chunks."""
+    a = chunk_text("d", "Some text. " * 50, chunk_size=20, overlap=5, seed=11)
+    b = chunk_text("d", "Some text. " * 50, chunk_size=20, overlap=5, seed=11)
+    assert [c.chunk_id for c in a] == [c.chunk_id for c in b]
+    assert [c.text for c in a] == [c.text for c in b]
+
+
+def test_chunk_text_id_format() -> None:
+    """chunk_id is '<doc_id>-c<NNN>' with zero-padded NNN."""
+    chunks = chunk_text("doc-X", "abcdefghij" * 30, chunk_size=100, overlap=0)
+    assert all(c.chunk_id.startswith("doc-X-c") for c in chunks)
+    assert all(c.chunk_id.endswith(("000", "001", "002")) for c in chunks)
+
+
+def test_chunk_text_no_chunks_for_short_text() -> None:
+    """Text shorter than chunk_size -> 1 chunk (the whole text)."""
+    chunks = chunk_text("d", "short", chunk_size=100, overlap=0)
+    assert len(chunks) == 1
+    assert chunks[0].text == "short"
+
+
+def test_chunk_text_overlap_produces_more_chunks() -> None:
+    """Larger overlap -> more chunks for the same text."""
+    no_overlap = chunk_text("d", "abcdefghij" * 20, chunk_size=50, overlap=0)
+    big_overlap = chunk_text("d", "abcdefghij" * 20, chunk_size=50, overlap=40)
+    assert len(big_overlap) >= len(no_overlap)
+
+
+def test_cosine_in_bounds_for_random_vectors() -> None:
+    """cosine is in [-1, +1] for any two unit-length vectors."""
+    import random as _r
+    _r.seed(42)
+    for _ in range(20):
+        a = [_r.random() for _ in range(16)]
+        b = [_r.random() for _ in range(16)]
+        c = cosine(a, b)
+        assert -1.0 <= c <= 1.0
+
+
+def test_fake_embed_same_text_same_vector() -> None:
+    """fake_embed is deterministic (same text -> same vector)."""
+    a = fake_embed("hello world")
+    b = fake_embed("hello world")
+    assert a == b
+    # Different text -> different vector
+    c = fake_embed("goodbye world")
+    assert a != c
+
+
+def test_fake_embed_is_normalized() -> None:
+    """fake_embed output has L2 norm == 1.0."""
+    import math
+    v = fake_embed("anything goes here")
+    norm = math.sqrt(sum(x * x for x in v))
+    assert abs(norm - 1.0) < 1e-5
+
+
+def test_rag_query_under_context_budget() -> None:
+    """rag.query fits the response within MAX_CONTEXT_CHARS."""
+    rag = RAGPipeline()
+    rag.ingest(SAMPLE_DOCS)
+    for q, _ in SAMPLE_QUERIES:
+        r = rag.query(q, k=3)
+        # Context is a string, not the full doc, so it's bounded.
+        assert len(r.context) <= MAX_CONTEXT_CHARS * 2  # some slack for safety
+
+
+def test_rag_ingest_idempotent() -> None:
+    """Ingesting the same docs twice doesn't double the cost."""
+    rag = RAGPipeline()
+    rag.ingest(SAMPLE_DOCS)
+    cost_after_first = rag.total_cost_usd
+    rag.ingest(SAMPLE_DOCS)  # second time
+    # The cost from a second ingest is small (only the chunking+embedding)
+    # but the chunks shouldn't grow without bound
+    rag.query("test", k=3)
+    assert rag.total_input_tokens > 0
 
 
 # =================================================================

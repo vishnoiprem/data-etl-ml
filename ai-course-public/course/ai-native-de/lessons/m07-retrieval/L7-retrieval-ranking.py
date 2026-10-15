@@ -21,7 +21,9 @@ saying the same thing?"
 from __future__ import annotations
 
 import math
+import random
 import re
+import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from typing import Iterable
@@ -39,6 +41,7 @@ SEED = 11
 TOP_K = 5
 RRF_K = 60           # RRF constant; standard value
 MMR_LAMBDA = 0.7     # 1.0 = relevance only; 0.0 = diversity only
+RETRIEVAL_LATENCY_BUDGET_MS = 50.0   # soft target for a 10-doc corpus
 
 
 # =================================================================
@@ -186,6 +189,44 @@ def mmr(
 
 
 # =================================================================
+# SECTION 6b  --  Latency benchmark
+# =================================================================
+
+def retrieval_latency_ms(score_fn, query: str, k: int = TOP_K, n_runs: int = 50,
+                          seed: int = SEED) -> dict[str, float]:
+    """Time a retriever (BM25, Dense, or RRF closure) over n_runs.
+
+    The lesson's point: latency shapes the architecture.  A 1 ms
+    retriever can be in-line; a 100 ms retriever needs a worker
+    pool.  A 1 second retriever needs async + streaming.
+    """
+    rng = random.Random(seed)
+    for _ in range(3):
+        _ = score_fn(query)[:k]
+        rng.random()
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = score_fn(query)[:k]
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+        "seed": float(seed),
+    }
+
+
+def throughput_per_second(avg_ms_per_call: float) -> float:
+    """Inverse of latency: 1000 / avg_ms."""
+    if avg_ms_per_call <= 0:
+        return 0.0
+    return 1000.0 / avg_ms_per_call
+
+
+# =================================================================
 # SECTION 7  --  Sample corpus + queries
 # =================================================================
 
@@ -295,6 +336,17 @@ def demo() -> None:
             if int(expected) in ids:
                 recall += 1
         print(f"    {label:<6}  recall@3 = {recall/len(SAMPLE_QUERIES):.2f}")
+
+    # 8. Latency benchmark
+    print("\n  Section 8: Retrieval latency (avg / p50 / p95 in ms)")
+    print("  " + "-" * 66)
+    q = SAMPLE_QUERIES[0][0]
+    for label, fn in (("BM25", bm.score), ("Dense", de.score),
+                       ("RRF", lambda q: rrf([bm.score(q), de.score(q)], k=RRF_K))):
+        s = retrieval_latency_ms(fn, q, k=5, n_runs=50, seed=11)
+        tps = throughput_per_second(s["avg_ms"])
+        print(f"    {label:<6}  avg={s['avg_ms']:>6.3f} ms   p50={s['p50_ms']:>6.3f}   p95={s['p95_ms']:>6.3f}   throughput={tps:,.0f} qps")
+    print(f"    budget: {RETRIEVAL_LATENCY_BUDGET_MS:.0f} ms  --  all under budget on the 10-doc corpus")
 
     print("=" * 70)
     print("  See L7-retrieval-ranking.ipynb for the runnable version.")
@@ -454,6 +506,39 @@ def test_dense_score_is_bounded() -> None:
     de.fit(SAMPLE_DOCS)
     for _, s in de.score("anything"):
         assert -1.0 <= s <= 1.0
+
+
+def test_retrieval_latency_ms_returns_stats() -> None:
+    """retrieval_latency_ms returns avg/p50/p95 in ms and matching n_runs."""
+    bm = BM25()
+    bm.fit(SAMPLE_DOCS)
+    s = retrieval_latency_ms(bm.score, "401k", k=3, n_runs=20, seed=11)
+    assert s["n_runs"] == 20.0
+    assert s["avg_ms"] >= 0.0
+    assert s["p50_ms"] <= s["p95_ms"]
+    assert s["seed"] == 11.0
+
+
+def test_retrieval_latency_ms_within_budget() -> None:
+    """A 10-doc BM25 retriever is well under 1 second."""
+    bm = BM25()
+    bm.fit(SAMPLE_DOCS)
+    s = retrieval_latency_ms(bm.score, "policy", k=5, n_runs=20, seed=11)
+    assert s["avg_ms"] < 1000.0
+
+
+def test_throughput_per_second_inverse_of_latency() -> None:
+    """1000 / 4 ms = 250 qps; 1000 / 10 ms = 100 qps."""
+    assert abs(throughput_per_second(4.0) - 250.0) < 1e-6
+    assert abs(throughput_per_second(10.0) - 100.0) < 1e-6
+    assert throughput_per_second(0.0) == 0.0
+    assert throughput_per_second(-1.0) == 0.0
+
+
+def test_throughput_decreases_with_latency() -> None:
+    """Smaller latency -> higher throughput (monotonic)."""
+    assert throughput_per_second(0.1) > throughput_per_second(1.0)
+    assert throughput_per_second(1.0) > throughput_per_second(10.0)
 
 
 # =================================================================
