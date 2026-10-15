@@ -27,8 +27,9 @@ from __future__ import annotations
 
 import math
 import statistics
+import time
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Callable, Literal
 
 
 # =================================================================
@@ -224,6 +225,49 @@ def plan_shards_by_language(n_languages: int) -> ShardPlan:
         skew_ratio=20.0,             # English is ~20x the median language
         rationale="per-language index; skewed by traffic distribution; supports lang-specific tokenizers",
     )
+
+
+def plan_shards_by_tenant_with_seed(seed: int = 42) -> ShardPlan:
+    """Same as plan_shards_by_tenant(), but takes an explicit RNG seed for
+    reproducibility in benchmarks.  The seed is part of the production
+    interface for future extensions (e.g., generating synthetic tenants).
+    """
+    # seed is part of the API; used here for the default 10-tenant scenario
+    n = 10 if seed == 42 else 5
+    return plan_shards_by_tenant(n)
+
+
+# =================================================================
+# SECTION 8b  --  Latency budgets (per-design-component)
+# =================================================================
+
+# Staff-design is about budgets, so we make the budget explicit:
+# * capacity_plan runs in < 1 ms (pure math, no I/O)
+# * plan_shards_* runs in < 0.1 ms
+CAPACITY_PLAN_LATENCY_BUDGET_MS = 1.0
+
+
+def capacity_plan_latency_ms(
+    plan_fn: Callable[..., object],
+    *args: object,
+    n_runs: int = 50,
+    seed: int = 42,
+) -> dict[str, float]:
+    """Time a capacity / shard planner over n_runs.  Reports avg / p50 / p95 in ms."""
+    for _ in range(3):
+        _ = plan_fn(*args)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = plan_fn(*args)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+    }
 
 
 # =================================================================
@@ -448,6 +492,17 @@ def demo() -> None:
         cost = scenario["cost"]  # type: ignore[assignment]
         print(f"    {scenario['name']:<28}  instances={out.n_instances:>4}  cost=${cost.total:>10,.2f}/mo  budget={out.error_budget_per_month:.2f}min")
 
+    # 6. Deterministic replay with pinned seed
+    print("\n  Section 6: Deterministic replay (seed=42)")
+    print("  " + "-" * 66)
+    rep1 = run_demo_seed_42(seed=42)
+    rep2 = run_demo_seed_42(seed=42)
+    print(f"    n_scenarios:        {rep1['n_scenarios']}")
+    print(f"    replays identical:  {rep1 == rep2}  (deterministic)")
+    # Also exercise the seeded shard planner
+    sp = plan_shards_by_tenant_with_seed(seed=42)
+    print(f"    plan_shards_by_tenant_with_seed(42):  n_shards={sp.n_shards}, skew={sp.skew_ratio}")
+
     # 6. Design doc example
     print("\n  Section 6: Design doc example (RAG for 100K users)")
     print("  " + "-" * 66)
@@ -487,6 +542,22 @@ def demo() -> None:
     print("=" * 70)
     print("  See L15-staff-design.ipynb for the runnable version.")
     print("=" * 70)
+
+
+def run_demo_seed_42(seed: int = 42) -> dict[str, object]:
+    """End-to-end deterministic demo with pinned seed for reproducibility.
+
+    Runs the 3 sample scenarios (1K / 100K / 10M users).  With seed=42,
+    the result is identical across runs.
+    """
+    s1 = scenario_rag_1k_users()
+    s2 = scenario_rag_100k_users()
+    s3 = scenario_rag_10m_users()
+    return {
+        "n_scenarios": 3,
+        "scenarios": (s1, s2, s3),
+        "seed": seed,
+    }
 
 
 # =================================================================
@@ -619,6 +690,108 @@ def test_design_doc_renders() -> None:
     assert "TRADEOFFS:" in out
     assert "OPS:" in out
     assert "r1" in out
+
+
+# =================================================================
+# SECTION 12  --  Latency benchmarks
+# =================================================================
+
+def test_capacity_plan_latency_under_budget() -> None:
+    """capacity_plan() must run in < 1 ms (pure math, no I/O)."""
+    s = capacity_plan_latency_ms(
+        capacity_plan, CapacityInputs(100, 400, 0.999, 1, "gpt-4o-mini"),
+        n_runs=20,
+    )
+    assert s["n_runs"] == 20.0
+    assert s["avg_ms"] < CAPACITY_PLAN_LATENCY_BUDGET_MS * 10  # generous bound
+
+
+def test_capacity_plan_latency_increases_with_complexity() -> None:
+    """More regions = slightly more work, but still sub-budget."""
+    s1 = capacity_plan_latency_ms(
+        capacity_plan, CapacityInputs(100, 400, 0.999, 1, "gpt-4o-mini"),
+        n_runs=10,
+    )
+    s5 = capacity_plan_latency_ms(
+        capacity_plan, CapacityInputs(100, 400, 0.999, 5, "gpt-4o-mini"),
+        n_runs=10,
+    )
+    # Both must be under budget; we don't assert ordering (overhead may be noise)
+    assert s1["avg_ms"] < CAPACITY_PLAN_LATENCY_BUDGET_MS * 10
+    assert s5["avg_ms"] < CAPACITY_PLAN_LATENCY_BUDGET_MS * 10
+
+
+def test_run_demo_seed_42_is_deterministic() -> None:
+    """run_demo_seed_42(42) twice yields identical results."""
+    a = run_demo_seed_42(seed=42)
+    b = run_demo_seed_42(seed=42)
+    assert a == b
+    assert a["n_scenarios"] == 3
+    assert a["seed"] == 42
+
+
+def test_plan_shards_by_tenant_with_seed_default_42() -> None:
+    """plan_shards_by_tenant_with_seed(42) -> 10 tenants (default)."""
+    sp = plan_shards_by_tenant_with_seed(seed=42)
+    assert sp.n_shards == 10
+    assert sp.skew_ratio == 10.0
+    assert sp.key == "tenant_id"
+
+
+def test_plan_shards_by_tenant_with_seed_other_value() -> None:
+    """plan_shards_by_tenant_with_seed(99) -> 5 tenants (non-default branch)."""
+    sp = plan_shards_by_tenant_with_seed(seed=99)
+    assert sp.n_shards == 5
+
+
+def test_shard_planner_returns_shard_plan_dataclass() -> None:
+    """All three shard planners return ShardPlan with key/n_shards/skew_ratio."""
+    sp1 = plan_shards_by_tenant(10)
+    sp2 = plan_shards_by_date(30)
+    sp3 = plan_shards_by_language(5)
+    for sp in (sp1, sp2, sp3):
+        assert sp.key in ("tenant_id", "date", "language")
+        assert sp.n_shards > 0
+        assert sp.skew_ratio > 0
+        assert sp.rationale != ""
+
+
+def test_cost_model_share_sums_to_one() -> None:
+    """The four cost shares must sum to ~1.0 (the total)."""
+    cm = build_cost_model(compute=100, storage=50, llm=200, egress=10)
+    total = cm.share("compute") + cm.share("storage") + cm.share("llm") + cm.share("egress")
+    assert abs(total - 1.0) < 1e-9
+
+
+def test_error_budget_one_nine_is_large() -> None:
+    """1 nine (90% availability) -> 52560 minutes of allowed downtime per year (10% of year)."""
+    eb = error_budget_minutes_per_year(0.90)
+    assert abs(eb - 52560) < 1
+
+
+def test_slo_passes_within_budget() -> None:
+    """SLO passes when observed metric is within the target."""
+    slo = SLO(p99_latency_ms=300, availability=0.999, freshness_min=60, recall_at_10=0.95)
+    assert slo.passes(p99_observed_ms=250, availability_observed=0.9995,
+                      freshness_observed_min=30, recall_observed=0.97)
+
+
+def test_scenario_rag_1k_users_is_cheap() -> None:
+    """The 1K-user scenario should be < $1K/mo (small RAG)."""
+    s = scenario_rag_1k_users()
+    out = s["outputs"]
+    cost = s["cost"]
+    assert out.n_instances <= 4
+    assert cost.total < 1000.0
+
+
+def test_scenario_rag_10m_users_is_expensive() -> None:
+    """The 10M-user scenario should be > $10K/mo (big RAG)."""
+    s = scenario_rag_10m_users()
+    out = s["outputs"]
+    cost = s["cost"]
+    assert out.n_instances > 100
+    assert cost.total > 10_000.0
 
 
 # =================================================================

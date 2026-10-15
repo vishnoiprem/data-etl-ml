@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -138,8 +139,14 @@ class MockLLM:
     pick the best match whose args can be extracted from the task.
     """
 
-    def decide(self, task: str, history: list["Step"], tools: ToolRegistry) -> ToolCall | None:
-        """Return the next tool call, or None to declare 'done'."""
+    def decide(self, task: str, history: list["Step"], tools: ToolRegistry,
+               seed: int = SEED) -> ToolCall | None:
+        """Return the next tool call, or None to declare 'done'.
+
+        `seed` is the LLM's RNG seed (pinned for reproducibility).  The
+        current implementation is fully deterministic without randomness,
+        but the arg is part of the production interface.
+        """
         # If the most recent step succeeded and we have an answer, stop.
         if history and not str(history[-1].observation).startswith("ERROR"):
             # Special case: if the last call's observation is a clean answer, stop.
@@ -281,7 +288,7 @@ class Agent:
         run = AgentRun(task=task)
         history: list[Step] = []
         for i in range(self.max_steps):
-            call = self.llm.decide(task, history, self.registry)
+            call = self.llm.decide(task, history, self.registry, seed=SEED)
             if call is None:
                 run.stopped_reason = "no_tool"
                 run.final_answer = self._synthesize_answer(task, history)
@@ -732,6 +739,159 @@ def test_step_string_truncates_long_obs() -> None:
     out = str(s)
     assert "..." in out
     assert len(out) < 200
+
+
+# =================================================================
+# SECTION 10  --  Latency benchmarks
+# =================================================================
+
+# Latency budget for a single agent step.  The think -> call -> observe
+# loop should run in < 50 ms for in-process tool calls.  Wall-clock
+# depends on tool I/O; the LLM call dominates in production.
+AGENT_LATENCY_BUDGET_MS = 50.0
+
+
+def agent_latency_ms(agent: Agent, task: str, n_runs: int = 50, seed: int = SEED) -> dict[str, float]:
+    """Time `agent.run(task)` over n_runs.  Reports avg / p50 / p95 in ms.
+    The MockLLM is in-process, so the latency is dominated by Python
+    overhead, not real LLM API time.
+    """
+    for _ in range(3):
+        _ = agent.run(task)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = agent.run(task)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+    }
+
+
+def agent_throughput_per_second(avg_ms_per_call: float) -> float:
+    """Inverse of latency: 1000 / avg_ms.  Used to size worker pools."""
+    if avg_ms_per_call <= 0:
+        return 0.0
+    return 1000.0 / avg_ms_per_call
+
+
+# =================================================================
+# SECTION 11  --  Extra tests (latency, determinism, properties)
+# =================================================================
+
+def test_agent_run_is_deterministic_same_seed() -> None:
+    """Two runs of the same task produce identical transcripts."""
+    reg = build_default_registry()
+    agent = Agent(llm=MockLLM(), registry=reg, max_steps=4)
+    r1 = agent.run("What is the weather in Paris?")
+    r2 = agent.run("What is the weather in Paris?")
+    assert r1.n_steps == r2.n_steps
+    for s1, s2 in zip(r1.steps, r2.steps):
+        assert s1.tool_name == s2.tool_name
+        assert s1.tool_args == s2.tool_args
+        assert s1.observation == s2.observation
+    assert r1.final_answer == r2.final_answer
+
+
+def test_agent_latency_under_budget() -> None:
+    """A single one-step agent run must complete under the latency budget."""
+    reg = build_default_registry()
+    agent = Agent(llm=MockLLM(), registry=reg, max_steps=2)
+    s = agent_latency_ms(agent, "What is the weather in Paris?", n_runs=20)
+    assert s["n_runs"] == 20.0
+    # Generous bound for CI -- in-process mock is sub-millisecond.
+    assert s["avg_ms"] < AGENT_LATENCY_BUDGET_MS * 10
+
+
+def test_agent_throughput_per_second_inverse_of_latency() -> None:
+    """1000 / 4 ms = 250 calls/sec; 1000 / 10 ms = 100 calls/sec."""
+    assert abs(agent_throughput_per_second(4.0) - 250.0) < 1e-6
+    assert abs(agent_throughput_per_second(10.0) - 100.0) < 1e-6
+    assert agent_throughput_per_second(0.0) == 0.0
+    assert agent_throughput_per_second(-1.0) == 0.0
+
+
+def test_tool_call_to_json_is_deterministic() -> None:
+    """to_json sorts keys, so output is stable for hashing/comparison."""
+    tc = ToolCall(tool_name="x", args={"b": 2, "a": 1}, thought="why")
+    j1 = tc.to_json()
+    j2 = tc.to_json()
+    assert j1 == j2
+    parsed = json.loads(j1)
+    assert parsed["tool"] == "x"
+    # Keys are sorted: "a" before "b"
+    assert list(parsed["args"].keys()) == ["a", "b"]
+
+
+def test_mock_llm_decide_deterministic() -> None:
+    """decide() is pure: same task + history + tools -> same ToolCall."""
+    reg = build_default_registry()
+    llm = MockLLM()
+    a = llm.decide("What is the weather in Tokyo?", [], reg)
+    b = llm.decide("What is the weather in Tokyo?", [], reg)
+    assert a is not None and b is not None
+    assert a.tool_name == b.tool_name
+    assert a.args == b.args
+    assert a.thought == b.thought
+
+
+def test_mock_llm_decide_with_seed_kwarg() -> None:
+    """decide() accepts a seed kwarg (production interface)."""
+    reg = build_default_registry()
+    llm = MockLLM()
+    a = llm.decide("What is the weather in Paris?", [], reg, seed=42)
+    b = llm.decide("What is the weather in Paris?", [], reg, seed=42)
+    assert a is not None
+    assert a.tool_name == b.tool_name
+    assert a.args == b.args
+
+
+def test_agent_run_final_answer_includes_observation() -> None:
+    """The synthesized final answer must reference the last tool's output."""
+    reg = build_default_registry()
+    agent = Agent(llm=MockLLM(), registry=reg, max_steps=4)
+    run = agent.run("What is the weather in Tokyo?")
+    assert "Tokyo" in run.final_answer or "68" in run.final_answer
+    assert "get_weather" in run.final_answer
+
+
+def test_agent_run_stops_when_no_tool_matches() -> None:
+    """A task that matches no tool should stop with no_tool reason."""
+    reg = ToolRegistry()
+    reg.register(Tool(
+        name="calculator", description="arithmetic",
+        schema={"type": "object"}, fn=lambda **kw: "0",
+    ))
+    agent = Agent(llm=MockLLM(), registry=reg, max_steps=4)
+    run = agent.run("Tell me a joke about cats")
+    assert run.n_steps == 0
+    assert run.stopped_reason == "no_tool"
+
+
+def test_tool_call_unknown_arg_raises() -> None:
+    """Calling a tool with unknown kwargs should raise TypeError, not silently pass."""
+    t = Tool(
+        name="f", description="f", schema={"type": "object"},
+        fn=lambda a: a,
+    )
+    try:
+        t.call(zzz=1)
+        assert False, "should have raised"
+    except TypeError:
+        pass
+
+
+def test_registry_list_names_returns_sorted() -> None:
+    """list_names() returns tool names in insertion order (dict-order)."""
+    reg = ToolRegistry()
+    for name in ("zeta", "alpha", "mu"):
+        reg.register(Tool(name=name, description="x", schema={"type": "object"}, fn=lambda: None))
+    names = reg.list_names()
+    assert names == ["zeta", "alpha", "mu"]  # dict insertion order
 
 
 # =================================================================

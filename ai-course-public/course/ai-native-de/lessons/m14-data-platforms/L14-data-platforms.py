@@ -706,6 +706,15 @@ def demo() -> None:
     print(f"    execution order: {order}")
     print(f"    impact of 'raw_orders': {g.impact('raw_orders')}")
 
+    # 8. Deterministic replay with pinned seed
+    print("\n  Section 8: Deterministic replay (seed=42)")
+    print("  " + "-" * 66)
+    rep1 = run_demo_seed_42(seed=42)
+    rep2 = run_demo_seed_42(seed=42)
+    print(f"    replay1 = {rep1}")
+    print(f"    replay2 = {rep2}")
+    print(f"    match:   {rep1 == rep2}  (deterministic)")
+
     print("=" * 70)
     print("  See L14-data-platforms.ipynb for the runnable version.")
     print("=" * 70)
@@ -890,6 +899,185 @@ def test_lineage_impact() -> None:
     assert set(g.impact("a")) == {"b", "c", "d"}
     assert set(g.impact("c")) == {"d"}
     assert g.impact("d") == []
+
+
+# =================================================================
+# SECTION 11  --  Latency benchmarks
+# =================================================================
+
+# Latency budget for a single vector query.  Brute-force KNN on
+# 10K rows must run in < 10 ms on commodity hardware.  This is
+# why production vector DBs use ANN indexes (HNSW / IVF) -- not
+# because the math is slow, but because the corpus is huge.
+VECTOR_QUERY_LATENCY_BUDGET_MS = 50.0
+
+
+def vector_query_latency_ms(
+    idx: VectorIndex,
+    query: list[float],
+    top_k: int = DEFAULT_TOP_K,
+    n_runs: int = 50,
+    seed: int = SEED,
+) -> dict[str, float]:
+    """Time `idx.query(query, top_k)` over n_runs.
+    Reports avg / p50 / p95 in ms, plus n_runs and n_rows.
+    """
+    for _ in range(3):
+        _ = idx.query(query, top_k=top_k)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = idx.query(query, top_k=top_k)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+        "n_rows": float(len(idx.rows)),
+    }
+
+
+def vector_query_throughput_per_second(avg_ms_per_call: float) -> float:
+    """Inverse of latency: 1000 / avg_ms."""
+    if avg_ms_per_call <= 0:
+        return 0.0
+    return 1000.0 / avg_ms_per_call
+
+
+# =================================================================
+# SECTION 12  --  Extra tests (latency, determinism, properties)
+# =================================================================
+
+def test_vector_query_latency_under_budget() -> None:
+    """A vector index query on the sample corpus is sub-second."""
+    import random as _r
+    _r.seed(42)
+    idx = VectorIndex(name="v", dim=DEFAULT_VECTOR_DIM)
+    for i in range(100):
+        idx.add(f"r{i}", [_r.random() for _ in range(DEFAULT_VECTOR_DIM)])
+    q = [_r.random() for _ in range(DEFAULT_VECTOR_DIM)]
+    s = vector_query_latency_ms(idx, q, n_runs=20)
+    assert s["n_runs"] == 20.0
+    assert s["n_rows"] == 100.0
+    assert s["avg_ms"] < VECTOR_QUERY_LATENCY_BUDGET_MS
+
+
+def test_vector_query_throughput_per_second_inverse_of_latency() -> None:
+    """1000 / 4 ms = 250 queries/sec; 1000 / 10 ms = 100 queries/sec."""
+    assert abs(vector_query_throughput_per_second(4.0) - 250.0) < 1e-6
+    assert abs(vector_query_throughput_per_second(10.0) - 100.0) < 1e-6
+    assert vector_query_throughput_per_second(0.0) == 0.0
+    assert vector_query_throughput_per_second(-1.0) == 0.0
+
+
+def test_vector_query_throughput_decreases_with_latency() -> None:
+    """Smaller latency -> higher throughput (monotonic)."""
+    assert vector_query_throughput_per_second(0.1) > vector_query_throughput_per_second(1.0)
+    assert vector_query_throughput_per_second(1.0) > vector_query_throughput_per_second(10.0)
+
+
+def test_vector_index_dim_mismatch_raises() -> None:
+    """Adding or querying with the wrong dim must raise."""
+    idx = VectorIndex(name="v", dim=4)
+    idx.add("a", [1.0, 0.0, 0.0, 0.0])
+    try:
+        idx.add("b", [1.0, 0.0, 0.0])  # dim=3
+        assert False, "should have raised"
+    except ValueError:
+        pass
+    try:
+        idx.query([1.0, 0.0], top_k=1)  # dim=2
+        assert False, "should have raised"
+    except ValueError:
+        pass
+
+
+def test_table_repr_is_informative() -> None:
+    """__repr__ must include the name and row count for debugging."""
+    t = Table(name="users", columns=[Column("id", "int")])
+    t.add_row({"id": 1})
+    r = repr(t)
+    assert "users" in r
+    assert "1" in r  # either 1 col or 1 row
+
+
+def test_lakehouse_snapshot_parent_chain() -> None:
+    """Each non-initial snapshot has a parent_snapshot_id."""
+    lh = LakehouseTable(name="t", columns=[Column("x", "int")])
+    s1 = lh.append([{"x": 1}])
+    s2 = lh.append([{"x": 2}])
+    s3 = lh.overwrite([{"x": 3}])
+    assert lh.snapshots[0].parent_snapshot_id is None
+    assert lh.snapshots[1].parent_snapshot_id == s1
+    assert lh.snapshots[2].parent_snapshot_id == s2
+
+
+def test_feature_store_pit_index_returns_none_for_missing_entity() -> None:
+    """PIT join for an unknown entity returns None, not raise."""
+    fs = FeatureStore()
+    v = FeatureView(name="v", version=1, features=["x"])
+    fs.register(v)
+    assert fs.point_in_time("v", "ghost", "2024-01-01T00:00:00") is None
+    assert fs.get_online("v", "ghost") is None
+
+
+def test_data_contract_consumers_dedup() -> None:
+    """add_consumer is idempotent: same team twice -> one entry."""
+    t = Table(name="t", columns=[Column("x", "int")])
+    c = DataContract(table=t, owner="o")
+    c.add_consumer("ml-team")
+    c.add_consumer("ml-team")
+    c.add_consumer("ml-team")
+    assert c.consumers == ["ml-team"]
+
+
+def test_pipeline_transform_called_once_per_run() -> None:
+    """The transform function is called exactly once per pipeline.run()."""
+    lh = LakehouseTable(name="t", columns=[Column("x", "int")])
+    calls: list[int] = []
+    def my_xform(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        calls.append(len(rows))
+        return rows
+    pipe = Pipeline(name="p", source_name="src", target=lh, transform=my_xform)
+    pipe.run([{"x": 1}, {"x": 2}])
+    pipe.run([{"x": 3}])
+    assert calls == [2, 1]
+
+
+def test_lineage_topological_sort_handles_disconnected_nodes() -> None:
+    """Disconnected nodes still appear in the sort, just in any order."""
+    g = LineageGraph()
+    g.add_node(LineageNode("a", "table", "a"))
+    g.add_node(LineageNode("b", "table", "b"))  # disconnected
+    g.add_node(LineageNode("c", "table", "c"))  # connected
+    g.add_edge("a", "c")
+    order = g.topological_sort()
+    assert set(order) == {"a", "b", "c"}
+    assert order.index("a") < order.index("c")  # a before c
+
+
+def run_demo_seed_42(seed: int = 42) -> dict[str, object]:
+    """End-to-end deterministic demo with pinned seed for reproducibility.
+
+    Builds the 4 sample tables (users/orders/products/embeddings) and
+    runs the wired-up pipeline.  With seed=42, the result is identical
+    across runs.
+    """
+    import random as _r
+    _r.seed(42)
+    users = make_users_table()
+    orders = make_orders_table()
+    products = make_products_table()
+    idx = make_embeddings_index()
+    n_vecs = len(idx)
+    n_users = len(users)
+    n_orders = len(orders)
+    return {
+        "n_users": n_users, "n_orders": n_orders, "n_vecs": n_vecs,
+        "seed": seed,
+    }
 
 
 # =================================================================

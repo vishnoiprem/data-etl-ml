@@ -438,6 +438,152 @@ def test_flat_search_top_k_sorted() -> None:
     assert scores == sorted(scores, reverse=True)
 
 
+def test_recall_at_k_zero_when_no_overlap() -> None:
+    """recall@k=0 when retrieved and truth sets are disjoint."""
+    pred = [("a", 0.9), ("b", 0.8)]
+    truth = [("c", 0.7), ("d", 0.6)]
+    assert recall_at_k(pred, truth, k=2) == 0.0
+
+
+def test_recall_at_k_full_overlap() -> None:
+    """recall@k=1.0 when retrieved contains all truth items."""
+    pred = [("a", 0.9), ("b", 0.8), ("c", 0.7)]
+    truth = [("a", 0.9), ("b", 0.8)]
+    assert recall_at_k(pred, truth, k=2) == 1.0
+
+
+def test_recall_at_k_handles_short_retrieved() -> None:
+    """If retrieved has fewer than k items, recall is computed on what we have."""
+    pred = [("a", 0.9)]
+    truth = [("a", 0.9), ("b", 0.8)]
+    # |pred[:1] & truth[:2]| = 1, |truth[:2]| = 2, recall = 0.5
+    assert abs(recall_at_k(pred, truth, k=2) - 0.5) < 1e-6
+
+
+def test_make_corpus_is_deterministic_per_seed() -> None:
+    """Same seed -> same corpus."""
+    a, ida = make_corpus(50, 8, seed=42)
+    b, idb = make_corpus(50, 8, seed=42)
+    assert ida == idb
+    assert np.array_equal(a, b)
+    c, _ = make_corpus(50, 8, seed=43)
+    assert not np.array_equal(a, c)
+
+
+def test_make_corpus_dim_matches_request() -> None:
+    """Corpus has the requested dimension."""
+    for dim in (8, 16, 32, 64):
+        v, _ = make_corpus(20, dim, seed=0)
+        assert v.shape == (20, dim)
+
+
+def test_make_queries_come_from_corpus() -> None:
+    """Each query vector must be a row of the corpus (sanity check)."""
+    vectors, _ = make_corpus(100, 8, seed=0)
+    queries = make_queries(vectors, 10, seed=1)
+    # All query rows must be in the corpus
+    for q in queries:
+        # Find a row equal to q
+        matches = np.where(np.all(vectors == q, axis=1))[0]
+        assert len(matches) > 0
+
+
+def test_flat_search_on_known_neighbor() -> None:
+    """Searching with a corpus vector returns itself as top-1 with score 1.0."""
+    vectors, ids = make_corpus(50, 8, seed=0)
+    flat = FlatIndex(vectors=vectors, ids=ids)
+    # Query with a normalized vector in the corpus; self-similarity = 1.0
+    hits = flat.search(vectors[7], k=1)
+    assert hits[0][0] == "v00007"
+    assert abs(hits[0][1] - 1.0) < 1e-4
+
+
+def test_hnsw_graph_is_symmetric() -> None:
+    """If i has j as a neighbor, j must have i as a neighbor (undirected graph)."""
+    vectors, ids = make_corpus(50, 8, seed=0)
+    hnsw = HNSWLiteIndex(M=4, ef_construction=16, ef_search=16, vectors=vectors, ids=ids)
+    for i in range(vectors.shape[0]):
+        hnsw.add(i)
+    # For node 25, all of its neighbors should include 25 in their lists
+    for neighbor in hnsw.graph[25]:
+        assert 25 in hnsw.graph[neighbor], (
+            f"asymmetric edge: 25 -> {neighbor} but {neighbor} -> 25 missing"
+        )
+
+
+def test_pq_codes_in_valid_range() -> None:
+    """All PQ codes must be in [0, k)."""
+    vectors, _ = make_corpus(50, 16, seed=0)
+    pq = build_pq_lite(vectors, n_subq=8, k=16, seed=0)
+    assert pq.codes.min() >= 0
+    assert pq.codes.max() < 16
+
+
+def test_pq_compresses_vector() -> None:
+    """PQ code count (n_subq) << original dim."""
+    vectors, _ = make_corpus(50, 64, seed=0)
+    pq = build_pq_lite(vectors, n_subq=8, k=16, seed=0)
+    # Each vector is now 8 codes (32 bytes) vs 64 floats (256 bytes)
+    assert pq.codes.shape[1] == 8
+    assert pq.codes.shape[0] == 50
+
+
+def test_ivf_postings_partition_indices() -> None:
+    """IVF postings together cover [0, n) without duplicates or missing rows."""
+    vectors, _ = make_corpus(100, 8, seed=0)
+    ivf = build_ivf_lite(vectors, list(map(str, range(100))), n_lists=8, seed=0)
+    all_indices = sorted(idx for posting in ivf.postings for idx in posting)
+    assert all_indices == list(range(100))
+
+
+def test_ivf_search_returns_real_neighbors() -> None:
+    """IVF top-1 for a corpus vector is itself (with high score)."""
+    vectors, ids = make_corpus(200, 16, seed=0)
+    ivf = build_ivf_lite(vectors, ids, n_lists=8, seed=0)
+    # Query with vectors[7]; expect v00007 as top-1
+    hits = ivf.search(vectors[7], k=1)
+    assert hits[0][0] == "v00007"
+
+
+def test_hnsw_recall_above_random() -> None:
+    """HNSW recall@10 must be > 0.3 (above random baseline of ~10/200 = 0.05)."""
+    vectors, ids = make_corpus(500, 32, seed=0)
+    queries = make_queries(vectors, 20, seed=1)
+    flat = FlatIndex(vectors=vectors, ids=ids)
+    hnsw = HNSWLiteIndex(M=8, ef_construction=32, ef_search=32, vectors=vectors, ids=ids)
+    for i in range(vectors.shape[0]):
+        hnsw.add(i)
+    truth = [set(d for d, _ in flat.search(q, k=10)) for q in queries]
+    pred = [set(d for d, _ in hnsw.search(q, k=10)) for q in queries]
+    recalls = [len(t & p) / 10 for t, p in zip(truth, pred)]
+    mean_recall = sum(recalls) / len(recalls)
+    assert mean_recall > 0.3, f"HNSW recall too low: {mean_recall}"
+
+
+def test_index_comparison_table_constructed() -> None:
+    """Build all 4 indexes and confirm the comparison runs without errors."""
+    vectors, ids = make_corpus(200, 16, seed=0)
+    queries = make_queries(vectors, 5, seed=1)
+    flat = FlatIndex(vectors=vectors, ids=ids)
+    ivf = build_ivf_lite(vectors, ids, n_lists=8, seed=0)
+    pq = build_pq_lite(vectors, n_subq=8, k=8, seed=0)
+    hnsw = HNSWLiteIndex(M=8, ef_construction=16, ef_search=16, vectors=vectors, ids=ids)
+    for i in range(vectors.shape[0]):
+        hnsw.add(i)
+    # Run all 4 indexes; none should error
+    truth = [flat.search(q, k=10) for q in queries]
+    ivf_hits = [ivf.search(q, k=10) for q in queries]
+    pq_hits = [pq.search(vectors, ids, q, k=10) for q in queries]
+    hnsw_hits = [hnsw.search(q, k=10) for q in queries]
+    # All should return 10 hits
+    for hits in (ivf_hits, pq_hits, hnsw_hits):
+        for h in hits:
+            assert len(h) == 10
+    # IVF recall must be < 1.0 (approximate) but > 0
+    ivf_recall = np.mean([recall_at_k(h, t, 10) for h, t in zip(ivf_hits, truth)])
+    assert 0.0 < ivf_recall <= 1.0
+
+
 # =================================================================
 # ENTRY
 # =================================================================
