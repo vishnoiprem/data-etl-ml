@@ -3,10 +3,10 @@
 # from the requirements-dev.txt at the repo root.
 
 # Core
-python-dotenv>=1.0.1
-pydantic>=2.6.0
-pydantic-settings>=2.2.0
-loguru>=0.7.2
+python-dotenv>=1.2.4
+pydantic>=2.14.1
+pydantic-settings>=2.15.0
+loguru>=0.7.3
 typer>=0.12.0
 rich>=13.7.0
 
@@ -15,47 +15,47 @@ networkx>=3.2
 
 # Embeddings & retrieval (LOCAL mode)
 sentence-transformers>=5.6.0
-faiss-cpu>=1.8.0
+faiss-cpu>=1.15.1
 rank-bm25>=0.2.2
 
 # Document processing
-markdown>=3.6
+markdown>=3.11
 
 # Numerics
 numpy>=1.26.0
-scikit-learn>=1.5.0
+scikit-learn>=1.9.1
 
 # LLM (optional — mock fallback if not installed / no key)
 anthropic>=0.39.0
 
 # Dashboard
-streamlit>=1.54.0
+streamlit>=1.65.0
 plotly>=5.20.0
 
 # ── Tier 1 security overrides — must match root
 # See docs/SECURITY_AUDIT.md
 pypdf==6.20.0
 nltk==3.10.3
-transformers==5.10.0
+transformers==5.19.0
 mlflow==3.17.1
-tornado==6.5.9
-aiohttp==3.14.3
-gitpython==3.1.60
-diffusers==0.38.0
+tornado==6.5.10
+aiohttp==3.14.5
+gitpython==3.2.0
+diffusers==0.41.0
 pillow==12.3.0
 pyspark==3.5.8
 pyarrow==23.0.1
-langchain==1.3.9
-langchain-core==1.3.3
-langchain-community==0.3.27
-langchain-openai==1.1.14
-langsmith==0.8.18
-distributed==2026.1.0
-ray==2.56.0
-chainlit==2.10.1
-llama-index==0.13.0
-llama-index-core==0.13.0
+langchain==1.4.4
+langchain-core==1.6.9
+langchain-community==0.4.2
+langchain-openai==1.7.0
+langsmith==0.14.7
+distributed==2026.8.0
+ray==2.59.0
+chainlit==2.11.0
+llama-index==0.14.25
+llama-index-core==0.14.25
 llama-index-cli==0.13.0
-langgraph-sdk==0.4.4
-black==26.3.1
-pytest==9.0.3
+langgraph-sdk==0.4.6
+black==26.10.1
+pytest==9.1.1
