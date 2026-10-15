@@ -425,6 +425,62 @@ def test_chunker_label_matches_method() -> None:
     assert all(c.chunker == "structure" for c in st)
 
 
+def test_fixed_window_handles_empty_text() -> None:
+    """Empty input → zero chunks (not a crash)."""
+    assert chunk_fixed_window("d", "", chunk_size=100, overlap=10) == []
+
+
+def test_recursive_handles_single_word() -> None:
+    """A single short token produces a single chunk."""
+    out = chunk_recursive("d", "hello", chunk_size=100, overlap=0)
+    assert len(out) == 1
+    assert out[0].text == "hello"
+
+
+def test_ablation_picks_winner() -> None:
+    """ablation lets us pick the chunker with the highest recall_at_3."""
+    rows = ablation("d", "Some text. " * 50)
+    max_recall = max(r.recall_at_3 for r in rows)
+    winner = max(rows, key=lambda r: r.recall_at_3)
+    assert winner.recall_at_3 == max_recall
+    assert winner.n_chunks > 0
+
+
+def test_structure_strips_headings_from_body() -> None:
+    """The body of structure chunks does not contain the markdown heading chars."""
+    chunks = chunk_structure("d", "# Title\nA sentence. Another sentence. Third sentence.")
+    bodies = [c.text for c in chunks]
+    assert all("# " not in b for b in bodies)
+
+
+def test_chunks_have_doc_id() -> None:
+    """All chunkers stamp the doc_id on every chunk."""
+    fw = chunk_fixed_window("doc-A", "a" * 300)
+    rc = chunk_recursive("doc-B", "a. " * 50)
+    st = chunk_structure("doc-C", "# H\nbody. body. body.")
+    assert all(c.doc_id == "doc-A" for c in fw)
+    assert all(c.doc_id == "doc-B" for c in rc)
+    assert all(c.doc_id == "doc-C" for c in st)
+
+
+def test_chunk_start_increases() -> None:
+    """Within a fixed-window chunker, start is monotonic and step = chunk_size - overlap."""
+    text = "abcdefghij" * 50  # 500 chars
+    chunks = chunk_fixed_window("d", text, chunk_size=100, overlap=20)
+    starts = [c.start for c in chunks]
+    assert starts == sorted(starts)
+    if len(chunks) > 1:
+        # step is chunk_size - overlap = 80
+        assert starts[1] - starts[0] == 80
+
+
+def test_chunker_count_consistent() -> None:
+    """Ablation reports 3 rows, one per chunker (fixed/recursive/structure)."""
+    rows = ablation("d", "Some text. " * 50)
+    labels = sorted(r.chunker for r in rows)
+    assert labels == ["fixed_window", "recursive", "structure"]
+
+
 # =================================================================
 # ENTRY
 # =================================================================

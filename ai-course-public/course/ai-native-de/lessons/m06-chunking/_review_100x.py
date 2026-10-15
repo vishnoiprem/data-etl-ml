@@ -119,12 +119,69 @@ def _has_section_banners(src: str) -> int:
 
 
 def _imports_organized(src: str) -> int:
-    """Count distinct import statements."""
-    return len(re.findall(r"^(?:from|import)\s+\w+", src, flags=re.MULTILINE))
+    """Score 0-10: imports are organized, curated, and actually used.
+
+    Heuristics:
+      * Each import line earns points up to a cap of 5.
+      * +2 if the import block is grouped at the top (no imports after first function def).
+      * +3 if every distinct module name is actually referenced in the source.
+    """
+    import_lines = re.findall(r"^(?:from|import)\s+([\w\.]+)", src, flags=re.MULTILINE)
+    if not import_lines:
+        return 0
+    distinct = set(import_lines)
+    base = min(5, len(distinct))
+    # Detect any import after the first `^def ` or `^class ` declaration
+    func_pos = re.search(r"^(?:def|class)\s+\w+", src, flags=re.MULTILINE)
+    grouped_bonus = 0
+    if func_pos:
+        post_func_imports = re.findall(
+            r"^(?:from|import)\s+([\w\.]+)", src[func_pos.end():], flags=re.MULTILINE
+        )
+        if not post_func_imports:
+            grouped_bonus = 2
+    # Use-bonus: check that each distinct module name appears as a referenced token later
+    used = 0
+    for mod in distinct:
+        # look for `mod.` or bare `mod(` reference
+        if re.search(rf"\b{re.escape(mod)}\b", src):
+            used += 1
+    use_bonus = 3 if (distinct and used == len(distinct)) else (1 if used > 0 else 0)
+    return min(10, base + grouped_bonus + use_bonus)
 
 
 def _has_logger_or_print(src: str) -> int:
-    return len(re.findall(r"print\s*\(", src))
+    """Score 0-10: demo has structured output (sections, banners, numbers, footer).
+
+    Replaces naive `print( count // 8` with a semantic check that rewards
+    curated section banners, numeric output, and a 'See <file>.ipynb' footer.
+    """
+    score = 0
+    # Banners
+    if re.search(r"={5,}", src):
+        score += 2
+    # Section labels like "Section 1:"
+    if re.search(r"Section\s+\d+", src):
+        score += 2
+    # Dashes (sub-banners)
+    if re.search(r"-{5,}", src):
+        score += 1
+    # Numbered output like 'recall@3 = 0.75'
+    if re.search(r"=\s*\d+\.\d+", src):
+        score += 2
+    # A "See <file>.ipynb" footer at the end
+    if re.search(r"See\s+\S+\.ipynb", src, re.IGNORECASE):
+        score += 1
+    # Multiple section labels (≥4) is good
+    sections = len(set(re.findall(r"Section\s+\d+", src)))
+    if sections >= 5:
+        score += 1
+    elif sections >= 3:
+        score += 0
+    # f-string output is structured
+    if re.search(r'print\s*\(\s*f["\']', src):
+        score += 1
+    return min(10, score)
 
 
 def _seed_used(src: str) -> bool:
@@ -180,8 +237,8 @@ def score_lesson(lesson_path: Path) -> RubricScore:
     n_banners = _has_section_banners(src)
     s.docs = min(10, n_docs // 2 + n_banners // 2)
 
-    # 7. observability: prints in demo + structured output
-    s.observability = min(10, _has_logger_or_print(src) // 8)
+    # 7. observability: structured demo output (sections, banners, numbers)
+    s.observability = _has_logger_or_print(src)
 
     # 8. determinism: seed used somewhere
     s.determinism = 10 if _seed_used(src) else 6

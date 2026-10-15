@@ -409,6 +409,53 @@ def test_end_to_end_pipeline() -> None:
     assert all(isinstance(i, int) and isinstance(s, float) for i, s in merged)
 
 
+def test_tokenize_empty_string() -> None:
+    """Empty input → no tokens, not a crash."""
+    assert tokenize("") == []
+
+
+def test_bm25_returns_scores_in_range() -> None:
+    """All BM25 scores should be >= 0 (standard BM25 is non-negative)."""
+    bm = BM25()
+    bm.fit(SAMPLE_DOCS)
+    scored = bm.score("vacation")
+    assert all(s >= 0.0 for _, s in scored)
+
+
+def test_rrf_known_recipe() -> None:
+    """RRF formula is sum(1 / (k + rank)) across lists.  Sanity check."""
+    # Three docs: A is rank 1 in list1 only, B is rank 1 in list2 only, C is in neither.
+    # With k=60: A = 1/61 = 0.01639, B = 1/61 = 0.01639, C = 0.0.
+    # C is unambiguously last.  A and B tie -- order between them is unspecified.
+    merged = rrf(
+        [[("A", 1.0), ("B", 0.9)], [("B", 1.0), ("A", 0.9)]],
+        k=60,
+    )
+    docs_in_order = [d for d, _ in merged]
+    assert "C" not in docs_in_order
+    # C never appears because it isn't in any input list
+    assert set(docs_in_order) == {"A", "B"}
+    a_score = next(s for d, s in merged if d == "A")
+    b_score = next(s for d, s in merged if d == "B")
+    assert abs(a_score - b_score) < 1e-9  # ties are expected here
+
+
+def test_mmr_no_candidates_returns_empty() -> None:
+    """MMR with no candidates returns []."""
+    qv = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+    vecs = np.zeros((0, 3), dtype=np.float32)
+    selected = mmr(qv, vecs, candidate_ids=[], lambda_=0.5, k=3)
+    assert selected == []
+
+
+def test_dense_score_is_bounded() -> None:
+    """Dense cosine scores are in [-1, +1] for normalized vectors."""
+    de = Dense()
+    de.fit(SAMPLE_DOCS)
+    for _, s in de.score("anything"):
+        assert -1.0 <= s <= 1.0
+
+
 # =================================================================
 # ENTRY
 # =================================================================

@@ -517,6 +517,67 @@ def test_detect_regressions_alert() -> None:
     assert faith_alert.is_regression
 
 
+def test_ragas_scores_mean() -> None:
+    """The 3-metric mean is the simple arithmetic mean of the three RAGAS scores."""
+    s = RAGASScores(faithfulness=0.6, answer_relevancy=0.9, context_recall=0.3)
+    assert abs(s.mean() - 0.6) < 1e-9
+
+
+def test_pass_rate_all_pass() -> None:
+    """pass_rate is 1.0 when every EvalResult.passed is True."""
+    report = EvaluationReport()
+    for i in range(3):
+        report.add(EvalResult(
+            query=f"q{i}", ground_truth="t", answer="a",
+            retrieved_ids=["d"], relevant_ids=["d"],
+            scores=RAGASScores(0.9, 0.9, 0.9), category="factual",
+        ))
+    assert report.pass_rate() == 1.0
+
+
+def test_pass_rate_none_pass() -> None:
+    """pass_rate is 0.0 when no EvalResult.passed is True."""
+    report = EvaluationReport()
+    for i in range(3):
+        report.add(EvalResult(
+            query=f"q{i}", ground_truth="t", answer="a",
+            retrieved_ids=["d"], relevant_ids=["d"],
+            scores=RAGASScores(0.1, 0.1, 0.1), category="factual",
+        ))
+    assert report.pass_rate() == 0.0
+
+
+def test_std_scores_one_sample_is_zero() -> None:
+    """With one sample, std is 0 (rubric: len < 2 → zero std)."""
+    report = EvaluationReport()
+    report.add(EvalResult(
+        query="q", ground_truth="t", answer="a",
+        retrieved_ids=["d"], relevant_ids=["d"],
+        scores=RAGASScores(0.5, 0.6, 0.7), category="factual",
+    ))
+    s = report.std_scores()
+    assert s.faithfulness == 0.0
+    assert s.answer_relevancy == 0.0
+    assert s.context_recall == 0.0
+
+
+def test_golden_set_default_len_is_zero() -> None:
+    """A fresh GoldenSet is empty."""
+    gs = GoldenSet()
+    assert len(gs) == 0
+    assert gs.by_category() == {}
+
+
+def test_regression_alert_str_format() -> None:
+    """The RegressionAlert __str__ includes the metric name and the delta."""
+    a = RegressionAlert(metric="faithfulness", baseline=0.9, current=0.7,
+                         delta=-0.2, threshold=0.05)
+    s = str(a)
+    assert "faithfulness" in s
+    assert "-0.200" in s or "-0.2" in s
+    assert "REGRESSION" in s
+
+
 # =================================================================
 # ENTRY
 # =================================================================
