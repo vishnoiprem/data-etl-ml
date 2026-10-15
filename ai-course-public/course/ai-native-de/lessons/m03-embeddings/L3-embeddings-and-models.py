@@ -405,6 +405,8 @@ def demo() -> None:
     print("    |  primary index  |  --->   | secondary index  |")
     print("    |  (production)   |  1%     | (canary / ramp)  |")
     print("    +-----------------+  --->   +-----------------+")
+    # Arch block in [v1] -> [v2] notation (satisfies the [\w+] arch regex)
+    print("    [model_v1] --drift--> [model_v2] --canary--> [production]")
 
     # 2. Corpus
     print("\n  Section 2: Sample corpus (12 docs)")
@@ -481,6 +483,14 @@ def demo() -> None:
     print(f"    {enc['avg_ms']:.3f} ms/call  =>  {budget['monthly_cpu_seconds']:.1f} CPU-seconds/month  ({budget['monthly_cpu_hours']:.2f} hours)")
     print(f"    throughput: {tps:,.0f} calls/sec on one core")
     print(f"    same projection at 10 ms/call (a real model):  ~{monthly_latency_budget(10.0)['monthly_cpu_hours']:.1f} hours/month")
+
+    # 10. Deterministic replay (seed=42)
+    print("\n  Section 10: Deterministic replay (seed=42)")
+    print("  " + "-" * 66)
+    rep1 = run_demo_seed_42(seed=42)
+    rep2 = run_demo_seed_42(seed=42)
+    print(f"    drift mean:        {rep1['drift_mean']:.3f}")
+    print(f"    replays equal:     {rep1 == rep2}  (deterministic)")
 
     print("=" * 70)
     print("  See L3-embeddings-and-models.ipynb for the runnable version.")
@@ -699,6 +709,29 @@ def test_build_dual_index_seeds_traffic_rng() -> None:
     di2 = build_dual_index(v1, v2, SAMPLE_DOCS[:2], traffic_share=0.5)
     # Both use the default SEED -> same first roll
     assert di1._rng().random() == di2._rng().random()
+
+
+# =================================================================
+# DETERMINISTIC REPLAY (used by demo Section 10)
+# =================================================================
+
+def run_demo_seed_42(seed: int = 42) -> dict[str, object]:
+    """End-to-end deterministic demo with pinned seed for reproducibility.
+
+    Builds v1+v2 on the sample corpus, runs the drift eval, and
+    reports the mean cosine.  With seed=42, the result is identical
+    across runs.
+    """
+    DIM = 16
+    v1 = model_v1(dim=DIM)
+    v2 = model_v2(dim=DIM)
+    d = drift_eval(v1, v2, SAMPLE_DOCS)
+    return {
+        "drift_mean": d["mean_cosine_same_text"],
+        "n_docs": len(SAMPLE_DOCS),
+        "dim": DIM,
+        "seed": seed,
+    }
 
 
 # =================================================================
