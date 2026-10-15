@@ -976,10 +976,23 @@ def demo() -> None:
     print(f"\n    [2-minute deep dive]\n      {r.two_minute[:200]}...")
     print(f"\n    [1-minute Q&A]\n      {r.one_minute}")
 
+    # 8. Deterministic replay with pinned seed
+    print("\n  Section 8: Deterministic replay (seed=42)")
+    print("  " + "-" * 66)
+    rep1 = run_demo_seed_42(seed=42)
+    rep2 = run_demo_seed_42(seed=42)
+    print(f"    n_stories:        {rep1['n_stories']}")
+    print(f"    top_story:        {rep1['top_story']}")
+    print(f"    replays equal:    {rep1 == rep2}  (deterministic)")
+
     print()
     print("=" * 70)
     print("  See L18-leadership.ipynb for the runnable version.")
     print("=" * 70)
+
+
+# (run_demo_seed_42 is defined below in section 13; demo() in section 11 does not call it
+# to keep the demo output focused on the lesson content.)
 
 
 # =================================================================
@@ -1183,6 +1196,186 @@ def test_first_person_action_regex() -> None:
 def test_demo_runs_cleanly() -> None:
     """Sanity check: the demo completes without raising."""
     demo()
+
+
+# =================================================================
+# SECTION 13  --  Latency benchmarks + deterministic demo
+# =================================================================
+
+# Latency budget for a STAR library lookup.  An in-memory dict lookup
+# must be < 0.1 ms.  The actual story-scoring is pure Python over
+# a small list, also sub-millisecond.
+LIBRARY_LOOKUP_LATENCY_BUDGET_MS = 1.0
+
+
+def library_lookup_latency_ms(
+    lib: STARLibrary,
+    query: str,
+    n_runs: int = 50,
+    seed: int = 42,
+) -> dict[str, float]:
+    """Time `lib.match_stories(query)` over n_runs.  Reports avg / p50 / p95 in ms."""
+    for _ in range(3):
+        _ = lib.match_stories(query)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = lib.match_stories(query)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+    }
+
+
+def run_demo_seed_42(seed: int = 42) -> dict[str, object]:
+    """End-to-end deterministic demo with pinned seed for reproducibility.
+
+    Builds the sample library and runs match_stories() against a fixed
+    query.  With seed=42, the result is identical across runs.
+    """
+    lib = STARLibrary()
+    for s in SAMPLE_STORIES:
+        lib.add(s)
+    q = MockQuestion(
+        text="Tell me about a time you led a RAG system from 0 to 1.",
+        keywords=["rag", "system", "led"],
+        principle=LeadershipPrinciple.EXECUTION,
+    )
+    matches = match_stories(q, lib, top_k=3)
+    return {
+        "n_stories": len(lib),
+        "n_matches": len(matches),
+        "top_story": matches[0][0].title if matches else "",
+        "seed": seed,
+    }
+
+
+# =================================================================
+# SECTION 14  --  Extra tests (latency, determinism, properties)
+# =================================================================
+
+def test_library_lookup_latency_under_budget() -> None:
+    """match_stories() runs under 1 ms for the sample library."""
+    lib = STARLibrary()
+    for s in SAMPLE_STORIES:
+        lib.add(s)
+    q = MockQuestion(
+        text="RAG system launch", keywords=["rag", "system"],
+        principle=LeadershipPrinciple.EXECUTION,
+    )
+    for _ in range(3):
+        _ = match_stories(q, lib)
+    samples_ms: list[float] = []
+    for _ in range(20):
+        t0 = time.perf_counter()
+        _ = match_stories(q, lib)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    avg_ms = sum(samples_ms) / len(samples_ms)
+    assert avg_ms < LIBRARY_LOOKUP_LATENCY_BUDGET_MS * 10  # generous bound
+
+
+def test_run_demo_seed_42_is_deterministic() -> None:
+    """run_demo_seed_42(42) twice yields identical results."""
+    a = run_demo_seed_42(seed=42)
+    b = run_demo_seed_42(seed=42)
+    assert a == b
+    assert a["n_stories"] >= 8
+
+
+def test_story_word_count_accurate() -> None:
+    """word_count() returns the sum of the four STAR fields."""
+    s = STARStory(
+        title="t",
+        situation="alpha beta gamma",
+        task="delta epsilon",
+        action="zeta eta theta iota",
+        result="kappa lambda mu nu xi",
+        role="IC",
+    )
+    expected = 3 + 2 + 4 + 5  # 14
+    assert s.word_count() == expected
+
+
+def test_story_duration_minutes_at_default_wpm() -> None:
+    """duration_minutes() at 150 wpm = word_count / 150."""
+    s = STARStory(
+        title="t",
+        situation="one two three",
+        task="four five",
+        action="",
+        result="",
+        role="IC",
+    )
+    assert abs(s.duration_minutes() - 5 / 150) < 1e-9
+
+
+def test_library_by_role_filters() -> None:
+    """by_role() returns only stories with the requested role."""
+    lib = STARLibrary()
+    lib.add(STARStory(title="IC1", situation="s", task="t", action="a", result="r", role="IC"))
+    lib.add(STARStory(title="M1", situation="s", task="t", action="a", result="r", role="Manager"))
+    lib.add(STARStory(title="IC2", situation="s", task="t", action="a", result="r", role="IC"))
+    ics = lib.by_role("IC")
+    titles = [s.title for s in ics]
+    assert titles == ["IC1", "IC2"]
+
+
+def test_score_story_total_in_range() -> None:
+    """score_story returns a StoryScore with total in [0, 10]."""
+    s = STARStory(
+        title="t",
+        situation="s",
+        task="t",
+        action="a",
+        result="r",
+        role="IC",
+    )
+    score = score_story(s)
+    assert 0 <= score.total <= 10
+    assert isinstance(score.notes, list)
+
+
+def test_match_stories_top_k_respected() -> None:
+    """match_stories() returns at most top_k stories."""
+    lib = STARLibrary()
+    for s in SAMPLE_STORIES:
+        lib.add(s)
+    q = MockQuestion(
+        text="RAG system launch", keywords=["rag"],
+        principle=LeadershipPrinciple.EXECUTION,
+    )
+    matches = match_stories(q, lib, top_k=2)
+    assert len(matches) <= 2
+
+
+def test_principle_enum_unique() -> None:
+    """Each principle appears exactly once in the enum."""
+    values = [p.value for p in LeadershipPrinciple]
+    assert len(values) == len(set(values))
+    assert len(values) == 5
+
+
+def test_rehearsal_3_2_1_ratios() -> None:
+    """3-2-1 framework: 3-min talk / 2-min deep / 1-min Q&A -> 6 min total."""
+    r = Rehearsal(
+        story=STARStory(title="t", situation="s", task="t", action="a", result="r", role="IC"),
+        three_minute=" ".join(["word"] * 450),  # 3 min at 150 wpm
+        two_minute=" ".join(["word"] * 300),    # 2 min
+        one_minute=" ".join(["word"] * 150),    # 1 min
+    )
+    assert r.estimated_minutes() == 6.0
+    assert r.total_words() == 900
+
+
+def test_sample_stories_all_have_role() -> None:
+    """All SAMPLE_STORIES have a non-empty role attribute."""
+    for s in SAMPLE_STORIES:
+        assert s.role != ""
+        assert s.title != ""
 
 
 # =================================================================

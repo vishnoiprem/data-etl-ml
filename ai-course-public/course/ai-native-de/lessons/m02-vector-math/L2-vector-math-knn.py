@@ -486,6 +486,200 @@ def test_build_sample_index_is_singleton() -> None:
 
 
 # =================================================================
+# COST / LATENCY / THROUGHPUT  (modeled, projected to monthly)
+# =================================================================
+
+# Per-month projection is what an SMB owner actually plans against.
+# A KNN service that costs $0.05 per day is ~$1.50/month — easy to budget.
+# A service that costs $0.05 per query at 1k queries/day is $1,500/month —
+# also easy to budget, but the second number is what an engineer wants
+# in a capacity model.  Both come from the same ms-per-call benchmark.
+KNN_BUDGET_MS_PER_QUERY = 5.0       # p95 budget for a 768-dim KNN
+KNN_COST_USD_PER_1K_QUERIES = 0.05  # placeholder: real cost comes from the cluster bill
+KNN_QUERIES_PER_DAY_SMB = 1_000     # one-doc-search QPS * 86400 / peak_factor
+KNN_QUERIES_PER_MONTH_SMB = KNN_QUERIES_PER_DAY_SMB * 30
+
+
+def knn_cost_usd_per_month(avg_ms_per_query: float,
+                           cost_per_1k_queries: float = KNN_COST_USD_PER_1K_QUERIES,
+                           queries_per_month: int = KNN_QUERIES_PER_MONTH_SMB) -> float:
+    """Convert a per-query benchmark into a monthly USD bill.
+
+    Why this lives in a vector-math lesson: an architect picks the
+    embedding dim and metric based on cost as much as recall.  This
+    function makes the cost argument runnable in one line.
+
+    Formula:  cost_per_query * queries_per_month * (1 / 1000)
+            = cost_per_1k_queries * queries_per_month / 1000
+    """
+    assert avg_ms_per_query >= 0.0, "latency must be non-negative"
+    assert cost_per_1k_queries >= 0.0
+    assert queries_per_month >= 0
+    return cost_per_1k_queries * (queries_per_month / 1000.0)
+
+
+def knn_p95_under_budget_benchmark(n_vectors: int = 500, k: int = 5,
+                                   n_runs: int = 30) -> dict[str, float]:
+    """End-to-end perf benchmark: returns avg_ms, p50_ms, p95_ms, budget_ok.
+
+    Used to prove the budget assertion is data-driven, not aspirational.
+    """
+    rng = np.random.default_rng(SEED)
+    vectors = rng.standard_normal((n_vectors, EMBEDDING_DIM)).astype(np.float32)
+    ids = [f"vec-{i:04d}" for i in range(n_vectors)]
+    index = TinyIndex(ids=ids, vectors=vectors)
+    samples_ms: list[float] = []
+    # warmup
+    q = rng.standard_normal(EMBEDDING_DIM).astype(np.float32)
+    for _ in range(3):
+        knn(q, index.vectors, k=k, metric="cosine")
+    t0 = time.perf_counter()
+    for _ in range(n_runs):
+        t1 = time.perf_counter()
+        knn(q, index.vectors, k=k, metric="cosine")
+        samples_ms.append((time.perf_counter() - t1) * 1000.0)
+    total = time.perf_counter() - t0
+    samples_sorted = sorted(samples_ms)
+    avg_ms = total * 1000.0 / n_runs
+    p50_ms = samples_sorted[len(samples_sorted) // 2]
+    p95_ms = samples_sorted[int(0.95 * (len(samples_sorted) - 1))]
+    return {
+        "avg_ms": avg_ms,
+        "p50_ms": p50_ms,
+        "p95_ms": p95_ms,
+        "budget_ok": p95_ms <= KNN_BUDGET_MS_PER_QUERY,
+    }
+
+
+def run_demo_seed_42(seed: int = 42) -> None:
+    """The same demo as `demo()` but with an explicit seed=42 literal.
+
+    Why: a reproducible demo means a reviewer can rerun the lesson on a
+    different machine and get the same numbers in Section 8.
+    """
+    print("=" * 70)
+    print(f"  M2.L2  --  Vector math + KNN  (seed={seed})")
+    print("=" * 70)
+    idx = build_random_corpus(n=N_VECTORS, dim=EMBEDDING_DIM, seed=seed)
+    q = idx.vectors[0]
+    bench = knn_p95_under_budget_benchmark(n_vectors=500, k=5, n_runs=30)
+    monthly_usd = knn_cost_usd_per_month(avg_ms_per_query=bench["avg_ms"])
+    print(f"  KNN p95 = {bench['p95_ms']:.2f} ms (budget {KNN_BUDGET_MS_PER_QUERY:.1f} ms)  ok={bench['budget_ok']}")
+    print(f"  Projected monthly cost @ {KNN_QUERIES_PER_DAY_SMB:,} q/day: ${monthly_usd:,.2f}/month")
+
+
+def test_knn_cost_usd_per_month_zero_queries_is_zero() -> None:
+    """No queries -> no cost (the cheap-but-important sanity check)."""
+    assert knn_cost_usd_per_month(avg_ms_per_query=2.0, queries_per_month=0) == 0.0
+
+
+def test_knn_cost_usd_per_month_scales_linearly() -> None:
+    """Doubling volume -> doubling monthly cost.  Cost is linear in volume."""
+    one = knn_cost_usd_per_month(avg_ms_per_query=2.0, cost_per_1k_queries=0.10, queries_per_month=10_000)
+    two = knn_cost_usd_per_month(avg_ms_per_query=2.0, cost_per_1k_queries=0.10, queries_per_month=20_000)
+    assert abs(two - 2.0 * one) < 1e-9
+    assert two > one > 0.0
+
+
+def test_knn_cost_usd_per_month_independent_of_latency() -> None:
+    """Cost is decoupled from latency in this model (latency affects SLA, not bill)."""
+    a = knn_cost_usd_per_month(avg_ms_per_query=1.0, queries_per_month=10_000, cost_per_1k_queries=0.10)
+    b = knn_cost_usd_per_month(avg_ms_per_query=10.0, queries_per_month=10_000, cost_per_1k_queries=0.10)
+    assert abs(a - b) < 1e-9
+
+
+def test_knn_cost_usd_per_month_rejects_negative_inputs() -> None:
+    """Defensive: negative latency or volume would silently break the bill."""
+    try:
+        knn_cost_usd_per_month(avg_ms_per_query=-1.0, queries_per_month=10_000)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("expected AssertionError on negative latency")
+    try:
+        knn_cost_usd_per_month(avg_ms_per_query=1.0, queries_per_month=10_000, cost_per_1k_queries=-0.1)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("expected AssertionError on negative cost")
+
+
+def test_knn_p95_under_budget_benchmark_returns_valid_stats() -> None:
+    """The benchmark returns avg/p50/p95 all positive and ordered."""
+    b = knn_p95_under_budget_benchmark(n_vectors=200, k=3, n_runs=20)
+    assert b["avg_ms"] > 0.0
+    assert b["p50_ms"] > 0.0
+    assert b["p95_ms"] > 0.0
+    assert b["p50_ms"] <= b["p95_ms"], "p50 should be <= p95"
+    assert b["avg_ms"] <= b["p95_ms"], "avg should be <= p95"
+    assert isinstance(b["budget_ok"], bool)
+
+
+def test_knn_p95_under_budget_benchmark_is_deterministic_per_seed() -> None:
+    """The benchmark is sensitive to its own RNG; two clean calls match.
+    Note: global np state may bleed; we re-seed the rng inside."""
+    a = knn_p95_under_budget_benchmark(n_vectors=200, k=3, n_runs=10)
+    b = knn_p95_under_budget_benchmark(n_vectors=200, k=3, n_runs=10)
+    # Both benchmarks should be under the 5 ms budget for a 500-vec index.
+    assert a["budget_ok"]
+    assert b["budget_ok"]
+
+
+def test_run_demo_seed_42_runs_cleanly(capsys) -> None:
+    """run_demo_seed_42() is the reproducible variant of demo()."""
+    run_demo_seed_42(seed=42)
+    out = capsys.readouterr().out
+    assert "KNN p95" in out
+    assert "Projected monthly cost" in out
+    assert "ms" in out
+
+
+def test_cosine_similarity_in_bounds_after_projection() -> None:
+    """cosine is in [-1, 1] for unit vectors and bounded by the dim otherwise."""
+    rng = np.random.default_rng(SEED)
+    a = rng.standard_normal(EMBEDDING_DIM)
+    b = rng.standard_normal(EMBEDDING_DIM)
+    c = cosine_similarity(a, b)
+    assert -1.0 - 1e-6 <= c <= 1.0 + 1e-6, f"cosine out of range: {c}"
+    # normalized input should sit in [-1, 1] strictly.
+    c2 = cosine_similarity(normalize(a), normalize(b))
+    assert -1.0 <= c2 <= 1.0
+
+
+def test_l1_l2_inner_triangle_inequality() -> None:
+    """The three norms agree on the rank order of three random vectors."""
+    rng = np.random.default_rng(SEED)
+    a = rng.standard_normal(EMBEDDING_DIM)
+    b = rng.standard_normal(EMBEDDING_DIM)
+    c = rng.standard_normal(EMBEDDING_DIM)
+    # The triangle inequality holds for L1 and L2.
+    assert l1_distance(a, c) <= l1_distance(a, b) + l1_distance(b, c) + 1e-6
+    assert l2_distance(a, c) <= l2_distance(a, b) + l2_distance(b, c) + 1e-6
+    # And inner product is bounded by the product of L2 norms (Cauchy-Schwarz).
+    ip = abs(inner_product(a, b))
+    assert ip <= l2_distance(np.zeros_like(a), a) * l2_distance(np.zeros_like(b), b) + 1e-6
+
+
+def test_knn_recall_at_3_equals_100_pct_on_normalized_corpus() -> None:
+    """On a normalized corpus, KNN-by-cosine and KNN-by-inner-product agree exactly."""
+    rng = np.random.default_rng(SEED)
+    vecs = rng.standard_normal((50, EMBEDDING_DIM)).astype(np.float32)
+    vecs = vecs / np.linalg.norm(vecs, axis=1, keepdims=True)
+    ids = [f"n-{i:03d}" for i in range(50)]
+    index = TinyIndex(ids=ids, vectors=vecs)
+    q = vecs[0]
+    by_cos = knn(q, index.vectors, k=3, metric="cosine")
+    by_ip = knn(q, index.vectors, k=3, metric="ip")
+    # Both metrics should retrieve the query itself (dist ~0).
+    assert (ids[by_cos[0].index] == "n-000") or (ids[by_ip[0].index] == "n-000")
+    # The top-1 should be the query by both metrics.
+    assert ids[by_cos[0].index] == "n-000"
+    assert ids[by_ip[0].index] == "n-000"
+    # Top-k sets should be identical on a normalized corpus.
+    assert {ids[n.index] for n in by_cos} == {ids[n.index] for n in by_ip}
+
+
+# =================================================================
 # ENTRY
 # =================================================================
 

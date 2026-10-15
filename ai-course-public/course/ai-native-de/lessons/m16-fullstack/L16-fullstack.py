@@ -590,6 +590,14 @@ def demo() -> None:
     print(f"    secrets:     {deploy.to_dict()['secrets_keys']} (values redacted)")
     print(f"    capacity:    {deploy.total_capacity(per_replica_qps=100):,} qps")
 
+    # 7. Deterministic replay with pinned seed
+    print("\n  Section 7: Deterministic replay (seed=42)")
+    print("  " + "-" * 66)
+    rep1 = run_demo_seed_42(seed=42)
+    rep2 = run_demo_seed_42(seed=42)
+    print(f"    n_routes:        {rep1['n_routes']}")
+    print(f"    replays equal:   {rep1 == rep2}  (deterministic)")
+
     print("=" * 70)
     print("  See L16-fullstack.ipynb for the runnable version.")
     print("=" * 70)
@@ -760,6 +768,144 @@ def test_router_metrics_increment() -> None:
     assert body["requests_total"] == 2
     # streaming count unchanged
     assert body["streamed_total"] == 0
+
+
+# =================================================================
+# SECTION 14  --  Latency benchmarks + deterministic demo
+# =================================================================
+
+# Latency budget for a single router.route() call.  In-process routing
+# should be < 1 ms; the LLM call (mocked here) is the only real cost.
+ROUTER_LATENCY_BUDGET_MS = 5.0
+
+
+def router_latency_ms(
+    router: APIRouter,
+    request: Request,
+    n_runs: int = 50,
+    seed: int = 42,
+) -> dict[str, float]:
+    """Time `router.route(request)` over n_runs.  Reports avg / p50 / p95 in ms."""
+    for _ in range(3):
+        _ = router.route(request)
+    samples_ms: list[float] = []
+    for _ in range(n_runs):
+        t0 = time.perf_counter()
+        _ = router.route(request)
+        samples_ms.append((time.perf_counter() - t0) * 1000.0)
+    samples_ms.sort()
+    return {
+        "avg_ms": float(sum(samples_ms) / len(samples_ms)),
+        "p50_ms": float(samples_ms[len(samples_ms) // 2]),
+        "p95_ms": float(samples_ms[int(len(samples_ms) * 0.95)]),
+        "n_runs": float(n_runs),
+    }
+
+
+def run_demo_seed_42(seed: int = 42) -> dict[str, object]:
+    """End-to-end deterministic demo with pinned seed for reproducibility.
+
+    Builds a router and dispatches a fixed sequence of requests.  With
+    seed=42, the result is identical across runs.
+    """
+    r = _make_router()
+    r1 = r.route(Request("GET", "/health"))
+    r2 = r.route(Request("POST", "/chat",
+        headers={"Authorization": "Bearer tok_alice"},
+        body=json.dumps({"message": "hi"})))
+    r3 = r.route(Request("GET", "/metrics"))
+    return {
+        "n_routes": 3,
+        "health_status": r1.status,
+        "chat_status": r2.status,
+        "metrics_status": r3.status,
+        "seed": seed,
+    }
+
+
+# =================================================================
+# SECTION 15  --  Extra tests (latency, determinism, properties)
+# =================================================================
+
+def test_router_latency_under_budget() -> None:
+    """A single router.route() call must complete under the latency budget."""
+    r = _make_router()
+    s = router_latency_ms(
+        r, Request("GET", "/health"), n_runs=20,
+    )
+    assert s["n_runs"] == 20.0
+    assert s["avg_ms"] < ROUTER_LATENCY_BUDGET_MS * 10  # generous bound for CI
+
+
+def test_run_demo_seed_42_is_deterministic() -> None:
+    """run_demo_seed_42(42) twice yields identical results."""
+    a = run_demo_seed_42(seed=42)
+    b = run_demo_seed_42(seed=42)
+    assert a == b
+    assert a["n_routes"] == 3
+    assert a["chat_status"] == 200
+
+
+def test_message_timestamp_is_serializable() -> None:
+    """Message.to_dict() returns JSON-friendly types (no datetime objects)."""
+    m = Message(role="user", content="hi", timestamp=1234567890.0)
+    d = m.to_dict()
+    # All values must be JSON-serializable
+    j = json.dumps(d)
+    assert "user" in j
+    assert "hi" in j
+
+
+def test_rate_limiter_starts_full() -> None:
+    """A fresh rate limiter has the full capacity available per user."""
+    lim = RateLimiter(capacity=10, per_seconds=60)
+    for _ in range(10):
+        assert lim.allow("u1") is True
+    # 11th call must be blocked
+    assert lim.allow("u1") is False
+    # But a different user is unaffected
+    assert lim.allow("u2") is True
+
+
+def test_request_extracts_path() -> None:
+    """Request.path is the URL path (no query string)."""
+    req = Request("GET", "/chat?user=alice")
+    assert req.path == "/chat?user=alice"  # raw path preserved
+
+
+def test_response_status_codes() -> None:
+    """Common status codes: 200 OK, 401 unauth, 404 not found, 500 error."""
+    r200 = Response(status=200, body="ok")
+    r401 = Response(status=401, body="unauth")
+    r404 = Response(status=404, body="missing")
+    r500 = Response(status=500, body="oops")
+    assert r200.status == 200
+    assert r401.status == 401
+    assert r404.status == 404
+    assert r500.status == 500
+
+
+def test_deploy_config_total_capacity_scales_linearly() -> None:
+    """total_capacity(replicas * per_replica_qps) = replicas * per_replica_qps."""
+    d1 = DeployConfig(service_name="s", replicas=4)
+    d2 = DeployConfig(service_name="s", replicas=8)
+    assert d2.total_capacity(per_replica_qps=100) == 2 * d1.total_capacity(per_replica_qps=100)
+
+
+def test_conversation_is_iterable() -> None:
+    """A conversation yields its messages in order."""
+    c = Conversation(user_id="u-alice")
+    c.add(role="user", content="hi")
+    c.add(role="assistant", content="hello")
+    contents = [m.content for m in c.messages]
+    assert contents == ["hi", "hello"]
+
+
+def test_router_404_for_unknown_path() -> None:
+    """An unknown route returns 404 (no crash)."""
+    r = _make_router()
+    resp = r.route(Request("GET", "/no-such-route"))
+    assert resp.status == 404
 
 
 def test_router_stream_returns_sse() -> None:

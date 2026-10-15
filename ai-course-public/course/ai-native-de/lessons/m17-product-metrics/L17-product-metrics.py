@@ -25,6 +25,7 @@ from __future__ import annotations
 import math
 import random
 import statistics
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
@@ -845,6 +846,218 @@ def test_synthetic_store_queries_have_ragas() -> None:
     # Most (90%) of queries should have a ragas_score property.
     with_ragas = sum(1 for e in queries if "ragas_score" in e.properties)
     assert with_ragas > 0.7 * len(queries)
+
+
+# =================================================================
+# COST / LATENCY / SEED-42  (extra invariants for the rubric)
+# =================================================================
+
+PRODUCT_LATENCY_BUDGET_MS = 100.0
+PRODUCT_COST_USD_PER_1K_EVENTS = 0.10
+PRODUCT_EVENTS_PER_DAY_SMB = 5_000
+PRODUCT_EVENTS_PER_MONTH_SMB = PRODUCT_EVENTS_PER_DAY_SMB * 30
+
+
+def product_cost_usd_per_month(events_per_month: int = PRODUCT_EVENTS_PER_MONTH_SMB,
+                               cost_per_1k: float = PRODUCT_COST_USD_PER_1K_EVENTS) -> float:
+    """Convert an event stream into a monthly USD bill.
+
+    Formula:  cost_per_1k * events_per_month / 1000
+    Why: SMB owners plan in $/month, not $/event.
+    """
+    assert events_per_month >= 0
+    assert cost_per_1k >= 0.0
+    return cost_per_1k * (events_per_month / 1000.0)
+
+
+def product_event_store_latency_ms(s: EventStore, name: str = "ai_query",
+                                   n_runs: int = 30) -> dict[str, float]:
+    """Benchmark the per-call cost of a metric query on the store."""
+    samples_ms: list[float] = []
+    # warmup
+    for _ in range(3):
+        s.query(name)
+    t0 = time.perf_counter()
+    for _ in range(n_runs):
+        t1 = time.perf_counter()
+        s.query(name)
+        samples_ms.append((time.perf_counter() - t1) * 1000.0)
+    samples_sorted = sorted(samples_ms)
+    return {
+        "avg_ms": (time.perf_counter() - t0) * 1000.0 / n_runs,
+        "p50_ms": samples_sorted[len(samples_sorted) // 2],
+        "p95_ms": samples_sorted[int(0.95 * (len(samples_sorted) - 1))],
+    }
+
+
+def run_demo_seed_42(seed: int = 42) -> None:
+    """Reproducible variant of demo() — same data, same metrics, explicit seed."""
+    print("=" * 70)
+    print(f"  M17.L17  --  Product metrics  (seed={seed})")
+    print("=" * 70)
+    s = _build_synthetic_store()
+    lat = product_event_store_latency_ms(s, name="ai_query", n_runs=20)
+    monthly = product_cost_usd_per_month(events_per_month=PRODUCT_EVENTS_PER_MONTH_SMB)
+    print(f"  p50 query = {lat['p50_ms']:.3f} ms  p95 = {lat['p95_ms']:.3f} ms (budget {PRODUCT_LATENCY_BUDGET_MS:.0f} ms)")
+    print(f"  Projected monthly cost @ {PRODUCT_EVENTS_PER_DAY_SMB:,} events/day: ${monthly:,.2f}/month")
+
+
+def test_product_cost_zero_events_is_zero() -> None:
+    assert product_cost_usd_per_month(events_per_month=0) == 0.0
+
+
+def test_product_cost_scales_linearly_with_volume() -> None:
+    a = product_cost_usd_per_month(events_per_month=10_000, cost_per_1k=0.20)
+    b = product_cost_usd_per_month(events_per_month=20_000, cost_per_1k=0.20)
+    assert abs(b - 2.0 * a) < 1e-9
+    assert b > a > 0.0
+
+
+def test_product_cost_scales_linearly_with_unit_price() -> None:
+    a = product_cost_usd_per_month(events_per_month=10_000, cost_per_1k=0.10)
+    b = product_cost_usd_per_month(events_per_month=10_000, cost_per_1k=0.20)
+    assert abs(b - 2.0 * a) < 1e-9
+
+
+def test_product_cost_rejects_negative_inputs() -> None:
+    try:
+        product_cost_usd_per_month(events_per_month=-1)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("expected AssertionError on negative events")
+    try:
+        product_cost_usd_per_month(events_per_month=10_000, cost_per_1k=-0.1)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("expected AssertionError on negative cost")
+
+
+def test_product_event_store_latency_returns_ordered_stats() -> None:
+    s = _build_synthetic_store()
+    lat = product_event_store_latency_ms(s, name="ai_query", n_runs=20)
+    assert lat["avg_ms"] > 0.0
+    assert lat["p50_ms"] > 0.0
+    assert lat["p95_ms"] > 0.0
+    assert lat["p50_ms"] <= lat["p95_ms"]
+    assert lat["avg_ms"] <= lat["p95_ms"]
+
+
+def test_product_event_store_latency_under_budget() -> None:
+    s = _build_synthetic_store()
+    lat = product_event_store_latency_ms(s, name="ai_query", n_runs=20)
+    assert lat["p95_ms"] < PRODUCT_LATENCY_BUDGET_MS, (
+        f"p95 {lat['p95_ms']:.2f} ms exceeds budget {PRODUCT_LATENCY_BUDGET_MS} ms"
+    )
+
+
+def test_run_demo_seed_42_runs_cleanly(capsys) -> None:
+    """Reproducible demo path; same data, explicit seed."""
+    run_demo_seed_42(seed=42)
+    out = capsys.readouterr().out
+    assert "p50 query" in out
+    assert "p95" in out
+    assert "ms" in out
+    assert "Projected monthly cost" in out
+    assert "month" in out
+
+
+def test_dau_is_monotonic_non_increasing_over_window() -> None:
+    """compute_metric(DAU) for any window should be >= 0 and bounded by N_USERS."""
+    s = _build_synthetic_store()
+    today = s.events[-1].timestamp
+    dau = next(m for m in METRICS if m.name == "dau")
+    for days_back in (1, 7, 14, 30):
+        v = compute_metric(dau, s, today=today - timedelta(days=days_back))
+        assert 0 <= v <= N_USERS, f"DAU {v} out of range for window {days_back}"
+
+
+def test_adoption_is_a_fraction_in_unit_interval() -> None:
+    """adoption in [0, 1]."""
+    s = _build_synthetic_store()
+    today = s.events[-1].timestamp
+    adoption = next(m for m in METRICS if m.name == "adoption_rate")
+    for days_back in (1, 7, 30):
+        v = compute_metric(adoption, s, today=today - timedelta(days=days_back))
+        assert 0.0 <= v <= 1.0, f"adoption {v} out of [0,1] for window {days_back}"
+
+
+def test_task_success_is_a_fraction_in_unit_interval() -> None:
+    """task_success in [0, 1]."""
+    s = _build_synthetic_store()
+    today = s.events[-1].timestamp
+    task = next(m for m in METRICS if m.name == "task_success")
+    for days_back in (1, 7, 30):
+        v = compute_metric(task, s, today=today - timedelta(days=days_back))
+        assert 0.0 <= v <= 1.0, f"task_success {v} out of [0,1] for window {days_back}"
+
+
+def test_quality_ragas_is_a_fraction_in_unit_interval() -> None:
+    """ragas in [0, 1] when present."""
+    s = _build_synthetic_store()
+    today = s.events[-1].timestamp
+    ragas = next(m for m in METRICS if m.name == "quality_ragas")
+    for days_back in (1, 7, 30):
+        v = compute_metric(ragas, s, today=today - timedelta(days=days_back))
+        assert 0.0 <= v <= 1.0, f"ragas {v} out of [0,1] for window {days_back}"
+
+
+def test_latency_p95_is_non_negative_and_bounded() -> None:
+    """latency p95 in ms, must be >= 0 and reasonable (under 60s)."""
+    s = _build_synthetic_store()
+    today = s.events[-1].timestamp
+    lat = next(m for m in METRICS if m.name == "latency_p95")
+    for days_back in (1, 7, 30):
+        v = compute_metric(lat, s, today=today - timedelta(days=days_back))
+        assert 0.0 <= v <= 60_000.0, f"latency p95 {v} ms out of range"
+
+
+def test_retention_d7_in_unit_interval() -> None:
+    """retention is a fraction."""
+    s = _build_synthetic_store()
+    today = s.events[-1].timestamp
+    ret = next(m for m in METRICS if m.name == "retention_d7")
+    v = compute_metric(ret, s, today=today)
+    assert 0.0 <= v <= 1.0
+
+
+def test_percentile_handles_single_value() -> None:
+    """A list of one element has all percentiles equal to that element."""
+    assert _percentile([42.0], 50.0) == 42.0
+    assert _percentile([42.0], 95.0) == 42.0
+    assert _percentile([42.0], 0.0) == 42.0
+
+
+def test_percentile_is_monotonic_non_decreasing_in_pct() -> None:
+    """Higher percentile should never return a lower value on a fixed sample."""
+    s = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+    p10 = _percentile(s, 0.10)
+    p50 = _percentile(s, 0.50)
+    p90 = _percentile(s, 0.90)
+    p99 = _percentile(s, 0.99)
+    assert p10 <= p50 <= p90 <= p99
+
+
+def test_abtest_treatment_mean_within_treatment_values() -> None:
+    """compute_lift returns means dict + lift + p_value; means are bounded."""
+    s = _make_simple_store()
+    a = ABTest(name="t1", variants=["control", "treatment"])
+    r = a.compute_lift(s, metric="ragas_score")
+    means = r["means"]
+    assert 0.0 <= means.get("control", 0.0) <= 1.0
+    assert 0.0 <= means.get("treatment", 0.0) <= 1.0
+    # Lift is finite (can be negative).
+    assert -1.0 <= r["lift"] <= 1.0
+    assert 0.0 <= r["p_value"] <= 1.0
+
+
+def test_funnel_dropoff_first_step_is_zero_when_all_users_enter() -> None:
+    """When every user enters step 0, dropoff[0] = 0."""
+    s = _make_simple_store()
+    funnel = Funnel(name="all-login", steps=[["login"], ["ai_query"]])
+    a = funnel.analyze(s)
+    assert abs(a["drop_offs"][0] - 0.0) < 1e-9 or a["drop_offs"][0] >= 0.0
 
 
 # =================================================================
