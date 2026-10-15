@@ -1,8 +1,11 @@
 """SQLite connection management with parameterized query support."""
+import logging
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 import os
+
+log = logging.getLogger("rag.db")
 
 DB_PATH = os.environ.get("RAG_DB_PATH", str(Path(__file__).parent.parent / "rag_traces.db"))
 

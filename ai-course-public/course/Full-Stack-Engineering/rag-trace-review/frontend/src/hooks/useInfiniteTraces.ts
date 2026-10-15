@@ -2,9 +2,13 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { fetchTraces, submitFeedback } from '../api/client';
 import type { TraceFilters, Rating, TracePage, TraceSummary } from '../types';
 
+// Centralized cache keys: every traces query uses the same prefix
+// so optimistic updates and invalidations cover all filters.
+const TRACES_KEY = ['traces'] as const;
+
 export function useInfiniteTraces(filters: TraceFilters) {
   return useInfiniteQuery<TracePage, Error>({
-    queryKey: ['traces', filters],
+    queryKey: [...TRACES_KEY, filters],
     queryFn: ({ pageParam, signal }) => fetchTraces(filters, pageParam as string | null, signal),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.meta.next_cursor ?? undefined,
@@ -17,9 +21,9 @@ export function useSubmitFeedback() {
     mutationFn: ({ id, rating }: { id: string; rating: Rating }) =>
       submitFeedback(id, rating),
     onMutate: async ({ id, rating }) => {
-      await qc.cancelQueries({ queryKey: ['traces'] });
+      await qc.cancelQueries({ queryKey: TRACES_KEY });
       const snapshots = qc.getQueriesData<{ pages: TracePage[]; pageParams: unknown[] }>({
-        queryKey: ['traces'],
+        queryKey: TRACES_KEY,
       });
       snapshots.forEach(([key, data]) => {
         if (!data) return;
@@ -39,6 +43,6 @@ export function useSubmitFeedback() {
     onError: (_e, _v, ctx) => {
       ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data));
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['traces'] }),
+    onSettled: () => qc.invalidateQueries({ queryKey: TRACES_KEY }),
   });
 }
