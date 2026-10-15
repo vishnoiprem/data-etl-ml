@@ -6,7 +6,7 @@
 # for the one you use.
 
 # Test runner
-pytest>=7.0,<9.0
+pytest>=9.1.1,<10.0
 
 # Optional LLM providers (uncomment as needed)
 # anthropic>=0.30.0   # for AnthropicRouter
