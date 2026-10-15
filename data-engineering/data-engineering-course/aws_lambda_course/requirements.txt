@@ -26,7 +26,7 @@ gunicorn==23.0.0
 mako==1.3.12
 bleach==6.4.0
 fsspec==2026.6.0
-cryptography==46.0.5
+cryptography==50.0.2
 protobuf==6.33.5
 pymongo==4.18.2
 httplib2==0.32.0
