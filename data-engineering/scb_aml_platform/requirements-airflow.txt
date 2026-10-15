@@ -67,7 +67,7 @@ geopy==2.5.0
 jaraco-context==6.1.0
 diffusers==0.38.0
 pypdf==6.20.0
-mlflow==3.15.0
+mlflow==3.17.1
 transformers==5.10.0
 chainlit==2.10.1
 llama-index==0.13.0
