@@ -16,7 +16,7 @@
 
 apache-airflow==3.3.2
 sqlalchemy==1.4.52
-pandas==2.0.3
+pandas==2.3.3
 loguru==0.7.2
 
 # ── Security overrides (Tier 1) — Airflow venv must override too
