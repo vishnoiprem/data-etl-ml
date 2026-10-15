@@ -11,8 +11,9 @@
 - [ ] Explain each design choice in a Meta L6 interview.
 - [ ] Build and run the entire project locally.
 
-## 21-Day Plan (90 min/day: 10 + 20 + 30 + 20 + 20)
+## 26-Day Plan (90 min/day: 10 + 20 + 30 + 20 + 20)
 
+### Core full-stack (Days 1–21)
 | Day | Module | Topic |
 |---|---|---|
 | 1 | M1 | How full-stack applications work |
@@ -37,6 +38,19 @@
 | 20 | M18 | Mock Interview Day 3 |
 | 21 | M18 | Capstone Polish + Final Review |
 
+### System design + AI domain (Days 22–26) 🆕
+| Day | Module | Topic |
+|---|---|---|
+| 22 | M19 | System Design: URL Shortener |
+| 23 | M19 | System Design: RAG at Scale |
+| 24 | M20 | AI Domain: Vector Databases + Embeddings |
+| 25 | M20 | AI Domain: LLM Streaming, Function Calling, Evals |
+| 26 | M19 | System Design Mock Interview (Chat) |
+
+### Supplementary reading
+- `docs/SYSTEM_DESIGN_PRIMER.md` — 60-min framework + 5 designs
+- `docs/META_GOOGLE_REALITY_CHECK.md` — what this course covers vs. what you still need
+
 ## Project structure
 ```
 rag-trace-review/
@@ -45,7 +59,9 @@ rag-trace-review/
 ├── docs/
 │   ├── INDEX.md
 │   ├── STEP_BY_STEP.md
-│   └── DAY_01.md → DAY_21.md
+│   ├── SYSTEM_DESIGN_PRIMER.md
+│   ├── META_GOOGLE_REALITY_CHECK.md
+│   └── DAY_01.md → DAY_26.md
 ├── backend/    (FastAPI + SQLite + pytest, 14 tests)
 └── frontend/   (React 18 + TS + Vite + TanStack)
 ```
@@ -68,7 +84,7 @@ curl 'http://localhost:8000/traces?limit=2'
 
 ## 100× Review
 Script: `/tmp/fix_review_100.sh`
-Stable result: **100 / 100** (or 102/102 with the v2/v3 polish)
+Stable result: **100 / 100**
 
 ## Grading Rubric (used by every day)
 | Area | Score |
