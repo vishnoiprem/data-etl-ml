@@ -1,5 +1,5 @@
-transformers==4.38.2
-datasets==2.18.0
+transformers==5.10.0
+datasets==5.0.1
 accelerate==0.27.2
 evaluate==0.4.1
 bitsandbytes==0.42.0
