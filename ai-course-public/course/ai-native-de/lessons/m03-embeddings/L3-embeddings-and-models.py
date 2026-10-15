@@ -259,12 +259,20 @@ def demo() -> None:
     # 1. Model registry
     print("\n  Section 1: Embedding model registry")
     print("  " + "-" * 66)
-    v1 = model_v1(dim=16)
-    v2 = model_v2(dim=32)
+    # Use same dim for v1/v2 so the drift comparison in Section 6 is meaningful.
+    # The default v1=16 / v2=32 is shown later for the cross-dim registry listing
+    # but the drift comparison requires matching dim.
+    DIM = 16
+    v1 = model_v1(dim=DIM)
+    v2 = model_v2(dim=DIM)
+    v1b = model_v1(dim=16)
+    v2b = model_v2(dim=32)
     print(f"    v1: {v1}")
     print(f"    v2: {v2}")
     print(f"    Same dim? {v1.dim == v2.dim}  (v1={v1.dim}, v2={v2.dim})")
     print(f"    Same id?  {v1.model_id == v2.model_id}")
+    # The v1b/v2b pair has different dims and is used in Section 7 to show
+    # the cross-dim registry; not used for drift.
     print(f"    v1 norm check: {float(np.linalg.norm(v1.encode('hello'))):.3f}  (should be 1.0)")
 
     # 2. Corpus
