@@ -1,0 +1,382 @@
+"""
+================================================================
+M2 L2  --  Vector Mathematics and Similarity Search
+================================================================
+
+Run:    python3 lessons/m02-vector-math/L2-vector-math-knn.py
+Keys:   none (numpy + stdlib only)
+
+Builds on M1.L1's cosine_sim and l2_norm.  Adds:
+  * L1 (Manhattan) distance
+  * Inner product, dot product identity
+  * Normalized vectors + inner-product = cosine
+  * Brute-force exact KNN with three distance metrics
+  * A small "index" that wraps the KNN so retrieval is one function call
+  * Tests that the KNN ordering matches the closed-form sort
+
+The lesson's point: production vector DBs are fast approximations
+to what this file does exactly.  Know the exact version before
+you trust the approximate one.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from typing import Callable
+
+import numpy as np
+
+
+# =================================================================
+# CONFIG  --  all magic numbers live here
+# =================================================================
+
+LESSON_NUMBER = "M2.L2"
+EMBEDDING_DIM = 16          # small so the brute-force KNN is hand-checkable
+N_VECTORS = 200             # corpus size for the demo
+SEED = 42
+
+
+# =================================================================
+# SECTION 1  --  Distance and similarity primitives
+# =================================================================
+
+def l1_distance(a: np.ndarray, b: np.ndarray) -> float:
+    """L1 (Manhattan) distance: sum of absolute element-wise differences."""
+    return float(np.sum(np.abs(a - b)))
+
+
+def l2_distance(a: np.ndarray, b: np.ndarray) -> float:
+    """L2 (Euclidean) distance: sqrt(sum((a_i - b_i)^2))."""
+    return float(np.sqrt(np.sum((a - b) ** 2)))
+
+
+def inner_product(a: np.ndarray, b: np.ndarray) -> float:
+    """Dot product: sum(a_i * b_i).  Equivalent to a @ b."""
+    return float(np.dot(a, b))
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    """Cosine similarity in [-1, +1].  Returns 0.0 if either input is zero."""
+    na = float(np.sqrt(np.sum(a * a)))
+    nb = float(np.sqrt(np.sum(b * b)))
+    if na == 0.0 or nb == 0.0:
+        return 0.0
+    return float(np.dot(a, b) / (na * nb))
+
+
+def normalize(v: np.ndarray) -> np.ndarray:
+    """L2-normalize a vector: divide by its norm.  Returns the zero vector unchanged."""
+    n = float(np.sqrt(np.sum(v * v)))
+    if n == 0.0:
+        return v.copy()
+    return v / n
+
+
+# =================================================================
+# SECTION 2  --  Identity:  cos(a, b) == inner_product(norm(a), norm(b))
+# =================================================================
+
+def cos_via_inner_product(a: np.ndarray, b: np.ndarray) -> float:
+    """Cosine computed via inner product of L2-normalized vectors.
+
+    Proves the identity used by every vector DB: when all vectors are
+    pre-normalized at ingest, similarity = inner product, which is
+    one matmul on the query side.  No sqrt, no divide.
+    """
+    return float(np.dot(normalize(a), normalize(b)))
+
+
+# =================================================================
+# SECTION 3  --  Brute-force KNN
+# =================================================================
+
+@dataclass(frozen=True)
+class Neighbor:
+    """One neighbor returned by KNN.  Smaller distance = closer."""
+    index: int
+    distance: float
+
+
+def knn(
+    query: np.ndarray,
+    matrix: np.ndarray,
+    k: int = 5,
+    metric: str = "cosine",
+) -> list[Neighbor]:
+    """Exact K-nearest-neighbors.  O(N * dim) time, O(N) memory.
+
+    metric in {"cosine", "l2", "l1", "ip"}:
+      cosine  -> 1 - cosine_similarity  (smaller = closer)
+      l2      -> L2 distance
+      l1      -> L1 (Manhattan) distance
+      ip      -> -inner_product  (more positive = closer; we negate for sort)
+    """
+    fn: Callable[[np.ndarray, np.ndarray], float]
+    if metric == "cosine":
+        fn = lambda a, b: 1.0 - cosine_similarity(a, b)
+    elif metric == "l2":
+        fn = l2_distance
+    elif metric == "l1":
+        fn = l1_distance
+    elif metric == "ip":
+        fn = lambda a, b: -inner_product(a, b)
+    else:
+        raise ValueError(f"unknown metric: {metric!r}")
+
+    n = matrix.shape[0]
+    if k > n:
+        k = n
+    dists = np.array([fn(query, matrix[i]) for i in range(n)], dtype=np.float64)
+    # argpartition is O(N); argsort is O(N log N).  We use argsort so the
+    # return order is deterministic (smallest distance first).
+    order = np.argsort(dists, kind="stable")[:k]
+    return [Neighbor(index=int(i), distance=float(dists[i])) for i in order]
+
+
+# =================================================================
+# SECTION 4  --  Tiny "index" wrapping KNN
+# =================================================================
+
+@dataclass
+class TinyIndex:
+    """A toy vector index.  In production: FAISS / HNSW / Qdrant."""
+    vectors: np.ndarray    # shape (N, dim)
+    ids: list[str]
+    metric: str = "cosine"
+
+    def search(self, query: np.ndarray, k: int = 5) -> list[tuple[str, float]]:
+        """Return [(id, distance)] for the k nearest neighbors."""
+        neighbors = knn(query, self.vectors, k=k, metric=self.metric)
+        return [(self.ids[n.index], n.distance) for n in neighbors]
+
+
+# =================================================================
+# SECTION 5  --  Sample corpus (10 hand-written vectors)
+# =================================================================
+
+SAMPLE_VECTORS: dict[str, np.ndarray] = {
+    # 4 HR-ish vectors  (cluster A)
+    "hr-001": np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    "hr-002": np.array([0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    "hr-003": np.array([0.8, 0.0, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    "hr-004": np.array([1.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    # 3 finance-ish vectors  (cluster B)
+    "fin-001": np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    "fin-002": np.array([0.0, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          0.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0], dtype=np.float32),
+    "fin-003": np.array([0.1, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    # 3 ops-ish vectors  (cluster C)
+    "ops-001": np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0], dtype=np.float32),
+    "ops-002": np.array([0.0, 0.1, 0.9, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1, 0.0], dtype=np.float32),
+    "ops-003": np.array([0.1, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                          0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.1], dtype=np.float32),
+}
+
+
+def build_sample_index() -> TinyIndex:
+    """Build a TinyIndex from SAMPLE_VECTORS."""
+    ids = list(SAMPLE_VECTORS.keys())
+    matrix = np.stack([SAMPLE_VECTORS[i] for i in ids], axis=0)
+    return TinyIndex(vectors=matrix, ids=ids, metric="cosine")
+
+
+# =================================================================
+# SECTION 6  --  Larger random corpus for the perf demo
+# =================================================================
+
+def build_random_corpus(n: int = N_VECTORS, dim: int = EMBEDDING_DIM, seed: int = SEED) -> TinyIndex:
+    """N random unit vectors; ids are 'v000'..'v{n-1}'."""
+    rng = np.random.default_rng(seed=seed)
+    raw = rng.random((n, dim), dtype=np.float32)
+    normed = raw / np.linalg.norm(raw, axis=1, keepdims=True)
+    ids = [f"v{i:04d}" for i in range(n)]
+    return TinyIndex(vectors=normed.astype(np.float32), ids=ids, metric="ip")
+
+
+# =================================================================
+# SECTION 7  --  Demo
+# =================================================================
+
+def demo() -> None:
+    """End-to-end walkthrough: 7 sections, prints banners + numbers."""
+    print("=" * 70)
+    print(f"  {LESSON_NUMBER}  --  Vector Math + KNN from scratch")
+    print("=" * 70)
+
+    # 1. Distance primitives
+    print("\n  Section 1: Distance primitives (L1, L2, inner product, cosine)")
+    print("  " + "-" * 66)
+    a = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+    b = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+    c = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+    print(f"    L1(a, b)      = {l1_distance(a, b):.3f}   (orthogonal -> 2.0)")
+    print(f"    L2(a, b)      = {l2_distance(a, b):.3f}   (orthogonal -> 1.414)")
+    print(f"    L2(a, c)      = {l2_distance(a, c):.3f}   (identical  -> 0.0)")
+    print(f"    inner(a, b)   = {inner_product(a, b):.3f}   (orthogonal -> 0.0)")
+    print(f"    cos(a, b)     = {cosine_similarity(a, b):.3f}   (orthogonal -> 0.0)")
+    print(f"    cos(a, c)     = {cosine_similarity(a, c):.3f}   (identical  -> 1.0)")
+
+    # 2. Cosine via inner product
+    print("\n  Section 2: cos == inner_product(norm(a), norm(b))")
+    print("  " + "-" * 66)
+    a_n = np.array([3.0, 1.0, 0.0], dtype=np.float32)
+    b_n = np.array([0.0, 2.0, 1.0], dtype=np.float32)
+    direct = cosine_similarity(a_n, b_n)
+    via_ip = cos_via_inner_product(a_n, b_n)
+    print(f"    direct cos    = {direct:.5f}")
+    print(f"    via inner     = {via_ip:.5f}")
+    print(f"    match         = {abs(direct - via_ip) < 1e-5}")
+
+    # 3. KNN on the 10-doc sample
+    print("\n  Section 3: KNN on the 10-doc sample (cosine, k=3)")
+    print("  " + "-" * 66)
+    idx = build_sample_index()
+    q = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+    hits = idx.search(q, k=3)
+    for id_, dist in hits:
+        print(f"    {id_}  dist={dist:.3f}")
+
+    # 4. KNN on 200 random unit vectors, metric sweep
+    print("\n  Section 4: KNN on 200 random unit vectors (k=5, metric sweep)")
+    print("  " + "-" * 66)
+    big = build_random_corpus()
+    for metric in ("cosine", "l2", "l1", "ip"):
+        big.metric = metric
+        t0 = __import__("time").perf_counter()
+        for _ in range(5):
+            q = big.vectors[0]
+            _ = big.search(q, k=5)
+        dt = (__import__("time").perf_counter() - t0) / 5
+        print(f"    metric={metric:<8}  avg latency = {dt*1000:.2f} ms / query")
+
+    # 5. Recall@K vs numpy.argsort
+    print("\n  Section 5: KNN recall@10 vs numpy.argsort (ground truth)")
+    print("  " + "-" * 66)
+    big.metric = "cosine"
+    q = big.vectors[7]
+    truth = set(np.argsort([1 - cosine_similarity(q, v) for v in big.vectors])[:10].tolist())
+    pred = set(n.index for n in knn(q, big.vectors, k=10, metric="cosine"))
+    print(f"    truth size = {len(truth)}, pred size = {len(pred)}")
+    print(f"    intersection = {len(truth & pred)}/10  (recall@10 = {len(truth & pred)/10:.2f})")
+
+    # 6. Identity: cosine == 1 - distance used by knn
+    print("\n  Section 6: distance = 1 - cosine, so KNN ranks are equivalent")
+    print("  " + "-" * 66)
+    pairs = [(big.vectors[0], big.vectors[i]) for i in (1, 2, 3)]
+    for x, y in pairs:
+        d = l2_distance(x, y)
+        c = cosine_similarity(x, y)
+        print(f"    L2={d:.3f}   cos={c:.3f}   1-cos={1-c:.3f}   (no closed form; both valid)")
+
+    # 7. Index wrapper one-liner
+    print("\n  Section 7: TinyIndex.search() wraps knn() in one call")
+    print("  " + "-" * 66)
+    hits = build_sample_index().search(np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32), k=3)
+    print(f"    query='finance-like vector', top-3 = {hits}")
+
+    print("=" * 70)
+    print("  See L2-vector-math-knn.ipynb for the runnable version with assertions.")
+    print("=" * 70)
+
+
+# =================================================================
+# SECTION 8  --  Tests  (10 unit tests, pytest-compatible)
+# =================================================================
+
+def test_l1_orthogonal() -> None:
+    """L1 of [1,0] and [0,1] is 2."""
+    a = np.array([1.0, 0.0])
+    b = np.array([0.0, 1.0])
+    assert abs(l1_distance(a, b) - 2.0) < 1e-6
+
+
+def test_l2_orthogonal() -> None:
+    """L2 of [1,0] and [0,1] is sqrt(2)."""
+    a = np.array([1.0, 0.0])
+    b = np.array([0.0, 1.0])
+    assert abs(l2_distance(a, b) - math.sqrt(2)) < 1e-6
+
+
+def test_l2_identical() -> None:
+    """L2 of a vector with itself is 0."""
+    a = np.array([0.3, 0.4, 0.5])
+    assert l2_distance(a, a) < 1e-9
+
+
+def test_inner_product_orthogonal() -> None:
+    """Inner product of orthogonal unit vectors is 0."""
+    a = np.array([1.0, 0.0])
+    b = np.array([0.0, 1.0])
+    assert abs(inner_product(a, b)) < 1e-9
+
+
+def test_cosine_identical() -> None:
+    """Cosine of a vector with itself is 1."""
+    a = np.array([0.3, 0.4, 0.5])
+    assert abs(cosine_similarity(a, a) - 1.0) < 1e-6
+
+
+def test_cosine_via_inner_product_matches_direct() -> None:
+    """The identity: cos(a,b) == inner_product(norm(a), norm(b))."""
+    a = np.array([3.0, 1.0, 0.0])
+    b = np.array([0.0, 2.0, 1.0])
+    assert abs(cosine_similarity(a, b) - cos_via_inner_product(a, b)) < 1e-6
+
+
+def test_normalize_preserves_direction() -> None:
+    """normalize(v) has the same direction as v; its L2 norm is 1."""
+    v = np.array([3.0, 4.0])
+    n = normalize(v)
+    assert abs(np.linalg.norm(n) - 1.0) < 1e-6
+    # direction: n[0] / n[1] == v[0] / v[1]
+    assert abs(n[0] / n[1] - v[0] / v[1]) < 1e-6
+
+
+def test_normalize_zero_vector_is_safe() -> None:
+    """normalize of the zero vector does not divide by zero."""
+    z = np.zeros(4)
+    n = normalize(z)
+    assert np.allclose(n, z)
+
+
+def test_knn_recall_matches_numpy() -> None:
+    """knn returns the same top-K as numpy.argsort (recall@K = 1.0)."""
+    rng = np.random.default_rng(seed=0)
+    matrix = rng.random((50, 8), dtype=np.float32)
+    q = matrix[3]
+    truth = set(np.argsort([1 - cosine_similarity(q, v) for v in matrix])[:5].tolist())
+    pred = set(n.index for n in knn(q, matrix, k=5, metric="cosine"))
+    assert truth == pred
+
+
+def test_tiny_index_returns_ids() -> None:
+    """TinyIndex.search returns (id, distance) tuples in distance order."""
+    idx = build_sample_index()
+    q = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+    hits = idx.search(q, k=3)
+    assert len(hits) == 3
+    # distances must be non-decreasing
+    assert hits[0][1] <= hits[1][1] <= hits[2][1]
+    # the closest must be an HR doc (the query is HR-shaped)
+    assert hits[0][0].startswith("hr-")
+
+
+# =================================================================
+# ENTRY
+# =================================================================
+
+if __name__ == "__main__":
+    demo()
