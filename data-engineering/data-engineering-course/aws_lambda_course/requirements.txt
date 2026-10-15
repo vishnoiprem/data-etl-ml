@@ -42,7 +42,7 @@ litestar==2.22.0
 nbconvert==7.17.1
 pillow==12.3.0
 tornado==6.5.9
-pyarrow==17.0.0
+pyarrow==23.0.1
 sentence-transformers==5.6.0
 pyspark==3.5.8
 fonttools==4.60.2
