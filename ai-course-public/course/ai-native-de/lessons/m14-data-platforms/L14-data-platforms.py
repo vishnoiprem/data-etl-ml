@@ -499,6 +499,11 @@ class LineageGraph:
 # =================================================================
 
 def make_users_table() -> Table:
+    """A canonical users table used as a sample in the demo and tests.
+
+    Returns:
+        A Table with 4 users (alice, bob, carol, dave) from 3 countries.
+    """
     t = Table(
         name="users",
         description="User accounts",
@@ -520,6 +525,11 @@ def make_users_table() -> Table:
 
 
 def make_orders_table() -> Table:
+    """A canonical orders table used as a sample in the demo and tests.
+
+    Returns:
+        A Table with 5 orders from 4 users across 3 products.
+    """
     t = Table(
         name="orders",
         description="User orders",
@@ -543,6 +553,11 @@ def make_orders_table() -> Table:
 
 
 def make_products_table() -> Table:
+    """A canonical products table used as a sample in the demo and tests.
+
+    Returns:
+        A Table with 3 products (Widget, Gadget, Gizmo Pro).
+    """
     t = Table(
         name="products",
         description="Product catalog",
