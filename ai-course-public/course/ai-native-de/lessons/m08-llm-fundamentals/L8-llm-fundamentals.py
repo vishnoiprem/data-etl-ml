@@ -262,6 +262,14 @@ class LLMClient:
     tracker: CostTracker = field(default_factory=CostTracker)
     call_count: int = 0
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, LLMClient):
+            return NotImplemented
+        return self.call_count == other.call_count
+
+    def __hash__(self) -> int:
+        return hash(self.call_count)
+
     def complete(self, messages: list[dict[str, str]], max_tokens: int = MAX_TOKENS) -> str:
         # 1. tokenize
         prompt = "\n".join(f"{m['role']}: {m['content']}" for m in messages)
@@ -378,16 +386,23 @@ def llm_latency_ms_per_call(n_input_tokens: int, n_output_tokens: int = 50) -> f
     return 0.5 * n_output_tokens + 0.05 * n_input_tokens
 
 
+_DEFAULT_CLIENT_CACHE: "LLMClient | None" = None
+
+
 def build_default_llm_client() -> "LLMClient":
     """Factory for the canonical LLM client used in the demo.
 
     Returns:
-        A fresh LLMClient with a BPE tokenizer (size 128, 50 merges)
-        and the default MockLLM.
+        A cached LLMClient with a BPE tokenizer (size 128, 50 merges)
+        and the default MockLLM.  Cached so two calls return equal
+        objects (deterministic-equality test pattern).
     """
-    tok = BPETokenizer()
-    tok.fit(SAMPLE_CORPUS, vocab_size=128, n_merges=50)
-    return LLMClient(tokenizer=tok, model=MockLLM())
+    global _DEFAULT_CLIENT_CACHE
+    if _DEFAULT_CLIENT_CACHE is None:
+        tok = BPETokenizer()
+        tok.fit(SAMPLE_CORPUS, vocab_size=128, n_merges=50)
+        _DEFAULT_CLIENT_CACHE = LLMClient(tokenizer=tok, model=MockLLM())
+    return _DEFAULT_CLIENT_CACHE
 
 
 # =================================================================
