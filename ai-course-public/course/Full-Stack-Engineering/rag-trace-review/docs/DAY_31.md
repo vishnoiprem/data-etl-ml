@@ -147,7 +147,7 @@ def test_coin_change():
     assert coin_change([1, 5, 10, 25], 30) == 2
     assert coin_change([2], 3) == -1
     assert coin_change([1], 0) == 0
-    assert coin_change([186, 419, 83, 408], 6249) == 20  # classic gotcha
+    assert coin_change([186, 419, 83, 408], 6249) == 20  # famous LeetCode gotcha: large coins force a slow greedy; DP must run to completion
 
 def test_lcs():
     assert lcs("abcde", "ace") == 3

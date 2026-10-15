@@ -222,20 +222,18 @@ A 60-minute framework for Meta/Google-style coding interviews. Read this before 
 
 ---
 
-## 50/80 score = hire; 35/80 = no-hire
+## 42/60 score = hire; 30/60 = no-hire
 
 | Area | What's graded |
 |---|---|
 | Correctness | Does it work? Edge cases? |
 | Code quality | Clean, readable, no dead code? |
 | Debugging | Trace correctly? Spot bugs? |
-| API design | N/A (algorithmic round) |
-| Frontend | N/A |
 | Performance | Right Big-O? Optimal pattern? |
 | Testing | Edge cases covered? |
 | Communication | Articulate? Pattern identified? |
 
-For this course, we adapt the rubric to a 7-area / 70 scale (no API/frontend), pass = 49/70.
+For this course, the algorithm days use a 6-area / 60 rubric (API/frontend excluded as N/A). Pass = 42/60, distinction = 48/60.
 
 ---
 

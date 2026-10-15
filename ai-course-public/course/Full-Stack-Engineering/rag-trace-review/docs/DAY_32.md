@@ -102,14 +102,14 @@ class LRUCache:
 #### Walkthrough (when `cap=2`)
 - `put(1,1)`: cache = {1:1}, list = [(head), 1, (tail)].
 - `put(2,2)`: cache = {1:1, 2:2}, list = [(head), 1, 2, (tail)].
-- `get(1)`: returns 1, list = [(head), 2, 1, (tail)].
-- `put(3,3)`: evicts 2 (LRU), cache = {1:1, 3:3}.
+- `get(1)`: returns 1, list = [(head), 2, 1, (tail)] — `1` moves to the front (most-recently used).
+- `put(3,3)`: evicts `2` (the LRU, now at `tail.prev`), cache = {1:1, 3:3}.
 - `get(2)`: returns -1.
 
 #### Why this works
 - Hash map → O(1) lookup.
-- Doubly-linked list → O(1) insertion/removal, and we always know the LRU (tail.prev).
-- The list maintains usage order: most-recent at head.next, least-recent at tail.prev.
+- Doubly-linked list → O(1) insertion/removal, and we always know the LRU (`tail.prev`).
+- The list maintains usage order: **most-recent at `head.next`** (touching head), **least-recent at `tail.prev`** (touching tail). `_add` inserts after head; `_remove` unlinks a node.
 
 #### Alternative (Python idiomatic)
 ```python
@@ -158,7 +158,7 @@ def ladder_length(begin: str, end: str, word_list: list[str]) -> int:
     return 0
 ```
 
-- **Time:** O(L · 26 · N). **Space:** O(N).
+- **Time:** O(L · 26 · B), where L is the word length and B is the BFS frontier (≤ N). **Space:** O(N) for the visited set + queue.
 - **Sample:** `begin="hit", end="cog", list=["hot","dot","dog","lot","log","cog"]` → `5` (hit→hot→dot→dog→cog).
 
 ---
@@ -222,7 +222,7 @@ This is the full 45-min mock. **Time yourself.**
 > No. We need to know the LRU, and the LRU is the only thing that changes order. Either we store the order (list, O(n) total) or we use a structure that can answer "what's the LRU?" in O(1) (heap with timestamps, but then update is O(log n)).
 
 **Q6 — "What's Word Ladder's complexity?"**
-> O(L · 26 · N) time, O(N) space. L = word length, N = word list size. BFS guarantees shortest path.
+> O(L · 26 · B) time where B is the BFS frontier size (≤ N), O(N) space. L = word length, N = word list size. BFS guarantees shortest path.
 
 **Q7 — "How would you return ALL shortest paths in Word Ladder?"**
 > BFS to find min depth, then DFS with backtracking from end to begin, only using edges that are at min depth. Or BFS building a parent graph, then DFS from end.

@@ -147,8 +147,8 @@ def min_window(s: str, t: str) -> str:
 **Fix:** always do `have[out] -= 1` and re-check `satisfied`.
 
 ### Bug 2: last[ch] check doesn't account for window
-**Symptom:** `s="abba"`, expected `2`, got `1`.
-**Fix:** `if ch in last and last[ch] >= l`. The old index is outside the window.
+**Symptom:** A naive version that doesn't check `last[ch] >= l` returns the wrong answer for `s="abba"`. With the buggy version, when we see the second `a` at index 3, we jump `l` back to `0` (where the first `a` is), but the first `a` is no longer in the window. Correct answer is `2` (e.g. `"ab"` or `"bb"`).
+**Fix:** `if ch in last and last[ch] >= l`. The old index is outside the current window — only jump `l` if the old index is still in the window.
 
 ### Bug 3: max_area only moves the smaller side
 **Symptom:** swap the conditional, area is wrong.

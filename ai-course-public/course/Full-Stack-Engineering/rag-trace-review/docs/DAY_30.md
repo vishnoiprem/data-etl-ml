@@ -98,6 +98,14 @@ class UF:
 
 ## 3. Coding (30 min)
 
+> **Note on `Node` class:** Problems 2 and 3 use a different `Node` class than Day 29 (LeetCode's `Node` has `val` and `neighbors`, not `v`/`left`/`right`). Define it once at the top of your file:
+> ```python
+> class Node:
+>     def __init__(self, val=0, neighbors=None):
+>         self.val = val
+>         self.neighbors = neighbors if neighbors is not None else []
+> ```
+
 Solve **3 problems**, ~10 min each.
 
 ### Problem 1: Number of Islands
@@ -171,8 +179,12 @@ def pacific_atlantic(heights: list[list[int]]) -> list[list[int]]:
                     seen.add((nr, nc))
                     q.append((nr, nc))
         return seen
-    pac = bfs([(0, c) for c in range(C)] + [(r, 0) for r in range(1, R)])
-    atl = bfs([(R-1, c) for c in range(C)] + [(r, C-1) for r in range(R-1)])
+    # Pacific: top row + left column (skip (0,0) — already in top row)
+    pac_starts = [(0, c) for c in range(C)] + [(r, 0) for r in range(1, R)]
+    # Atlantic: bottom row + right column (skip (R-1, C-1) — already in bottom row)
+    atl_starts = [(R-1, c) for c in range(C)] + [(r, C-1) for r in range(R - 1)]
+    pac = bfs(pac_starts)
+    atl = bfs(atl_starts)
     return [list(p) for p in (pac & atl)]
 ```
 
@@ -188,8 +200,8 @@ def pacific_atlantic(heights: list[list[int]]) -> list[list[int]]:
 **Fix:** only 4 directions. Diagonals = 8 directions (separate problem).
 
 ### Bug 2: course schedule misses self-loop
-**Symptom:** `prereq = [[0, 0]]` returns True.
-**Fix:** `indeg[0] = 1`. Topological sort correctly identifies the cycle (taken=0).
+**Symptom:** A naive version that skips indegree computation (or uses an adjacency-only check) returns `True` for `prereq = [[0, 0]]` — it sees an edge but doesn't notice the cycle.
+**Fix:** correctly compute `indeg[a] += 1` for each prereq `[a, b]`. With `[[0, 0]]`, indeg becomes `[1, 0]`, queue is empty, `taken=0`, so the function correctly returns `False`.
 
 ### Bug 3: pacific_atlantic reverses the flow
 **Symptom:** water can't flow up, but the result includes cells that only flow up.

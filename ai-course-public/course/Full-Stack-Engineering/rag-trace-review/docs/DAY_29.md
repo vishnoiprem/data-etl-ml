@@ -108,7 +108,7 @@ def is_valid_bst(root: Optional[Node]) -> bool:
 
 ### Problem 3: Lowest Common Ancestor
 
-Given a BST, find LCA of two nodes.
+Given the root of a BST and two target values `p` and `q`, find the value of the LCA (lowest common ancestor).
 
 ```python
 def lca_bst(root: Optional[Node], p: int, q: int) -> Optional[int]:
@@ -124,6 +124,7 @@ def lca_bst(root: Optional[Node], p: int, q: int) -> Optional[int]:
 ```
 
 - **Time:** O(h) iterative, O(h) recursive.
+- **Note:** the LeetCode version takes `TreeNode` objects, not values. Same algorithm — compare by value via the nodes' `.val` field.
 - **Variant (binary tree, not BST):** use parent pointers or store paths from root to each node, then compare.
 
 ---
@@ -178,7 +179,7 @@ def test_lca_bst():
 ## 5. Mock interview practice (20 min)
 
 **Q1 — "Iterative BFS or recursive DFS — which is faster?"**
-> BFS uses a heap-allocated queue; recursion uses the call stack. In practice, BFS is slightly faster per call but uses more memory.
+> BFS uses a heap-allocated `deque`; recursion uses the call stack. In practice, BFS is slightly faster per call (deque operations are O(1) amortized) but uses more memory (each queue entry is a heap object vs. a stack frame). For trees, iterative DFS with an explicit stack is often faster than recursive DFS.
 
 **Q2 — "How do you handle a tree so deep it blows the stack?"**
 > Convert to iterative with an explicit stack. Or use a chunked traversal (process 1000 nodes at a time).

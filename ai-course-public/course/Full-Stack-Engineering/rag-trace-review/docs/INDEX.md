@@ -11,7 +11,7 @@
 - [ ] Explain each design choice in a Meta L6 interview.
 - [ ] Build and run the entire project locally.
 
-## 26-Day Plan (90 min/day: 10 + 20 + 30 + 20 + 20)
+## 32-Day Plan (90 min/day: 10 + 20 + 30 + 20 + 20)
 
 ### Core full-stack (Days 1–21)
 | Day | Module | Topic |
@@ -98,18 +98,11 @@ curl 'http://localhost:8000/traces?limit=2'
 Script: `/tmp/fix_review_100.sh`
 Stable result: **100 / 100**
 
-## Grading Rubric (used by every day)
-| Area | Score |
-|---|---|
-| Correctness | /10 |
-| Code quality | /10 |
-| Debugging | /10 |
-| API design | /10 |
-| Frontend implementation | /10 |
-| Performance | /10 |
-| Testing | /10 |
-| Communication | /10 |
-| **Total** | **/80** |
+## Grading Rubric
+**Days 1–26 (full-stack, system design, AI):** 8 areas × 10 = **/80**.
+- Correctness, Code quality, Debugging, API design, Frontend implementation, Performance, Testing, Communication.
+- Pass: ≥ 56/80 (≥ 70%). Distinction: ≥ 64/80 (≥ 80%).
 
-**Pass mark:** ≥ 56/80 (≥ 70%).
-**Distinction:** ≥ 64/80 (≥ 80%).
+**Days 27–32 (algorithms):** 6 areas × 10 = **/60** (API design and Frontend implementation are N/A).
+- Correctness, Code quality, Debugging, Performance, Testing, Communication.
+- Pass: ≥ 42/60 (≥ 70%). Distinction: ≥ 48/60 (≥ 80%).

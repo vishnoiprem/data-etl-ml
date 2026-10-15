@@ -112,9 +112,9 @@ def top_k_frequent(nums: list[int], k: int) -> list[int]:
 
 ## 4. Debugging & tests (20 min)
 
-### Bug 1: two_sum returns same index twice
-**Symptom:** `nums = [3,3]`, `target = 6`, returns `[1,1]`.
-**Fix:** check if `need in seen` before adding current to `seen`. (Order matters.)
+### Bug 1: two_sum uses the same element twice
+**Symptom:** A naive version with `if v in seen: return [seen[v], i]` works for distinct values, but for `nums = [3,3]`, target = 6 it returns `[0, 1]` (correct). However, a version that doesn't check `need in seen` BEFORE inserting current can match the wrong pair.
+**Fix:** always check `need in seen` before writing to `seen[v] = i`. Order matters.
 
 ### Bug 2: group_anagrams mutates the dict key
 **Symptom:** later, the groups are wrong because keys changed.
@@ -131,7 +131,7 @@ def top_k_frequent(nums: list[int], k: int) -> list[int]:
 ```python
 def test_two_sum():
     assert sorted(two_sum([2,7,11,15], 9)) == [0, 1]
-    assert two_sum([3,3], 6) == [1, 1]  # same value OK
+    assert two_sum([3,3], 6) == [0, 1]  # same value, distinct indices
 
 def test_group_anagrams():
     g = group_anagrams(["eat","tea","tan","ate","nat","bat"])
