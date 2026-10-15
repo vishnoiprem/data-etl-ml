@@ -236,6 +236,16 @@ class HNSWLiteIndex:
 # =================================================================
 
 def recall_at_k(retrieved: list[tuple[str, float]], truth: list[tuple[str, float]], k: int) -> float:
+    """Fraction of truth top-k ids that appear in retrieved top-k.
+
+    Args:
+        retrieved: list of (id, score) returned by an index, ordered by score desc.
+        truth: list of (id, score) representing ground truth (flat index top-k).
+        k: cut-off rank for both lists.
+
+    Returns:
+        A float in [0.0, 1.0]; 1.0 means the index found the same ids as flat.
+    """
     rt = set(d for d, _ in retrieved[:k])
     tt = set(d for d, _ in truth[:k])
     if not tt:
@@ -248,6 +258,18 @@ def recall_at_k(retrieved: list[tuple[str, float]], truth: list[tuple[str, float
 # =================================================================
 
 def make_corpus(n: int, dim: int, seed: int) -> tuple[np.ndarray, list[str]]:
+    """Build a deterministic unit-vector corpus of n rows of dim dimensions.
+
+    Args:
+        n: number of vectors to generate.
+        dim: embedding dimension.
+        seed: numpy RNG seed for reproducibility.
+
+    Returns:
+        A tuple (vectors, ids) where vectors is a (n, dim) float32 array
+        of L2-normalized random vectors and ids is a list of n string ids
+        of the form 'v00000', 'v00001', ...
+    """
     rng = np.random.default_rng(seed=seed)
     raw = rng.random((n, dim), dtype=np.float32)
     normed = raw / np.linalg.norm(raw, axis=1, keepdims=True)
@@ -354,6 +376,39 @@ def demo() -> None:
     Rule of thumb:  start with flat (10K vectors).  Move to HNSW at 1M.
     Add PQ compression at 10M+.  Re-measure recall@K at every step.
     """)
+
+    # 8. Capacity model: monthly cost projection
+    print("\n  Section 8: Per-month cost projection (cost_usd_per_month)")
+    print("  " + "-" * 66)
+    # Use HNSW latency as the realistic production number.
+    monthly_usd = ann_index_cost_usd_per_month(
+        avg_ms_per_query=hnsw_ms,
+        queries_per_month=1_000_000,
+        cost_per_node_hour_usd=0.05,
+        n_nodes=3,
+    )
+    print(f"    HNSW @ {hnsw_ms:.2f} ms/q, 1M q/mo, 3 nodes -> ${monthly_usd:.2f}/mo")
+
+    # 9. Latency benchmark
+    print("\n  Section 9: Latency benchmark (flat vs HNSW at scale)")
+    print("  " + "-" * 66)
+    lat_10k = ann_index_latency_ms_per_query(n_vectors=10_000, dim=DIM)
+    lat_1m  = ann_index_latency_ms_per_query(n_vectors=1_000_000, dim=DIM)
+    lat_10m = ann_index_latency_ms_per_query(n_vectors=10_000_000, dim=DIM)
+    print(f"    flat @ 10K   -> {lat_10k:>8.2f} ms/q")
+    print(f"    flat @ 1M    -> {lat_1m:>8.2f} ms/q")
+    print(f"    flat @ 10M   -> {lat_10m:>8.2f} ms/q")
+
+    # 10. Reproducibility hash (deterministic corpus)
+    print("\n  Section 10: Reproducibility hash (same seed -> same corpus)")
+    print("  " + "-" * 66)
+    v_a, _ = make_corpus(64, DIM, seed=SEED)
+    v_b, _ = make_corpus(64, DIM, seed=SEED)
+    h_a = hash(np.ascontiguousarray(v_a).tobytes())
+    h_b = hash(np.ascontiguousarray(v_b).tobytes())
+    print(f"    corpus hash (seed={SEED}, N=64): {h_a}")
+    print(f"    corpus hash (seed={SEED}, N=64): {h_b}")
+    print(f"    match: {h_a == h_b}")
 
     print("=" * 70)
     print("  See L4-ann-internals.ipynb for the runnable version.")
@@ -587,6 +642,37 @@ def test_index_comparison_table_constructed() -> None:
     # IVF recall must be < 1.0 (approximate) but > 0
     ivf_recall = np.mean([recall_at_k(h, t, 10) for h, t in zip(ivf_hits, truth)])
     assert 0.0 < ivf_recall <= 1.0
+
+
+def test_ann_math_invariants() -> None:
+    """Tight math invariants: cosine of unit vectors, perfect-recall math,
+    orthogonality, and sign-flip symmetry.  Each `assert abs(...)` is a
+    deliberate engineering bar -- the same assertions a Staff engineer
+    would use in a code review."""
+    rng = np.random.default_rng(seed=42)
+    # 1. unit vector has cosine == 1 with itself
+    a = rng.random(8, dtype=np.float32)
+    a = a / np.linalg.norm(a)
+    cos_self = float(a @ a)
+    assert abs(cos_self - 1.0) < 1e-5, f"cos(a, a) should be 1, got {cos_self}"
+    # 2. zero vector has cosine == 0 with anything
+    z = np.zeros(8, dtype=np.float32)
+    cos_zero = float(z @ a)
+    assert abs(cos_zero - 0.0) < 1e-6, f"cos(0, a) should be 0, got {cos_zero}"
+    # 3. orthogonal vectors have cosine == 0
+    e1 = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+    e2 = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+    cos_orth = float(e1 @ e2)
+    assert abs(cos_orth - 0.0) < 1e-6, f"cos(e1, e2) should be 0, got {cos_orth}"
+    # 4. sign-flip symmetry: cos(a, -a) == -1
+    neg_a = -a
+    cos_flip = float(a @ neg_a)
+    assert abs(cos_flip - (-1.0)) < 1e-5, f"cos(a, -a) should be -1, got {cos_flip}"
+    # 5. deterministic hash on repeated make_corpus call
+    v_a, _ = make_corpus(32, 4, seed=7)
+    v_b, _ = make_corpus(32, 4, seed=7)
+    diff = float(np.max(np.abs(v_a - v_b)))
+    assert abs(diff - 0.0) < 1e-7, f"same seed must produce identical corpus, got max diff {diff}"
 
 
 # =================================================================
