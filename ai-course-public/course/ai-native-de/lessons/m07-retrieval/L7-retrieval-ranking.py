@@ -41,6 +41,8 @@ SEED = 11
 TOP_K = 5
 RRF_K = 60           # RRF constant; standard value
 MMR_LAMBDA = 0.7     # 1.0 = relevance only; 0.0 = diversity only
+BM25_K1 = 1.5        # term-frequency saturation; Okapi default
+BM25_B = 0.75        # document-length normalization; Okapi default
 RETRIEVAL_LATENCY_BUDGET_MS = 50.0   # soft target for a 10-doc corpus
 
 

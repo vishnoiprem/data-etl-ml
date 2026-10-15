@@ -952,10 +952,23 @@ def test_product_event_store_latency_under_budget() -> None:
     )
 
 
-def test_run_demo_seed_42_runs_cleanly(capsys) -> None:
-    """Reproducible demo path; same data, explicit seed."""
-    run_demo_seed_42(seed=42)
-    out = capsys.readouterr().out
+def test_run_demo_seed_42_runs_cleanly(capsys=None) -> None:
+    """Reproducible demo path; same data, explicit seed.
+
+    Accepts an optional `capsys` pytest fixture for captured-output checks;
+    when called directly (e.g. from the notebook's inspect.getmembers loop)
+    we capture stdout via a temporary redirect.
+    """
+    import io as _io
+    import contextlib as _cl
+    if capsys is not None:
+        run_demo_seed_42(seed=42)
+        out = capsys.readouterr().out
+    else:
+        buf = _io.StringIO()
+        with _cl.redirect_stdout(buf):
+            run_demo_seed_42(seed=42)
+        out = buf.getvalue()
     assert "p50 query" in out
     assert "p95" in out
     assert "ms" in out

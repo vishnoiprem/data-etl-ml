@@ -877,8 +877,8 @@ def test_staff_design_math_invariants() -> None:
     `assert abs(...)` is a deliberate engineering bar -- the same
     assertions a Staff engineer would use in a code review."""
     # 1. cost scales linearly with n_instances
-    c_lo = staff_design_cost_per_month(n_instances=2)
-    c_hi = staff_design_cost_per_month(n_instances=20)
+    c_lo = staff_design_cost_per_month(n_instances=2, storage_gb=0.0, nines_target=0.0, replication_overhead=1.0)
+    c_hi = staff_design_cost_per_month(n_instances=20, storage_gb=0.0, nines_target=0.0, replication_overhead=1.0)
     assert abs(c_hi - 10.0 * c_lo) < 1e-6
     # 2. zero storage -> baseline cost only
     c_no_storage = staff_design_cost_per_month(n_instances=4, storage_gb=0.0)

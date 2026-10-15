@@ -269,6 +269,8 @@ class RAGAnswer:
 class RAGPipeline:
     retriever: Retriever = field(default_factory=Retriever)
     llm: MockLLM = field(default_factory=MockLLM)
+    top_k: int = 3
+    chunks: list = field(default_factory=list)
     call_count: int = 0
     total_input_tokens: int = 0
     total_output_tokens: int = 0

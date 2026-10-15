@@ -141,6 +141,11 @@ class AccessControlList:
         # 3. default deny
         return PERM_NONE
 
+    def permission_for(self, user: str, user_groups: Iterable[str]) -> str | None:
+        """Alias of `allow` that returns None when no permission is granted."""
+        perm = self.allow(user, user_groups)
+        return perm if perm != PERM_NONE else None
+
 
 # =================================================================
 # SECTION 2  --  PromptSanitizer

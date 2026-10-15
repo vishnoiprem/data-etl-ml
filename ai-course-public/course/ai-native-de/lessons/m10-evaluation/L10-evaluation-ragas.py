@@ -791,8 +791,8 @@ def test_eval_math_invariants() -> None:
     a3 = detect_regressions(RAGASScores(0.8, 0.8, 0.8), RAGASScores(0.6, 0.6, 0.6), threshold=0.05)
     assert len(a3) == 3
     assert all(alert.is_regression for alert in a3)
-    # 9. detect_regressions: threshold = 0.1 catches 5% drops
-    a5 = detect_regressions(RAGASScores(1.0, 1.0, 1.0), RAGASScores(0.95, 0.95, 0.95), threshold=0.1)
+    # 9. detect_regressions: threshold = 0.1 catches 11% drops (strict <)
+    a5 = detect_regressions(RAGASScores(1.0, 1.0, 1.0), RAGASScores(0.89, 0.89, 0.89), threshold=0.1)
     assert len(a5) == 3
     assert all(alert.is_regression for alert in a5)
     # 10. EvalResult equality (same query, answer, scores -> equal)

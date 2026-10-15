@@ -1204,12 +1204,12 @@ def test_platform_math_invariants() -> None:
     `assert abs(...)` is a deliberate engineering bar -- the same
     assertions a Staff engineer would use in a code review."""
     # 1. cost scales linearly with storage_gb
-    c_lo = platform_cost_per_month(storage_gb=1.0)
-    c_hi = platform_cost_per_month(storage_gb=10.0)
+    c_lo = platform_cost_per_month(storage_gb=1.0, compute_hours_per_month=0.0, network_gb_per_month=0.0)
+    c_hi = platform_cost_per_month(storage_gb=10.0, compute_hours_per_month=0.0, network_gb_per_month=0.0)
     assert abs(c_hi - 10.0 * c_lo) < 1e-6
     # 2. cost scales linearly with compute_hours_per_month
-    c_100 = platform_cost_per_month(storage_gb=0.0, compute_hours_per_month=100.0)
-    c_500 = platform_cost_per_month(storage_gb=0.0, compute_hours_per_month=500.0)
+    c_100 = platform_cost_per_month(storage_gb=0.0, compute_hours_per_month=100.0, network_gb_per_month=0.0)
+    c_500 = platform_cost_per_month(storage_gb=0.0, compute_hours_per_month=500.0, network_gb_per_month=0.0)
     assert abs(c_500 - 5.0 * c_100) < 1e-6
     # 3. cost scales linearly with network_gb_per_month
     c_n1 = platform_cost_per_month(storage_gb=0.0, compute_hours_per_month=0.0, network_gb_per_month=10.0)
