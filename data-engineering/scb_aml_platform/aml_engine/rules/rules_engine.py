@@ -58,8 +58,22 @@ class RuleAlert:
 
 
 def _make_alert_id(rule_id: str, customer_id: str) -> str:
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    return f"ALT_{rule_id}_{customer_id[:8]}_{ts}"
+    """Generate a unique alert ID.
+
+    The previous version used a per-second timestamp + customer_id prefix,
+    which collided when a customer triggered the same rule twice in the
+    same second (not unusual for high-volume CTR scenarios). Now includes
+    a monotonic sequence number + microsecond precision, so two alerts
+    generated in the same call are guaranteed distinct.
+    """
+    # Module-level sequence counter survives across calls in the same
+    # process. Wrap with a lock if you call this from multiple threads.
+    _make_alert_id._seq += 1
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+    return f"ALT_{rule_id}_{customer_id[:8]}_{ts}_{_make_alert_id._seq:04d}"
+
+
+_make_alert_id._seq = 0  # type: ignore[attr-defined]
 
 
 # ─────────────────────────────────────────────
