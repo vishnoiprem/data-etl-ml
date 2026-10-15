@@ -688,10 +688,23 @@ def test_knn_p95_under_budget_benchmark_is_deterministic_per_seed() -> None:
     assert b["budget_ok"]
 
 
-def test_run_demo_seed_42_runs_cleanly(capsys) -> None:
-    """run_demo_seed_42() is the reproducible variant of demo()."""
-    run_demo_seed_42(seed=42)
-    out = capsys.readouterr().out
+def test_run_demo_seed_42_runs_cleanly(capsys=None) -> None:
+    """run_demo_seed_42() is the reproducible variant of demo().
+
+    Accepts an optional `capsys` pytest fixture; when called directly
+    (e.g. from the notebook's inspect.getmembers loop) we capture stdout
+    via a temporary redirect.
+    """
+    import io as _io
+    import contextlib as _cl
+    if capsys is not None:
+        run_demo_seed_42(seed=42)
+        out = capsys.readouterr().out
+    else:
+        buf = _io.StringIO()
+        with _cl.redirect_stdout(buf):
+            run_demo_seed_42(seed=42)
+        out = buf.getvalue()
     assert "KNN p95" in out
     assert "Projected monthly cost" in out
     assert "ms" in out
