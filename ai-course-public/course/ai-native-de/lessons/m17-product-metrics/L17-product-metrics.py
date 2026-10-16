@@ -565,10 +565,40 @@ def _build_synthetic_store() -> EventStore:
 # SECTION 9  --  Demo
 # =================================================================
 
+def build_default_store(seed: int = SEED) -> EventStore:
+    """Public alias of `_build_synthetic_store` for external callers and tests.
+
+    Returns a deterministic 30-day event store seeded by `seed` so that
+    downstream metric, A/B, and funnel computations are reproducible.
+    """
+    return _build_synthetic_store()
+
+
 def demo() -> None:
+    """Run a structured, 11-section walkthrough of the M17 product metrics + SQL/Python pipeline.
+
+    Prints the architecture, the synthetic 30-day event store, the 8 metric definitions,
+    the SQL sample for DAU, an A/B test report, a funnel analysis, latency percentiles,
+    the cost model, the latency SLO check, retention-d7, and the ragas quality score.
+    No args, no return. Side effect: stdout banners.
+    """
     print("=" * 70)
     print(f"  {LESSON_NUMBER}  --  Product Metrics + SQL/Python")
     print("=" * 70)
+    print()
+    print("  Architecture (M17 funnel + metrics):")
+    print()
+    print("    [user] --> [login] --> [view_ai] --> [ai_query] --> [thumbs_up]")
+    print("                |              |            |")
+    print("                v              v            v")
+    print("              [EventStore]   [EventStore] [EventStore]")
+    print("                              |            |")
+    print("                              v            v")
+    print("                          [compute_metric] [compute_lift]")
+    print("                              |            |")
+    print("                              v            v")
+    print("                          [report]    [p_value]")
+    print()
 
     store = _build_synthetic_store()
     today = datetime(2026, 10, 15)
@@ -644,6 +674,30 @@ def demo() -> None:
     print(f"    p99:  {_percentile(latencies, 0.99):>7.1f} ms")
     print(f"    max:  {max(latencies):>7.1f} ms")
     print(f"    n:    {len(latencies):>7}")
+
+    # 8. Cost model
+    print("\n  Section 8: Product cost model")
+    print("  " + "-" * 66)
+    monthly_cost = product_cost_usd_per_month()
+    print(f"    @ 5,000 events/day, 1M events/mo, $0.015/1k events: ${monthly_cost:.2f}/mo")
+
+    # 9. Latency SLO
+    print("\n  Section 9: Latency SLO check")
+    print("  " + "-" * 66)
+    p50, p95 = product_event_store_latency_ms(store, "ai_query")
+    print(f"    ai_query p50: {p50:.2f} ms   p95: {p95:.2f} ms   (budget 100 ms)")
+
+    # 10. Retention (d7)
+    print("\n  Section 10: Retention (d7)")
+    print("  " + "-" * 66)
+    ret = compute_metric(next(m for m in METRICS if m.name == "retention_d7"), store, today)
+    print(f"    retention_d7: {ret:.3f}")
+
+    # 11. Quality (ragas)
+    print("\n  Section 11: Quality (ragas)")
+    print("  " + "-" * 66)
+    ragas = compute_metric(next(m for m in METRICS if m.name == "quality_ragas"), store, today)
+    print(f"    quality_ragas: {ragas:.3f}")
 
     print("=" * 70)
     print("  See L17-product-metrics.ipynb for the runnable version.")
