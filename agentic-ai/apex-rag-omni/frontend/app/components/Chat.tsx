@@ -69,7 +69,20 @@ interface ChatMessage {
   stopped?: boolean; // user hit Stop
   error?: string;
   feedback?: "up" | "down";
+  explain?: Explain;
 }
+
+interface Explain {
+  text: string;
+  streaming: boolean;
+  model?: string;
+  verdict?: "pass" | "warn" | "fail";
+  reason?: string | null;
+  error?: string;
+  skipped?: boolean;
+}
+
+interface Caps { explain: boolean; model: string | null; model_is_local: boolean }
 
 interface ChatSession {
   id: string;
@@ -82,6 +95,7 @@ interface ChatSession {
 const STORAGE_KEY = "apex_api_key";
 const API_BASE_STORAGE_KEY = "apex_api_base";
 const SESSIONS_STORAGE_KEY = "apex_chat_sessions";
+const EXPLAIN_STORAGE_KEY = "apex_explain";
 // Set NEXT_PUBLIC_API_BASE=/api in production (same-origin via the reverse proxy).
 const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const DEFAULT_API_KEY = "devkey-change-me";
@@ -129,6 +143,10 @@ function sanitize(sessions: ChatSession[]): ChatSession[] {
   return sessions.map((s) => ({
     ...s,
     messages: s.messages.map((m) =>
+      m.explain?.streaming
+        ? { ...m, explain: { ...m.explain, streaming: false, error: m.explain.text ? undefined : "Interrupted" } }
+        : m,
+    ).map((m) =>
       m.pending || m.streaming
         ? {
             ...m,
@@ -180,12 +198,18 @@ interface StreamHandlers {
   }) => void;
   onToken: (delta: string) => void;
   onDone: (d: { trace_id: string; evidence: Evidence; timing_ms: Timing }) => void;
+  onExplain?: (e:
+    | { type: "start"; model: string }
+    | { type: "token"; delta: string }
+    | { type: "end"; verdict: "pass" | "warn" | "fail"; reason: string | null; text: string; model: string }
+    | { type: "skipped" }
+    | { type: "error"; message: string }) => void;
 }
 
 async function streamQuery(
   apiBase: string,
   apiKey: string,
-  body: { collection: Collection; query: string },
+  body: { collection: Collection; query: string; explain?: boolean },
   signal: AbortSignal,
   h: StreamHandlers,
 ): Promise<void> {
@@ -236,7 +260,12 @@ async function streamQuery(
       else if (event === "done") {
         finished = true;
         h.onDone(payload);
-      } else if (event === "error") throw new Error(payload.message);
+      } else if (event === "explain_start") h.onExplain?.({ type: "start", model: payload.model });
+      else if (event === "explain_token") h.onExplain?.({ type: "token", delta: payload.delta });
+      else if (event === "explain_end") h.onExplain?.({ type: "end", ...payload });
+      else if (event === "explain_skipped") h.onExplain?.({ type: "skipped" });
+      else if (event === "explain_error") h.onExplain?.({ type: "error", message: payload.message });
+      else if (event === "error") throw new Error(payload.message);
     }
   }
   if (!finished) throw new Error("Connection closed before the answer finished.");
@@ -386,6 +415,8 @@ export default function Chat() {
   const [busy, setBusy] = useState<boolean>(false);
   const [atBottom, setAtBottom] = useState<boolean>(true);
   const [hydrated, setHydrated] = useState<boolean>(false);
+  const [caps, setCaps] = useState<Caps | null>(null);
+  const [explainOn, setExplainOn] = useState<boolean>(true);
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -400,6 +431,9 @@ export default function Chat() {
   useEffect(() => {
     setApiKey(readKey());
     setApiBase(readApiBase());
+    try {
+      setExplainOn(window.localStorage.getItem(EXPLAIN_STORAGE_KEY) !== "off");
+    } catch { /* default on */ }
     const loaded = loadSessions();
     if (loaded.length > 0) {
       setSessions(loaded);
@@ -413,6 +447,23 @@ export default function Chat() {
     setHydrated(true);
     inputRef.current?.focus();
   }, [newSession]);
+
+  // What this backend can do (is a free model configured?).
+  useEffect(() => {
+    let live = true;
+    fetch(`${apiBase}/capabilities`, { headers: { "X-API-Key": apiKey } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((c) => live && setCaps(c))
+      .catch(() => live && setCaps(null));
+    return () => { live = false; };
+  }, [apiBase, apiKey]);
+
+  const toggleExplain = useCallback(() => {
+    setExplainOn((v) => {
+      try { window.localStorage.setItem(EXPLAIN_STORAGE_KEY, v ? "off" : "on"); } catch { /* ignore */ }
+      return !v;
+    });
+  }, []);
 
   // Persist (never before hydration — would clobber stored chats).
   useEffect(() => {
@@ -478,7 +529,7 @@ export default function Chat() {
         await streamQuery(
           apiBase,
           apiKey,
-          { collection: session.collection, query },
+          { collection: session.collection, query, explain: explainOn && !!caps?.explain },
           ctrl.signal,
           {
             onMeta: (traceId) =>
@@ -514,6 +565,16 @@ export default function Chat() {
                 flags: d.evidence.flags,
                 timing: d.timing_ms,
               })),
+            onExplain: (e) =>
+              patchMessage(sid, assistantId, (m) => {
+                const cur: Explain = m.explain ?? { text: "", streaming: true };
+                if (e.type === "start") return { ...m, explain: { text: "", streaming: true, model: e.model } };
+                if (e.type === "token") return { ...m, explain: { ...cur, streaming: true, text: cur.text + e.delta } };
+                if (e.type === "end")
+                  return { ...m, explain: { text: e.text, streaming: false, model: e.model, verdict: e.verdict, reason: e.reason } };
+                if (e.type === "skipped") return { ...m, explain: { text: "", streaming: false, skipped: true } };
+                return { ...m, explain: { ...cur, streaming: false, error: e.message } };
+              }),
           },
         );
       } catch (e: unknown) {
@@ -531,7 +592,7 @@ export default function Chat() {
         setBusy(false);
       }
     },
-    [apiBase, apiKey, patchMessage],
+    [apiBase, apiKey, patchMessage, explainOn, caps],
   );
 
   const sendQuery = useCallback(
@@ -816,6 +877,23 @@ export default function Chat() {
               </button>
             )}
           </div>
+          <div className="apex-explain-row">
+            {caps?.explain ? (
+              <button
+                type="button"
+                className={`apex-chip ${explainOn ? "apex-chip--on" : ""}`}
+                onClick={toggleExplain}
+                aria-pressed={explainOn}
+                title={`After each answer, ${caps.model} explains it in plain words. ${caps.model_is_local ? "Runs on this machine; nothing leaves it." : "Sends the question and the cited passages to the model provider."}`}
+              >
+                ✨ Explain in plain words: {explainOn ? "on" : "off"}
+              </button>
+            ) : (
+              <span className="apex-chip apex-chip--off" title="Set APEX_MODEL_GATEWAY_URL to a free model (Ollama, Groq, OpenRouter). See README.">
+                ✨ Plain-words explanation: not set up
+              </span>
+            )}
+          </div>
           <div className="apex-fineprint">
             Answers are grounded in retrieved sources. Enter to send · Shift+Enter for a new line
           </div>
@@ -1006,6 +1084,34 @@ function SessionItem({
   );
 }
 
+/* ---------- Plain-words explanation ---------- */
+
+function ExplainCard({ ex, spanCount, onCite }: { ex: Explain; spanCount: number; onCite: CiteFn }) {
+  if (ex.error)
+    return <div className="apex-explain apex-explain--muted">Couldn't generate an explanation ({ex.error}). The sourced answer above is unaffected.</div>;
+  if (!ex.streaming && ex.verdict === "fail")
+    return (
+      <div className="apex-explain apex-explain--muted">
+        I couldn't verify a plain-words explanation against the sources, so I'm not showing one. The sourced answer above is reliable.
+      </div>
+    );
+  return (
+    <div className="apex-explain">
+      <div className="apex-explain-head">
+        <span>✨ In plain words</span>
+        {ex.model && <span className="apex-explain-model">{ex.model}</span>}
+        {ex.streaming && <span className="apex-explain-status">verifying against sources…</span>}
+        {!ex.streaming && ex.verdict === "pass" && <span className="apex-explain-status apex-explain-status--ok">✓ checked against sources</span>}
+        {!ex.streaming && ex.verdict === "warn" && <span className="apex-explain-status apex-explain-status--warn">⚠ loosely matches sources</span>}
+      </div>
+      <div className="apex-explain-body">
+        {renderRich(ex.text, spanCount, onCite)}
+        {ex.streaming && <span className="apex-caret" aria-hidden />}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Message row ---------- */
 
 function MessageRow({
@@ -1134,6 +1240,10 @@ function MessageRow({
               </div>
             )}
           </>
+        )}
+
+        {msg.explain && !msg.explain.skipped && (
+          <ExplainCard ex={msg.explain} spanCount={spans.length} onCite={onCite} />
         )}
 
         {(done || msg.stopped || msg.error) && (

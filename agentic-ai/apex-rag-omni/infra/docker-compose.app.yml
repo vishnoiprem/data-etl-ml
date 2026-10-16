@@ -10,6 +10,11 @@ services:
       APEX_API_KEYS: ${APEX_PROXY_KEY:?set APEX_PROXY_KEY in .env.prod}${APEX_EXTRA_KEYS:+,${APEX_EXTRA_KEYS}}
       APEX_FRONTEND_ORIGIN: https://${DOMAIN:-localhost}
       APEX_DATA_DIR: /data
+      # Optional free model for plain-words explanations (see README). Ollama on the host:
+      APEX_MODEL_GATEWAY_URL: ${APEX_MODEL_GATEWAY_URL:-}
+      APEX_MODEL_NAME: ${APEX_MODEL_NAME:-qwen2.5:3b}
+      APEX_MODEL_GATEWAY_KEY: ${APEX_MODEL_GATEWAY_KEY:-}
+    extra_hosts: ["host.docker.internal:host-gateway"]
     volumes:
       - apex-data:/data          # uploaded documents  (BACK THIS UP)
       - apex-audit:/app/audit    # audit log

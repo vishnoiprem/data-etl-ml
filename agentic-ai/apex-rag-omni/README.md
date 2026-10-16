@@ -39,11 +39,41 @@ I built APEX-RAG Omni. It's not a demo RAG — it's a sovereign platform designe
 | Streaming chat UI | **Working**: SSE, stop/regenerate/copy/feedback, history. |
 | Document upload | **Working**: txt/md/csv/pdf → passages → searchable + citable, dedupe, per-collection, delete, PII/injection warnings. |
 | Docker + HTTPS deploy | **Working** (Caddy + web + api, login, key injection). Verified locally with Docker. |
+| Plain-words explanation | **Working** with any OpenAI-compatible free model (Ollama/Groq/OpenRouter/Gemini); output verified against the sources, withdrawn if it fails. Tested with a mocked model; run Option A/B to use a real one. |
 | Hallucination gate | **Working**: every answer is checked claim-by-claim (citations resolve, numbers match the source, lexical support); failures are refused. Word/number based, not an LLM judge. |
 | Sanitization | **Working**: input normalisation + prompt-injection refusal (pattern list), PII masked before audit/logs, markup stripped from output. |
 | Auth, CORS, audit queue, cursor-paginated traces | **Working**, tested (time-ordered trace ids, constant-time key check). |
 | Flink CDC freshness, shadow-index dual-write, 100M-doc scale, embedding cost | **Design only.** |
 | Eval metrics | Harness exists; quote only numbers from a real `make eval` run. |
+
+## Plain-words explanations with a free model
+
+After every sourced answer, a small free model can explain it in plain, friendly English ("✨ In plain words"). The model **never finds facts** - retrieval does that. It only re-explains the evidence, and its text is **checked against the cited sources** (every sentence must cite a real source, every number must appear in it, enough of its wording must match, no links). If a check fails, the explanation is removed and you keep the verified answer. Refused answers are never explained.
+
+**Option A - local and private (recommended; ~2 GB disk, no account, no cost)**
+```bash
+brew install ollama            # or https://ollama.com/download
+ollama serve &                 # starts on :11434
+ollama pull qwen2.5:3b         # small multilingual model
+echo 'APEX_MODEL_GATEWAY_URL=http://localhost:11434/v1
+APEX_MODEL_NAME=qwen2.5:3b' >> .env
+make api && make web           # the chat shows "✨ Explain in plain words: on"
+```
+Nothing leaves your machine. On a server with Docker, run Ollama on the host and set `APEX_MODEL_GATEWAY_URL=http://host.docker.internal:11434/v1` in `.env.prod`.
+
+**Option B - free hosted model (needs a free API key; question + cited passages are sent to that provider)**
+
+| Provider | `APEX_MODEL_GATEWAY_URL` | `APEX_MODEL_NAME` (example) |
+|---|---|---|
+| Groq | `https://api.groq.com/openai/v1` | `llama-3.1-8b-instant` |
+| OpenRouter | `https://openrouter.ai/api/v1` | `meta-llama/llama-3.2-3b-instruct:free` |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.0-flash` |
+
+Set `APEX_MODEL_GATEWAY_KEY` too. Free tiers have rate limits and may change; check company data policy before sending internal documents to a hosted provider.
+
+The toggle under the input turns explanations on/off per browser. Leave `APEX_MODEL_GATEWAY_URL` empty to disable the feature; the chip then reads "not set up".
+
+**How it behaves:** the text streams in labelled "verifying against sources…", then shows "✓ checked against sources" (or "⚠ loosely matches"), or is withdrawn with a note. Explanations are English only today, and a small model's wording can be stiff - the sourced answer above it is always the authority.
 
 ## Upload your own documents
 
@@ -120,7 +150,7 @@ Health endpoints for your monitor: `/api/healthz` (liveness). `/api/readyz` repo
 **Know the limits before you expose it**
 - One shared login (HTTP basic auth). Everyone who can log in can upload, delete and read every collection. For per-user access put it behind your SSO (oauth2-proxy/Azure AD in front of Caddy) instead.
 - Single node, local index: fine for thousands of documents; the Qdrant/ES/Flink design in `docs/architecture.md` is **not** deployed by this stack.
-- Answers are extractive (verbatim cited sentences), not a chat model. No per-key rate limiting yet (backlog B3).
+- The main answer is extractive (verbatim cited sentences); only the optional explanation comes from a model. No per-key rate limiting yet (backlog B3).
 - Don't upload secrets or regulated personal data unless your policy allows it; the upload warning is advisory.
 
 ## Run (local development)

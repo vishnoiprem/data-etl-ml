@@ -48,7 +48,8 @@ def _nums(text: str) -> set[str]:
     return {n.replace(",", "").rstrip(".") for n in _NUM.findall(text)}
 
 
-def check_answer(answer: str, spans_text: list[str]) -> HallucinationReport:
+def check_answer(answer: str, spans_text: list[str],
+                 pass_at: float = PASS, fail_at: float = FAIL) -> HallucinationReport:
     lines = [l.strip() for l in answer.splitlines() if l.strip()]
     if not lines:
         return HallucinationReport(0.0, "fail", [])
@@ -71,8 +72,8 @@ def check_answer(answer: str, spans_text: list[str]) -> HallucinationReport:
         missing = _nums(claim) - _nums(evidence)
         if missing:
             problems.append(f"number(s) {sorted(missing)} not found in cited source")
-        results.append(ClaimResult(claim, support, not problems and support >= FAIL, problems))
+        results.append(ClaimResult(claim, support, not problems and support >= fail_at, problems))
     g = sum(r.support for r in results) / len(results)
     hard = any(r.problems for r in results)
-    verdict = "fail" if hard or g < FAIL else ("pass" if g >= PASS else "warn")
+    verdict = "fail" if hard or g < fail_at else ("pass" if g >= pass_at else "warn")
     return HallucinationReport(round(g, 3), verdict, results)

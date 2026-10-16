@@ -14,6 +14,7 @@ Status (updated on branch `feature/apex-rag-omni-chatgpt-review`). Items 1-7 shi
 | 8 | Streaming `/query/stream` (SSE) + measured per-stage timings | **DONE** (feature/apex-rag-omni-chatgpt-review) |
 | 9 | Working local retriever + extractive grounded answerer (replaces stubs) | **DONE** |
 | 10 | Hallucination gate + input/output sanitization + PII redaction in audit | **DONE** |
+| 12 | Optional free-model plain-words explanation, verified against sources | **DONE** (generation of the *answer* by an LLM is still B2) |
 | 11 | Time-ordered trace ids (keyset-pagination correctness), constant-time auth | **DONE** |
 
 9 gaps remain. Listed in execution order. Each is a separate PR.

@@ -47,7 +47,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import audit_queue, document_store
+from . import audit_queue, document_store, explain as explain_mod, llm
 from .local_index import invalidate as _invalidate_index
 from .apex_answerer import (
     EvidenceJSON as AnswererEvidenceJSON, grounded_answer, stream_tokens,
@@ -131,6 +131,9 @@ class QueryRequest(BaseModel):
     # route layer before reaching Qdrant. The dict shape is preserved
     # here for OpenAPI clarity.
     filters: dict[str, str] = Field(default_factory=dict)
+    # Ask the configured (free) model to re-explain the verified answer in
+    # plain words. Only honoured by /query/stream.
+    explain: bool = False
 
 
 class EvidenceSpan(BaseModel):
@@ -365,10 +368,24 @@ def _sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
 
+@app.get("/capabilities")
+async def capabilities(
+    api_key: str = Depends(verify_api_key),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    """What the UI may offer. `explain` is true only when a model endpoint is configured."""
+    ok = llm.is_configured(settings)
+    local = settings.model_gateway_url.startswith(
+        ("http://localhost", "http://127.", "http://host.docker.internal", "http://ollama"))
+    return {"explain": ok, "model": settings.model_name if ok else None,
+            "model_is_local": ok and local}
+
+
 @app.post("/query/stream")
 async def post_query_stream(
     req: QueryRequest,
     api_key: str = Depends(verify_api_key),
+    settings: Settings = Depends(get_settings),
 ) -> StreamingResponse:
     """SSE variant of /query. Event order:
 
@@ -403,6 +420,9 @@ async def post_query_stream(
                 "evidence": ej.model_dump(),
                 "timing_ms": timing,
             })
+            if req.explain and not ej.refused:
+                async for chunk in _explain_events(trace_id, req, ej, settings, api_key):
+                    yield chunk
         except Exception as exc:  # noqa: BLE001 — surfaced to the client
             logger.exception("stream failed trace_id=%s", trace_id)
             yield _sse("error", {"message": str(exc)})
@@ -411,6 +431,49 @@ async def post_query_stream(
         gen(), media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+async def _explain_events(trace_id, req, ej, settings, api_key):
+    """Stream a plain-language explanation of a verified answer, then verify it.
+
+    Events: explain_start | explain_token* | explain_end{verdict,text,...} |
+            explain_skipped{reason} | explain_error{message}
+    The UI shows tokens as they arrive but treats `explain_end` as the
+    authority: on verdict=fail the text is discarded.
+    """
+    if not llm.is_configured(settings):
+        yield _sse("explain_skipped", {"reason": "no_model_configured"})
+        return
+    spans = [s.model_dump() for s in ej.spans]
+    msgs = explain_mod.build_messages(ej.query, ej.answer, spans)
+    yield _sse("explain_start", {"model": settings.model_name})
+    buf = ""
+    try:
+        async for delta in llm.stream_chat(msgs, settings):
+            buf += delta
+            if len(buf) > explain_mod.MAX_CHARS * 2:
+                break  # runaway generation; verification below will fail it
+            yield _sse("explain_token", {"delta": delta})
+    except llm.LLMError as exc:
+        logger.warning("explain failed trace_id=%s: %s", trace_id, exc)
+        yield _sse("explain_error", {"message": str(exc)})
+        return
+    spans_text = [s["text"] for s in spans]
+    text = explain_mod.clean_explanation(buf)
+    text = explain_mod.repair_citations(text, spans_text)
+    verdict, rep, reason = explain_mod.verify_explanation(text, spans_text)
+    await audit_queue.enqueue_audit(
+        trace_id=trace_id, kind="explain", payload={
+            "verdict": verdict, "reason": reason, "model": settings.model_name,
+            "groundedness": rep.groundedness if rep else None,
+            "actor_prefix": safe_key_for_log(api_key),
+        },
+    )
+    yield _sse("explain_end", {
+        "verdict": verdict, "reason": reason, "model": settings.model_name,
+        "groundedness": rep.groundedness if rep else None,
+        "text": text if verdict != "fail" else "",
+    })
 
 
 @app.post("/documents", status_code=status.HTTP_201_CREATED)
