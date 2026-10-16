@@ -1,0 +1,21 @@
+# M07.L7 — Run History (Retrieval + Ranking)
+
+**Latest run:** 100 / 100, 20 tests pass / 0 tests fail, 100 iterations
+
+**Total historical runs:** 5
+
+## Recent runs (last 10)
+
+| Timestamp | Total |
+|---|---:|
+| 2026-10-16T02-15-45Z | 0 |
+| 2026-10-16T02-07-51Z | 0 |
+| 2026-10-15T16-53-32Z | 0 |
+| 2026-10-15T16-52-09Z | 0 |
+| 2026-10-15T16-19-37Z | 0 |
+
+See all runs in this folder: `5 JSONs + matching MDs`
+
+---
+
+*Generated from per-module `_review_100x.py` runs.*
