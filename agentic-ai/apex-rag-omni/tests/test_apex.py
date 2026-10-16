@@ -25,30 +25,30 @@ from eval.harness import (recall_at_k, ndcg_at_k, score_query,
 
 
 class TestRouter:
-    def test_classify_finance(self):
-        assert classify_domain("What was Q3 revenue vs EBITDA?") == Domain.FINANCE
+    def test_classify_hr_policies(self):
+        assert classify_domain("How much PTO do I get?") == Domain.HR_POLICIES
 
-    def test_classify_legal(self):
-        assert classify_domain("Show me the indemnity clause") == Domain.LEGAL
+    def test_classify_tech_docs(self):
+        assert classify_domain("How do I deploy this service on Kubernetes?") == Domain.TECH_DOCS
 
-    def test_classify_medical(self):
-        assert classify_domain("Patient shows symptoms of ICD-10 diagnosis") == Domain.MEDICAL
+    def test_classify_product_docs(self):
+        assert classify_domain("Show me the Q4 feature roadmap epic") == Domain.PRODUCT_DOCS
 
     def test_classify_default(self):
-        assert classify_domain("hello world") == Domain.FINANCE
+        assert classify_domain("hello world") == Domain.HR_POLICIES
 
     def test_hint_overrides(self):
-        assert classify_domain("x", hint=Domain.LEGAL) == Domain.LEGAL
+        assert classify_domain("x", hint=Domain.TECH_DOCS) == Domain.TECH_DOCS
 
     def test_evidence_no_spans_refused(self):
-        ej = build_evidence_json("q", Domain.FINANCE, "ans", spans=[])
+        ej = build_evidence_json("q", Domain.HR_POLICIES, "ans", spans=[])
         assert ej.refused is True
         assert ej.refusal_reason is not None
 
     def test_evidence_with_spans_ok(self):
         from agent.router import EvidenceSpan
         spans = [EvidenceSpan(doc_id="0x1", offset=0, text="t", score=0.9)]
-        ej = build_evidence_json("q", Domain.FINANCE, "ans", spans=spans)
+        ej = build_evidence_json("q", Domain.HR_POLICIES, "ans", spans=spans)
         assert ej.refused is False
         assert len(ej.spans) == 1
 
@@ -95,7 +95,7 @@ class TestAnswerer:
         )
 
     def test_extract_citations(self):
-        ans = "Revenue grew [doc_1] but margins shrank [doc_2]."
+        ans = "PTO accrued [doc_1] but parental leave was capped [doc_2]."
         assert extract_citations(ans) == [1, 2]
 
     def test_enforce_grounded(self):
@@ -113,14 +113,14 @@ class TestAnswerer:
 
     def test_make_answer_refused(self):
         retrieved = [self._doc("a"), self._doc("b")]
-        ej, trace = make_answer("q", Domain.FINANCE, retrieved, "no citations")
+        ej, trace = make_answer("q", Domain.HR_POLICIES, retrieved, "no citations")
         assert ej.refused is True
         assert trace.refused is True
 
     def test_make_answer_grounded(self):
         retrieved = [self._doc("a"), self._doc("b"), self._doc("c"), self._doc("d")]
         ans = "Answer [doc_1] [doc_2] [doc_3] [doc_4] covers everything."
-        ej, trace = make_answer("q", Domain.FINANCE, retrieved, ans)
+        ej, trace = make_answer("q", Domain.HR_POLICIES, retrieved, ans)
         assert ej.refused is False
         assert len(ej.spans) == 4
 

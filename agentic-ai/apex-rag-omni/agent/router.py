@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class Domain(str, Enum):
-    """The three served domains."""
-    FINANCE = "finance"
-    LEGAL = "legal"
-    MEDICAL = "medical"
+    """The three served collections (Omni layer)."""
+    HR_POLICIES = "hr_policies"
+    TECH_DOCS = "tech_docs"
+    PRODUCT_DOCS = "product_docs"
 
 
 class EvidenceSpan(BaseModel):
@@ -64,7 +64,7 @@ def load_template(domain: Domain) -> PromptTemplate:
 
 
 def classify_domain(query: str, hint: Domain | None = None) -> Domain:
-    """Classify the query into one of 3 domains.
+    """Classify the query into one of 3 collections.
 
     Uses a simple keyword heuristic for low latency. In production this
     would be a fine-tuned classifier; for the prototype we trade 1-2% accuracy
@@ -73,19 +73,19 @@ def classify_domain(query: str, hint: Domain | None = None) -> Domain:
     if hint is not None:
         return hint
     q = query.lower()
-    finance_kw = {"revenue", "ebitda", "10-k", "10-q", "audit", "fiscal", "eps"}
-    legal_kw = {"clause", "agreement", "liability", "indemnif", "statute", "case"}
-    medical_kw = {"patient", "diagnosis", "dose", "icd-10", "symptom", "trial"}
-    f = sum(1 for k in finance_kw if k in q)
-    l = sum(1 for k in legal_kw if k in q)
-    m = sum(1 for k in medical_kw if k in q)
-    if m > max(f, l):
-        return Domain.MEDICAL
-    if l > f:
-        return Domain.LEGAL
-    if f > 0:
-        return Domain.FINANCE
-    return Domain.FINANCE  # default
+    hr_kw = {"pto", "vacation", "leave", "policy", "hr", "benefit", "401k", "parental"}
+    tech_kw = {"api", "endpoint", "deploy", "kubernetes", "docker", "service", "ci", "cd"}
+    product_kw = {"feature", "roadmap", "spec", "user", "story", "epic", "mvp"}
+    h = sum(1 for k in hr_kw if k in q)
+    t = sum(1 for k in tech_kw if k in q)
+    p = sum(1 for k in product_kw if k in q)
+    if t > max(h, p):
+        return Domain.TECH_DOCS
+    if p > h:
+        return Domain.PRODUCT_DOCS
+    if h > 0:
+        return Domain.HR_POLICIES
+    return Domain.HR_POLICIES  # default
 
 
 def build_evidence_json(query: str, domain: Domain, answer: str,
