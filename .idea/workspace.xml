@@ -4,26 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="" />
+    <list default="true" id="8b761286-e17e-499e-873c-73dcdf755cec" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
-  </component>
-  <component name="DBNavigator.Project.Workspace.Settings">
-    <assistant-settings>
-      <credential-settings>
-        <credentials />
-      </credential-settings>
-      <profile-settings>
-        <profiles />
-      </profile-settings>
-      <mcp-server-settings>
-        <workspace-integration value="false" />
-        <mcp-servers />
-        <mcp-tool-approvals />
-      </mcp-server-settings>
-    </assistant-settings>
   </component>
   <component name="DockDockBuild.Settings">
     <option name="codePath" value="$PROJECT_DIR$" />
@@ -61,7 +48,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "feat/practice-meta-coding-round",
     "last_opened_file_path": "/Users/prem/PycharmProjects/data-etl-ml/medium/meta/meta-ai",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -93,7 +80,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-c59985aa861c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.24374.152" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.18034.82" />
+        <option value="bundled-python-sdk-975db3bf15a3-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.18034.82" />
       </set>
     </attachedChunks>
   </component>
@@ -107,7 +95,6 @@
       <updated>1791643149916</updated>
       <workItem from="1791643152676" duration="1625000" />
       <workItem from="1791645918419" duration="2227000" />
-      <workItem from="1792136785061" duration="334000" />
     </task>
     <servers />
   </component>

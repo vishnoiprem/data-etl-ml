@@ -475,7 +475,45 @@ def derive_email_from_company(company):
     reg = ".".join(domain.split(".")[-2:]) if domain.count(".") >= 1 else domain
     if reg in BOUNCE_DENY:
         return None
+    # Bounced-recently self-heal: if this domain has bounced at least
+    # once in the last 30 days, return None. The first time we tried it,
+    # the MX probe caught it; this check makes sure we don't try it
+    # again from the scraper (which is upstream of the SMTP path).
+    if _domain_bounced_recently(reg, days=30):
+        return None
     return f"careers@{domain}"
+
+
+def _domain_bounced_recently(domain: str, days: int = 30) -> bool:
+    """True if `domain` has ≥1 bounce in the last `days`.
+
+    Reads from the leads table. Cached for 1h per process to avoid
+    hammering the DB on every lead insert.
+    """
+    if not domain:
+        return False
+    now = time.time()
+    cache = _domain_bounced_recently._cache
+    if domain in cache and cache[domain][1] > now - 3600:
+        return cache[domain][0]
+    try:
+        from db.lead_store import get_cursor
+        with get_cursor() as cur:
+            cur.execute("""
+                SELECT 1 FROM leads
+                WHERE status = 'bounced'
+                  AND LOWER(contact_email) LIKE %s
+                  AND updated_at > NOW() - (%s || ' days')::INTERVAL
+                LIMIT 1
+            """, (f"%@{domain}", str(days)))
+            hit = cur.fetchone() is not None
+    except Exception:
+        hit = False  # fail open
+    cache[domain] = (hit, now)
+    return hit
+
+
+_domain_bounced_recently._cache = {}  # type: ignore[attr-defined]
 
 
 def scrape_remoteok():

@@ -1,0 +1,599 @@
+/* apex-rag-omni — global styles
+ *
+ * Single file, no preprocessor. Kept short: layout, the chat UI,
+ * and the small set of utility classes the components reference.
+ * Dark theme by default, inspired by ChatGPT's "midnight" palette
+ * but with our own accent (a cool teal for citations, a soft amber
+ * for the HR collection).
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0d0d0f;
+  color: #e8e8ea;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+a {
+  color: #6cb6ff;
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+/* ---------- Chat layout ---------- */
+
+.apex-chat {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: 100vh;
+  background: #0d0d0f;
+}
+.apex-chat--collapsed {
+  grid-template-columns: 0 1fr;
+}
+.apex-chat--collapsed .apex-sidebar {
+  display: none;
+}
+
+.apex-sidebar {
+  background: #131316;
+  border-right: 1px solid #232328;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.apex-newchat {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #34343a;
+  border-radius: 8px;
+  background: #1a1a1f;
+  color: #e8e8ea;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 16px;
+  transition: background 120ms;
+}
+.apex-newchat:hover { background: #232328; }
+
+.apex-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+.apex-sidebar-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #232328;
+}
+
+.apex-sidebar-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #6b6b75;
+  text-transform: uppercase;
+  padding: 6px 8px;
+}
+.apex-sidebar-empty {
+  font-size: 12px;
+  color: #5a5a63;
+  padding: 6px 8px;
+}
+
+.apex-collection, .apex-session {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: #c8c8cf;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.apex-collection:hover, .apex-session:hover {
+  background: #1d1d22;
+  color: #e8e8ea;
+}
+.apex-collection--on, .apex-session--on {
+  background: #2a2a32;
+  color: #fff;
+}
+
+.apex-traces-link {
+  font-size: 12px;
+  padding: 6px 8px;
+  color: #6cb6ff;
+}
+
+/* ---------- Main column ---------- */
+
+.apex-main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 0;
+}
+
+.apex-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #232328;
+  background: #0d0d0f;
+  position: relative;
+  z-index: 2;
+}
+.apex-burger {
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #c8c8cf;
+}
+.apex-burger:hover { background: #1d1d22; }
+
+.apex-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  color: #e8e8ea;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.apex-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #232328;
+  color: #c8c8cf;
+  text-transform: lowercase;
+}
+.apex-pill--hr_policies  { background: #3a2c1a; color: #f0c890; }
+.apex-pill--tech_docs    { background: #1a2a3a; color: #90c0f0; }
+.apex-pill--product_docs { background: #2a1a3a; color: #c890f0; }
+
+.apex-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 0 16px;
+}
+
+.apex-empty {
+  max-width: 640px;
+  margin: 80px auto 0;
+  text-align: center;
+  padding: 0 24px;
+}
+.apex-empty h2 {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 8px;
+  color: #e8e8ea;
+}
+.apex-empty p {
+  color: #9a9aa3;
+  margin: 0 0 24px;
+}
+
+.apex-starters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.apex-starter {
+  padding: 12px 16px;
+  border: 1px solid #2a2a32;
+  border-radius: 10px;
+  background: #16161a;
+  color: #e8e8ea;
+  text-align: left;
+  font-size: 13px;
+  transition: background 120ms, border-color 120ms;
+}
+.apex-starter:hover {
+  background: #1d1d22;
+  border-color: #3a3a44;
+}
+
+/* ---------- Messages ---------- */
+
+.apex-msg {
+  max-width: 760px;
+  margin: 0 auto 24px;
+  padding: 0 24px;
+}
+.apex-msg-meta {
+  font-size: 12px;
+  color: #6b6b75;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}
+.apex-msg-time {
+  color: #5a5a63;
+  margin-left: 4px;
+}
+
+.apex-bubble {
+  padding: 12px 16px;
+  border-radius: 12px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+.apex-bubble--user {
+  background: #2a2a32;
+  color: #e8e8ea;
+  border-bottom-left-radius: 4px;
+}
+.apex-bubble--assistant {
+  background: #16161a;
+  border: 1px solid #232328;
+  border-bottom-left-radius: 4px;
+}
+
+.apex-pending {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  height: 18px;
+}
+.apex-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6b6b75;
+  animation: apex-bounce 1.2s infinite ease-in-out;
+}
+.apex-dot:nth-child(2) { animation-delay: 0.15s; }
+.apex-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes apex-bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1.0); opacity: 1.0; }
+}
+
+.apex-error-inline {
+  color: #ff7a90;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+.apex-refused {
+  color: #f0c890;
+  font-style: italic;
+}
+
+.apex-cite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin: 0 1px;
+  border-radius: 4px;
+  background: #2a3a4a;
+  color: #6cb6ff;
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: super;
+  border: 1px solid #3a4a5a;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.apex-cite:hover {
+  background: #3a4a5a;
+}
+.apex-cite--invalid {
+  background: #3a2a2a;
+  color: #ff9a90;
+  border-color: #5a3a3a;
+  cursor: not-allowed;
+}
+
+.apex-sources-toggle {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #9a9aa3;
+  border: 1px solid #2a2a32;
+  border-radius: 6px;
+}
+.apex-sources-toggle:hover {
+  background: #1d1d22;
+  color: #e8e8ea;
+}
+
+.apex-sources {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.apex-source {
+  padding: 10px 12px;
+  background: #0d0d0f;
+  border: 1px solid #232328;
+  border-radius: 8px;
+  transition: border-color 200ms, background 200ms;
+}
+.apex-source--flash {
+  border-color: #6cb6ff;
+  background: #1a2530;
+}
+.apex-source-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+.apex-source-n {
+  color: #6cb6ff;
+  font-weight: 600;
+}
+.apex-source-id {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  color: #c8c8cf;
+  flex: 1;
+  word-break: break-all;
+}
+.apex-source-score {
+  color: #5a5a63;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}
+.apex-source-text {
+  font-size: 12px;
+  color: #9a9aa3;
+  white-space: pre-wrap;
+}
+
+/* ---------- Input bar ---------- */
+
+.apex-inputbar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px 20px;
+  background: linear-gradient(to top, #0d0d0f 70%, transparent);
+  border-top: 1px solid #232328;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+.apex-input {
+  flex: 1;
+  resize: none;
+  background: #16161a;
+  border: 1px solid #2a2a32;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #e8e8ea;
+  font: inherit;
+  line-height: 1.5;
+  max-height: 200px;
+  outline: none;
+  transition: border-color 120ms;
+}
+.apex-input:focus { border-color: #3a4a5a; }
+.apex-input:disabled { opacity: 0.5; }
+
+.apex-send {
+  padding: 0 18px;
+  background: #2a3a4a;
+  color: #c8d8e8;
+  border-radius: 10px;
+  font-weight: 500;
+  align-self: stretch;
+}
+.apex-send:hover:not(:disabled) { background: #3a4a5a; }
+.apex-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ---------- Settings chip ---------- */
+
+.apex-settings {
+  margin-left: auto;
+  position: relative;
+}
+.apex-settings-btn {
+  font-size: 18px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: #c8c8cf;
+}
+.apex-settings-btn:hover { background: #1d1d22; }
+
+.apex-settings-panel {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  background: #16161a;
+  border: 1px solid #2a2a32;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 280px;
+  z-index: 10;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.apex-settings-label {
+  font-size: 11px;
+  color: #6b6b75;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+.apex-settings-input {
+  padding: 8px 10px;
+  background: #0d0d0f;
+  border: 1px solid #2a2a32;
+  border-radius: 6px;
+  color: #e8e8ea;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+.apex-settings-input:focus { border-color: #3a4a5a; }
+.apex-settings-save {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #2a3a4a;
+  border-radius: 6px;
+  color: #c8d8e8;
+  font-size: 12px;
+}
+.apex-settings-save:hover { background: #3a4a5a; }
+
+/* ---------- Trace reviewer fallback styles ---------- */
+/* (The reviewer uses inline styles; this is for any future classes.) */
+
+.apex-error {
+  background: #2a1a1a;
+  color: #ff9a90;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 12px 20px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+.apex-trace-reviewer {
+  padding: 20px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.apex-header { margin-bottom: 12px; }
+.apex-header h1 { font-size: 16px; margin: 0 0 6px; }
+.apex-summary {
+  font-size: 12px;
+  color: #6b6b75;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.apex-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.apex-filter {
+  padding: 4px 10px;
+  border: 1px solid #2a2a32;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #c8c8cf;
+}
+.apex-filter--on { background: #2a3a4a; color: #c8d8e8; border-color: #3a4a5a; }
+.apex-virtualized {
+  flex: 1;
+  border: 1px solid #232328;
+  border-radius: 8px;
+  background: #131316;
+  overflow: hidden;
+}
+.apex-row {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid #1a1a1f;
+  font-size: 12px;
+}
+.apex-row--refused { background: #1f1818; }
+.apex-cell { padding: 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.apex-cell--ts { color: #6b6b75; width: 80px; font-family: ui-monospace, monospace; }
+.apex-cell--collection { width: 100px; }
+.apex-cell--query { flex: 1; color: #e8e8ea; }
+.apex-cell--latency { color: #6cb6ff; width: 80px; text-align: right; }
+.apex-cell--refused { width: 70px; }
+.apex-cell--stars { width: 110px; }
+.apex-hr_policies { color: #f0c890; }
+.apex-tech_docs { color: #90c0f0; }
+.apex-product_docs { color: #c890f0; }
+.apex-star {
+  background: transparent;
+  border: none;
+  color: #34343a;
+  font-size: 14px;
+  padding: 0 1px;
+  cursor: pointer;
+}
+.apex-star--on { color: #f0c890; }
+.apex-footer {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b6b75;
+}
+.apex-loadmore {
+  padding: 6px 14px;
+  border: 1px solid #2a2a32;
+  border-radius: 6px;
+  color: #c8c8cf;
+}
+.apex-loadmore:hover { background: #1d1d22; }
+
+.apex-key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 16px;
+  flex-wrap: wrap;
+}
+.apex-key-label {
+  font-size: 11px;
+  color: #6b6b75;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.apex-key-input, .apex-base-input {
+  padding: 6px 10px;
+  background: #16161a;
+  border: 1px solid #2a2a32;
+  border-radius: 6px;
+  color: #e8e8ea;
+  font: inherit;
+  font-size: 12px;
+  width: 200px;
+  outline: none;
+}
+.apex-key-input:focus, .apex-base-input:focus { border-color: #3a4a5a; }
+.apex-key-save {
+  padding: 6px 10px;
+  background: #2a3a4a;
+  border-radius: 6px;
+  color: #c8d8e8;
+  font-size: 12px;
+}
+.apex-key-save:hover { background: #3a4a5a; }

@@ -8,6 +8,14 @@ autonomously, has its own dashboard, and ships in offline-stub mode by
 default so you can see the whole pipeline work end-to-end without an
 API key.
 
+> **What's new in 0.2.0 (2026-10-13):** [`CHANGELOG.md`](./CHANGELOG.md)
+> `LICENSE` (MIT), `.env.example` for the LLM keys, `.gitignore` (no
+> more committed 480KB of generated PDFs), 5 new tests for the router
+> fallback chain, plus 3 new docs:
+> [`docs/FIRST_DOLLAR.md`](./docs/FIRST_DOLLAR.md) (7-day runbook),
+> [`docs/PRODUCT_NICHES.md`](./docs/PRODUCT_NICHES.md) (what to ship),
+> [`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md) (when it breaks).
+
 ## The four streams
 
 ```
@@ -57,15 +65,29 @@ API key.
 
 ```bash
 cd ai-engineering/40-ai-side-hustle
-pip install -r requirements.txt
-make demo            # run all 4 streams on sample data, print dashboard
+make help            # see all 13 targets — start here
+make install         # pip install -r requirements.txt
+make demo            # run all 4 streams on stub data, print dashboard
 make simulate-30d    # run streams + inject 30 days of synthetic sales
 make stream-1        # run only the SEO content engine
 make stream-2        # run only the SaaS scaffolder
 make stream-3        # run only the digital product factory
 make stream-4        # run only the merch stream
-make test            # unit tests, no network
+make launchkit       # build Gumroad launch kits (PDF + sales page + tweets) for all products
+make test            # unit tests, no network (110 tests, ~3 sec)
 ```
+
+**Want a real LLM, not the stub?** Copy `.env.example` to `.env`
+and set `ANTHROPIC_API_KEY=sk-ant-...` (recommended; ~$0.04/day
+at 40 calls/day with `claude-3-5-haiku`). Then uncomment
+`# anthropic>=0.30.0` in `requirements.txt` and `make install`.
+The router will pick Anthropic first, fall back to OpenAI, then
+to `StubRouter` if no key is set. See `.env.example` for details.
+
+**Want to make money this week, not just run a demo?**
+Read [`docs/FIRST_DOLLAR.md`](./docs/FIRST_DOLLAR.md) — a literal
+7-day runbook that takes you from `make demo` to your first sale
+on Gumroad.
 
 ## Money math
 
@@ -131,6 +153,18 @@ At a conservative $50/mo across all streams, that's a **3,750:1 ROI**.
 └── README.md
 ```
 
+## Documentation
+
+The README is the overview. The docs/ folder is the recipes:
+
+| File | Read it when |
+|---|---|
+| [`docs/FIRST_DOLLAR.md`](./docs/FIRST_DOLLAR.md) | You have time this week and want a literal 7-day plan to your first Gumroad sale. |
+| [`docs/PRODUCT_NICHES.md`](./docs/PRODUCT_NICHES.md) | You're picking a topic and want to know which 3 ship today vs. 7 to try next. |
+| [`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md) | `make demo` didn't work like the README claims. 95% of issues are in the first 5 sections. |
+| [`CHANGELOG.md`](./CHANGELOG.md) | You want to know what changed between 0.1.0 and 0.2.0. |
+| [`LICENSE`](./LICENSE) | MIT — the full text. |
+
 ## License
 
-MIT.
+MIT. See [`LICENSE`](./LICENSE).
