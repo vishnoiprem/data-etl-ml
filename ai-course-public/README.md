@@ -30,6 +30,7 @@ ai-course-public/
 ├── course/                       # the actual course content
 │   ├── ai-fde/                   # 9-week AI Forward-Deployed Engineer curriculum (the FDE track)
 │   ├── ai-agents/                # 5-lesson flagship: ROI formula + 1000-cycle proof + watchdog autopilot
+│   ├── ai-native-de/             # 19-module AI-Native Data Engineering curriculum (Senior/Staff target: Meta AI-Native DE)
 │   ├── 180-day-ai/               # 6-month founder / indie-hacker track
 │   ├── practice/                 # hands-on exercises + labs
 │   ├── hardcode/                 # 9-level reference curriculum (llm-foundations → failure-handling) + eval suite
