@@ -1,0 +1,43 @@
+{
+  "name": "graph-rag-web",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-plotly.js": "^2.6.0",
+    "plotly.js-dist-min": "^2.35.0",
+    "react-cytoscapejs": "^2.0.0",
+    "cytoscape": "^3.30.0",
+    "cytoscape-cose-bilkent": "^4.1.0",
+    "lucide-react": "^0.460.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4",
+    "class-variance-authority": "^0.7.0",
+    "@radix-ui/react-tabs": "^1.1.1",
+    "@radix-ui/react-slot": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-plotly.js": "^2.6.3",
+    "@types/cytoscape": "^3.21.7",
+    "@vitejs/plugin-react": "^6.1.0",
+    "typescript": "^5.6.3",
+    "vite": "^8.3.0"
+  },
+  "overrides": {
+    "braces": "^3.0.3",
+    "chokidar": "^4.0.3",
+    "fast-glob": "^3.3.3",
+    "micromatch": "^4.0.8",
+    "postcss-selector-parser": "^7.1.6",
+    "postcss-nested": "^7.0.0"
+  }
+}
