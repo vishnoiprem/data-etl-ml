@@ -50,6 +50,36 @@ const ROW_HEIGHT = 64;
 const VIEWPORT_HEIGHT = 720;
 const TODAY = new Date().toISOString().slice(0, 10);
 
+// Default API key for local dev. The user can override this from the
+// header input (saved to localStorage). In prod, the key should come
+// from a real session — for this prototype, the dev-mode key matches
+// the .env default.
+const DEFAULT_API_KEY = "devkey-change-me";
+const STORAGE_KEY = "apex_api_key";
+
+// API base URL. The frontend runs on :3000 (Next.js) and the API on
+// :8000 (FastAPI/uvicorn). The user can override at runtime via
+// localStorage.setItem("apex_api_base", "https://api.example.com").
+const DEFAULT_API_BASE = "http://localhost:8000";
+const API_BASE_STORAGE_KEY = "apex_api_base";
+
+function readKey(): string {
+  if (typeof window === "undefined") return DEFAULT_API_KEY;
+  return window.localStorage.getItem(STORAGE_KEY) ?? DEFAULT_API_KEY;
+}
+
+function readApiBase(): string {
+  if (typeof window === "undefined") return DEFAULT_API_BASE;
+  return window.localStorage.getItem(API_BASE_STORAGE_KEY) ?? DEFAULT_API_BASE;
+}
+
+function authHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    "X-API-Key": DEFAULT_API_KEY,
+  };
+}
+
 export default function ApexRagOmni() {
   const [traces, setTraces] = useState<Trace[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -57,6 +87,22 @@ export default function ApexRagOmni() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<Collection | "all">("all");
+  const [apiKey, setApiKey] = useState<string>(DEFAULT_API_KEY);
+  const [keyInput, setKeyInput] = useState<string>(DEFAULT_API_KEY);
+  const [keySaved, setKeySaved] = useState<boolean>(false);
+  const [apiBase, setApiBase] = useState<string>(DEFAULT_API_BASE);
+  const [baseInput, setBaseInput] = useState<string>(DEFAULT_API_BASE);
+  const [baseSaved, setBaseSaved] = useState<boolean>(false);
+
+  // Hydrate the key + base URL from localStorage on mount.
+  useEffect(() => {
+    const k = readKey();
+    const b = readApiBase();
+    setApiKey(k);
+    setKeyInput(k);
+    setApiBase(b);
+    setBaseInput(b);
+  }, []);
 
   // Pending optimistic feedback — keyed by trace_id, value is the rating.
   // If the POST fails, we roll back from this map.
@@ -78,7 +124,14 @@ export default function ApexRagOmni() {
         limit: String(PAGE_SIZE),
       });
       if (cursor) params.set("cursor", cursor);
-      const res = await fetch(`/traces?${params.toString()}`);
+      const res = await fetch(`${apiBase}/traces?${params.toString()}`, {
+        headers: { "X-API-Key": apiKey },
+      });
+      if (res.status === 403) {
+        throw new Error(
+          "API key rejected. Run localStorage.setItem('apex_api_key', '<your-key>') in DevTools and reload.",
+        );
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: TracesResponse = await res.json();
       setTraces((prev) => [...prev, ...data.traces]);
@@ -89,12 +142,22 @@ export default function ApexRagOmni() {
     } finally {
       setLoading(false);
     }
-  }, [cursor, hasMore, loading]);
+  }, [cursor, hasMore, loading, apiKey, apiBase]);
 
-  // Initial load
+  // Re-fetch from the top when the key or base URL changes
+  // (reset cursor + traces so the next page is the first page of the
+  // new query).
+  useEffect(() => {
+    setTraces([]);
+    setCursor(null);
+    setHasMore(true);
+    setError(null);
+  }, [apiKey, apiBase]);
+
+  // Initial load (after key + base hydrate from localStorage).
   useEffect(() => {
     loadMore();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [apiKey, apiBase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Optimistic feedback: update local state immediately, POST in
@@ -111,12 +174,17 @@ export default function ApexRagOmni() {
       );
       try {
         // 2. POST in background
-        const res = await fetch("/feedback", {
+        const res = await fetch(`${apiBase}/feedback`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "X-API-Key": apiKey },
           body: JSON.stringify({ trace_id: traceId, rating }),
         });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (res.status === 403) {
+        throw new Error(
+          "API key rejected. Run localStorage.setItem('apex_api_key', '<your-key>') in DevTools and reload.",
+        );
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       } catch {
         // 3. Roll back on failure
         pending.current.delete(traceId);
@@ -127,8 +195,30 @@ export default function ApexRagOmni() {
         );
       }
     },
-    [traces],
+    [traces, apiKey],
   );
+
+  // Save the key the user typed: persist to localStorage and update state.
+  const handleSaveKey = useCallback(() => {
+    const trimmed = keyInput.trim();
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, trimmed);
+    }
+    setApiKey(trimmed);
+    setKeySaved(true);
+    setTimeout(() => setKeySaved(false), 1500);
+  }, [keyInput]);
+
+  // Save the API base URL the user typed: persist to localStorage and update state.
+  const handleSaveBase = useCallback(() => {
+    const trimmed = baseInput.trim().replace(/\/+$/, "");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(API_BASE_STORAGE_KEY, trimmed);
+    }
+    setApiBase(trimmed);
+    setBaseSaved(true);
+    setTimeout(() => setBaseSaved(false), 1500);
+  }, [baseInput]);
 
   // Filtered list (cheap O(N) — runs on every render but the row count
   // is bounded by what's loaded so far; virtualized windowing is the
@@ -210,6 +300,54 @@ export default function ApexRagOmni() {
               </button>
             ),
           )}
+        </div>
+        <div className="apex-key">
+          <label className="apex-key-label" htmlFor="apex-key-input">
+            X-API-Key
+          </label>
+          <input
+            id="apex-key-input"
+            type="password"
+            className="apex-key-input"
+            value={keyInput}
+            onChange={(e) => setKeyInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSaveKey();
+            }}
+            placeholder="devkey-change-me"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <button
+            type="button"
+            className="apex-key-save"
+            onClick={handleSaveKey}
+          >
+            {keySaved ? "saved" : "save"}
+          </button>
+          <label className="apex-key-label" htmlFor="apex-base-input">
+            API base
+          </label>
+          <input
+            id="apex-base-input"
+            type="text"
+            className="apex-base-input"
+            value={baseInput}
+            onChange={(e) => setBaseInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSaveBase();
+            }}
+            placeholder="http://localhost:8000"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <button
+            type="button"
+            className="apex-key-save"
+            onClick={handleSaveBase}
+          >
+            {baseSaved ? "saved" : "save"}
+          </button>
         </div>
       </header>
 
