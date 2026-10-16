@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass, field
 
 from .local_index import tokens
+from .textproc import normalize_digits
 
 PASS = 0.80
 FAIL = 0.50
@@ -45,11 +46,12 @@ class HallucinationReport:
 
 
 def _nums(text: str) -> set[str]:
-    return {n.replace(",", "").rstrip(".") for n in _NUM.findall(text)}
+    return {n.replace(",", "").rstrip(".") for n in _NUM.findall(normalize_digits(text))}
 
 
 def check_answer(answer: str, spans_text: list[str],
-                 pass_at: float = PASS, fail_at: float = FAIL) -> HallucinationReport:
+                 pass_at: float = PASS, fail_at: float = FAIL,
+                 lexical: bool = True) -> HallucinationReport:
     lines = [l.strip() for l in answer.splitlines() if l.strip()]
     if not lines:
         return HallucinationReport(0.0, "fail", [])
@@ -67,6 +69,8 @@ def check_answer(answer: str, spans_text: list[str],
         ev_toks = set(tokens(evidence))
         claim_toks = [t for t in tokens(claim) if not t.isdigit()]
         support = (sum(t in ev_toks for t in claim_toks) / len(claim_toks)) if claim_toks else 1.0
+        if not lexical and evidence:
+            support = 1.0  # cross-language: wording can't be compared; numbers/citations still are
         if not evidence:
             support = 0.0
         missing = _nums(claim) - _nums(evidence)

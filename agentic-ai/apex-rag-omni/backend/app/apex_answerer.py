@@ -19,14 +19,15 @@ from pydantic import BaseModel
 
 from .apex_retriever import RetrievedDoc
 from .local_index import get_index, tokens
+from .textproc import detect_lang, split_sentences
 
 Collection = Literal["hr_policies", "tech_docs", "product_docs"]
 
 MIN_SENTENCE_SCORE = 0.5  # IDF-weighted share of the query a sentence must cover
+MIN_SENTENCE_SCORE_TH = 0.35  # Thai has no spaces: question particles break several trigrams, so allow less
 RELATIVE_CUT = 0.75  # keep sentences within 75% of the best sentence's score
 MAX_SENTENCES = 4
 MAX_DOCS_CONSIDERED = 5
-_SENT_SPLIT = re.compile(r"(?<=[.!?])[ \t]+(?=[A-Z0-9])|\n+")  # sentence end, or paragraph/heading break
 _CITE = re.compile(r"\[doc_(\d+)\]")
 
 
@@ -87,15 +88,17 @@ def grounded_answer(query: str, collection: Collection,
     w = known
     total_w = sum(known.values()) + (len(qterms) - len(known)) * 0.5 * mean_w
 
+    min_score = MIN_SENTENCE_SCORE_TH if detect_lang(query) == "th" else MIN_SENTENCE_SCORE
+
     picks: list[tuple[int, int, str, float]] = []  # (doc rank, sent idx, sentence, score)
     for rank, d in enumerate(retrieved[:MAX_DOCS_CONSIDERED]):
-        sents = [s.strip() for s in _SENT_SPLIT.split(d.text) if s.strip()]
+        sents = split_sentences(d.text)
         title_terms = set(tokens(d.title))
         for i, s in enumerate(sents):
             st = set(tokens(s))
             # Title words count: "PTO Policy §2 Carryover" gives context to its sentences.
             score = sum(w.get(t, 0.0) for t in qterms & (st | title_terms)) / total_w
-            if (qterms & st & w.keys()) and score >= MIN_SENTENCE_SCORE:
+            if (qterms & st & w.keys()) and score >= min_score:
                 picks.append((rank, i, s, score))
     if not picks:
         return _refuse(query, collection,

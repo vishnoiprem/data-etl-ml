@@ -765,3 +765,13 @@ button {
 .apex-chip { padding: 3px 12px; border-radius: 999px; font-size: 12px; border: 1px solid #34343a; color: #8b8b95; }
 .apex-chip--on { border-color: var(--cp-blue); color: #a9c8f5; background: rgba(48,111,199,.15); }
 .apex-chip--off { border-style: dashed; cursor: help; }
+
+/* multilingual: native font fallbacks + language picker */
+html, body, button, textarea, input, select {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans Thai", "Thonburi", "Sukhumvit Set", "Noto Sans Devanagari", "Kohinoor Devanagari", "Devanagari Sangam MN",
+    "PingFang SC", "Noto Sans SC", "Microsoft YaHei", "Noto Sans", sans-serif;
+}
+.apex-lang { background: #1a1a1f; color: #e8e8ea; border: 1px solid #34343a; border-radius: 8px; padding: 4px 8px; font-size: 13px; margin-right: 6px; }
+.apex-lang:hover { border-color: var(--cp-blue); }
+.apex-answer, .apex-explain-body { line-height: 1.75; }

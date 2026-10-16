@@ -17,6 +17,7 @@ import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .textproc import split_sentences
 from .sanitize import _INJECTION_RE, redact_pii  # noqa: PLC2701 (same package)
 from .settings import get_settings
 
@@ -95,7 +96,6 @@ def clean_text(t: str) -> str:
     return t.strip()
 
 
-_SENT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")
 
 
 def chunk_text(text: str) -> list[str]:
@@ -110,7 +110,7 @@ def chunk_text(text: str) -> list[str]:
         if len(para) <= CHUNK_MAX:
             units.append(para)
             continue
-        for s in _SENT.split(para):
+        for s in split_sentences(para):
             while len(s) > CHUNK_MAX:
                 units.append(s[:CHUNK_MAX])
                 s = s[CHUNK_MAX:]
@@ -156,7 +156,7 @@ def add_document(collection: str, filename: str, data: bytes) -> dict:
         "doc_id": rec["id"], "filename": safe_name, "collection": collection,
         "chunks": len(chunks), "chars": len(text),
         "pii_detected": redact_pii(text)[1],
-        "injection_like": bool(_INJECTION_RE.search(text)),
+        "injection_like": bool(_INJECTION_RE.search(unicodedata.normalize("NFKC", text))),
     }
 
 

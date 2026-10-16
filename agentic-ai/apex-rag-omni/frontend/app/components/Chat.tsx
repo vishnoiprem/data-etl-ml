@@ -17,14 +17,19 @@
  */
 
 import React, {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 
-type Collection = "hr_policies" | "tech_docs" | "product_docs";
+import { I18N, LANGS, STARTERS, detectUiLang, type Collection, type Dict, type Lang } from "./i18n";
+
+const LangCtx = createContext<{ t: Dict; lang: Lang }>({ t: I18N.en, lang: "en" });
+const useT = () => useContext(LangCtx);
 
 interface Span {
   doc_id: string;
@@ -80,6 +85,7 @@ interface Explain {
   reason?: string | null;
   error?: string;
   skipped?: boolean;
+  translated?: boolean;
 }
 
 interface Caps { explain: boolean; model: string | null; model_is_local: boolean }
@@ -100,32 +106,9 @@ const EXPLAIN_STORAGE_KEY = "apex_explain";
 const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const DEFAULT_API_KEY = "devkey-change-me";
 
-const COLLECTIONS: { id: Collection; label: string; hint: string }[] = [
-  { id: "hr_policies", label: "HR Policies", hint: "PTO, benefits, conduct" },
-  { id: "tech_docs", label: "Tech Docs", hint: "services, APIs, runbooks" },
-  { id: "product_docs", label: "Product Docs", hint: "features, releases" },
-];
+const COLLECTIONS: { id: Collection }[] = [{ id: "hr_policies" }, { id: "tech_docs" }, { id: "product_docs" }];
 
-const STARTERS: Record<Collection, string[]> = {
-  hr_policies: [
-    "How much PTO do I get per year?",
-    "What is the parental leave policy?",
-    "How do I submit an expense report?",
-  ],
-  tech_docs: [
-    "How do I authenticate to the API gateway?",
-    "Where do I find the deployment runbook?",
-    "What's the SLA for the search service?",
-  ],
-  product_docs: [
-    "How do I export data to CSV?",
-    "What's new in this release?",
-    "How do I invite a teammate?",
-  ],
-};
-
-const colLabel = (c: Collection) =>
-  COLLECTIONS.find((x) => x.id === c)?.label ?? c;
+const LANG_STORAGE_KEY = "apex_lang";
 
 /* ---------- storage helpers ---------- */
 
@@ -201,7 +184,7 @@ interface StreamHandlers {
   onExplain?: (e:
     | { type: "start"; model: string }
     | { type: "token"; delta: string }
-    | { type: "end"; verdict: "pass" | "warn" | "fail"; reason: string | null; text: string; model: string }
+    | { type: "end"; verdict: "pass" | "warn" | "fail"; reason: string | null; text: string; model: string; translated?: boolean }
     | { type: "skipped" }
     | { type: "error"; message: string }) => void;
 }
@@ -415,6 +398,8 @@ export default function Chat() {
   const [busy, setBusy] = useState<boolean>(false);
   const [atBottom, setAtBottom] = useState<boolean>(true);
   const [hydrated, setHydrated] = useState<boolean>(false);
+  const [lang, setLang] = useState<Lang>("en");
+  const t = I18N[lang];
   const [caps, setCaps] = useState<Caps | null>(null);
   const [explainOn, setExplainOn] = useState<boolean>(true);
 
@@ -431,6 +416,10 @@ export default function Chat() {
   useEffect(() => {
     setApiKey(readKey());
     setApiBase(readApiBase());
+    try {
+      const saved = window.localStorage.getItem(LANG_STORAGE_KEY) as Lang | null;
+      setLang(saved && saved in I18N ? saved : detectUiLang());
+    } catch { /* default */ }
     try {
       setExplainOn(window.localStorage.getItem(EXPLAIN_STORAGE_KEY) !== "off");
     } catch { /* default on */ }
@@ -457,6 +446,15 @@ export default function Chat() {
       .catch(() => live && setCaps(null));
     return () => { live = false; };
   }, [apiBase, apiKey]);
+
+  const changeLang = useCallback((l: Lang) => {
+    setLang(l);
+    try { window.localStorage.setItem(LANG_STORAGE_KEY, l); } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const toggleExplain = useCallback(() => {
     setExplainOn((v) => {
@@ -571,7 +569,7 @@ export default function Chat() {
                 if (e.type === "start") return { ...m, explain: { text: "", streaming: true, model: e.model } };
                 if (e.type === "token") return { ...m, explain: { ...cur, streaming: true, text: cur.text + e.delta } };
                 if (e.type === "end")
-                  return { ...m, explain: { text: e.text, streaming: false, model: e.model, verdict: e.verdict, reason: e.reason } };
+                  return { ...m, explain: { text: e.text, streaming: false, model: e.model, verdict: e.verdict, reason: e.reason, translated: e.translated } };
                 if (e.type === "skipped") return { ...m, explain: { text: "", streaming: false, skipped: true } };
                 return { ...m, explain: { ...cur, streaming: false, error: e.message } };
               }),
@@ -730,23 +728,23 @@ export default function Chat() {
     .find((m) => m.role === "assistant")?.id;
 
   return (
+    <LangCtx.Provider value={{ t, lang }}>
     <div className={`apex-chat ${sidebarOpen ? "" : "apex-chat--collapsed"}`}>
       <aside className="apex-sidebar">
         <button type="button" className="apex-newchat" onClick={() => addSession(collection)}>
-          + New chat
+          {t.newChat}
         </button>
 
         <div className="apex-sidebar-section">
-          <div className="apex-sidebar-label">Collection</div>
+          <div className="apex-sidebar-label">{t.collection}</div>
           {COLLECTIONS.map((c) => (
             <button
               key={c.id}
               type="button"
               className={`apex-collection ${activeCollection === c.id ? "apex-collection--on" : ""}`}
               onClick={() => switchCollection(c.id)}
-              title={c.hint}
             >
-              {c.label}
+              {t.col[c.id]}
             </button>
           ))}
         </div>
@@ -754,7 +752,7 @@ export default function Chat() {
         <KnowledgeBase apiBase={apiBase} apiKey={apiKey} collection={activeCollection} />
 
         <div className="apex-sidebar-section apex-sidebar-history">
-          <div className="apex-sidebar-label">History</div>
+          <div className="apex-sidebar-label">{t.history}</div>
           {sessions.map((s) => (
             <SessionItem
               key={s.id}
@@ -774,7 +772,7 @@ export default function Chat() {
 
         <div className="apex-sidebar-section apex-sidebar-bottom">
           <a className="apex-traces-link" href="/traces" target="_blank" rel="noreferrer">
-            View trace reviewer →
+            {t.traces}
           </a>
         </div>
       </aside>
@@ -796,9 +794,14 @@ export default function Chat() {
           <h1 className="apex-title">
             apex-rag-omni{" "}
             <span className={`apex-pill apex-pill--${activeCollection}`}>
-              {colLabel(activeCollection)}
+              {t.col[activeCollection]}
             </span>
           </h1>
+          <select className="apex-lang" value={lang} onChange={(e) => changeLang(e.target.value as Lang)} aria-label={t.language}>
+            {LANGS.map((l) => (
+              <option key={l.id} value={l.id}>{l.label}</option>
+            ))}
+          </select>
           <SettingsChip
             apiBase={apiBase}
             apiKey={apiKey}
@@ -811,13 +814,10 @@ export default function Chat() {
           <div className="apex-thread">
             {activeSession && activeSession.messages.length === 0 && (
               <div className="apex-empty">
-                <h2>What can I help you find?</h2>
-                <p>
-                  Searching <strong>{colLabel(activeCollection)}</strong>. Every answer cites
-                  its sources, or is refused.
-                </p>
+                <h2>{t.emptyTitle}</h2>
+                <p>{t.emptySub(t.col[activeCollection])}</p>
                 <div className="apex-starters">
-                  {STARTERS[activeCollection].map((s) => (
+                  {STARTERS[lang][activeCollection].map((s) => (
                     <button key={s} type="button" className="apex-starter" onClick={() => sendQuery(s)}>
                       {s}
                     </button>
@@ -858,7 +858,7 @@ export default function Chat() {
             <textarea
               ref={inputRef}
               className="apex-input"
-              placeholder={`Ask ${colLabel(activeCollection)}…`}
+              placeholder={t.placeholder(t.col[activeCollection])}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={onKeyDown}
@@ -884,22 +884,23 @@ export default function Chat() {
                 className={`apex-chip ${explainOn ? "apex-chip--on" : ""}`}
                 onClick={toggleExplain}
                 aria-pressed={explainOn}
-                title={`After each answer, ${caps.model} explains it in plain words. ${caps.model_is_local ? "Runs on this machine; nothing leaves it." : "Sends the question and the cited passages to the model provider."}`}
+                title={`${t.explainTip} (${caps.model}${caps.model_is_local ? ", local" : ", hosted"})`}
               >
-                ✨ Explain in plain words: {explainOn ? "on" : "off"}
+                {explainOn ? t.explainOn : t.explainOff}
               </button>
             ) : (
               <span className="apex-chip apex-chip--off" title="Set APEX_MODEL_GATEWAY_URL to a free model (Ollama, Groq, OpenRouter). See README.">
-                ✨ Plain-words explanation: not set up
+                {t.explainNotSetUp}
               </span>
             )}
           </div>
           <div className="apex-fineprint">
-            Answers are grounded in retrieved sources. Enter to send · Shift+Enter for a new line
+            {t.fineprint}
           </div>
         </form>
       </main>
     </div>
+    </LangCtx.Provider>
   );
 }
 
@@ -910,6 +911,7 @@ interface UploadedDoc { id: string; filename: string; chars: number; chunks: num
 function KnowledgeBase({
   apiBase, apiKey, collection,
 }: { apiBase: string; apiKey: string; collection: Collection }) {
+  const { t } = useT();
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
   const [builtin, setBuiltin] = useState<number>(0);
   const [note, setNote] = useState<{ kind: "ok" | "warn" | "err"; text: string } | null>(null);
@@ -987,7 +989,7 @@ function KnowledgeBase({
 
   return (
     <div className="apex-sidebar-section apex-kb">
-      <div className="apex-sidebar-label">Knowledge base</div>
+      <div className="apex-sidebar-label">{t.knowledgeBase}</div>
       <input
         ref={fileRef}
         type="file"
@@ -998,12 +1000,12 @@ function KnowledgeBase({
         aria-label="upload documents"
       />
       <button type="button" className="apex-upload" disabled={uploading} onClick={() => fileRef.current?.click()}>
-        {uploading ? "Uploading…" : "⬆ Upload documents"}
+        {uploading ? t.uploading : t.upload}
       </button>
-      <div className="apex-kb-hint">.txt · .md · .csv · .pdf · up to 5 MB</div>
+      <div className="apex-kb-hint">{t.uploadHint}</div>
       {note && <div className={`apex-kb-note apex-kb-note--${note.kind}`} role="status">{note.text}</div>}
       <button type="button" className="apex-kb-toggle" onClick={() => setOpen((v) => !v)}>
-        {open ? "▾" : "▸"} {docs.length} uploaded · {builtin} built-in
+        {open ? "▾" : "▸"} {t.counts(docs.length, builtin)}
       </button>
       {open &&
         docs.map((d) => (
@@ -1029,6 +1031,7 @@ function SessionItem({
   onRename: (t: string) => void;
   onDelete: () => void;
 }) {
+  const { t } = useT();
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(session.title);
   const commit = () => {
@@ -1067,7 +1070,7 @@ function SessionItem({
         }}
         title="Double-click to rename"
       >
-        {session.title}
+        {session.title === "New chat" ? t.newChat.replace(/^\+\s*/, "") : session.title}
       </button>
       <button
         type="button"
@@ -1087,22 +1090,19 @@ function SessionItem({
 /* ---------- Plain-words explanation ---------- */
 
 function ExplainCard({ ex, spanCount, onCite }: { ex: Explain; spanCount: number; onCite: CiteFn }) {
+  const { t } = useT();
   if (ex.error)
     return <div className="apex-explain apex-explain--muted">Couldn't generate an explanation ({ex.error}). The sourced answer above is unaffected.</div>;
   if (!ex.streaming && ex.verdict === "fail")
-    return (
-      <div className="apex-explain apex-explain--muted">
-        I couldn't verify a plain-words explanation against the sources, so I'm not showing one. The sourced answer above is reliable.
-      </div>
-    );
+    return <div className="apex-explain apex-explain--muted">{t.explainFailed}</div>;
   return (
     <div className="apex-explain">
       <div className="apex-explain-head">
-        <span>✨ In plain words</span>
+        <span>{t.inPlain}</span>
         {ex.model && <span className="apex-explain-model">{ex.model}</span>}
-        {ex.streaming && <span className="apex-explain-status">verifying against sources…</span>}
-        {!ex.streaming && ex.verdict === "pass" && <span className="apex-explain-status apex-explain-status--ok">✓ checked against sources</span>}
-        {!ex.streaming && ex.verdict === "warn" && <span className="apex-explain-status apex-explain-status--warn">⚠ loosely matches sources</span>}
+        {ex.streaming && <span className="apex-explain-status">{t.verifying}</span>}
+        {!ex.streaming && ex.verdict === "pass" && <span className="apex-explain-status apex-explain-status--ok">{ex.translated ? t.backChecked : t.checked}</span>}
+        {!ex.streaming && ex.verdict === "warn" && <span className={`apex-explain-status ${ex.translated ? "apex-explain-status--ok" : "apex-explain-status--warn"}`}>{ex.translated ? t.backChecked : t.loose}</span>}
       </div>
       <div className="apex-explain-body">
         {renderRich(ex.text, spanCount, onCite)}
@@ -1125,6 +1125,7 @@ function MessageRow({
   onFeedback: (v: "up" | "down") => void;
   onAsk: (q: string) => void;
 }) {
+  const { t, lang } = useT();
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const isUser = msg.role === "user";
@@ -1171,7 +1172,7 @@ function MessageRow({
         {msg.pending && (
           <div className="apex-pending" aria-label="searching">
             <span className="apex-dot" /><span className="apex-dot" /><span className="apex-dot" />
-            <span className="apex-pending-label">Searching {colLabel(msg.collection)}…</span>
+            <span className="apex-pending-label">{t.searching(t.col[msg.collection])}</span>
           </div>
         )}
 
@@ -1180,15 +1181,12 @@ function MessageRow({
         {!msg.error && msg.refused && !msg.pending && (
           <div className="apex-refused">
             {msg.flags?.includes("prompt_injection") ? (
-              <p>I can't help with that request.</p>
+              <p>{t.injection}</p>
             ) : (
               <>
-                <p>
-                  I couldn't find a reliable answer to that in <strong>{colLabel(msg.collection)}</strong>.
-                  Try rephrasing, or ask about something these documents cover:
-                </p>
+                <p>{t.refused(t.col[msg.collection])}</p>
                 <div className="apex-starters apex-starters--inline">
-                  {STARTERS[msg.collection].map((q) => (
+                  {STARTERS[lang][msg.collection].map((q) => (
                     <button key={q} type="button" className="apex-starter" onClick={() => onAsk(q)} disabled={busy}>
                       {q}
                     </button>
@@ -1213,17 +1211,17 @@ function MessageRow({
             className={`apex-ground ${msg.groundedness >= 0.8 ? "apex-ground--ok" : "apex-ground--warn"}`}
             title="Share of each claim's content found in the sources it cites, with numbers checked exactly"
           >
-            {msg.groundedness >= 0.8 ? "✓ Grounded" : "⚠ Weakly grounded"} · {Math.round(msg.groundedness * 100)}%
+            {msg.groundedness >= 0.8 ? t.grounded : t.weak} · {Math.round(msg.groundedness * 100)}%
           </div>
         )}
         {done && msg.flags?.includes("prompt_injection") && (
-          <div className="apex-ground apex-ground--bad">⛔ Blocked: looks like a prompt-injection attempt</div>
+          <div className="apex-ground apex-ground--bad">{t.blocked}</div>
         )}
 
         {spans.length > 0 && !msg.pending && (
           <>
             <button type="button" className="apex-sources-toggle" onClick={() => setExpanded((v) => !v)}>
-              {expanded ? "▾" : "▸"} Sources ({spans.length})
+              {expanded ? "▾" : "▸"} {t.sources} ({spans.length})
             </button>
             {expanded && (
               <div className="apex-sources">

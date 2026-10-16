@@ -58,6 +58,7 @@ from .apex_retriever import (
     InvalidFilterKeys, hybrid_search, rerank_top_k, validate_filter_keys,
 )
 from .hallucination import check_answer
+from .textproc import detect_lang
 from .sanitize import redact_pii, sanitize_output, sanitize_query
 from .auth import safe_key_for_log, verify_api_key
 from .eval_store import PRODUCTION_TARGETS, latest_report
@@ -334,6 +335,33 @@ def _run_pipeline(req: QueryRequest):
     return candidates, top, ej, timing, flags
 
 
+async def _run_pipeline_i18n(req, settings):
+    """_run_pipeline plus cross-language rescue: if a non-English question finds
+    nothing, translate it to English with the configured model and retry, so a
+    Thai/Vietnamese/Chinese/Hindi question can still reach English documents.
+    The answer text is then the (English) source sentences; the plain-words
+    explanation can be written in the user's own language."""
+    result = _run_pipeline(req)
+    _, _, ej, timing, flags = result
+    lang = detect_lang(ej.query or req.query)
+    if not ej.refused or "prompt_injection" in flags or lang == "en" or not llm.is_configured(settings):
+        return result
+    t0 = time.perf_counter()
+    alt = await explain_mod.translate_query(ej.query, settings)
+    translate_ms = (time.perf_counter() - t0) * 1000
+    if not alt:
+        return result
+    cands2, top2, ej2, timing2, flags2 = _run_pipeline(req.model_copy(update={"query": alt}))
+    if ej2.refused:
+        return result
+    ej2.query = ej.query  # keep the user's own words
+    flags2 = list(flags2) + ["translated_query"]
+    ej2.flags = flags2
+    timing2["translate_ms"] = translate_ms
+    timing2["total_ms"] += translate_ms + timing["total_ms"]
+    return cands2, top2, ej2, timing2, flags2
+
+
 async def _audit_query(trace_id, req, candidates, top, ej, timing, api_key, flags=()):
     safe_q, pii = redact_pii(ej.query or "")
     await audit_queue.enqueue_audit(
@@ -352,6 +380,7 @@ async def _audit_query(trace_id, req, candidates, top, ej, timing, api_key, flag
 async def post_query(
     req: QueryRequest,
     api_key: str = Depends(verify_api_key),
+    settings: Settings = Depends(get_settings),
 ) -> QueryResponse:
     """Grounded RAG query. hybrid_search -> rerank -> grounded answer.
 
@@ -359,7 +388,7 @@ async def post_query(
     a per-collection allowlist. Timings are measured, not estimated.
     """
     trace_id = new_trace_id()
-    candidates, top, ej, timing, flags = _run_pipeline(req)
+    candidates, top, ej, timing, flags = await _run_pipeline_i18n(req, settings)
     await _audit_query(trace_id, req, candidates, top, ej, timing, api_key, flags)
     return QueryResponse(trace_id=trace_id, evidence=ej, timing_ms=timing)
 
@@ -401,7 +430,7 @@ async def post_query_stream(
     a real HTTP 400, not an in-band error event.
     """
     trace_id = new_trace_id()
-    candidates, top, ej, timing, flags = _run_pipeline(req)
+    candidates, top, ej, timing, flags = await _run_pipeline_i18n(req, settings)
 
     async def gen():
         try:
@@ -445,7 +474,8 @@ async def _explain_events(trace_id, req, ej, settings, api_key):
         yield _sse("explain_skipped", {"reason": "no_model_configured"})
         return
     spans = [s.model_dump() for s in ej.spans]
-    msgs = explain_mod.build_messages(ej.query, ej.answer, spans)
+    lang = detect_lang(ej.query)
+    msgs = explain_mod.build_messages(ej.query, ej.answer, spans, lang)
     yield _sse("explain_start", {"model": settings.model_name})
     buf = ""
     try:
@@ -461,7 +491,21 @@ async def _explain_events(trace_id, req, ej, settings, api_key):
     spans_text = [s["text"] for s in spans]
     text = explain_mod.clean_explanation(buf)
     text = explain_mod.repair_citations(text, spans_text)
-    verdict, rep, reason = explain_mod.verify_explanation(text, spans_text)
+    cross = explain_mod.is_cross_lingual(text, spans_text)
+    verdict, rep, reason = explain_mod.verify_explanation(text, spans_text, cross)
+    if cross and verdict != "fail":
+        # Wording can't be compared across languages directly, so translate the
+        # explanation back to English and check THAT against the sources. A
+        # garbled or invented explanation does not survive the round trip.
+        back = await explain_mod.back_translate(text, settings)
+        if back:
+            v2, rep2, why2 = explain_mod.verify_explanation(back, spans_text, cross_lingual=False)
+            if v2 == "fail":
+                verdict, reason = "fail", f"back-translation does not match the sources ({why2})"
+            else:
+                verdict = v2
+                reason = "translated: verified by back-translation"
+                rep = rep2 or rep
     await audit_queue.enqueue_audit(
         trace_id=trace_id, kind="explain", payload={
             "verdict": verdict, "reason": reason, "model": settings.model_name,
@@ -472,6 +516,7 @@ async def _explain_events(trace_id, req, ej, settings, api_key):
     yield _sse("explain_end", {
         "verdict": verdict, "reason": reason, "model": settings.model_name,
         "groundedness": rep.groundedness if rep else None,
+        "translated": cross, "lang": lang,
         "text": text if verdict != "fail" else "",
     })
 

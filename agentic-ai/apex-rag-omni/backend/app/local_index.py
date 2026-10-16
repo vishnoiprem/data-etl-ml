@@ -16,24 +16,9 @@ from dataclasses import dataclass
 
 from .corpus import CORPUS
 from .document_store import passages
+from .textproc import STOP, stem, tokens  # noqa: F401  (re-exported for callers)
 
 DIM = 1024
-_WORD = re.compile(r"[a-z0-9]+")
-STOP = frozenset(
-    "a an the of to in on for and or is are was were be do does did how what when where which who i my me we our "
-    "you your it its this that with at by from as can should will about get s t much many".split()
-)
-
-
-def stem(w: str) -> str:
-    for suf in ("ations", "ation", "ings", "ing", "ies", "ed", "es", "s"):
-        if w.endswith(suf) and len(w) - len(suf) >= 3:
-            return w[: -len(suf)]
-    return w
-
-
-def tokens(text: str) -> list[str]:
-    return [stem(w) for w in _WORD.findall(text.lower()) if w not in STOP]
 
 
 def _h(s: str) -> int:

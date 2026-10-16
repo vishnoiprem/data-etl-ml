@@ -12,8 +12,10 @@ import unicodedata
 from dataclasses import dataclass, field
 
 # Zero-width + bidi override/isolate chars: used to hide instructions or
-# spoof text direction. Cc/Cf categories are stripped except \n and \t.
+# spoof text direction. Cc/Cf categories are stripped except \n and \t, and
+# ZWNJ/ZWJ (U+200C/D) which are legitimate inside Hindi words.
 _STRIP_CATS = {"Cc", "Cf", "Co", "Cs"}
+_KEEP = "\n\t\u200c\u200d"
 
 _INJECTION_PATTERNS = [
     r"ignore (all |any |the )?(previous|prior|above|earlier) (instructions?|prompts?|rules?)",
@@ -26,8 +28,22 @@ _INJECTION_PATTERNS = [
     r"override (your |the )?(safety|guardrails?|rules?|polic(?:y|ies))",
     r"</?(system|assistant|im_start|im_end)>|<\|im_(start|end)\|>",
     r"\bBEGIN (SYSTEM|PROMPT)\b",
+    # Thai
+    r"(ไม่ต้องสนใจ|เพิกเฉย|ละเว้น|ลืม)(คำสั่ง|กฎ|ข้อกำหนด)(ก่อนหน้า|ข้างต้น|ทั้งหมด)",
+    r"(เปิดเผย|แสดง|บอก).{0,12}(system prompt|พรอมต์ระบบ|คำสั่งระบบ)",
+    # Vietnamese
+    r"(bỏ qua|phớt lờ|quên)\s+(tất cả\s+|mọi\s+)?(các\s+)?(hướng dẫn|chỉ dẫn|lệnh|quy tắc)\s+(trước|ở trên|phía trên)",
+    r"(tiết lộ|hiển thị|in ra).{0,15}(system prompt|lời nhắc hệ thống)",
+    # Chinese
+    r"(忽略|无视|忘记|忘掉)(之前|以上|先前|上述|所有)(的)?(所有)?(指令|指示|提示|规则|说明)",
+    r"(泄露|显示|输出|告诉我).{0,6}(系统提示|系统指令|system prompt)",
+    # Hindi
+    r"(पिछले|पहले के|ऊपर के|सभी)\s*(निर्देशों|निर्देश|आदेशों|नियमों)\s*(को)?\s*(अनदेखा|नज़रअंदाज़|भूल)",
+    r"(सिस्टम प्रॉम्प्ट|system prompt).{0,12}(बताओ|दिखाओ|प्रकट)",
 ]
-_INJECTION_RE = re.compile("|".join(f"(?:{p})" for p in _INJECTION_PATTERNS), re.I)
+# Patterns are NFKC-normalised like the text they match (e.g. Thai sara am "ำ" decomposes).
+_INJECTION_RE = re.compile(
+    unicodedata.normalize("NFKC", "|".join(f"(?:{p})" for p in _INJECTION_PATTERNS)), re.I)
 
 
 @dataclass
@@ -45,7 +61,7 @@ def sanitize_query(raw: str, max_chars: int = 2000) -> SanitizedQuery:
     t = unicodedata.normalize("NFKC", raw)
     cleaned = "".join(
         ch for ch in t
-        if ch in "\n\t" or unicodedata.category(ch) not in _STRIP_CATS
+        if ch in _KEEP or unicodedata.category(ch) not in _STRIP_CATS
     )
     if cleaned != t:
         flags.append("control_chars_removed")

@@ -37,6 +37,7 @@ I built APEX-RAG Omni. It's not a demo RAG — it's a sovereign platform designe
 | Retrieval | **Working**: in-process BM25 + hashed-vector index with RRF fusion over a built-in demo corpus (`backend/app/local_index.py`). Same contract as the 10-shard Qdrant + ES fan-out, which is the **design**, not deployed here. |
 | Answers | **Working**: extractive and grounded. Every sentence is verbatim corpus text with a `[doc_N]` citation, or the query is refused. No LLM call yet (`stream_tokens` is the seam). |
 | Streaming chat UI | **Working**: SSE, stop/regenerate/copy/feedback, history. |
+| Five languages (en/th/vi/zh/hi) | **Working**: tokenizer, answers, uploads, UI, safety, explanations. Real-model tested; Hindi quality limited by the small model. |
 | Document upload | **Working**: txt/md/csv/pdf → passages → searchable + citable, dedupe, per-collection, delete, PII/injection warnings. |
 | Docker + HTTPS deploy | **Working** (Caddy + web + api, login, key injection). Verified locally with Docker. |
 | Plain-words explanation | **Working** with any OpenAI-compatible free model (Ollama/Groq/OpenRouter/Gemini); output verified against the sources, withdrawn if it fails. Tested with a mocked model; run Option A/B to use a real one. |
@@ -45,6 +46,29 @@ I built APEX-RAG Omni. It's not a demo RAG — it's a sovereign platform designe
 | Auth, CORS, audit queue, cursor-paginated traces | **Working**, tested (time-ordered trace ids, constant-time key check). |
 | Flink CDC freshness, shadow-index dual-write, 100M-doc scale, embedding cost | **Design only.** |
 | Eval metrics | Harness exists; quote only numbers from a real `make eval` run. |
+
+## Languages: English, ไทย, Tiếng Việt, 中文, हिन्दी
+
+The whole product works in all five languages: the interface (switcher in the top bar, auto-detected from your browser), search, answers, uploads, safety checks, and the plain-words explanation.
+
+| | How it is handled |
+|---|---|
+| Search | Language-aware tokenizer: Vietnamese diacritics folded (`tiền` ≈ `tien`), Chinese character bigrams, Thai character trigrams (no dictionary needed), Devanagari words kept intact; digits in any script (๒๐, २०) become `20` |
+| Answers | Verbatim sentences from your documents, split with each language's sentence rules (`。！？`, `।`, Thai clauses) and cited `[doc_N]` |
+| Uploads | Thai / Vietnamese / Chinese / Hindi `.txt/.md/.csv/.pdf` are chunked and searchable like English |
+| Safety | Prompt-injection phrases blocked in all five languages; PII masking in audit logs |
+| Demo content | Each collection ships a few passages in every language so you can try it immediately |
+| Explanation | Written in the language of the question |
+
+**Asking in one language about documents in another** (e.g. a Thai question about English docs): if the question finds nothing directly and a model is configured, it is translated to English, searched again, and the answer (English source sentences) is returned with the explanation in your language. This needs the model from the section above; without it, ask in the documents' language.
+
+**How a translated explanation is verified:** words can't be compared across languages, so (1) citations and every number must check out, and (2) the explanation is translated *back* to English and that is compared with the sources. Garbled output does not survive the round trip and is withdrawn. Tested live: Thai, Vietnamese and Chinese pass; a garbled Hindi explanation from the 3B model was correctly withdrawn.
+
+**Limits (be upfront with users)**
+- Model quality varies by language. `qwen2.5:3b` is solid in Chinese and Vietnamese, acceptable in Thai, and weak in Hindi (more explanations get withdrawn). For better Thai/Hindi use a larger model: `ollama pull qwen2.5:7b` (≈4.7 GB) or a free hosted model such as Groq `llama-3.3-70b-versatile`.
+- Search is keyword-based. Synonyms and paraphrases across languages can miss ("maximum" vs "limited"); real multilingual embeddings (e.g. `bge-m3`) are the next upgrade.
+- Numbers written as words (二十, बीस, "twenty") are not number-checked; digits are.
+- Thai/Chinese matching uses character n-grams, so very short questions can match loosely; the grounded-answer check still requires enough of the question to be covered.
 
 ## Plain-words explanations with a free model
 
@@ -73,7 +97,7 @@ Set `APEX_MODEL_GATEWAY_KEY` too. Free tiers have rate limits and may change; ch
 
 The toggle under the input turns explanations on/off per browser. Leave `APEX_MODEL_GATEWAY_URL` empty to disable the feature; the chip then reads "not set up".
 
-**How it behaves:** the text streams in labelled "verifying against sources…", then shows "✓ checked against sources" (or "⚠ loosely matches"), or is withdrawn with a note. Explanations are English only today, and a small model's wording can be stiff - the sourced answer above it is always the authority.
+**How it behaves:** the text streams in labelled "verifying against sources…", then shows "✓ checked against sources" (or "⚠ loosely matches"), or is withdrawn with a note. A small model's wording can be stiff - the sourced answer above it is always the authority.
 
 ## Upload your own documents
 
