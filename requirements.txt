@@ -74,7 +74,7 @@ transformers==5.10.0
 jupyterlab==4.6.4
 jupyter-server==2.21.0
 notebook==7.6.3
-chainlit==2.10.1
+chainlit==2.12.0
 llama-index==0.13.0
 llama-index-core==0.13.0
 llama-index-cli==0.13.0
