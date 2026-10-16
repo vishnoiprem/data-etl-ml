@@ -82,11 +82,17 @@ def recent_traces(day: str, after_id: str = "", limit: int = 50) -> list[dict]:
     if not path.exists():
         return []
     out: list[dict] = []
+    ratings: dict[str, int] = {}  # trace_id -> latest rating
     with open(path) as f:
         for line in f:
             try:
                 d = json.loads(line)
             except Exception:
+                continue
+            if d.get("kind") == "feedback":
+                r = d.get("payload", {}).get("rating")
+                if isinstance(r, int):
+                    ratings[d.get("trace_id", "")] = r
                 continue
             if d.get("kind") != "query":
                 continue
@@ -107,6 +113,8 @@ def recent_traces(day: str, after_id: str = "", limit: int = 50) -> list[dict]:
                 "refused": payload.get("refused", False),
                 "rating": None,
             })
+    for r in out:
+        r["rating"] = ratings.get(r["trace_id"])
     out.sort(key=lambda r: r["trace_id"])
     return out[:limit]
 

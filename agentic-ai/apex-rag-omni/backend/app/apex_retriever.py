@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from .local_index import get_index
+
 
 N_SHARDS = 10
 Collection = Literal["hr_policies", "tech_docs", "product_docs"]
@@ -52,6 +54,7 @@ def validate_filter_keys(collection: Collection, filters: dict[str, str]) -> Non
 class RetrievedDoc(BaseModel):
     doc_id: str
     text: str
+    title: str = ""
     vector_score: float = 0.0
     bm25_score: float = 0.0
     rrf_score: float = 0.0
@@ -83,27 +86,19 @@ def hybrid_search(collection: Collection, query: str,
     """
     if filters is not None:
         validate_filter_keys(collection, filters)
-    # Stub: in production, fan out to 10 Qdrant shards + ES.
-    # Here we return synthetic results that exercise the RRF path.
+    # Local hybrid index (BM25 + hashed-vector) over the built-in corpus.
+    # Production swaps this block for a fan-out to the 10 Qdrant shards + ES;
+    # the return contract (RRF-fused RetrievedDoc list) is identical.
+    idx = get_index(collection)
     vector_hits = [
-        RetrievedDoc(
-            doc_id=f"{collection}-vec-{i:04d}",
-            text=f"vector hit {i} for {query[:30]}",
-            vector_score=1.0 - i * 0.02,
-            shard_id=shard_for(f"{collection}-vec-{i:04d}"),
-            collection=collection,
-        )
-        for i in range(top_k)
+        RetrievedDoc(doc_id=d.doc_id, text=d.text, title=d.title, vector_score=sc,
+                     shard_id=shard_for(d.doc_id), collection=collection)
+        for d, sc in idx.vector(query)[:top_k]
     ]
     bm25_hits = [
-        RetrievedDoc(
-            doc_id=f"{collection}-bm25-{i:04d}",
-            text=f"bm25 hit {i} for {query[:30]}",
-            bm25_score=1.0 - i * 0.02,
-            shard_id=shard_for(f"{collection}-bm25-{i:04d}"),
-            collection=collection,
-        )
-        for i in range(top_k)
+        RetrievedDoc(doc_id=d.doc_id, text=d.text, title=d.title, bm25_score=sc,
+                     shard_id=shard_for(d.doc_id), collection=collection)
+        for d, sc in idx.bm25(query)[:top_k]
     ]
     return _rrf_fuse(vector_hits, bm25_hits)
 
@@ -119,6 +114,7 @@ def _rrf_fuse(vector_hits: list[RetrievedDoc],
         if d.doc_id in by_id:
             by_id[d.doc_id].rrf_score += 1.0 / (k + rank)
             by_id[d.doc_id].bm25_score = d.bm25_score
+            by_id[d.doc_id].title = by_id[d.doc_id].title or d.title
         else:
             d.rrf_score = 1.0 / (k + rank)
             by_id[d.doc_id] = d

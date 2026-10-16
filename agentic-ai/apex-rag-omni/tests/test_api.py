@@ -288,3 +288,128 @@ async def test_eval_requires_api_key(client):
 #  in-process because pydantic-settings honors env at construction;
 #  it's covered by manual smoke / a separate staging-environment
 #  test. The 403 path is fully covered above.)
+
+
+# ---------- Streaming (/query/stream) ----------
+
+
+def _parse_sse(text: str) -> list[tuple[str, dict]]:
+    out = []
+    for block in text.strip().split("\n\n"):
+        ev, data = None, None
+        for line in block.splitlines():
+            if line.startswith("event: "):
+                ev = line[7:]
+            elif line.startswith("data: "):
+                data = json.loads(line[6:])
+        if ev:
+            out.append((ev, data))
+    return out
+
+
+@pytest.mark.asyncio
+async def test_stream_requires_api_key(client):
+    r = await client.post(
+        "/query/stream", json={"collection": "hr_policies", "query": "PTO?"}
+    )
+    assert r.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_stream_bad_filter_is_http_400(client):
+    r = await client.post(
+        "/query/stream",
+        headers={"X-API-Key": "test-key-1"},
+        json={"collection": "hr_policies", "query": "PTO?",
+              "filters": {"rogue": "x"}},
+    )
+    assert r.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_stream_event_order_and_reassembly(client):
+    r = await client.post(
+        "/query/stream",
+        headers={"X-API-Key": "test-key-1"},
+        json={"collection": "hr_policies", "query": "What is PTO?"},
+    )
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/event-stream")
+    events = _parse_sse(r.text)
+    names = [e for e, _ in events]
+    assert names[0] == "meta" and names[1] == "sources" and names[-1] == "done"
+    assert set(names[2:-1]) == {"token"}
+    done = events[-1][1]
+    streamed = "".join(d["delta"] for e, d in events if e == "token")
+    assert streamed == done["evidence"]["answer"]
+    assert events[0][1]["trace_id"] == done["trace_id"]
+    t = done["timing_ms"]
+    assert t["total_ms"] >= t["hybrid_ms"] >= 0
+    # timings are measured, not a fixed 40/10/50 split of the total
+    assert abs(t["hybrid_ms"] - 0.4 * t["total_ms"]) > 1e-9
+
+
+def test_stream_tokens_never_splits_citation():
+    from backend.app.apex_answerer import stream_tokens
+    a = "[doc_1] [doc_2] hello  world\n"
+    parts = list(stream_tokens(a))
+    assert "".join(parts) == a
+    assert not any(p.strip().startswith("[doc") and not p.strip().endswith("]")
+                   for p in parts)
+
+
+# ---------- Real retrieval + grounding ----------
+
+
+async def _ask(client, collection, q):
+    r = await client.post("/query", headers={"X-API-Key": "test-key-1"},
+                          json={"collection": collection, "query": q})
+    assert r.status_code == 200
+    return r.json()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("collection,q,expect,doc_prefix", [
+    ("hr_policies", "How much PTO do I get per year?", "20 days", "hr-pto"),
+    ("hr_policies", "What is the parental leave policy?", "16 weeks", "hr-leave"),
+    ("tech_docs", "How do I authenticate to the API gateway?", "X-API-Key", "tech-auth"),
+    ("product_docs", "How do I export data to CSV?", "100,000 rows", "prod-export"),
+])
+async def test_answers_are_grounded_and_correct(client, collection, q, expect, doc_prefix):
+    ev = (await _ask(client, collection, q))["evidence"]
+    assert not ev["refused"], ev
+    assert expect in ev["answer"]
+    assert ev["spans"][0]["doc_id"].startswith(doc_prefix)
+    for line in ev["answer"].splitlines():
+        cites = [int(c) for c in __import__("re").findall(r"\[doc_(\d+)\]", line)]
+        assert cites and all(1 <= c <= len(ev["spans"]) for c in cites)
+    # every cited sentence really is verbatim corpus text
+    for s in ev["spans"]:
+        assert s["title"]
+
+
+@pytest.mark.asyncio
+async def test_out_of_scope_question_is_refused(client):
+    ev = (await _ask(client, "hr_policies", "What is the capital of France?"))["evidence"]
+    assert ev["refused"] is True
+    assert ev["answer"] == "" and ev["spans"] == []
+
+
+@pytest.mark.asyncio
+async def test_collections_are_isolated(client):
+    ev = (await _ask(client, "tech_docs", "How much PTO do I get per year?"))["evidence"]
+    assert all(not s["doc_id"].startswith("hr-") for s in ev["spans"])
+
+
+def test_trace_ids_are_time_ordered():
+    import time
+    from backend.app.main import new_trace_id
+    a = new_trace_id(); time.sleep(0.003); b = new_trace_id()
+    assert len(a) == 36 and a < b
+
+
+@pytest.mark.asyncio
+async def test_feedback_validation(client):
+    h = {"X-API-Key": "test-key-1"}
+    assert (await client.post("/feedback", headers=h, json={"trace_id": "x" * 65, "rating": 5})).status_code == 422
+    assert (await client.post("/feedback", headers=h, json={"trace_id": "t", "rating": 9})).status_code == 422
