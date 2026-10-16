@@ -127,7 +127,7 @@ mlflow>=2.8.0                  # NEW: Experiment tracking
 
 # NLP
 nltk>=3.9.0
-spacy>=3.8.0
+spacy>=3.8.16
 rouge==1.0.1
 
 # Big Data
