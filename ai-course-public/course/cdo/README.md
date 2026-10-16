@@ -111,4 +111,4 @@ Junior / Mid / Senior / Staff — circle yours.
 
 ---
 
-**Last updated:** 2026-10-16 · **License:** MIT
+**Last updated:** 2026-10-16 · **Status:** All 8 weeks + 8 case studies + 4 mock rounds + practice manual complete. **License:** MIT
