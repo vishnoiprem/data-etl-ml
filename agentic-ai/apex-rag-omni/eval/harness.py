@@ -154,3 +154,94 @@ def check_acceptance(report: EvalReport) -> tuple[bool, list[str]]:
     if report.judge_hallucination > ACCEPTANCE["judge_hallucination"]:
         failures.append(f"Hallucination {report.judge_hallucination:.2f} > {ACCEPTANCE['judge_hallucination']}")
     return (len(failures) == 0, failures)
+
+
+def _build_synthetic_gold(n: int) -> list[GoldItem]:
+    """Build a small synthetic gold set for the dev/dummy path.
+
+    Each item has 1-2 gold doc ids that match the dummy retriever's
+    `f"{collection}-bm25-0001"` style. The dummy retriever returns
+    synthetic results, so the judge here is a deterministic stub.
+    """
+    collections = ["hr_policies", "tech_docs", "product_docs"]
+    out: list[GoldItem] = []
+    for i in range(n):
+        c = collections[i % len(collections)]
+        gold_ids = [f"{c}-bm25-0001", f"{c}-vec-0001"]
+        relevance = {f"{c}-bm25-0001": 3, f"{c}-vec-0001": 2}
+        out.append(GoldItem(
+            query_id=f"q-{i:04d}",
+            query=f"synthetic query {i} for {c}",
+            gold_doc_ids=gold_ids,
+            graded_relevance=relevance,
+        ))
+    return out
+
+
+def _dummy_retrieve(query: str) -> list[str]:
+    """Stub retrieve that returns deterministic ids matching the gold."""
+    # Infer collection from the synthetic query (the build sets `for {c}`).
+    for c in ("hr_policies", "tech_docs", "product_docs"):
+        if c in query:
+            return [f"{c}-bm25-0001", f"{c}-vec-0001",
+                    f"{c}-bm25-0002", f"{c}-vec-0002"]
+    return ["x", "y", "z"]
+
+
+def _dummy_judge(query: str, retrieved: list[str]) -> dict[str, float]:
+    """Stub judge that scores deterministically. Replace with a real
+    LLM-as-judge call once B2 (real LLM) is in place.
+    """
+    return {
+        "groundedness": 4.0,
+        "completeness": 3.5,
+        "hallucination": 1.5,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI entry for `python -m eval.harness --out <path>`.
+
+    Writes a report JSON; the FastAPI /eval route reads the most recent
+    one via eval_store.latest_report(). The output path defaults to
+    eval/reports/eval_<ts>.json if not given.
+    """
+    import argparse
+    parser = argparse.ArgumentParser(description="APEX eval harness")
+    parser.add_argument("--out", type=str, default=None,
+                        help="Output path for the report JSON")
+    parser.add_argument("--n", type=int, default=200,
+                        help="Number of synthetic gold items to score")
+    args = parser.parse_args(argv)
+
+    out_path = args.out
+    if not out_path:
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+        out_path = f"eval/reports/eval_{ts}.json"
+
+    gold = _build_synthetic_gold(args.n)
+    report = run_harness(
+        gold=gold,
+        retrieve_fn=_dummy_retrieve,
+        judge_fn=_dummy_judge,
+        out_path=out_path,
+    )
+    passed, failures = check_acceptance(report)
+    print(f"wrote {out_path}")
+    print(f"  n_samples={report.n_samples} "
+          f"recall@8={report.recall_at_8:.3f} "
+          f"ndcg@10={report.ndcg_at_10:.3f}")
+    print(f"  judge groundedness={report.judge_groundedness:.2f} "
+          f"hallucination={report.judge_hallucination:.2f}")
+    if passed:
+        print("  ACCEPTANCE: PASS")
+        return 0
+    print("  ACCEPTANCE: FAIL")
+    for f in failures:
+        print(f"    - {f}")
+    return 1
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())

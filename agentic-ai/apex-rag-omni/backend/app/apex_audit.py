@@ -4,12 +4,18 @@ The trace log is the source of truth for the frontend trace reviewer.
 Cursor pagination uses (day, trace_id) as the sort key, so the
 query plan is a range scan with keyset pagination — O(1) per page,
 not OFFSET O(N).
+
+WRITES are off the event loop: the request path calls
+`audit_queue.enqueue_audit()` which is non-blocking. The actual disk
+write happens in the background drain task (see audit_queue.py). This
+file owns the READ path and a small sync `append_audit` helper used
+by bootstrap scripts and tests that don't go through the FastAPI
+lifespan (and therefore don't have the queue initialized).
 """
 from __future__ import annotations
 
 import json
 import threading
-from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
@@ -22,7 +28,10 @@ _LOCK = threading.Lock()
 
 
 def append_audit(trace_id: str, kind: str, payload: dict) -> None:
-    """Append an event to the audit log. Never overwrites."""
+    """Sync write to the audit log. NEVER call from the async request path —
+    use `audit_queue.enqueue_audit()` instead. This helper is for bootstrap
+    scripts, tests, and one-off admin tasks.
+    """
     ev = {
         "ts": datetime.now(timezone.utc).isoformat(),
         "trace_id": trace_id,
@@ -74,3 +83,8 @@ def recent_traces(day: str, after_id: str = "", limit: int = 50) -> list[dict]:
             })
     out.sort(key=lambda r: r["trace_id"])
     return out[:limit]
+
+
+def audit_path() -> Path:
+    """Path to the audit log. Used by the queue to know where to write."""
+    return _AUDIT_PATH

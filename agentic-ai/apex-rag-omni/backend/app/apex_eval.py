@@ -4,14 +4,17 @@ Production targets (per staff-level spec):
   Recall@8 = 0.89
   nDCG@8 = 0.91
   p95 latency = 420 ms
+
+This module owns the EvalReport dataclass and the metric primitives.
+The store (Postgres or JSONL) is in `eval_store.py`. The previous
+version of this file returned hardcoded fakes; the real numbers now
+come from the harness.
 """
 from __future__ import annotations
 
-import json
 import math
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Literal
 
 Collection = Literal["hr_policies", "tech_docs", "product_docs"]
@@ -34,48 +37,23 @@ class EvalReport:
         return asdict(self)
 
 
-# Production targets — what we report against
-PRODUCTION_TARGETS = {
-    "recall_at_8": 0.89,
-    "ndcg_at_8": 0.91,
-    "p95_latency_ms": 420.0,
-    "judge_groundedness": 4.0,
-    "judge_hallucination": 2.0,
-}
+def empty_report() -> EvalReport:
+    """Return an empty EvalReport with current timestamp and zeros.
 
-
-def latest_eval() -> EvalReport:
-    """Return the latest eval report. In production this is a DB read.
-
-    For the prototype, we return the production targets themselves
-    (so /eval always shows what the system is measured against) and
-    a small sample that demonstrates the metrics are computed.
+    Used by the route when no report exists yet. Caller can detect this
+    case via the `n_samples == 0` check or `by_collection == {}`.
     """
-    sample = EvalReport(
+    return EvalReport(
         timestamp=datetime.now(timezone.utc).isoformat(),
-        n_samples=1000,
-        recall_at_8=PRODUCTION_TARGETS["recall_at_8"],
-        ndcg_at_8=PRODUCTION_TARGETS["ndcg_at_8"],
-        p50_latency_ms=180.0,
-        p95_latency_ms=PRODUCTION_TARGETS["p95_latency_ms"],
-        judge_groundedness=PRODUCTION_TARGETS["judge_groundedness"],
-        judge_hallucination=1.4,
-        by_collection={
-            "hr_policies": {
-                "recall_at_8": 0.91, "ndcg_at_8": 0.93,
-                "p95_latency_ms": 380.0, "n_samples": 350,
-            },
-            "tech_docs": {
-                "recall_at_8": 0.88, "ndcg_at_8": 0.90,
-                "p95_latency_ms": 440.0, "n_samples": 350,
-            },
-            "product_docs": {
-                "recall_at_8": 0.87, "ndcg_at_8": 0.90,
-                "p95_latency_ms": 460.0, "n_samples": 300,
-            },
-        },
+        n_samples=0,
+        recall_at_8=0.0,
+        ndcg_at_8=0.0,
+        p50_latency_ms=0.0,
+        p95_latency_ms=0.0,
+        judge_groundedness=0.0,
+        judge_hallucination=0.0,
+        by_collection={},
     )
-    return sample
 
 
 def recall_at_k(retrieved: list[str], gold: list[str], k: int = 8) -> float:
