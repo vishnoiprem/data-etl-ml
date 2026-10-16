@@ -447,6 +447,244 @@
 
 ---
 
+<a id="story-11-the-failure"></a>
+## Story 11 — A failure that cost real money
+
+> **Why this story matters.** The hardest question in the executive loop is "tell me about a project that failed." Every CDO has shipped a dud. The candidate who has no failure story has no self-awareness. The candidate who owns the failure, names the root cause, and shows the change in behavior is the candidate who gets hired.
+
+> **Use it for:** Q12, Q13, Q15 (failure questions in Day 35's difficult-questions list). Also Googleyness at Google, "Are Right A Lot" at Amazon, "Intellectual Honesty" at Stripe.
+
+### Claim
+"I shipped a `[WHAT FAILED — model / migration / hire / launch]` that cost `[CONFIRM: $X]` and taught me `[ONE-SENTENCE LESSON]`."
+
+### Evidence
+[YOUR STORY HERE — fill in the actual failure. 3-5 sentences. What was it? What did you commit to? When did you know it was failing? What did you do? What's the $ cost? What did you change after?]
+
+### 30s
+"I shipped a `[FAILED THING]` that cost `[CONFIRM: $X]`. The root cause was `[ROOT CAUSE — one sentence]`. I caught it `[WHEN — e.g., within 2 weeks / after a customer escalation]`, killed it, and told `[WHO — CEO / board / BU head]` within `[TIMEFRAME]`. The change in my behavior since: `[ONE-SENTENCE LESSON]`."
+
+### 2min STAR
+
+**S (Situation).** `[2-3 sentences — the company, the constraint, the commitment. E.g., "We had committed to a $X migration by Q3. The team was 8 people. The data was 10B rows. The CEO had signed off the date at the board meeting."]`
+
+**T (Task).** `[1-2 sentences — your specific job. E.g., "I was the director of data. I owned the date and the budget. The migration was my commitment."]`
+
+**A (Action — the 3-5 things you did, including the failure).**
+- `[1st action — what you did right]`
+- `[2nd action — what you did right]`
+- `[3rd action — THE FAILURE — the wrong call, the missed signal, the skipped step]`
+- `[4th action — when you knew, what you did about it]`
+- `[5th action — the recovery, the comms, the fix]`
+
+**R (Result).** `[The cost — $X, time, customer impact. Then the lesson. The lesson is the most important part. The interviewer is grading your self-awareness, not your success rate.]`
+
+### Deep dive (the CTO / Bar Raiser will push on this)
+- **The signal you missed.** `[What data point should you have caught? When? What would have triggered an earlier stop?]`
+- **The sunk-cost trap.** `[At what point did you decide to keep going vs. kill it? Why?]`
+- **The comms.** `[Who did you tell? When? What did you say? What did you NOT say that you should have?]`
+- **The behavior change.** `[What do you do differently now? E.g., "I now require a 2-week kill-criterion check at the 30-day mark of every project."]`
+
+### Follow-ups
+
+1. **"What was the hardest part of telling the CEO?"** — [YOUR ANSWER]
+2. **"Would you make the same call again?"** — [YOUR ANSWER — show the learning, not the regret]
+3. **"What did the team think of you after?"** — [YOUR ANSWER — show the relationship repair, not the blame]
+4. **"How did this change how you hire?"** — [YOUR ANSWER — bridge to the people story]
+5. **"If a candidate told you this story, would you hire them?"** — [YOUR ANSWER — the meta-test; show you value the signal]
+
+---
+
+<a id="story-12-the-political-loss"></a>
+## Story 12 — A political battle you lost
+
+> **Why this story matters.** The CDO who has never lost an argument hasn't been in the room. The executive loop tests "will this person fight the right battles, lose the right way, and execute anyway?" Amazon's "Disagree and Commit" and "Have Backbone" probe exactly this. Meta's "Be Bold" rewards the fight. Google's "no-surprises" rewards the data behind it.
+
+> **Use it for:** Q17 (Day 35), "Disagree and Commit" at Amazon, "Have Backbone" at Amazon, "Be Bold" at Meta.
+
+### Claim
+"I fought for `[WHAT YOU BELIEVED]`. The `[CEO / VP / BU head]` overrode me. I executed anyway. The result was `[OUTCOME — could be a partial win, a Pyrrhic victory, or a learning]`. The lesson was `[ONE SENTENCE]`."
+
+### Evidence
+[YOUR STORY HERE — fill in the actual political loss. 3-5 sentences. What did you believe? Who overrode you? On what data? How did you execute the override? What was the cost? What would you do differently?]
+
+### 30s
+"I pushed for `[POSITION]`. I had the data. The `[CEO / VP]` overrode me on `[REASON]`. I executed the override within `[TIMEFRAME]`. The result was `[OUTCOME — including the cost of the override]`. The lesson: `[ONE SENTENCE — e.g., "pick the battles that are worth the political capital; this one wasn't; the next one I picked was."]`"
+
+### 2min STAR
+
+**S (Situation).** `[2-3 sentences — the context, the stakes, the relationship. E.g., "Q2. The cloud bill was up 30% YoY. I proposed a multi-cloud consolidation that would save $X/year. The CTO wanted single-cloud for operational simplicity. The CEO had to break the tie."]`
+
+**T (Task).** `[1-2 sentences — what you had to do. E.g., "I had to make the case, accept the call, and execute the override. All three."]`
+
+**A (Action — the 3-5 things you did).**
+- `[1st — the data you brought]`
+- `[2nd — the alliances you built]`
+- `[3rd — the case you made, including the strongest version of the counter-position]`
+- `[4th — the moment of loss, and what you said in the room]`
+- `[5th — the execution after the loss; the speed and quality of the handoff]`
+
+**R (Result).** `[The outcome. Include the cost of the override — financial, time, team morale. Then the relationship repair. Then the lesson.]`
+
+### Deep dive
+- **The data you brought vs. the data they brought.** `[Who had better data? Was yours dismissed? Why?]`
+- **The alliance you didn't build.** `[In hindsight, who should you have brought in earlier? Who surprised you?]`
+- **The moment of loss.** `[What did the CEO say? What did you NOT say that you wanted to?]`
+- **The execution speed.** `[How fast did you pivot? What signal did the team read?]`
+- **The relationship after.** `[Are you still working with this person? How did you repair?]`
+
+### Follow-ups
+
+1. **"Do you regret it?"** — [YOUR ANSWER — show the maturity, not the bitterness]
+2. **"What would you do differently?"** — [YOUR ANSWER — show the specific behavior change]
+3. **"If it happened again, would you fight the same way?"** — [YOUR ANSWER — show you've thought about it]
+4. **"How did this affect your relationship with the CEO?"** — [YOUR ANSWER — show the relationship management]
+5. **"When SHOULD a CDO lose a political battle?"** — [YOUR ANSWER — show the meta-judgment]
+
+---
+
+<a id="story-13-the-change-of-mind"></a>
+## Story 13 — A time you changed your mind
+
+> **Why this story matters.** The CDO who is never wrong is the CDO who is always wrong. Strong opinions, loosely held. The executive loop tests "is this person learning, or just collecting validation?" Amazon's "Learn and Be Curious" and Stripe's "Intellectual Honesty" probe exactly this.
+
+> **Use it for:** Q15 (Day 35), "Learn and Be Curious" at Amazon, Stripe's "Intellectual Honesty," "Bias for Action" (the opposite — the moment you held action to learn).
+
+### Claim
+"I was sure about `[POSITION A]`. The data pushed me to `[POSITION B]`. I switched in `[TIMEFRAME]`. The cost of the switch was `[CONFIRM: $X or N weeks]`. The lesson was `[ONE SENTENCE]`."
+
+### Evidence
+[YOUR STORY HERE — fill in the actual change of mind. 3-5 sentences. What were you sure about? What changed your mind? When? How did you communicate the change to the team / CEO / board? What was the cost of switching?]
+
+### 30s
+"I was sure `[POSITION A]`. The `[WHAT CHANGED — a pilot, a customer, a metric, a hire]` changed my mind. I switched in `[TIMEFRAME]`. I told the team `[HOW]`. The cost of the switch was `[CONFIRM: $X or N weeks]`. The lesson: `[ONE SENTENCE — e.g., "I now run a 30-day pilot before committing to architecture choices, not after."]`"
+
+### 2min STAR
+
+**S (Situation).** `[2-3 sentences — what you believed, why you believed it, who else believed it. E.g., "I had championed a single-warehouse architecture for 2 years. I'd written 3 memos, defended it in 2 all-hands, and hired 6 people against it."]`
+
+**T (Task).** `[1-2 sentences — what the new data was, who brought it. E.g., "A 60-day pilot showed a 35% query cost delta at our scale. The platform lead brought the data. I had to decide."]`
+
+**A (Action — the 3-5 things you did).**
+- `[1st — the moment you saw the data; the emotional reaction]`
+- `[2nd — the verification you did; the people you talked to]`
+- `[3rd — the conversation with the people who shared your old view]`
+- `[4th — the public switch; how you framed it; the credibility cost]`
+- `[5th — the new direction; the speed of the pivot]`
+
+**R (Result).** `[The outcome — including the cost of the switch and the credibility hit. Then the lesson. The lesson is the win; the cost is the proof.]`
+
+### Deep dive
+- **The data that changed your mind.** `[What was it? Why didn't you have it before? What would have given it to you earlier?]`
+- **The people you convinced.** `[Who were the early movers? Who held out? How did you handle them?]`
+- **The credibility cost.** `[How did the team / CEO read the switch? Did it cost you political capital? Did it buy you credibility?]`
+- **The new conviction.** `[How strong is the new view? Under what data would you change again?]`
+
+### Follow-ups
+
+1. **"What would have given you the data earlier?"** — [YOUR ANSWER]
+2. **"How did the people who agreed with your old position take it?"** — [YOUR ANSWER]
+3. **"Did anyone use the switch against you later?"** — [YOUR ANSWER]
+4. **"How do you decide when to switch vs. when to hold?"** — [YOUR ANSWER — the meta-rule]
+5. **"What did you learn about your own decision-making?"** — [YOUR ANSWER — the self-awareness]
+
+---
+
+<a id="story-14-the-people-decision-that-hurt"></a>
+## Story 14 — A people decision that hurt
+
+> **Why this story matters.** The CDO who has never made a hard people decision hasn't been a CDO. The executive loop tests "can this person make the call, deliver it humanely, and keep the team moving?" This is the "Hire and Develop the Best" / "Insist on the Highest Standards" probe at Amazon, the "no-bureaucracy" test at Shopify, the "rigor" test at Stripe.
+
+> **Use it for:** Q6, Q8, Q10 (Day 35), "Hire and Develop the Best" at Amazon, the "right-sized team" expectation at Shopify.
+
+### Claim
+"I `[FIRED / PIP'd / LAYOFF'd / LET GO OF]` a `[WHO — senior engineer / manager / director]` who `[WHAT THEY WERE SUPPOSED TO DO]`. It was `[THE HARDEST PART]`. The result was `[OUTCOME — the team, the work, the person]`. The lesson was `[ONE SENTENCE]`."
+
+### Evidence
+[YOUR STORY HERE — fill in the actual people decision. 3-5 sentences. Who was it? What were they not doing? How long did you wait? How did you deliver the message? What was the aftermath? Did they land somewhere good?]
+
+### 30s
+"I had to `[PIP / fire / lay off]` a `[ROLE]` who `[THE GAP]`. I waited `[TIMEFRAME]` before acting. I delivered it `[HOW — direct, with empathy, with a clear off-ramp]`. The result: `[WHAT HAPPENED TO THE TEAM, THE WORK, THE PERSON]`. The lesson: `[ONE SENTENCE — e.g., "The cost of waiting is always higher than the cost of acting. I now have a 30/60/90 day check-in on every senior hire."]`"
+
+### 2min STAR
+
+**S (Situation).** `[2-3 sentences — the role, the gap, the team impact. E.g., "A senior engineer on my platform team. Strong technically. Underperforming on collaboration. The team was starting to avoid them. Three of my best engineers had raised it in 1:1s in the previous month."]`
+
+**T (Task).** `[1-2 sentences — your job. E.g., "I had to decide: invest more, PIP, or let go. The team's signal was clear. The decision was mine."]`
+
+**A (Action — the 3-5 things you did).**
+- `[1st — the direct feedback conversation; what you said]`
+- `[2nd — the PIP if applicable; the milestones; the off-ramp]`
+- `[3rd — the delivery; the day, the time, the room]`
+- `[4th — the team's reaction; the 1:1s you had]`
+- `[5th — the aftercare; references, severance, internal mobility]`
+
+**R (Result).** `[The team recovery. The work recovery. The person's landing. The lesson.]`
+
+### Deep dive
+- **The signal you missed.** `[When did the gap first show? What did you tell yourself? What would you do differently?]`
+- **The cost of waiting.** `[What did the team lose in the 6 months you waited? Be specific.]`
+- **The delivery.** `[How did you prepare? Who was in the room? What did you say? What did you NOT say?]`
+- **The team's reaction.** `[How long to recover? Did anyone leave? Did anyone thank you?]`
+- **The aftercare.** `[What did you do for the person after? References? Internal mobility? Outplacement?]`
+
+### Follow-ups
+
+1. **"How long did you wait before acting?"** — [YOUR ANSWER]
+2. **"What did the team think of you after?"** — [YOUR ANSWER]
+3. **"Would you make the same call again?"** — [YOUR ANSWER]
+4. **"What did the person go on to do?"** — [YOUR ANSWER]
+5. **"How do you decide when to invest vs. when to let go?"** — [YOUR ANSWER — the meta-rule]
+
+---
+
+<a id="story-15-the-no-to-the-ceo"></a>
+## Story 15 — The time you said no to the CEO
+
+> **Why this story matters.** This is the high-stakes one. The CDO who never says no to the CEO is a yes-person. The CDO who says no without data is a blocker. The CDO who says no, brings the data, hears the override, and executes anyway is the CDO who gets re-hired. Amazon's "Have Backbone, Disagree and Commit" probes exactly this. Meta's "Build Awesome Things" rewards the no when it's right. Google's "no-surprises" rewards the data behind the no.
+
+> **Use it for:** Q17, Q19 (Day 35), "Have Backbone" at Amazon, the "right-sized team" / "no-bureaucracy" at Shopify (the inverse — Shopify wants you to say no to over-engineering).
+
+### Claim
+"The CEO asked for `[WHAT]`. I said no. I brought `[DATA / RISK / COST]`. The CEO `[OVERRODE / ACCEPTED / NEGOTIATED]`. I `[EXECUTED / ESCALATED / RESIGNED]`. The result was `[OUTCOME]`. The lesson was `[ONE SENTENCE]`."
+
+### Evidence
+[YOUR STORY HERE — fill in the actual no. 3-5 sentences. What did the CEO ask? Why did you say no? What data did you bring? How did the conversation go? What was the override or acceptance? What was the cost?]
+
+### 30s
+"The CEO asked for `[WHAT]`. I said no because `[REASON WITH DATA]`. The CEO `[OVERRODE / ACCEPTED]`. I `[EXECUTED / NEGOTIATED]`. The result was `[OUTCOME — including the cost of saying no, and the cost of being overridden if applicable]`. The lesson: `[ONE SENTENCE — e.g., "The cost of a bad yes is always higher than the cost of a hard no. I will say no with data, and I will execute the override with discipline."]`"
+
+### 2min STAR
+
+**S (Situation).** `[2-3 sentences — the ask, the stakes, the timing. E.g., "Q4. The CEO wanted to ship a customer-facing AI feature by year-end. The board had been promised. The data team had 4 months of work, 1 model in production, and a feature store that was 60% done."]`
+
+**T (Task).** `[1-2 sentences — the call you had to make. E.g., "I had to decide: ship by year-end with risk, or push the date. The board promise was on the line."]`
+
+**A (Action — the 3-5 things you did).**
+- `[1st — the data you brought; the risk quantification; the cost of failure]`
+- `[2nd — the conversation with the CEO; the room, the tone, the framing]`
+- `[3rd — the alternative you proposed; the compromise]`
+- `[4th — the override OR the acceptance; the explicit decision]`
+- `[5th — the execution; the speed; the comms to the team]`
+
+**R (Result).** `[The outcome. Include the cost of the no, the cost of the override (if any), the relationship after, the lesson.]`
+
+### Deep dive
+- **The data.** `[What did you bring? What was the risk? What was the cost of failure?]`
+- **The framing.** `[How did you frame the no? "This will fail" vs. "This will succeed under these conditions" — both work; the second works better.]`
+- **The override (if it happened).** `[How did you execute? How did you protect the team? How did you protect the CEO?]`
+- **The acceptance (if it happened).** `[How did the CEO respond? What was the political cost? Was there a quid pro quo?]`
+- **The relationship after.** `[How did this affect the trust? Did it buy you credibility? Did it cost you?]`
+
+### Follow-ups
+
+1. **"How did you decide to say no vs. negotiate?"** — [YOUR ANSWER]
+2. **"What if the CEO had overridden you?"** — [YOUR ANSWER — show you've thought about the override path]
+3. **"How did the team read the no?"** — [YOUR ANSWER]
+4. **"Would you say no again?"** — [YOUR ANSWER]
+5. **"When SHOULD a CDO say no to the CEO?"** — [YOUR ANSWER — the meta-rule, e.g., "When the cost of failure is irreversible, the data is clear, and the alternative is within reach. I will not say no to a reversible decision."]
+
+---
+
 ## Personal Weaknesses Ledger (append-only)
 
 > Reuse the pattern from `medium/meta/coach/PROGRESS.md`. Every Friday, append a row.
