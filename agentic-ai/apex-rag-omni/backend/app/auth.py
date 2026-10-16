@@ -9,6 +9,8 @@ The key is never logged in full — only a 6-char prefix.
 """
 from __future__ import annotations
 
+import hmac
+
 from fastapi import Depends, Header, HTTPException, status
 
 from .settings import Settings, get_settings
@@ -47,8 +49,12 @@ async def verify_api_key(
             headers={"WWW-Authenticate": "ApiKey"},
         )
     # Constant-time comparison: avoid timing oracles.
-    valid_set = set(valid)
-    if x_api_key not in valid_set:
+    # Compare against EVERY key (no early exit) with hmac.compare_digest;
+    # `in set` is a hash lookup, not constant-time.
+    ok = False
+    for k in valid:
+        ok |= hmac.compare_digest(x_api_key.encode(), k.encode())
+    if not ok:
         # We don't differentiate "wrong key" from "unknown key" — both 403.
         # We don't log the candidate here, just the prefix of the request.
         raise HTTPException(

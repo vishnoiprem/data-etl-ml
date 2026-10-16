@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -110,21 +111,18 @@ async def test_full_flow_one_doc(client):
     ev = body["evidence"]
     assert ev["collection"] == "hr_policies"
     assert ev["query"] == "How much PTO do I get?"
-    # The answer must contain citation markers. The dummy retriever
-    # returns `hr_policies-vec-NNNN` and `hr_policies-bm25-NNNN` ids.
-    # The answerer simulates a fully-grounded response, so every
-    # returned doc should be cited.
+    # Grounding contract: every answer line ends in a citation, every
+    # citation resolves to a span, and the answer is real corpus text.
     answer = ev["answer"]
-    cited_ids = [int(s.split("]")[0]) for s in answer.split("[doc_") if s and s[0].isdigit()]
     n_returned = len(ev["spans"])
     assert n_returned > 0
-    # The answerer should cite each doc that was passed in (full coverage).
-    assert len(cited_ids) == n_returned, (
-        f"expected {n_returned} citations, got {len(cited_ids)}: {cited_ids!r}"
-    )
-    # Every span has a doc_id from the retriever.
+    for line in answer.splitlines():
+        cites = [int(c) for c in re.findall(r"\[doc_(\d+)\]", line)]
+        assert cites, f"uncited line: {line!r}"
+        assert all(1 <= c <= n_returned for c in cites), (cites, n_returned)
+    assert "20 days" in answer  # PTO accrual from the HR corpus
     for span in ev["spans"]:
-        assert span["doc_id"].startswith("hr_policies-"), span["doc_id"]
+        assert span["doc_id"].startswith("hr-"), span["doc_id"]
         assert span["score"] > 0
     # Not refused.
     assert ev["refused"] is False

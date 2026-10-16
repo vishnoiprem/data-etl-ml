@@ -1,6 +1,6 @@
 # Production Hardening — Backlog
 
-This pass (v0.2.0) shipped 6 of 15 audit gaps:
+Status (updated on branch `feature/apex-rag-omni-chatgpt-review`). Items 1-7 shipped in v0.2.0; 8-11 shipped here:
 
 | # | Gap | Status |
 |---|---|---|
@@ -11,6 +11,11 @@ This pass (v0.2.0) shipped 6 of 15 audit gaps:
 | 5 | `Settings(BaseSettings)` + `.env.example`, env-driven config | **DONE** |
 | 6 | `QueryRequest.query` max_length=2000 + per-collection filter allowlist | **DONE** |
 | 7 | Real eval harness (Postgres + JSONL fallback, no more hardcoded targets) | **DONE** |
+| 8 | Streaming `/query/stream` (SSE) + measured per-stage timings | **DONE** (feature/apex-rag-omni-chatgpt-review) |
+| 9 | Working local retriever + extractive grounded answerer (replaces stubs) | **DONE** |
+| 10 | Hallucination gate + input/output sanitization + PII redaction in audit | **DONE** |
+| 12 | Optional free-model plain-words explanation, verified against sources | **DONE** (generation of the *answer* by an LLM is still B2) |
+| 11 | Time-ordered trace ids (keyset-pagination correctness), constant-time auth | **DONE** |
 
 9 gaps remain. Listed in execution order. Each is a separate PR.
 
@@ -25,6 +30,7 @@ This pass (v0.2.0) shipped 6 of 15 audit gaps:
 ### B2. Real LLM call (gap #11)
 - **Why:** `apex_answerer.grounded_answer()` simulates the gateway (zero latency, perfect output). The current `/query` is a deterministic mock. Real model integration is the single biggest correctness risk.
 - **Files:** `backend/app/apex_answerer.py` (replace simulation with httpx call to `settings.model_gateway_url`), add `tenacity` retry decorator with `wait_exponential`, add circuit breaker state.
+- **Note:** the streaming seam is `stream_tokens()`; the hallucination gate and sanitizers already run on whatever answer is produced, so a model's output is checked before it reaches the user.
 - **Plan:** `httpx.AsyncClient(timeout=httpx.Timeout(connect=2, read=8, write=10, pool=2))` against the gateway. On 5xx or timeout: retry with exponential backoff (max 3). If still failing: return `refused=True, refusal_reason="model gateway unavailable"` — never hang. Track in-flight calls; if > 50 concurrent, refuse new ones (circuit open).
 - **Estimate:** 1 day.
 
@@ -55,7 +61,7 @@ This pass (v0.2.0) shipped 6 of 15 audit gaps:
 ### B7. ADRs + documentation honesty (gap #15)
 - **Why:** README claims "Not a demo" but `apex_retriever.py` returns synthetic data, `apex_answerer.py` simulates the gateway. The deception undermines every other claim in the README.
 - **Files:** New `docs/adr/0001-eval-store-choice.md` (Postgres + JSONL fallback), `docs/adr/0002-async-audit-queue.md` (asyncio.Queue + drain task), `docs/adr/0003-filter-key-allowlist.md`, `docs/adr/0004-auth-api-key.md`. Update `README.md` with a "Status" section listing live vs. simulated per surface.
-- **Plan:** Each ADR follows the standard format (Context / Decision / Consequences). README "Status" section: 1 table per major surface (retriever, answerer, eval store, audit store, gateway), with column "Status" = `live | simulated | stubbed` and a sentence explaining what's needed to move to `live`. Be honest: `apex_retriever` is currently a stub that returns synthetic data, and B2 is what makes it live.
+- **Plan:** Each ADR follows the standard format (Context / Decision / Consequences). README "Status" section: 1 table per major surface (retriever, answerer, eval store, audit store, gateway), with column "Status" = `live | simulated | stubbed` and a sentence explaining what's needed to move to `live`. Retriever is now a working in-process index (`local_index.py`) over a demo corpus; the answerer is extractive (no LLM). B2 adds the LLM, B8 swaps in Qdrant/ES. The hallucination gate (`hallucination.py`) already sits in front of any generator.
 - **Estimate:** 4 hours.
 
 ### B8. Replace dummy retriever with real Qdrant client (gap #11, separate from B2)
