@@ -8,6 +8,8 @@ Endpoints (per staff-level spec):
        hybrid_search() across 10 Qdrant shards -> rerank Top8 -> grounded
        answer with evidence_json (anti-hallucination contract).
        Requires X-API-Key. query body capped at APEX_MAX_QUERY_CHARS.
+  POST /documents (multipart: collection + file), GET /documents, DELETE /documents/{id}
+       Upload .txt/.md/.csv/.pdf into a collection; searchable immediately.
   POST /query/stream
        Same pipeline as /query, delivered as Server-Sent Events so the
        UI can render tokens as they are produced (ChatGPT-style):
@@ -38,12 +40,15 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query, status
+from fastapi import (
+    Depends, FastAPI, File, Form, HTTPException, Query, UploadFile, status,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from . import audit_queue
+from . import audit_queue, document_store
+from .local_index import invalidate as _invalidate_index
 from .apex_answerer import (
     EvidenceJSON as AnswererEvidenceJSON, grounded_answer, stream_tokens,
 )
@@ -106,7 +111,7 @@ app.add_middleware(
         o.strip() for o in _settings_for_cors.frontend_origin.split(",") if o.strip()
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["X-API-Key", "Content-Type"],
 )
 
@@ -406,6 +411,63 @@ async def post_query_stream(
         gen(), media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@app.post("/documents", status_code=status.HTTP_201_CREATED)
+async def upload_document(
+    collection: Collection = Form(...),
+    file: UploadFile = File(...),
+    api_key: str = Depends(verify_api_key),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    """Upload a .txt/.md/.csv/.pdf into a collection. It is extracted,
+    cleaned, chunked into citable passages, de-duplicated by SHA-256, and
+    searchable immediately. Returns PII / injection-like warnings so the
+    uploader can decide whether to keep it."""
+    data = await file.read(settings.max_upload_bytes + 1)
+    try:
+        info = document_store.add_document(collection, file.filename or "document", data)
+    except document_store.UploadError as exc:
+        raise HTTPException(status_code=exc.status, detail=str(exc))
+    _invalidate_index(collection)
+    await audit_queue.enqueue_audit(
+        trace_id=f"upload-{info['doc_id']}", kind="upload", payload={
+            "collection": collection, "filename": info["filename"],
+            "chunks": info["chunks"], "pii_detected": info["pii_detected"],
+            "injection_like": info["injection_like"],
+            "actor_prefix": safe_key_for_log(api_key),
+        },
+    )
+    return info
+
+
+@app.get("/documents")
+async def list_documents(
+    collection: Collection = Query(...),
+    api_key: str = Depends(verify_api_key),
+) -> dict:
+    from .corpus import CORPUS
+    return {
+        "collection": collection,
+        "builtin_passages": len(CORPUS[collection]),
+        "documents": document_store.list_documents(collection),
+    }
+
+
+@app.delete("/documents/{doc_id}")
+async def delete_document(
+    doc_id: str,
+    collection: Collection = Query(...),
+    api_key: str = Depends(verify_api_key),
+) -> dict:
+    if not document_store.delete_document(collection, doc_id):
+        raise HTTPException(status_code=404, detail="No such uploaded document.")
+    _invalidate_index(collection)
+    await audit_queue.enqueue_audit(
+        trace_id=f"delete-{doc_id}", kind="delete_document",
+        payload={"collection": collection, "actor_prefix": safe_key_for_log(api_key)},
+    )
+    return {"ok": True, "doc_id": doc_id}
 
 
 @app.post("/feedback")

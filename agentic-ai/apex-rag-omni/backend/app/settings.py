@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     # NEVER use `*` here. 127.0.0.1 is a different origin than localhost.
     frontend_origin: str = "http://localhost:3000,http://127.0.0.1:3000"
 
+    # --- Uploads ---
+    # Where uploaded documents are stored. Empty = <project>/data. Mount a volume here in prod.
+    data_dir: str = ""
+    max_upload_bytes: int = 5 * 1024 * 1024
+
     # --- Tunables ---
     # Bounded queue for the audit log writer. If full, requests drop with
     # a counter (we never block the request path on disk I/O).

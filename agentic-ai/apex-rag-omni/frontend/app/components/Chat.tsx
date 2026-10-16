@@ -82,7 +82,8 @@ interface ChatSession {
 const STORAGE_KEY = "apex_api_key";
 const API_BASE_STORAGE_KEY = "apex_api_base";
 const SESSIONS_STORAGE_KEY = "apex_chat_sessions";
-const DEFAULT_API_BASE = "http://localhost:8000";
+// Set NEXT_PUBLIC_API_BASE=/api in production (same-origin via the reverse proxy).
+const DEFAULT_API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const DEFAULT_API_KEY = "devkey-change-me";
 
 const COLLECTIONS: { id: Collection; label: string; hint: string }[] = [
@@ -689,6 +690,8 @@ export default function Chat() {
           ))}
         </div>
 
+        <KnowledgeBase apiBase={apiBase} apiKey={apiKey} collection={activeCollection} />
+
         <div className="apex-sidebar-section apex-sidebar-history">
           <div className="apex-sidebar-label">History</div>
           {sessions.map((s) => (
@@ -818,6 +821,121 @@ export default function Chat() {
           </div>
         </form>
       </main>
+    </div>
+  );
+}
+
+/* ---------- Knowledge base: upload / list / delete documents ---------- */
+
+interface UploadedDoc { id: string; filename: string; chars: number; chunks: number; uploaded_at: string }
+
+function KnowledgeBase({
+  apiBase, apiKey, collection,
+}: { apiBase: string; apiKey: string; collection: Collection }) {
+  const [docs, setDocs] = useState<UploadedDoc[]>([]);
+  const [builtin, setBuiltin] = useState<number>(0);
+  const [note, setNote] = useState<{ kind: "ok" | "warn" | "err"; text: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const headers = useMemo(() => ({ "X-API-Key": apiKey }), [apiKey]);
+
+  const refresh = useCallback(async () => {
+    try {
+      const r = await fetch(`${apiBase}/documents?collection=${collection}`, { headers });
+      if (!r.ok) return;
+      const d = await r.json();
+      setDocs(d.documents);
+      setBuiltin(d.builtin_passages);
+    } catch {
+      /* backend down: the chat area already explains it */
+    }
+  }, [apiBase, collection, headers]);
+
+  useEffect(() => {
+    setNote(null);
+    void refresh();
+  }, [refresh]);
+
+  const upload = useCallback(
+    async (files: FileList | null) => {
+      if (!files?.length) return;
+      setUploading(true);
+      setNote(null);
+      let ok = 0;
+      const warns: string[] = [];
+      for (const f of Array.from(files)) {
+        const fd = new FormData();
+        fd.append("collection", collection);
+        fd.append("file", f);
+        try {
+          const r = await fetch(`${apiBase}/documents`, { method: "POST", headers, body: fd });
+          const body = await r.json().catch(() => ({}));
+          if (!r.ok) {
+            setNote({ kind: "err", text: `${f.name}: ${body.detail ?? `HTTP ${r.status}`}` });
+            continue;
+          }
+          ok++;
+          if (body.pii_detected?.length) warns.push(`${f.name} contains ${body.pii_detected.join(", ")}`);
+          if (body.injection_like) warns.push(`${f.name} has instruction-like text`);
+        } catch {
+          setNote({ kind: "err", text: `Can't reach the API at ${apiBase}.` });
+          break;
+        }
+      }
+      if (ok) {
+        setNote(
+          warns.length
+            ? { kind: "warn", text: `Uploaded ${ok}. Review: ${warns.join("; ")}` }
+            : { kind: "ok", text: `Uploaded ${ok} file${ok > 1 ? "s" : ""}. Ready to ask.` },
+        );
+        setOpen(true);
+      }
+      if (fileRef.current) fileRef.current.value = "";
+      setUploading(false);
+      void refresh();
+    },
+    [apiBase, collection, headers, refresh],
+  );
+
+  const remove = useCallback(
+    async (d: UploadedDoc) => {
+      if (!window.confirm(`Remove "${d.filename}" from the knowledge base?`)) return;
+      await fetch(`${apiBase}/documents/${d.id}?collection=${collection}`, { method: "DELETE", headers });
+      void refresh();
+    },
+    [apiBase, collection, headers, refresh],
+  );
+
+  return (
+    <div className="apex-sidebar-section apex-kb">
+      <div className="apex-sidebar-label">Knowledge base</div>
+      <input
+        ref={fileRef}
+        type="file"
+        multiple
+        accept=".txt,.md,.csv,.pdf"
+        hidden
+        onChange={(e) => void upload(e.target.files)}
+        aria-label="upload documents"
+      />
+      <button type="button" className="apex-upload" disabled={uploading} onClick={() => fileRef.current?.click()}>
+        {uploading ? "Uploading…" : "⬆ Upload documents"}
+      </button>
+      <div className="apex-kb-hint">.txt · .md · .csv · .pdf · up to 5 MB</div>
+      {note && <div className={`apex-kb-note apex-kb-note--${note.kind}`} role="status">{note.text}</div>}
+      <button type="button" className="apex-kb-toggle" onClick={() => setOpen((v) => !v)}>
+        {open ? "▾" : "▸"} {docs.length} uploaded · {builtin} built-in
+      </button>
+      {open &&
+        docs.map((d) => (
+          <div key={d.id} className="apex-kb-doc" title={`${d.chunks} passages · ${d.chars.toLocaleString()} chars`}>
+            <span className="apex-kb-name">{d.filename}</span>
+            <button type="button" className="apex-session-del" style={{ visibility: "visible" }} onClick={() => void remove(d)} aria-label={`remove ${d.filename}`}>
+              ×
+            </button>
+          </div>
+        ))}
     </div>
   );
 }

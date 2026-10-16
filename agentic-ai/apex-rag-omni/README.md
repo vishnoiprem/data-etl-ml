@@ -37,13 +37,93 @@ I built APEX-RAG Omni. It's not a demo RAG — it's a sovereign platform designe
 | Retrieval | **Working**: in-process BM25 + hashed-vector index with RRF fusion over a built-in demo corpus (`backend/app/local_index.py`). Same contract as the 10-shard Qdrant + ES fan-out, which is the **design**, not deployed here. |
 | Answers | **Working**: extractive and grounded. Every sentence is verbatim corpus text with a `[doc_N]` citation, or the query is refused. No LLM call yet (`stream_tokens` is the seam). |
 | Streaming chat UI | **Working**: SSE, stop/regenerate/copy/feedback, history. |
+| Document upload | **Working**: txt/md/csv/pdf → passages → searchable + citable, dedupe, per-collection, delete, PII/injection warnings. |
+| Docker + HTTPS deploy | **Working** (Caddy + web + api, login, key injection). Verified locally with Docker. |
 | Hallucination gate | **Working**: every answer is checked claim-by-claim (citations resolve, numbers match the source, lexical support); failures are refused. Word/number based, not an LLM judge. |
 | Sanitization | **Working**: input normalisation + prompt-injection refusal (pattern list), PII masked before audit/logs, markup stripped from output. |
 | Auth, CORS, audit queue, cursor-paginated traces | **Working**, tested (time-ordered trace ids, constant-time key check). |
 | Flink CDC freshness, shadow-index dual-write, 100M-doc scale, embedding cost | **Design only.** |
 | Eval metrics | Harness exists; quote only numbers from a real `make eval` run. |
 
-## Run
+## Upload your own documents
+
+Out of the box each collection has a small demo corpus. Add your real documents and they become searchable and citable immediately.
+
+**In the UI:** pick a collection in the sidebar → **⬆ Upload documents** → choose one or more files. Ask a question; answers cite your file by name (e.g. `remote-work.txt (1/2)`). Open **▸ N uploaded** to see or remove files.
+
+**Via the API:**
+```bash
+curl -X POST http://localhost:8000/documents \
+  -H "X-API-Key: $KEY" -F collection=hr_policies -F file=@remote-work.pdf
+curl "http://localhost:8000/documents?collection=hr_policies" -H "X-API-Key: $KEY"        # list
+curl -X DELETE "http://localhost:8000/documents/<doc_id>?collection=hr_policies" -H "X-API-Key: $KEY"
+```
+
+| | |
+|---|---|
+| Formats | `.txt` `.md` `.csv` `.pdf` (text PDFs; scanned/image PDFs need OCR first - not supported) |
+| Size | 5 MB per file (`APEX_MAX_UPLOAD_BYTES`) |
+| Processing | extract → strip control chars → split into ~500-char passages on paragraph/sentence boundaries → index. Each passage is one citable `[doc_N]` source |
+| Duplicates | SHA-256 of the cleaned text; re-uploading the same content returns `409` |
+| Scope | a document belongs to one collection; other collections never see it |
+| Safety | Upload response lists `pii_detected` (emails, cards, phones, IDs) and `injection_like` so you can decide whether to keep a file. Markup is stripped from anything returned to the UI |
+| Storage | `APEX_DATA_DIR` (default `./data`, gitignored; `/data` volume in Docker). **Back it up** - it is your knowledge base |
+
+Tips for good answers: use clear headings and short paragraphs; one topic per file; put numbers and policy names in the text (answers are copied verbatim from your passages, never invented).
+
+## Host it and make it live
+
+The production stack is three containers behind Caddy: **proxy** (automatic HTTPS + login + injects the API key) → **web** (Next.js) + **api** (FastAPI). The API key never reaches the browser. Tested end to end (login, streaming, upload, restart persistence).
+
+**You need:** a Linux server or VM (1 vCPU / 1 GB is enough for the built-in index), Docker with the Compose plugin, a domain name, ports 80 and 443 open.
+
+```bash
+# 1. DNS: point rag.example.com (A/AAAA record) at the server's IP.
+
+# 2. On the server:
+git clone <your-repo> && cd data-etl-ml/agentic-ai/apex-rag-omni
+cp .env.prod.example .env.prod
+
+# 3. Fill in .env.prod
+python3 -c "import secrets;print(secrets.token_urlsafe(32))"                      # -> APEX_PROXY_KEY
+docker run --rm caddy:2 caddy hash-password --plaintext 'a-strong-password'      # -> APEX_BASIC_HASH
+#    (in .env.prod escape every $ in the hash as $$ ; set DOMAIN and APEX_BASIC_USER)
+
+# 4. Go live
+docker compose -f infra/docker-compose.app.yml --env-file .env.prod up -d --build
+
+# 5. Check
+docker compose -f infra/docker-compose.app.yml --env-file .env.prod ps     # api shows (healthy)
+curl -u admin:'a-strong-password' https://rag.example.com/api/healthz      # {"status":"ok"}
+```
+Open `https://rag.example.com`, log in, upload documents, ask questions. Caddy obtains and renews the TLS certificate by itself.
+
+**Try it locally first:** set `DOMAIN=http://localhost` in `.env.prod` and use `http://localhost`.
+
+**Operate**
+```bash
+# update to a new version
+git pull && docker compose -f infra/docker-compose.app.yml --env-file .env.prod up -d --build
+
+# logs
+docker compose -f infra/docker-compose.app.yml --env-file .env.prod logs -f api
+
+# back up uploaded documents (do this on a schedule)
+docker run --rm -v apex-rag-omni_apex-data:/d -v "$PWD":/b alpine tar czf /b/apex-data-$(date +%F).tgz -C /d .
+
+# rotate the key: change APEX_PROXY_KEY in .env.prod, then `up -d` again
+```
+Health endpoints for your monitor: `/api/healthz` (liveness). `/api/readyz` reports 503 until Qdrant/ES are configured; that is expected for the built-in index.
+
+**Other hosts:** any VM works (AWS Lightsail/EC2, Azure VM, DigitalOcean, Hetzner). For a managed platform (Cloud Run, ECS, Azure Container Apps) deploy the `api` and `web` images, mount a persistent volume at `/data`, and terminate TLS + login at the platform's gateway; keep `NEXT_PUBLIC_API_BASE=/api` and route `/api/*` to the API.
+
+**Know the limits before you expose it**
+- One shared login (HTTP basic auth). Everyone who can log in can upload, delete and read every collection. For per-user access put it behind your SSO (oauth2-proxy/Azure AD in front of Caddy) instead.
+- Single node, local index: fine for thousands of documents; the Qdrant/ES/Flink design in `docs/architecture.md` is **not** deployed by this stack.
+- Answers are extractive (verbatim cited sentences), not a chat model. No per-key rate limiting yet (backlog B3).
+- Don't upload secrets or regulated personal data unless your policy allows it; the upload warning is advisory.
+
+## Run (local development)
 
 ```bash
 # Backend (uses ../../.env venv automatically)

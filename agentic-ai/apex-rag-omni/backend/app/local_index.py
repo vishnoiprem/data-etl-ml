@@ -15,6 +15,7 @@ from collections import Counter
 from dataclasses import dataclass
 
 from .corpus import CORPUS
+from .document_store import passages
 
 DIM = 1024
 _WORD = re.compile(r"[a-z0-9]+")
@@ -96,6 +97,11 @@ _INDEXES: dict[str, LocalIndex] = {}
 
 
 def get_index(collection: str) -> LocalIndex:
+    """Built-in demo corpus + user uploads, cached until invalidate()."""
     if collection not in _INDEXES:
-        _INDEXES[collection] = LocalIndex(CORPUS[collection])
+        _INDEXES[collection] = LocalIndex(CORPUS[collection] + passages(collection))
     return _INDEXES[collection]
+
+
+def invalidate(collection: str) -> None:
+    _INDEXES.pop(collection, None)

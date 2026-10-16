@@ -26,7 +26,7 @@ MIN_SENTENCE_SCORE = 0.5  # IDF-weighted share of the query a sentence must cove
 RELATIVE_CUT = 0.75  # keep sentences within 75% of the best sentence's score
 MAX_SENTENCES = 4
 MAX_DOCS_CONSIDERED = 5
-_SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9])")
+_SENT_SPLIT = re.compile(r"(?<=[.!?])[ \t]+(?=[A-Z0-9])|\n+")  # sentence end, or paragraph/heading break
 _CITE = re.compile(r"\[doc_(\d+)\]")
 
 
@@ -76,12 +76,16 @@ def grounded_answer(query: str, collection: Collection,
         return _refuse(query, collection, "Query has no searchable terms"), ""
 
     idf = get_index(collection).idf
-    # Terms absent from the collection can never match; they must not
-    # penalise an otherwise well-covered question ("vacation" vs "PTO").
-    w = {t: idf[t] for t in qterms if t in idf}
-    total_w = sum(w.values())
-    if not total_w:
+    # Terms absent from the collection can never match. They count AGAINST
+    # coverage (at 50% of the average term weight) so a single stray word
+    # ("days") cannot masquerade as a full answer to "days I can work remotely",
+    # yet one unknown synonym ("vacation") does not sink an otherwise good match.
+    known = {t: idf[t] for t in qterms if t in idf}
+    if not known:
         return _refuse(query, collection, "No query term appears in this collection"), ""
+    mean_w = sum(idf.values()) / len(idf)
+    w = known
+    total_w = sum(known.values()) + (len(qterms) - len(known)) * 0.5 * mean_w
 
     picks: list[tuple[int, int, str, float]] = []  # (doc rank, sent idx, sentence, score)
     for rank, d in enumerate(retrieved[:MAX_DOCS_CONSIDERED]):

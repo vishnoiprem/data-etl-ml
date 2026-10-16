@@ -1,0 +1,43 @@
+# Production-style stack: Caddy (HTTPS + login) -> web (Next.js) + api (FastAPI).
+# Run from agentic-ai/apex-rag-omni:   docker compose -f infra/docker-compose.app.yml --env-file .env.prod up -d --build
+name: apex-rag-omni
+
+services:
+  api:
+    build: { context: .., dockerfile: Dockerfile }
+    restart: unless-stopped
+    environment:
+      APEX_API_KEYS: ${APEX_PROXY_KEY:?set APEX_PROXY_KEY in .env.prod}${APEX_EXTRA_KEYS:+,${APEX_EXTRA_KEYS}}
+      APEX_FRONTEND_ORIGIN: https://${DOMAIN:-localhost}
+      APEX_DATA_DIR: /data
+    volumes:
+      - apex-data:/data          # uploaded documents  (BACK THIS UP)
+      - apex-audit:/app/audit    # audit log
+    expose: ["8000"]
+
+  web:
+    build: { context: ../frontend, args: { NEXT_PUBLIC_API_BASE: /api } }
+    restart: unless-stopped
+    depends_on: [api]
+    expose: ["3000"]
+
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [web, api]
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      APEX_BASIC_USER: ${APEX_BASIC_USER:?set APEX_BASIC_USER}
+      APEX_BASIC_HASH: ${APEX_BASIC_HASH:?set APEX_BASIC_HASH (caddy hash-password)}
+      APEX_PROXY_KEY: ${APEX_PROXY_KEY}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  apex-data:
+  apex-audit:
+  caddy-data:
+  caddy-config:
