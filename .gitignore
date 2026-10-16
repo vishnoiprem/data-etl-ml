@@ -54,6 +54,17 @@ data/
 .DS_Store
 Thumbs.db
 
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# Local audit data
+.audit/
+audit-results/
+
 # Environments
 .env
 .venv
