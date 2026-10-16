@@ -379,7 +379,9 @@ export default function Chat() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draft, setDraft] = useState<string>("");
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(
+    () => typeof window === "undefined" || window.innerWidth >= 720, // closed on phones from first paint
+  );
   const [busy, setBusy] = useState<boolean>(false);
   const [atBottom, setAtBottom] = useState<boolean>(true);
   const [hydrated, setHydrated] = useState<boolean>(false);
@@ -407,7 +409,6 @@ export default function Chat() {
       setSessions([s]);
       setActiveId(s.id);
     }
-    if (window.innerWidth < 720) setSidebarOpen(false);
     setHydrated(true);
     inputRef.current?.focus();
   }, [newSession]);
