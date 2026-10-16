@@ -1,7 +1,7 @@
 # AI-Native DE Course + AI Agents Flagship — Final Run Report
 
-**Generated:** 2026-10-16T02:20Z
-**Mode:** Re-run all 19 modules + 1000-cycle proof (no code changes, just verification)
+**Generated:** 2026-10-16T02:58Z
+**Mode:** Full re-run: all 19 module reviews + 1000-cycle proof + L5 notebook execute + L1 lesson + practice lessons + hardcode lessons
 
 ---
 
@@ -40,7 +40,7 @@ correctness, imports, types, tests, invariants, docs, observability, determinism
 
 ## Part 2 — `course/ai-agents/` (1000-cycle ROI proof)
 
-**Run:** 2026-10-16T02:20:30Z, seed=42, 1000 cycles, 282,978 cycles/sec
+**Run:** 2026-10-16T02:56:28Z, seed=42, 1000 cycles, 276,305 cycles/sec
 
 | Metric | Value |
 |---|---:|

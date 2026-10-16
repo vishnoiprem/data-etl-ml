@@ -1,18 +1,25 @@
 # M17.L17 - Run History (Product Metrics)
 
-**Latest run:** 93 / 100, 34 pass / 0 fail, 100 iterations
+**Latest run:** 100 / 100, 34 pass / 0 fail, 100 iterations
 
-**Total historical runs:** 3
+**Total historical runs:** 12
 
 ## Recent runs (last 10, newest first)
 
 | Timestamp | Total / 100 | Iters | Tests |
 |---|---:|---:|---|
+| 2026-10-16T02-52-53Z | 100 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-50-13Z | 80 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-46-54Z | 96 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-44-10Z | 96 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-40-33Z | 93 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-38-34Z | 93 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-36-35Z | 93 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-34-38Z | 93 | 100 | 34 pass / 0 fail |
+| 2026-10-16T02-32-38Z | 93 | 100 | 34 pass / 0 fail |
 | 2026-10-16T02-19-47Z | 93 | 100 | 34 pass / 0 fail |
-| 2026-10-15T17-23-10Z | 116 | 100 | 33 pass / 1 fail |
-| 2026-10-15T16-21-31Z | 115 | 100 | 32 pass / 2 fail |
 
-See all runs in this folder: `3 JSONs + matching MDs`
+See all runs in this folder: `12 JSONs + matching MDs`
 
 ---
 

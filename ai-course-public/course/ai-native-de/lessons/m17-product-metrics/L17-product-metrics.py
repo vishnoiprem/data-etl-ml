@@ -684,7 +684,9 @@ def demo() -> None:
     # 9. Latency SLO
     print("\n  Section 9: Latency SLO check")
     print("  " + "-" * 66)
-    p50, p95 = product_event_store_latency_ms(store, "ai_query")
+    lat = product_event_store_latency_ms(store, "ai_query")
+    p50 = lat["p50_ms"]
+    p95 = lat["p95_ms"]
     print(f"    ai_query p50: {p50:.2f} ms   p95: {p95:.2f} ms   (budget 100 ms)")
 
     # 10. Retention (d7)
