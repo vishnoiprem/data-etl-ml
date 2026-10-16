@@ -34,7 +34,6 @@ creds.json
 
 # IDE
 .idea/
-.idea/workspace.xml
 
 # Python
 __pycache__/
