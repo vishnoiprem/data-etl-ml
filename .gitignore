@@ -34,7 +34,6 @@ creds.json
 
 # IDE
 .idea/
-.idea/workspace.xml
 
 # Python
 __pycache__/
@@ -79,7 +78,14 @@ data/
 !.env.example
 !**/.env.example
 
-# Large ML files (kept in LFS for some specific paths; ignored for the rest)
+# Build artefacts (Node)
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# Local audit data
+audit-results/
 *.bin
 *.h5
 *.parquet
@@ -127,3 +133,7 @@ realtime-stock-pipeline/trade-finder/logs/*.log
 realtime-stock-pipeline/trade-finder/logs/*.pid
 realtime-stock-pipeline/trade-finder/logs/stress_*.json
 realtime-stock-pipeline/trade-finder/reports/email_*.txt
+
+# apex-rag-omni frontend manifests (otherwise hidden by *.json above)
+!agentic-ai/apex-rag-omni/frontend/package.json
+!agentic-ai/apex-rag-omni/frontend/tsconfig.json
