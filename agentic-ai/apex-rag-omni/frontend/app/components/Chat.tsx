@@ -241,6 +241,24 @@ async function streamQuery(
   if (!finished) throw new Error("Connection closed before the answer finished.");
 }
 
+/* ---------- icons (inline SVG, inherit currentColor) ---------- */
+
+const Icon = ({ d, fill }: { d: string; fill?: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill={fill ? "currentColor" : "none"}
+       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d={d} />
+  </svg>
+);
+const IconCopy = () => <Icon d="M9 9h11v11H9z M5 15H4V4h11v1" />;
+const IconCheck = () => <Icon d="M5 13l4 4L19 7" />;
+const IconRetry = () => <Icon d="M20 11a8 8 0 1 0-2.3 5.7 M20 4v7h-7" />;
+const IconUp = ({ on }: { on: boolean }) => (
+  <Icon fill={on} d="M7 11v9H4v-9z M7 11l4-8a2 2 0 0 1 2 2v4h6a2 2 0 0 1 2 2.3l-1.3 7A2 2 0 0 1 17.7 20H7" />
+);
+const IconDown = ({ on }: { on: boolean }) => (
+  <Icon fill={on} d="M17 13V4h3v9z M17 13l-4 8a2 2 0 0 1-2-2v-4H5a2 2 0 0 1-2-2.3l1.3-7A2 2 0 0 1 6.3 4H17" />
+);
+
 /* ---------- lightweight markdown ---------- */
 
 type CiteFn = (n: number) => void;
@@ -346,6 +364,12 @@ function renderRich(text: string, spanCount: number, onCite: CiteFn): React.Reac
   return out;
 }
 
+/** A lone bullet looks odd; show a single-sentence answer as a paragraph. */
+function oneLineAsParagraph(t: string): string {
+  const lines = t.split("\n").filter((l) => l.trim());
+  return lines.length === 1 ? lines[0].replace(/^\s*[-*]\s+/, "") : t;
+}
+
 /* ---------- main component ---------- */
 
 export default function Chat() {
@@ -383,7 +407,9 @@ export default function Chat() {
       setSessions([s]);
       setActiveId(s.id);
     }
+    if (window.innerWidth < 720) setSidebarOpen(false);
     setHydrated(true);
+    inputRef.current?.focus();
   }, [newSession]);
 
   // Persist (never before hydration — would clobber stored chats).
@@ -571,6 +597,7 @@ export default function Chat() {
       setActiveId(s.id);
       setCollection(col);
       setDraft("");
+      if (window.innerWidth < 720) setSidebarOpen(false);
       inputRef.current?.focus();
     },
     [newSession, stop],
@@ -672,6 +699,7 @@ export default function Chat() {
                 if (s.id !== activeId) stop();
                 setActiveId(s.id);
                 setCollection(s.collection);
+                if (window.innerWidth < 720) setSidebarOpen(false);
               }}
               onRename={(t) => renameSession(s.id, t)}
               onDelete={() => deleteSession(s.id)}
@@ -685,6 +713,10 @@ export default function Chat() {
           </a>
         </div>
       </aside>
+
+      {sidebarOpen && (
+        <div className="apex-backdrop" onClick={() => setSidebarOpen(false)} aria-hidden />
+      )}
 
       <main className="apex-main">
         <header className="apex-topbar">
@@ -738,6 +770,7 @@ export default function Chat() {
                 busy={busy}
                 onRegenerate={() => regenerate(m.id)}
                 onFeedback={(v) => sendFeedback(m.id, v)}
+                onAsk={sendQuery}
               />
             ))}
           </div>
@@ -857,7 +890,7 @@ function SessionItem({
 /* ---------- Message row ---------- */
 
 function MessageRow({
-  msg, sessionId, isLastAssistant, busy, onRegenerate, onFeedback,
+  msg, sessionId, isLastAssistant, busy, onRegenerate, onFeedback, onAsk,
 }: {
   msg: ChatMessage;
   sessionId: string;
@@ -865,6 +898,7 @@ function MessageRow({
   busy: boolean;
   onRegenerate: () => void;
   onFeedback: (v: "up" | "down") => void;
+  onAsk: (q: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -910,8 +944,9 @@ function MessageRow({
       <div className="apex-avatar" aria-hidden>A</div>
       <div className="apex-msg-body">
         {msg.pending && (
-          <div className="apex-pending" aria-label="thinking">
+          <div className="apex-pending" aria-label="searching">
             <span className="apex-dot" /><span className="apex-dot" /><span className="apex-dot" />
+            <span className="apex-pending-label">Searching {colLabel(msg.collection)}…</span>
           </div>
         )}
 
@@ -919,14 +954,29 @@ function MessageRow({
 
         {!msg.error && msg.refused && !msg.pending && (
           <div className="apex-refused">
-            I can't answer that from the available sources
-            {msg.refusalReason ? ` (${msg.refusalReason})` : ""}.
+            {msg.flags?.includes("prompt_injection") ? (
+              <p>I can't help with that request.</p>
+            ) : (
+              <>
+                <p>
+                  I couldn't find a reliable answer to that in <strong>{colLabel(msg.collection)}</strong>.
+                  Try rephrasing, or ask about something these documents cover:
+                </p>
+                <div className="apex-starters apex-starters--inline">
+                  {STARTERS[msg.collection].map((q) => (
+                    <button key={q} type="button" className="apex-starter" onClick={() => onAsk(q)} disabled={busy}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {!msg.error && !msg.refused && msg.text && (
           <div className={`apex-answer ${msg.streaming ? "apex-answer--streaming" : ""}`}>
-            {renderRich(msg.text, spans.length, onCite)}
+            {renderRich(oneLineAsParagraph(msg.text), spans.length, onCite)}
             {msg.streaming && <span className="apex-caret" aria-hidden />}
           </div>
         )}
@@ -971,7 +1021,7 @@ function MessageRow({
           <div className="apex-actions">
             {!msg.error && msg.text && (
               <button type="button" className="apex-act" onClick={copy} aria-label="copy answer" title="Copy">
-                {copied ? "✓" : "⧉"}
+                {copied ? <IconCheck /> : <IconCopy />}
               </button>
             )}
             {done && msg.traceId && (
@@ -984,7 +1034,7 @@ function MessageRow({
                   aria-pressed={msg.feedback === "up"}
                   title="Good answer"
                 >
-                  👍
+                  <IconUp on={msg.feedback === "up"} />
                 </button>
                 <button
                   type="button"
@@ -994,18 +1044,18 @@ function MessageRow({
                   aria-pressed={msg.feedback === "down"}
                   title="Bad answer"
                 >
-                  👎
+                  <IconDown on={msg.feedback === "down"} />
                 </button>
               </>
             )}
             {isLastAssistant && !busy && (
               <button type="button" className="apex-act" onClick={onRegenerate} aria-label="regenerate" title="Regenerate">
-                ↻
+                <IconRetry />
               </button>
             )}
             {msg.timing && (
               <span className="apex-msg-time" title={msg.traceId}>
-                {msg.timing.total_ms.toFixed(0)} ms
+                {msg.timing.total_ms < 10 ? msg.timing.total_ms.toFixed(1) : msg.timing.total_ms.toFixed(0)} ms
               </span>
             )}
           </div>

@@ -693,3 +693,32 @@ button {
 .apex-ground--ok   { background: rgba(67,147,143,.2);  color: #7cc4bf; border: 1px solid var(--cp-green); }
 .apex-ground--warn { background: rgba(246,194,74,.15); color: var(--cp-yellow); border: 1px solid var(--cp-yellow); }
 .apex-ground--bad  { background: rgba(218,56,50,.18);  color: #ff8d88; border: 1px solid var(--cp-red); }
+
+
+/* ---------- UX pass ---------- */
+/* legacy .apex-msg shrink-wrapped + centered every row; make rows full-width */
+.apex-msg { max-width: none; width: 100%; margin: 0; padding: 0; }
+.apex-msg--user { justify-content: flex-end; }
+.apex-bubble--user { max-width: min(80%, 560px); }
+.apex-source-id { font-family: inherit; font-weight: 600; word-break: normal; }
+.apex-source-score { font-family: ui-monospace, Menlo, monospace; }
+.apex-pending { gap: 5px; height: auto; padding: 4px 0; }
+.apex-pending-label { margin-left: 6px; color: #8b8b95; font-size: 13px; }
+.apex-act { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 28px; padding: 0; }
+.apex-act:disabled { opacity: .4; cursor: not-allowed; }
+.apex-refused p { margin: 0 0 10px; }
+.apex-starters--inline { flex-direction: column; align-items: stretch; gap: 6px; max-width: 460px; }
+.apex-starters--inline .apex-starter { text-align: left; padding: 8px 12px; font-size: 13px; }
+.apex-backdrop { display: none; }
+.apex-sidebar-history { scrollbar-width: thin; }
+
+@media (max-width: 720px) {
+  .apex-backdrop { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 9; }
+  .apex-chat:not(.apex-chat--collapsed) .apex-sidebar { box-shadow: 4px 0 24px rgba(0,0,0,.5); }
+  .apex-thread { padding: 16px 0 24px; }
+  .apex-scroll { padding: 0 12px; }
+  .apex-inputbar { padding: 8px 12px 12px; }
+  .apex-fineprint { display: none; }
+  .apex-bubble--user { max-width: 88%; }
+  .apex-session-del { visibility: visible; }
+}
