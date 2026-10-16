@@ -23,6 +23,7 @@ This folder is the bridge between "I watched the video" and "I shipped a system 
 | **180-day projects** | [`180-day-ai/`](./180-day-ai/) | 30 projects × 6 months. Each project is a complete working system. | 30-90 min/day |
 | **Capstone starters** | [`capstone-starters/`](./capstone-starters/) | Runnable starter code for each of the 5 capstone templates. | Multi-day |
 | **Codebook exercises** | [`workbooks/exercises/`](./workbooks/exercises/) | Challenges that turn the codebook reference into active practice. | 15-45 min |
+| **Executive interview drills** | [`cdo/practice/`](./cdo/practice/) | The daily 90-min CDO / Head of Data practice manual (concept + case + mock + review). 4 mock rounds in Week 8. | 90 min/day |
 
 ### Pick your architect level
 

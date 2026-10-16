@@ -20,6 +20,7 @@
 | **Capstone shopper** picking a build | [`course/capstone-starters/README.md`](course/capstone-starters/README.md) | 7 days (capstone 6) or 8 weeks (capstones 1-5) |
 | **Just here for the marketing** (Substack, sales page, social) | [`marketing/`](marketing/) | 1 read |
 | **Just here for the business plan** (90-day, offer ladder, revenue math) | [`business/`](business/) | 1 read |
+| **Senior data leader** (CDO / Head of Data / Director) preparing for executive interviews | [`course/cdo/README.md`](course/cdo/README.md) | 8 weeks |
 
 ---
 
@@ -31,6 +32,7 @@ ai-course-public/
 │   ├── ai-fde/                   # 9-week AI Forward-Deployed Engineer curriculum (the FDE track)
 │   ├── ai-agents/                # 5-lesson flagship: ROI formula + 1000-cycle proof + watchdog autopilot
 │   ├── ai-native-de/             # 19-module AI-Native Data Engineering curriculum (Senior/Staff target: Meta AI-Native DE)
+│   ├── cdo/                      # 8-week Data & AI Executive Leadership Masterclass (CDO / Head of Data interview prep)
 │   ├── 180-day-ai/               # 6-month founder / indie-hacker track
 │   ├── practice/                 # hands-on exercises + labs
 │   ├── hardcode/                 # 9-level reference curriculum (llm-foundations → failure-handling) + eval suite
