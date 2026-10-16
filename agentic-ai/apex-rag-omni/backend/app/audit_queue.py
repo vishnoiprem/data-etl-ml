@@ -158,6 +158,18 @@ def stats() -> dict[str, int]:
     }
 
 
+def audit_path() -> Path | None:
+    """The path the drain task writes to. None if not initialized.
+
+    `apex_audit.recent_traces` uses this so the reader and writer
+    always agree on the file. Without this, the queue could be
+    configured to write to a tmp file in tests while the reader
+    reads from the project path — and the two surfaces silently
+    diverge.
+    """
+    return _audit_path
+
+
 def reset_for_test() -> None:
     """Reset module state. Tests only — never call from prod."""
     global _queue, _drain_task, _dropped_count, _written_count, _audit_path

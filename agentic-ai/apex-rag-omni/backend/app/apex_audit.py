@@ -11,6 +11,11 @@ write happens in the background drain task (see audit_queue.py). This
 file owns the READ path and a small sync `append_audit` helper used
 by bootstrap scripts and tests that don't go through the FastAPI
 lifespan (and therefore don't have the queue initialized).
+
+The audit log path is shared with the queue: the queue writes to
+`_audit_path()` and the reader reads from the same. This avoids the
+"writer in one place, reader in another" bug that would let a
+configurable path silently diverge.
 """
 from __future__ import annotations
 
@@ -22,9 +27,27 @@ from typing import Literal
 
 Collection = Literal["hr_policies", "tech_docs", "product_docs"]
 
-_AUDIT_PATH = Path(__file__).parent.parent.parent / "audit" / "audit.jsonl"
-_AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+_DEFAULT_AUDIT_PATH = Path(__file__).parent.parent.parent / "audit" / "audit.jsonl"
+_DEFAULT_AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
 _LOCK = threading.Lock()
+
+
+def _audit_path() -> Path:
+    """Return the active audit log path.
+
+    Falls back to the default project path when the queue is not
+    initialized (e.g. from scripts and tests that don't go through
+    the FastAPI lifespan). When the queue IS initialized, the path
+    it was given is the source of truth.
+    """
+    # Local import to avoid a circular dep: audit_queue imports nothing
+    # from apex_audit at module level, but apex_audit is read by the
+    # route layer which also imports audit_queue.
+    from . import audit_queue as _q
+    qp = _q.audit_path()
+    if qp is not None:
+        return qp
+    return _DEFAULT_AUDIT_PATH
 
 
 def append_audit(trace_id: str, kind: str, payload: dict) -> None:
@@ -39,8 +62,9 @@ def append_audit(trace_id: str, kind: str, payload: dict) -> None:
         "payload": payload,
     }
     line = json.dumps(ev)
+    path = _audit_path()
     with _LOCK:
-        with open(_AUDIT_PATH, "a") as f:
+        with open(path, "a") as f:
             f.write(line + "\n")
 
 
@@ -52,11 +76,13 @@ def recent_traces(day: str, after_id: str = "", limit: int = 50) -> list[dict]:
     Uses an index on (day, trace_id). O(log N) per page.
 
     For the prototype we read the audit log and filter in memory.
+    Reads from the same path the queue writes to.
     """
-    if not _AUDIT_PATH.exists():
+    path = _audit_path()
+    if not path.exists():
         return []
     out: list[dict] = []
-    with open(_AUDIT_PATH) as f:
+    with open(path) as f:
         for line in f:
             try:
                 d = json.loads(line)
@@ -86,5 +112,5 @@ def recent_traces(day: str, after_id: str = "", limit: int = 50) -> list[dict]:
 
 
 def audit_path() -> Path:
-    """Path to the audit log. Used by the queue to know where to write."""
-    return _AUDIT_PATH
+    """Public accessor. Used by callers that need to know the active path."""
+    return _audit_path()
