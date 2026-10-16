@@ -1361,60 +1361,10 @@ def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
         # If the deny store is missing/broken, fail open — better to send
         # a few extra emails than to silently block all sends.
         print(f"  [bounce-deny] warn: {e}")
-
-    # 24h freshness filter — skip backlog leads. The throttle recovery
-    # plan: only touch leads created in the last 24h until Gmail lifts
-    # the hold. Older leads have stale contact info + may have already
-    # been sent to before the throttle, so they're more likely to bounce.
-    freshness_hours = int(os.getenv("AVILX_FRESHNESS_HOURS", "24"))
-    if freshness_hours > 0:
-        from datetime import datetime, timezone
-        from db.lead_store import get_cursor
-        with get_cursor() as cur:
-            cur.execute("""
-                SELECT id FROM leads
-                WHERE created_at > NOW() - (%s || ' hours')::INTERVAL
-            """, (str(freshness_hours),))
-            fresh_ids = {r["id"] for r in cur.fetchall()}
-        before = len(pending)
-        pending = [l for l in pending if l["id"] in fresh_ids]
-        if before - len(pending):
-            print(f"  [freshness-{freshness_hours}h] skipped {before - len(pending)} backlog leads")
-
     # Apply mode filter at the cursor, not in Python — single round-trip.
     if mode != "both":
         pending = [l for l in pending
                    if (l.get("apply_mode") or "pitch_pod") == mode]
-
-    # Per-lead pre-send guard (tail log + MX probe + caps). Runs AFTER
-    # all DB-side filters so we only check what we'd actually send.
-    # The guard short-circuits on first failure with a tagged reason.
-    from lib.email_guard import can_send_to
-    _guard_daily = int(os.getenv("RECOVERY_DAILY_LIMIT", "3"))
-    _guard_hourly = int(os.getenv("RECOVERY_HOURLY_LIMIT", "2"))
-    # Skip MX probe during dry runs (keeps --dry fast and offline)
-    _do_mx = not dry
-    before = len(pending)
-    skipped_guard = 0
-    _filter_pending: list = []
-    for lead in pending:
-        ok, reason = can_send_to(
-            lead["contact_email"],
-            max_daily=_guard_daily,
-            max_hourly=_guard_hourly,
-            do_mx_probe=_do_mx,
-        )
-        if ok:
-            _filter_pending.append(lead)
-        else:
-            skipped_guard += 1
-            if dry:
-                # Visible in dry runs so operator can audit
-                print(f"  [dry-guard] ⏭  {lead['contact_email']:35s}  {lead['company'][:20]:20s}  → {reason}")
-    pending = _filter_pending
-    if skipped_guard:
-        print(f"  [guard] skipped {skipped_guard} leads (tail/cap/mx/deny)")
-
     pending = pending[:max_emails]
 
     sent, failed, bounced = 0, 0, 0

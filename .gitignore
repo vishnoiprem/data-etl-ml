@@ -1,6 +1,8 @@
 # Python environments
 venv/
 .venv/
+# Node — package install output (regenerated from lockfile)
+node_modules/
 # Secrets — never commit. The patterns below catch the common
 # .env filenames (literal ".env", "foo.env", "aws.env", ".env.local",
 # ".env.production", etc.) plus a few "creds/" / "secrets/" directory
@@ -125,6 +127,3 @@ realtime-stock-pipeline/trade-finder/logs/*.log
 realtime-stock-pipeline/trade-finder/logs/*.pid
 realtime-stock-pipeline/trade-finder/logs/stress_*.json
 realtime-stock-pipeline/trade-finder/reports/email_*.txt
-realtime-stock-pipeline/trade-finder/reports/skipped_*.txt
-realtime-stock-pipeline/trade-finder/reports/20[0-9][0-9]-*.md
-realtime-stock-pipeline/trade-finder/data/.last_emitted.json

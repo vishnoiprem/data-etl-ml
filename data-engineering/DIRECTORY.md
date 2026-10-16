@@ -90,31 +90,8 @@ conversation, not tied to a specific audience:
 
 - **[e-commerce-end-2end/](./e-commerce-end-2end/)** — full
   e-commerce data pipeline.
-- **[marketplace-100/](./marketplace-100/)** — 100 marketplace
-  datasets, 1 self-driving agent, zero Airflow. The end-to-end
-  Databricks-native project: Marketplace API → ingest (COPY
-  INTO + Auto Loader) → Lakeflow Declarative Pipeline → MLflow
-  + Unity Catalog → Mosaic AI Agent (Foundation Model API) →
-  Lakebase (Postgres-compatible) → Databricks App digest.
-  Serverless, Free Edition, 100 autonomous iterations. **The
-  project that pulls together every Databricks primitive in
-  one agentic loop.**
 - **[data-engineering/](./README.md)** — this directory's
   top-level README.
-
----
-
-## What was added in 2026-10-14
-
-- **[marketplace-100/](./marketplace-100/)** — the agentic
-  Databricks project. Uses the Marketplace Consumer API
-  (REST), Auto Loader + COPY INTO, Lakeflow Declarative
-  Pipelines, MLflow + Unity Catalog model registration,
-  Mosaic AI Agent Framework with Foundation Model API
-  tool-use, Lakebase (Postgres) for the ops log, and a
-  Streamlit Databricks App for the digest. 100 iterations,
-  30 days, Free Edition. 28 passing tests; local smoke
-  test runs in 3-5s with no external services.
 
 ---
 
@@ -136,5 +113,5 @@ Two changes to make the directory easier to navigate:
 
 ---
 
-**Last updated:** 2026-10-14  
+**Last updated:** 2026-10-13  
 **License:** MIT — use freely in your own courses, prototypes, and products.  

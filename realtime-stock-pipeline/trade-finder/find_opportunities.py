@@ -196,38 +196,39 @@ PRODUCTS: list[dict] = [
      "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0, "IN": 4.0}},
     {"name": "stainless steel straw",  "cat": "lifestyle",   "kg": 0.05,
      "src": {"CN": 0.40, "IN": 0.50, "VN": 0.42, "TR": 0.55, "MX": 0.60, "BD": 0.45, "ID": 0.48, "TH": 0.50},
-     "dst": {"US": 4.0, "DE": 5.0, "UK": 4.5, "AU": 6.0, "JP": 5.5, "CA": 5.0, "AE": 4.5, "IN": 2.0}},
+     "dst": {"US": 4.0, "DE": 5.0, "UK": 4.5, "AU": 6.0, "JP": 5.5, "CA": 5.0, "AE": 4.5}},
+
     # -------- HIGH-TICKET — bigger per-unit margin, slower turnover --------
     {"name": "cordless hair dryer ionic", "cat": "beauty-tech", "kg": 0.80,
      "src": {"CN": 18.0, "IN": 22.0, "VN": 20.0, "TR": 24.0, "MX": 26.0, "BD": 21.0, "ID": 22.0, "TH": 23.0},
-     "dst": {"US": 89.0, "DE": 105.0, "UK": 100.0, "AU": 125.0, "JP": 115.0, "CA": 110.0, "AE": 95.0, "IN": 48.95}},
+     "dst": {"US": 89.0, "DE": 105.0, "UK": 100.0, "AU": 125.0, "JP": 115.0, "CA": 110.0, "AE": 95.0}},
     {"name": "robotic vacuum cleaner",    "cat": "home-tech",   "kg": 4.50,
      "src": {"CN": 85.0, "IN": 95.0, "VN": 90.0, "TR": 100.0, "MX": 110.0, "BD": 92.0, "ID": 95.0, "TH": 96.0},
-     "dst": {"US": 320.0, "DE": 380.0, "UK": 360.0, "AU": 440.0, "JP": 410.0, "CA": 390.0, "AE": 340.0, "IN": 176.0}},
+     "dst": {"US": 320.0, "DE": 380.0, "UK": 360.0, "AU": 440.0, "JP": 410.0, "CA": 390.0, "AE": 340.0}},
     {"name": "air fryer 5L",              "cat": "kitchen-tech","kg": 5.20,
      "src": {"CN": 32.0, "IN": 38.0, "VN": 34.0, "TR": 40.0, "MX": 44.0, "BD": 36.0, "ID": 37.0, "TH": 38.0},
-     "dst": {"US": 120.0, "DE": 140.0, "UK": 135.0, "AU": 165.0, "JP": 150.0, "CA": 145.0, "AE": 130.0, "IN": 66.0}},
+     "dst": {"US": 120.0, "DE": 140.0, "UK": 135.0, "AU": 165.0, "JP": 150.0, "CA": 145.0, "AE": 130.0}},
     {"name": "electric scooter foldable", "cat": "mobility",    "kg": 14.0,
      "src": {"CN": 180.0, "IN": 210.0, "VN": 195.0, "TR": 220.0, "MX": 240.0, "BD": 200.0, "ID": 205.0, "TH": 210.0},
-     "dst": {"US": 580.0, "DE": 680.0, "UK": 650.0, "AU": 790.0, "JP": 720.0, "CA": 690.0, "AE": 620.0, "IN": 290.0}},
+     "dst": {"US": 580.0, "DE": 680.0, "UK": 650.0, "AU": 790.0, "JP": 720.0, "CA": 690.0, "AE": 620.0}},
     {"name": "smartwatch fitness band",   "cat": "wearables",   "kg": 0.15,
      "src": {"CN": 9.0, "IN": 11.0, "VN": 10.0, "TR": 12.0, "MX": 13.0, "BD": 10.0, "ID": 10.5, "TH": 11.0},
-     "dst": {"US": 49.0, "DE": 58.0, "UK": 55.0, "AU": 68.0, "JP": 62.0, "CA": 58.0, "AE": 52.0, "IN": 22.05}},
+     "dst": {"US": 49.0, "DE": 58.0, "UK": 55.0, "AU": 68.0, "JP": 62.0, "CA": 58.0, "AE": 52.0}},
     {"name": "4k action camera",          "cat": "electronics", "kg": 0.30,
      "src": {"CN": 28.0, "IN": 33.0, "VN": 30.0, "TR": 35.0, "MX": 38.0, "BD": 31.0, "ID": 32.0, "TH": 33.0},
-     "dst": {"US": 110.0, "DE": 130.0, "UK": 125.0, "AU": 150.0, "JP": 138.0, "CA": 132.0, "AE": 118.0, "IN": 44.0}},
+     "dst": {"US": 110.0, "DE": 130.0, "UK": 125.0, "AU": 150.0, "JP": 138.0, "CA": 132.0, "AE": 118.0}},
     {"name": "noise-cancelling headphones","cat": "audio",      "kg": 0.45,
      "src": {"CN": 24.0, "IN": 28.0, "VN": 26.0, "TR": 30.0, "MX": 33.0, "BD": 27.0, "ID": 28.0, "TH": 29.0},
-     "dst": {"US": 95.0, "DE": 115.0, "UK": 110.0, "AU": 130.0, "JP": 122.0, "CA": 115.0, "AE": 100.0, "IN": 42.75}},
+     "dst": {"US": 95.0, "DE": 115.0, "UK": 110.0, "AU": 130.0, "JP": 122.0, "CA": 115.0, "AE": 100.0}},
     {"name": "mini projector 1080p",      "cat": "electronics", "kg": 1.30,
      "src": {"CN": 55.0, "IN": 65.0, "VN": 60.0, "TR": 70.0, "MX": 75.0, "BD": 62.0, "ID": 64.0, "TH": 65.0},
-     "dst": {"US": 180.0, "DE": 215.0, "UK": 205.0, "AU": 245.0, "JP": 225.0, "CA": 215.0, "AE": 195.0, "IN": 72.0}},
+     "dst": {"US": 180.0, "DE": 215.0, "UK": 205.0, "AU": 245.0, "JP": 225.0, "CA": 215.0, "AE": 195.0}},
     {"name": "electric toothbrush sonic", "cat": "beauty-tech", "kg": 0.25,
      "src": {"CN": 8.0, "IN": 10.0, "VN": 9.0, "TR": 11.0, "MX": 12.0, "BD": 9.5, "ID": 9.8, "TH": 10.0},
-     "dst": {"US": 39.0, "DE": 47.0, "UK": 45.0, "AU": 55.0, "JP": 50.0, "CA": 47.0, "AE": 42.0, "IN": 21.45}},
+     "dst": {"US": 39.0, "DE": 47.0, "UK": 45.0, "AU": 55.0, "JP": 50.0, "CA": 47.0, "AE": 42.0}},
     {"name": "portable power station 300Wh", "cat": "energy",   "kg": 4.00,
      "src": {"CN": 95.0, "IN": 110.0, "VN": 100.0, "TR": 115.0, "MX": 125.0, "BD": 105.0, "ID": 108.0, "TH": 110.0},
-     "dst": {"US": 320.0, "DE": 380.0, "UK": 365.0, "AU": 440.0, "JP": 405.0, "CA": 385.0, "AE": 340.0, "IN": 160.0}},
+     "dst": {"US": 320.0, "DE": 380.0, "UK": 365.0, "AU": 440.0, "JP": 405.0, "CA": 385.0, "AE": 340.0}},
 ]
 
 
@@ -557,28 +558,12 @@ def _write_markdown_report(opps: list[Opportunity], fx: dict[str, float]) -> Pat
     ]
     if rich_sorted:
         top = rich_sorted[0]
-        # ROI / break-even block — answers "how long until I get my money back"
-        # and "what's the minimum order to make it worth doing".
-        cap = top.capital_for_500u
-        margin = top.margin_usd
-        # Break-even units = round-up capital / per-unit margin
-        be_units = int(cap / margin) + 1 if margin > 0 else 0
-        # Assume 2 units/day turnover as a conservative baseline for new seller
-        days_to_breakeven = round(be_units / 2.0, 1) if be_units else 0
-        # ROI = profit / capital for a 500-unit batch
-        roi_500 = round((margin * 500) / cap, 2) if cap > 0 else 0.0
         lines += [
             f"**Highest rich_score:** {top.product} {top.source_country}→{top.dest_country}",
             f"  - ${top.margin_usd:.2f} margin per unit ({top.margin_pct*100:.0f}%)",
             f"  - {top.units_for_10k:,} units = $10,000 profit",
             f"  - Capital needed for 500 units: ${top.capital_for_500u:,.0f}",
             f"  - Sells on {top.platform} in {COUNTRY_META[top.dest_country]['name']}",
-            "",
-            f"**ROI / break-even (top opportunity):**",
-            f"  - Break-even units:        {be_units} (capital ÷ per-unit margin)",
-            f"  - Days to break-even:      ~{days_to_breakeven} (assumes 2 units/day)",
-            f"  - ROI on 500-unit batch:   {roi_500*100:.0f}%",
-            f"  - Min viable order:        50-100 units (test the listing before scaling)",
         ]
     path.write_text("\n".join(lines))
     return path

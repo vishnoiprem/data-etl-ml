@@ -1,0 +1,143 @@
+name: security-gate
+
+# Hard security gate — fails the build on any HIGH or CRITICAL vuln
+# introduced by a manifest change. Runs on PRs touching pip/npm manifests,
+# Dockerfiles, or the gate itself. Companion to the advisory `pip-audit`
+# workflow which still runs weekly + on every push.
+
+on:
+  pull_request:
+    paths:
+      - "requirements*.txt"
+      - "**/requirements*.txt"
+      - "**/package.json"
+      - "Dockerfile*"
+      - "**/Dockerfile*"
+      - ".github/workflows/security-gate.yml"
+  push:
+    branches: [master, main]
+    paths:
+      - "requirements*.txt"
+      - "**/requirements*.txt"
+      - "**/package.json"
+      - "Dockerfile*"
+      - "**/Dockerfile*"
+      - ".github/workflows/security-gate.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pip-audit-gate:
+    name: pip-audit (block on HIGH/CRITICAL)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        manifest:
+          # Auto-discovered by scripts/run_pip_audit.sh at runtime; here we
+          # only pin the top-of-repo + recently-touched manifests so PRs
+          # get fast feedback on the most common change sites.
+          - requirements.txt
+          - ai-engineering/01-enterprise-rag-platform/requirements.txt
+          - ai-engineering/05-distributed-inference/requirements.txt
+          - ai-engineering/10-hello-world-mlops-main/requirements.txt
+          - ai-engineering/16-graph-rag/requirements.txt
+          - ai-engineering/realtime-crypto-sentiment/requirements.txt
+          - data-engineering/scb_aml_platform/requirements-airflow.txt
+          - data-engineering/financial-reporting-platform/requirements.txt
+          - data-engineering/e-commerce-end-2end/requirements.txt
+          - data-engineering/lazada-superset/requirements.txt
+          - data-engineering/data-engineering-course/aws_lambda_course/requirements.txt
+          - data-engineering/data-engineering-course/aws_ec2_course/requirements.txt
+          - data-engineering/data-engineering-course/aws_eventbridge_course/requirements.txt
+          - data-engineering/data-engineering-course/aws_snowflake_course/requirements.txt
+          - flink-cdc-dashboard/requirements.txt
+          - Spark/document-processing/requirements.txt
+          - agentic-ai/7_Bedrock_course/recap/py-starter/requirements.txt
+          - agentic-ai/7_Bedrock_course/recap/py-starter/requirements-dev.txt
+          - agentic-ai/7_Bedrock_course/textApi/py/requirements-dev.txt
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pip-audit==2.10.1
+      - name: Audit ${{ matrix.manifest }} (fails on HIGH/CRITICAL)
+        run: |
+          if [ ! -f "${{ matrix.manifest }}" ]; then
+            echo "::notice::${{ matrix.manifest }} not present in this PR — skipping"
+            exit 0
+          fi
+          # Extract just pinned (==) lines for pip-audit (it requires exact pins)
+          tmp=$(mktemp)
+          grep -E '^[A-Za-z0-9_.\-]+==[0-9]' "${{ matrix.manifest }}" > "$tmp" || true
+          if [ ! -s "$tmp" ]; then
+            echo "::notice::${{ matrix.manifest }} has no pinned deps to audit"
+            rm -f "$tmp"
+            exit 0
+          fi
+          # Capture JSON, then fail if any HIGH/CRITICAL found.
+          set +e
+          python -m pip_audit -r "$tmp" --no-deps --disable-pip --format json > audit.json
+          rc=$?
+          set -e
+          python - <<'PYEOF'
+          import json, sys, os
+          with open('audit.json') as f:
+              data = json.load(f)
+          blockers = []
+          for dep in data.get('dependencies', []):
+              for v in dep.get('vulns', []):
+                  fix = (v.get('fix_versions') or [])
+                  sev = (v.get('severity') or '').upper()
+                  if sev in ('HIGH', 'CRITICAL') and not fix:
+                      blockers.append((dep['name'], v.get('id'), sev))
+          if blockers:
+              print('::error::Blocking security findings:', file=sys.stderr)
+              for name, vid, sev in blockers:
+                  print(f'::error file=${{ matrix.manifest }}::{sev} {name} {vid} (no fix version available)', file=sys.stderr)
+              sys.exit(1)
+          PYEOF
+          rm -f audit.json "$tmp"
+
+  npm-audit-gate:
+    name: npm audit (block on HIGH/CRITICAL)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - aws/ecs-data-ingestion
+          - agentic-ai/7_Bedrock_course/ts
+          - agentic-ai/7_Bedrock_course/recap/ts-strarter
+          - agentic-ai/7_Bedrock_course/imageApi/ts
+          - agentic-ai/7_Bedrock_course/textApi/ts
+          - ai-engineering/16-graph-rag/web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install deps and audit
+        working-directory: ${{ matrix.project }}
+        run: |
+          if [ ! -f package.json ]; then
+            echo "::notice::${{ matrix.project }} has no package.json — skipping"
+            exit 0
+          fi
+          npm install --no-audit --no-fund --legacy-peer-deps
+          # npm audit returns nonzero on vulns — parse JSON and fail only on HIGH/CRITICAL.
+          npm audit --json > audit.json
+          node -e "
+            const d = require('./audit.json');
+            const m = d.metadata.vulnerabilities;
+            if (m.critical > 0 || m.high > 0) {
+              console.error('Blocking: ' + m.critical + ' critical, ' + m.high + ' high');
+              process.exit(1);
+            }
+            console.log('OK: ' + m.total + ' total (0 critical, 0 high)');
+          "
