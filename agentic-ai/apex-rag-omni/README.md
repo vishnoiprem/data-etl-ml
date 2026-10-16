@@ -12,7 +12,8 @@ I built APEX-RAG Omni. It's not a demo RAG — it's a sovereign platform designe
 - `GET /traces?cursor=trace_123&limit=50` — cursor O(1) not OFFSET O(N), uses index `(day, trace_id)`
 - `POST /query` — `hybrid_search()` 10 shards → rerank Top8 → grounded answer with `evidence_json`
 - `POST /feedback` — optimistic update, gold dataset for LLM-as-judge
-- `GET /eval` — Recall@8 0.89, nDCG@8 0.91, p95 420 ms
+- `POST /query/stream` — same pipeline over SSE (`meta → sources → token* → done`) for the chat UI
+- `GET /eval` — latest report from the eval harness (empty until `make eval` has run; targets are returned separately)
 
 ### Frontend: `frontend/app/components/ApexRagOmni.tsx`
 - Virtualized list for 1k+ rows
@@ -29,17 +30,27 @@ I built APEX-RAG Omni. It's not a demo RAG — it's a sovereign platform designe
 - 3 collections: `hr_policies`, `tech_docs`, `product_docs` — each owns its prompt template
 - `evidence_json` is the contract: every claim cites `[doc_N]`, or the answer is refused
 
+## What is real vs. designed
+
+| Layer | Status in this repo |
+|---|---|
+| Retrieval | **Working**: in-process BM25 + hashed-vector index with RRF fusion over a built-in demo corpus (`backend/app/local_index.py`). Same contract as the 10-shard Qdrant + ES fan-out, which is the **design**, not deployed here. |
+| Answers | **Working**: extractive and grounded. Every sentence is verbatim corpus text with a `[doc_N]` citation, or the query is refused. No LLM call yet (`stream_tokens` is the seam). |
+| Streaming chat UI | **Working**: SSE, stop/regenerate/copy/feedback, history. |
+| Hallucination gate | **Working**: every answer is checked claim-by-claim (citations resolve, numbers match the source, lexical support); failures are refused. Word/number based, not an LLM judge. |
+| Sanitization | **Working**: input normalisation + prompt-injection refusal (pattern list), PII masked before audit/logs, markup stripped from output. |
+| Auth, CORS, audit queue, cursor-paginated traces | **Working**, tested (time-ordered trace ids, constant-time key check). |
+| Flink CDC freshness, shadow-index dual-write, 100M-doc scale, embedding cost | **Design only.** |
+| Eval metrics | Harness exists; quote only numbers from a real `make eval` run. |
+
 ## Run
 
 ```bash
-# Backend
-pip install fastapi uvicorn
-uvicorn backend.app.main:app --reload --port 8000
+# Backend (uses ../../.env venv automatically)
+make api            # http://localhost:8000
 
-# Frontend
-cd frontend
-npm install
-npm run dev
+# Frontend (second terminal)
+make web            # http://localhost:3000
 ```
 
 ## Test
@@ -52,6 +63,11 @@ curl "http://localhost:8000/traces?day=2026-10-16&cursor=trace_001000&limit=50"
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -d '{"collection":"hr_policies","query":"What is PTO?"}'
+
+# Streaming (SSE) - what the chat UI uses
+curl -N -X POST http://localhost:8000/query/stream \
+  -H "X-API-Key: devkey-change-me" -H "Content-Type: application/json" \
+  -d '{"collection":"hr_policies","query":"How much PTO do I get per year?"}'
 
 # Optimistic feedback
 curl -X POST http://localhost:8000/feedback \
@@ -71,18 +87,23 @@ apex-rag-omni/
 ├── requirements.txt             # backend deps
 ├── backend/
 │   └── app/
-│       ├── main.py              # FastAPI: /traces, /query, /feedback, /eval
+│       ├── main.py              # FastAPI: /traces, /query, /query/stream (SSE), /feedback, /eval
 │       ├── apex_router.py       # collection classifier + prompt loader
-│       ├── apex_retriever.py    # 10-shard hybrid search (BM25 + vector, RRF)
-│       ├── apex_answerer.py     # grounded answer with evidence_json
+│       ├── apex_retriever.py    # hybrid search (BM25 + vector, RRF); local index today, Qdrant/ES by design
+│       ├── local_index.py       # in-process BM25 + hashed-vector index (zero infra)
+│       ├── corpus.py            # built-in demo corpus (3 collections)
+│       ├── apex_answerer.py     # extractive grounded answer with evidence_json + citations
+│       ├── hallucination.py     # claim-level check: citations, numbers, lexical support
+│       ├── sanitize.py          # input sanitization, prompt-injection flags, PII redaction, output stripping
 │       ├── apex_audit.py        # append-only audit log + cursor reader
 │       └── apex_eval.py         # Recall@8, nDCG@8, p95 latency
 ├── frontend/
 │   ├── package.json
 │   └── app/
-│       ├── page.tsx             # Next.js entry
+│       ├── page.tsx             # Next.js entry (chat)
 │       └── components/
-│           └── ApexRagOmni.tsx  # virtualized 1k-row trace reviewer
+│           ├── Chat.tsx         # ChatGPT-style streaming chat UI
+│           └── ApexRagOmni.tsx  # virtualized 1k-row trace reviewer (/traces)
 ├── prompts/
 │   ├── hr_policies.yaml
 │   ├── tech_docs.yaml

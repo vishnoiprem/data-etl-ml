@@ -43,8 +43,9 @@ class Settings(BaseSettings):
     model_gateway_key: str = ""
 
     # --- Web ---
-    # Allowed CORS origin for the Next.js frontend. NEVER use `*` here.
-    frontend_origin: str = "http://localhost:3000"
+    # Allowed CORS origin(s) for the Next.js frontend, comma-separated.
+    # NEVER use `*` here. 127.0.0.1 is a different origin than localhost.
+    frontend_origin: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     # --- Tunables ---
     # Bounded queue for the audit log writer. If full, requests drop with
