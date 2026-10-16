@@ -79,7 +79,14 @@ data/
 !.env.example
 !**/.env.example
 
-# Large ML files (kept in LFS for some specific paths; ignored for the rest)
+# Build artefacts (Node)
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# Local audit data
+audit-results/
 *.bin
 *.h5
 *.parquet
