@@ -88,6 +88,8 @@ cell_order = [
     ("code:cell_28_async_batch_ingestion.py", "code"),
     ("chunking_intro", "md"),
     ("code:cell_29_chunking_strategies.py", "code"),
+    ("multitenancy_intro", "md"),
+    ("code:cell_30_multitenancy.py", "code"),
     ("footer", "md"),
 ]
 
