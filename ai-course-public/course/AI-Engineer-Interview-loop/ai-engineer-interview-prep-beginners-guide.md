@@ -1,20 +1,20 @@
 # How to Prep for Your First AI Engineer Interview (and Actually Get the Offer)
 
-*I have been on both sides of this interview table. Bombed my first one, then passed the next three. Here's what actually changed.*
+*I have been on both sides of this interview table, bombed my first one, and then passed the next three, so here's what actually changed.*
 
 ---
 
 ## 0. Look, let's skip the intro
 
-Want to land an AI engineer job? Cool. We do not need me to tell you the field is hot or that "AI is the future." You already know that, so let's skip the pep talk and get to the stuff that actually matters.
+Want to land an AI engineer job? Cool, because we do not need me to tell you the field is hot or that "AI is the future," since you already know that, so let's skip the pep talk and get to the stuff that actually matters.
 
-I bombed my first AI interview because I spent 20 minutes whiteboarding transformer attention mechanisms when the hiring manager just wanted to know if I could write a basic API wrapper. I passed the next three. Here's what actually changed.
+I bombed my first AI interview because I spent 20 minutes whiteboarding transformer attention mechanisms when the hiring manager just wanted to know if I could write a basic API wrapper, and I passed the next three, so here's what actually changed.
 
 ---
 
 ## 1. What an AI Engineer Actually Does (Hint: Not What You Think)
 
-Most people confuse this role with ML research or data science. That's wrong. An AI Engineer builds **products** that use AI, so you won't be training models from scratch. You'll be wiring up APIs, building RAG pipelines, shipping features, and making sure things don't break at 2am.
+Most people confuse this role with ML research or data science, but they are wrong, because an AI Engineer builds **products** that use AI, so you will not be training models from scratch. Instead, you will be wiring up APIs, building RAG pipelines, shipping features, and making sure things do not break at 2am.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -34,7 +34,7 @@ Most people confuse this role with ML research or data science. That's wrong. An
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-If you show up to an interview talking about transformer architectures and backprop, you are answering the wrong question. They want to know: **can you build something useful with this stuff?**
+If you show up to an interview talking about transformer architectures and backprop, you are answering the wrong question, since they want to know: **can you build something useful with this stuff?**
 
 ---
 
@@ -88,7 +88,7 @@ Forget the 50-item checklists on LinkedIn. Here's what hiring managers actually 
 
 ## 3. The Interview Loop (What to Expect)
 
-Here's the typical structure. Some companies vary, but the bones are the same.
+Here's the typical structure, and while some companies vary, the bones are the same.
 
 ### Round 1: Recruiter screen (30 min)
 This is where they cover your background, motivation, salary expectations, and basic fit, with nothing technical. Have your "tell me about yourself" pitch ready, and keep it under 2 minutes.
@@ -103,7 +103,7 @@ Live coding plus 1-2 AI concept questions, and sometimes a take-home. The take-h
 - Behavioral (STAR format, have your stories ready)
 
 ### Round 4: Final + offer
-Hiring manager, team fit, comp negotiation. Don't lowball yourself here.
+Hiring manager, team fit, and comp negotiation, so do not lowball yourself here.
 
 ```
               AI ENGINEER INTERVIEW LOOP
@@ -130,7 +130,7 @@ Hiring manager, team fit, comp negotiation. Don't lowball yourself here.
                                                  (offer)
 ```
 
-Honest pass rates look like ~50% → ~40% → ~25% → ~75%, which means roughly 4% of applicants end up with an offer. Yikes. Read on.
+Honest pass rates look like ~50% → ~40% → ~25% → ~75%, which means roughly 4% of applicants end up with an offer, so yikes, but read on.
 
 ---
 
@@ -272,17 +272,17 @@ This is where most candidates fumble. See the deep-dive below.
      └─────┘ └──────┘ └────────┘
 ```
 
-Walk through intent detection → RAG over docs → tool calls for actions → safety checks → human fallback. Mention eval pipeline. Mention cost.
+Walk through intent detection, then RAG over docs, then tool calls for actions, then safety checks, and finally human fallback, while you mention the eval pipeline and the cost.
 
 ### Behavioral
 
 **Q6: "Tell me about a project you are proud of."**
 
-Use STAR. Quantify the result whenever you can, and if you can't quantify the impact, quantify the effort. "Reduced support tickets by 30%" beats "Built a chatbot" every time.
+Use STAR, and quantify the result whenever you can, since if you can't quantify the impact, you should quantify the effort, because "Reduced support tickets by 30%" beats "Built a chatbot" every time.
 
 **Q7: "Tell me about a disagreement with a coworker."**
 
-Don't trash anyone, show that you can disagree and commit, and demonstrate that you brought data to the discussion rather than ego.
+Do not trash anyone, since you should show that you can disagree and commit, and demonstrate that you brought data to the discussion rather than ego.
 
 **Q8: "How do you stay current with AI?"**
 
@@ -300,7 +300,7 @@ Have an opinion on trends like agentic systems, smaller models, on-device AI, an
 
 ## 5. Build 2-3 Projects (Not 10)
 
-You don't need a portfolio of 30 half-finished repos. You need 2-3 things that actually work and you can talk about for 20 minutes each.
+You do not need a portfolio of 30 half-finished repos, since you only need 2-3 things that actually work and that you can talk about for 20 minutes each.
 
 ### Project 1: RAG Q&A Bot
 Pick a domain you care about (books you love, a hobby, your old company's docs) and build a chatbot that answers questions using retrieval. Deploy it somewhere. **A URL is worth more than a GitHub link.**
@@ -308,12 +308,12 @@ Pick a domain you care about (books you love, a hobby, your old company's docs) 
 Stack: OpenAI API, LangChain or LlamaIndex, Pinecone or ChromaDB, FastAPI.
 
 ### Project 2: An Agent with Tools
-Build something that can search the web, query a database, send a Slack message. This shows you understand function calling and orchestration.
+Build something that can search the web, query a database, and send a Slack message, because that shows you understand function calling and orchestration.
 
 Stack: Function calling, ReAct pattern, at least 2-3 tools.
 
 ### Project 3: An Eval Pipeline
-This one's underrated. Build a system that benchmarks different prompts or models on a fixed dataset, which shows you understand quality measurement. Something most beginners don't.
+This one is underrated, so build a system that benchmarks different prompts or models on a fixed dataset, because that shows you understand quality measurement, which is something most beginners skip.
 
 Stack: Python, pytest, Promptfoo or Braintrust.
 
@@ -348,11 +348,11 @@ Stack: Python, pytest, Promptfoo or Braintrust.
 
 ## 6. LLM Evaluation: The Part Most Beginners Skip
 
-This is the section I wish someone had shown me before my first interview, because evaluation is the difference between a toy and a product.
+This is the section I wish someone had shown me before my first interview, since evaluation is the difference between a toy and a real product.
 
 ### Why BLEU and ROUGE Aren't Enough
 
-You might hear about BLEU (Bilingual Evaluation Understudy) in interviews since it was made for translation and checks if n-grams in your output match a reference. Sounds reasonable, until you see this:
+You might hear about BLEU (Bilingual Evaluation Understudy) in interviews since it was made for translation and checks if n-grams in your output match a reference, which sounds reasonable until you see this:
 
 ```
    Reference:  "The cat sat on the mat."
@@ -376,11 +376,11 @@ You might hear about BLEU (Bilingual Evaluation Understudy) in interviews since 
    └─────────────────────────────────────────────┘
 ```
 
-ROUGE has the same problem. It counts word overlap, not whether the answer is actually useful.
+ROUGE has the same problem, since it counts word overlap and not whether the answer is actually useful.
 
 ### So What Do Real Companies Do?
 
-They build their own evals. Public benchmarks (MMLU, GPQA, EvalPlus, SWE-bench) are useful but they don't tell you if your specific chatbot is good at your specific task.
+They build their own evals, because public benchmarks (MMLU, GPQA, EvalPlus, SWE-bench) are useful but they do not tell you if your specific chatbot is good at your specific task.
 
 Different products care about different things:
 - **Healthcare agent:** factuality is everything. One wrong drug name = lawsuit.
@@ -389,7 +389,7 @@ Different products care about different things:
 
 ### Evaluation Datasets
 
-An eval dataset is just a list of (input, expected output) pairs. Sounds simple. It's not.
+An eval dataset is just a list of (input, expected output) pairs, which might sound simple, but it really is not.
 
 The questions to ask:
 - What task are we actually measuring?
@@ -417,14 +417,14 @@ For a real system, say a content moderation classifier, you'd build a dataset li
 
 ### Offline vs Online
 
-Two flavors, both matter.
+There are two flavors, and both matter.
 
 | Type | When | Pros | Cons |
 |------|------|------|------|
 | **Offline** | Before deploy | Fast, cheap, reproducible | Doesn't match real users |
 | **Online** | In production | Real-world, accurate | Risky, slow feedback |
 
-You need both. Here's how they fit together:
+You need both, and here is how they fit together:
 
 ```
               EVALUATION LIFECYCLE
@@ -504,7 +504,7 @@ Takes 3 weeks to label new examples. By then, the bug is everywhere. **Fix:** in
 
 ## 7. The Week Before
 
-Don't cram. Cramming doesn't work for interviews. Do this instead:
+Do not cram, because cramming does not work for interviews, so do this instead:
 
 - [ ] Re-read your resume. Be ready to talk about every single line.
 - [ ] Research the company. Their AI products, recent news, who their competitors are.
@@ -518,7 +518,7 @@ Don't cram. Cramming doesn't work for interviews. Do this instead:
 
 ## 8. Questions You Should Ask Them
 
-Asking good questions is half the interview. Here's what works:
+Asking good questions is half the interview, and here is what works:
 
 - "What's the most interesting AI problem your team is solving right now?"
 - "How do you measure whether an AI feature is actually working in production?"
@@ -527,29 +527,29 @@ Asking good questions is half the interview. Here's what works:
 - "What's the eval process before an AI feature ships?"
 - "What's the biggest headache with AI reliability or cost?"
 
-Don't ask about salary, PTO, or remote in round 1. Save it for the recruiter or the offer call.
+Do not ask about salary, PTO, or remote in round 1, since you should save it for the recruiter or the offer call.
 
 ---
 
 ## 9. Mistakes That Cost People Offers
 
 ### Mistake 1: Trying to learn everything
-You can't, so pick a stack and go deep. Depth beats breadth every single time.
+You cannot, so pick a stack and go deep, since depth beats breadth every single time.
 
 ### Mistake 2: Skipping fundamentals
-Telling me "I use AI to write my code" is a fast track to bombing the live coding round. Know your basics.
+Telling me "I use AI to write my code" is a fast track to bombing the live coding round, so know your basics.
 
 ### Mistake 3: Ignoring system design
 Even juniors get asked, so practice designing a chatbot or a search engine out loud, with a diagram.
 
 ### Mistake 4: No stories ready
-"Tell me about a challenge" should never be a deer-in-headlights moment. Have 3-4 STAR stories ready and rehearse them.
+"Tell me about a challenge" should never be a deer-in-headlights moment, so have 3-4 STAR stories ready and rehearse them.
 
 ### Mistake 5: Lying
 I've caught people doing this, and it always ends the interview. "I don't know, but here's how I'd find out" is the move.
 
 ### Mistake 6: Being a robot
-AI engineering is collaborative, so be human. Ask about the team, be curious, and remember that nobody wants to work with someone who just recites answers.
+AI engineering is collaborative, so be human, ask about the team, be curious, and remember that nobody wants to work with someone who just recites answers.
 
 ---
 
@@ -614,13 +614,13 @@ Starting from zero? Here's what worked for me:
             └────────────────────┘
 ```
 
-Total: ~150-200 hours. Adjust to your life, but keep showing up.
+Total time comes to roughly 150-200 hours, so adjust to your life, but keep showing up.
 
 ---
 
 ## 12. What I Look for When I'm the One Hiring
 
-I run an AI team. Here's my rubric.
+I run an AI team, and here is my rubric.
 
 ```
           HIRING RUBRIC
@@ -648,11 +648,11 @@ I run an AI team. Here's my rubric.
 
 ### What gets someone hired
 
-- They think out loud before they code. Silent coding is a bad sign.
-- They say "I don't know" without panic. Faking it is an instant no.
-- They tie AI to business outcomes. Not "AI is cool" but "this saves 10 hours a week."
-- They ask about the eval pipeline. That shows production thinking.
-- They've shipped something. A deployed side project beats 10 certifications.
+- They think out loud before they code, because silent coding is a bad sign.
+- They say "I do not know" without panic, since faking it is an instant no.
+- They tie AI to business outcomes like "this saves 10 hours a week" rather than just saying "AI is cool."
+- They ask about the eval pipeline, which shows production thinking.
+- They have shipped something, and a deployed side project beats 10 certifications every time.
 
 ### Red flags
 
@@ -677,13 +677,13 @@ I run an AI team. Here's my rubric.
    │  Write about what you learn.                   │
    │  Public learning compounds.                    │
    │                                                │
-   │  Apply broadly but intentionally.              │
-   │  50 thoughtful applications beat 500 spammy ones. │
+   │  Apply broadly, but apply intentionally.       │
+   │  50 thoughtful beats 500 spammy.               │
    │                                                │
    └────────────────────────────────────────────────┘
 ```
 
-Here's the thing nobody tells you. The interview is just two people deciding if they want to work together. That's it. Be curious. Be honest. Be a person, not a portfolio.
+Here is the thing nobody tells you, which is that the interview is just two people deciding if they want to work together, so be curious, be honest, and be a person rather than a portfolio.
 
 ---
 
@@ -696,8 +696,8 @@ If this was useful, I am writing more stuff like this, so follow along to make s
 - **Medium:** [https://medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 - **LinkedIn:** [https://www.linkedin.com/in/vishnoiprem](https://www.linkedin.com/in/vishnoiprem)
 
-I write about AI engineering, interview prep, and the things I wish someone had told me earlier. No fluff, no recycled LinkedIn takes, just stuff I've actually learned the hard way.
+I write about AI engineering, interview prep, and the things I wish someone had told me earlier, with no fluff, no recycled LinkedIn takes, and just stuff I have actually learned the hard way.
 
-If you have got questions or you are job hunting right now, drop me a message. I read everything.
+If you have got questions or you are job hunting right now, drop me a message, since I read everything.
 
 *If this helped, send it to a friend who's job hunting. If it did not, tell me what I missed.*
