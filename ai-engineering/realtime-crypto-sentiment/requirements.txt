@@ -41,7 +41,7 @@ lxml==6.1.0
 websockets==13.1
 transformers==5.10.0
 torch==2.14.1
-numpy==1.26.4
+numpy==2.5.4
 pandas==2.2.3
 streamlit==1.54.0
 plotly==5.24.1
