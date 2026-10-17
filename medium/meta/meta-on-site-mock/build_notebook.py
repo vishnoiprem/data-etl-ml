@@ -90,6 +90,8 @@ cell_order = [
     ("code:cell_29_chunking_strategies.py", "code"),
     ("multitenancy_intro", "md"),
     ("code:cell_30_multitenancy.py", "code"),
+    ("ai_native_intro", "md"),
+    ("code:cell_31_ai_native_eval_loop.py", "code"),
     ("footer", "md"),
 ]
 
