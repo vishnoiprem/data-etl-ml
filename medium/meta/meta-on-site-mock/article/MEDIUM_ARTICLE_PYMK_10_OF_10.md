@@ -1,7 +1,7 @@
 ---
 title: "The Meta L6 PYMK Question: An Interview Transcript With the 5 Drill-Downs That Filter Candidates"
 subtitle: "A real conversation. Real pushback. Real answers that get you 10/10."
-description: "How to answer the PYMK question at Meta L6 AI-Native Data Engineer on-site. The architecture, the validator that prevents hallucination, the SQL that filters weak candidates, and the 5 follow-up questions the interviewer always asks."
+description: "How to answer the PYMK question at Meta L6 AI-Native Data Engineer on-site. Three transcripts (6/10, 8/10, 10/10), the validator code that prevents hallucination, the SQL that filters weak candidates, and the 5 follow-up questions the interviewer always asks."
 author: "Prem Vishnoi"
 date: 2026-10-17
 canonical_url: ""
@@ -9,17 +9,40 @@ cover_image: "pymk_transcript_cover.png"
 tags: ["meta", "interview", "data-engineering", "pymk", "llm", "system-design"]
 ---
 
-# The Meta L6 PYMK Question: An Interview Transcript With the 5 Drill-Downs That Filter Candidates
+# The Meta L6 PYMK Question: An Interview Transcript
 
-This is a transcript. Not a tutorial. The candidate says things, the interviewer pushes back, the candidate recovers or doesn't. The marks are real — a 6/10 candidate, an 8/10 candidate, and the 10/10 candidate who got the offer.
+A 6/10 candidate, an 8/10 candidate, and the 10/10 candidate who got the offer — answering the same Meta L6 PYMK question, getting pushed back by the interviewer, recovering or not.
 
-The question is the same in all three:
+The 5 drill-downs the interviewer always hits. The validator code that separates 8/10 from 10/10. The honest-gaps pattern that signals "I've shipped this, not just read about it."
 
-> Design a People-You-May-Know feed with AI-generated explanations like "You both worked at Meta." No hallucination. 500 million users. Support historical friendship queries. Bounded fanout for celebrities.
+## Table of contents
+
+- [The question](#the-question)
+- [Transcript 1: the 6/10 candidate](#transcript-1-the-610-candidate)
+- [Transcript 2: the 8/10 candidate](#transcript-2-the-810-candidate)
+- [Transcript 3: the 10/10 candidate](#transcript-3-the-1010-candidate)
+- [The 5 drill-downs (memorize these)](#the-5-drill-downs-memorize-these)
+- [What separates 6/10 from 10/10](#what-separates-610-from-1010)
+- [How to practice](#how-to-practice)
 
 ---
 
-## The 6/10 candidate
+## The question
+
+> Design a People-You-May-Know feed with AI-generated explanations like "You both worked at Meta." No hallucination. 500 million users. Support historical friendship queries. Bounded fanout for celebrities.
+
+The question is testing four things at once:
+
+1. Can you model a temporal graph at scale (time travel)?
+2. Can you generate explanations that are grounded in evidence, not invented by the LLM?
+3. Can you control fanout when a single user has 50M followers?
+4. Can you wire it together without a privacy violation at 2am?
+
+Most candidates solve #1 with "SCD2" and stop there. The L6 answer solves all four.
+
+---
+
+## Transcript 1: the 6/10 candidate
 
 **Candidate:** Okay, so I'd use a graph database like Neo4j to store friendships. Then I'd run a recommendation algorithm on the graph to find users you might know. For the AI explanations, I'd use an LLM to generate the text.
 
@@ -53,7 +76,7 @@ The question is the same in all three:
 
 ---
 
-## The 8/10 candidate
+## Transcript 2: the 8/10 candidate
 
 **Candidate:** I'd separate the system into three layers. The graph layer stores friendships as SCD2 records with a canonical pair key — `(user_id_low, user_id_high)` so the index is symmetric. The candidate layer runs offline over GraphX or similar, computing the top 100 candidates per active user. The explanation layer pre-computes reasons with the LLM, but only against structured evidence.
 
@@ -85,7 +108,7 @@ The question is the same in all three:
 
 ---
 
-## The 10/10 candidate
+## Transcript 3: the 10/10 candidate
 
 **Candidate:** I'll separate the system into three layers — graph history, candidate generation, and online serving with grounded explanations. Let me draw the boxes first, then I'll show you the code that prevents hallucination.
 
@@ -187,38 +210,83 @@ def validate_and_serve(evidence: dict, generated: str) -> str:
 
 ---
 
+## The 5 drill-downs (memorize these)
+
+The interviewer will hit one of these five. The structure of your answer matters more than the exact words.
+
+### 1. "How do you stop the LLM from inventing facts?"
+
+Show the validator. Be honest about its gaps. Have a follow-up plan.
+
+The honest answer: "It's per-claim, not whole-output. The known gap is named-entity hallucination. Here's the fix: a per-entity extractor that strips all entities from the output and verifies each one is in evidence. That's a follow-up; I haven't shipped it yet."
+
+### 2. "A and B worked at the same company but never overlapped. Suggest them?"
+
+Date overlap. The whole system hinges on this predicate.
+
+```sql
+SELECT a.user_id, b.user_id, a.company_id
+FROM work_history a
+JOIN work_history b
+  ON a.company_id = b.company_id
+ AND a.user_id < b.user_id
+ AND a.start_date < COALESCE(b.end_date, CURRENT_DATE)
+ AND b.start_date < COALESCE(a.end_date, CURRENT_DATE);
+```
+
+The principle: "Without it, the explanation 'you both worked at Meta' is technically true but semantically false. The user will lose trust after one bad suggestion."
+
+### 3. "Late event, watermark closed, what happens?"
+
+Reconciliation job, log it, size the worker.
+
+The answer: "Flink reads `event_time`, not `processing_time`. The late event has `valid_from = 2026-01-14` and the as-of query for January 16th returns true. If the watermark has closed, the late event goes to a reconciliation job, not the live query path. The user sees the correct answer for the present, and we log it as 'late event' so we can size the reconciliation worker."
+
+### 4. "Celebrity with 50M followers. Walk me through."
+
+Push vs pull by degree threshold. Name the operational ceiling, not a magic number.
+
+The answer: "Above a degree threshold, I switch from push to pull. The threshold is whatever the fanout worker can sustain — find it by looking at p99 fanout-worker latency and finding the degree at which it crosses your SLO. A single user with more than ~5,000 friends would consume more than 1% of total write capacity on each friend-add. That's the operational ceiling."
+
+### 5. "Block hasn't propagated. User sees the blocked candidate. Now what?"
+
+Authoritative serving-time check. Cost of violation is unbounded, cost of prevention is 1ms.
+
+The answer: "The serving path does an authoritative privacy check on every request. Single RocksDB point lookup at the head of the response builder, <1ms. If the candidate is blocked, it's filtered out before the response is built. I don't trust the cache because the cost of a privacy violation is unbounded — regulatory incident, user trust violation, PR event. The cost of a 1ms lookup is bounded and small."
+
+---
+
 ## What separates 6/10 from 10/10
 
-The 6/10 candidate uses the right vocabulary — "graph database," "recommendation algorithm," "prompt engineering" — but can't draw the architecture. The 10/10 candidate names the actual systems (TAO, Spark GraphX, ZippyDB) and the actual production mechanism (the validator code, not the prompt).
+### The validator is the spine
 
-Three things make the difference:
+The 6/10 trusts the LLM. The 8/10 separates facts from generation. The 10/10 *shows the code* and is honest about its gaps ("this is per-claim, not whole-output; here's the known hole and how I'd close it").
 
-**1. The validator is the spine.** The 6/10 trusts the LLM. The 8/10 separates facts from generation. The 10/10 *shows the code* and is honest about its gaps ("this is per-claim, not whole-output; here's the known hole and how I'd close it").
+### The numbers are honest, not invented
 
-**2. The numbers are honest, not invented.** The 6/10 makes up specifics. The 10/10 says "5,000 is a guess, here's how I'd find the real number" and "7 days is the standard because Kafka retention is 14."
+The 6/10 makes up specifics. The 10/10 says "5,000 is a guess, here's how I'd find the real number" and "7 days is the standard because Kafka retention is 14."
 
-**3. The follow-ups are answered with principles, not memorized answers.** The 10/10 candidate doesn't have a script. They have a way of thinking: "what's the cost of failure, what's the cost of prevention, what's the trade-off, what's the rollback?"
+### The follow-ups are answered with principles, not memorized answers
 
-## The 5 drill-downs (memorize the structure, not the words)
+The 10/10 candidate doesn't have a script. They have a way of thinking: "what's the cost of failure, what's the cost of prevention, what's the trade-off, what's the rollback?"
 
-The interviewer will hit one of these five:
+### The cadence is short and specific
 
-1. **"How do you stop the LLM from inventing facts?"** — Show the validator. Be honest about its gaps. Have a follow-up plan.
-2. **"A and B worked at the same company but never overlapped. Suggest them?"** — Date overlap. The whole system hinges on this predicate.
-3. **"Late event, watermark closed, what happens?"** — Reconciliation job, log it, size the worker.
-4. **"Celebrity with 50M followers. Walk me through."** — Push vs pull by degree threshold. Name the operational ceiling.
-5. **"Block hasn't propagated. User sees the blocked candidate. Now what?"** — Authoritative serving-time check. Cost of violation is unbounded, cost of prevention is 1ms.
+The 10/10 candidate talks in short sentences with specific numbers. The 6/10 talks in vague vocab. The cadence is the signal. Read the transcripts out loud — not to memorize, to hear the rhythm.
 
-If you can answer those five with specific code, specific numbers, and honest gaps, you get 10/10.
+### The closing line is short, not a paragraph
 
-## The closing line (use this verbatim, then stop)
+> "Grounded, bounded, auditable. SCD2 with canonical key. Overlap-aware evidence. Deterministic claim validation. Pull-based fanout. Serving-time privacy. Eval in CI, canary before promotion, auto-rollback on regression."
 
-> "The design is grounded, bounded, and auditable: temporal graph data with canonical key for time travel, overlap-aware evidence for shared employment, deterministic claim validation for zero hallucination, pull-based fanout for high-degree users, and serving-time privacy enforcement. The eval set is the test suite, the judge is the linter, the canary is the staging environment. Without all four, you're shipping LLM changes on hope, not measurement."
+Then stop. Let them choose the next drill-down. Long closing monologues read as memorized.
 
-Then stop. Let them choose the next drill-down.
+---
 
-## The full transcript as practice
+## How to practice
 
-Read this transcript out loud twice. Not to memorize — to hear how the 10/10 candidate talks: short sentences, specific numbers, honest gaps, named systems. The cadence is what gets you 10/10. The architecture is what gets you the job.
+1. **Read the three transcripts out loud.** Not to memorize — to hear how the 10/10 candidate talks.
+2. **Practice the 5 drill-downs.** Get to the point where you can answer each in under 60 seconds.
+3. **Run the code.** The full runnable code (4 layers, SCD2 schema, work-overlap SQL, validator, celebrity fanout math) is in `cell_17_pymk.py` of the [github.com/vishnoiprem/data-etl-ml](https://github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock) repo. It runs on a fresh laptop in 90 seconds.
+4. **Read the validator code out loud once.** It's the spine of the 10/10 answer. If you forget everything else, remember this: the LLM only verbalizes, the validator decides what ships, the audit log records every rejection.
 
-The full runnable code (4 layers, SCD2 schema, work-overlap SQL, validator, celebrity fanout math) is in the [github.com/vishnoiprem/data-etl-ml](https://github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock) repo, 580 lines in `cell_17_pymk.py`. It runs on a fresh laptop in 90 seconds. The validator demo is the one I showed the interviewer.
+The architecture gets you the interview. The validator gets you the offer.
