@@ -62,6 +62,8 @@ cell_order = [
     ("code:cell_15_opentelemetry.py", "code"),
     ("cost_intro", "md"),
     ("code:cell_16_cost_calculator.py", "code"),
+    ("pymk_intro", "md"),
+    ("code:cell_17_pymk.py", "code"),
     ("footer", "md"),
 ]
 
