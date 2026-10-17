@@ -72,6 +72,12 @@ cell_order = [
     ("code:cell_20_kafka_delivery.py", "code"),
     ("hnsw_intro", "md"),
     ("code:cell_21_hnsw.py", "code"),
+    ("eval_intro", "md"),
+    ("code:cell_22_eval_metrics.py", "code"),
+    ("clickhouse_intro", "md"),
+    ("code:cell_23_clickhouse.py", "code"),
+    ("spark_intro", "md"),
+    ("code:cell_24_spark_backfill.py", "code"),
     ("footer", "md"),
 ]
 
