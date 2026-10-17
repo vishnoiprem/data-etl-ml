@@ -27,7 +27,7 @@ Most people confuse this role with ML research or data science. That's wrong. An
 │     • Publish papers    • Statistics           • Ship to production │
 │     • Novel research    • Visualizations       • RAG, agents, APIs  │
 │                                                                     │
-│          ◄─────────────  YOU ARE HERE  ──────────────►           │
+│         ◄──────────────  YOU ARE HERE  ──────────────►              │
 │                                                                     │
 │   Day job:  Shipping features, not papers.                          │
 │                                                                     │
