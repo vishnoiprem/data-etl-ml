@@ -64,6 +64,14 @@ cell_order = [
     ("code:cell_16_cost_calculator.py", "code"),
     ("pymk_intro", "md"),
     ("code:cell_17_pymk.py", "code"),
+    ("mmr_vs_rerank_intro", "md"),
+    ("code:cell_18_mmr_vs_rerank.py", "code"),
+    ("bm25_intro", "md"),
+    ("code:cell_19_bm25_deepdive.py", "code"),
+    ("kafka_intro", "md"),
+    ("code:cell_20_kafka_delivery.py", "code"),
+    ("hnsw_intro", "md"),
+    ("code:cell_21_hnsw.py", "code"),
     ("footer", "md"),
 ]
 
