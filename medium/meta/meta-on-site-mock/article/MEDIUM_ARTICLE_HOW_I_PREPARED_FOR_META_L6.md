@@ -499,4 +499,4 @@ That's the loop. Build it. Run it. Speak it.
 
 ---
 
-*If you want the full runnable notebook, it's open-sourced at `[your-repo]`. Every cell is a single Python file. The build script assembles them into a Jupyter notebook that runs end-to-end on a fresh laptop with just `numpy` and `sqlite3`.*
+*If you want the full runnable notebook, it's open-sourced at [github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock](https://github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock). Every cell is a single Python file. The build script assembles them into a Jupyter notebook that runs end-to-end on a fresh laptop with just `numpy` and `sqlite3`.*
