@@ -78,6 +78,12 @@ cell_order = [
     ("code:cell_23_clickhouse.py", "code"),
     ("spark_intro", "md"),
     ("code:cell_24_spark_backfill.py", "code"),
+    ("gdpr_intro", "md"),
+    ("code:cell_25_gdpr.py", "code"),
+    ("query_optimizer_intro", "md"),
+    ("code:cell_26_query_optimizer.py", "code"),
+    ("finetune_intro", "md"),
+    ("code:cell_27_embedding_finetune.py", "code"),
     ("footer", "md"),
 ]
 
