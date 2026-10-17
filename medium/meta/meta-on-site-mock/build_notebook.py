@@ -84,6 +84,10 @@ cell_order = [
     ("code:cell_26_query_optimizer.py", "code"),
     ("finetune_intro", "md"),
     ("code:cell_27_embedding_finetune.py", "code"),
+    ("async_ingestion_intro", "md"),
+    ("code:cell_28_async_batch_ingestion.py", "code"),
+    ("chunking_intro", "md"),
+    ("code:cell_29_chunking_strategies.py", "code"),
     ("footer", "md"),
 ]
 
