@@ -8,7 +8,7 @@
 
 Want to land an AI engineer job? Cool. We do not need me to tell you the field is hot or that "AI is the future." You already know that, so let's skip the pep talk and get to the stuff that actually matters.
 
-I bombed my first AI interview, then passed the next three in a row. Here's what changed.
+I bombed my first AI interview because I spent 20 minutes whiteboarding transformer attention mechanisms when the hiring manager just wanted to know if I could write a basic API wrapper. I passed the next three. Here's what actually changed.
 
 ---
 
@@ -21,15 +21,15 @@ Most people confuse this role with ML research or data science. That's wrong. An
 │                          WHICH ONE ARE YOU?                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
-│   ML Researcher         Data Scientist         AI Engineer          │
-│   ─────────────         ──────────────         ───────────          │
-│   • Train models        • Analyze data         • Build with AI      │
-│   • Publish papers      • Statistics           • Ship to production │
-│   • Novel research      • Visualizations       • RAG, agents, APIs  │
+│     ML Researcher       Data Scientist         AI Engineer          │
+│     ─────────────       ──────────────         ───────────          │
+│     • Train models      • Analyze data         • Build with AI      │
+│     • Publish papers    • Statistics           • Ship to production │
+│     • Novel research    • Visualizations       • RAG, agents, APIs  │
 │                                                                     │
-│         ◄───────────  YOU ARE HERE  ───────────►                   │
+│          ◄─────────────  YOU ARE HERE  ──────────────►           │
 │                                                                     │
-│   Day job:  Shipping features, not papers.                         │
+│   Day job:  Shipping features, not papers.                          │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -52,7 +52,7 @@ Forget the 50-item checklists on LinkedIn. Here's what hiring managers actually 
 - How LLMs actually work, including tokenization, context windows, and attention at a high level.
 - Prompt engineering with few-shot, chain-of-thought, and system prompts.
 - Embeddings and vector DBs, knowing when you need them and when you don't.
-- RAG, which is the bread and butter of production AI, so know it cold.
+- RAG. It is the standard for production AI right now, so know it cold.
 - Function calling, which is how agents talk to tools.
 
 ### Tier 3: Production
@@ -175,7 +175,7 @@ This comes up in 90% of AI interviews. Memorize the flow:
 
 **Q2: "How do you stop hallucinations?"**
 
-There's no silver bullet. You layer defenses:
+There is no magic fix. You have to layer your defenses:
 
 ```
                    DEFENSE IN DEPTH
@@ -413,7 +413,7 @@ For a real system, say a content moderation classifier, you'd build a dataset li
 - Has a clear labeling rubric
 - Measures inter-annotator agreement (if two labelers disagree a lot, your dataset is broken, not the model)
 
-> **Tip:** Mentioning inter-annotator agreement in an interview is a strong signal. Most beginners don't know to bring it up.
+*Pro tip:* If you casually mention "inter-annotator agreement" in an interview, you will immediately stand out. Most juniors do not even know that is a thing, let alone that bad labels are usually the real problem.
 
 ### Offline vs Online
 
@@ -497,7 +497,7 @@ Takes 3 weeks to label new examples. By then, the bug is everywhere. **Fix:** in
 
    5. Monitor in production for drift
 
-   6. Iterate. Eval is a flywheel, not a one-shot.
+   6. Iterate. Evaluation is an ongoing process, not a one-time checklist.
 ```
 
 ---
@@ -678,7 +678,7 @@ I run an AI team. Here's my rubric.
    │  Public learning compounds.                    │
    │                                                │
    │  Apply broadly but intentionally.              │
-   │  50 thoughtful apps beats 500 spray-and-pray.  │
+   │  50 thoughtful applications beat 500 spammy ones. │
    │                                                │
    └────────────────────────────────────────────────┘
 ```
@@ -689,15 +689,9 @@ Here's the thing nobody tells you. The interview is just two people deciding if 
 
 ## 13. Closing
 
-You'll get rejected. I did too.
+You will get rejected, just like I did, and just like everyone I respect did, but that does not mean you are bad. It just means you have not found the right fit yet, so build stuff, write about it, talk to people, and do it all again.
 
-Everyone I respect did.
-
-It doesn't mean you are bad. You just haven't found the right fit yet.
-
-Build stuff, write about it, talk to people, and do it all again.
-
-If this was useful, I'm writing more stuff like this. Follow along so you don't miss the next one:
+If this was useful, I am writing more stuff like this, so follow along to make sure you do not miss the next one:
 
 - **Medium:** [https://medium.com/@premvishnoi](https://medium.com/@premvishnoi)
 - **LinkedIn:** [https://www.linkedin.com/in/vishnoiprem](https://www.linkedin.com/in/vishnoiprem)
