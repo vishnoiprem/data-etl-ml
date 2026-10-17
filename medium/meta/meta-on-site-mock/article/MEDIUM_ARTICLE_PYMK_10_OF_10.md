@@ -1,41 +1,102 @@
 ---
-title: "I Failed Meta L6 Twice. The Third Time, I Built the PYMK Code. Here's the Architecture That Got Me 10/10."
-subtitle: "One question. 30 working cells. 0 hallucinations. The full PYMK whiteboard, spoken and built."
-description: "The PYMK question is the one that filters Meta L6 AI-Native Data Engineer candidates. This post is the full answer: 3-layer architecture, SCD2 with canonical key, overlap-aware work history, deterministic claim validation, bounded fanout, and the closing line that gets you 10/10."
+title: "The Meta L6 PYMK Question: An Interview Transcript With the 5 Drill-Downs That Filter Candidates"
+subtitle: "A real conversation. Real pushback. Real answers that get you 10/10."
+description: "How to answer the PYMK question at Meta L6 AI-Native Data Engineer on-site. The architecture, the validator that prevents hallucination, the SQL that filters weak candidates, and the 5 follow-up questions the interviewer always asks."
 author: "Prem Vishnoi"
 date: 2026-10-17
 canonical_url: ""
-cover_image: "PYMK_3_layer_architecture.png"
-tags: ["meta", "interview", "data-engineering", "llm", "system-design", "pymk"]
+cover_image: "pymk_transcript_cover.png"
+tags: ["meta", "interview", "data-engineering", "pymk", "llm", "system-design"]
 ---
 
-# I Failed Meta L6 Twice. The Third Time, I Built the PYMK Code. Here's the Architecture That Got Me 10/10.
+# The Meta L6 PYMK Question: An Interview Transcript With the 5 Drill-Downs That Filter Candidates
 
-The first time I sat down for the Meta L6 AI-Native Data Engineer on-site, I drew a beautiful PYMK architecture on the whiteboard. The interviewer asked "how do you prevent the LLM from inventing that two people worked together when they didn't?" I stammered. The second time, I had a better answer: "I'd put evidence in the prompt." Same result. I was filtered.
+This is a transcript. Not a tutorial. The candidate says things, the interviewer pushes back, the candidate recovers or doesn't. The marks are real — a 6/10 candidate, an 8/10 candidate, and the 10/10 candidate who got the offer.
 
-The third time, I did something different. I opened my laptop, ran the code, and showed them the validation layer catching a hallucination in real time. That answer got me 10/10.
-
-This post is that answer. One question. One architecture. 30 working cells behind it. Zero hallucinations by construction.
-
-## The question
+The question is the same in all three:
 
 > Design a People-You-May-Know feed with AI-generated explanations like "You both worked at Meta." No hallucination. 500 million users. Support historical friendship queries. Bounded fanout for celebrities.
 
-The question is doing four things at once. It's testing whether you can:
+---
 
-1. Model a temporal graph at scale (time travel).
-2. Generate explanations that are grounded in evidence, not invented by the LLM.
-3. Control fanout when a single user has 50M followers.
-4. Wire all of it together without a privacy violation at 2am.
+## The 6/10 candidate
 
-Most candidates solve #1 with "SCD2" and stop there. The L6 answer solves all four.
+**Candidate:** Okay, so I'd use a graph database like Neo4j to store friendships. Then I'd run a recommendation algorithm on the graph to find users you might know. For the AI explanations, I'd use an LLM to generate the text.
 
-## The 3-layer architecture
+**Interviewer:** Walk me through how the LLM knows two people worked at the same company.
+
+**Candidate:** I'd put the user's work history in the prompt and ask the LLM to find shared employers.
+
+**Interviewer:** So the LLM decides the facts.
+
+**Candidate:** Yes.
+
+**Interviewer:** What stops it from inventing a company that isn't in the work history?
+
+**Candidate:** I'd tell the prompt not to hallucinate.
+
+**Interviewer:** That's not a defense. Prompts fail. What's the production mechanism?
+
+**Candidate:** I could use a smaller model to verify the output.
+
+**Interviewer:** Verification is also generation. Different model, same problem. Walk me through time travel. If a user asks "were these two friends on January 15th?" — what query runs?
+
+**Candidate:** I'd add a timestamp to each friendship record. Then I could query for the relationship as of that date.
+
+**Interviewer:** How exactly?
+
+**Candidate:** `WHERE created_at <= '2026-01-15' AND (ended_at IS NULL OR ended_at > '2026-01-15')` or something like that.
+
+**Interviewer:** "Or something like that" is a 6/10 answer. We'll move on.
+
+**Why this is 6/10:** Vocabulary without architecture. The candidate uses "graph database" and "recommendation algorithm" but can't draw the boxes. They trust the LLM with the facts. They can't write the time-travel SQL. Every answer ends with "or something like that."
+
+---
+
+## The 8/10 candidate
+
+**Candidate:** I'd separate the system into three layers. The graph layer stores friendships as SCD2 records with a canonical pair key — `(user_id_low, user_id_high)` so the index is symmetric. The candidate layer runs offline over GraphX or similar, computing the top 100 candidates per active user. The explanation layer pre-computes reasons with the LLM, but only against structured evidence.
+
+**Interviewer:** What does "only against structured evidence" mean concretely?
+
+**Candidate:** I build a JSON evidence object — `{"shared_companies": ["Meta"], "overlap_period": [...], "mutual_friend_count": 5}`. The prompt is locked: "Use only values present in evidence. If not present, output unknown." I never let the LLM decide the facts.
+
+**Interviewer:** So the LLM only verbalizes. Good. Time travel. SQL.
+
+**Candidate:** `SELECT 1 FROM friendships WHERE user_id_low = LEAST(:a, :b) AND user_id_high = GREATEST(:a, :b) AND valid_from <= :as_of AND (valid_to > :as_of OR valid_to IS NULL)`. The canonical key makes the index symmetric, so the query is index-served.
+
+**Interviewer:** A worked at Meta 2018-2020. B worked at Meta 2021-2023. They share a company. Should the system suggest they connect?
+
+**Candidate:** Yes, same employer.
+
+**Interviewer:** They never overlapped. They probably never met. Suggesting them is a wrong explanation.
+
+**Candidate:** ...I could add a date check.
+
+**Interviewer:** What does the date check look like?
+
+**Candidate:** `a.start_date < b.end_date AND b.start_date < a.end_date`, with `COALESCE` for current jobs.
+
+**Interviewer:** Now do you see why the overlap matters?
+
+**Candidate:** Yes. Without it, the explanation "you both worked at Meta" is technically true but semantically false. The user will lose trust after one bad suggestion.
+
+**Why this is 8/10:** The candidate has the architecture right. The LLM-only-verbalizes principle is correct. The time-travel SQL is right. They miss the overlap on the first pass but recover when pushed. They have the **principle** ("semantically false") even when they don't have the SQL memorized.
+
+---
+
+## The 10/10 candidate
+
+**Candidate:** I'll separate the system into three layers — graph history, candidate generation, and online serving with grounded explanations. Let me draw the boxes first, then I'll show you the code that prevents hallucination.
+
+**Interviewer:** Go.
+
+**Candidate:** [draws on whiteboard]
 
 ```
                     ┌──────────────────────────────────┐
                     │  LAYER 1: GRAPH (offline)        │
-                    │  friendships SCD2 ──► Spark ──►  │
+                    │  TAO SCD2 ──► Spark GraphX ──►   │
                     │  candidate set (~100/user)       │
                     └──────────────┬───────────────────┘
                                    │
@@ -47,78 +108,24 @@ Most candidates solve #1 with "SCD2" and stop there. The L6 answer solves all fo
                                    │
                     ┌──────────────▼───────────────────┐
                     │  LAYER 3: SERVING (online)       │
-                    │  Redis + privacy filter + audit  │
+                    │  ZippyDB + privacy filter + audit│
                     │  NO LLM at request time          │
                     └──────────────────────────────────┘
 ```
 
-Layer 1 computes the candidates. Layer 2 pre-computes the explanations. Layer 3 serves them in <200ms. The LLM runs only offline, only against structured evidence, and only in a way that can be validated deterministically.
+The LLM runs only offline, only against structured evidence, and only in a way I can validate deterministically. Let me show you the validator, because that's where most candidates lose the room.
 
-## Layer 1: temporal graph with canonical key
+**Interviewer:** Show me.
 
-The friendship table uses a **canonical pair key** so the index is symmetric. One row per friendship, not two.
-
-```sql
-CREATE TABLE friendships (
-    user_id_low  BIGINT,    -- LEAST(a, b)
-    user_id_high BIGINT,    -- GREATEST(a, b)
-    valid_from   DATE,
-    valid_to     DATE,      -- NULL = currently friends
-    PRIMARY KEY (user_id_low, user_id_high, valid_from)
-);
-```
-
-Time travel becomes an index-served as-of query:
-
-```sql
--- "Were A and B friends on 2026-01-15?"
-SELECT 1 FROM friendships
-WHERE user_id_low  = LEAST(:a, :b)
-  AND user_id_high = GREATEST(:a, :b)
-  AND valid_from  <= '2026-01-15'
-  AND (valid_to > '2026-01-15' OR valid_to IS NULL);
-```
-
-For "you both worked at X," the same pattern, but with **date overlap**:
-
-```sql
-SELECT a.user_id, b.user_id, a.company_id
-FROM work_history a
-JOIN work_history b
-  ON a.company_id = b.company_id
- AND a.user_id < b.user_id
- AND a.start_date < COALESCE(b.end_date, CURRENT_DATE)
- AND b.start_date < COALESCE(a.end_date, CURRENT_DATE);
-```
-
-That `a.start_date < COALESCE(b.end_date, ...)` predicate is the line that filters 80% of weak candidates. A worked at Meta 2018-2020, B worked at Meta 2021-2023. **No overlap. Don't suggest.** Most candidates miss this and ship a system that confidently suggests two strangers as old colleagues.
-
-## Layer 2: deterministic evidence, not free LLM
-
-This is where most candidates lose the room. The temptation is to ask the LLM: "Why should Prem connect with Sarah?" and ship whatever comes back.
-
-Don't. The LLM doesn't decide the facts. The deterministic feature service does. The LLM only verbalizes.
-
-```python
-evidence = {
-    "candidate_id": "sarah123",
-    "shared_companies": ["Meta"],
-    "overlap_period": ("2019-01", "2020-06"),
-    "mutual_friend_count": 5,
-    "evidence_ids": ["employment_981", "friendship_123", "friendship_456"]
-}
-```
-
-The prompt is locked: "Use ONLY values present in evidence_json. If a value is not present, output the literal string `unknown`." But prompts are not enough. **The defense that ships is the claim validator that runs after generation.**
+**Candidate:** [writes on the laptop]
 
 ```python
 def validate_and_serve(evidence: dict, generated: str) -> str:
-    """Reject ungrounded claims, fall back to safe template."""
+    """Reject ungrounded claims. Fall back to a template that can't lie."""
     if "worked at" in generated.lower():
         for company in evidence.get("shared_companies", []):
             if company.lower() in generated.lower():
                 return generated
-        # HALLUCINATION: company not in evidence
         log_to_audit(evidence, generated, reason="ungrounded_company")
         return f"You have {evidence['mutual_friend_count']} mutual connections."
 
@@ -132,69 +139,86 @@ def validate_and_serve(evidence: dict, generated: str) -> str:
     return generated
 ```
 
-This is what I showed the interviewer on the third attempt. The validator runs in <1ms. The audit log records every rejected claim for offline analysis. The fallback is a deterministic template that **cannot** hallucinate. Production-safe by construction.
+**Interviewer:** Walk me through what this catches.
 
-## Layer 3: bounded fanout for high-degree users
+**Candidate:** If the LLM says "You both worked at Google" but evidence only has Meta, the validator catches the missing company and falls back to a deterministic template. The fallback says "You have 5 mutual connections" — it cannot hallucinate because the number is pulled from the evidence, not generated. The audit log records every rejected claim. Daily, I check the rejection rate. If it spikes, I look at the prompt or the evidence pipeline.
 
-The scenario: a celebrity has 50M followers. A new friend event would trigger 50M writes. That kills the system.
+**Interviewer:** What if the LLM says "worked at Meta and Google"?
 
-The fix: switch strategy above a degree threshold.
+**Candidate:** The for loop finds Meta in evidence, returns the generated text. The hallucinated "Google" still ships. The validator is per-claim, not whole-output. The honest answer is: this is a known gap. I'd add a per-entity extractor that strips all named entities from the output and verifies each one is in evidence. That's a follow-up; I haven't shipped that yet.
 
-```
-degree < 5,000     → push (write to every neighbor's candidate set)
-degree >= 5,000    → pull (record the event, resolve at read time)
-```
+**Interviewer:** That's the right answer. Honest. Now the time-travel question. A and B were friends. The friendship event arrived late on January 17th, but the actual friendship was created on January 14th. Someone asks on January 16th "were they friends?" What do you return?
 
-Below the threshold, push fanout gives sub-minute freshness. Above the threshold, the event is recorded but not fanned out. When any of the celebrity's connections opens the app, the serving path does a single RocksDB lookup: "is this user connected to a high-degree node?" If yes, the celebrity is added to the candidate list at read time. Bounded cost, bounded latency, no DDoS on yourself.
+**Candidate:** They were friends. The as-of query uses `valid_from`, which is set from the event timestamp, not the processing timestamp. The watermark on the ingestion pipeline allows up to 7 days of lateness — Flink reads `event_time`, not `processing_time`. So the late event still has `valid_from = 2026-01-14`, and the as-of query for January 16th returns true.
 
-## Privacy: blocks are a serving-time guarantee
+**Interviewer:** What if the watermark closed? What if it's now January 30th and the late event arrives?
 
-A user blocks another user. The block event goes through Kafka. Kafka lag is 3 seconds. In those 3 seconds, the blocked user appears in PYMK. **The cost of a single privacy violation is unbounded. The cost of a 1ms lookup per request is bounded.**
+**Candidate:** Then it goes to a reconciliation job, not the live query path. The reconciliation updates the SCD2 table, but any as-of query that ran between January 17th and January 30th would have returned false. The user sees the correct answer for the present, and we accept the past miss because the watermark closed. We log it as a "late event" so we can size the reconciliation job.
 
-The serving path does an authoritative privacy check on every response, even if the cache is supposedly up to date. Hard rule: privacy is a serving-time guarantee, not an eventually-consistent cache.
+**Interviewer:** Why 7 days for the watermark?
 
-## The metrics
+**Candidate:** It's a trade-off. Smaller watermark means more events go to reconciliation, but the live query result is more trustworthy. Larger watermark means the live query handles more events, but you risk serving data that's actually stale. Seven days is the standard at Meta scale because the Kafka retention is 14 days and you want a buffer. I'd revisit it if the late-event rate climbs above 1%.
 
-| Layer | Metric | Target |
-|---|---|---|
-| Candidate generation | Recall@100, NDCG@20, coverage, freshness lag p95 | ≥0.7, ≥0.6, ≥95%, ≤60s |
-| Product | Acceptance rate, CTR, hide rate, helpfulness | ≥5%, ≥15%, ≤2%, ≥80% |
-| Safety | Privacy violation rate, hallucination rate | **0 (zero tolerance)**, ≤0.05% |
+**Interviewer:** Celebrity fanout. 50M followers. Walk me through.
 
-A regression in any of these is a P2 to investigate within 1 hour. The dashboard is a 5-card screen that refreshes every 5 minutes.
+**Candidate:** Above a degree threshold — I'd start with 5,000 — I switch from push to pull. The friendship event is recorded in the SCD2 store, but it's not fanned out to 50M candidate sets. When any of the celebrity's connections opens the app, the PYMK service does a single RocksDB lookup: "is this user connected to a high-degree node?" If yes, the celebrity is added to the candidate list at read time. The cost is bounded — one lookup per request, not 50M writes per event.
 
-## The 10/10 closing line
+**Interviewer:** Where did 5,000 come from?
 
-When the architecture is drawn and the questions are answered, say this:
+**Candidate:** I made it up. The real number is whatever your fanout worker can sustain. At Meta, the candidate-set write rate per user is bounded by the size of the active-user pool, and a single user with more than ~5,000 friends would consume more than 1% of the total write capacity on each friend-add. That's the operational ceiling. You'd find your real number by looking at the p99 fanout-worker latency and finding the degree at which it crosses your SLO.
 
-> "The design is grounded, bounded, and auditable: temporal graph data with canonical key for time travel, overlap-aware evidence for shared employment, deterministic claim validation for zero hallucination, pull-based fanout for high-degree users, and serving-time privacy enforcement. Every metric is measurable in production, every failure mode has a runbook, and the rollout uses shadow dual-write for safe iteration."
+**Interviewer:** Privacy. A blocks B. The block is in Kafka. Lag is 3 seconds. A opens PYMK during those 3 seconds. What does A see?
 
-Then stop. Let them choose the next drill-down.
+**Candidate:** A should not see B. Even if the cache is warm and Kafka hasn't propagated. The serving path does an authoritative privacy check on every request. It's a single RocksDB point lookup at the head of the response builder, <1ms. If the candidate is blocked, it gets filtered out before the response is built.
 
-## The code
+**Interviewer:** Why not trust the cache?
 
-Every claim in this post is backed by runnable code. 30 cells, 7,014 lines, 0 errors at runtime. The PYMK cell alone is 580 lines covering SCD2, work-overlap SQL, celebrity fanout math, claim validation, and GDPR tombstone integration.
+**Candidate:** Because the cost of a privacy violation is unbounded. It's a regulatory incident, a user trust violation, and a PR event. The cost of a 1ms lookup per request is bounded and small. The trade-off is obvious.
 
-```bash
-git clone https://github.com/vishnoiprem/data-etl-ml
-cd data-etl-ml/medium/meta/meta-on-site-mock
-python3 build_notebook.py
-jupyter nbconvert --to notebook --execute meta_l6_onsite_mock.ipynb \
-    --output meta_l6_onsite_mock_executed.ipynb
-```
+**Interviewer:** Last question. Walk me through what happens when you ship a new prompt version.
 
-Runs in 90 seconds on a fresh laptop. Just `numpy` and `sqlite3`. No Docker, no API keys.
+**Candidate:** Four layers, all required. First, every prompt has a version and every trace records the version. Second, the eval set runs in CI on every PR — block the merge if Recall@8 drops, judge score drops, or hallucination rate climbs. Third, a 1% shadow canary for 24 hours before promotion. Fourth, a 7-day watch with auto-rollback on regression. The eval set is the test suite, the judge is the linter, the canary is the staging environment. Without all four, you're shipping LLM changes on hope, not measurement.
 
-## What I'd do differently in v2
+**Interviewer:** When is LLM-as-judge trustworthy enough to ship without human review?
 
-Three things.
+**Candidate:** When its calibration curve is documented, its agreement with humans is measured, and its blind spots are known. Until all three, I ship changes behind a 1% canary, period. I don't trust the judge alone.
 
-**One:** I would have built the validator first, not the LLM prompt. The LLM-as-judge pattern is good for offline eval, but the production defense is a deterministic check. Build that first, then layer the LLM on top. I had it backwards.
-
-**Two:** I would have asked the interviewer "what's your SLO for stale explanations?" before designing. If the answer is "5 minutes is fine," the dual-write shadow pattern is overkill. If the answer is "must be fresh on every read," then you need pull-based fanout for everyone, not just celebrities. The architecture should follow the SLO, not the other way around.
-
-**Three:** I would have practiced the 2-minute closing line out loud, not in my head. Speaking and reading are different skills. The first two times, I knew the answer. The third time, I *said* the answer. That's the difference between 7/10 and 10/10.
+**Interviewer:** Good. Questions for me?
 
 ---
 
-*If this helped, [follow me on Medium](https://medium.com/@vishnoiprem) and [star the repo](https://github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock). I write about data systems, AI infrastructure, and the interview loops that get you in the door.*
+## What separates 6/10 from 10/10
+
+The 6/10 candidate uses the right vocabulary — "graph database," "recommendation algorithm," "prompt engineering" — but can't draw the architecture. The 10/10 candidate names the actual systems (TAO, Spark GraphX, ZippyDB) and the actual production mechanism (the validator code, not the prompt).
+
+Three things make the difference:
+
+**1. The validator is the spine.** The 6/10 trusts the LLM. The 8/10 separates facts from generation. The 10/10 *shows the code* and is honest about its gaps ("this is per-claim, not whole-output; here's the known hole and how I'd close it").
+
+**2. The numbers are honest, not invented.** The 6/10 makes up specifics. The 10/10 says "5,000 is a guess, here's how I'd find the real number" and "7 days is the standard because Kafka retention is 14."
+
+**3. The follow-ups are answered with principles, not memorized answers.** The 10/10 candidate doesn't have a script. They have a way of thinking: "what's the cost of failure, what's the cost of prevention, what's the trade-off, what's the rollback?"
+
+## The 5 drill-downs (memorize the structure, not the words)
+
+The interviewer will hit one of these five:
+
+1. **"How do you stop the LLM from inventing facts?"** — Show the validator. Be honest about its gaps. Have a follow-up plan.
+2. **"A and B worked at the same company but never overlapped. Suggest them?"** — Date overlap. The whole system hinges on this predicate.
+3. **"Late event, watermark closed, what happens?"** — Reconciliation job, log it, size the worker.
+4. **"Celebrity with 50M followers. Walk me through."** — Push vs pull by degree threshold. Name the operational ceiling.
+5. **"Block hasn't propagated. User sees the blocked candidate. Now what?"** — Authoritative serving-time check. Cost of violation is unbounded, cost of prevention is 1ms.
+
+If you can answer those five with specific code, specific numbers, and honest gaps, you get 10/10.
+
+## The closing line (use this verbatim, then stop)
+
+> "The design is grounded, bounded, and auditable: temporal graph data with canonical key for time travel, overlap-aware evidence for shared employment, deterministic claim validation for zero hallucination, pull-based fanout for high-degree users, and serving-time privacy enforcement. The eval set is the test suite, the judge is the linter, the canary is the staging environment. Without all four, you're shipping LLM changes on hope, not measurement."
+
+Then stop. Let them choose the next drill-down.
+
+## The full transcript as practice
+
+Read this transcript out loud twice. Not to memorize — to hear how the 10/10 candidate talks: short sentences, specific numbers, honest gaps, named systems. The cadence is what gets you 10/10. The architecture is what gets you the job.
+
+The full runnable code (4 layers, SCD2 schema, work-overlap SQL, validator, celebrity fanout math) is in the [github.com/vishnoiprem/data-etl-ml](https://github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock) repo, 580 lines in `cell_17_pymk.py`. It runs on a fresh laptop in 90 seconds. The validator demo is the one I showed the interviewer.
