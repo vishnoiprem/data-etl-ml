@@ -21,7 +21,7 @@ The 5 drill-downs the interviewer always hits. The validator code that separates
 - [Transcript 1: the 6/10 candidate](#transcript-1-the-610-candidate)
 - [Transcript 2: the 8/10 candidate](#transcript-2-the-810-candidate)
 - [Transcript 3: the 10/10 candidate](#transcript-3-the-1010-candidate)
-- [The 5 drill-downs (memorize these)](#the-5-drill-downs-memorize-these)
+- [The 5 drill-downs](#the-5-drill-downs)
 - [What separates 6/10 from 10/10](#what-separates-610-from-1010)
 - [How to practice](#how-to-practice)
 
@@ -72,7 +72,7 @@ Most candidates solve #1 with "SCD2" and stop there. The L6 answer solves all fo
 
 **Interviewer:** "Or something like that" is a 6/10 answer. We'll move on.
 
-**Why this is 6/10:** Vocabulary without architecture. The candidate uses "graph database" and "recommendation algorithm" but can't draw the boxes. They trust the LLM with the facts. They can't write the time-travel SQL. Every answer ends with "or something like that."
+**Why this is 6/10:** Vocabulary without architecture. The candidate uses "graph database" (L47) and "recommendation algorithm" (L47) but can't draw the boxes. They trust the LLM with the facts at L55 ("Yes.") when asked if the LLM decides the facts. They can't write the time-travel SQL — at L71 the candidate says "or something like that" instead of the predicate. Every answer ends in a softener: "or something like that" (L73), "I could use" (L63), "I'd tell the prompt" (L59).
 
 ---
 
@@ -104,7 +104,7 @@ Most candidates solve #1 with "SCD2" and stop there. The L6 answer solves all fo
 
 **Candidate:** Yes. Without it, the explanation "you both worked at Meta" is technically true but semantically false. The user will lose trust after one bad suggestion.
 
-**Why this is 8/10:** The candidate has the architecture right. The LLM-only-verbalizes principle is correct. The time-travel SQL is right. They miss the overlap on the first pass but recover when pushed. They have the **principle** ("semantically false") even when they don't have the SQL memorized.
+**Why this is 8/10:** The candidate has the architecture right. The LLM-only-verbalizes principle at L85 is correct. The time-travel SQL at L89 is index-served by the canonical key. They miss the overlap on the first pass at L93 ("Yes, same employer.") but recover at L101 with the right predicate. They have the **principle** ("semantically false" at L105) even when they don't have the SQL memorized — and the principle is what the interviewer is testing. The recovery is what separates 8/10 from 6/10. The miss on the first pass is what keeps them from 10/10.
 
 ---
 
@@ -210,9 +210,9 @@ def validate_and_serve(evidence: dict, generated: str) -> str:
 
 ---
 
-## The 5 drill-downs (memorize these)
+## The 5 drill-downs
 
-The interviewer will hit one of these five. The structure of your answer matters more than the exact words.
+The interviewer will hit one of these five. Below is what the 10/10 candidate actually says in transcript 3 — internalize the *shape*, not the script. Read each one, then close the tab and say it back in your own words. If you can say it without sounding like you're reciting, you're ready.
 
 ### 1. "How do you stop the LLM from inventing facts?"
 
@@ -258,35 +258,53 @@ The answer: "The serving path does an authoritative privacy check on every reque
 
 ## What separates 6/10 from 10/10
 
-### The validator is the spine
+Five concrete differences, each with a line citation from the transcripts above.
 
-The 6/10 trusts the LLM. The 8/10 separates facts from generation. The 10/10 *shows the code* and is honest about its gaps ("this is per-claim, not whole-output; here's the known hole and how I'd close it").
+### 1. The validator is shown, not described
 
-### The numbers are honest, not invented
+- **6/10** (L59): "I'd tell the prompt not to hallucinate." — a request, not a defense.
+- **10/10** (L145-163): writes the `validate_and_serve` function, then names its known gap at L171: "this is per-claim, not whole-output... that's a follow-up; I haven't shipped that yet."
 
-The 6/10 makes up specifics. The 10/10 says "5,000 is a guess, here's how I'd find the real number" and "7 days is the standard because Kafka retention is 14."
+The difference: the 10/10 *runs the code in their head* and tells you what's missing. That's the **honest-gaps pattern**: state what you haven't shipped, with the next step. It's the single strongest signal that you've built the system, not read about it.
 
-### The follow-ups are answered with principles, not memorized answers
+### 2. The numbers come with their derivation
 
-The 10/10 candidate doesn't have a script. They have a way of thinking: "what's the cost of failure, what's the cost of prevention, what's the trade-off, what's the rollback?"
+- **6/10** (L67): "I'd add a timestamp to each friendship record." — no number, no schema.
+- **10/10** (L175): "the watermark on the ingestion pipeline allows up to 7 days of lateness" — then at L183 names the *why*: "Kafka retention is 14 days and you want a buffer."
 
-### The cadence is short and specific
+The difference: a 10/10 answer never gives a magic number. It gives the number *and the operational reasoning that produced it*. When the interviewer pushes on the number (L187: "Where did 5,000 come from?"), the 10/10 says "I made it up" and immediately tells you how to find the real one.
 
-The 10/10 candidate talks in short sentences with specific numbers. The 6/10 talks in vague vocab. The cadence is the signal. Read the transcripts out loud — not to memorize, to hear the rhythm.
+### 3. The drill-downs are answered with the underlying trade-off, not the rule
 
-### The closing line is short, not a paragraph
+- **8/10** (L101): gives the right SQL but only after being told to.
+- **10/10** (L191): "a single user with more than ~5,000 friends would consume more than 1% of the total write capacity on each friend-add. That's the operational ceiling."
+
+The 10/10 doesn't recite the rule. They derive it from first principles: write capacity is bounded, the fanout worker has a rate, the threshold is the degree at which the rate breaks the SLO.
+
+### 4. The cadence is concrete
+
+Read the 6/10 transcript out loud. Notice the hedging: "or something like that" (L73), "I could add a date check" (L97), "I'd tell the prompt not to" (L59). Every sentence ends in a softener.
+
+Now read the 10/10 transcript. Sentences are short. Numbers are specific. Each sentence is either a claim, a number, or a trade-off — never a softener. **The cadence is the signal.** It's not what you say, it's how often you hedge.
+
+### 5. The closing line is a punchlist, not a paragraph
+
+The 10/10 closes at L203 with nine clauses separated by periods, each one a system property:
 
 > "Grounded, bounded, auditable. SCD2 with canonical key. Overlap-aware evidence. Deterministic claim validation. Pull-based fanout. Serving-time privacy. Eval in CI, canary before promotion, auto-rollback on regression."
 
-Then stop. Let them choose the next drill-down. Long closing monologues read as memorized.
+Then they stop talking. The interviewer chooses the next drill-down. The punchlist works because each clause is a *noun phrase* — no verbs, no softeners, no explanation. A 6/10 closing monologue has verbs and hedges; a 10/10 closing has noun phrases and silence.
 
 ---
 
 ## How to practice
 
-1. **Read the three transcripts out loud.** Not to memorize — to hear how the 10/10 candidate talks.
-2. **Practice the 5 drill-downs.** Get to the point where you can answer each in under 60 seconds.
+1. **Read the three transcripts out loud.** Not to memorize — to hear how the 10/10 candidate talks. Time yourself: the 10/10 transcript (L113-209) is ~12 minutes spoken. The 6/10 transcript is ~3 minutes. If your answer is closer to 3 minutes, you're not going deep enough.
+
+2. **Practice the 5 drill-downs.** For each, set a 60-second timer and answer without looking. If you can't, the gap is in the underlying trade-off, not the script.
+
 3. **Run the code.** The full runnable code (4 layers, SCD2 schema, work-overlap SQL, validator, celebrity fanout math) is in `cell_17_pymk.py` of the [github.com/vishnoiprem/data-etl-ml](https://github.com/vishnoiprem/data-etl-ml/tree/main/medium/meta/meta-on-site-mock) repo. It runs on a fresh laptop in 90 seconds.
-4. **Read the validator code out loud once.** It's the spine of the 10/10 answer. If you forget everything else, remember this: the LLM only verbalizes, the validator decides what ships, the audit log records every rejection.
+
+4. **Read the validator out loud once.** The LLM verbalizes. The validator decides what ships. The audit log records every rejection. Three sentences, one rhythm.
 
 The architecture gets you the interview. The validator gets you the offer.
