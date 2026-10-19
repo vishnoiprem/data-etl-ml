@@ -182,7 +182,23 @@ The strongest Anthropic candidates in 2026 are the ones who can say: "Constituti
 2. **System design goes 2-3× deeper than OpenAI's.** Pick the 1 feature to go deep on. Cut the rest by name. The "strip away features" style is Anthropic's signature.
 3. **Constitutional AI is a bet, not a destination.** The candidate who can defend a specific bet and name a specific alternative wins the safety round.
 4. **Multi-level coding is the test.** "Build a database → add transactions → add an index → add persistence" is the canonical sequence. Time the levels. The candidate who runs out of time on level 3 loses.
-5. **No salary negotiation.** "The initial offer is the final offer." Get the level right up front. The candidate who tries to negotiate loses leverage.
+5. **No salary negotiation.** "The initial offer is the final offer." Get the level right up front. The candidate who tries to negotiate base loses leverage.
+
+---
+
+## What failed Anthropic candidates said they did wrong
+
+Across 2025-2026 reports, the patterns differ from OpenAI in interesting ways. Anthropic's failures are less about "missed a buried invariant" and more about "missed the safety frame."
+
+**1. They treated the safety round as a sub-question.** Multiple 2026 reports describe candidates who thought the safety round was folded into behavioral, and didn't prepare a specific safety-decision story. Result: they got generic behavioral questions and a separate safety interviewer they hadn't drilled with. The safety round is pass/fail — failing it kills the offer regardless of how the rest went.
+
+**2. They under-explained Constitutional AI.** Candidates who recited the original 2022 paper lost to candidates who could also name the 2026 evolution (Model Spec Midtraining, May 2026) and a specific alternative. Anthropic interviewers in 2026 are testing whether you follow the *current* alignment work, not whether you memorized the original paper.
+
+**3. They tried to negotiate base.** 2026 reports confirm: the initial offer is the final offer. Candidates who tried to negotiate base got the same number back. The lever is the *level*, not the base — get the level right in the recruiter call, not at offer time.
+
+**4. They over-engineered the CodeSignal 4-level build.** 55 min for 4 levels = ~12-15 min each. Candidates who spent 25 min on level 1 (CRUD) had no time for levels 3 and 4 (indexing, persistence). The fix: budget 12 min per level, ship a working v1, name the upgrade.
+
+**5. They under-prepared the system design "strip away features" style.** Multiple 2026 reports describe candidates who designed the full system (channels, threads, reactions, presence) when the prompt explicitly said 1-on-1 only. The signal in the prompt is the test — read it twice.
 
 ---
 
