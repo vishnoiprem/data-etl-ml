@@ -1,5 +1,5 @@
 # 🗂️ TECHCOMBANK OCT 23 ROADSHOW — MASTER INDEX
-### For Prem Vishnoi | Director, Data Engineering | Last updated: Oct 19, 2026 (numbers fact-checked — see FACT_CHECK_2026-10-19.md)
+### For Prem Vishnoi | Director, Data Engineering | Last updated: Oct 19, 2026 (numbers fact-checked — see DEEP_DIVE §21)
 
 > **This is the entry point.** All prep materials live in this directory. Read this file first; it tells you what to read when.
 
@@ -10,7 +10,6 @@
 | # | File | What it is | When to read |
 |---|---|---|---|
 | 1 | `00_MASTER_INDEX.md` | **This file** — your navigation hub | Now |
-| 1b | `FACT_CHECK_2026-10-19.md` | **Verified numbers + error log. Trust this over any other file.** | FIRST (10 min) |
 | 2 | `TECHCOMBANK_DEEP_DIVE.md` | The bank itself: history, strategy, business, data/AI, leadership, business plan, competition, regulation | Tonight (40 min) |
 | 3 | `BATTLE_CARD_ROADSHOW_2026.md` | Strategic battle card: 12 panel Q&A, networking tactics, risks, checklist | Oct 22 (45 min) |
 | 4 | `PREM_PREP_PACK_OCT23.md` | Execution pack: pitches, openers, follow-ups, cheat sheet, scripts | Oct 22 (30 min) |
@@ -19,7 +18,7 @@
 **Source materials (do not edit, reference only):**
 - `Director, Data Engineering (40000058).pdf` — The job description
 - `Prem_CV_Techcombank_Data_AI.pdf` — Your tailored CV
-- `techcomebacnk.pdf` — ⚠️ actually a printout of your own Q&A doc, NOT a company document. Ground truth = `FACT_CHECK_2026-10-19.md`
+- `techcomebacnk.pdf` — ⚠️ actually a printout of your own Q&A doc, NOT a company document. Ground truth = TECHCOMBANK_DEEP_DIVE.md §21
 - `TECHNICAL_ROUND_QA.md` — Technical Q&A prep
 - `resume.md` — Resume source
 - `Editing For a Senior Delivery Consultant — Data Engineering (AWS Professional Services)…pdf` — Related AWS role
@@ -32,9 +31,9 @@
 |---|---|
 | **Oct 14 (today)** | Read MASTER_INDEX (now). Read DEEP_DIVE §1, 7, 8, 10 (40 min). Read DEEP_DIVE §6 (financials) in full (15 min). Read C_LEVEL_COMMUNICATION_PLAYBOOK §1-2 (10 min). |
 | **Oct 15-16** | Read full DEEP_DIVE (1.5 hours). Read DEEP_DIVE §19 (10 conversation hooks) twice. |
-| **Oct 17-18** | Read DEEP_DIVE §4 leadership + FACT_CHECK (30 min). Rehearse 30s + 60s pitches out loud 5x each (20 min). |
+| **Oct 17-18** | Read DEEP_DIVE §4 leadership + §21 fact-check (30 min). Rehearse 30s + 60s pitches out loud 5x each (20 min). |
 | **Oct 19-20** | Re-read C_LEVEL_COMMUNICATION_PLAYBOOK. Rehearse killer question 5x in different tones (15 min). |
-| **Oct 21** | Check the 9M26 results (released Oct 20) and update FACT_CHECK numbers (1 hour). |
+| **Oct 21** | Check the 9M26 results (released Oct 20) and update DEEP_DIVE §21 numbers (1 hour). |
 | **Oct 22** | Read BATTLE_CARD §3 (12 panel Q&A) + §5 (networking). Read PREP_PACK §E (cheat sheet) + §A (pitches) + §L (2 sentences). Publish 1 Medium / LinkedIn post (the "value drop" link). Print cheat sheet on index card. Send "looking forward" email to recruiter. Pack bag per PREP_PACK §H. |
 | **Oct 23 (event day)** | Arrive 30 min early. Re-read cheat sheet once. Be the 2nd or 3rd to ask the panel question. Execute reception plan. Within 21:00-22:00, write down every conversation + 1 follow-up. Within 12h, send LinkedIn requests. Within 24h, send thank-you emails. |
 

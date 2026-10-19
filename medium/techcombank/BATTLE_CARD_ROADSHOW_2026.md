@@ -2,7 +2,7 @@
 ## Director, Data Engineering (40000058) — Singapore, Oct 23 2026
 ### Battle Card — Final Selection Stage (4 candidates → 1 hire)
 
-> ⚠️ **19 Oct 2026 fact-check:** every "company PDF p.X" citation below refers to a file that is NOT in this folder (`techcomebacnk.pdf` is your own Q&A). Treat those claims as unverified unless FACT_CHECK_2026-10-19.md confirms them. Verified numbers are in that file.
+> ⚠️ **19 Oct 2026 fact-check:** every "company PDF p.X" citation below refers to a file that is NOT in this folder (`techcomebacnk.pdf` is your own Q&A). Treat those claims as unverified unless DEEP_DIVE §21 confirms them. Verified numbers are in that file.
 >
 > **Author's note:** This document is built strictly from the six source files Prem provided. Where the JD or company PDF was not specific, I have flagged assumptions. Where Prem's CV is thin, I have reframed — not fabricated. Prem must memorise the bolded 60–90 second answers; everything else is reference.
 
