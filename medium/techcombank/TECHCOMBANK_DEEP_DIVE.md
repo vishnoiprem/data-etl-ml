@@ -10,13 +10,13 @@
 # TABLE OF CONTENTS
 
 1. Techcombank at a Glance (2026)
-2. The History (1989 → 2026) — 4 eras
+2. The History (1993 → 2026) — 4 eras
 3. The Business Model — what they actually do
 4. Leadership & Governance
 5. Ownership & Shareholders
 6. Financial Performance (5-year trajectory)
-7. Strategic Narrative — "Banking on Vietnam's Bright Tomorrow" / Techcombank 2030
-8. The 6 Strategic Enablers (their published framework)
+7. Strategic Narrative — Techcombank 2025–2030
+8. The 6 Strategic Enablers (UNVERIFIED — source file missing)
 9. The Digital & Technology Transformation
 10. Data & AI Strategy (the deep dive)
 11. Subsidiaries & Ecosystem
@@ -39,17 +39,17 @@
 | **Full name** | Vietnam Technological and Commercial Joint Stock Bank |
 | **Vietnamese name** | Ngân hàng Thương mại Cổ phần Kỹ thương Việt Nam (Techcombank) |
 | **Stock code** | HOSE: **TCB** |
-| **Founded** | 1989 |
+| **Founded** | 1993 |
 | **Headquarters** | Ho Chi Minh City (operational HQ) and Hanoi (registered office) — both major |
-| **CEO** | Jens Lottner (since January 2024) |
+| **CEO** | Jens Lottner (since 18 Aug 2020; re-appointed for 2025–2030) |
 | **Chair** | Ho Hung Anh |
-| **Customers** | ~14.5M+ (verify against latest annual report) |
-| **Digital banking users** | ~15.5M+ (verify) |
-| **Branches** | ~300+ across Vietnam (verify) |
-| **Employees** | ~13,000+ (verify) |
-| **Total assets** | Reported in the ~USD 30B range; among top 5 Vietnamese banks by assets (verify) |
+| **Customers** | ~18.2M at 6M26 (18.0M FY25, +2.7M in 2025; 15.4M FY24) |
+| **Digital acquisition** | 66.3% of new-to-bank retail customers acquired digitally in 6M26 (62.3% in FY25) |
+| **Branches** | ~300 (299 at FY24; verify latest) |
+| **Employees** | ~11.6k (third-party data; verify) |
+| **Total assets** | VND 1,273 trillion at 30 Jun 2026 (VND 1,192T at FY25) ≈ USD 48B / 45B at ~26,500 VND/USD (my conversion) |
 | **Brand value** | Among top 3 most valuable banking brands in Vietnam (reported) |
-| **Position** | **#1 in digital satisfaction in Vietnam** (DMA — Mekong Capital / Decision Lab ranking) |
+| **Position** | **#1 in digital satisfaction in Vietnam** (Decision Lab Bank Satisfaction Ranking 2025, YouGov BrandIndex-based; Techcombank #1 overall, up 2 places) |
 | **Sector** | Commercial banking (retail-heavy) |
 | **Listed** | Ho Chi Minh Stock Exchange (HOSE), since June 2018 |
 
@@ -59,36 +59,36 @@
 
 # 2. THE HISTORY — 4 Eras
 
-## Era 1: Foundation (1989–1995)
-- **Founded in 1989** as Vietnam Technological and Commercial Joint Stock Bank, one of the earliest joint-stock commercial banks to emerge after **Đổi Mới** (Vietnam's 1986 economic reforms).
-- The name **"Techcombank"** was deliberately chosen to signal a **technology + commerce** orientation — distinctive for a bank in 1989, and a brand positioning the bank has carried ever since.
+## Era 1: Foundation (1993–1995)
+- **Founded in 1993** as Vietnam Technological and Commercial Joint Stock Bank, one of the earliest joint-stock commercial banks to emerge after **Đổi Mới** (Vietnam's 1986 economic reforms). *(Earlier drafts said 1989 — wrong.)*
+- The name **"Techcombank"** was deliberately chosen to signal a **technology + commerce** orientation — distinctive for a bank in 1993, and a brand positioning the bank has carried ever since.
 - Era 1 was about **survival and establishing credibility** in a banking sector that was newly liberalising.
 
 ## Era 2: Growth & Restructuring (1995–2013)
 - Steady growth through the late 1990s and 2000s.
 - **Vietnam's WTO accession in 2007** opened the banking sector to foreign competition and capital, accelerating modernisation pressure.
-- **Ho Hung Anh became Chairman** during this period — a turning point. He is an entrepreneur with deep interests across real estate, technology, and financial services. (Verify exact year of his chairmanship before citing; some sources place it in the mid-2000s.)
+- **Ho Hung Anh became Chairman** during this period — a turning point. He is an entrepreneur with deep interests across real estate, technology, and financial services. (Chairman since May 2008 per public profiles — verify.)
 - Late 2000s–early 2010s: significant investment in **retail banking infrastructure** and IT systems.
 
 ## Era 3: IPO, Modernisation & Scale (2014–2018)
 - **Major transformation** in this period:
   - **2014–2016:** Restructuring of ownership, professionalisation of management, foreign strategic investor engagement.
   - **2016:** Techcombank raised a **significant pre-IPO funding round** including a major investment from **Warburg Pincus** — reported as one of the largest PE deals in Vietnamese banking history at the time (verify exact figure before citing).
-- **June 2018: IPO on HOSE** (Ho Chi Minh Stock Exchange) — widely reported as one of Vietnam's largest-ever IPOs.
+- **2018: IPO (~USD 922M, priced late April 2018) and HOSE listing in June 2018** (Ho Chi Minh Stock Exchange) — widely reported as one of Vietnam's largest-ever IPOs.
 - The IPO marked Techcombank's transition from a private bank to a **publicly-accountable institution**.
 - This era also saw the build-out of the **retail banking franchise** — credit cards, mortgages, consumer lending.
 
-## Era 4: Digital Transformation & "Banking on Vietnam's Bright Tomorrow" (2018–2026)
+## Era 4: Digital Transformation (2018–2026)
 - The current era — defined by:
   - **Digital-first strategy** — public articulation, app investment, GenAI pilots.
-  - **BSS 4.0** core banking modernisation (reported as completed; 4× faster transaction processing).
-  - **GenAI in production** — including TCB ChatB@nk and the 24/7 virtual assistant.
-  - **Data lakehouse** build-out (the greenfield inside the bank that the Director, Data Engineering role will help land).
-  - **"Techcombank 2030"** strategic narrative — the long-range aspiration.
-- **January 2024: Jens Lottner becomes CEO** — a non-Vietnamese CEO, reported as a signal of professionalisation and international ambition.
+  - **Core banking:** Temenos T24 (upgraded from GLOBUS in a record eight weeks, per Finextra). *"BSS 4.0" and "4× faster" appear in no public source I could find — do not cite.*
+  - **GenAI** — Amazon Bedrock-based applications and customer/employee assistants (verify product names; "TCB ChatB@nk" not found in public sources).
+  - **Databricks Data Intelligence Platform** adopted (announced Oct 2024): unifies data from 50+ systems, Unity Catalog governance, MLflow, 45+ ML models. The role extends a running platform — it is NOT greenfield.
+  - **2025–2030 strategy:** target ~30M customers, 4× total operating income, double market share (reported); follows the 2020–25 Data / Digitalization / Talent programme. Vision: "Change banking, Change lives".
+- **18 Aug 2020: Jens Lottner becomes CEO** (succeeding Nguyen Le Quoc Anh, CEO Sep 2016–Sep 2020); **re-appointed Aug 2025 for 2025–2030**. A non-Vietnamese CEO, ex-CFO of Siam Commercial Bank (where he led a data-lake/digital programme), earlier McKinsey/BCG.
 - Lottner's mandate (as publicly reported): operationalise the 2030 strategy, sharpen customer experience, accelerate digital execution.
 
-> ⚠️ **Softened from the previous draft:** the prior-CEO name and the pre-IPO dollar figure have been removed because they could not be confirmed from the source files. **Verify both before citing.**
+> ✅ **Fact-checked 19 Oct 2026:** prior CEO = Nguyen Le Quoc Anh (2016–2020). IPO ≈ USD 922M. See FACT_CHECK_2026-10-19.md.
 
 ---
 
@@ -97,7 +97,7 @@
 Techcombank is a **retail-heavy, technology-forward commercial bank**. Three revenue engines:
 
 ## 3.1 Retail Banking (the largest engine)
-- **Customers:** 14.5M+ individuals (verify)
+- **Customers:** ~18.2M retail + corporate (6M26)
 - **Products:** savings, mortgages, personal loans, credit cards, auto loans, bancassurance
 - **Distinctive:** Strong position in **mass-affluent and emerging-affluent** segment — middle-class Vietnamese with growing disposable income
 - **Distribution:** ~300 branches + dominant digital app
@@ -120,7 +120,7 @@ Techcombank is a **retail-heavy, technology-forward commercial bank**. Three rev
 - **Other:** residual
 
 ### Margin profile (verify before citing)
-- NIM (Net Interest Margin): reported in the **~4.5–5.0% range** — among the higher in Vietnam, vs. industry average that compresses closer to 3.5–4.0%
+- NIM (LTM): **3.8% FY25, 3.6% at 6M26** (4.4% FY24); quarterly 3.9% in 4Q25, 3.1% in 1Q26, 3.4% in 2Q26. Still among Vietnam's higher, but compressing — cost of funds rose to 4.6–4.8%.
 - This is a **strategic moat** — Techcombank reportedly earns more per dollar of lending than most peers
 - **Why:** stronger brand → better CASA (current account, savings account) ratio → cheaper funding → better NIM
 
@@ -135,7 +135,7 @@ Techcombank is a **retail-heavy, technology-forward commercial bank**. Three rev
 | Role | Name | Background |
 |---|---|---|
 | **Chairman of the Board** | **Ho Hung Anh** | Major shareholder, long-tenured chairman, entrepreneur with interests across real estate, technology, and financial services |
-| **CEO** | **Jens Lottner** | Since Jan 2024. Reported as a former NAB (National Australia Bank) executive. International retail-banking experience. Customer-experience mandate. |
+| **CEO** | **Jens Lottner** | CEO since 18 Aug 2020; 2nd term 2025–2030. Ex-CFO Siam Commercial Bank (Thailand), earlier McKinsey/BCG; 28+ yrs in financial services. Data/digital/talent agenda. |
 | **Independent Directors** | Several senior figures, including international banking veterans | |
 | **Head of Data Engineering & Delivery** (your likely line manager) | Not publicly named in the source materials | Plausibly the hiring manager for the Director, Data Engineering role |
 | **CDO / Head of Data** | Not publicly named in available materials | Plausibly the sponsor of the Director, Data Engineering role |
@@ -160,7 +160,7 @@ Techcombank is a **retail-heavy, technology-forward commercial bank**. Three rev
 
 ## 5.1 Pre-IPO (2014–2018)
 - Ho Hung Anh & related parties: reported as the largest shareholder block
-- **Warburg Pincus:** major pre-IPO investor (figure to be verified)
+- **Warburg Pincus:** reported ~USD 370M investment (Wikipedia dates it 2018; verify)
 - Other institutional investors: smaller stakes
 
 ## 5.2 Post-IPO (2018–2024)
@@ -181,42 +181,54 @@ Techcombank is a **retail-heavy, technology-forward commercial bank**. Three rev
 
 # 6. FINANCIAL PERFORMANCE (5-year trajectory)
 
-> ⚠️ **CRITICAL — verify all figures against the latest Techcombank quarterly results and Annual Report before citing any specific number at the event.** The figures below are **approximate, drawn from public reporting and the company PDF**. A wrong number to a CFO is a self-inflicted wound.
+> ✅ **Rebuilt 19 Oct 2026 from Techcombank's own press releases** (FY25 released 20 Jan 2026; 6M26 released 21 Jul 2026). All consolidated, VND. Earlier 2021–2023 estimates were removed — they were unsourced and several were wrong (e.g. NIM ~4.7%, CASA ~47%, ROE ~19%). 9M26 results are due **20 Oct 2026** — refresh before the event.
 
-| Metric | 2021 | 2022 | 2023 | 2024 | 2025 (est) |
-|---|---|---|---|---|---|
-| **Total assets (USD bn)** | ~22 | ~26 | ~28 | ~30 | ~32+ |
-| **Customer loans (USD bn)** | ~13 | ~16 | ~18 | ~20 | ~22+ |
-| **Customer deposits (USD bn)** | ~14 | ~17 | ~20 | ~22 | ~24+ |
-| **Net profit (USD bn)** | ~0.7 | ~0.85 | ~0.9 | ~1.0+ | ~1.1+ |
-| **NIM (%)** | ~5.0 | ~5.0 | ~4.8 | ~4.7 | ~4.6 |
-| **NPL ratio (%)** | ~1.5 | ~1.4 | ~1.4 | ~1.3 | ~1.3 |
-| **ROE (%)** | ~22 | ~22 | ~20 | ~19 | ~18 |
-| **CASA ratio (%)** | ~40 | ~42 | ~45 | ~47 | ~50+ |
-| **Cost-to-income (%)** | ~38 | ~36 | ~35 | ~33 | ~32 |
+| Metric | FY24 | FY25 | 6M26 |
+|---|---|---|---|
+| **Total assets (VND tn)** | 979 | 1,192 (+21.8% YoY) | 1,273 (+22.7% YoY) |
+| **Customer deposits (VND tn)** | 565 | 665.6 (+17.9%) | 697.4 (+18.4%) |
+| **Total operating income (VND tn)** | 47.0 | 53.4 (+13.6%) | 28.6 (+17.5%) |
+| **Net interest income (VND tn)** | 35.5 | 38.2 (+7.5%) | 20.3 (+16.3%) |
+| **Net fee income (VND tn)** | — | 11.5 (+7.8%) | 7.6 (+37.6%) |
+| **Profit before tax (VND tn)** | 27.5 | 32.5 (+18.2%) | 18.5 (+22.5%) |
+| **NIM, LTM (%)** | 4.4 | 3.8 | 3.6 |
+| **CASA ratio (%)** | 40.8 (4Q24) | 40.4 | 38.3 |
+| **NPL ratio (%)** | 1.17 | 1.13 | 1.15 |
+| **Loan-loss coverage (%)** | 113.8 | 127.9 | 125.5 |
+| **ROE, LTM (%)** | 15.5 | 16.0 | 16.0 |
+| **ROA, LTM (%)** | 2.4 | 2.4 | 2.4 |
+| **Cost-to-income (%)** | 32.7 | 30.8 | 29.7 |
+| **CAR, Basel II (%)** | 15.4 | 14.6 | 15.0 |
+| **Customers (m)** | ~15.4 | ~18.0 (+2.7m) | 18.2 |
+| **Real-estate share of corporate loans (%)** | 33.2 | 30.7 | — |
 
-### What the trajectory reportedly tells you
-- **Steady, predictable growth** — not a volatile emerging-market bank
-- **ROE consistently in the high-teens to low-twenties** — among the best in Vietnamese banking (if accurate)
-- **NIM staying above 4.5%** while peers compress — competitive advantage (if accurate)
-- **NPLs well-controlled** — reportedly under 1.5%, vs. industry often 1.8–2.5%
-- **CASA reportedly rising** — digital banking winning cheap deposits
-- **Cost-to-income improving** — digital automation paying off
+USD at ~26,500 VND/USD (my conversion, approximate): FY25 PBT ≈ USD 1.2B; total assets ≈ USD 45B; 6M26 assets ≈ USD 48B.
+
+### What the trajectory actually tells you
+- **Growth is accelerating:** PBT +18.2% (FY25) then +22.5% (6M26); 2Q26 was the highest quarterly PBT on record (VND 9.7tn).
+- **NIM is compressing, not "staying above 4.5%":** 4.4% → 3.8% → 3.6% LTM; quarterly NIM dipped to 3.1% in 1Q26 before 3.4% in 2Q26. Cost of funds rose to ~4.6–4.8%.
+- **CASA is falling, not rising:** 40.8% → 40.4% → 38.3%. Retail CASA (incl. auto-earning) fell 14.0% YTD in 6M26 as customers moved money to higher-yield products. Still described as industry-leading.
+- **Income is diversifying into fees/insurance:** NFI +37.6% in 6M26 driven by insurance and LCs; NFI/TOI 26.6%.
+- **Asset quality is stable:** NPL 1.13–1.15% (vs. earlier draft's incorrect "~1.3%"); coverage 125–129%.
+- **ROE ~16%** — solid but not "high-teens to low-twenties"; efficiency strong (CIR ~30%).
+- **Retail & unsecured lending is the engine:** FY25 retail credit +30.8% YTD; unsecured lending 3.5× — a direct credit-scoring/NBO data use case.
 
 ### The financial case for the platform (your pitch)
-- Whatever the precise numbers, the **direction** is clear: CASA is up, deposits are growing, and the bank is investing in digital. This means the bank is **growing its way into needing better data** — every percentage point of CASA growth means millions of customer interactions to analyse, every loan is a data point for credit scoring, every digital transaction is a personalisation opportunity. **The data platform is what unlocks the next leg of NIM and cost-to-income improvement.** This is the financial framing of your role.
+- Whatever the precise numbers, the **direction** is clear: deposits (+18% YoY) and customers are growing fast while NIM and CASA compress, and the bank is investing in digital. This means the bank is **growing its way into needing better data** — every customer added (18.2M today, ~30M targeted) means millions of customer interactions to analyse, every loan is a data point for credit scoring, every digital transaction is a personalisation opportunity. **The data platform is what defends NIM and CASA as funding costs rise, and keeps cost-to-income near 30%.** This is the financial framing of your role.
 
 ---
 
-# 7. STRATEGIC NARRATIVE — "Banking on Vietnam's Bright Tomorrow" / Techcombank 2030
+# 7. STRATEGIC NARRATIVE — Techcombank 2025–2030
+
+> ⚠️ "Banking on Vietnam's Bright Tomorrow" and "to be the leading and most beloved bank... by digital customers" could not be found in any public Techcombank source; the only file cited for them (`techcomebacnk.pdf`) is actually your own Q&A printout and does not contain them. Do not quote them. Verified: vision "Change banking, Change lives"; 2020–25 pillars Data / Digitalization / Talent; 2025–2030 strategy targets ~30M customers and 4× TOI (reported).
 
 ## 7.1 The headline
-- **"Banking on Vietnam's Bright Tomorrow"** — the bank's public brand promise (as referenced in the company PDF)
+- **Vision (verified):** "Change banking, Change lives"; the "Bright Tomorrow" slogan is unverified
 - Anchored to the goal: **"to be the leading and most beloved bank in Vietnam by digital customers"**
 - Internal frame: **"Techcombank 2030"** — the long-range plan
 
 ## 7.2 The 2030 North Star (your read, verify exact language)
-- Significantly larger customer base (north of 20M)
+- ~30M customers, 4× total operating income, double market share (reported targets; verify wording)
 - Digital channels as the dominant revenue source
 - Top-tier NPS in every segment
 - A platform that powers both internal AI and partner ecosystem
@@ -229,9 +241,9 @@ Techcombank is a **retail-heavy, technology-forward commercial bank**. Three rev
 
 ---
 
-# 8. THE 6 STRATEGIC ENABLERS (their published framework)
+# 8. THE 6 STRATEGIC ENABLERS (unverified — source file missing)
 
-This is the bank's own published framework (as referenced in the company PDF). **Memorise the labels if not the exact wording.**
+⚠️ Not traceable to a public Techcombank document (source file missing). Use as a thinking frame — say "as I understand your priorities", never "your published enablers".
 
 1. **Strengthen franchise** — defensive and offensive moves in core segments
 2. **Deliver consistent customer experience across segments** — the "one Techcombank" experience
@@ -247,15 +259,15 @@ This is the bank's own published framework (as referenced in the company PDF). *
 # 9. THE DIGITAL & TECHNOLOGY TRANSFORMATION
 
 ## 9.1 What's reportedly been built
-- **Techcombank mobile app** — widely reported as among the top-rated banking apps in Vietnam
+- **Techcombank mobile app** — Global Finance / FinanceAsia / Euromoney "Best Mobile Banking App in Vietnam" (reported)
 - **Techcombank Business** app for corporate / SME customers
-- **TCB ChatB@nk** — GenAI-powered chatbot, reported as in production
+- **GenAI** — Amazon Bedrock-based apps (reported); "TCB ChatB@nk" unverified
 - **24/7 virtual assistant** — NLP-driven
 - **Real-time payments** — integrated with Vietnam's national payment rails
-- **Core banking modernisation (BSS 4.0)** — reported as completed; ~4× faster transactions
-- **Data lakehouse** — in build-out phase (the greenfield inside the bank that the Director, Data Engineering is being hired to land)
+- **Core banking** — Temenos T24 (BSS 4.0 / "4× faster" unverified)
+- **Data platform** — Databricks Data Intelligence Platform adopted (Oct 2024); not greenfield
 - **AI-powered credit scoring** — reportedly in production for selected retail products
-- **NBO / personalisation** — ambition for "tens of millions of customers" (company PDF)
+- **NBO / personalisation** — ambition for "tens of millions of users" (from the JD, not a Techcombank release)
 - **Agentic AI** — early-stage automation experiments
 - **RPA + NLP** — back-office automation
 
@@ -276,7 +288,7 @@ This is the bank's own published framework (as referenced in the company PDF). *
 
 ### Pillar 1: **Data Lakehouse** (the foundation)
 - A unified "single source of truth" for analytics and AI
-- Likely **Databricks class** (open table formats — Delta Lake / Iceberg)
+- **Databricks** (confirmed, Oct 2024); open table formats (Delta Lake / Iceberg)
 - Bronze/Silver/Gold medallion pattern
 - Data contracts at the source boundary
 - PII classified at ingest
@@ -296,7 +308,7 @@ This is the bank's own published framework (as referenced in the company PDF). *
 - **Direct relevance to:** your Lazada recommender work, your Makro segmentation work
 
 ### Pillar 4: **GenAI in Production**
-- Customer service (TCB ChatB@nk, virtual assistant)
+- Customer service (customer/employee assistants)
 - Employee productivity (internal copilots)
 - Developer productivity (Text-to-SQL, code generation)
 - **Direct relevance to:** your Makro Text-to-SQL production deployment
@@ -309,8 +321,8 @@ This is the bank's own published framework (as referenced in the company PDF). *
 - BCBS 239-style reporting requirements
 - **This is the unglamorous part of the job that determines whether the bank passes its next audit.** Many candidates overlook it. **You should not.**
 
-## 10.3 The technology stack signals (from JD + company PDF)
-- **Cloud:** AWS-anchored (signalled by their parallel AWS Professional Services hiring)
+## 10.3 The technology stack signals (from the JD + public reports)
+- **Cloud:** AWS (Amazon Bedrock use reported) + Databricks
 - **Data platform:** Open table formats (Delta Lake / Iceberg class)
 - **Streaming:** Apache Kafka + **Apache Flink** (explicit in JD)
 - **Batch / Legacy:** Hadoop, Hive, Spark (they have a Hadoop estate to modernise)
@@ -332,7 +344,7 @@ This is the bank's own published framework (as referenced in the company PDF). *
 
 | Their need (from JD + strategy) | Your proof point (from CV) |
 |---|---|
-| Lakehouse on Databricks | **Built exactly this at Makro** (10B rows/day) |
+| Databricks lakehouse (already adopted Oct 2024) | **Built exactly this at Makro** (10B rows/day) — you can scale/govern it, not just stand it up |
 | Hadoop modernisation | **SCB + DBS + PayPal Hadoop/Spark history** |
 | Kafka + Flink | **Both in your stack** (Flink depth is your gap to manage) |
 | Open table formats (Delta / Iceberg) | **Databricks Lakehouse at Makro** |
@@ -352,10 +364,10 @@ Techcombank operates a broader financial-services ecosystem. **Verify the exact 
 
 | Subsidiary / Affiliate (verify) | Function |
 |---|---|
-| **Techcombank Securities (TCBS)** | Brokerage, investment banking, wealth management. Reported as one of the larger securities firms in Vietnam. |
-| **Techcombank Life Insurance** | Bancassurance partner (verify exact brand name) |
-| **Techcombank Asset Management** | Fund management |
-| **Consumer finance affiliate** | Higher-yielding consumer lending (verify exact brand name — historically known as "Techcombank Money Inc." or similar) |
+| **Techcom Securities (TCBS), HOSE: TCX** | IPO/listed Oct 2025; FY25 PBT VND 7.1T (+50%); largest equity capital in the industry; Top-3 HOSE brokerage (9.0% in 4Q25). |
+| **Techcom Life** | Life insurer; licence July 2025, first products launched within 6 months |
+| **Techcom Insurance (TCGI)** | Non-life insurer; launched late 2024; >VND 500B premiums, >650k customers in 2025 |
+| **Prior banca partner** | The bancassurance partnership terminated in 2024 (hit 4Q24 income); insurance is now in-house |
 | **Various ecosystem partners** | E-wallets, fintech, real estate |
 
 **What this means for the Director, Data Engineering:**
@@ -369,7 +381,9 @@ Techcombank operates a broader financial-services ecosystem. **Verify the exact 
 
 Techcombank is reported as **one of the most decorated Vietnamese banks** internationally:
 
-- **#1 in digital satisfaction in Vietnam** (DMA — Digital Made in Asia, by Mekong Capital and Decision Lab) — for multiple consecutive years
+- **#1 overall in Decision Lab's 2025 Bank Satisfaction Rankings** (published 21 Apr 2025; +4-point index, up two places) — "digital" sub-ranking and "consecutive years" NOT verified
+- **FinanceAsia "Best Domestic Bank in Vietnam"** — 4th consecutive year (cited in 6M26 release)
+- **Fitch first-time IDR BB- / Positive** (Nov 2025); Moody's Ba3, S&P BB, FiinRatings AA-
 - **#1 in retail banking trust** (Vietnam) — reported
 - **#2 in retail brand consideration** (Vietnam) — reported
 - **Best Digital Bank in Vietnam** — multiple international awards (The Banker, Asian Banker, etc.)
@@ -377,7 +391,7 @@ Techcombank is reported as **one of the most decorated Vietnamese banks** intern
 - **Strong ESG ratings** — improving (verify specific rating)
 - **Brand value** — top 3 most valuable banking brands in Vietnam (reported)
 
-> 💡 **When you reference these in conversation:** be specific. *"DMA 2025 #1 in digital satisfaction"* lands harder than *"they've won some awards."* Always include the year.
+> 💡 **When you reference these in conversation:** be specific. *"Decision Lab 2025 #1 in bank satisfaction"* lands harder than *"they've won some awards."* Always include the year.
 
 ---
 
@@ -504,7 +518,7 @@ They will be **forgiving** about historical detail (you're new to the bank) and 
 - Not knowing the digital / data / AI agenda
 - Not knowing the competitive frame (VPBank, MB, MoMo)
 - Not knowing the regulatory frame at least at principles level
-- Not knowing recent leadership changes (Jens Lottner since Jan 2024)
+- Not knowing recent leadership changes (Jens Lottner CEO since Aug 2020, re-appointed 2025–2030)
 - Confusing Techcombank with another Vietnamese bank
 
 ---
@@ -513,25 +527,25 @@ They will be **forgiving** about historical detail (you're new to the bank) and 
 
 Use these sparingly. **One or two per conversation.** The goal is to signal homework, not recite a PDF.
 
-1. **The "Banking on Vietnam's Bright Tomorrow" narrative:** *"I see Techcombank's 'Banking on Vietnam's Bright Tomorrow' as one of the more coherent bank strategies in ASEAN — most banks talk about digital, you've published the 6 enablers and the data/AI pillars."*
+1. **The 2025–2030 strategy:** *"I see Techcombank's 2025–2030 plan — 30 million customers, 4× income, built on data, digital and talent — as one of the more coherent bank strategies in ASEAN — most banks talk about digital, you've published the 6 enablers and the data/AI pillars."*
 
-2. **BSS 4.0 completion:** *"BSS 4.0 completion is the bedrock — the lakehouse has to drink from that new core cleanly. That's a specific architectural problem, not a generic 'data platform'."*
+2. **Databricks already running:** *"You announced Databricks in October 2024 — 50-plus systems unified, Unity Catalog, MLflow. The next problem is the one I've lived: scaling governed feature and model reuse, and taking the Hadoop tail down, without breaking regulatory reporting."*
 
-3. **Jens Lottner's mandate:** *"Jens's customer-experience mandate maps directly to what the data platform should be enabling — every personalised touch, every faster decision, every reduced complaint."*
+3. **Jens Lottner's mandate:** *"Jens led a data-lake and digital programme as CFO at Siam Commercial Bank before joining; the 2025–2030 plan — 30 million customers, 4× income — only works if data is the product, not the plumbing."*
 
 4. **The 6 enablers:** *"If I deliver enablers 3 and 4 — modernise the platform and empower an AI-driven workforce — I'm enabling 1, 2, 5, and 6 by construction."*
 
 5. **The 4 data/AI pillars:** *"The lakehouse, credit scoring, personalisation, and GenAI — that's a coherent portfolio, not a wish list. The question is the sequencing and the foundational dependency."*
 
-6. **The CASA / NIM story:** *"Your CASA at ~47% and NIM at ~4.7% gives you the funding cost to invest in the platform. Many banks don't have that luxury. You do — and the platform will protect and extend it."* **(Verify before citing.)**
+6. **The CASA / NIM story:** *"Your CASA at ~40% — industry-leading — gives you the funding cost to invest in the platform, and with NIM compressing from 4.4% to 3.6% LTM, protecting it matters more every quarter. The platform is how you do that."* **(FY25 40.4%, 6M26 38.3%.)**
 
-7. **The TCB ChatB@nk GenAI production use case:** *"Shipping TCB ChatB@nk in production tells me you're past the experimentation phase. The interesting work now is the data foundation under it."*
+7. **GenAI in production:** *"Building on Amazon Bedrock puts you past experimentation. The interesting work now is the governed data foundation under it."* (verify specifics first)
 
 8. **The competitive frame vs VPBank / MB:** *"The next 5M customers in Vietnam will choose between Techcombank, VPBank, and the fintechs. Whoever has the better data and AI will win. That's the role."*
 
 9. **The regulatory frame:** *"Decree 13/2023 and the SBV's evolving AI guidance are not a constraint to design around — they're the architectural frame. I'd build the lakehouse so the policy is encoded in the platform, not bolted on."*
 
-10. **The 2030 ambition as the long game:** *"Techcombank 2030 is a public commitment. The Director, Data Engineering role is a critical hire for that narrative. I'm here because I want to be part of that."*
+10. **The 2030 ambition as the long game:** *"Doubling to ~30M customers and 4× operating income by 2030 is a public commitment. The Director, Data Engineering role is a critical hire for that narrative. I'm here because I want to be part of that."*
 
 ---
 
@@ -545,26 +559,27 @@ You should verify any specific number before you cite it on Oct 23. Here are the
 | **Techcombank Sustainability Report** | techcombank.com → Sustainability | ESG, green lending |
 | **HOSE filings** | hsc.com.vn, vietstock.vn, Techcombank IR | Quarterly results, ownership disclosures |
 | **Jens Lottner interviews** | YouTube, Bloomberg, local press | CEO mandate, public statements |
-| **DMA — Digital Made in Asia** | Mekong Capital / Decision Lab website | Digital satisfaction ranking |
+| **Decision Lab Bank Satisfaction Rankings** | decisionlab.co / Vietnam News 21 Apr 2025 | Satisfaction ranking |
+| **Techcombank quarterly press releases** | techcombank.com → Investors → Financial information | FY25 (20 Jan 2026), 6M26 (21 Jul 2026); 9M26 due 20 Oct 2026 |
 | **The Banker / Asian Banker** | thebanker.com | Awards, "Bank of the Year" recognition |
 | **Vietnam SBV publications** | sbv.gov.vn | Regulatory text |
 | **Decree 13/2023** | Vietnamese government gazette | Personal data protection text |
-| **Techcombank press releases** | techcombank.com → News | GenAI / TCB ChatB@nk announcements |
+| **Techcombank press releases** | techcombank.com → News | Databricks (Oct 2024) and GenAI announcements |
 | **LinkedIn** | Techcombank page + senior leaders | Org structure, recent hires |
 
 ### What to verify before Oct 23 (priority order)
-- [ ] **Jens Lottner's exact title and tenure start date**
-- [ ] **Latest customer count** (~14.5M+)
-- [ ] **Latest digital banking user count** (~15.5M+)
+- [x] **Jens Lottner** — CEO since 18 Aug 2020; 2nd term from 18 Aug 2025
+- [x] **Latest customer count** — 18.2M (6M26)
+- [ ] **Digital banking user count** — not published in the releases I read; don't cite 15.5M
 - [ ] **Latest total assets**
 - [ ] **Latest ROE / NIM / NPL / CASA**
 - [ ] **Most recent quarterly results narrative**
-- [ ] **DMA ranking year and position** (most recent)
-- [ ] **Most recent GenAI / TCB ChatB@nk announcement**
-- [ ] **Any press release on BSS 4.0 completion details**
+- [x] **Ranking** — Decision Lab 2025: #1 overall (Apr 2025); check for a 2026 edition
+- [ ] **Most recent GenAI announcement** (Amazon Bedrock / assistants)
+- [ ] ~~BSS 4.0~~ — no public source found; drop it
 - [ ] **Head of Data / CDO if named in any public source**
-- [ ] **Prior CEO's name and tenure** (the previous draft contained an unverified name — find the correct one)
-- [ ] **Ho Hung Anh's exact year of becoming Chairman**
+- [x] **Prior CEO** — Nguyen Le Quoc Anh, Sep 2016–Sep 2020
+- [x] **Ho Hung Anh chairman** — since May 2008 (verify)
 - [ ] **Subsidiary brand names** (TCBS confirmed; others verify)
 
 ---
@@ -574,8 +589,8 @@ You should verify any specific number before you cite it on Oct 23. Here are the
 ## This week (before Oct 23)
 1. **Read the 2024/2025 Annual Report** — CEO letter + strategy section + tech section (1.5 hours)
 2. **Watch 2 Jens Lottner videos on YouTube** — note his language, his priorities (1 hour)
-3. **Skim the DMA report commentary on Techcombank** (30 min)
-4. **Read the recent GenAI / TCB ChatB@nk press release** (15 min)
+3. **Skim Decision Lab 2025 ranking commentary** (30 min)
+4. **Read the Techcombank–Databricks press release (Oct 2024)** (15 min)
 5. **Verify the financial figures in §6** against the latest quarterly report (30 min)
 6. **Re-read this file once** the night before (30 min)
 

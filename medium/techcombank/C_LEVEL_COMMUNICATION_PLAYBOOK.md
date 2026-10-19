@@ -114,7 +114,7 @@ The C-level person should leave the conversation **thinking about the question y
 
 **How to talk to him:**
 - Frame the platform as a **customer-experience enabler**, not a tech project
-- Use international examples (DBS, Standard Chartered, NAB)
+- Use international examples (DBS, Standard Chartered, Siam Commercial Bank — the CEO's former employer)
 - Don't oversell Vietnam-specific knowledge; he's the foreigner, not you
 - Reference his mandate explicitly: *"Your customer-experience mandate maps directly to what the data platform should be enabling"*
 
@@ -254,7 +254,7 @@ These phrases signal Director-band thinking. Use ONE per conversation, max.
 |---|---|---|
 | **Customer count** | Growing (toward 25M by 2030) | Acquisition + onboarding analytics |
 | **Digital revenue %** | Growing (toward 80%+) | Every digital product runs on your platform |
-| **NPS / DMA rank** | Hold #1 or improve | Personalisation, complaint prediction, journey analytics |
+| **NPS / Decision Lab rank** | Hold #1 or improve | Personalisation, complaint prediction, journey analytics |
 | **Strategic narrative execution** | "Techcombank 2030" delivery | You are the platform foundation for the 2030 story |
 | **Brand value** | Growing | Digital experience quality |
 | **Total shareholder return** | Outperform peers | NIM protection + growth via platform |
@@ -262,16 +262,16 @@ These phrases signal Director-band thinking. Use ONE per conversation, max.
 **How to talk to the CEO about KPIs:**
 - Translate everything into **customer outcomes**
 - Use 2030 narrative language: "If I deliver the lakehouse in 18 months, you can credibly claim the platform foundation for the 2030 story"
-- Reference DMA #1: *"The data work I'd want to do would protect and extend that #1 in digital satisfaction"*
+- Reference Decision Lab 2025 #1: *"The data work I'd want to do would protect and extend that #1 in bank satisfaction"*
 
 ## 2.3 The CFO's KPIs
 
 | KPI | Typical target | Your platform's contribution |
 |---|---|---|
-| **NIM (Net Interest Margin)** | Maintain 4.5%+ | Better credit decisions → better risk-adjusted pricing |
+| **NIM (Net Interest Margin)** | Defend ~3.6% LTM (down from 4.4% FY24; cost of funds rising) | Better credit decisions → better risk-adjusted pricing |
 | **CASA ratio** | Grow 1-2pp/year | Personalisation drives engagement, engagement drives CASA stickiness |
 | **Cost-to-income ratio** | Reduce to ~30% | Platform efficiency + automation (40% cloud cost takeout is your proof) |
-| **ROE** | 18-22% | NIM protection + cost takeout = ROE |
+| **ROE** | ~16% LTM (FY25 16.0%, 6M26 16.0%; 15.5% FY24) | NIM protection + cost takeout = ROE |
 | **NPL ratio** | <1.5% | Better credit scoring, better early warning |
 | **Provision coverage** | Strong | Better risk prediction |
 | **Capital adequacy (CAR)** | Above SBV minimum | RWA accuracy = data quality |
