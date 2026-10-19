@@ -1,4 +1,4 @@
-streamlit==1.54.0
+streamlit==1.66.0
 redis==5.0.3
 pandas==2.0.3
 plotly==5.15.0
