@@ -65,6 +65,9 @@ data/
 !*.jsonl.example
 # release-please state files (root of repo)
 !release-please-config.json
+# Grafana provisioned dashboards (ships with the MLOps fine-tune project so
+# Grafana auto-loads them on first boot).
+!agentic-ai/19-mlops-finetune-genai/infra/grafana/**/*.json
 !.release-please-manifest.json
 .devcontainer/
 !.devcontainer/devcontainer.json
