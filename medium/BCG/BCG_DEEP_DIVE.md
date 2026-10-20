@@ -1,5 +1,5 @@
 # BCG DEEP DIVE — for Prem Vishnoi (data engineering / AI delivery)
-### Built 20 Oct 2026 from BCG's own April 2026 press release + press coverage. Role and interview date were not given, so this assumes a BCG X / data-engineering-style role in Singapore. **Correct me if the role is different.**
+### Built 20 Oct 2026 from BCG's own April 2026 press release + press coverage. Role (from recruiter brief, 20 Oct): **BCG Platinion — Data & AI Architecture, Southeast Asia, Senior Manager to Director.** See BCG_INTERVIEW_PREP.md for fit scorecard and answers.
 
 > ⚠️ Numbers below are verified against the sources at the bottom. Anything marked *(unverified)* must not be quoted.
 
@@ -24,7 +24,7 @@
 ## 2. What BCG is (business model in 6 lines)
 1. Management consultancy: strategy → transformation → **build and run** technology (BCG X).
 2. Revenue = people-time on client engagements, moving toward outcome-based and AI-enabled pricing (CEO has spoken on this).
-3. **BCG X** = ex-BCG Gamma (analytics/AI), BCG Digital Ventures and Platinion, merged into one tech build arm. "Gamma" is now a legacy term — don't build your pitch on it.
+3. **BCG Platinion** = BCG's technology-architecture practice (the recruiter brief describes it as a specialist practice; some sources place it inside BCG X — confirm the reporting line). **BCG X** = ex-BCG Gamma (analytics/AI), BCG Digital Ventures and Platinion, merged into one tech build arm. "Gamma" is now a legacy term — don't build your pitch on it.
 4. **10-20-70 model:** 10% algorithms, 20% technology and data, 70% people and process change. Use it as your frame: *"data engineering is the 20%, adoption is the 70%."*
 5. Delivery is **client-site, case-team, 6–12 week sprints**, with Partner/MD, Principal, Project Leader, Consultant structure; technical staff sit in "X Delivery".
 6. Culture: high-performance, up-or-out reputation, strong intellectual rigour, heavy on structured communication.
