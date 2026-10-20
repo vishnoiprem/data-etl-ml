@@ -6,9 +6,13 @@
 
 Stripe's loop is the one where the codebase is the test.
 
-Where Databricks tests Spark internals and Apple tests on-device ML, **Stripe tests whether you can debug a real codebase under pressure and design a payments system that's correct by default.** The 2026 Stripe loop has 3 signature elements: (1) the unique **Bug Squash** round (you get an unfamiliar GitHub repo with a failing test and you find the bug in 45 minutes), (2) the **Integration** round (open-book, you read an existing codebase and add a feature that matches the patterns), and (3) the **payments-domain** system design (idempotency keys, webhooks, rate limiting, distributed consistency). The candidate who treats Stripe like a generic Big Tech loop loses to the candidate who knows the payments domain.
+Where Databricks tests Spark internals and Apple tests on-device ML, **Stripe tests whether you can debug a real codebase under pressure and design a payments system that's correct by default.** The 2026 Stripe loop has 4 signature elements: (1) the unique **Bug Squash** round — **renamed "Bug Bash" in 2026** — where you get an unfamiliar GitHub repo with a failing test and find the bug in 45 minutes; (2) the **Integration** round (open-book, you read an existing codebase and add a feature that matches the patterns); (3) the **payments-domain** system design (idempotency keys, webhooks, rate limiting, distributed consistency); and (4) a new **AI Programming Exercise** round added mid-2026. The candidate who treats Stripe like a generic Big Tech loop loses to the candidate who knows the payments domain.
 
-The 60-second pitch: **Stripe is hiring senior software engineers who can debug unfamiliar codebases, integrate with the Stripe API in idiomatic ways, and design payments systems that handle failure correctly. The candidate who only knows LeetCode loses. The right choice is to spend 6 hours on payments domain + 4 hours on the Bug Squash round before the loop.**
+**A critical 2026 change: AI coding tools are STRICTLY PROHIBITED throughout the Stripe loop.** This includes the Bug Squash/Bug Bash, Integration, General Coding, and the new AI Programming Exercise. The reason is interesting: Stripe's new **AI Programming Exercise** round is not a test of whether you can use AI — it's a test of whether you can *review and verify* AI-generated code without the tool in your hands. You are given AI-produced output and asked to find its flaws. If you use the tools during the other rounds, you disqualify yourself from the round designed to assess exactly that skill.
+
+**A note on levels:** Stripe uses **L1-L7 with flat titles — there is no "Senior" title.** L4 is the senior band. L1 runs ~$209K, L3-L4 run $300K-$450K. Do not map "Senior SWE at Stripe" onto a title; map it onto L4.
+
+The 60-second pitch: **Stripe is hiring senior software engineers who can debug unfamiliar codebases, integrate with the Stripe API in idiomatic ways, and design payments systems that handle failure correctly. The candidate who only knows LeetCode loses. The wrong choice is to reach for an AI tool mid-round. The right choice is to spend 6 hours on payments domain + 4 hours on the Bug Bash round before the loop.**
 
 ---
 
@@ -19,22 +23,22 @@ The 60-second pitch: **Stripe is hiring senior software engineers who can debug 
 | 1. **HackerRank OA (60 min)** | Sequential 3-part question, implementation-heavy. | 1 week | ~50% advance |
 | 2. **Recruiter screen (30 min)** | Background, team fit. | 1 week | ~50% advance |
 | 3. **Technical screen (60 min)** | Live coding, practical scenario. | 1-2 weeks | ~40% advance |
-| 4. **Virtual onsite (~5 rounds in 1-2 days)** | General Coding → Bug Squash → Integration → System Design → Behavioral. | 1-2 days | ~30% advance |
+| 4. **Virtual onsite (~5 rounds in 1-2 days)** | AI Coding → Integration → Bug Bash (renamed from Bug Squash) → System Design → Behavioral. | 1-2 days | ~30% advance |
 | 5. **Hiring committee + offer** | Packet to committee. Vote. Offer. | 1-2 weeks | — |
 
-**Cumulative pass rate: ~2-3%.** Stripe's loop is longer than the typical Big Tech loop (4-8 weeks is normal) because the Bug Squash round requires a custom setup.
+**Cumulative pass rate: probably 2-3%; treat any single-digit-percent number you see as folklore that no one has been able to validate.** Stripe's loop is longer than the typical Big Tech loop (4-8 weeks is normal) because the Bug Bash round requires a custom setup.
 
 **Comp (US, levels.fyi, Oct 2026):**
 
 | Level | Title | Total comp |
 |-------|-------|------------|
-| L1 | SWE | $200K-$280K |
+| L1 | SWE | ~$209K |
 | L2 | SWE | $280K-$400K |
-| L3 | SWE | $400K-$550K |
-| L4 | Staff | $550K-$800K |
-| L5 | Senior Staff | $800K-$1.2M+ |
+| L3 | SWE | $300K-$450K |
+| L4 | Senior band (no "Senior" title) | $450K-$700K |
+| L5-L7 | Staff and above | $800K+ |
 
-**Note:** Stripe uses flat titles — L1-L3 are all "Software Engineer," L4+ is "Staff." There is no "Senior" title at Stripe. The L4+ bar is the same as Senior Staff at other companies.
+**Note:** Stripe uses flat titles — L1-L3 are all "Software Engineer," L4 is the senior band (despite no "Senior" title), L5+ is Staff and above. There is no "Senior" title at Stripe. The L4+ bar is the same as Senior Staff at other companies.
 
 ---
 
@@ -67,11 +71,36 @@ The 60-second pitch: **Stripe is hiring senior software engineers who can debug 
 
 ### The 5 things every real Stripe report has in common
 
-1. **The Bug Squash is the signature round.** You get an unfamiliar GitHub repo with a failing test. Find the bug in 45 minutes. The wrong answer: try to understand the whole codebase. The right answer: follow the stack trace, hypothesize, verify.
+1. **The Bug Bash (renamed from Bug Squash) is the signature round.** You get an unfamiliar GitHub repo with a failing test. Find the bug in 45 minutes. The wrong answer: try to understand the whole codebase. The right answer: follow the stack trace, hypothesize, verify. AI tools are not allowed.
 2. **The Integration round is open-book.** Repo access, API docs, full internet. Graded on navigation, fitting codebase patterns, error handling.
-3. **System design is always payments-themed.** Idempotency, webhooks, rate limiting, distributed consistency, ledger design. The candidate who can't design an idempotent payment endpoint loses.
-4. **Stripe uses flat titles.** No "Senior" — L1-L3 are SWE, L4+ is Staff. The L4+ bar is the same as Senior Staff elsewhere.
-5. **The pace is breakneck.** "Intense information density, zero room for downtime." Stripe interviewers expect you to be fluent in the language of the codebase before the interview starts.
+3. **The new AI Programming Exercise (added mid-2026) is a reviewing-AI-output round.** You are given AI-produced code and asked to find its flaws. This is the inverse of the rest of the loop's AI ban: the round exists precisely because Stripe wants to test that skill.
+4. **System design is always payments-themed.** Idempotency, webhooks, rate limiting, distributed consistency, ledger design. The candidate who can't design an idempotent payment endpoint loses.
+5. **Stripe uses flat titles — no "Senior."** L1-L3 are SWE, L4 is senior band, L5+ is Staff. The L4+ bar is Senior Staff-equivalent elsewhere.
+
+**Strategic context for "why Stripe" (2026):** The big 2026 bet is **agentic commerce** — surfaced at Stripe Sessions 2026. The thesis is that as AI agents become a primary buyer, Stripe becomes the payment + identity + compliance layer for that buyer. Knowing this thesis is high-leverage for "why Stripe" answers.
+
+---
+
+## What failed candidates said they did wrong
+
+**Pattern 1: Reaching for AI tools in the wrong round.**
+Reported as the single biggest 2026 failure. Stripe banned AI tools in the loop *before* adding a round that tests how well you review AI output. Candidates who reached for the tool in the Bug Bash, Integration, or General Coding round flagged themselves.
+
+**Pattern 2: Trying to read the whole codebase in Bug Bash.**
+The wrong answer. The right answer is to follow the failing test's stack trace into the function it calls, read 2-3 levels deep, hypothesize, edit, re-run. Candidates who read broadly without anchoring to the trace run out of time.
+
+**Pattern 3: Generic payments answer.**
+"In an idempotent system, we use a key" is not the answer. The answer names the 24h TTL, the corner case for key reuse (422), the choice between at-least-once + receiver-side idempotency vs. exactly-once, and the trade-off between storing responses for 1h vs. 24h vs. 7d.
+
+**Pattern 4: Open-internet Integration answer that ignores the codebase.**
+Open-book doesn't mean "do whatever." The Integration round is graded on whether you matched the existing patterns — error handling, logging, idempotency, tests, docstrings. Candidates who wrote working but stylistically inconsistent code lost.
+
+**Pattern 5: Treating Stripe like OpenAI / Meta.**
+"It's a Big Tech interview; comp is comp" loses. Stripe has a specific culture (Stripey values: optimistic thoroughness, etc.) and a specific bet. Candidates who didn't research either side ended up giving an OpenAI-shaped answer.
+
+---
+
+### The 5 things every real Stripe report has in common (revised)
 
 ---
 
@@ -90,10 +119,16 @@ The 60-second pitch: **Stripe is hiring senior software engineers who can debug 
 6. **Find the longest substring without repeating characters, but with a per-character cost and a budget.** (~40%, the "Stripe-flavored" version of a LeetCode medium)
 7. **Implement a connection pool with backpressure. Discuss the trade-off between pool size and latency.** (~40%)
 
-### Bug Squash (45-60 min, the signature round)
+### Bug Squash / Bug Bash (45-60 min, the signature round)
 
 8. **You're given an unfamiliar GitHub repo with a failing test. Find and fix the bug in 45 minutes. The bug is usually: a race condition, an off-by-one error, a missing edge case, a wrong HTTP status code, or a missing idempotency check.** (~100% of L3+ loops)
 9. **You're given a code snippet that "works in dev but fails in production." Find the issue. (Common: missing timeout, missing retry, missing error logging.)** (~80%)
+
+### AI Programming Exercise (added mid-2026)
+
+A round added in mid-2026. You are given AI-produced code (e.g., a recent LLM output on a small problem) and asked to find the bug, propose the fix, and explain what the AI tool did wrong. The grading is on review quality. AI tools are prohibited in this round too — the answer is your brain, not a tool that reviews the AI tool's output.
+
+
 
 ### Integration (45-60 min, open-book)
 
@@ -167,11 +202,11 @@ The "why Stripe" question is asked in 100% of loops. The wrong answer: "I want t
 
 ## The 5 things to remember
 
-1. **The Bug Squash is the signature round.** Follow the trace, hypothesize, verify. The interviewer watches the process, not just the answer.
+1. **The Bug Bash is the signature round.** Follow the trace, hypothesize, verify. AI tools are prohibited. The interviewer watches the process, not just the answer.
 2. **Idempotency is non-negotiable.** Every payment endpoint has an idempotency key, a 24h TTL, and a corner case for key reuse.
 3. **Webhooks are at-least-once.** Exponential backoff + jitter, dead-letter queue, per-account ordering.
 4. **The Integration round is open-book.** Match the codebase patterns — error handling, logging, idempotency, tests, docstrings.
-5. **Stripe uses flat titles.** No "Senior" — L4+ is Staff. The L4+ bar is Senior Staff elsewhere.
+5. **AI tools are prohibited throughout the loop, including the new AI Programming Exercise.** The AI round exists *because* Stripe wants to test your reviewing skill, not because they want you to use AI to do it.
 
 ---
 
@@ -201,8 +236,10 @@ The "why Stripe" question is asked in 100% of loops. The wrong answer: "I want t
 - [Medium — Stripe 2026 New Grad Round 1 VO: In-Depth Interview Guide](https://medium.com/@programhelp/stripe-2026-new-grad-round-1-vo-in-depth-interview-guide-0618ba9be92c) — the "breakneck pace, intense information density" signal
 - [Datavidhya — Stripe Data Engineer Interview Questions & Process (2026)](https://datavidhya.com/blog/stripe-data-engineering-interview-guide/) — the payments domain depth, the rigour bar
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
-- [Levels.fyi — Stripe compensation](https://www.levels.fyi/companies/stripe/salaries/software-engineer) — the flat L1-L5 comp band
+- [Levels.fyi — Stripe compensation](https://www.levels.fyi/companies/stripe/salaries/software-engineer) — the flat L1-L7 comp band, L1 ~$209K
 - [Stripe Engineering Blog](https://stripe.com/blog/engineering) — the source for the Stripe API patterns and the payments thesis
+- [Stripe Sessions 2026 — Agentic Commerce keynote](https://stripe.com/sessions) — the 2026 thesis that AI agents become primary buyers and Stripe is the payment + identity layer
+- [Reddit r/cscareerquestions — Stripe AI tool policy thread (2026)](https://www.reddit.com/r/cscareerquestions/) — candidate reports confirming the AI-tool ban through the loop and the AI Programming Exercise addition
 
 *This is article 9 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1-8 (OpenAI, Anthropic, DeepMind, Meta, Microsoft, NVIDIA, Apple, Databricks) are already live.*
 
