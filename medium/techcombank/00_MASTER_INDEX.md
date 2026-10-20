@@ -96,6 +96,8 @@
 
 ## 👥 The C-Suite Power Map (who to find at the reception)
 
+> **Update 20 Oct:** the confirmed agenda lists the CEO (Dr. Jens Lottner), Chief People Officer (Ms. Veo Nguyen), Chief CIBG Officer (Ms. Phan Thi Hai Yen), Chief Private Banking Officer (Ms. Nguyen Van Linh), Techcom Securities Chairman (Mr. Nguyen Xuan Minh) and BOD Senior Advisor (Mr. Raymundo Yu). **No data leaders are named.** Start with the Chief People Officer and ask who runs data. Talking points per leader: BATTLE_CARD §5.0. Event: Fri 23 Oct, 18:00–21:00, reception 19:20–21:00. The table below is the fallback if data leaders turn up.
+
 | Priority | Person | Find for |
 |---|---|---|
 | 🔴 | Head of Data Engineering & Delivery | Hiring manager — your 1:1 |

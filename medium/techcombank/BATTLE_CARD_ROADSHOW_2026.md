@@ -326,7 +326,75 @@
 
 ## 5. CONVERSATION STARTERS / NETWORKING TACTICS
 
-### 5.1 Likely panel composition and what each person probably cares about
+### 5.0 CONFIRMED EVENT AGENDA + WHO TO TALK TO AND WHAT TO SAY (added 20 Oct 2026)
+
+**Agenda (Fri 23 Oct):** 18:00 opening (Chief People Officer) → 18:10 CEO strategy spotlight → 18:30 leadership panel (corporate, investment & private banking; live audience Q&A) → **19:20–21:00 networking reception (100 min)** → 21:00 close.
+
+> ⚠️ **Key insight:** the listed leaders are **not data leaders**. The panel is CIBG / private banking / securities / people. No CDO, CTO or Head of Data Engineering is named. So the data pitch must be **translated into their business** (clients, deals, wealth, talent) and you should **ask who runs data** rather than assume. Section 5.1 below (data-leader panel) is now a fallback if they attend.
+
+| Leader (per agenda) | What they care about | What to talk about (1–2 lines) | Smart question |
+|---|---|---|---|
+| **Dr. Jens Lottner** — CEO (speaks 18:10) | 2025–2030 plan: ~30M customers, 4× income; AI/data as enablers | Do NOT pitch in the room. In Q&A or one line after: "Your 6M26 note that AI and data are already delivering productivity gains — the next step is making that reuse repeatable across the group." Mention his Siam Commercial Bank data-lake background only if natural. | "What is the one capability you want the data platform to give the bank in the next 18 months?" |
+| **Ms. Veo Nguyen** — Chief People Officer (opens; likely owns this hiring event) | Senior talent attraction, retention, culture, overseas Vietnamese returnees | Thank her for the event; show you understand why the bank hires overseas talent; your story: team 8 → 30, promotions, TRC holder, can be in HCMC in 30 days. | "Which senior data and AI roles are hardest to fill, and what makes someone succeed here in the first year?" **Ask her who owns the Director, Data Engineering hire and for an introduction.** |
+| **Ms. Phan Thi Hai Yen** — Chief CIBG Officer (corporate & investment banking) | Corporate client growth, deals, transaction banking, onboarding speed; FY25 IB fees VND 4.2tn (+20.7%) | Data helps her win and serve clients: client 360, faster onboarding/KYC, credit and cash-flow signals, pipeline analytics, clean regulatory data. Month-end close 5 days → 2 hours = trusted numbers faster. | "Where does data slow your relationship managers most today: onboarding, credit decisions, or client insight?" |
+| **Ms. Nguyen Van Linh** — Chief Private Banking Officer | Affluent/HNW clients, wealth products, personalisation, cross-sell with securities and insurance | Personalisation and next-best-offer at scale; one customer view across bank, securities, insurance (Techcom Life, TCGI); privacy by design. Your Lazada/Makro recommender and segmentation work maps here. | "How much of a client's relationship across the bank, securities and insurance can you see in one view today?" |
+| **Mr. Nguyen Xuan Minh** — Chairman of the BOD, Techcom Securities (TCX) | Securities growth: FY25 PBT VND 7.1tn (+50%), listed Oct 2025, HOSE brokerage 9.0%; risk and peak-volume resilience | Real-time data and risk: streaming trade data, margin-risk monitoring, governance (securities also answers to SSC). Your Kafka/Flink streaming experience. | "As the platform scales, how are you thinking about real-time risk and data sharing between the bank and securities?" |
+| **Mr. Raymundo Yu** — Senior Advisor of BOD | Board-level view: governance, risk, international best practice | Governance and discipline: lineage, auditability, control framework; short, structured, humble. Let him lead. | "From your board perspective, what separates banks that really monetise data from those that just invest in it?" |
+
+**Titles are only what the agenda says.** I could not verify backgrounds — look each person up on LinkedIn / Techcombank's site tonight (10 min each) before using any personal detail.
+
+### 5.0b Per-leader script: opener, talk, 3 questions, close (added 20 Oct 2026)
+
+**1. Dr. Jens Lottner (CEO) — only if he opens the door**
+- *Opener:* "Dr. Lottner, thank you for the strategy talk. I'm Prem, a data engineering leader from Singapore."
+- *Talk (15 sec):* "The 2030 goal of about 30 million customers needs data reuse to be repeatable, not project by project."
+- *Questions:* (1) "What is the one capability you want the data platform to give the bank in 18 months?" (2) "Where has AI delivered the clearest productivity gain so far?" (3) "What would slow the 30-million-customer goal most, if anything?"
+- *Close:* "Thank you, I won't take more of your time."
+
+**2. Ms. Veo Nguyen (Chief People Officer) — your first stop**
+- *Opener:* "Thank you for hosting tonight. I'm Prem, applying for the Director, Data Engineering role."
+- *Talk:* grew a team from 8 to 30, promoted engineers to senior and principal; TRC holder, can be in HCMC within 30 days.
+- *Questions:* (1) "Which senior data roles are hardest to fill and why?" (2) "What makes a senior hire succeed in the first year here?" (3) "Who owns the Director, Data Engineering hiring — could you introduce me?"
+- *Close:* "May I send you a short follow-up tomorrow?"
+
+**3. Ms. Phan Thi Hai Yen (Chief CIBG Officer)**
+- *Opener:* "I enjoyed the panel, especially the point about [one thing she said]."
+- *Talk:* "At Makro I cut month-end close from five days to two hours; the same discipline gives relationship managers a trusted single client view."
+- *Questions:* (1) "Where does data slow your relationship managers most — onboarding, credit decisions or client insight?" (2) "How do you track a client's activity across lending, trade and securities today?" (3) "What reporting would you want in real time that you get next day?"
+- *Close:* "I'd be glad to share how I'd approach this."
+
+**4. Ms. Nguyen Van Linh (Chief Private Banking Officer)**
+- *Opener:* "I was interested in your view on private banking client expectations."
+- *Talk:* "My recommender and segmentation work taught me that personalisation only works with one clean customer view and strong privacy controls."
+- *Questions:* (1) "How much of a client's relationship across bank, securities and insurance can your team see in one view?" (2) "What makes a wealth client trust the bank's recommendations?" (3) "Which insight would help your advisers most that they lack today?"
+- *Close:* "Thank you, that was very useful."
+
+**5. Mr. Nguyen Xuan Minh (Chairman, Techcom Securities)**
+- *Opener:* "Congratulations on the Techcom Securities listing and last year's results."
+- *Talk:* "Streaming data and real-time risk at peak volume is where I've worked: Kafka and Flink at Lazada, 100M+ events a day."
+- *Questions:* (1) "As volumes grow, how do you think about real-time risk and margin monitoring?" (2) "How closely should data be shared between the bank and securities, given the different regulators?" (3) "What has been hardest to scale technically since the listing?"
+- *Close:* "Thank you, I learned a lot."
+
+**6. Mr. Raymundo Yu (Senior Advisor, BOD)**
+- *Opener:* "I'd value your perspective if you have a minute."
+- *Talk:* governance only — lineage, audit trail, controls. Short and humble.
+- *Questions:* (1) "What separates banks that truly monetise data from those that just invest in it?" (2) "What do boards most need to see about data and AI risk?" (3) "What advice would you give someone joining to lead data engineering?"
+- *Close:* "Thank you for your time."
+
+**Rules for every conversation:** ask one question at a time, listen, repeat one thing they said, never criticise, 3–5 minutes max, write the notes the same night.
+
+**Time plan for the 100-minute reception**
+1. First 15 min: find the **Chief People Officer** and ask who runs data engineering.
+2. Next 30 min: **CIBG** and **Private Banking** leaders — be useful, not salesy.
+3. Next 20 min: other candidates and Techcombank engineers/managers.
+4. Last 20 min: **CEO / advisor** only if a natural opening appears. Never queue to pitch.
+5. Leave by ~21:15; write notes that night; thank-yous within 24h.
+
+**One line for everyone (adapt):** "My background is regulated banking data (Standard Chartered AML) plus consumer-scale platforms (Lazada, Makro). I'm here because Techcombank is genuinely using data to grow. What does data mean for your area?"
+
+**Do not:** talk Hadoop/Flink with a private banker; pitch the CEO; hand out a CV unasked; criticise any area.
+
+### 5.1 (Fallback — if data leaders attend) Likely panel composition and what each person probably cares about
 Prem cannot be certain who is on the panel, but the JD and the company PDF give strong signals.
 
 | Likely panelist | What they probably care about | Prem's hook |
