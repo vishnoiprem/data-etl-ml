@@ -2,7 +2,7 @@
 ## Director, Data Engineering (40000058) — Singapore, Oct 23 2026
 ### Battle Card — Final Selection Stage (4 candidates → 1 hire)
 
-> ⚠️ **19 Oct 2026 fact-check:** every "company PDF p.X" citation below refers to a file that is NOT in this folder (`techcomebacnk.pdf` is your own Q&A). Treat those claims as unverified unless FACT_CHECK_2026-10-19.md confirms them. Verified numbers are in that file.
+> ⚠️ **19 Oct 2026 fact-check:** every "company PDF p.X" citation below refers to a file that is NOT in this folder (`techcomebacnk.pdf` is your own Q&A). Treat those claims as unverified unless DEEP_DIVE §21 confirms them. Verified numbers are in that file.
 >
 > **Author's note:** This document is built strictly from the six source files Prem provided. Where the JD or company PDF was not specific, I have flagged assumptions. Where Prem's CV is thin, I have reframed — not fabricated. Prem must memorise the bolded 60–90 second answers; everything else is reference.
 
@@ -466,6 +466,33 @@ Concrete tactics:
 - "AI will replace" or "AI won't replace" — *stay out of the AI theology debate.*
 - Specific SBV circular numbers or dates that have not been verified. *Speak in principles, not specifics.*
 - A specific salary number first. *"I'd rather understand the level and scope properly first" — see TECHNICAL_ROUND_QA §12, line 442.*
+
+---
+
+### 6b. Why Data Director candidates at a bank like Techcombank typically fail (added 20 Oct 2026)
+
+> ⚠️ **Honest source note:** I found **no public account** of why specific Techcombank Director-level data candidates were rejected (Glassdoor/Indeed show only general feedback: ~69% positive experience, difficulty ~3/5, multiple rounds, skills tests, presentations, background checks). The list below is **inferred** from the JD (40000058), the bank's public strategy and common bank-hiring patterns — treat it as a risk checklist, not as facts about past candidates.
+
+| # | Likely reason for no offer | What the panel hears | How Prem counters it |
+|---|---|---|---|
+| 1 | **Strategy talk, no hands-on depth** — JD wants "architect hat", dimensional models, Flink/Kafka, Arrow | "A manager who can't debug or design" | Bring one detailed design story (grain, SCD2, CDC, reconciliation). Be honest on Flink depth. |
+| 2 | **Thin on governance/regulation** — JD asks Level 4 in governance, metadata, data management | "Great engineer, not safe for a bank" | Lineage, data contracts, PII at ingest, audit trail, maker-checker. Say "I'd align with your compliance team" on circulars. |
+| 3 | **Treating Techcombank as greenfield** — they already run Databricks (Oct 2024), 45+ ML models | "Did not do the homework" | Cite Databricks adoption; ask what's hard about scaling and governing it. |
+| 4 | **Wrong numbers or stale facts** — e.g. CEO tenure, customer count, NIM | "Careless with facts" (fatal in a bank) | Use verified numbers only (DEEP_DIVE §21). Hedge when unsure. |
+| 5 | **No people-leadership evidence** — JD requires 4+ years managing, hiring, KPIs/KRAs | "Individual contributor in a Director title" | 8 → 30 team story, promotions, a performance-management example, one attrition lesson. |
+| 6 | **Retail/e-commerce only, no banking proof** | "Doesn't know our risk culture" | Lead with Standard Chartered AML (15+ countries) and DBS; show controls thinking. |
+| 7 | **Overselling / arrogance / criticising the bank** | "Cultural fit risk, loss of face" | Credit the team, frame gaps as opportunities, listen more than talk. |
+| 8 | **Over-qualified / flight-risk perception** — a Head applying for a Director | "Will he leave or be bored?" | Say plainly: "I want to be closer to the build." Mention TRC and 30-day move to remove risk. |
+| 9 | **Vague answers, no numbers, no trade-offs** | "Cannot own a decision" | Answer frame: headline, number, risk, control, question back (Playbook §1.7). |
+| 10 | **No follow-through after the event** | "Not serious" | Send thank-you within 24h, with one specific takeaway and the promised one-page note. |
+| 11 | **Relocation/visa/notice-period ambiguity** | "Hiring risk, slow start" | State TRC, notice period and start date clearly, once. |
+| 12 | **Panel mismatch** — impressing one person, ignoring the CFO/CRO/CTO | "No cross-functional influence" | Prepare one line for each exec type (Playbook §1.5, §1.8). |
+
+**Self-test before Oct 23 (answer yes to all):**
+- [ ] Can I explain one architecture end-to-end *and* one team-scaling story in 90 seconds each?
+- [ ] Can I name 3 verified Techcombank facts without notes (18.2M customers, Databricks Oct 2024, NIM 3.6%)?
+- [ ] Do I have a one-line answer for "why a Director role?" and "why banking again?"
+- [ ] Do I know exactly what I will send within 24 hours after meeting someone?
 
 ---
 

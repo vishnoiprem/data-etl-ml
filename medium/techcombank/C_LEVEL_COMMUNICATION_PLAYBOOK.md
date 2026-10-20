@@ -9,7 +9,7 @@
 
 | Part | Section | What's in it |
 |---|---|---|
-| **1** | How to talk to C-level | 7 rules, 5-min conversation structure, 4 loves/4 hates, personality-by-personality framing, 5 magic phrases |
+| **1** | How to talk to C-level | 7 rules, 5-min conversation structure, 4 loves/4 hates, personality-by-personality framing, 5 magic phrases, **1.7 how a bank Director sounds (habits, vocabulary, etiquette, answer frame)**, **1.8 leadership talk + questions to ask (by audience, follow-ups, what not to ask)** |
 | **2** | KPIs every C-level tracks | Universal 4 + CEO / CFO / CTO / CRO / CHRO / Compliance / CDO / your line manager |
 | **3** | 5 KPI metrics for your first 90 days | What you'd measure if hired |
 | **4** | Pocket cheat sheet | Print this on index card |
@@ -234,6 +234,133 @@ These phrases signal Director-band thinking. Use ONE per conversation, max.
 3. **"The thing I'd want to validate before committing is..."** — shows epistemic humility
 4. **"What I've learned the hard way is..."** — shows scar-based wisdom
 5. **"If I were in your seat, the question I'd be asking is..."** — shows C-level thinking
+
+---
+
+## 1.7 How a Bank Director Sounds (added 20 Oct 2026)
+
+A bank Director is not a startup CTO. Panelists listen for **control, accountability and calm**, then for ambition. Same content, different register.
+
+### The 6 habits
+| Habit | Startup-speak (avoid) | Bank-director speak (use) |
+|---|---|---|
+| **1. Own the outcome, name the control** | "We move fast and fix things." | "We ship in small releases, each with a rollback and an owner. Regulatory reports never go through an untested path." |
+| **2. Numbers with a unit and a date** | "Costs dropped a lot." | "Cloud spend down 40% over two quarters, with no change to SLA." (use only numbers you can defend) |
+| **3. Risk before reward** | "This will unlock huge value." | "The value is X. The risk is Y, and this is how I contain it." |
+| **4. Decisions, not opinions** | "I think we could maybe..." | "My recommendation is A over B, because of cost-to-serve and audit risk. I'd revisit in 90 days." |
+| **5. Plain words, short sentences** | "Leverage synergies on the data fabric." | "One governed copy of the data. Every number traceable to its source." |
+| **6. Respect hierarchy without being timid** | Interrupting, name-dropping | Let the senior person finish. Answer in 30 seconds, then offer detail. "Happy to go deeper if useful." |
+
+### Banking vocabulary to use naturally (don't over-pack)
+- **Control language:** audit trail, lineage, segregation of duties, maker-checker, data owner / steward, reconciliation, sign-off, exception handling.
+- **Risk language:** model risk, operational risk, data quality threshold, regulatory reporting, Basel II CAR, NPL, coverage ratio.
+- **Value language:** NIM, CASA, cost-to-income, cost of funds, fee income, cost-to-serve, customer acquisition cost.
+- **Techcombank numbers you can use (verified, DEEP_DIVE §21):** ~18M customers, NIM 3.6% LTM, CASA 38%, CIR ~30%, 66% of new retail customers acquired digitally.
+
+### Vietnam / Techcombank etiquette
+- Greet with respect: titles (Mr / Ms, then role) until invited otherwise. Use both hands for a business card.
+- Be modest and specific: "In my experience at Makro..." beats "I single-handedly...". Credit the team.
+- Avoid criticising the bank's current state. Frame gaps as **opportunities**: "The next stage is scaling reuse across domains."
+- Don't corner someone with a hard question in a group. Ask one-to-one, softly: "If I may ask..."
+- Silence is fine. Pause, then answer.
+
+### The 4-step answer frame (use for any question, 45–60 seconds)
+1. **Headline** — the answer in one sentence.
+2. **Why** — the business or risk reason, with one number.
+3. **How** — 2–3 concrete steps, with the control.
+4. **Check** — "Does that match how you're thinking about it?"
+
+### Example: "How would you modernise our Hadoop estate?"
+> "Incrementally, not big-bang. First I'd inventory by workload and retire what nobody reads, typically 20–30% of jobs in my experience. Then I'd move one domain with a clear business owner, dual-running and reconciling to the cent before cutover, because a regulatory number that moves unexplained is the real risk. It does cost more during dual-run, so I'd budget for it up front. Does that fit how your teams are set up?"
+
+### Example: "How do you handle a disagreement with a business head?"
+> "I turn the opinion into a decision with trade-offs. I put the options, cost, risk and timeline on one page, ask the data owner to confirm the facts, and agree who decides. If we still differ, I escalate the decision, not the argument."
+
+### Example: opening to a CFO / CRO / CDO in one line
+- **CFO:** "I'd measure this platform in cost-to-income and cost-to-serve, not tickets closed."
+- **CRO:** "Every model input is traceable, versioned and reproducible as of the reporting date."
+- **CDO:** "One governed copy, many engines — so the business trusts the number the first time."
+
+### Say / don't say
+| Don't | Do |
+|---|---|
+| "I don't know." | "I don't have that figure to hand — I'd confirm it with your team and come back tomorrow." |
+| "That's wrong." | "I see it slightly differently; may I share why?" |
+| "We always did X at Lazada." | "At Lazada the pattern was X; for a bank I'd adapt it with these controls." |
+| Quote a circular number you're unsure of | "I'd align with your compliance team on the exact circular." |
+| Talk for 3+ minutes | Stop at 60 seconds, invite questions. |
+
+### 30-second pocket version
+**Answer first. One number. One risk. One control. Then ask a question back.**
+
+---
+
+## 1.8 Leadership Talk + The Questions to Ask (added 20 Oct 2026)
+
+### How a leader talks (vs. a senior engineer)
+| Senior engineer says | Leader says |
+|---|---|
+| "I built a pipeline that..." | "I owned the outcome: the close went from 5 days to 2 hours. The pipeline was how." |
+| "My team did X." | "I set the goal, removed the blockers, and my engineers delivered X. Here's what I'd do differently." |
+| "We had a problem with quality." | "Incidents were hurting trust, so I made quality a team KPI. Production incidents fell 60%." |
+| "I managed 30 people." | "I scaled the team from 8 to 30 across four squads, and promoted engineers to senior and principal." |
+| "I'd use Kafka and Flink." | "The business needs a decision within seconds. That points to streaming; here is the cost and the risk." |
+
+**Five leadership signals panelists listen for**
+1. **Ownership** — "I decided / I was accountable", plus one honest mistake and what you changed.
+2. **Developing people** — name how you grew someone, not only what you shipped.
+3. **Influence without authority** — a story where you changed a senior person's mind with data.
+4. **Judgement under pressure** — what you chose *not* to build, and why.
+5. **Calm** — short sentences, no defensiveness when challenged.
+
+**Story template (STAR-L, 90 seconds):** Situation → Task → Action (what *you* did) → Result (a number) → **Lesson** (what you'd do differently). Prepare 4 stories: scaling a team, a failed or delayed project, a conflict with a business head, a cost or risk decision.
+
+### Questions to ask (pick 2–3 per conversation, never all)
+**Golden rule:** ask about their problems, not their perks. Listen 80%. Write down what you hear — it becomes your 90-day plan.
+
+**To the hiring manager (Head of Data Engineering & Delivery)**
+1. "What is the one decision the data platform is blocking today — the single thing, not the wish list?" *(killer question)*
+2. "What would make you say in 12 months that this hire was the best decision you made?"
+3. "How is the team split today between platform, domain squads and BAU support? Where is the pain?"
+4. "How much of the Hadoop estate remains, and what is the target date to retire it?"
+5. "What does the engineering career path look like — how do you promote a senior engineer to principal?"
+
+**To the CDO / head of data**
+1. "Where does data strategy sit between the business tribes and the enabling tribe — who owns data quality today?"
+2. "Which two or three data products matter most to the 2030 plan, and which are still blocked by data?"
+3. "How do you balance central standards against squad autonomy in the data platform?"
+4. "How mature is lineage and metadata for regulatory reporting, and what's the next milestone?"
+
+**To the CFO / finance lead**
+1. "How do you want to see platform cost: per query, per domain, or as a share of cost-to-income?"
+2. "Where would a faster close or cleaner finance data change a decision for you?"
+
+**To the CTO / CIO**
+1. "How do you want the data platform to integrate with core banking and the event backbone — CDC, APIs or both?"
+2. "What are the cloud and data-residency constraints that shape what we can put where?"
+
+**To the CRO / compliance**
+1. "Which reports or models cause the most audit friction today?"
+2. "What does the regulator expect on explainability for AI models — what would you want built in from day one?"
+
+**To a peer engineer or architect**
+1. "What is the thing you'd fix first in the platform if you had a free quarter?"
+2. "What's a typical week like — how much is build versus operations?"
+
+**To other candidates / alumni (networking)**
+1. "What drew you to Techcombank?" and "How is the culture day to day?"
+
+### Follow-up lines (after they answer)
+- "That's helpful — what has made that hard so far?"
+- "If that were solved, what would change for the business?"
+- "Who else should I speak to about that?"
+- "Could I send you a one-page note on how I'd approach it?" (then actually send it within 24 hours)
+
+### Questions NOT to ask at this stage
+Salary, bonus, leave, visa terms, working hours, or anything you could find on the website. Save for the recruiter after an offer signal.
+
+### Closing line (leader style)
+> "Thank you — this conversation sharpened my view of the role. If it's useful, I'll send you a one-page outline of how I'd approach the first ninety days."
 
 ---
 
