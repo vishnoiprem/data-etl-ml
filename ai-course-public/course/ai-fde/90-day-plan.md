@@ -135,6 +135,11 @@ This is the richest month for reuse — the capstone projects already
 | 7 | Dec 5–11 | [`phase-4-capstone/projects/02-multi-agent-dispatcher/`](./phase-4-capstone/projects/02-multi-agent-dispatcher/) | Multi-agent with verifier |
 | 8 | Dec 12–20 | `02-multi-agent-dispatcher` + auth/human-approval layer | End-to-end ops agent with approval gates |
 
+**Reference material (skim, don't run end-to-end):**
+
+- [`phase-5-advanced/projects/02-oauth-multi-tenant/`](./phase-5-advanced/projects/02-oauth-multi-tenant/) — the JWT/tenant pattern that Project 2 needs.
+- [`phase-5-advanced/case-studies/engagement-8-cost-ceiling-breach.md`](./phase-5-advanced/case-studies/engagement-8-cost-ceiling-breach.md) — the postmortem that becomes a behavioral STAR story for Phase 6.
+
 **What you add that the course doesn't have:**
 
 - **A real customer-shaped scenario.** The course uses PacificFreight
@@ -186,10 +191,37 @@ deployment → security → ROI.**
 
 | Week | Days | Run this | Produces |
 |---|---|---|---|
-| 9 | Dec 21–27 | [`phase-4-capstone/projects/03-distilled-slm/`](./phase-4-capstone/projects/03-distilled-slm/) | Cost model + serving decision |
-| 10 | Dec 28–Jan 3 | [`phase-4-capstone/case-studies/`](./phase-4-capstone/case-studies/) | 5 case studies + portfolio narrative |
-| 11 | Jan 4–10 | [`case-studies/REHEARSAL-CHECKLIST.md`](./phase-4-capstone/case-studies/REHEARSAL-CHECKLIST.md) + [`CAPSTONE-PRESENTATION.md`](./phase-4-capstone/case-studies/CAPSTONE-PRESENTATION.md) | 5-min business presentation, rehearsed |
-| 12 | Jan 11–19 | Mock interviews (5 total) | Recorded mock FDE interviews |
+| 9 | Dec 21–27 | [`phase-6-interview-prep/`](./phase-6-interview-prep/) decomposition + system-design modules | The 4-step framework (Clarify / Decompose / Design / Tradeoffs) drilled on all 4 scenarios |
+| 10 | Dec 28–Jan 3 | [`phase-6-interview-prep/behavioral/`](./phase-6-interview-prep/behavioral/) + [`customer-simulation/`](./phase-6-interview-prep/customer-simulation/) | 3 STAR stories drawn from your own case studies + the slipped-deployment simulation |
+| 11 | Jan 4–10 | [`phase-7-FDE-100-interview/00-INDEX.md`](./phase-7-FDE-100-interview/00-INDEX.md) → [`03-openai-fde.md`](./phase-7-FDE-100-interview/03-openai-fde.md) + 2 more targets | Company-specific process, success/rejection stories, reading list |
+| 12 | Jan 11–19 | [`phase-4-capstone/case-studies/REHEARSAL-CHECKLIST.md`](./phase-4-capstone/case-studies/REHEARSAL-CHECKLIST.md) + 5 mock interviews | Recorded mock FDE interviews, rehearsed against the phase-7 scripts |
+
+### Month 3 is where phase-7 earns its keep
+
+[`phase-7-FDE-100-interview/`](./phase-7-FDE-100-interview/)
+holds 100 company-specific FDE interview files. Each one carries a
+company snapshot, the actual interview process, success *and*
+rejection stories with reasoning, and a reading list.
+
+**How to use it in the final two weeks:**
+
+1. **Pick 3–5 target companies** from the tier map in
+   [`00-INDEX.md`](./phase-7-FDE-100-interview/00-INDEX.md). For an
+   OpenAI-primary plan: OpenAI, Anthropic, Palantir, Scale AI, and
+   one big-tech PS shop (AWS ProServe or Google CE).
+2. **Read each file end-to-end** — snapshot → process → success →
+   rejection → reading list.
+3. **For every success-story Q, practice answering out loud** for
+   60–90 seconds. Then compare against the recorded mock.
+4. **For every rejection story, write the better answer in your own
+   words**, then say it. The rejection files are the highest-value
+   part of the directory — they show the near-misses.
+5. **Drill the reading-list items in the final week** before each loop.
+
+**Why this matters:** the success stories are answers that *worked*
+at a specific company. Copying them verbatim reads as rehearsed;
+re-deriving the reasoning from your own artifacts reads as senior.
+The rejection files are where that distinction is most visible.
 
 ### The 5 system design exercises
 
@@ -204,15 +236,20 @@ Practice these as written exercises, each answered in 45 minutes:
 Exercise 5 is the hardest and the most valuable. It is also the one
 that separates an FDE from a backend engineer.
 
+All five map to the 9 patterns in
+[`phase-6-interview-prep/system-design/`](./phase-6-interview-prep/system-design/)
+— exercises 1 and 3 to `01-read-heavy` + `04-distributed-storage`,
+exercise 2 to `09-agentic-ai`, exercise 4 to `05-transactional`.
+
 ### The 5 mock interviews
 
-| # | Focus | Format |
-|---|---|---|
-| 1 | Coding under pressure (Python) | 45 min, no AI assistant |
-| 2 | System design (scenario 1) | 60 min, whiteboarding |
-| 3 | Customer discovery → architecture (ambiguous brief) | 60 min, role-play |
-| 4 | Debugging a production incident you didn't build | 45 min |
-| 5 | Business case + ROI (Project 3 presentation) | 30 min |
+| # | Focus | Format | Drill against |
+|---|---|---|---|
+| 1 | Coding under pressure (Python) | 45 min, no AI assistant | `phase-7/03-openai-fde.md` Round 2 |
+| 2 | System design (scenario 1) | 60 min, whiteboarding | `phase-6/system-design/` framework |
+| 3 | Customer discovery → architecture (ambiguous brief) | 60 min, role-play | `phase-6/customer-simulation/` |
+| 4 | Debugging a production incident you didn't build | 45 min | `phase-7/` rejection stories |
+| 5 | Business case + ROI (Project 3 presentation) | 30 min | `phase-5-advanced/case-studies/engagement-8-cost-ceiling-breach.md` |
 
 **Record every one.** The recording is the artifact; the interview
 is just the input.
@@ -314,19 +351,26 @@ moves.
 
 ```
    90-day plan          Course phases           Portfolio
-   (this file)          (4 phases, 9 weeks)     (the evidence)
+   (this file)          (7 phases)              (the evidence)
 
    Month 1        ───▶  phase-1, phase-2   ───▶  Project 1 artifact
    Month 2        ───▶  phase-3, 01, 02    ───▶  Project 2 artifact
-   Month 3        ───▶  phase-4, 03, cases  ───▶  Project 3 artifact
-                                                      +
-                                              Portfolio-Head-of-AI/
-                                              (the judgment docs)
+                                  (+ phase-5 patterns)
+   Month 3        ───▶  phase-4 (03), cases ──▶  Project 3 artifact
+                       phase-6 (interview)       +
+                       phase-7 (100 companies)  Portfolio-Head-of-AI/
+                                                   (the judgment docs)
 ```
 
-The course teaches the four phases. This plan schedules them against
-a deadline and adds the two things the course deliberately doesn't
-teach: **interview reps** and **customer-facing rehearsal**.
+The course teaches seven phases. This plan schedules the load-bearing
+ones against a deadline and adds the two things the course
+deliberately doesn't teach: **timed interview reps** and
+**customer-facing rehearsal**.
+
+Phases 5 (advanced scale) and 7 (the 100-company bank) are treated
+here as *reference material* rather than sequential work — phase 5's
+Redis/OAuth/sandbox/DR patterns inform Project 2's production-readiness,
+and phase 7's company files are the drilling material for Month 3.
 
 ---
 

@@ -1,6 +1,6 @@
 # AI FDE — the full course
 
-> **A 9-week course that teaches you to be an AI Forward-Deployed Engineer.** You build 4 things, write 5 case studies, and demo a capstone system live.
+> **A 7-phase course that teaches you to be an AI Forward-Deployed Engineer.** You build 12 things across 4 project phases, write 15 case studies, drill 11 interview round types, and rehearse against 100 company-specific interview loops.
 
 An **AI FDE** is an engineer who lands inside a customer's company, builds them an AI service that works, deploys it in production, hands it off to the customer's team, and leaves. The whole job takes 9 weeks. This course teaches you how.
 
@@ -95,6 +95,22 @@ Most AI projects die at "Who owns this?" — and most AI courses stop at "the de
 - A portfolio narrative
 - A capstone presentation (7 slides, 10 minutes)
 
+### Phase 5 — Advanced
+- 4 projects: Redis state externalization, OAuth multi-tenant, gVisor sandbox, multi-region DR
+- 5 scale-event postmortems: multi-tenant onboarding, region failover, cost ceiling breach, evals at scale, principal handoff
+- 3 lessons: state externalization, auth and tenancy, sandbox hardening
+- **35/35 tests** (adds 10 to the Phase 4 suite)
+
+### Phase 6 — Interview Prep
+- 9 modules mapped to 11 interview round types (decomposition, behavioral, system design, practical coding, SWE coding, take-home, project deep dive, customer simulation, company experiences, GenAI)
+- The 4-step framework (Clarify / Decompose / Design / Tradeoffs) as reusable muscle memory
+- 12 real interview reports + customer simulation scenarios
+
+### Phase 7 — FDE 100-Company Interview Bank
+- 100 per-company FDE/FDSE interview files (Palantir, Anthropic, OpenAI, Anthropic, AWS, Snowflake, Databricks, … )
+- Each file: company snapshot, interview process, success stories, rejection stories, reading list
+- Tiered: FDE-native / frontier lab / big-tech PS / growing
+
 ---
 
 ## How to use this course
@@ -136,12 +152,37 @@ course/ai-fde/
 │   ├── CONSULTING-TRACK.md
 │   ├── technical/                 ← 3 lessons
 │   └── consulting/                ← 3 lessons + 3 ops artifacts (runbook, RACI, on-call)
-└── phase-4-capstone/              ← 4 projects + 5 case studies + portfolio
-    ├── README.md
-    ├── scenario-brief.md
-    ├── projects/                  ← 4 self-contained projects
-    ├── case-studies/              ← 5 case studies + portfolio + presentation
-    └── technical/                 ← 3 lessons (.md each)
+├── phase-4-capstone/              ← 4 projects + 5 case studies + portfolio
+│   ├── README.md
+│   ├── scenario-brief.md
+│   ├── projects/                  ← 4 self-contained projects
+│   ├── case-studies/              ← 5 case studies + portfolio + presentation
+│   └── technical/                 ← 3 lessons (.md each)
+├── phase-5-advanced/              ← 4 projects: Redis, OAuth multi-tenant, gVisor, multi-region DR
+│   ├── README.md
+│   ├── scenario-brief.md
+│   ├── projects/                  ← 01-redis-state, 02-oauth, 03-gvisor, 04-multi-region-dr
+│   ├── technical/                 ← 3 lessons (state, auth/tenancy, sandbox)
+│   └── case-studies/              ← 5 scale-event postmortems
+├── phase-6-interview-prep/        ← 9 modules mapped to 11 interview round types
+│   ├── README.md
+│   ├── interview-process.md       ← the FDE loop, day-in-the-life
+│   ├── decomposition/             ← 4-step: clarify / decompose / design / tradeoffs
+│   ├── behavioral/                ← 3 question types + STAR
+│   ├── system-design/             ← 9 system design patterns
+│   ├── practical-coding/          ← AI-assisted coding rounds
+│   ├── swe-coding/                ← classic SWE prep
+│   ├── take-home/                 ← 3 take-home patterns
+│   ├── project-deep-dives/        ← the 45-min presentation script
+│   ├── customer-simulation/       ← highest-signal round
+│   ├── company-experiences/       ← 12 real interview reports
+│   └── generative-ai/             ← GenAI-specific + companion courses
+└── phase-7-FDE-100-interview/     ← 100 company-specific FDE/FDSE interview files
+    ├── 00-INDEX.md                ← tier map + how to use
+    ├── 03-openai-fde.md           ← OpenAI: process, success/rejection, reading list
+    ├── 01-palantir-fdse.md        ← Palantir FDSE (FDE-native tier)
+    ├── 02-anthropic-fde.md        ← Anthropic (frontier-lab tier)
+    └── …95 more companies…       ← tiered: FDE-native / frontier / big-tech PS
 ```
 
 ---
@@ -160,8 +201,8 @@ If you answered NO to any of those, you haven't finished your job. Go back to th
 
 ---
 
-**Length:** ~9 weeks full-time, ~16 weeks part-time
-**Cost:** $0 (everything runs with the mock LLM backend, no API key needed)
+**Length:** Phases 1–4 ~9 weeks full-time; the full 7-phase track ~20 weeks full-time, ~34 weeks part-time
+**Cost:** $0 (everything runs with the mock LLM backend, no API key needed); Phase 5 production mode adds ~$50/mo infra
 **Goal:** You finish and you can put "AI FDE" on your LinkedIn.
 
 ---
