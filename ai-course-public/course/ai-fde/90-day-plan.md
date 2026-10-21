@@ -245,14 +245,17 @@ exercise 2 to `09-agentic-ai`, exercise 4 to `05-transactional`.
 
 | # | Focus | Format | Drill against |
 |---|---|---|---|
-| 1 | Coding under pressure (Python) | 45 min, no AI assistant | `phase-7/03-openai-fde.md` Round 2 |
-| 2 | System design (scenario 1) | 60 min, whiteboarding | `phase-6/system-design/` framework |
-| 3 | Customer discovery → architecture (ambiguous brief) | 60 min, role-play | `phase-6/customer-simulation/` |
-| 4 | Debugging a production incident you didn't build | 45 min | `phase-7/` rejection stories |
-| 5 | Business case + ROI (Project 3 presentation) | 30 min | `phase-5-advanced/case-studies/engagement-8-cost-ceiling-breach.md` |
+| 1 | Coding under pressure (Python) | 45 min, no AI assistant | `phase-7-FDE-100-interview/03-openai-fde.md` Round 2 story → practice as `phase-6-interview-prep/swe-coding/` pattern 1 |
+| 2 | System design (scenario 1) | 60 min, whiteboarding | `phase-7-FDE-100-interview/03-openai-fde.md` Round 3 story → practice as `phase-6-interview-prep/system-design/01-read-heavy.md` |
+| 3 | Customer discovery → architecture (ambiguous brief) | 60 min, role-play | `phase-7-FDE-100-interview/01-palantir-fdse.md` + `phase-6-interview-prep/customer-simulation/README.md` |
+| 4 | Debugging a production incident you didn't build | 45 min | Cross-reference failure stories from any `phase-7-FDE-100-interview/*.md` rejection section |
+| 5 | Business case + ROI (Project 3 presentation) | 30 min | `phase-5-advanced/case-studies/engagement-8-cost-ceiling-breach.md` + `phase-6-interview-prep/project-deep-dives/pacificfreight-deep-dive.md` |
 
 **Record every one.** The recording is the artifact; the interview
-is just the input.
+is just the input. The row shows both source material (phase-7) and
+the framework it gets drilled against (phase-6), so each interview
+practice uses a real Q paired with the four-step Clarify/Decompose/
+Design/Tradeoffs framework.
 
 ---
 
