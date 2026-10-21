@@ -4,6 +4,11 @@
 
 An **AI FDE** is an engineer who lands inside a customer's company, builds them an AI service that works, deploys it in production, hands it off to the customer's team, and leaves. The whole job takes 9 weeks. This course teaches you how.
 
+> **Want a deadline instead of a curriculum?** See
+> [`90-day-plan.md`](./90-day-plan.md) — the same four phases scheduled
+> against a 90-day window, plus the interview reps and customer-facing
+> rehearsal this course deliberately doesn't teach.
+
 ---
 
 ## The journey (the picture first)
@@ -112,6 +117,7 @@ Most AI projects die at "Who owns this?" — and most AI courses stop at "the de
 ```
 course/ai-fde/
 ├── README.md                      ← you are here
+├── 90-day-plan.md                 ← the same course, scheduled against a deadline
 ├── phase-1-foundations/           ← CLI tool + 1-pager + 5-question framework
 │   ├── README.md
 │   ├── scenario-brief.md
@@ -156,19 +162,12 @@ By the end of the course you should be able to answer YES to all 5:
 If you answered NO to any of those, you haven't finished your job. Go back to the phase that teaches it.
 
 ---
+
 **Length:** ~9 weeks full-time, ~16 weeks part-time
 **Cost:** $0 (everything runs with the mock LLM backend, no API key needed)
 **Goal:** You finish and you can put "AI FDE" on your LinkedIn.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
 
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21
 **License:** MIT — use freely in your own courses, prototypes, and products.  
