@@ -14,32 +14,29 @@ An **AI FDE** is an engineer who lands inside a customer's company, builds them 
 ## The journey (the picture first)
 
 ```
-                         THE 4-PHASE JOURNEY
+                         THE 7-PHASE JOURNEY
                          ══════════════════
 
-   PHASE 1            PHASE 2            PHASE 3            PHASE 4
-   Foundations        Core Build         Deployment         Capstone
-   ───────────        ──────────         ──────────         ────────
-   "I wrote a         "the tool is a     "it runs 24/7      "it's a platform
-    tool"              service"           for everyone"       the team extends"
+   PHASE 1            PHASE 2            PHASE 3            PHASE 4         PHASE 5            PHASE 6            PHASE 7
+   Foundations        Core Build         Deployment         Capstone        Advanced           Interview Prep     100-Company FDE
+   ───────────        ──────────         ──────────         ────────       ──────────         ────────────      ───────────────
+   "I wrote a         "the tool is a     "it runs 24/7      "the platform   "principal-grade    "you're a           "100 interview
+    tool"              service"           for everyone"       the team        scale, multi-       candidate, not     reports: tier,
+                                                          extends"        tenancy, DR,         a builder"         process, success,
+                                                                          sandbox"                               rejection, reading
 
-   ┌─────────┐        ┌──────────┐        ┌──────────┐        ┌──────────┐
-   │ CLI     │  ───▶  │ FastAPI  │  ───▶  │ Hardened │  ───▶  │ Platform │
-   │ tool    │        │ service  │        │ service  │        │ + 4      │
-   │ 1-pager │        │ + RAG    │        │ + breaker│        │ projects │
-   │ 5 qs    │        │ + eval   │        │ + ops    │        │ + case   │
-   │ + brief │        │ + Docker │        │   docs   │        │   studies│
-   └─────────┘        └──────────┘        └──────────┘        └──────────┘
-        │                  │                   │                   │
-        ▼                  ▼                   ▼                   ▼
-   Mei's laptop      Daniel's VM        Production          The team's
-                                           24/7               platform
+   ┌─────────┐        ┌──────────┐        ┌──────────┐        ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+   │ CLI     │  ───▶  │ FastAPI  │  ───▶  │ Hardened │  ───▶  │ 4        │    │ 4        │ ─▶ │ 9 modules│ ─▶ │ 100 files│
+   │ tool    │        │ service  │        │ service  │        │ projects │    │ projects │    │ + 11     │    │ + index  │
+   │ 1-pager │        │ + RAG    │        │ + breaker│        │ + 5 case │    │ + 5 case │    │ rounds   │    │          │
+   │ 5 qs    │        │ + eval   │        │ + ops    │        │ studies  │    │ studies  │    │          │    │          │
+   │ + brief │        │ + Docker │        │ + docs   │        │          │    │ + Redis  │    │          │    │          │
+   └─────────┘        └──────────┘        └──────────┘        └──────────┘    └──────────┘    └──────────┘    └──────────┘
 
-   TIME:  1 week         2 weeks            2 weeks            4 weeks
-   LINES: ~300           ~600               ~1500              ~3000
-   ARTIFACT: 1-pager   Service + 3 docs   Hardened service  4 projects +
-                                                          5 case studies +
-                                                          portfolio
+   TIME:  1 week         2 weeks            2 weeks            4 weeks         6 weeks            3 weeks            2-4 weeks
+   ARTIFACT: 1-pager   Service + 3 docs   Hardened service  4 projects +    4 projects +       Mock-loop, 35/35   Tier-specific
+                                                          5 case studies + 5 case studies      tests pass         rehearsal per
+                                                          portfolio                                              target company
 ```
 
 **Read it left to right.** Each phase is the previous phase *evolved*. Phase 1's CLI is the seed. Phase 4's platform is what you grow it into.
