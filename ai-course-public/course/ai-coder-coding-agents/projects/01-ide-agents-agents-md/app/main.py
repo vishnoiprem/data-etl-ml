@@ -20,10 +20,12 @@ app = FastAPI(
     description="Single-board Kanban for the AI Coder course capstone.",
 )
 
-# Static frontend served at /. The SPA is two files: app.js and styles.css.
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
-
 # API routes. All under /api so the static mount does not collide.
+#
+# ORDER IS LOAD-BEARING. Starlette matches routes in registration order, and a
+# `Mount("/")` matches every path. Registering the static mount first makes it
+# swallow all API routes below, which surfaces as a baffling 404/405 on every
+# endpoint. Always mount last, or mount at a real prefix like /static.
 app.include_router(cards.router, prefix="/api", tags=["cards"])
 
 
@@ -31,3 +33,8 @@ app.include_router(cards.router, prefix="/api", tags=["cards"])
 def healthz() -> dict[str, str]:
     """Cheap liveness probe. Returns the same shape on every call."""
     return {"status": "ok"}
+
+
+# Static frontend served at /. Registered LAST — see the ordering note above.
+# The SPA is three files: index.html, app.js, styles.css.
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

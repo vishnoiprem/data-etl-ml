@@ -5,7 +5,7 @@ beyond input validation and delegation.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -52,11 +52,20 @@ def move_card(
     return card
 
 
-@router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_card(card_id: int, db: Session = Depends(get_db)) -> None:
-    """Delete a card by id. Returns 404 if absent."""
+@router.delete(
+    "/{card_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
+def delete_card(card_id: int, db: Session = Depends(get_db)) -> Response:
+    """Delete a card by id. Returns 204 with an empty body.
+
+    `response_class=Response` is required: FastAPI asserts that a 204 route has
+    no response model, so a `-> None` return annotation fails at import time.
+    """
     card = db.get(Card, card_id)
     if card is None:
         raise HTTPException(status_code=404, detail="card not found")
     db.delete(card)
     db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
