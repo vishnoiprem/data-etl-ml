@@ -159,7 +159,7 @@ plotly>=5.18.0                 # NEW: Interactive viz
 
 # Web Framework
 fastapi==0.115.6
-uvicorn>=0.32.0
+uvicorn>=0.54.0
 
 # Infrastructure
 redis>=5.0.0
