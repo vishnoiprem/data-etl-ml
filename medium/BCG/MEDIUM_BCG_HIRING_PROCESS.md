@@ -56,6 +56,28 @@ The last line is the filter. Pure strategists fail the technical rounds. Pure en
 
 ## The process at a glance
 
+```mermaid
+flowchart LR
+    R0["Round 0<br/>CV screen<br/>Sector + skill match"] --> R1["Round 1 · 20-30 min<br/>Recruiter call<br/>Motivation, level, logistics"]
+    R1 --> R2["Round 2 · 30-45 min<br/>Hiring manager<br/>Experience depth, ownership"]
+    R2 --> R3["Round 3 · 45-60 min<br/>Architecture interview<br/>AWS, Databricks, GenAI"]
+    R3 --> R4["Round 4 · 45-60 min<br/>Case interview<br/>Tech-flavoured business case"]
+    R4 --> R5["Round 5 · 30-60 min<br/>Executive brief<br/>Reported for senior roles"]
+    R5 --> R6["Round 6 · 45-60 min<br/>Partner / MD<br/>Presence, judgement, fit"]
+    R6 --> R7["Round 7 · days to weeks<br/>Decision and offer<br/>Committee, references, level"]
+
+    classDef screen fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef tech fill:#43938F,stroke:#43938F,color:#fff
+    classDef exec fill:#F6C24A,stroke:#F6C24A,color:#222
+    classDef decide fill:#DA3832,stroke:#DA3832,color:#fff
+    class R0,R1,R2 screen
+    class R3,R4 tech
+    class R5,R6 exec
+    class R7 decide
+```
+
+*Blue: screening. Green: technical and case. Yellow: executive and partner. Red: decision.*
+
 | # | Round | Who | Length | What is really tested |
 |---|---|---|---|---|
 | 0 | Application and CV screen | Recruiter / talent team | n/a | Sector + skill match, consulting signal |
@@ -249,6 +271,9 @@ Expect a **technology-flavoured business case**, not a pure market-sizing puzzle
 5. A utility must meet new regulation on AI use in customer decisions. What is your governance plan?
 6. A CEO says "we need a GenAI strategy by next month." What do you ask first?
 7. A bank wants to sunset a mainframe in 3 years. Is that realistic, and how do you decide?
+8. A bank is buying a software company. How do you run the technology due diligence? *(mirrors a reported question)*
+9. Two companies merge and each runs its own data centres. Do you consolidate, and in what order? *(mirrors a reported question)*
+10. A client's IT cost is 20% above peers. Where do you look first, and what do you cut? *(mirrors a reported question)*
 
 **The structure interviewers expect**
 1. **Clarify** the goal, constraints and success metric
@@ -339,7 +364,7 @@ The most senior conversation. Often shorter on technology, heavier on judgement.
 
 - Interviewers share feedback and a committee agrees on **hire / no hire and level**
 - Reference checks follow, often two to three senior references
-- Level can differ from what you applied for (Principal offered instead of Director is common)
+- Level can differ from what you applied for (for example, a Principal offer when you applied as a Director; candidates report this happening)
 - Compensation is negotiated against level and market
 
 **Questions you will face (from referees and the offer stage)**
@@ -351,6 +376,153 @@ The most senior conversation. Often shorter on technology, heavier on judgement.
 - Your questions: "Why this level? What would move me to the next one, and over what timeframe?"
 
 **Tip:** have references briefed, and ask each to speak to *leadership and client influence*, not just technical skill.
+
+---
+
+## Real questions candidates report
+
+The questions in the rounds above are practice prompts I wrote to match the role. This section is different: it lists what candidates say they were asked, taken from public interview-prep sites. These are self-reported, short, and not BCG-confirmed. Loops differ by office and level.
+
+**Reported loop shapes**
+- Architect roles: about 3 rounds over 3 to 5 weeks, covering a screen, technical deep dives and case-based interviews
+- Glassdoor reports: 2 rounds with 4 interviewers (3 Managers, 1 Director), each about an hour, with a fit part and a case part. The first round is remote and the second is in the office
+- AI Architect roles: AI architecture, solution architecture, enterprise integration, model deployment, MLOps, production monitoring and scalability
+
+**Reported case and technical questions**
+1. Perform tech due diligence for a bank that is buying a software company
+2. Improve a company's IT architecture
+3. Discuss the pros and cons of a cloud implementation
+4. Propose an IT strategy and a cost-reduction plan
+5. Manage a post-merger integration (PMI) programme
+6. Merge two data centres
+
+Candidates also describe the *topics* below. They did not quote exact questions, so treat these as themes, not wording:
+- Technology vendor selection
+- IT transformation programmes
+- Enterprise systems and digital platforms
+
+**Reported fit questions**
+1. Walk through your career and the impact you made
+2. What challenges did you face, and how did you handle them?
+3. Why technology consulting specifically?
+4. What technology experience do you bring?
+
+**More reported questions (PrepLounge)**
+1. How do you merge two applications?
+2. How do you reduce cost during IT sourcing?
+3. A company wants to move its IT department somewhere cheaper. Which countries in Europe would you consider?
+4. How would you improve a company's IT architecture, and what benefits would specific changes give?
+
+**Reported case types (RoadToOffer)**
+- *IT transformation (insurance):* an ageing landscape of 200-plus applications to rationalise, consolidate or replace, with IT spend above peers
+- *ERP selection:* replace a legacy ERP and compare SAP S/4HANA with Oracle Cloud (sometimes Microsoft Dynamics)
+- *Cloud migration roadmap:* move from on-premise to AWS, Azure or GCP
+- *M&A technology due diligence:* assess a target's IT landscape for a private-equity or strategic buyer
+
+**How cases are run:** candidates describe a free-format case given by a Principal or Director, often based on one of their own past projects. Do not expect a fixed script.
+
+**Reported difficulty:** most Glassdoor reviewers rate the loop as hard, and about 1 in 2 candidates with a known outcome received an offer.
+
+---
+
+## Model answers to the reported questions
+
+These answers are mine, written as a senior Data and AI architect would give them. They are not BCG's answers. Any numbers are illustrative. Use the shape, then replace the numbers with your own evidence.
+
+### 1. Tech due diligence for a bank buying a software company
+**Open with the goal:** "Is the target's technology worth the price, and what will it cost to integrate?"
+- **Clarify:** deal thesis (product, customers, talent, or cost synergy), timeline, and walk-away conditions
+- **Five lenses:**
+  1. *Product and architecture:* monolith or services, scalability limits, tech debt, key-person dependency
+  2. *Security and compliance:* breach history, penetration tests, data residency, licences the bank's regulator will care about
+  3. *Data and AI:* data quality, ownership of the data, model provenance, open-source licence risk
+  4. *Engineering health:* release frequency, test coverage, incident rate, team attrition
+  5. *Integration cost:* what must change to meet the bank's controls, and in what order
+- **Output:** red, amber, green per lens, a cost-to-fix estimate, and a price adjustment or condition for each red
+- **Close:** "My recommendation is proceed, proceed with conditions, or stop, and the first condition is X."
+
+### 2. Improve a company's IT architecture
+- **Diagnose before you prescribe:** map applications, integrations, data flows and run cost. Find where change is slow, costly or risky
+- **Pick the biggest lever** (usually integration sprawl, duplicated systems or manual data movement)
+- **Recommend in waves:** quick wins (decommission duplicates, API-enable the top 3 systems), then platform (shared data layer, event backbone), then core replacement
+- **Quantify benefits:** run-cost saved, lead time cut, incidents avoided, and the cost and risk of getting there
+- **Governance:** a small architecture board with standards and an exception path, so you do not become a bottleneck
+
+### 3. Cloud implementation: pros and cons
+| Pros | Cons |
+|---|---|
+| Elastic capacity, faster delivery | Cost can rise without FinOps discipline |
+| Managed services reduce toil | Lock-in to provider services |
+| Resilience and global reach | Skills gap and operating-model change |
+| Security tooling at scale | Data residency and regulatory limits |
+
+**Close with a decision rule:** "Move workloads that are variable, customer-facing or data-heavy first. Keep stable, latency-bound or heavily regulated workloads where they are until the business case is clear."
+
+### 4. IT strategy and cost reduction
+1. **Baseline:** split IT spend into run, grow and transform, and benchmark against peers
+2. **Find the levers:** vendor and contract renegotiation, application rationalisation, infrastructure consolidation, sourcing mix, demand management
+3. **Sequence:** contracts and licences first (fast, low risk), then rationalisation, then structural change
+4. **Protect value:** never cut the spend that funds the strategy. Track savings against a baseline the CFO accepts
+
+### 5. Manage a post-merger integration (PMI)
+- **Day 1:** keep the business running. Email, access, finance close and customer-facing systems must work
+- **First 100 days:** integration management office, one target-state decision per domain (keep A, keep B, or new), synergy tracker
+- **Key decisions:** which application wins in each domain, which data model is the master, and what to retire
+- **Risks:** losing key engineers, regulatory deadlines, and integrating too much too fast
+- **Answer the CEO's question:** "Synergies of X by month 18, with the first quarter spent on stability, not savings."
+
+### 6. Merge two data centres
+1. **Inventory:** workloads, dependencies, latency needs, contracts and end-of-life dates
+2. **Decide the destination:** consolidate into one site, move to cloud, or a hybrid. Do not default to the larger site
+3. **Wave plan:** low-risk workloads first, rehearse each migration, define rollback, and keep a freeze window around the business peak
+4. **Network and data:** dual-run replication for near-zero downtime, then cut over
+5. **Decommission:** the savings only land when the old site is switched off, so budget the exit contracts
+
+### 7. Merge two applications
+- **Compare:** functional fit, data quality, cost, users and technical health
+- **Choose:** keep one and retire the other, build a new one, or federate through an API layer when the business case for a full merge is weak
+- **Migrate:** map and clean data first, migrate in cohorts (a product line or a country), and run both in parallel until reconciliation passes
+- **Risk:** customer-visible change. Plan communication and training as part of the project
+
+### 8. Reduce cost during IT sourcing
+- Consolidate vendors and use volume leverage
+- Run a competitive bid for any contract over its renewal window
+- Move from time-and-materials to outcome-based pricing where scope is stable
+- Right-size licences and cloud commitments to actual usage
+- Mix onshore, nearshore and offshore, but price in coordination and quality cost, not only the day rate
+
+### 9. Move IT somewhere cheaper: which European countries?
+**Answer with criteria, not a list.** Talent depth, language and time-zone fit, wage level and trend, political and legal stability, data-protection regime, and infrastructure.
+- Candidates often cited: Poland, Romania, Portugal, Bulgaria and the Baltics. The right pick depends on the skills you need
+- **Caveat:** wage gaps narrow over time and attrition can be high in hot markets. Check the current numbers before you commit
+
+### 10. ERP selection (S/4HANA versus Oracle Cloud)
+- **Start with requirements and process fit**, not the brand. Which processes are standard and which are differentiating?
+- **Compare on five axes:** functional fit, total cost of ownership over 7 to 10 years, implementation risk, ecosystem and talent, and roadmap and vendor viability
+- **Test with a fit-gap workshop** and reference calls with similar clients
+- **Recommend:** the option that fits the most processes with the least customisation. Customisation is where ERP programmes fail
+
+### 11. Cloud migration roadmap
+1. **Assess:** classify each application (retire, retain, rehost, replatform, refactor)
+2. **Foundation first:** landing zone, identity, networking, guardrails and cost tagging before the first workload
+3. **Waves:** pilot, then low-risk, then business-critical. Each wave has exit criteria
+4. **Operating model:** FinOps, security operations, and a platform team
+5. **Close:** the roadmap fails on people and process before it fails on technology
+
+### 12. Insurance IT transformation: 200-plus applications and a spend gap
+- **Diagnose the gap:** is the overspend in run cost, licences, duplication, or projects?
+- **Rationalise with a simple rule per application:** *retire* (low value), *consolidate* (duplicated), *modernise* (high value, high debt), *keep* (stable and fit)
+- **Build the case:** savings from retired and consolidated systems fund the modernisation. Show payback and the cash profile by year
+- **Sequence:** quick decommissions, then shared platforms (policy, claims, data), then core replacement
+
+### 13. Walk me through your career and the impact you made
+Use two minutes: where you started, the turning point, the biggest outcome with a number, and why this role is the logical next step. End on the connection to technology consulting.
+
+### 14. Why technology consulting, and what technology experience do you bring?
+> "I have built Data and AI platforms for one organisation at a time. I want to apply the pattern across industries and be accountable for the full outcome. What I bring is hands-on depth in [your stack] and a record of [your measurable result]."
+
+### 15. What challenges did you face, and how did you handle them?
+Pick one real failure. Use the five-step story: context, decision, action, result, lesson. Own your part of the mistake and show what you changed afterwards.
 
 ---
 
@@ -417,7 +589,9 @@ BCG Platinion is not hiring a cloud specialist, a strategist or an AI enthusiast
 
 ### Sources and honesty note
 - Role requirements: recruiter brief (20 Oct 2026)
-- Firm facts: BCG press release, 23 April 2026
+- Firm facts (Platinion and BCG X positioning, the 10-20-70 framing): BCG public material. Check against the current BCG site before publishing
+- Real questions: [Glassdoor BCG Platinion interviews](https://static.glassdoor.co.in/Interview/BCG-Platinion-Interview-Questions-E947061.htm), [PrepLounge](https://www.preplounge.com/consulting-forum/how-to-prep-for-bcg-platinion-20581), [Dataford AI Architect guide](https://dataford.io/interview-guides/bcg-platinion/ai-architect), [MBBPrep](https://mbbprep.com/community/is-the-bcg-platinion-interview-process-different-from-core-bcg-245)
+- Fetched in full: [PrepLounge](https://www.preplounge.com/consulting-forum/how-to-prep-for-bcg-platinion-20581) and [RoadToOffer](https://www.roadtooffer.com/blog/bcg-platinion-case-interview). Glassdoor and Dataford could not be read in full
 - Interview structure: aggregated candidate reports on public interview-prep sites. **Not BCG-confirmed**; verify with your recruiter
 
 *If this helped, follow for more breakdowns of consulting and big-tech hiring loops for data and AI engineers.*
