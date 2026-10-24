@@ -22,7 +22,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path("/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-course-public/course/ai-fde")
+ROOT = Path(__file__).resolve().parents[2] / "ai-course-public" / "course" / "ai-fde"
 if not ROOT.exists():
     sys.exit(f"root not found: {ROOT}")
 

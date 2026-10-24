@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-ROOT = Path("/Users/vishnoiprem/PycharmProjects/data-etl-ml/ai-course-public/course/ai-fde")
+ROOT = Path(__file__).resolve().parents[2] / "ai-course-public" / "course" / "ai-fde"
 
 # ---------- 2. Phase leak fixes ----------
 # Rule: any "phase-2-core-build" that is preceded by "Phase 3" (case-insensitive)
