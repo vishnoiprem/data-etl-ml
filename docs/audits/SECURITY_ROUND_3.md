@@ -4,7 +4,7 @@
 > the default branch as of 2026-10-16.
 >
 > See also: [`VULNERABILITY_AUDIT.md`](VULNERABILITY_AUDIT.md) for the
-> historical tracker and [`SECURITY.md`](SECURITY.md) for the repo
+> historical tracker and [`SECURITY.md`](../../SECURITY.md) for the repo
 > security policy.
 
 ## Headline numbers

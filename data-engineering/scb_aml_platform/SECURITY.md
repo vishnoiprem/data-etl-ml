@@ -2,7 +2,7 @@
 
 > Project-specific security notes. See the repo-level
 > [`SECURITY.md`](../../../SECURITY.md) for the overall policy and
-> [`VULNERABILITY_AUDIT.md`](../../../VULNERABILITY_AUDIT.md) for the
+> [`VULNERABILITY_AUDIT.md`](../../../docs/audits/VULNERABILITY_AUDIT.md) for the
 > current audit status.
 
 ## Threat model

@@ -573,7 +573,7 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 | `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
 | `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
 | `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
-| `postgress_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgress_cdc_kafka/README.md](postgress_cdc_kafka/README.md) |
+| `postgres_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgres_cdc_kafka/README.md](postgres_cdc_kafka/README.md) |
 
 ---
 
@@ -621,7 +621,7 @@ data-etl-ml/
 │   ├── ml/   (deep_Learning, GenAI-Pinnacle, LLM, ai-agent, vector-ebedding, …)
 │   ├── ai-engineering/   (course sub-folders)
 │   ├── golang/order-etl-pipeline/
-│   └── postgress_cdc_kafka/
+│   └── postgres_cdc_kafka/
 ├── 03-content/                 # Writing & teaching
 │   └── medium/                 # Medium articles + interview guides
 ├── 04-career/                  # Resume assets
@@ -635,11 +635,11 @@ data-etl-ml/
 │   └── Senior Delivery Consultant - Data Engineering/
 ├── docs/                       # Screenshots, demo GIFs, social preview HTML
 │   └── assets/
-├── scripts/                    # repo_stats.sh and similar
+├── scripts/                    # repo_stats.sh, docker_start.sh, maintenance/
 ├── infra/                      # Top-level Docker, env, requirements
 │   ├── docker-compose.yml
 │   ├── requirements.txt
-│   └── clean_repo.sh
+│   └── (clean_repo.sh now lives in scripts/maintenance/)
 ├── .github/                    # REPO_ABOUT, SOCIAL_PREVIEW, issue/PR templates
 ├── LICENSE                     # MIT
 ├── CONTRIBUTING.md
@@ -656,7 +656,7 @@ data-etl-ml/
 4. Move `medium/` into `03-content/medium/`.
 5. Move `Resume/` into `04-career/Resume/`.
 6. Move scratch / template folders into `05-reference/`.
-7. Move `docker-compose.yml`, `clean_repo.sh`, `requirements.txt` to `infra/`.
+7. Move `docker-compose.yml`, `scripts/maintenance/clean_repo.sh`, `requirements.txt` to `infra/`.
 8. Add a short `README.md` to each top-level `0X-…` folder.
 
 ---

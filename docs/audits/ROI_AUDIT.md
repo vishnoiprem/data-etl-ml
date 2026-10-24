@@ -101,7 +101,7 @@ These projects won't make you money directly. But they are the *proof* that clos
 
 ---
 
-### `Spark/`, `Python/`, `flink-cdc-dashboard/`, `postgress_cdc_kafka/`, `golang/` — VERDICT: `POLISH-OR-PARK` — Score 2/5 (each)
+### `Spark/`, `Python/`, `flink-cdc-dashboard/`, `postgres_cdc_kafka/`, `golang/` — VERDICT: `POLISH-OR-PARK` — Score 2/5 (each)
 
 These are interview-prep + reference builds. They're credible in a system-design conversation, but they don't ship product. Keep them clean; don't expect them to make money.
 
@@ -164,7 +164,7 @@ These do not produce income. They are inputs to *other* things that may produce 
 | `data-engineering/` | 1 | 3 | 3 | `POLISH-OR-PARK` |
 | `agentic-ai/` | 1 | 2 | 2 | `POLISH-OR-PARK` |
 | `ml/` | 0 | 1 | 4 | `POLISH-OR-PARK` |
-| `Spark/`, `Python/`, `flink-cdc-dashboard/`, `postgress_cdc_kafka/`, `golang/` | 0 | 1 | 4 | `POLISH-OR-PARK` |
+| `Spark/`, `Python/`, `flink-cdc-dashboard/`, `postgres_cdc_kafka/`, `golang/` | 0 | 1 | 4 | `POLISH-OR-PARK` |
 | `ai-course-public/`, `pincel-ai-program/`, `ml/notebooks/` | 0 | 0 | n/a | `ARCHIVE` |
 | `sam-installation/` | 0 | 0 | n/a | `ARCHIVE` |
 | `Resume/`, `Senior Delivery Consultant - Data Engineering/` | n/a | n/a | 1 | `POLISH` (you) |

@@ -115,7 +115,7 @@ diffusers>=0.27.0
 # 3.x line has unfixed transitive CVEs. 5.6.0 is the current major.
 sentence-transformers>=5.6.0,<6.0
 # No upstream fix yet; pinned to latest patched (3.10.3) per OSV.
-# See SECURITY_ROUND_3.md for the tracked issue.
+# See docs/audits/SECURITY_ROUND_3.md for the tracked issue.
 nltk>=3.10.3
 shap>=0.45.0
 matplotlib>=3.8.0
