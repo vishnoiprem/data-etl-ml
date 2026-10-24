@@ -189,3 +189,24 @@ upgrade" pattern.
 - `ci(scb-aml): add project-level pytest + pip-audit workflow`
 - `chore(scb-aml): add pip-audit gate script`
 - `docs(security): add SECURITY_ROUND_3.md tracking 80-vuln remediation`
+
+---
+
+## Update 2026-10-24: shared venv patch pass
+
+Ran `pip-audit --path .env/lib/python3.13/site-packages` against the shared venv (32 packages with advisories) and applied the safe upgrades only:
+
+| Package | From | To |
+|---|---|---|
+| `tornado` | 6.5.7 | 6.6 |
+| `urllib3` | 2.7.0 | 2.8.0 |
+| `werkzeug` | 3.1.8 | 3.1.9 |
+| `pyjwt` | 2.13.0 | 2.15.1 |
+
+`pip check` shows no new conflicts after the upgrades.
+
+**Not upgraded, and why**
+- `python-multipart` 0.0.18: `chainlit 2.4.1` requires `<0.0.19`. Fixed by moving `chainlit` first.
+- `starlette` 0.46.2: the fixes need 1.x, a major jump. `chainlit` already conflicts with 0.46.2.
+- `transformers` 4.57.6, `pypdf` 4.3.1, `llama-index` 0.10.x: major jumps that need a code-compat check (see the open items above).
+- Remaining packages (`aiohttp`, `mcp`, `jupyterlab`, `notebook`, `jupyter-server`, `pyspark`, `nltk` and others) were not triaged in this pass.
