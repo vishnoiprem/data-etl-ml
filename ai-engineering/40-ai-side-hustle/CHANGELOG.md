@@ -4,6 +4,17 @@ All notable changes to `40-ai-side-hustle` are documented here. The
 format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- `get_default_router()` now checks `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`
+  before choosing a provider. Previously an installed SDK with no key
+  selected the Anthropic router, and every stream failed with an
+  authentication error instead of falling back to the offline stub.
+- `HUSTLE_LLM_PROVIDER=stub` (documented in `.env.example`) is now honoured.
+- Dashboard tests used fixed 2026-10 dates that aged out of the 14-day
+  window; they now use dates relative to today.
+
 ## [0.2.0] — 2026-10-13
 
 ### Added
