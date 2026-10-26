@@ -117,19 +117,12 @@ A principal FDE's job is to make themselves unnecessary. Phase 5 tests that the 
 **Eval-set-as-spec. Runbook-as-contract. Cost-ceiling-as-score. Handoff-as-proof. State-externalization-as-precondition.**
 
 ---
+
 **Length:** ~6 weeks full-time (assuming Phase 1-4 complete)
 **Cost:** $0 mock-mode + ~$50/mo for the Redis + read-replica infra in production
 **Goal:** You can put "AI FDE @ enterprise scale" on your LinkedIn.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
 
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21
 **License:** MIT — use freely in your own courses, prototypes, and products.  
