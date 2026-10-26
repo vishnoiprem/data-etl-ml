@@ -92,7 +92,7 @@ User types: "How do I deploy a service?"
 >
 > 3. **Build eval harness first**, before the product. Even with no users, I needed to know if my retrieval was any good.
 >
-> 4. **MVP in 3 months**: docs only, 10 users, manual feedback. Then iterate to 500 users over 6 months.
+> 4. **MVP in 3 months, 10K by month 6, 100K by month 9**: docs only at MVP, then add modalities against the same 3 / 6 / 9-month cadence.
 >
 > The lesson: 0->1 isn't about coding fast. It's about defining the problem clearly enough that you know when you're done."
 
@@ -110,12 +110,10 @@ User types: "How do I deploy a service?"
 >
 > The 0->1 challenge: 4 different data types, 4 different storage systems, 4 different ACL models. But one unified query interface.
 >
-> **6-month plan:**
-> - Month 1-2: docs only, 10 power users, validate retrieval quality
-> - Month 3: add code search
-> - Month 4: add people search
-> - Month 5: add meetings
-> - Month 6: scale to 10K users, measure NPS, ship to all Meta
+> **3 / 6 / 9-month plan:**
+> - Month 1-3 (MVP): docs only, 10 power users, validate retrieval quality
+> - Month 3-6 (scale): add code → people → meetings, scale to 10K users
+> - Month 6-9 (expand): scale to 100K users, measure NPS, ship to all Meta
 >
 > **Success metrics:** time saved per user (target: 15 min/day), search success rate, daily active users."
 
@@ -217,6 +215,16 @@ CREATE TABLE meeting_search_traces (
   doc_id         BIGINT,
   accessed_at    TIMESTAMP
 ) PARTITIONED BY (DATE(accessed_at));
+
+CREATE TABLE eval_runs (
+  run_id          BIGINT PRIMARY KEY,
+  feature         STRING,           -- 'meeting_search', 'doc_search', etc.
+  prompt_version  STRING,
+  recall_at_8     FLOAT,
+  ndcg_at_8       FLOAT,
+  started_at      TIMESTAMP,
+  finished_at     TIMESTAMP
+) PARTITIONED BY (DATE(started_at));
 ```
 
 ---
@@ -486,8 +494,10 @@ MY REQUIREMENTS (L6+ = define the problem)
 USER PROBLEM
 ────────────
 Engineers waste 30 min/day finding info across 4 systems
-(wiki, code, people, meetings). 100k engineers × 30 min = 50k hours/day
-= $50M/year in lost productivity at Meta scale.
+(wiki, code, people, meetings). Cost-of-pain math at Meta scale:
+100k engineers × 30 min/day × 220 work days = 11M hours/year wasted.
+At a fully-loaded cost of $38/hour (~$80k base × 1.4 benefits × 1.05 overhead / 2080 hrs),
+that is ~$50M/year in lost productivity.
 
 SUCCESS METRICS (you define)
 ────────────────────────────
@@ -543,12 +553,20 @@ Month 5:    + meetings, 10K users
 Month 6:    scale to 100K, measure NPS
 Month 7+:   ship to all Meta if metrics hit
 
+METRIC GATES (no advancement without these)
+──────────────────────────────────────────
+Phase 1->2: WAU >= 50% of onboarded users
+Phase 2->3: NPS > 30
+Phase 3->4: p95 latency < 1s end-to-end
+Phase 4->5: citation accuracy >= 95% on LLM-as-judge eval
+Phase 5->6: zero P0 ACL incidents in prior 30 days
+
 ADOPTION STRATEGY (L7 territory)
 ────────────────────────────────
 - Slack bot: "ask @askmeta how do I deploy?"
 - Browser extension: highlight text → right-click → ask
 - IDE plugin: VSCode extension, ask without context switch
-- 10×10×10 rule: 10 power users × 10 use cases × 10 demos
+- Adoption cadence: 3 live demos/week to different teams, 1 written postmortem/week, 10 user interviews in the first 30 days
 
 RISKS (you name them)
 ─────────────────────
@@ -582,7 +600,7 @@ WHY ASK META WINS: one box, four modalities, grounded citations.
 
 **A:**
 1. **Interview 10 users:** top 3 pain points were (a) can't find docs, (b) RAG hallucinates, (c) don't know who to ask
-2. **Quantified:** 30 min/day wasted per engineer, $50M/year at Meta scale
+2. **Quantified:** 30 min/day wasted per engineer, $50M/year at Meta scale; new-hire ramp is also 5% slower than benchmark (sourced from onboarding survey n=120)
 3. **Defined success metrics:** satisfaction 73%→85%, p95 1.2s→500ms, Recall@8 0.71→0.85, time saved 15 min/user/day
 4. **Built eval harness first** — even with no users, I needed to know if retrieval was working
 5. **Ran baseline eval, proposed 3 options** to director with cost/benefit. Picked one.

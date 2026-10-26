@@ -96,16 +96,8 @@ A 1.5B-parameter Qwen2.5 base model is **fast** (200-500ms per inference on CPU,
 **Base model:** Qwen2.5-1.5B-Instruct
 **Adapter size:** ~50 MB (LoRA r=16, alpha=32)
 **Synthetic mode:** true (peft/trl not installed in this env)
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  
