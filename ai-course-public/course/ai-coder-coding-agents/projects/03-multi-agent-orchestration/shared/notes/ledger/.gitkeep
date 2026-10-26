@@ -1,0 +1,40 @@
+# Shared notes
+
+## Purpose
+
+The ledger is the ONLY channel between poles. No pole talks to another pole
+directly. Every write lands here as one JSONL line, validated against
+`../../contracts/log-event.schema.json`.
+
+## Why a file and not a database
+
+A database would be faster and correct. It's also the wrong choice for the
+course, because the file gives you three things a database hides:
+
+1. **Replay.** `cat ledger/*.jsonl` reconstructs the whole session. When a
+   pole misbehaves you want the actual bytes it wrote, not a query.
+2. **Diffability.** JSONL is line-oriented, so `git diff` on a ledger is
+   meaningful. The course commits ledgers from notable cycles.
+3. **Zero-dependency debugging.** No service to start when you want to know
+   why your agent didn't trade.
+
+## File naming
+
+One file per cycle, named by `trace_id`:
+
+```
+ledger/
+  a3f9c1e2.jsonl     # cycle 1
+  b7d04a55.jsonl     # cycle 2
+```
+
+`trace_id` is 8+ lowercase hex chars. It is generated once per cycle by the
+orchestrator and handed to every pole. If a pole posts to a file whose
+`trace_id` does not match its `event.trace_id`, the reconciler drops the line.
+
+## Reading a cycle
+
+```bash
+cat ledger/a3f9c1e2.jsonl | jq -c 'select(.pole=="risk-pole")'
+jq -s 'group_by(.pole) | map({pole: .[0].pole, n: length})' ledger/*.jsonl
+```

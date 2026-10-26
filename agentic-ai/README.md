@@ -1,8 +1,8 @@
-# Agentic AI — 18 Production Agents, MCP, Tool-Use, Multi-Agent Debate
+# Agentic AI — 19 Production Agents, MCP, Tool-Use, Multi-Agent Debate, MLOps fine-tune
 
-> **Eighteen working agent systems across MCP, browser-use, IDE-style,
-> hiring, customer service, debate, and computer-use.** LangGraph ·
-> Anthropic · OpenAI · Bedrock · MCP · RAGAS · DeepEval.
+> **Nineteen working agent systems across MCP, browser-use, IDE-style,
+> hiring, customer service, debate, computer-use, and MLOps fine-tuning.** LangGraph ·
+> Anthropic · OpenAI · Bedrock · MCP · RAGAS · DeepEval · MLflow · vLLM · Prometheus.
 
 This directory is the agentic-AI half of the portfolio. The bar I set for
 myself: every project ships an eval harness, a cost-per-task number, and a
@@ -45,6 +45,7 @@ latency, and its p99 failure mode, it's a demo, not a product.
 | 16 | [**9-terminal-agent-claude-code**](./9-terminal-agent-claude-code/) | Claude-Code-style terminal agent, sandboxed, bash + file edit | Terminal agent |
 | 17 | [**12-customer-service-agent**](./12-customer-service-agent/) | Customer service agent with policy lookup, escalation, post-mortem | Production domain agent |
 | 18 | [**agent_deployment_databricks**](./agent_deployment_databricks/) | Same agent surface, but on Databricks model serving with Lakehouse monitoring | Deployment story |
+| 19 | [**19-mlops-finetune-genai**](./19-mlops-finetune-genai/) | End-to-end MLOps: QLoRA SFT on Llama 3.1 8B, MLflow register, vLLM serve, Prometheus + Evidently drift | ML-Ops + serving |
 
 ---
 
@@ -94,8 +95,9 @@ The five patterns every production agent needs — and where they live here:
 | **Bounded loop / budget / retry** | `16-autonomous-loop/` |
 | **Verifier / critic** | `15-multi-agent-debate/` |
 | **Post-mortem / observability** | `12-customer-service-agent/`, `agent_deployment_databricks/` |
+| **Fine-tune → serve → drift** | `19-mlops-finetune-genai/` |
 
-A real production agent uses all five. The projects here are decomposed so
+A real production agent uses all of these. The projects here are decomposed so
 each one has a clear focus; in production, you'd compose them.
 
 ---
@@ -123,6 +125,8 @@ each one has a clear focus; in production, you'd compose them.
 - **Show me cost / budget discipline:** `16-autonomous-loop/`.
 - **Show me AWS-native:** `3-aws-bedrock-aurora-s3/`.
 - **Show me the curriculum angle:** `7_Bedrock_course/`.
+- **Show me ML-Ops end to end:** `19-mlops-finetune-genai/` — QLoRA fine-tune,
+  MLflow register, vLLM serve, Prometheus + drift alerting.
 
 ---
 

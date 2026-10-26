@@ -67,6 +67,9 @@ CREATE INDEX IF NOT EXISTS leads_apply_mode_idx ON leads(apply_mode);
 CREATE INDEX IF NOT EXISTS leads_email_idx ON leads(contact_email);
 CREATE INDEX IF NOT EXISTS leads_company_idx ON leads(company);
 CREATE INDEX IF NOT EXISTS leads_tracking_idx ON leads(tracking_id);
+-- 24h freshness filter (avoids a table scan in get_pending_leads_fresh)
+-- Used by the post-throttle recovery loop and the can_send_to guard.
+CREATE INDEX IF NOT EXISTS leads_created_at_idx ON leads(created_at DESC);
 -- Case-insensitive email lookup for opt-outs / get_by_email
 CREATE INDEX IF NOT EXISTS leads_contact_email_lower_idx
     ON leads (LOWER(contact_email))

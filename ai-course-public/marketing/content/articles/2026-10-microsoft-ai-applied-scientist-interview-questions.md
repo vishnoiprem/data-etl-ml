@@ -6,9 +6,11 @@
 
 Microsoft's loop is the most "balanced" of the frontier labs.
 
-Where OpenAI goes hard on production engineering, Anthropic goes hard on safety, and DeepMind goes hard on research, **Microsoft's loop is a balanced 5-round process** with coding, system design, ML theory, behavioral, and an AI-tooling round. The 2026 emphasis is on **Azure AI Search + Semantic Kernel** for the AI engineer track and on **Copilot + Bing** for the applied scientist track. The candidate who can integrate Azure AI Search with Semantic Kernel in a system design wins the loop.
+Where OpenAI goes hard on production engineering, Anthropic goes hard on safety, and DeepMind goes hard on research, **Microsoft's loop is a balanced 5-round process** with coding, system design, ML theory, behavioral, and an AI-tooling round. The 2026 emphasis is on **Azure AI Search + the Microsoft Agent Framework** for the AI engineer track and on **Copilot + Bing** for the applied scientist track. The candidate who can integrate Azure AI Search with the Agent Framework in a system design wins the loop.
 
-The 60-second pitch: **Microsoft is hiring applied scientists who can ship Copilot features on Azure, integrate AI Search with Semantic Kernel, and explain the trade-offs between GPT-4 class and open-weights models in production. The candidate who treats it like a generic Big Tech interview loses to the candidate who knows the Azure AI stack. The wrong choice is to skip the Azure prep. The right choice is to spend 4 hours on Azure AI Search + Semantic Kernel before the loop.**
+**A note on Semantic Kernel.** Semantic Kernel was Microsoft's previous orchestration SDK. **Microsoft Agent Framework** reached GA in 2026 and is the supported path for new agentic systems. Many legacy docs and training material still reference Semantic Kernel; for 2026 prep, treat Semantic Kernel as legacy and **read the Microsoft Agent Framework docs first**, then skim the Semantic Kernel docs to recognize the patterns when interviewers reference them.
+
+The 60-second pitch: **Microsoft is hiring applied scientists who can ship Copilot features on Azure, integrate AI Search with the Agent Framework, and explain the trade-offs between GPT-4 class and open-weights models in production. The candidate who treats it like a generic Big Tech interview loses to the candidate who knows the Azure AI stack. The wrong choice is to skip the Azure prep. The right choice is to spend 4 hours on Azure AI Search + Microsoft Agent Framework before the loop.**
 
 ---
 
@@ -18,11 +20,11 @@ The 60-second pitch: **Microsoft is hiring applied scientists who can ship Copil
 |-------|--------------|------|-----------|
 | 1. **Recruiter screen** | 30 min. Background, level calibration. | 1-2 weeks | ~50% advance |
 | 2. **Technical phone screen** | 60 min. 1-2 coding problems + ML fundamentals. | 1-2 weeks | ~40% advance |
-| 3. **Onsite loop (4-5 rounds in 1-2 days)** | 2 coding → 1 system design (Azure-infra heavy) → 1 ML theory → 1 behavioral (As Appropriate). | 1-2 days | ~30% advance |
+| 3. **Onsite loop (4-5 rounds in 1-2 days)** | 2 coding → 1 system design (Azure-infra heavy) → 1 ML theory → 1 behavioral. | 1-2 days | ~30% advance |
 | 4. **Hiring committee** | Packet to committee. Vote. 1-2 weeks. | 1-2 weeks | ~60% advance |
 | 5. **Team match + offer** | Match to a team (Copilot, Bing, Azure AI, M365). | 1-2 weeks | — |
 
-**Cumulative pass rate: ~1-2%.** Microsoft's bar is real, but it's the most predictable of the frontier labs.
+**Cumulative pass rate: probably single-digit-percent at most, but treat any "1-2%" number you see online as folklore.** Microsoft's bar is real, but it's the most predictable of the frontier labs, and the LPs are the true gate, not the technical rounds.
 
 **Comp (US, levels.fyi, Oct 2026):**
 
@@ -30,7 +32,9 @@ The 60-second pitch: **Microsoft is hiring applied scientists who can ship Copil
 |-------|-------|------------|
 | L62 | SWE II | $250K-$350K |
 | L63 | Senior SWE | $400K-$600K |
-| L64 | Principal SWE | $700K-$1.1M+ |
+| L64 | Principal SWE | $700K-$1M+ |
+
+**Caveat on the comp numbers:** These bands are plausible and consistent with what Levels.fyi shows for Microsoft SWE in 2026, but Microsoft publishes fewer per-level compensation breakdowns than OpenAI or Anthropic and these figures should be treated as informed estimates, not as quoted base salaries. Verify against Levels.fyi's most recent data for the specific role you're applying to before negotiating.
 
 ---
 
@@ -51,13 +55,34 @@ The 60-second pitch: **Microsoft is hiring applied scientists who can ship Copil
 > *"The Microsoft L63 and L64 senior software engineer interview process typically starts with a recruiter screen, followed by either an online coding assessment or a technical phone screen, then a full loop with 4-5 rounds. The loop is balanced: coding, system design, ML theory, behavioral. The system design round at L63+ is Azure-infra heavy."*
 > — [Hello Interview — Microsoft L63-64 Interview Guides & Questions (2026)](https://www.hellointerview.com/guides/microsoft/senior)
 
-### The 5 things every real Microsoft report has in common
+---
+
+## What failed candidates said they did wrong
+
+**Pattern 1: Generic Azure design.**
+Failed candidates name Azure services without naming the trade-off. Listing "AI Search, Cosmos DB, and an LLM" is not a design. The candidate who says "Azure AI Search gives me hybrid retrieval out of the box, and I lose fine-grained re-ranker control as a result — for the MVP that's the right trade, but at 10K QPS I'd swap in a custom re-ranker" is.
+
+**Pattern 2: Treating the behavioral round as a formality.**
+Because Microsoft's loop feels conversational, candidates relax and give surface answers. Microsoft's leadership values are genuinely graded. Prepare 8-10 STAR stories and have 2 ready on failure.
+
+**Pattern 3: Coding with 2 problems in 60 minutes.**
+Candidates prepared for 2 problems and only got through 1.5, running out of time on edge cases. Microsoft typically asks **1 LeetCode medium per round, 45-60 minutes** — meaning you have time to test, talk, and refactor. Use it. Rushing to get to a second problem is the wrong read of the format.
+
+**Pattern 4: Naming Semantic Kernel when the team uses the Agent Framework.**
+An interviewer at a team building on Microsoft Agent Framework will notice if your answer is built around the older SDK. It reads as stale research. Know which one the team uses.
+
+**Pattern 5: No specific "why Microsoft."**
+"I want to work on AI at a big company" is the most common rejected-candidate answer. Microsoft ships Copilot to hundreds of millions of users — name a specific bet, a specific thing you'd test, and a specific thing you disagree with.
+
+---
+
+## The 5 things every real Microsoft report has in common
 
 1. **The loop feels like a conversation, not a test.** Microsoft's interviewers are more collaborative than OpenAI's or DeepMind's. Don't be afraid to think out loud.
-2. **The system design round is Azure-infra heavy.** Copilot on Azure, AI Search, Semantic Kernel, Cosmos DB. The candidate who treats it like a generic system design loses.
-3. **The coding round is standard LeetCode medium.** No exotic questions. The 2026 emphasis is on clean code + tests + edge cases.
-4. **The behavioral round is "As Appropriate" — Microsoft's framework.** Microsoft uses a specific behavioral framework ("As Appropriate" = Adaptable, Self-Aware, Customer-Obsessed, Drive for Results, etc.). Prep using that framework.
-5. **The AI-tooling round (2026) is on by default.** You can use AI tools in most rounds. The test is whether you use them thoughtfully.
+2. **The system design round is Azure-infra heavy.** Copilot on Azure, AI Search, Microsoft Agent Framework, Cosmos DB. The candidate who treats it like a generic system design loses.
+3. **The coding round is standard LeetCode medium.** No exotic questions. The 2026 emphasis is on clean code + tests + edge cases. Expect 1 problem per coding round, 45-60 min, not 2.
+4. **The behavioral round uses Microsoft's leadership values.** The widely cited "As Appropriate" framing (Adaptable, Self-aware, Customer-obsessed, Drive for results, etc.) is **not** an official Microsoft term in their current interview-prep material — it persists as candidate shorthand. What Microsoft actually publishes is a set of leadership values around **growth mindset, customer obsession, diversity & inclusion, and One Microsoft.** Prep 8-10 STAR stories with at least 2 covering a real failure.
+5. **The AI-tooling round (2026) is on by default.** You can use AI tools in most rounds. The test is whether you use them thoughtfully — verify, don't paste.
 
 ---
 
@@ -148,10 +173,10 @@ The "why Microsoft" question is asked in 100% of loops. The wrong answer: "I wan
 ## The 5 things to remember
 
 1. **The loop is a conversation, not a test.** Talk out loud. Ask for hints. Microsoft interviewers are collaborative.
-2. **Azure-first, not generic.** The system design round is Azure-infra heavy. AI Search + Semantic Kernel + prompt caching.
+2. **Azure-first, not generic.** The system design round is Azure-infra heavy. AI Search + Microsoft Agent Framework + prompt caching.
 3. **RAG with Azure AI Search, end-to-end.** Name every component, the trade-off, and the threshold.
 4. **GPT-4 vs. open-weights, with the right pick.** 3 options, named trade-offs, migration path.
-5. **"As Appropriate" is the framework.** Microsoft uses a specific behavioral rubric. Prep using it.
+5. **Microsoft's leadership values, not "As Appropriate."** Growth mindset, customer obsession, D&I, One Microsoft. Prep 8-10 STAR stories, ≥2 on failure.
 
 ---
 
@@ -175,12 +200,14 @@ The "why Microsoft" question is asked in 100% of loops. The wrong answer: "I wan
 
 **Sources (with the human voices):**
 
-- [DataInterview — Microsoft AI Engineer Guide (2026)](https://www.datainterview.com/blog/microsoft-ai-engineer-interview) — the Azure AI Search + Semantic Kernel emphasis
+- [DataInterview — Microsoft AI Engineer Guide (2026)](https://www.datainterview.com/blog/microsoft-ai-engineer-interview) — the Azure AI Search + Agent Framework emphasis
 - [Hello Interview — Microsoft L63-64 Interview Guides & Questions (2026)](https://www.hellointerview.com/guides/microsoft/senior) — the loop structure, the L63-64 level expectations
 - [r/leetcode — I cracked a Microsoft L63 (Senior) role (Nov 2025)](https://www.reddit.com/r/leetcode/comments/1osm7o9/i_cracked_a_microsoft_l63_senior_role_and_wanted/) — the "more like a conversation than a test" signal
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
 - [Levels.fyi — Microsoft compensation](https://www.levels.fyi/companies/microsoft/salaries/software-engineer) — the L62-L64 comp band
 - [Glassdoor — Microsoft Interview Experience & Questions (2026)](https://www.glassdoor.com/Interview/Microsoft-Interview-Questions-E1651.htm) — the per-round pass rates
+- [Microsoft Learn — Microsoft Agent Framework (GA, 2026)](https://learn.microsoft.com/en-us/agent-framework/) — the GA framework that superseded Semantic Kernel for new agentic systems
+- [Microsoft Careers — Interviewing at Microsoft](https://careers.microsoft.com/v2/global/en/interviewing) — the official Microsoft leadership-values material
 
 *This is article 5 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1-4 (OpenAI, Anthropic, DeepMind, Meta) are already live.*
 
