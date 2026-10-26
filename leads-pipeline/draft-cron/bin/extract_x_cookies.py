@@ -41,7 +41,13 @@ def main() -> int:
         else:
             template = "[]"
         OUT.write_text(template)
-        print(f"created {OUT} from template")
+        # Restrict permissions — the file will soon contain session tokens.
+        # 0o600 = owner read/write only. (No-op on Windows but harmless.)
+        try:
+            os.chmod(OUT, 0o600)
+        except OSError:
+            pass
+        print(f"created {OUT} from template (chmod 0o600)")
     print("Opening Chromium (headed) — log into x.com in the new window.")
     print("When you see your timeline, come back here and press Enter.")
     with sync_playwright() as p:
@@ -93,7 +99,12 @@ def main() -> int:
             },
         ]
         OUT.write_text(json.dumps(out_cookies, indent=2))
-        print(f"wrote {OUT}")
+        # auth_token is a long-lived X.com session token. Owner-only.
+        try:
+            os.chmod(OUT, 0o600)
+        except OSError:
+            pass
+        print(f"wrote {OUT} (chmod 0o600)")
         print(f"  auth_token: {auth['value'][:20]}... (length {len(auth['value'])})")
         print(f"  ct0: {ct0['value'][:20]}... (length {len(ct0['value'])})")
         browser.close()

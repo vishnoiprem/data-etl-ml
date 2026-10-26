@@ -46,12 +46,31 @@ jobs:
           # freeform scopes (e.g. `ci`, `deps`, `docs`) are
           # fine too.
           requireScope: false
-          # Subject must be at least 3 chars; nothing past
-          # 72 chars (a soft industry limit for changelog
-          # rendering).
-          subjectPattern: ^(?!\s*$).{3,72}$
+          # Dependabot generates titles with TWO scope groups, e.g.
+          #   chore(leads)(deps): update requests requirement ...
+          #   chore(ts)(deps-dev): bump typescript from 5.9.3 to 7.0.2 ...
+          # The default Conventional Commits parser only accepts a single
+          # scope group, so every one of those Dependabot PRs failed this
+          # check. We parse the title ourselves and allow an optional
+          # second scope group, folding it into the scope.
+          #
+          # Groups: 1=type, 2=primary scope, 3=secondary scope, 4=subject
+          # The scope groups must be non-empty when present: `feat(): x` is
+          # rejected, `feat: x` and `feat(ui): x` are accepted.
+          headerPattern: '^(\w+)(?:\(([^()]+)\))?(?:\(([^()]+)\))?: (.*)$'
+          headerPatternCorrespondence: type, scope, scope, subject
+          # Subject must be at least 3 chars; nothing past 100 chars.
+          #
+          # The previous limit was 72, which is a soft industry convention for
+          # hand-written titles — but Dependabot generates titles mechanically
+          # and cannot shorten them. Its subjects run 77-90 characters
+          # (e.g. "update python-dotenv requirement from >=1.0.0 to >=1.2.4 in
+          # /leads-pipeline/draft-cron"), so a 72-char cap rejected every
+          # Dependabot PR that also used a directory scope. 100 accommodates
+          # them while still rejecting runaway titles.
+          subjectPattern: ^(?!\s*$).{3,100}$
           subjectPatternError: |
-            The subject must be 3-72 characters long and not
+            The subject must be 3-100 characters long and not
             blank. Try: `fix(leads): handle empty inbox`.
           # Multi-line commit body: optional, but if present
           # must have a blank line between subject and body.

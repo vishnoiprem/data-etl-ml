@@ -80,6 +80,52 @@ The 0.00% is the number. The invariant makes drift impossible, not just unlikely
 pip install -r requirements.txt
 make demo
 ```
+
+---
+
+## What this is NOT
+
+- **Not a payment processor.** The ledger is the
+  *book of record*. The payment processor (Stripe,
+  Adyen, Braintrust) is the upstream that *creates*
+  the transfers. The ledger receives them as
+  postings; the ledger does not initiate them.
+- **Not a chart of accounts.** The chart of accounts
+  (which accounts exist, which currencies, which
+  entity they belong to) is a *configuration* that
+  lives upstream of the ledger. The ledger enforces
+  double-entry on whatever accounts you give it.
+- **Not a reporting database.** Reports are read
+  from the ledger (sum debits, sum credits, balance
+  per account) but the reports themselves live in
+  the warehouse. The ledger is write-heavy,
+  append-only, and unindexed for analytics.
+- **Not optional for fintech.** The 0.00% drift
+  number is the *reason* this exists. A payments
+  company without a double-entry ledger finds out
+  the books don't close on day 1 of the audit, not
+  on day 365. Build it before the first dollar.
+
+---
+
+## Related directories
+
+- [`../event-sourced-audit/`](../event-sourced-audit/) —
+  the append-only event log pattern; the journal
+  is a money-movement-specialized version of the
+  same shape.
+- [`../multi-tenant-isolation/`](../multi-tenant-isolation/) —
+  the per-tenant access control that decides who
+  can post to which accounts.
+- [`../scb_aml_platform/`](../scb_aml_platform/) —
+  the production-shaped AML build (15 countries,
+  MAS 7-year retention) that consumes this
+  ledger in anger.
+- [`../bloomberg-symbology/`](../bloomberg-symbology/) —
+  the identifier-mapping pattern; the ledger
+  needs canonical instrument IDs to post
+  securities movements correctly.
+
 ---
 
 **Last updated:** 2026-10-12  
