@@ -111,7 +111,7 @@ editorial wrapping per the user's "Authored Q&A only" instruction.
   directory. The 18 production-shaped projects
   here are the *engineering* counterpart to the
   *interview prep* in this directory.
-- [`../postgress_cdc_kafka/`](../postgress_cdc_kafka/) —
+- [`../postgres_cdc_kafka/`](../../postgres_cdc_kafka/) —
   the Kafka reference that pairs with the
   `kafka_fundamentals` curriculum.
 - [`../keystone-iceberg-ops/`](../keystone-iceberg-ops/) —

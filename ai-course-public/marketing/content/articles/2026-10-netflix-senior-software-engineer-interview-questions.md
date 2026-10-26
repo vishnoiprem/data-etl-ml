@@ -6,9 +6,13 @@
 
 Netflix's loop is the one where you're already senior when you walk in.
 
-Where Databricks tests Spark internals and Stripe tests payments domain, **Netflix tests whether you're a peer, not a junior pretending to be senior.** Netflix is the only top tech company that doesn't hire junior engineers — every candidate is expected to be a Senior Software Engineer (L5+) or above from day one. The 2026 loop has 3 signature elements: (1) the **Keeper Test** (every interviewer asks "would I trust this person to fix the Playback service at 8 PM on a Friday?"), (2) the **practical, not puzzle, coding** (LRU caches with TTL, token bucket rate limiters, video manifest parsers — not brain teasers), and (3) the **team-dependent loop** (each team customizes the loop to the role).
+Where Databricks tests Spark internals and Stripe tests payments domain, **Netflix tests whether you're a peer, not a junior pretending to be senior.** Netflix heavily favors senior hires — every candidate is generally expected to be a Senior Software Engineer (L5+) or above. The 2026 loop has 4 signature elements: (1) the **Keeper Test** (every interviewer asks "would I trust this person to fix the Playback service at 8 PM on a Friday?"), (2) the **practical, not puzzle, coding** (LRU caches with TTL, token bucket rate limiters, video manifest parsers — not brain teasers), (3) the **team-dependent loop** (each team customizes the loop to the role), and (4) the **new AI-assisted coding round** — the only company in this series that is *pro*-AI in the loop.
 
-The 60-second pitch: **Netflix is hiring senior software engineers who can be trusted to own a production service end-to-end, write practical code that ships, and explain trade-offs with radical candor. The candidate who treats Netflix like a generic Big Tech loop loses. The right choice is to spend 4 hours on the Keeper Test + 4 hours on team-specific research before the loop.**
+**A note on "Netflix doesn't hire juniors."** This one is genuinely **contested.** Netflix has made public commitments to hiring at earlier levels, and recruiter screens vary by team. The safe, accurate framing is that Netflix **heavily favors senior** and that most posted SWE loops assume L5+. Don't tell an interviewer "Netflix doesn't hire juniors" — tell them you understand the bar Netflix holds.
+
+**The 2026 system-design shift worth knowing:** the default system design topic has shifted. **Ads infrastructure** has largely replaced "design Netflix" as the default system design topic — a reported L5 prompt was **ads frequency capping with multiple rolling windows and a check-and-reserve separation.** If you're prepping for an ads, streaming, or monetization team, that's the live prompt set. The take-home has similarly evolved into a **data modeling round** — designing ad-plan and support-tier schemas.
+
+The 60-second pitch: **Netflix is hiring senior software engineers who can be trusted to own a production service end-to-end, write practical code that ships, and explain trade-offs with radical candor. The candidate who treats Netflix like a generic Big Tech loop loses. The right choice is to spend 4 hours on the Keeper Test + 4 hours on team-specific research + 2 hours on ads infrastructure before the loop.**
 
 ---
 
@@ -18,21 +22,22 @@ The 60-second pitch: **Netflix is hiring senior software engineers who can be tr
 |-------|--------------|------|-----------|
 | 1. **Recruiter screen** | 30-45 min. Background, team fit. | 1 week | ~50% advance |
 | 2. **Technical phone screen (60 min, CoderPad)** | 1 practical problem (merge intervals, in-memory file system, rate limiter). | 1-2 weeks | ~40% advance |
-| 3. **Virtual onsite (4-5 rounds in 1-2 days)** | Coding → System Design (team-dependent) → Domain (team-dependent) → Behavioral (radical candor). | 1-2 days | ~30% advance |
+| 3. **Virtual onsite (4-5 rounds in 1-2 days)** | Coding → AI-Assisted Coding → System Design (team-dependent, often ads infra) → Domain (team-dependent) → Behavioral (radical candor). | 1-2 days | ~30% advance |
 | 4. **Hiring committee + offer** | Packet to committee. Vote. Offer. | 1-2 weeks | — |
 
-**Cumulative pass rate: ~2-3%.** Netflix's loop is shorter than most (4 stages vs. 5-6) because the senior-only hiring bar is enforced at the recruiter screen.
+**Cumulative pass rate: probably 2-3%; treat single-digit-percent numbers as folklore.** Netflix's loop is shorter than most (4 stages vs. 5-6) because the senior-favoring bar is enforced at the recruiter screen. **Feedback lag is genuinely 2+ weeks** — be ready for that.
 
 **Comp (Los Gatos, levels.fyi, Oct 2026):**
 
 | Level | Title | Total comp |
 |-------|-------|------------|
+| L3 | SWE | ~$210K |
+| L4 | SWE | ~$300K |
 | L5 | Senior SWE | $400K-$600K |
 | L6 | Staff SWE | $600K-$900K |
-| L7 | Senior Staff | $900K-$1.3M+ |
-| L8 | Principal | $1.3M+ |
+| L7 | Senior Staff | up to $1.14M |
 
-**Note:** Netflix comp is the most cash-heavy in big tech — almost no RSUs. The L5 base is ~$300K, the L6 base is ~$400K, the L7 base is ~$500K. Many candidates take the comp hit (relative to OpenAI / Meta) for the cash + freedom + responsibility culture.
+**Note:** Netflix comp is the most cash-heavy in big tech — almost no RSUs. The L5 base is ~$300K, the L6 base is ~$400K. Many candidates take the comp hit (relative to OpenAI / Meta) for the cash + freedom + responsibility culture.
 
 ---
 
@@ -65,11 +70,36 @@ The 60-second pitch: **Netflix is hiring senior software engineers who can be tr
 
 ### The 5 things every real Netflix report has in common
 
-1. **No junior engineers.** Every candidate is L5+ from day one. The recruiter screen enforces the bar.
+1. **Netflix heavily favors senior.** Most SWE loops assume L5+. The recruiter screen enforces the bar. (Contested whether juniors are hired at all — don't assert either way.)
 2. **The Keeper Test is the meta-rubric.** Every interviewer asks: would I trust this person to own the Playback service at 8 PM on a Friday?
 3. **Practical coding, not puzzles.** LRU caches with TTL, token bucket rate limiters, video manifest parsers. The signature problem: "fetch video fragments from S3, fall back to Open Connect on failure."
-4. **The loop is team-dependent.** Backend = JVM/Java. UI = React. Data = Iceberg/Spark. ML = model serving. Research the specific team before the loop.
+4. **The loop is team-dependent — and AI tools are allowed.** Netflix is the one company in this series where AI-assisted coding is assessed *positively*. Candidates who use an AI tool well and verify the output are rewarded. This is the opposite of Stripe and NVIDIA.
 5. **Cash-heavy comp, almost no RSUs.** The candidate who wants RSU-weighted comp goes to OpenAI / Meta. The candidate who wants cash + freedom goes to Netflix.
+
+**Strategic context for "why Netflix" (2026):** The live 2026 bets are the **ads pipeline** (Netflix's ad tier is now central to the growth story), **cloud gaming** (Netflix reported ~11× player growth in cloud-gaming experiments), a **TikTok-style vertical feed** for discovery, and **AI recommendations**. Any of these is a specific bet you can defend.
+
+---
+
+## What failed candidates said they did wrong
+
+**Pattern 1: Clever but unreadable code.**
+This is the Keeper Test failure mode in concrete form. Netflix explicitly penalizes optimal-but-unmaintainable code. If your solution is 20% faster and nobody can read it in six months, you failed. The grade is on the version that's easy to change.
+
+**Pattern 2: Not researching the team.**
+Netflix customizes the loop per team. Backend teams want JVM/Java/virtual-thread depth; UI teams want React; data teams want Iceberg and distributed query. Candidates who gave a generic answer lost. Two hours of team-specific reading is not optional.
+
+**Pattern 3: Generic system design when the prompt was ads infra.**
+The 2026 default has shifted toward ads infrastructure — frequency capping across multiple rolling windows, check-and-reserve separation. Candidates who heard "design Netflix" and prepared only a streaming-CDN answer were unprepared.
+
+**Pattern 4: Refusing to use AI tools.**
+Netflix is pro-AI in the loop. Candidates who bragged about not using AI tools — a flex that lands well at Stripe — read as out of step here. Use the tools, verify the output, explain what you checked.
+
+**Pattern 5: Not expecting the feedback lag.**
+Candidates report 2+ weeks between the final round and any feedback. Several assumed they'd been rejected and either withdrew or accepted another offer prematurely. Don't.
+
+---
+
+### The 5 things every real Netflix report has in common (revised)
 
 ---
 
@@ -161,11 +191,11 @@ The Keeper Test is the meta-rubric. The wrong answer: "I'd say yes, I trust myse
 
 ## The 5 things to remember
 
-1. **No junior engineers.** Every candidate is L5+ from day one. The recruiter screen enforces the bar.
+1. **Netflix heavily favors senior.** Most SWE loops assume L5+. The recruiter screen enforces the bar.
 2. **The Keeper Test is the meta-rubric.** Every interviewer asks: would I trust this person to own the Playback service at 8 PM on a Friday?
 3. **Practical coding, not puzzles.** LRU caches with TTL, token bucket rate limiters, video manifest parsers. Ship, don't impress.
-4. **The loop is team-dependent.** Research the team's recent blog posts + engineering bets before the loop.
-5. **Cash-heavy comp, almost no RSUs.** The candidate who wants freedom + cash + responsibility picks Netflix; the candidate who wants RSU-weighted comp picks OpenAI / Meta.
+4. **The loop is team-dependent — and AI-assisted coding is rewarded.** Netflix is the pro-AI loop in this series. Verify what you produce.
+5. **Cash-heavy comp, almost no RSUs.** The candidate who wants freedom + cash + responsibility picks Netflix; the candidate who wants RSU-weighted comp picks OpenAI / Meta. Expect 2+ weeks of feedback lag — don't panic.
 
 ---
 
@@ -189,14 +219,16 @@ The Keeper Test is the meta-rubric. The wrong answer: "I'd say yes, I trust myse
 
 **Sources (with the human voices):**
 
-- [TechInterview — Netflix Coding Interview Blueprint [2026]](https://www.techinterview.net/blog/netflix-coding-interview-guide) — the Keeper Test, the senior-only hiring bar, the practical coding focus
+- [TechInterview — Netflix Coding Interview Blueprint [2026]](https://www.techinterview.net/blog/netflix-coding-interview-guide) — the Keeper Test, the senior-favoring hiring bar, the practical coding focus
 - [Engineering Enablement — The Netflix software engineering interview: Lessons from the inside (Aug 2026)](https://engineeringenablement.substack.com/p/the-netflix-software-engineering) — the team-dependent system design, the FAANG distinction
 - [Grokking Tech Career — 12 Netflix Software Engineering Interview Questions (Aug 2026)](https://grokkingtechcareer.substack.com/p/12-netflix-software-engineering) — the context-switching interview style, the pivots between coding and system design
 - [r/InterviewCoderHQ — Netflix Software Engineer Interview 2026: L5 Loop Breakdown (Aug 2026)](https://www.reddit.com/r/InterviewCoderHQ/comments/1vnmyuh/netflix_software_engineer_interview_2026_l5_loop/) — the CoderPad environment, the practical problem distribution
 - [Coditioning — Netflix SWE Interview: System Design Guide (Jun 2026)](https://www.coditioning.com/blog/504/netflix-swe-system-design-interview) — the team-dependent design space, the Open Connect + Kafka + Iceberg themes
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
-- [Levels.fyi — Netflix compensation](https://www.levels.fyi/companies/netflix/salaries/software-engineer) — the L5-L8 cash-heavy comp band
+- [Levels.fyi — Netflix compensation](https://www.levels.fyi/companies/netflix/salaries/software-engineer) — the L3-L7 cash-heavy comp band, L7 up to $1.14M
 - [Netflix Tech Blog](https://netflixtechblog.com/) — the source for the Keeper Test, the freedom and responsibility culture, the engineering bets
+- [Reddit r/ExperiencedDevs — Netflix ads frequency capping thread (2026)](https://www.reddit.com/r/ExperiencedDevs/) — candidate reports of the ads-frequency-capping system design prompt as the live L5 default
+- [Netflix Q2 2026 shareholder letter](https://ir.netflix.net/) — the ads tier centrality and the cloud-gaming 11× growth note
 
 *This is article 10 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1-9 (OpenAI, Anthropic, DeepMind, Meta, Microsoft, NVIDIA, Apple, Databricks, Stripe) are already live.*
 

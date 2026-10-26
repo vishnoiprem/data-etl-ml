@@ -37,3 +37,7 @@ tests/_tmp_reports/
 # Eval reports (generated — local only)
 eval/reports/eval_*.json
 !eval/reports/.gitkeep
+
+# Production env (real secrets)
+.env.prod
+!.env.prod.example

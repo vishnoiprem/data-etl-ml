@@ -39,12 +39,27 @@ class Settings(BaseSettings):
     # Empty = JSONL fallback for the eval store (dev / single-node).
     # Set `postgresql+psycopg://user:pass@host:5432/apex` for prod.
     postgres_url: str = ""
+    # OpenAI-compatible chat endpoint used ONLY to explain an already-verified
+    # answer in plain words (never to find facts). Free options:
+    #   Ollama (local, private):  http://localhost:11434/v1   model qwen2.5:3b
+    #   Groq (free tier):         https://api.groq.com/openai/v1
+    #   OpenRouter (:free models) https://openrouter.ai/api/v1
+    #   Gemini (free tier):       https://generativelanguage.googleapis.com/v1beta/openai
     model_gateway_url: str = ""
     model_gateway_key: str = ""
+    model_name: str = "qwen2.5:3b"
+    model_timeout_s: float = 60.0
+    model_max_tokens: int = 220
 
     # --- Web ---
-    # Allowed CORS origin for the Next.js frontend. NEVER use `*` here.
-    frontend_origin: str = "http://localhost:3000"
+    # Allowed CORS origin(s) for the Next.js frontend, comma-separated.
+    # NEVER use `*` here. 127.0.0.1 is a different origin than localhost.
+    frontend_origin: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    # --- Uploads ---
+    # Where uploaded documents are stored. Empty = <project>/data. Mount a volume here in prod.
+    data_dir: str = ""
+    max_upload_bytes: int = 5 * 1024 * 1024
 
     # --- Tunables ---
     # Bounded queue for the audit log writer. If full, requests drop with

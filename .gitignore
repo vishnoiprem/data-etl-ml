@@ -34,7 +34,6 @@ creds.json
 
 # IDE
 .idea/
-.idea/workspace.xml
 
 # Python
 __pycache__/
@@ -66,6 +65,9 @@ data/
 !*.jsonl.example
 # release-please state files (root of repo)
 !release-please-config.json
+# Grafana provisioned dashboards (ships with the MLOps fine-tune project so
+# Grafana auto-loads them on first boot).
+!agentic-ai/19-mlops-finetune-genai/infra/grafana/**/*.json
 !.release-please-manifest.json
 .devcontainer/
 !.devcontainer/devcontainer.json
@@ -108,6 +110,12 @@ ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_m
 medium/meta/coach/
 .claude/agents/
 
+# Nested git worktrees under .claude/worktrees/. These were previously
+# committed as gitlinks (mode 160000) pointing at commits that do not
+# exist in this repo, which broke `git submodule status`, `git fsck`
+# and fresh clones. Ignore them everywhere so they can never be re-added.
+**/.claude/worktrees/
+
 # Private interview stories (never commit)
 medium/katalon/*_PRIVATE.md
 
@@ -134,3 +142,7 @@ realtime-stock-pipeline/trade-finder/logs/*.log
 realtime-stock-pipeline/trade-finder/logs/*.pid
 realtime-stock-pipeline/trade-finder/logs/stress_*.json
 realtime-stock-pipeline/trade-finder/reports/email_*.txt
+
+# apex-rag-omni frontend manifests (otherwise hidden by *.json above)
+!agentic-ai/apex-rag-omni/frontend/package.json
+!agentic-ai/apex-rag-omni/frontend/tsconfig.json

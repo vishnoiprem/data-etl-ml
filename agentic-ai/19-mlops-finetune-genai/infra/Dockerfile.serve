@@ -1,0 +1,33 @@
+# Slim vLLM serving image. Uses the upstream `vllm/vllm-openai` base to
+# keep the build cost minimal. The FastAPI wrapper (agent/serve.py) is
+# already OpenAI-compat, so we don't need to run the upstream server.
+
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
+
+# Build deps for bitsandbytes + flash-attn wheels pulled in at runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ curl ca-certificates git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/mlops
+
+# Install only what serve.py needs (avoid transformers+peft+trl which are
+# training-time deps). vllm pulls in torch for the GPU.
+COPY requirements.txt ./
+RUN pip install --upgrade pip && pip install -r requirements.txt \
+    && pip install vllm>=0.6.0 openai>=1.40.0
+
+# Project code — agent/ + scripts/. We deliberately exclude tests/
+# (smaller image, faster pull).
+COPY agent ./agent
+COPY scripts ./scripts
+COPY pyproject.toml ./
+
+ENV PYTHONPATH=/opt/mlops
+
+EXPOSE 8000 9090
+
+CMD ["python", "-m", "agent.serve", "--host", "0.0.0.0", "--port", "8000"]
