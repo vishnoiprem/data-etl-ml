@@ -2,6 +2,8 @@
 ## Director, Data Engineering (40000058) — Singapore, Oct 23 2026
 ### Battle Card — Final Selection Stage (4 candidates → 1 hire)
 
+> ⚠️ **19 Oct 2026 fact-check:** every "company PDF p.X" citation below refers to a file that is NOT in this folder (`techcomebacnk.pdf` is your own Q&A). Treat those claims as unverified unless DEEP_DIVE §21 confirms them. Verified numbers are in that file.
+>
 > **Author's note:** This document is built strictly from the six source files Prem provided. Where the JD or company PDF was not specific, I have flagged assumptions. Where Prem's CV is thin, I have reframed — not fabricated. Prem must memorise the bolded 60–90 second answers; everything else is reference.
 
 ---
@@ -67,7 +69,7 @@
 ## 2. TECHCOMBANK CONTEXT
 
 ### 2.1 Strategy 2024–2026 (cite specifics from the company PDF)
-- **"Banking on Vietnam's Bright Tomorrow"** — strategic narrative introduced in 2023, anchored to be *"the leading and most beloved bank in Vietnam by digital customers"* (company PDF p.1).
+- **"Banking on Vietnam's Bright Tomorrow"** — ⚠️ phrase not found in any public Techcombank source — treat as unverified; don't quote. Verified framing: vision *"Change banking, Change lives"*; 2020–25 Data/Digitalization/Talent programme; new 2025–2030 five-year strategy (≈30M customers, 4× TOI, reported).
 - **2026 strategic priorities** (company PDF p.1): (i) sustained business growth, (ii) **elevate customer experience through data and AI**, (iii) advance the operating model, (iv) strengthen ESG/sustainability.
 - **6 strategic enablers** (company PDF p.2): strengthen franchise; deliver consistent customer experience across segments; **modernise technology and data platform**; empower a data- and AI-driven workforce; drive digital sales & engagement; disciplined capital and risk management.
 - **2024–2026 data/AI investment** (company PDF p.4):
@@ -76,31 +78,31 @@
   - **Hyper-personalised marketing and NBO** at scale — "reaching tens of millions of customers" (Prem's recommender experience maps directly here).
   - **GenAI in customer service, employee productivity, and developer productivity** (company PDF p.4–5) — Prem's Text-to-SQL and Makro LLM work is precisely this archetype.
   - **Process automation** with agentic AI, NLP-driven virtual assistants, RPA (company PDF p.5).
-- **Techcombank moment-of-truth metrics** (company PDF p.2): #1 in digital satisfaction (DMA — *Digital Made in Asia* by Mekong Capital and Decision Lab), #1 in retail banking trust, 2nd highest in retail brand consideration. The job is to *defend and extend* that #1 in digital with a data platform that doesn't break under its own success.
+- **Techcombank moment-of-truth metrics** (public sources; the "company PDF" cited elsewhere in this file is not in the folder): #1 overall in Decision Lab's 2025 Bank Satisfaction Rankings (Apr 2025); FinanceAsia Best Domestic Bank in Vietnam 4 years running. ("DMA", "#1 trust", "#2 consideration" could not be verified.) The job is to *defend and extend* that #1 in digital with a data platform that doesn't break under its own success.
 
 ### 2.2 Leadership context (what's public and what to handle carefully)
-- **CEO:** Jens Lottner (CEO since Jan 2024, former NAB executive). International retail-banking background, customer-experience mandate.
-- **Long-tenure anchor:** the "Techcombank 2030" narrative was built under previous CEO; Jens is operationalising it. Frame the bank's strategy as **continuity under fresh operational discipline**.
+- **CEO:** Jens Lottner (CEO since 18 Aug 2020, re-appointed for 2025–2030; ex-CFO Siam Commercial Bank, McKinsey/BCG). Data/digital/talent agenda.
+- **Long-tenure anchor:** Jens has led since 2020 and owns the 2025–2030 strategy — frame it as **his plan**, not an inherited one.
 - **Head of Data / CDO role:** the company PDF repeatedly frames data + AI as a top strategic enabler but does not name a CDO. **The Director, Data Engineering is plausibly a key hire for the function** — meaning the panel likely includes a CDO-level sponsor or a Head of Data Engineering & Delivery who is acting in a CDO-like capacity. Prem should ask who that sponsor is.
 
 > ⚠️ **Handle carefully:** Do not name specific public figures you have not verified. Use "the CEO's office" / "your data leadership" / "the Head of Data Engineering & Delivery" as anchors.
 
 ### 2.3 Major platforms / public technology footprint
-- **Core banking:** Techcombank's "BSS 4.0" modernisation is referenced as a "completed migration to a new core banking system" with real-time transactions (company PDF p.2). This is the *bedrock* — the data platform has to drink from the new core cleanly.
-- **Digital channels:** Techcombank app, corporate banking, **TCB ChatB@nk** chatbot (GenAI), and a 24/7 virtual assistant. These are the visible consumer surface; they live on top of the data platform.
-- **Data & analytics:** building out a **data lakehouse** as the unified analytics foundation (company PDF p.4) — this is the *greenfield inside the bank* that the Director role will help land.
+- **Core banking:** Core banking is Temenos T24 (public). "BSS 4.0" is not in public sources — don't cite. The core is still the *bedrock* — the data platform has to drink from the new core cleanly.
+- **Digital channels:** Techcombank app, corporate banking, GenAI assistants (public reports cite Amazon Bedrock builds; "TCB ChatB@nk" unverified). These are the visible consumer surface; they live on top of the data platform.
+- **Data & analytics:** **Databricks Data Intelligence Platform already adopted (Oct 2024)** — 50+ systems unified, Unity Catalog, MLflow, 45+ ML models. The role *scales and governs* a running platform; it is not greenfield.
 - **AI in production:** multiple GenAI use cases already in market (company PDF p.5), agentic AI ambitions, NLP virtual assistant.
 
 ### 2.4 Competitive set and how Techcombank differentiates
 | Bank / fintech | What they do | Why it matters for the Director role |
 |---|---|---|
-| **VPBank** | Aggressive retail growth, large digital customer base (~14M). | VPBank and Techcombank are closest on retail scale; data/AI is the moat. |
+| **VPBank** | Aggressive retail growth, large digital customer base (verify count). | VPBank and Techcombank are closest on retail scale; data/AI is the moat. |
 | **MB (Military Bank)** | Strong digital, MBBank app, big investment in tech. | MB has been more public about core-banking modernisation. |
 | **Vietcombank (VCB)** | Largest by total assets, more conservative on digital. | VCB is the incumbent; Techcombank's #1 in digital satisfaction is the wedge. |
 | **MoMo** | Leading e-wallet, ~30M+ users, data-rich. | MoMo is a *fintech competitor on customer data*, not just a partner. |
 | **Timo, Cake by VPBank, etc.** | Digital-only banks. | Keep an eye on; signals the regulator's appetite. |
 
-**Techcombank's moat** (company PDF p.1–3): 14.5M+ customers, 30%+ YoY digital adoption growth, 4× faster transaction processing, #1 digital satisfaction. The Director of Data Engineering is being hired to keep that moat widening as the next 5M customers come on.
+**Techcombank's moat** (company PDF p.1–3): ~18.2M customers (6M26), 66% of new retail customers acquired digitally, #1 in e-banking transaction share (17.0% outbound / 15.6% inbound, 2025), #1 Decision Lab 2025. The Director of Data Engineering is being hired to keep that moat widening as the next 5M customers come on.
 
 ### 2.5 Vietnam banking regulator (SBV) pressures shaping data/AI
 - **SBV** is data-fluent and writes circulars that hit the platform: capital adequacy (Circular 41/2016 and updates), credit risk reporting, IT-security requirements for credit institutions.
@@ -109,7 +111,7 @@
 - **AI-specific guidance:** SBV has been issuing guidance on AI in banking; circulars evolve. **Don't quote circular numbers you have not verified — talk in principles.**
 
 ### 2.6 Recent wins / pain points / what they're publicly hiring for
-- **Wins:** #1 in digital satisfaction, BSS 4.0 migration completed, real-time transaction capability, 50%+ digital adoption, GenAI in production (chatbot, virtual assistant), 14.5M+ customers.
+- **Wins:** #1 Decision Lab 2025, PBT VND 32.5T FY25 (+18.2%) and 18.5T 6M26 (+22.5%), Databricks adopted, GenAI use cases scaling (CEO: AI/data "already delivering productivity gains"), ~18.2M customers.
 - **Pain points to listen for:**
   - Legacy Hadoop estate that hasn't fully modernised (the JD signals this strongly).
   - Pressure to deliver personalisation/NBO at scale — currently a 2026 ambition (company PDF p.4).
@@ -131,11 +133,11 @@
 
 > "Two reasons that are the same reason. Banking is where I started my career — I built AML and compliance data platforms at Standard Chartered across fifteen-plus countries, and I was at DBS before that. Then I went to consumer internet — Lazada, and now Makro. The platforms I run in retail are run to financial-controls standard, because they feed the statutory close.
 >
-> Techcombank is the exact intersection I've spent fifteen years on: a bank that has 14.5 million customers and is publicly committed to being data- and AI-led, in the most interesting retail-banking market in ASEAN. Vietnam's digital adoption curve is what Singapore's was in 2015 and what Indonesia's was in 2018. This is the moment to land the data foundation; the next five million customers will arrive on whatever platform we build in the next eighteen months.
+> Techcombank is the exact intersection I've spent fifteen years on: a bank that has 18 million customers and is publicly committed to being data- and AI-led, in the most interesting retail-banking market in ASEAN. Vietnam's digital adoption curve is what Singapore's was in 2015 and what Indonesia's was in 2018. This is the moment to land the data foundation; the next five million customers will arrive on whatever platform we build in the next eighteen months.
 >
 > And — specifically — I want to be in the engine room, not one more layer away from the build. The Director level is where I'm most useful right now."
 
-**Anchor numbers to land:** 15.5M digital banking users (company PDF p.1), 50%+ digital adoption growth, 14.5M+ customers, SCB AML across 15+ countries.
+**Anchor numbers to land:** 18.2M customers (6M26), 66% digital acquisition, PBT +22.5% 6M26, SCB AML across 15+ countries.
 
 ---
 
@@ -324,7 +326,75 @@
 
 ## 5. CONVERSATION STARTERS / NETWORKING TACTICS
 
-### 5.1 Likely panel composition and what each person probably cares about
+### 5.0 CONFIRMED EVENT AGENDA + WHO TO TALK TO AND WHAT TO SAY (added 20 Oct 2026)
+
+**Agenda (Fri 23 Oct):** 18:00 opening (Chief People Officer) → 18:10 CEO strategy spotlight → 18:30 leadership panel (corporate, investment & private banking; live audience Q&A) → **19:20–21:00 networking reception (100 min)** → 21:00 close.
+
+> ⚠️ **Key insight:** the listed leaders are **not data leaders**. The panel is CIBG / private banking / securities / people. No CDO, CTO or Head of Data Engineering is named. So the data pitch must be **translated into their business** (clients, deals, wealth, talent) and you should **ask who runs data** rather than assume. Section 5.1 below (data-leader panel) is now a fallback if they attend.
+
+| Leader (per agenda) | What they care about | What to talk about (1–2 lines) | Smart question |
+|---|---|---|---|
+| **Dr. Jens Lottner** — CEO (speaks 18:10) | 2025–2030 plan: ~30M customers, 4× income; AI/data as enablers | Do NOT pitch in the room. In Q&A or one line after: "Your 6M26 note that AI and data are already delivering productivity gains — the next step is making that reuse repeatable across the group." Mention his Siam Commercial Bank data-lake background only if natural. | "What is the one capability you want the data platform to give the bank in the next 18 months?" |
+| **Ms. Veo Nguyen** — Chief People Officer (opens; likely owns this hiring event) | Senior talent attraction, retention, culture, overseas Vietnamese returnees | Thank her for the event; show you understand why the bank hires overseas talent; your story: team 8 → 30, promotions, TRC holder, can be in HCMC in 30 days. | "Which senior data and AI roles are hardest to fill, and what makes someone succeed here in the first year?" **Ask her who owns the Director, Data Engineering hire and for an introduction.** |
+| **Ms. Phan Thi Hai Yen** — Chief CIBG Officer (corporate & investment banking) | Corporate client growth, deals, transaction banking, onboarding speed; FY25 IB fees VND 4.2tn (+20.7%) | Data helps her win and serve clients: client 360, faster onboarding/KYC, credit and cash-flow signals, pipeline analytics, clean regulatory data. Month-end close 5 days → 2 hours = trusted numbers faster. | "Where does data slow your relationship managers most today: onboarding, credit decisions, or client insight?" |
+| **Ms. Nguyen Van Linh** — Chief Private Banking Officer | Affluent/HNW clients, wealth products, personalisation, cross-sell with securities and insurance | Personalisation and next-best-offer at scale; one customer view across bank, securities, insurance (Techcom Life, TCGI); privacy by design. Your Lazada/Makro recommender and segmentation work maps here. | "How much of a client's relationship across the bank, securities and insurance can you see in one view today?" |
+| **Mr. Nguyen Xuan Minh** — Chairman of the BOD, Techcom Securities (TCX) | Securities growth: FY25 PBT VND 7.1tn (+50%), listed Oct 2025, HOSE brokerage 9.0%; risk and peak-volume resilience | Real-time data and risk: streaming trade data, margin-risk monitoring, governance (securities also answers to SSC). Your Kafka/Flink streaming experience. | "As the platform scales, how are you thinking about real-time risk and data sharing between the bank and securities?" |
+| **Mr. Raymundo Yu** — Senior Advisor of BOD | Board-level view: governance, risk, international best practice | Governance and discipline: lineage, auditability, control framework; short, structured, humble. Let him lead. | "From your board perspective, what separates banks that really monetise data from those that just invest in it?" |
+
+**Titles are only what the agenda says.** I could not verify backgrounds — look each person up on LinkedIn / Techcombank's site tonight (10 min each) before using any personal detail.
+
+### 5.0b Per-leader script: opener, talk, 3 questions, close (added 20 Oct 2026)
+
+**1. Dr. Jens Lottner (CEO) — only if he opens the door**
+- *Opener:* "Dr. Lottner, thank you for the strategy talk. I'm Prem, a data engineering leader from Singapore."
+- *Talk (15 sec):* "The 2030 goal of about 30 million customers needs data reuse to be repeatable, not project by project."
+- *Questions:* (1) "What is the one capability you want the data platform to give the bank in 18 months?" (2) "Where has AI delivered the clearest productivity gain so far?" (3) "What would slow the 30-million-customer goal most, if anything?"
+- *Close:* "Thank you, I won't take more of your time."
+
+**2. Ms. Veo Nguyen (Chief People Officer) — your first stop**
+- *Opener:* "Thank you for hosting tonight. I'm Prem, applying for the Director, Data Engineering role."
+- *Talk:* grew a team from 8 to 30, promoted engineers to senior and principal; TRC holder, can be in HCMC within 30 days.
+- *Questions:* (1) "Which senior data roles are hardest to fill and why?" (2) "What makes a senior hire succeed in the first year here?" (3) "Who owns the Director, Data Engineering hiring — could you introduce me?"
+- *Close:* "May I send you a short follow-up tomorrow?"
+
+**3. Ms. Phan Thi Hai Yen (Chief CIBG Officer)**
+- *Opener:* "I enjoyed the panel, especially the point about [one thing she said]."
+- *Talk:* "At Makro I cut month-end close from five days to two hours; the same discipline gives relationship managers a trusted single client view."
+- *Questions:* (1) "Where does data slow your relationship managers most — onboarding, credit decisions or client insight?" (2) "How do you track a client's activity across lending, trade and securities today?" (3) "What reporting would you want in real time that you get next day?"
+- *Close:* "I'd be glad to share how I'd approach this."
+
+**4. Ms. Nguyen Van Linh (Chief Private Banking Officer)**
+- *Opener:* "I was interested in your view on private banking client expectations."
+- *Talk:* "My recommender and segmentation work taught me that personalisation only works with one clean customer view and strong privacy controls."
+- *Questions:* (1) "How much of a client's relationship across bank, securities and insurance can your team see in one view?" (2) "What makes a wealth client trust the bank's recommendations?" (3) "Which insight would help your advisers most that they lack today?"
+- *Close:* "Thank you, that was very useful."
+
+**5. Mr. Nguyen Xuan Minh (Chairman, Techcom Securities)**
+- *Opener:* "Congratulations on the Techcom Securities listing and last year's results."
+- *Talk:* "Streaming data and real-time risk at peak volume is where I've worked: Kafka and Flink at Lazada, 100M+ events a day."
+- *Questions:* (1) "As volumes grow, how do you think about real-time risk and margin monitoring?" (2) "How closely should data be shared between the bank and securities, given the different regulators?" (3) "What has been hardest to scale technically since the listing?"
+- *Close:* "Thank you, I learned a lot."
+
+**6. Mr. Raymundo Yu (Senior Advisor, BOD)**
+- *Opener:* "I'd value your perspective if you have a minute."
+- *Talk:* governance only — lineage, audit trail, controls. Short and humble.
+- *Questions:* (1) "What separates banks that truly monetise data from those that just invest in it?" (2) "What do boards most need to see about data and AI risk?" (3) "What advice would you give someone joining to lead data engineering?"
+- *Close:* "Thank you for your time."
+
+**Rules for every conversation:** ask one question at a time, listen, repeat one thing they said, never criticise, 3–5 minutes max, write the notes the same night.
+
+**Time plan for the 100-minute reception**
+1. First 15 min: find the **Chief People Officer** and ask who runs data engineering.
+2. Next 30 min: **CIBG** and **Private Banking** leaders — be useful, not salesy.
+3. Next 20 min: other candidates and Techcombank engineers/managers.
+4. Last 20 min: **CEO / advisor** only if a natural opening appears. Never queue to pitch.
+5. Leave by ~21:15; write notes that night; thank-yous within 24h.
+
+**One line for everyone (adapt):** "My background is regulated banking data (Standard Chartered AML) plus consumer-scale platforms (Lazada, Makro). I'm here because Techcombank is genuinely using data to grow. What does data mean for your area?"
+
+**Do not:** talk Hadoop/Flink with a private banker; pitch the CEO; hand out a CV unasked; criticise any area.
+
+### 5.1 (Fallback — if data leaders attend) Likely panel composition and what each person probably cares about
 Prem cannot be certain who is on the panel, but the JD and the company PDF give strong signals.
 
 | Likely panelist | What they probably care about | Prem's hook |
@@ -360,7 +430,7 @@ Prem cannot be certain who is on the panel, but the JD and the company PDF give 
 3. "How much appetite is there to invest in a graduate pipeline versus buying senior?"
 
 ### 5.3 Positioning Prem's AWS Professional Services delivery experience as directly applicable
-- **AWS Solutions Architect Associate** + delivery experience is a direct match for Techcombank's AWS-anchored cloud strategy (company PDF p.4 references cloud as a primary direction). Prem is not "consulting" — he has *operated* the platforms.
+- **AWS Solutions Architect Associate** + delivery experience is a direct match for Techcombank's AWS/Databricks stack (public reports show Amazon Bedrock use at Techcombank; verify). Prem is not "consulting" — he has *operated* the platforms.
 - **Reframe the Xendit FinOps story** as a banking-relevant discipline: "In a regulated environment the cost story is the trust story — if you cannot explain the bill to the CFO, you cannot defend the architecture to the board. I cut forty percent out of cloud spend in a regulated-payments business while growing volumes. That muscle transfers directly."
 - **Reframe Makro's "bank-like controls"** explicitly: "My retail platforms are run to financial-controls standard because they feed the statutory close. The audit, lineage, and access-control patterns from SCB AML are the patterns my retail team operates under today."
 
@@ -372,7 +442,7 @@ Concrete tactics:
 
 1. **Be the person with the question, not the person with the answer.** The candidates who ask the best questions get remembered. Use the Q12 line — "what is the one decision the data platform is currently blocking?" — at the reception.
 2. **Be specific, not generic.** When asked "tell me about a platform you built", the answer is *ten billion rows a day, month-end from five days to two hours, forty percent cost takeout, 50+ executive dashboards*. Not "we modernised data infrastructure".
-3. **Bring one piece of value.** Have one concrete observation that the panel does not already know. Example: "I read in your DMA 2025 that you're #1 in digital satisfaction, and your NPS data would be a fantastic first project for the personalisation roadmap — the model is the easy part, the labelling on your own NPS data is the hard part." That is a sentence only Prem would say.
+3. **Bring one piece of value.** Have one concrete observation that the panel does not already know. Example: "I saw Decision Lab's 2025 ranking has you #1 on satisfaction, and your NPS data would be a fantastic first project for the personalisation roadmap — the model is the easy part, the labelling on your own NPS data is the hard part." That is a sentence only Prem would say.
 4. **Use the tribe/squad vocabulary correctly.** It signals Prem has read the JD *and* the company context. Most candidates will use "team" and "stakeholders"; Prem uses "squad, chapter, tribe, paved road."
 5. **Close loops.** If Prem says "I'll send you the lakehouse pattern we used at Makro", send the link the next day. Three of the four candidates will not. This alone can be decisive.
 6. **Help the other candidates.** Offer to introduce a candidate to someone in your network if you overhear a fit. This is counter-intuitive but it is read as senior behaviour and it is remembered.
@@ -467,6 +537,33 @@ Concrete tactics:
 
 ---
 
+### 6b. Why Data Director candidates at a bank like Techcombank typically fail (added 20 Oct 2026)
+
+> ⚠️ **Honest source note:** I found **no public account** of why specific Techcombank Director-level data candidates were rejected (Glassdoor/Indeed show only general feedback: ~69% positive experience, difficulty ~3/5, multiple rounds, skills tests, presentations, background checks). The list below is **inferred** from the JD (40000058), the bank's public strategy and common bank-hiring patterns — treat it as a risk checklist, not as facts about past candidates.
+
+| # | Likely reason for no offer | What the panel hears | How Prem counters it |
+|---|---|---|---|
+| 1 | **Strategy talk, no hands-on depth** — JD wants "architect hat", dimensional models, Flink/Kafka, Arrow | "A manager who can't debug or design" | Bring one detailed design story (grain, SCD2, CDC, reconciliation). Be honest on Flink depth. |
+| 2 | **Thin on governance/regulation** — JD asks Level 4 in governance, metadata, data management | "Great engineer, not safe for a bank" | Lineage, data contracts, PII at ingest, audit trail, maker-checker. Say "I'd align with your compliance team" on circulars. |
+| 3 | **Treating Techcombank as greenfield** — they already run Databricks (Oct 2024), 45+ ML models | "Did not do the homework" | Cite Databricks adoption; ask what's hard about scaling and governing it. |
+| 4 | **Wrong numbers or stale facts** — e.g. CEO tenure, customer count, NIM | "Careless with facts" (fatal in a bank) | Use verified numbers only (DEEP_DIVE §21). Hedge when unsure. |
+| 5 | **No people-leadership evidence** — JD requires 4+ years managing, hiring, KPIs/KRAs | "Individual contributor in a Director title" | 8 → 30 team story, promotions, a performance-management example, one attrition lesson. |
+| 6 | **Retail/e-commerce only, no banking proof** | "Doesn't know our risk culture" | Lead with Standard Chartered AML (15+ countries) and DBS; show controls thinking. |
+| 7 | **Overselling / arrogance / criticising the bank** | "Cultural fit risk, loss of face" | Credit the team, frame gaps as opportunities, listen more than talk. |
+| 8 | **Over-qualified / flight-risk perception** — a Head applying for a Director | "Will he leave or be bored?" | Say plainly: "I want to be closer to the build." Mention TRC and 30-day move to remove risk. |
+| 9 | **Vague answers, no numbers, no trade-offs** | "Cannot own a decision" | Answer frame: headline, number, risk, control, question back (Playbook §1.7). |
+| 10 | **No follow-through after the event** | "Not serious" | Send thank-you within 24h, with one specific takeaway and the promised one-page note. |
+| 11 | **Relocation/visa/notice-period ambiguity** | "Hiring risk, slow start" | State TRC, notice period and start date clearly, once. |
+| 12 | **Panel mismatch** — impressing one person, ignoring the CFO/CRO/CTO | "No cross-functional influence" | Prepare one line for each exec type (Playbook §1.5, §1.8). |
+
+**Self-test before Oct 23 (answer yes to all):**
+- [ ] Can I explain one architecture end-to-end *and* one team-scaling story in 90 seconds each?
+- [ ] Can I name 3 verified Techcombank facts without notes (18.2M customers, Databricks Oct 2024, NIM 3.6%)?
+- [ ] Do I have a one-line answer for "why a Director role?" and "why banking again?"
+- [ ] Do I know exactly what I will send within 24 hours after meeting someone?
+
+---
+
 ## 7. 24-HOUR PRE-EVENT CHECKLIST
 
 ### Tonight (Oct 22) — research and preparation
@@ -474,15 +571,15 @@ Concrete tactics:
 **Research (90 min total):**
 - [ ] Read the **Techcombank 2025 Annual Report** summary on the company website. Note any new CDO/CIO appointment, the data platform language they use, the regulatory references.
 - [ ] Read the **two most recent Techcombank press releases** on data / AI / digital. Quote one specific phrase from one of them in the 2-minute pitch.
-- [ ] Skim the **DMA 2025 (Digital Made in Asia)** report summary that Techcombank references. Note the #1 in digital satisfaction context.
+- [ ] Skim Decision Lab's 2025 Bank Satisfaction Rankings (Vietnam News, 21 Apr 2025) and the 6M26 press release; read the 9M26 release (20 Oct).
 - [ ] Read the **two most recent Techcombank LinkedIn posts from the CEO** (Jens Lottner) so Prem can reference one specific initiative in conversation.
 - [ ] Identify the **panelist names** from the RSVP / agenda if Techcombank publishes them. If not, ask the recruiter for names tomorrow morning.
 - [ ] **LinkedIn research:** for each panelist, find their last 5 posts. One specific question per panelist, prepared in advance.
 
 **Numbers to memorise cold (no prompting):**
-- [ ] 14.5M+ customers, 15.5M digital banking users, 50%+ digital adoption growth (company PDF p.1)
-- [ ] 4× faster transaction processing, #1 in digital satisfaction (DMA), #1 retail banking trust (company PDF p.2)
-- [ ] 30%+ YoY digital adoption growth
+- [ ] 18.2M customers (6M26), 66.3% digitally acquired, PBT VND 18.5T +22.5% (6M26 release)
+- [ ] #1 Decision Lab 2025; NIM LTM 3.6%; CASA 38.3%; NPL 1.15%; CIR ~30%
+- [ ] Databricks adopted Oct 2024 (50+ systems, 45+ ML models)
 - [ ] Prem's CV: 15+ years, ~30 people, $3M, 10bn+ rows/day, 5 days → 2 hours, 50+ dashboards, 40% cloud cost takeout, 100M+ events/day at Lazada, 15+ countries at SCB
 
 **Talking points to rehearse out loud (3× each, timed):**

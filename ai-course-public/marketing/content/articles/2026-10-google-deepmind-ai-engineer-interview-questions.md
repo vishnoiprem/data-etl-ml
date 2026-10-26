@@ -6,7 +6,7 @@
 
 DeepMind's interview is the one where the math comes back.
 
-Where OpenAI tests production-engineering instincts and Anthropic tests safety reasoning, DeepMind tests **research depth** — and it tests it the old-fashioned way. There's a 60-minute oral quiz round on linear algebra, probability, and ML fundamentals. There's a 90-minute "broken neural network" round where they hand you a training script that runs without errors but plateaus at loss = 2.3, and you find the bugs. And there's a 30-minute research talk where you defend your work against an interviewer who's read the paper 3 times and is looking for the 3 ablations you didn't run.
+Where OpenAI tests production-engineering instincts and Anthropic tests safety reasoning, DeepMind tests **research depth** — and it tests it the old-fashioned way. There's a 60-minute oral math quiz round on linear algebra, probability, and ML fundamentals (Research Scientist track only — for pure SWE track, math is folded into the ML coding round). There's a 45-60-minute "broken neural network" / code-review round where they hand you a training script that runs without errors but plateaus at loss = 2.3, and you find 3-4 bugs. And there's a 60-minute research paper discussion where you defend methodology, weaknesses, and extensions against an interviewer who's read the paper 3 times.
 
 The 60-second pitch: **DeepMind is hiring research engineers who can derive the gradient of logistic regression on a whiteboard AND debug a CUDA out-of-memory error in production. The candidate who only has research depth loses to the candidate who also has shipping instinct. The wrong choice is to skip the math prep. The right choice is to spend 8 hours on quiz prep, 8 hours on implementation, and 8 hours on the research talk defense.**
 
@@ -28,12 +28,12 @@ The 60-second pitch: **DeepMind is hiring research engineers who can derive the 
 
 | Level | Title | Total comp | Base | Stock/yr |
 |-------|-------|------------|------|----------|
-| L4 | SWE II | $400K | $185K | $215K |
-| L5 | Senior SWE | $700K | $240K | $460K |
-| L6 | Staff SWE | $1.1M | $290K | $810K |
-| L7 | Senior Staff | $1.5M+ | — | — |
+| L4 | SWE II | ~$280-400K | $185K | ~$100-215K |
+| L5 | Senior SWE | ~$451K (median) | $240K | ~$210K |
+| L6 | Staff SWE | ~$664K (median) | $290K | ~$370K |
+| L7 | Senior Staff | ~$1M-$1.2M | — | — |
 
-**Note:** DeepMind total comp is ~10-15% below OpenAI / Anthropic at the same level, but the Google brand and the internal mobility are real perks. Many candidates take the pay cut for the optionality.
+**Note:** DeepMind-specific offers cluster 10-20% above the generic Google L-band medians (per AI Paygrades 2026); the table above uses generic Google L-band medians as the floor. DeepMind's comp is ~20-40% below OpenAI / Anthropic at the same level, but the Google brand, internal mobility (you can move between DeepMind, Google Brain, Search, Cloud), and the liquid Alphabet stock are real perks. Many candidates take the pay cut for the optionality. Process for senior+ roles takes 8-12 weeks — significantly longer than OpenAI/Anthropic.
 
 ---
 
@@ -64,11 +64,12 @@ The 60-second pitch: **DeepMind is hiring research engineers who can derive the 
 
 After reading ~12 first-person DeepMind interview reports from 2026, the same 5 patterns show up in every successful and every failed loop:
 
-1. **The math comes back.** The oral quiz round is real. Candidates report being asked to derive the gradient of logistic regression on a whiteboard, explain why L2 is equivalent to a Gaussian prior, and compute the MLE of a Gaussian. Skipping math prep = failing the loop.
-2. **The broken neural network is the signature round.** A 90-min round where the training script runs without errors but the loss plateaus. The candidate who finds the 3 bugs (data leak, learning rate, normalization) in 60 min passes. The candidate who finds 1 in 90 min loses.
-3. **The research talk is a defense, not a presentation.** You present for 15 min, they grill you for 15 min on the ablations. The candidate who can name the 3 things they didn't test wins. The candidate who defends everything loses.
-4. **The system design round is ML-infra-heavy.** Not generic SWE design. Telemetry for training jobs, experiment tracking, model serving, distributed training. The candidate who treats it like a generic system-design interview loses.
-5. **The "Googliness" round is the soft-skill filter.** "Why DeepMind, specifically?" "A time you disagreed with your manager." "A time you changed your mind." Generic STAR answers lose. Specific DeepMind bets win.
+1. **The math comes back — but only for the Research track.** The 60-min oral math quiz (linear algebra, probability, optimization, gradient flow, Bayesian inference, convergence proofs) is real for the Research Scientist (RS) track. For pure SWE track, math is folded into the ML coding round, not a separate oral quiz. Candidates report being asked to derive the gradient of logistic regression on a whiteboard, explain why L2 is equivalent to a Gaussian prior, and compute the MLE of a Gaussian. Skipping math prep = failing the loop (for RS track).
+2. **The broken neural network is the signature round (45-60 min, not 90).** A code-review round where the training script runs without errors but the loss plateaus. The candidate who finds the 3-4 bugs (data leak, learning rate, normalization, label mismatch) in 45 min passes. The candidate who finds 1 in 60 min loses. The loss plateauing at exactly the class prior is the giveaway for a label leak.
+3. **The research paper discussion is a 60-min defense.** Unlike a "present your own work" format, this is a 60-min paper discussion where the interviewer picks a paper (often yours, often someone else's) and you defend methodology, weaknesses, and extensions. The candidate who can name the 3 ablations they didn't run wins. The candidate who defends everything loses.
+4. **The system design round is ML-infra-heavy, track-dependent.** For Research Engineer: distributed training systems design (pipeline/tensor parallelism, ZeRO, DeepSpeed) + evaluation infrastructure (harnesses, contamination, reproducibility). For pure SWE: generic system design + 1 domain-depth round on ML serving. The candidate who treats it like a generic system-design interview loses.
+5. **The "Googliness and Leadership" round is the soft-skill filter.** STAR-format behavioral. "Why DeepMind, specifically?" "A time you disagreed with your manager." "A time you changed your mind." Generic STAR answers lose. Specific DeepMind bets win. Note: there are TWO Googliness touchpoints — a pre-onsite behavioral phone screen, plus the onsite Googliness round.
+6. **AI tools policy is more conservative than OpenAI/Anthropic.** 2026 reports indicate DeepMind is generally AI-prohibited or heavily limited in the technical rounds — more conservative than other frontier labs. The take-home is the exception; live coding is not.
 
 ---
 
@@ -129,7 +130,9 @@ The research talk defense is graded on whether you can name the limits of your o
 
 ### Meta-answer 5: "Why DeepMind, specifically"
 
-The Googliness round is graded on whether you have a specific reason for being at DeepMind. The wrong answer: "I want to work on AGI." The right answer: "I want to work on [specific DeepMind bet — Gemini, AlphaFold, the robotics team, the safety team] because [specific reason — the eval gap I'd want to close, the scaling law I'd want to test, the safety mechanism I'd want to validate]. I disagree with [specific other bet] and would want to test [specific alternative]." **Specific bet, specific disagreement, specific test.**
+The Googliness round is graded on whether you have a specific reason for being at DeepMind. The wrong answer: "I want to work on AGI." The right answer: "I want to work on [specific 2026 DeepMind bet — the Gemini family, AlphaFold/AlphaGenome/AlphaEarth/AlphaEvolve, Gemini Robotics, or the AI Control Roadmap safety work] because [specific reason — the eval gap I'd want to close, the scaling law I'd want to test, the safety mechanism I'd want to validate]. I disagree with [specific other bet] and would want to test [specific alternative]." **Specific bet, specific disagreement, specific test.**
+
+**Note on the 2026 strategic landscape:** DeepMind's flagship 2026 safety bet is the **AI Control Roadmap** (treat agents as insider threats, capability-tiered defenses) — different framing from OpenAI's deliberative alignment or Anthropic's Constitutional AI. Gemini Robotics 2 is the headline robotics bet. The open-model channel is **Gemma**. Cite the 2026 work, not the 2014-2020 DeepMind heritage.
 
 ---
 
@@ -169,6 +172,22 @@ The Googliness round is graded on whether you have a specific reason for being a
 
 ---
 
+## What failed DeepMind candidates said they did wrong
+
+Across 2026 reports, the patterns cluster around three things: skipping the math, under-defending the paper, and conflating DeepMind with generic Google.
+
+**1. They skipped the math quiz prep (RS track).** Multiple 2026 RS-track candidates report being asked to derive gradients, MLE, MAP, and convergence proofs on a whiteboard — and freezing. The fix: 8 hours of whiteboard derivation, timed, with a friend grilling you. If you can't derive the gradient of logistic regression in 5 minutes, you're not ready.
+
+**2. They defended their own paper instead of discussing the chosen one.** The research paper discussion isn't a "present your work" round. The interviewer picks a paper (yours or someone else's) and you defend *methodology, weaknesses, and extensions.* Candidates who came in with a 15-min rehearsed presentation lost to candidates who listened to the prompt, picked the right 2 weaknesses, and proposed 1 specific extension. The fix: practice discussing 3-5 papers you didn't write, including 1 from a competing lab.
+
+**3. They conflated DeepMind with generic Google.** DeepMind's comp is ~20-40% below OpenAI / Anthropic at the same level, and the process takes 8-12 weeks. Candidates who expected Google-SWE norms (LC/NC rounds, generic system design) lost to candidates who prepared for DeepMind-specific rounds (the broken NN, the math quiz, the ML-infra system design). The fix: read the TechPrep / Coditioning 2026 guides specifically for DeepMind, not the generic Google SWE interview guide.
+
+**4. They tried to use AI tools in the technical rounds.** DeepMind is more conservative than OpenAI/Anthropic on AI tool usage in 2026 — generally prohibited or heavily limited in live coding and the broken NN round. Candidates who prompted the tool got caught or got downleveled.
+
+**5. They under-prepared "Why DeepMind" with 2026-specific bets.** Candidates who cited AlphaGo (2016), DeepMind's founding mission (2010), or "I want to work on AGI" lost to candidates who cited Gemini Robotics 2, the AI Control Roadmap (May 2026), AlphaGenome, or the open-model Gemma channel. The fix: read 3 recent DeepMind blog posts (2026) before the loop. Cite the current work.
+
+---
+
 ## What's next
 
 **Article 4 (next week):** *The Meta AI Research Engineer Interview in 2026 (E5/E6/E7).* Meta's loop is the most product-sense-heavy of the frontier labs: a 45-min "product sense" round where you debug a fake ML product, plus the standard coding + system design.
@@ -202,6 +221,12 @@ The Googliness round is graded on whether you have a specific reason for being a
 - [Levels.fyi — Google DeepMind compensation](https://www.levels.fyi/companies/google/salaries/software-engineer) — the L4-L7 comp band
 - [Goodfellow — Deep Learning Book](https://www.deeplearningbook.org/) — chapters 1-4 (math foundations)
 - [Deisenroth — Mathematics for Machine Learning](https://mml-book.github.io/) — the linear algebra + probability primer
+- [TechPrep — DeepMind Interview Process 2026](https://www.techprep.app/blog/deepmind-interview-process) — the 2026 process map, broken NN round details
+- [techinterview.org — DeepMind Interview Process 2026](https://www.techinterview.org/post/3233474918/deepmind-interview-process-2026/) — the 60-min math quiz (RS track), AI tool policy, 8-12 week timeline
+- [PracHub — Google DeepMind SWE Guide 2026](https://prachub.com/resources/google-deepmind-software-engineer-interview-guide-2026-coding-ml-systems-and-research-collaboration) — the coding + ML systems + research collaboration structure
+- [AI Paygrades — DeepMind compensation](https://aipaygrad.es/) — DeepMind-specific offers clustering 10-20% above generic Google L-band
+- [DeepMind — Securing the future of AI agents (AI Control Roadmap)](https://deepmind.google/blog/securing-the-future-of-ai-agents/) — the 2026 safety bet
+- [DeepMind Robotics](https://deepmind.google/accelerators/robotics/) — Gemini Robotics 2 as the 2026 robotics bet
 
 *This is article 3 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1 (OpenAI) and 2 (Anthropic) are already live. Follow the publication to get the rest as they drop.*
 
