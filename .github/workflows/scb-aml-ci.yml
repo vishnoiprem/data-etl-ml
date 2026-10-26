@@ -1,0 +1,69 @@
+name: scb-aml-ci
+
+# Project-level CI for data-engineering/scb_aml_platform/.
+# Mirrors the gates in leads-ci.yml (pytest + pip-audit) but
+# scoped to this project so PRs touching it get fast feedback
+# without running the whole monorepo.
+#
+# Triggers on any change under data-engineering/scb_aml_platform/.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data-engineering/scb_aml_platform/**"
+      - ".github/workflows/scb-aml-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "data-engineering/scb_aml_platform/**"
+      - ".github/workflows/scb-aml-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: data-engineering/scb_aml_platform
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: data-engineering/scb_aml_platform/requirements.in
+      - name: Install runtime + dev deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.in
+          pip install pytest pytest-cov pytest-asyncio ruff
+      - name: Lint
+        run: |
+          ruff check scb_aml_platform/ tests/
+      - name: Test
+        run: |
+          python -m pytest tests/ -v --tb=short
+
+  audit:
+    name: pip-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: data-engineering/scb_aml_platform
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pip-audit==2.10.1
+          bash scripts/run_pip_audit.sh

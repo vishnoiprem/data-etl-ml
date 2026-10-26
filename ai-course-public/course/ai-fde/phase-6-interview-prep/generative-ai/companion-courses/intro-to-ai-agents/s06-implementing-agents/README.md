@@ -57,16 +57,8 @@ This section maps to **Phase 1 (Foundations) + Phase 2 (Applications) + Phase 3 
 ## The thesis
 
 **The implementation is 10 layers, each with a first-class artifact.** Framework choice is a config decision (L6.1). The shipping agent is a 200-line class (L6.2). Tools are a registry with schema validation (L6.3). Memory is a 3-tier store (L6.4). Guardrails are 5 layers around the loop (L6.5). The eval set is the spec (L6.6). Deployment is a 3-line Dockerfile (L6.7). Monitoring is 4 metrics on a dashboard (L6.8). Error handling is a 4-category taxonomy (L6.9). Debugging is a 5-step playbook (L6.10). **The FDE candidate who can name all 10 layers and the artifact for each is the candidate who can ship a production agent end-to-end.**
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  
