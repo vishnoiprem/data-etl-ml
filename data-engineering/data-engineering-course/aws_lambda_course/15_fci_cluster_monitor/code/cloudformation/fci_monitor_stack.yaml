@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  FCI Cluster Monitor — full stack for section 15. Provisions the
+  monitor Lambda, an SNS topic for ops alerts, a CloudWatch alarm on
+  FSx FreeStorageCapacity, and an EventBridge schedule that invokes
+  the Lambda every 5 minutes. The Lambda zip is uploaded via
+  ``aws cloudformation package`` (see deploy.sh).
+
+Parameters:
+  FsxFileSystemId:
+    Type: String
+    Description: FSx file system to monitor (e.g. fs-0123456789abcdef0).
+    AllowedPattern: "^fs-[0-9a-f]{8,40}$"
+  ThresholdGb:
+    Type: Number
+    Default: 100
+    Description: Grow the volume when StorageCapacity falls below this value.
+  GrowFactor:
+    Type: Number
+    Default: 1.2
+    MinValue: 1.01
+    MaxValue: 10.0
+    Description: Multiplicative grow factor (1.2 = +20%).
+  CooldownSeconds:
+    Type: Number
+    Default: 1800
+    Description: Minimum seconds between two grow calls.
+  OpsEmail:
+    Type: String
+    Description: Email address that subscribes to the SNS alert topic.
+    AllowedPattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+  ScheduleExpression:
+    Type: String
+    Default: "rate(5 minutes)"
+    Description: EventBridge schedule expression for the monitor Lambda.
+  CodeS3Bucket:
+    Type: String
+    Description: S3 bucket that holds the packaged Lambda zip (created by `aws cloudformation package`).
+  CodeS3Key:
+    Type: String
+    Default: "monitor_lambda.zip"
+    Description: S3 key of the packaged Lambda zip.
+
+Resources:
+  # ---------------------------------------------------------------------
+  # SNS topic + email subscription
+  # ---------------------------------------------------------------------
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: fci-monitor-alerts
+      DisplayName: FCI Cluster Monitor Alerts
+      KmsMasterKeyId: alias/aws/sns
+
+  AlertsTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref AlertsTopic
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref AlertsTopic
+            Condition:
+              StringEquals:
+                AWS:SourceOwner: !Sub "${AWS::AccountId}"
+
+  OpsEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref OpsEmail
+
+  # ---------------------------------------------------------------------
+  # IAM role for the monitor Lambda
+  # ---------------------------------------------------------------------
+  MonitorLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: fci-monitor-lambda-exec
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: fci-monitor-fsx
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - fsx:DescribeFileSystems
+                  - fsx:UpdateFileSystem
+                Resource:
+                  - !Sub "arn:aws:fsx:${AWS::Region}:${AWS::AccountId}:file-system/${FsxFileSystemId}"
+        - PolicyName: fci-monitor-sns
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref AlertsTopic
+        - PolicyName: fci-monitor-logs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+
+  # ---------------------------------------------------------------------
+  # Monitor Lambda
+  # ---------------------------------------------------------------------
+  MonitorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: fci-monitor
+      Runtime: python3.11
+      Handler: lambda_function.handler
+      Role: !GetAtt MonitorLambdaRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          FSX_FILE_SYSTEM_ID: !Ref FsxFileSystemId
+          THRESHOLD_GB: !Ref ThresholdGb
+          GROW_FACTOR: !Ref GrowFactor
+          COOLDOWN_SECONDS: !Ref CooldownSeconds
+          DRY_RUN: "false"
+          LOG_LEVEL: INFO
+      Code:
+        S3Bucket: !Ref CodeS3Bucket
+        S3Key: !Ref CodeS3Key
+
+  # ---------------------------------------------------------------------
+  # EventBridge schedule (every 5 min by default)
+  # ---------------------------------------------------------------------
+  MonitorSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: fci-monitor-every-5-min
+      Description: Triggers the FCI monitor Lambda on a fixed schedule.
+      ScheduleExpression: !Ref ScheduleExpression
+      State: ENABLED
+      Targets:
+        - Id: fci-monitor-target
+          Arn: !GetAtt MonitorFunction.Arn
+
+  MonitorSchedulePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref MonitorFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt MonitorSchedule.Arn
+
+  # ---------------------------------------------------------------------
+  # CloudWatch alarm on FSx FreeStorageCapacity
+  # ---------------------------------------------------------------------
+  FreeStorageAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: fci-monitor-fsx-free-storage-low
+      AlarmDescription: !Sub "Fires when FSx ${FsxFileSystemId} FreeStorageCapacity is below ${ThresholdGb} GiB."
+      Namespace: AWS/FSx
+      MetricName: FreeStorageCapacity
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: !Ref ThresholdGb
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: notBreaching
+      Dimensions:
+        - Name: FileSystemId
+          Value: !Ref FsxFileSystemId
+        - Name: StorageTier
+          Value: Standard
+      AlarmActions:
+        - !Ref AlertsTopic
+      OKActions:
+        - !Ref AlertsTopic
+
+Outputs:
+  MonitorFunctionArn:
+    Value: !GetAtt MonitorFunction.Arn
+    Description: ARN of the FCI monitor Lambda.
+  MonitorFunctionName:
+    Value: !Ref MonitorFunction
+    Description: Name of the FCI monitor Lambda.
+  AlertsTopicArn:
+    Value: !Ref AlertsTopic
+    Description: ARN of the SNS alerts topic.
+  AlertsTopicName:
+    Value: !GetAtt AlertsTopic.TopicName
+    Description: Name of the SNS alerts topic.
+  MonitorScheduleArn:
+    Value: !GetAtt MonitorSchedule.Arn
+    Description: ARN of the EventBridge schedule rule.
+  FreeStorageAlarmArn:
+    Value: !GetAtt FreeStorageAlarm.Arn
+    Description: ARN of the CloudWatch low-storage alarm.

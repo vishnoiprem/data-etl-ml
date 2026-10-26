@@ -106,3 +106,7 @@ The demo:
 | Eval cost | < $5 / candidate |
 | Regression detection accuracy | > 95% on injected regressions |
 | Coverage | ≥ 1 golden set + ≥ 1 adv set per use case |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

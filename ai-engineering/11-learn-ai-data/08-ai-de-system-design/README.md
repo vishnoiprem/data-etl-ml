@@ -51,3 +51,7 @@ By the end of Module 8 you can:
 ```
 
 Each design lesson in this module follows the framework. Use them as templates when you practice.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

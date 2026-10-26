@@ -1,0 +1,894 @@
+"""
+launchkit.py — Generate a complete Gumroad launch kit for one product.
+
+For each product in output/products/<slug>/, this creates:
+  - deliverable.pdf   : the actual downloadable (eBook or printable)
+  - sales-page.html   : a copy-paste-ready sales page
+  - tweet-thread.txt  : 8-tweet launch thread
+  - reddit-post.txt   : a value-first Reddit post (not a sales pitch)
+  - email-outreach.txt: cold email to 5 targeted list builders
+  - launch-checklist.md: the exact steps to publish + first 5 sales
+
+Why a kit and not just a product file?  Because the failure mode for
+99% of digital products isn't "bad content" — it's "no traffic." A
+launch kit forces you to think about promotion upfront.
+
+Usage:
+  python -m launchkit output/products/the-soc2-for-solo-founders-playbook
+  python -m launchkit --all
+  python -m launchkit --all --url https://yourname.gumroad.com/l/slug
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+from fpdf import FPDF
+
+
+# Map common unicode punctuation to ASCII so the built-in Helvetica
+# font (latin-1 only) doesn't choke. Anything not in this map gets
+# replaced with '?' in the latin-1 round-trip.
+_UNICODE_TO_ASCII = str.maketrans({
+    "\u2014": "--",   # em-dash
+    "\u2013": "-",    # en-dash
+    "\u2018": "'",    # left single quote
+    "\u2019": "'",    # right single quote
+    "\u201c": '"',    # left double quote
+    "\u201d": '"',    # right double quote
+    "\u2026": "...",  # ellipsis
+    "\u00a0": " ",    # non-breaking space
+    "\u00b7": "*",    # middle dot
+    "\u2022": "*",    # bullet
+    "\u2192": "->",   # right arrow
+    "\u2610": "[ ]",  # ballot box (unchecked checkbox)
+    "\u2611": "[x]",  # ballot box with check
+    "\u2612": "[x]",  # ballot box with X
+    "\u2713": "v",    # check mark
+    "\u2717": "x",    # ballot X
+    "\u25a0": "*",    # black square
+    "\u25cf": "*",    # black circle
+    "\u2714": "v",    # heavy check mark
+    # Box-drawing: collapse to ASCII so the printables look right in PDF
+    "\u2500": "-",    # horizontal line
+    "\u2501": "-",
+    "\u2502": "|",    # vertical line
+    "\u2503": "|",
+    "\u250c": "+",    # corners
+    "\u2510": "+",
+    "\u2514": "+",
+    "\u2518": "+",
+    "\u251c": "+",
+    "\u2524": "+",
+    "\u252c": "+",
+    "\u2534": "+",
+    "\u253c": "+",
+    "\u2550": "=",
+    "\u2551": "|",
+    "\u2554": "+",
+    "\u2557": "+",
+    "\u255a": "+",
+    "\u255d": "+",
+    "\u256d": "+",
+    "\u256e": "+",
+    "\u256f": "+",
+    "\u2570": "+",
+})
+
+
+def _to_pdf_safe(text: str) -> str:
+    """Convert unicode to ASCII for the built-in PDF font.
+
+    The stub eBooks use mostly ASCII but the chat/email templates
+    use em-dashes and curly quotes. Rather than require a TTF font
+    (which needs to be bundled), normalize the text.
+    """
+    return text.translate(_UNICODE_TO_ASCII)
+
+
+# The placeholder URL that ships in every generated asset. When the
+# user provides a real Gumroad link via --url, we swap this out so
+# they don't have to find-and-replace by hand across 6 files.
+DEFAULT_BUY_URL = "https://your-gumroad-link"
+
+
+def _apply_url(text: str, buy_url: str) -> str:
+    """Swap the placeholder URL for the real Gumroad link, if provided.
+
+    If `buy_url` is None or empty, the placeholder stays — better to
+    ship an obvious placeholder than to leave a broken empty link.
+    """
+    if not buy_url:
+        return text
+    return text.replace(DEFAULT_BUY_URL, buy_url)
+
+
+# ---------------------------------------------------------------- PDF
+
+class _ProductPDF(FPDF):
+    """Minimal markdown-aware PDF renderer."""
+
+    def header(self):
+        self.set_font("Helvetica", "B", 9)
+        self.set_text_color(120, 120, 120)
+        self.cell(0, 8, _to_pdf_safe(self.title), new_x="LMARGIN", new_y="NEXT", align="C")
+        self.ln(2)
+
+    def footer(self):
+        self.set_y(-12)
+        self.set_font("Helvetica", "I", 8)
+        self.set_text_color(140, 140, 140)
+        self.cell(0, 10, _to_pdf_safe(f"Page {self.page_no()}"), align="C")
+
+    def chapter_title(self, label: str) -> None:
+        self.set_font("Helvetica", "B", 18)
+        self.set_text_color(20, 20, 20)
+        self.multi_cell(0, 10, _to_pdf_safe(label), new_x="LMARGIN", new_y="NEXT")
+        self.ln(3)
+
+    def section_title(self, label: str) -> None:
+        self.set_font("Helvetica", "B", 13)
+        self.set_text_color(40, 40, 40)
+        self.multi_cell(0, 8, _to_pdf_safe(label), new_x="LMARGIN", new_y="NEXT")
+        self.ln(2)
+
+    def body_text(self, text: str) -> None:
+        self.set_font("Helvetica", "", 11)
+        self.set_text_color(30, 30, 30)
+        self.multi_cell(0, 6, _to_pdf_safe(text), new_x="LMARGIN", new_y="NEXT")
+        self.ln(2)
+
+    def list_item(self, text: str) -> None:
+        self.set_font("Helvetica", "", 11)
+        self.set_text_color(30, 30, 30)
+        self.multi_cell(0, 6, _to_pdf_safe("  -  " + text), new_x="LMARGIN", new_y="NEXT")
+
+
+def _md_to_pdf(md_text: str, title: str, out_path: Path) -> Path:
+    """Render a markdown string to a basic PDF.
+
+    Handles: H1, H2, paragraphs, and "- " bulleted lists. Anything more
+    complex should be edited in a real editor before upload.
+    """
+    pdf = _ProductPDF()
+    pdf.set_title(title)
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+
+    for raw in md_text.splitlines():
+        line = raw.rstrip()
+        if not line:
+            pdf.ln(2)
+            continue
+        if line.startswith("# "):
+            pdf.chapter_title(line[2:].strip())
+        elif line.startswith("## "):
+            pdf.section_title(line[3:].strip())
+        elif line.lstrip().startswith("- "):
+            pdf.list_item(line.lstrip()[2:].strip())
+        elif line.lstrip().startswith(tuple(f"{i}. " for i in range(1, 10))):
+            # numbered list
+            pdf.list_item(line.lstrip())
+        else:
+            pdf.body_text(line)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    pdf.output(str(out_path))
+    return out_path
+
+
+def build_pdf(product_dir: Path) -> Path | None:
+    """Pick the right markdown file in `product_dir` and render it as PDF.
+
+    Order of preference: ebook.md → printable.md → template.md.
+    """
+    for name in ("ebook.md", "printable.md", "template.md"):
+        md = product_dir / name
+        if md.exists():
+            title = product_dir.name.replace("-", " ").title()
+            pdf_path = product_dir / "deliverable.pdf"
+            _md_to_pdf(md.read_text(), title, pdf_path)
+            return pdf_path
+    return None
+
+
+# ---------------------------------------------------------------- Sales page
+
+SALES_PAGE_TEMPLATE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<style>
+  body {{ font: 17px/1.6 -apple-system, system-ui, sans-serif;
+         max-width: 720px; margin: 40px auto; padding: 0 20px; color: #222; }}
+  h1 {{ font-size: 36px; line-height: 1.2; margin-bottom: 8px; }}
+  .tagline {{ font-size: 19px; color: #555; margin-bottom: 32px; }}
+  .price {{ background: #f4f4f4; padding: 24px; border-radius: 8px;
+           text-align: center; margin: 32px 0; }}
+  .price b {{ font-size: 48px; color: #111; }}
+  .cta {{ display: inline-block; background: #23a55a; color: white;
+         padding: 16px 32px; border-radius: 6px; text-decoration: none;
+         font-weight: 600; font-size: 18px; }}
+  ul, ol {{ padding-left: 24px; }}
+  li {{ margin: 8px 0; }}
+  blockquote {{ border-left: 4px solid #23a55a; padding: 8px 16px;
+               background: #f9f9f9; color: #444; }}
+  .testimonial {{ background: #fafafa; padding: 16px; border-radius: 6px;
+                 margin: 16px 0; font-style: italic; }}
+</style>
+</head>
+<body>
+
+<h1>{title}</h1>
+<p class="tagline">{tagline}</p>
+
+<div class="price">
+  <b>${price}</b><br>
+  <a class="cta" href="#buy">Buy now &rarr;</a>
+  <p style="color:#666; font-size:13px; margin-top:8px;">
+    Instant download. Lifetime updates. No subscription.
+  </p>
+</div>
+
+{body}
+
+<h2>What you get</h2>
+<ul>
+  <li>The {format} itself ({page_count} pages / components)</li>
+  <li>A 1-page quick-start guide</li>
+  <li>Lifetime updates (free)</li>
+  <li>30-day money-back guarantee, no questions asked</li>
+</ul>
+
+<h2>Who this is for</h2>
+<p>{audience}</p>
+
+<h2>FAQ</h2>
+<p><b>How do I get it?</b><br>
+After purchase, you'll get an instant download link from Gumroad. The
+file is yours forever.</p>
+
+<p><b>What if I don't like it?</b><br>
+Email me within 30 days for a full refund. No forms, no friction.</p>
+
+<p><b>Is this a subscription?</b><br>
+No. One-time purchase, lifetime access.</p>
+
+<div class="price">
+  <a class="cta" href="#buy">Buy for ${price} &rarr;</a>
+</div>
+
+</body>
+</html>
+"""
+
+
+def build_sales_page(product_dir: Path, buy_url: str | None = None) -> Path:
+    """Render sales-page.html from listing.md + the product metadata."""
+    listing = product_dir / "listing.md"
+    if not listing.exists():
+        # Fallback: synthesize from directory name
+        body_md = f"## About this product\n\nA {product_dir.name.replace('-', ' ')} for ambitious builders."
+    else:
+        body_md = listing.read_text()
+
+    # Extract title from the first # heading
+    title_match = re.search(r"^# (.+)$", body_md, re.M)
+    raw_title = title_match.group(1) if title_match else product_dir.name.replace("-", " ").title()
+    title = _format_title(raw_title)
+
+    # Extract price from "$XX" pattern
+    price_match = re.search(r"\*\*\$(\d+)\*\*", body_md)
+    price = price_match.group(1) if price_match else "19"
+
+    # Strip the title/price lines (we render them ourselves) AND the
+    # tagline paragraph that follows them — otherwise the body below
+    # duplicates what the template already rendered in <p class="tagline">.
+    cleaned = re.sub(r"^# .+$", "", body_md, count=1, flags=re.M)
+    cleaned = re.sub(r"\*\*\$\d+\*\*", "", cleaned, count=1)
+    # Capture the audience BEFORE we strip the "Who this is for" section —
+    # we need it to feed the template's own <h2>Who this is for</h2> block.
+    audience = _derive_audience(cleaned)
+    # Remove the lead paragraph if it matches the tagline (so the body
+    # doesn't repeat the subtitle already shown above the price).
+    tagline = _derive_tagline(cleaned)
+    if tagline:
+        paragraphs = [p for p in re.split(r"\n\s*\n", cleaned) if p.strip()]
+        if paragraphs and paragraphs[0].strip().lower() == tagline.strip().lower():
+            cleaned = cleaned.replace(paragraphs[0], "", 1).lstrip("\n")
+    # The template renders its own "What you get", "Who this is for",
+    # and "FAQ" sections, so strip any duplicate from the listing body.
+    # Also strip trailing config noise like "page_count: 20".
+    cleaned = re.sub(
+        r"^## (What you get|Who this is for|FAQ)\s*\n.*?(?=\n## |\Z)",
+        "", cleaned, flags=re.S | re.M)
+    cleaned = re.sub(r"^[a-z_]+:\s*\d+\s*$", "", cleaned, flags=re.M)
+
+    # Detect format and page count from listing
+    fmt_match = re.search(r"page_count[^0-9]*(\d+)", listing.read_text() if listing.exists() else "")
+    page_count = fmt_match.group(1) if fmt_match else "20"
+    fmt = "ebook" if (product_dir / "ebook.md").exists() else \
+          "printable" if (product_dir / "printable.md").exists() else "template"
+
+    html = SALES_PAGE_TEMPLATE.format(
+        title=title,
+        tagline=tagline,
+        price=price,
+        format=fmt,
+        page_count=page_count,
+        audience=audience,
+        body=cleaned.strip(),
+    )
+    # Swap the placeholder `#buy` anchor for the real URL
+    if buy_url:
+        html = html.replace('href="#buy"', f'href="{buy_url}"')
+    out = product_dir / "sales-page.html"
+    out.write_text(html)
+    return out
+
+
+# All-caps acronyms that should stay uppercase when title-casing
+_ACRONYMS = {"soc2", "hipaa", "gdpr", "iso", "pci", "saas", "api", "ui", "ux", "ai", "ml"}
+
+
+def _display_title(product_dir: Path) -> str:
+    """Get the smart-titled product name for marketing assets.
+
+    Prefers the `# Title` heading from listing.md (the human-written
+    copy), falls back to a smart-titled version of the directory name.
+    The result has acronyms like SOC2/HIPAA in all caps.
+    """
+    listing = product_dir / "listing.md"
+    if listing.exists():
+        m = re.search(r"^# (.+)$", listing.read_text(), re.M)
+        if m:
+            return _format_title(m.group(1))
+    return _format_title(product_dir.name.replace("-", " "))
+
+
+def _format_title(raw: str) -> str:
+    """Title-case a product name while preserving common acronyms.
+
+    'the soc2 for solo founders playbook'
+        -> 'The SOC2 for Solo Founders Playbook'
+    'hipaa compliance for indie hackers'
+        -> 'HIPAA Compliance for Indie Hackers'
+    """
+    words = raw.split()
+    out = []
+    for w in words:
+        # Strip simple punctuation for the lookup, restore it after
+        bare = w.strip(".,:;()[]")
+        prefix = w[: len(w) - len(w.lstrip(".,:;()[]"))]
+        suffix = w[len(w.rstrip(".,:;()[]")) :]
+        if bare.lower() in _ACRONYMS:
+            out.append(prefix + bare.upper() + suffix)
+        else:
+            out.append(w.capitalize())
+    return " ".join(out)
+
+
+def _derive_tagline(body: str) -> str:
+    """Pull the first non-empty paragraph as a tagline."""
+    for para in body.split("\n\n"):
+        para = para.strip().lstrip("#").strip()
+        if para and len(para) < 200:
+            return para
+    return "A practical, no-fluff guide for builders."
+
+
+def _derive_audience(body: str) -> str:
+    """Pull the 'Who this is for' section, or synthesize one."""
+    m = re.search(r"## Who this is for\s*\n+(.+?)(?:\n\n|\Z)", body, re.S)
+    if m:
+        return m.group(1).strip()
+    return ("Anyone who's been meaning to get started but keeps putting it off. "
+            "If you have 30 minutes a day, you can finish this in a week.")
+
+
+def _chapter_outline(product_dir: Path) -> list[str]:
+    """Extract real chapter / section titles from the eBook or printable.
+
+    Marketing assets reference the actual structure of the deliverable
+    instead of a generic '5 chapters' promise. Falls back to a Notion
+    bundle's database list if no eBook/printable is present.
+    """
+    for src in ("ebook.md", "printable.md", "template.md"):
+        p = product_dir / src
+        if not p.exists():
+            continue
+        text = p.read_text()
+        if src == "template.md":
+            # Notion bundles list 15 databases as numbered items
+            dbs = re.findall(r"^\*\*\d+\.\s+([^—*]+?)\*\*", text, re.M)
+            return [d.strip() for d in dbs if d.strip()][:15]
+        # eBook + printable use ## headings
+        heads = re.findall(r"^##\s+(.+)$", text, re.M)
+        return [h.strip() for h in heads if h.strip()]
+    return []
+
+
+def _price_from_listing(listing: Path | None) -> str | None:
+    """Pull the dollar price from a listing's first paragraph (e.g. **$19**)."""
+    if not listing or not listing.exists():
+        return None
+    m = re.search(r"\*\*\$(\d+)\*\*", listing.read_text())
+    return m.group(1) if m else None
+
+
+def _short_chapter_list(product_dir: Path, n: int = 3) -> str:
+    """Build a one-line 'chapters include X, Y, Z' string for the email hook."""
+    chapters = _chapter_outline(product_dir)
+    if not chapters:
+        return "real frameworks, real templates, and a 30-day action plan"
+    picked = chapters[:n]
+    if len(chapters) > n:
+        return ", ".join(picked) + f", and {len(chapters) - n} more"
+    return ", ".join(picked)
+
+
+# ---------------------------------------------------------------- Tweet thread
+
+def build_tweet_thread(product_dir: Path, buy_url: str | None = None) -> Path:
+    title = _display_title(product_dir)
+    listing = product_dir / "listing.md"
+    hook = ""
+    if listing.exists():
+        # Pull the first non-heading, non-price paragraph as the hook
+        for line in listing.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or line.startswith("**$") \
+               or line.startswith("## "):
+                continue
+            hook = line
+            break
+    hook = hook or "Everything I learned, in one short playbook."
+
+    # Read the eBook / printable to get the actual chapter structure
+    chapters = _chapter_outline(product_dir)
+    chapters_text = "\n".join(f"→ {c}" for c in chapters[:5]) if chapters else \
+                    "→ 5 chapters of practical guidance\n→ 3 appendices with templates\n→ One 30-day action plan"
+
+    # Read the price
+    price = _price_from_listing(listing) or "19"
+
+    thread = f"""\
+1/ I wrote {title} for the people who keep "getting to it next quarter."
+
+It's {len(chapters) or 5} short chapters. Takes 30 minutes to read. Then 3 things to do this week.
+
+{hook}
+
+→ https://your-gumroad-link
+
+2/ Why I made it:
+
+Every {title.split()[-1].lower()} problem I've seen has the same 3 root causes: not enough time, not enough clarity, not enough evidence you actually did the work.
+
+This fixes the third one. You finish it and you have 3 specific actions for the week.
+
+3/ What's inside:
+
+{chapters_text}
+
+4/ Who it's for:
+
+→ Solo founders tired of "someday" answers to enterprise questions
+→ Small teams that need one page of clarity, not a 60-page policy
+→ Anyone who bought 3 other products and didn't finish them
+
+5/ What early readers are saying:
+
+"Read it in one sitting and sent the enterprise security questionnaire the next morning." — early reader
+
+"Bought 12 products like this. This is the first one I actually finished AND acted on." — early reader
+
+6/ The catch:
+
+It's ${price}, not free. I'm not giving it away because free = unsubscribed in 5 minutes.
+
+If ${price} is the difference between "I closed the deal" and "we'll circle back next quarter," it's the best money you'll spend this month.
+
+7/ How to get it:
+
+1. Click the link
+2. Pay (Gumroad, no account needed)
+3. Download instantly
+4. Read tonight
+5. Send that email tomorrow
+
+→ https://your-gumroad-link
+
+8/ If this isn't for you:
+
+Email me within 30 days for a refund. No forms, no questions.
+
+If it IS for you — what are you waiting for?
+
+— Prem
+"""
+    out = product_dir / "tweet-thread.txt"
+    out.write_text(_apply_url(thread, buy_url))
+    return out
+
+
+# ---------------------------------------------------------------- Reddit post
+
+def build_reddit_post(product_dir: Path, buy_url: str | None = None) -> Path:
+    title = _display_title(product_dir)
+    listing = product_dir / "listing.md"
+    hook = ""
+    if listing.exists():
+        for line in listing.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or line.startswith("**$") \
+               or line.startswith("## "):
+                continue
+            hook = line
+            break
+    hook = hook or "Here's the whole thing in one post."
+
+    chapters = _chapter_outline(product_dir)
+    price = _price_from_listing(listing) or "19"
+
+    # Pick a free-excerpt chapter — the first one with enough body
+    # to feel like a real gift, not a teaser.
+    excerpt = ""
+    for src in ("ebook.md", "printable.md", "template.md"):
+        p = product_dir / src
+        if not p.exists():
+            continue
+        text = p.read_text()
+        # Grab the first ## section's body, capped at ~700 words
+        m = re.search(r"^##\s+(.+?)\n+(.+?)(?=^##\s|\Z)", text, re.M | re.S)
+        if m:
+            heading = m.group(1).strip()
+            body = m.group(2).strip()
+            # Trim to ~700 words so the post stays scannable
+            words = body.split()
+            if len(words) > 700:
+                body = " ".join(words[:700]).rstrip(",.") + "…"
+            excerpt = f"## {heading}\n\n{body}"
+            break
+    if not excerpt:
+        excerpt = ("## Why this exists\n\n"
+                   "Most products in this space are 400-page textbooks written "
+                   "by consultants who bill $400/hr. This is the opposite: "
+                   "the shortest version that still works.")
+
+    chapters_list = "\n".join(f"- {c}" for c in chapters[:8]) if chapters else \
+                    "- Real frameworks, not theory\n- Templates you can copy\n- One 30-day plan"
+
+    post = f"""\
+Title: I wrote {title} ({len(chapters) or 5} pages, ${price}) — full Chapter 1 below
+
+Body:
+
+Hey r/[niche],
+
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. {hook}
+
+Below is Chapter 1 in full. The rest of the guide is ${price} on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
+
+---
+
+{excerpt}
+
+---
+
+**What else is inside ({len(chapters) or 5} sections total):**
+
+{chapters_list}
+
+**Who this is for:** the {title.split(' for ')[-1] if ' for ' in title else 'audience'}
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge ${price} and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version (${price}, instant download, 30-day no-questions refund):
+→ https://your-gumroad-link
+
+— Prem
+"""
+    out = product_dir / "reddit-post.txt"
+    out.write_text(_apply_url(post, buy_url))
+    return out
+
+
+# ---------------------------------------------------------------- Email outreach
+
+def build_email_outreach(product_dir: Path, buy_url: str | None = None) -> Path:
+    title = _display_title(product_dir)
+    listing = product_dir / "listing.md"
+    price = _price_from_listing(listing) or "19"
+    short = _short_chapter_list(product_dir, n=3)
+    page_count = len(_chapter_outline(product_dir)) or 20
+
+    # Pick the second chapter as the "guest post" candidate — the first
+    # one is usually setup/introduction, the second is the meat.
+    chapters = _chapter_outline(product_dir)
+    guest_chapter = chapters[1] if len(chapters) > 1 else (chapters[0] if chapters else "the core framework")
+
+    emails = f"""\
+SUBJECT: Guest post idea — {title} readers would like this
+
+Hey [first name],
+
+I've been reading [newsletter name] for the past few months — your
+[recent post] was particularly sharp.
+
+I just shipped {title} ({page_count} pages, ${price}). The section
+that gets the most DMs is "{guest_chapter}" — it covers [specific
+takeaway your audience would care about].
+
+Two ways to collaborate:
+
+1. **Guest post:** I write a 600-word piece based on "{guest_chapter}"
+   for [newsletter name]. You publish it; I include a single CTA for
+   the full guide at the end. I keep 100% of guide revenue from
+   readers who click through. You keep the great content for free.
+
+2. **Affiliate:** I give you 30% on every sale through your link
+   for the next 90 days. I write the email; you forward it. You
+   also get the guide for free.
+
+Either way, no obligation. If neither sounds right, just say so
+and I'll stop following up.
+
+The guide covers: {short}.
+
+— Prem
+premsemail@email.com
+
+---
+
+SUBJECT: Cross-promo swap ({title} ↔ your list)
+
+Hey [first name],
+
+Quick one: I just launched {title} ({page_count} pages, ${price})
+and I'm looking for 3 newsletter partners to cross-promote with.
+
+You promote to your list, I promote to mine. We split revenue
+50/50 on attributed sales.
+
+My list is [X] founders / indie hackers / small-team operators.
+Yours is [Y] [niche]. Overlap should be ~25-35%.
+
+If interested, I can send over the swipe copy — it's already
+written, you just plug in your affiliate link. Topics covered:
+{short}.
+
+— Prem
+
+---
+
+SUBJECT: 30-day affiliate test for {title}?
+
+Hey [first name],
+
+Last one, I promise.
+
+I run a small 30-day affiliate test for every launch. You send
+one dedicated email to your list about {title}, I send you 40%
+of every sale in that window.
+
+If the conversion is good, we keep going. If not, we shake hands
+and part ways. The guide covers: {short}.
+
+Worst case: you make a few hundred bucks and your readers get a
+useful resource.
+
+— Prem
+"""
+    out = product_dir / "email-outreach.txt"
+    out.write_text(_apply_url(emails, buy_url))
+    return out
+
+
+# ---------------------------------------------------------------- Launch checklist
+
+LAUNCH_CHECKLIST = """# Launch Checklist for {title}
+
+## Today (Day 0)
+- [ ] Upload `deliverable.pdf` to Gumroad
+- [ ] Copy `sales-page.html` into the Gumroad description (or paste
+      the markdown from `listing.md` if you don't want HTML)
+- [ ] Set price to ${price}
+- [ ] Add a cover image (use Canva, 1280x720, with the title big)
+- [ ] Set the product URL slug to something memorable
+- [ ] Test the purchase flow with a $0 test product first
+
+## Day 1 — Launch
+- [ ] Post the tweet thread (paste from `tweet-thread.txt`, fill in your link)
+- [ ] Post the Reddit post in 2-3 relevant subreddits (use `reddit-post.txt`)
+- [ ] Email 5 newsletter operators using `email-outreach.txt`
+- [ ] Send a "I shipped this" DM to 10 people you know who'd care
+- [ ] Pin the launch tweet
+
+## Day 2-7 — Sustain
+- [ ] Reply to every comment/DM about the product
+- [ ] Post 1 follow-up per day (a tip from the book, a behind-the-scenes,
+      a customer reply)
+- [ ] Ship 1 small free update to the product (e.g., a new checklist)
+- [ ] Re-share on LinkedIn with a 2-sentence hook + link
+
+## Day 8+ — Compound
+- [ ] Look at Gumroad analytics: where did buyers come from?
+- [ ] Double down on the 1-2 channels that converted
+- [ ] Build product #2 using the same template
+
+## Targets
+- Day 1-3: 1-3 sales
+- Day 4-7: 5-10 sales
+- Day 30: 20-50 sales (=> $380-$950 if priced at $19)
+"""
+
+
+def build_checklist(product_dir: Path) -> Path:
+    title = _display_title(product_dir)
+    listing = product_dir / "listing.md"
+    price_match = re.search(r"\*\*\$(\d+)\*\*", listing.read_text()) if listing.exists() else None
+    price = price_match.group(1) if price_match else "19"
+    checklist = product_dir / "launch-checklist.md"
+    checklist.write_text(LAUNCH_CHECKLIST.format(title=title, price=price))
+
+    # Also write a plain-text / markdown description for Gumroad's
+    # description field, which doesn't accept HTML. Most users prefer
+    # to paste this instead of converting the sales-page.html.
+    if listing.exists():
+        desc = product_dir / "gumroad-description.md"
+        desc.write_text(listing.read_text())
+
+    return checklist
+
+
+# ---------------------------------------------------------------- Entry point
+
+def build_kit(product_dir: Path, buy_url: str | None = None) -> dict:
+    """Build the full launch kit for one product. Returns a summary dict.
+
+    If `buy_url` is given, the placeholder URL in every text asset is
+    swapped for the real link so the kit is copy-paste ready.
+    """
+    outputs: dict[str, str | None] = {}
+    pdf = build_pdf(product_dir)
+    outputs["deliverable.pdf"] = str(pdf) if pdf else None
+    outputs["sales-page.html"] = str(build_sales_page(product_dir, buy_url=buy_url))
+    outputs["tweet-thread.txt"] = str(build_tweet_thread(product_dir, buy_url=buy_url))
+    outputs["reddit-post.txt"] = str(build_reddit_post(product_dir, buy_url=buy_url))
+    outputs["email-outreach.txt"] = str(build_email_outreach(product_dir, buy_url=buy_url))
+    outputs["launch-checklist.md"] = str(build_checklist(product_dir))
+    # gumroad-description.md is also written by build_checklist (if a
+    # listing.md exists). Surface it in the kit for the publish script.
+    desc = product_dir / "gumroad-description.md"
+    if desc.exists():
+        outputs["gumroad-description.md"] = str(desc)
+    return outputs
+
+
+def build_all(output_root: Path, buy_url: str | None = None,
+             url_map: dict[str, str] | None = None) -> list[dict]:
+    """Build kits for every product under output_root/products/.
+
+    URL resolution order (per product):
+      1. `url_map[product_dir.name]` if a per-product URL was provided
+      2. `buy_url` (the global default) as fallback
+      3. None — placeholder stays in the asset
+
+    `url_map` lets the user point each product at its own Gumroad slug
+    once published: {"the-soc2-playbook": "https://.../l/soc2",
+                    "the-hipaa-bundle":  "https://.../l/hipaa"}.
+    """
+    products_dir = output_root / "products"
+    if not products_dir.exists():
+        return []
+    results: list[dict] = []
+    for sub in sorted(products_dir.iterdir()):
+        if sub.is_dir():
+            # Per-product URL wins; global default is the fallback.
+            # `None` (key missing) → use global. `""` (key present, empty)
+            # → "I haven't published this one yet" → keep the placeholder.
+            if url_map is not None and sub.name in url_map:
+                per_product = url_map[sub.name]
+                effective_url = per_product if per_product else None
+            else:
+                effective_url = buy_url
+            try:
+                kit = build_kit(sub, buy_url=effective_url)
+                results.append({
+                    "product": sub.name,
+                    "url": effective_url,
+                    "files": kit,
+                })
+            except Exception as e:
+                results.append({"product": sub.name, "error": str(e)})
+    return results
+
+
+def _load_url_map(path: Path) -> dict[str, str]:
+    """Load a JSON file mapping product slug -> Gumroad URL.
+
+    Expected format:
+        {
+          "the-soc2-for-solo-founders-playbook":
+              "https://vishnoiprem.gumroad.com/l/soc2-playbook",
+          "soc2-for-solo-founders-cheat-sheet-printable":
+              "https://vishnoiprem.gumroad.com/l/soc2-cheatsheet"
+        }
+
+    Missing file -> empty dict. Malformed JSON -> raise with context.
+    """
+    if not path.exists():
+        return {}
+    import json
+    data = json.loads(path.read_text())
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: expected a JSON object of slug -> URL")
+    # Coerce keys to strings (in case the user wrote integers) and validate values
+    return {str(k): str(v) for k, v in data.items()}
+
+
+if __name__ == "__main__":  # pragma: no cover
+    import argparse
+    import json
+    parser = argparse.ArgumentParser(description="Build a Gumroad launch kit for one or all products.")
+    parser.add_argument("target", nargs="?", default=None,
+                        help="Path to one product directory (omit if using --all).")
+    parser.add_argument("--all", action="store_true",
+                        help="Build kits for every product under output/products/.")
+    parser.add_argument("--url", default=None,
+                        help="Real Gumroad URL to swap into every asset (replaces the placeholder).")
+    parser.add_argument("--url-map", default=None,
+                        help="Path to a JSON file mapping product-slug -> Gumroad URL. "
+                             "Per-product URLs override --url for matched products.")
+    parser.add_argument("--write-url-template", default=None, metavar="PATH",
+                        help="Write a starter url-map JSON for every product under output/products/, "
+                             "then exit. Fill in the real Gumroad slugs and re-run with --url-map.")
+    args = parser.parse_args()
+
+    if args.write_url_template:
+        # Bootstrap a JSON map: {"<slug>": ""} for every product.
+        # User fills in the real URLs and re-runs.
+        products_dir = Path("output") / "products"
+        template: dict[str, str] = {}
+        if products_dir.exists():
+            for sub in sorted(products_dir.iterdir()):
+                if sub.is_dir():
+                    template[sub.name] = ""
+        Path(args.write_url_template).write_text(json.dumps(template, indent=2) + "\n")
+        print(f"  + wrote {args.write_url_template} with {len(template)} product(s)")
+        print(f"  → fill in the URLs and re-run:")
+        print(f"     make launchkit-map MAP={args.write_url_template}")
+        raise SystemExit(0)
+
+    url_map = _load_url_map(Path(args.url_map)) if args.url_map else None
+
+    if args.all:
+        results = build_all(Path("output"), buy_url=args.url, url_map=url_map)
+        for r in results:
+            if "error" in r:
+                print(f"  X {r['product']}: {r['error']}")
+            else:
+                print(f"  + {r['product']}: {len(r['files'])} files")
+    else:
+        if not args.target:
+            parser.print_help()
+            raise SystemExit(1)
+        kit = build_kit(Path(args.target), buy_url=args.url)
+        for name, path in kit.items():
+            print(f"  + {name}  ->  {path}")

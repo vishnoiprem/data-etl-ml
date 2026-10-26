@@ -266,3 +266,7 @@ one successful `FOR SYSTEM_VERSION AS OF` query showing the original
 row count. The driver exercises all of those without AWS. The pytest
 suite is the regression net. The shell scripts are the live-account
 equivalent.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1,0 +1,48 @@
+# ============================================================================
+# profiles.yml — local Snowflake profile for the dbt project.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# The `mock` target uses dummy credentials so `dbt parse` runs without
+# a real Snowflake account — perfect for the in-class smoke test.
+#
+# For a real connection, copy this file to ~/.dbt/profiles.yml and
+# fill in account, user, password/key-path, database, and warehouse.
+# ============================================================================
+
+dbt_snowflake_dbt:
+  target: mock
+  outputs:
+    mock:
+      type: snowflake
+      account: "mock-account"
+      user: "mock_user"
+      authenticator: "mock"
+      database: "DBT_SNOWFLAKE_DBT_MOCK"
+      warehouse: "MOCK_WH"
+      schema: "public"
+      threads: 4
+
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      authenticator: "snowflake"
+      private_key_path: "{{ env_var('DBT_SNOWFLAKE_PK_PATH', '~/.ssh/snowflake_key.p8') }}"
+      private_key_passphrase: "{{ env_var('DBT_SNOWFLAKE_PK_PASSPHRASE') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'DBT_SNOWFLAKE_DBT_DEV') }}"
+      warehouse: "TRANSFORMING"
+      schema: "analytics_engineering"
+      threads: 8
+
+    prod:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      authenticator: "snowflake"
+      private_key_path: "{{ env_var('DBT_SNOWFLAKE_PK_PATH') }}"
+      private_key_passphrase: "{{ env_var('DBT_SNOWFLAKE_PK_PASSPHRASE') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE', 'DBT_SNOWFLAKE_DBT_PROD') }}"
+      warehouse: "TRANSFORMING_PROD"
+      schema: "analytics_engineering"
+      threads: 16

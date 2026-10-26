@@ -1,0 +1,57 @@
+Title: I wrote SOC2 For Solo Founders Cheat Sheet (printable) (6 pages, $9) — full Chapter 1 below
+
+Body:
+
+Hey r/[niche],
+
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. Pin it to your wall. Do the SOC2 thing.
+
+Below is Chapter 1 in full. The rest of the guide is $9 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
+
+---
+
+## Page 1 — The Five Controls (wall poster)
+
+**The only five SOC2 controls a solo founder needs to ship Type 1 in 90 days.**
+
+1. **Access control.** SSO on every system. MFA on every account. Offboarding checklist that disables access within 24 hours of termination.
+2. **Change management.** Every code change is PR-reviewed, tested, and has a CHANGELOG entry.
+3. **Incident response.** A 1-page runbook: detect, contain, eradicate, recover, post-mortem.
+4. **Vendor management.** Spreadsheet of every third party that touches customer data, with security review status.
+5. **Encryption + backup.** TLS everywhere. DB encrypted at rest. Daily backups with a monthly restore drill.
+
+**If you have these five working, you can pass Type 1.** Everything else is decoration.
+
+---
+
+---
+
+**What else is inside (6 sections total):**
+
+- Page 1 — The Five Controls (wall poster)
+- Page 2 — The 90-Day Calendar
+- Page 3 — Weekly Compliance Checklist
+- Page 4 — The Offboarding Checklist (run within 24 hours of any termination)
+- Page 5 — The Vendor Review (one per vendor, ~10 min each)
+- Page 6 — The Incident Response 1-Pager (laminate this)
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $9 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($9, instant download, 30-day no-questions refund):
+→ https://vishnoiprem.gumroad.com/l/soc2-cheatsheet
+
+— Prem

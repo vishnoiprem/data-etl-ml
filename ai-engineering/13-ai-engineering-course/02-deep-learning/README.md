@@ -32,3 +32,7 @@ This module goes inside the network: gradient descent and backpropagation step b
 ## The Lead Lesson
 
 > **Lesson 1 — [Bias in Neural Networks](./01-bias-in-neural-networks.md)** — the often-missed first lesson of deep learning. Worked example: build a tiny 2-layer network for XOR from scratch in NumPy, watch how adding bias unlocks the problem, then visualize the decision boundary before/after.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

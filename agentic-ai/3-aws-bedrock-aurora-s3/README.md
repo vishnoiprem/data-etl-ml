@@ -377,3 +377,7 @@ Select the bucket from the bucket list.
 Click the "Delete" button.
 
 Enter the bucket name in the text box to confirm deletion and click the "Delete bucket" button.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

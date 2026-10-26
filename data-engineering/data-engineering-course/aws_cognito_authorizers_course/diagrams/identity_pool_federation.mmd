@@ -1,0 +1,24 @@
+%%{init: {"flowchart": {"htmlLabels": true}} }%%
+flowchart TD
+    User([End User]) -->|1. sign in with email + password| HostedUI[Cognito Hosted UI]
+
+    HostedUI -->|2. issues ID + access tokens| UserPool[(Cognito User Pool<br/>id_token, access_token)]
+
+    User -->|3. presents id_token or access_token| IdentityPool
+
+    IdentityPool[Cognito Identity Pool] -->|4. looks up token issuer| UserPool
+    IdentityPool -->|alt. OIDC / SAML / Facebook / Google| ExternalIdP[External IdP<br/>Okta, Azure AD, Google, ...]
+
+    IdentityPool -->|5. assume role via STS| AuthRole[IAM Role:<br/>Cognito_IdentityPoolAuth_Role]
+    IdentityPool -->|5b. (guest) assume role via STS| GuestRole[IAM Role:<br/>Cognito_IdentityPoolUnauth_Role]
+
+    AuthRole -->|6. attached as session credentials| SessionCreds[AWS STS<br/>temp AccessKeyId/SecretKey/SessionToken]
+
+    SessionCreds -->|7. direct API call| S3[(Amazon S3)]
+    SessionCreds -->|7. direct API call| DynamoDB[(Amazon DynamoDB)]
+    SessionCreds -->|7. direct API call| Lambda[AWS Lambda invoke]
+
+    classDef aws fill:#FF9900,stroke:#232F3E,color:#232F3E,stroke-width:2px;
+    classDef user fill:#146EB4,stroke:#0F4F8A,color:#fff,stroke-width:2px;
+    class UserPool,IdentityPool,S3,DynamoDB,Lambda,SessionCreds aws;
+    class User,HostedUI user;

@@ -28,3 +28,7 @@ Multimodal foundations: ViT, image embeddings, diffusion models, GANs, VAEs. The
 ## The Lead Lesson
 
 > **Lesson 1 — [Multimodal AI](./01-multimodal-ai.md)** — the framing lesson. Worked example: take an open CLIP model, embed 1K images and 1K text descriptions, show that the image embeddings cluster by concept and align with text embeddings of the same concepts.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

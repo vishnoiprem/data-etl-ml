@@ -1,0 +1,95 @@
+# .pre-commit-config.yaml — runs locally before every `git commit`
+#
+# Install once:
+#   pip install pre-commit
+#   pre-commit install
+#
+# Then every `git commit` runs these hooks. Bypass with
+# `git commit --no-verify` (use sparingly).
+#
+# The hooks here mirror the gates in .github/workflows/leads-ci.yml
+# so failures show up locally before the CI even sees the push.
+#
+# Note: pre-commit installs its own isolated environments, so the
+# Python version and pinned versions in this file determine what
+# actually runs.
+
+repos:
+  # ── General hygiene ─────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # The workflow YAMLs use GitHub-specific syntax that pyyaml
+        # can't validate, but check-yaml still catches trailing junk.
+        exclude: ^\.github/workflows/
+      - id: check-added-large-files
+        # Anything >500 KB is a suspect; leads-pipeline/draft-cron
+        # had a 776 MB .tailored_resumes/ dir sneak in once.
+        args: ["--maxkb=500"]
+        exclude: |
+          (?x)^(
+            leads-pipeline/draft-cron/.*\.html
+            realtime-stock-pipeline/trade-finder/logs/.*\.stdout
+            realtime-stock-pipeline/trade-finder/reports/email_.*\.txt
+          )$
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+  # ── Python lint (leads-pipeline only) ───────────────────────
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        files: ^leads-pipeline/draft-cron/.*\.py$
+        args:
+          - "--max-line-length=110"
+          - "--extend-ignore=E501,W503,E731"
+          # Advisory only — same as CI. Promote to a hard error
+          # once the existing warnings are fixed.
+        additional_dependencies: []
+
+  # ── Dockerfile lint (leads-pipeline only) ───────────────────
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        # hadolint flags un-pinned apt packages, missing --no-install-recommends,
+        # add-apt-key (deprecated), etc.
+        files: ^leads-pipeline/draft-cron/Dockerfile$
+
+  # ── Shell script lint ───────────────────────────────────────
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        files: ^leads-pipeline/draft-cron/.*\.(sh|bash)$
+
+  # ── Secret / credential detection ──────────────────────────
+  # Catches AWS access keys (AKIA[0-9A-Z]{16}), the matching
+  # 40-char base64 secret, GCP service-account JSON blobs, GitHub
+  # PATs (ghp_/gho_/ghs_/ghr_), Slack tokens, and generic
+  # high-entropy strings. Backed up by the in-repo regression
+  # test agentic-ai/5-amazon-transcribe/tests/test_no_hardcoded_aws_keys.py
+  # which the leads-ci job also runs. Two layers because pre-commit
+  # only fires when `pre-commit install` was run locally.
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        # The baseline file is committed and contains only
+        # fingerprint hashes (no secret material). On first
+        # install, generate it locally with:
+        #   detect-secrets scan > .secrets.baseline
+        # Then audit / accept the legitimate findings with
+        #   detect-secrets audit .secrets.baseline
+        exclude: |
+          (?x)^(
+            \.secrets\.baseline
+            | .*/__pycache__/.*
+            | .*\.min\.(js|css)
+            | aws/dist/awscli/.*
+          )$

@@ -18,3 +18,7 @@ Generate a boilerplate template in your current project directory using the foll
 # Credits
 
 * This project has been generated with [Cookiecutter](https://github.com/audreyr/cookiecutter)
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

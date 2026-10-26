@@ -1,0 +1,24 @@
+%% Diagram: Snowflake warehouse scaling — scale-up vs scale-out
+%% Source lecture: Snowflake Complete Masterclass - Section 7 (Performance)
+%% Description:  Scale-up (single, bigger) vs scale-out (more clusters of the
+%%               same size).  Scale-up = each query uses more CPUs/RAM.
+%%               Scale-out = more concurrent queries, same per-query size.
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+```mermaid
+graph LR
+    subgraph UP["Scale UP  (ALTER WAREHOUSE SET WAREHOUSE_SIZE)"]
+        XS["1 × X-Small<br/>(1 server)"] --> M["1 × Medium<br/>(1 server, 4× bigger)"]
+    end
+
+    subgraph OUT["Scale OUT  (MAX_CLUSTER_COUNT > 1)"]
+        XS2["2 × X-Small<br/>(2 servers)"] -. "concurrent queries" .-> XS3["2 × X-Small<br/>(2 servers)"]
+    end
+
+    Q1["Query A"] --> XS
+    Q1B["Query A (bigger)"] --> M
+    QA["Query A"] --> XS2
+    QB["Query B (concurrent)"] --> XS3
+
+    style UP  fill:#FEF3C7,stroke:#B45309
+    style OUT fill:#DCFCE7,stroke:#166534
+```

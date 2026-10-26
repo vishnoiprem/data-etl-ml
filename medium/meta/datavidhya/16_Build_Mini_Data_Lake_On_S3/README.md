@@ -189,3 +189,7 @@ curated), the curated sales file is `STANDARD_IA`, versioning is
 exercise every one of those without AWS. The shell scripts are kept in
 sync with the boto3 calls in the tests so the AWS-side run follows the
 same code path.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -75,3 +75,7 @@ curl -X POST "$APP_URL/chat"   -H "Content-Type: application/json"   -d '{"messa
 - Define scorer jobs and evaluation datasets in a separate evaluation pipeline.
 - Archive selected traces to governed Delta tables according to retention policy.
 - Configure Unity Gateway policies, budgets, rate limits, usage tracking, and request/response logging in the platform.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1,0 +1,13 @@
+{"ts": 1791617583.614523, "kind": "plan", "tasks": ["t_research", "t_write", "t_review"]}
+{"ts": 1791617583.614845, "kind": "research", "task_id": "t_research", "agent": "researcher"}
+{"type": "msg", "ts": 1791617583.614829, "msg_id": "f32cb472-4f1e-49ef-b03c-1b13216e75f4", "sender": "coordinator", "recipient": "researcher", "topic": "tasks", "requires_response": false, "correlation_id": null}
+{"type": "msg", "ts": 1791617583.6373, "msg_id": "2473a50a-b11e-456b-bec7-025caca7e841", "sender": "researcher", "recipient": "coordinator", "topic": "task_result", "requires_response": false, "correlation_id": null}
+{"ts": 1791617583.638676, "kind": "task_done", "task_id": "t_research", "result_preview": "Findings:\n1. The topic is well-covered in modern sources.\n2. Key terms: retrieval, augmentation, evaluation.\n3. Recommen"}
+{"ts": 1791617583.6391208, "kind": "write", "task_id": "t_write", "agent": "writer"}
+{"type": "msg", "ts": 1791617583.639097, "msg_id": "a306ec39-a8cd-4b99-8fac-ac883d8351a2", "sender": "coordinator", "recipient": "writer", "topic": "tasks", "requires_response": false, "correlation_id": null}
+{"type": "msg", "ts": 1791617583.640095, "msg_id": "65b83124-6b91-4f35-8ec4-a381af9b0ab6", "sender": "writer", "recipient": "coordinator", "topic": "task_result", "requires_response": false, "correlation_id": null}
+{"ts": 1791617583.64047, "kind": "task_done", "task_id": "t_write", "result_preview": "Draft:\nRetrieval-augmented systems combine lexical and semantic search to ground model outputs in real evidence. A re-ra"}
+{"ts": 1791617583.640836, "kind": "review", "task_id": "t_review", "agent": "reviewer"}
+{"type": "msg", "ts": 1791617583.640812, "msg_id": "7e112271-07f0-463d-8531-a6aa58bbde83", "sender": "coordinator", "recipient": "reviewer", "topic": "tasks", "requires_response": false, "correlation_id": null}
+{"type": "msg", "ts": 1791617583.641781, "msg_id": "b5891ca7-c05d-4664-8ec4-8dfd2d6d065c", "sender": "reviewer", "recipient": "coordinator", "topic": "task_result", "requires_response": false, "correlation_id": null}
+{"ts": 1791617583.642147, "kind": "task_done", "task_id": "t_review", "result_preview": "{'score': 0.92, 'needs_human_review': False, 'notes': 'Draft is coherent, concise, and on-topic.'}"}

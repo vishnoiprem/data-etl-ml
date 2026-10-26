@@ -232,3 +232,7 @@ makro-superset/
 | `testdb.niq_sales_perf` | Sales fact: `sls_amt`, `sls_qty`, `no_trx`, `no_cust`, `day_sid`, `week_sid`, `store_no`, `store_name`, `region`, `store_format`, `class_name`, `brand`, `div_name`, `supplier`, `prod_num` |
 | `testdb.niq_prod_hier`  | Product hierarchy: `prod_num`, `brand`, `supplier`, `class_name`, `div_name`                                                                                                                |
 | `testdb.niq_user`       | User auth table (used by original Streamlit app, not needed in Superset)                                                                                                                    |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -65,3 +65,7 @@ Each file follows: `NN_<problem_slug>.py` and `NN_<problem_slug>.md`
 - `NN` = 01–10 inside the folder.
 - `.py` = runnable, self-contained Python/SQL demo.
 - `.md` = explainer: problem, thinking, memory aid, AI use cases.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

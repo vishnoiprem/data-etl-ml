@@ -120,3 +120,8 @@ After adding a demo:
 | Loom / YouTube thumbnail | `<project>-thumb.png` |
 
 All under `docs/assets/`. See `docs/assets/README.md` for full conventions.
+
+---
+
+**Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.

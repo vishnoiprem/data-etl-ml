@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  L63 standalone template — Lambda execution role with least-privilege
+  S3 Get/Put access on a specific bucket. Deploy with:
+    aws cloudformation deploy \
+      --stack-name l63-sandbox \
+      --template-file 02_lambda_execution_role.yaml \
+      --capabilities CAPABILITY_IAM
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: l62-minimal-bucket-example
+    Description: S3 bucket the Lambda is allowed to read/write.
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: l63-lambda-exec-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Tags:
+        - Key: lecture
+          Value: L63
+        - Key: course
+          Value: aws-lambda-serverless
+
+  LambdaS3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: l63-lambda-s3-policy
+      Roles:
+        - !Ref LambdaExecutionRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:ListBucket
+            Resource:
+              - !Sub "arn:aws:s3:::${BucketName}"
+              - !Sub "arn:aws:s3:::${BucketName}/*"
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt LambdaExecutionRole.Arn
+    Description: ARN of the Lambda execution role.
+  RoleName:
+    Value: !Ref LambdaExecutionRole
+    Description: Name of the Lambda execution role.
