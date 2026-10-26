@@ -62,6 +62,54 @@ The first version let the LLM override the must-have check. Result: a candidate 
 pip install -r requirements.txt
 make demo
 ```
+
+---
+
+## What this is NOT
+
+- **Not an automated hiring system.** A 1:8
+  screen-to-offer conversion is good; it's not
+  perfect. The agent produces a *shortlist* — a
+  human recruiter still makes the call. Remove the
+  human and you've built a liability.
+- **Not a LinkedIn-scraping tool.** Sourcing uses
+  LinkedIn's *API* with the documented quota; it
+  does not bypass ToS, scrape at scale, or evade
+  rate limits. The pattern respects platform
+  boundaries by design.
+- **Not fair-by-default.** The fairness audit
+  (`p > 0.05` across gender proxy) is a *check*,
+  not a guarantee. A model that scores well on
+  one proxy can still fail on another (age,
+  ethnicity, school tier). Run the audit on every
+  protected class relevant to your jurisdiction.
+- **Not a replacement for the recruiter.** The
+  4.2 hours saved per JD is real, but the
+  recruiter's value is in the *screen* and the
+  *negotiation*, not the sourcing. The agent
+  handles the part the recruiter was happy to
+  automate; the rest is the recruiter's craft.
+
+---
+
+## Related directories
+
+- [`../12-customer-service-agent/`](../12-customer-service-agent/) —
+  the customer-service cousin: same shape (skill
+  extract → score → draft → log) on inbound tickets
+  instead of outbound candidates.
+- [`../15-multi-agent-debate/`](../15-multi-agent-debate/) —
+  the verifier pattern; useful when a single LLM
+  scorer isn't reliable enough for a high-stakes
+  decision.
+- [`../16-autonomous-loop/`](../16-autonomous-loop/) —
+  the bounded-loop + budget + retry pattern; the
+  sourcing + outreach loop needs a step budget to
+  avoid runaway.
+- [`../../ai-engineering/04-fm-evaluation/`](../../ai-engineering/04-fm-evaluation/) —
+  the eval framework that produced the screen-to-offer
+  + fairness numbers in the table above.
+
 ---
 
 **Last updated:** 2026-10-12  

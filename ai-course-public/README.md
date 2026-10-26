@@ -16,6 +16,7 @@
 | **Small business owner (SG/TW/VN/CN)** who wants to save 10+ hours/week | [`course/ai-fde/.../L9-4-the-smb-first-7-days.md`](course/ai-fde/phase-6-interview-prep/generative-ai/companion-courses/intro-to-ai-agents/s09-ai-agents-in-business/L9-4-the-smb-first-7-days.md) | 7 days (1 hour/day) |
 | **AI engineer** who wants the full FDE curriculum | [`course/ai-fde/README.md`](course/ai-fde/README.md) | 9 weeks |
 | **Founder / indie hacker** who wants a 6-month build path | [`course/180-day-ai/README.md`](course/180-day-ai/README.md) | 6 months |
+| **Decision-maker** who needs a 1-pager: "is this AI agent thing worth it?" | [`course/ai-agents/README.md`](course/ai-agents/README.md) | 5 min (read the headline) or 20 min (run the 1000-cycle review) |
 | **Capstone shopper** picking a build | [`course/capstone-starters/README.md`](course/capstone-starters/README.md) | 7 days (capstone 6) or 8 weeks (capstones 1-5) |
 | **Just here for the marketing** (Substack, sales page, social) | [`marketing/`](marketing/) | 1 read |
 | **Just here for the business plan** (90-day, offer ladder, revenue math) | [`business/`](business/) | 1 read |
@@ -28,6 +29,8 @@
 ai-course-public/
 ├── course/                       # the actual course content
 │   ├── ai-fde/                   # 9-week AI Forward-Deployed Engineer curriculum (the FDE track)
+│   ├── ai-agents/                # 5-lesson flagship: ROI formula + 1000-cycle proof + watchdog autopilot
+│   ├── ai-native-de/             # 19-module AI-Native Data Engineering curriculum (Senior/Staff target: Meta AI-Native DE)
 │   ├── 180-day-ai/               # 6-month founder / indie-hacker track
 │   ├── practice/                 # hands-on exercises + labs
 │   ├── hardcode/                 # 9-level reference curriculum (llm-foundations → failure-handling) + eval suite
@@ -101,6 +104,7 @@ ai-course-public/
 | **SMB Substack post** | 1 published | 📝 `2026-10-smb-ai-quick-wins/01-post-body.md` drafted (2,300 words) | Not yet on Substack |
 | **SMB offer ladder** | 1 written | 📝 `business/plan/smb-offer-ladder.md` drafted | Not yet on landing page |
 | **L9-4 SMB lecture** | 1 written | 📝 `L9-4-the-smb-first-7-days.md` drafted (~3,000 words) | In course, not yet taught |
+| **AI Agents flagship** | 5 lessons + 1000-cycle proof | 📝 `course/ai-agents/` drafted · L1 + L5 working · autopilot running · **P50 +$239/mo, 95.1% positive, P05 $0/mo** | Headline number published; L2-L4 point to existing FDE material |
 | **Capstone 6 (SMB content recycler)** | 1 + tests | 📝 `06-smb-content-recycler/` drafted · 5/5 tests pass | Code complete, no users yet |
 | **Substack publication** | 1 post live | ⏳ 0 (post not published yet) | Blocker for everything else |
 | **Landing page** | 1 live | ⏳ 0 | Not yet built |

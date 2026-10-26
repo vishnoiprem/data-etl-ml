@@ -1,4 +1,4 @@
-# Launch Checklist for The Soc2 For Solo Founders Playbook
+# Launch Checklist for The SOC2 For Solo Founders Playbook
 
 ## Today (Day 0)
 - [ ] Upload `deliverable.pdf` to Gumroad

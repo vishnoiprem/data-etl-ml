@@ -138,16 +138,8 @@ When you finish Phase 3 you have a service that:
 Phase 4 (in `../phase-4-capstone/`) takes the Phase 3 service and turns it into a **platform**: MCP for tool use, multi-agent for complex cases, a distilled SLM for cost, a fresh engagement for breadth, plus 5 case studies and a capstone presentation.
 
 Read [`../phase-4-capstone/scenario-brief.md`](../phase-4-capstone/scenario-brief.md) for the Phase 4 lift.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
 
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21
 **License:** MIT — use freely in your own courses, prototypes, and products.  

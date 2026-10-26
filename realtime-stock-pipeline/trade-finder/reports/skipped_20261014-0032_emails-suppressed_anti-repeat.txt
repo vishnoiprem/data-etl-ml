@@ -1,0 +1,9 @@
+Emails suppressed (anti-repeat) @ 2026-10-14T00:32:10.181483
+Top opportunity is materially identical to last cycle:
+  product:      compression socks
+  route:        CN->AU
+  dest price:   $11.83 (within ±5% of last)
+  capital/500u: $795 (within ±5% of last)
+
+This is the autopilot's 'investment should be less' guard.
+To force a re-emit, delete data/.last_emitted.json.
