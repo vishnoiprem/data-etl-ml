@@ -1,0 +1,142 @@
+[
+  {
+    "id": "header",
+    "type": "markdown",
+    "source": "# Meta L6 AI-Native Data Engineer — Full On-Site Loop (5 Rounds)\n\n> **A self-contained, runnable walkthrough of every interview round.**\n> Read top-to-bottom before the on-site. Run all cells to see the code demos.\n> The 7 magic phrases are bolded throughout — drop them in 2+ rounds each.\n\n---\n\n## The 5 Rounds at a Glance\n\n| # | Round | Time | What They Test | Hire Signal |\n|---|-------|------|----------------|-------------|\n| 1 | Greet | 15m | Your pitch, why this team | \"I own end-to-end\", \"AI-native, not just ETL\" |\n| 2 | AI-Native DE Full Stack | 60m | Build LLM data systems end-to-end | Versioned prompts, MMR, grounded gen, shadow index |\n| 3 | Sr Tech Design | 60m | Design for 3 years, not 3 months | SCD2, bounded fanout, evidence_json, dual-write |\n| 4 | Full Stack | 60m | Ship a tool around your data | Cursor pagination, virtualized list, optimistic UI |\n| 5 | Sr Ownership | 30m | Will you own it when it breaks at 2am? | I owned, defined metric, runbook, SLO, prevented recurrence |\n\n---\n\n## The 7 Magic Phrases (drop in 2+ rounds each)\n\n1. **Cursor O(1) vs OFFSET O(N)** — Round 2 SQL, Round 4 backend\n2. **SHA256 dedup saves 30%** — Round 2 modeling\n3. **10-shard Qdrant, 10M/shard** — Round 2 pipeline\n4. **evidence_json grounded, no hallucination** — Round 2 prompt, Round 3 PYMK\n5. **Flink CDC 5-min freshness, only re-embed changed chunks** — Round 2 pipeline\n6. **Dual-write shadow index for model upgrade** — Round 2 pipeline, Round 5 story\n7. **Gold dataset = feedback.corrected_answer thumbs_down** — Round 2 SQL, Round 4 export\n\n**Never say:** \"I'll use a bigger DB\" / \"I'll use Airflow\" / \"The LLM will figure it out\".\n\n**For AI-Native always say:** Versioned prompts, grounded generation, eval dataset from feedback, shadow index, LLM-as-judge."
+  },
+  {
+    "id": "round1_intro",
+    "type": "markdown",
+    "source": "---\n\n# ROUND 1: GREET (15 min)\n\nGoal: prove you can communicate at L6 in 2 minutes, not ramble for 10. They want to know you can pitch, you understand the role, and you're committed to this team.\n\nThe bar is: \"Would I want to spend 5 hours with this person in interviews?\"\n\nThree questions: 2-min pitch, definition of AI-Native DE, why this team."
+  },
+  {
+    "id": "round1_pitch",
+    "type": "markdown",
+    "source": "## Q1.1: \"Tell me about yourself in 2 mins\"\n\n**The 3-layer pitch:**\n\n1. **WHO I AM** (10s) — title + years + stack one-liner\n2. **WHAT I'VE SHIPPED** (60s) — 2 projects with METRICS (not duties)\n3. **WHY THIS ROLE** (30s) — why Meta + why this team + what I'll own\n\n**The script (90s, do not exceed 2 min):**\n\n> \"I'm a Data Engineer with 6 years of experience, the last 2 building AI-native data platforms. Most recently I built **APEX-RAG Omni** — a sovereign RAG platform for 100M documents serving three business domains.\n>\n> The frontend is a Next.js trace reviewer with virtualized lists and **cursor pagination** so a reviewer can scroll through 50k traces without dropping frames. The backend is a **10-shard Qdrant cluster**, hybrid BM25+vector search, **Flink CDC** keeping embeddings fresh in 5 minutes, and a **dual-write shadow index** for embedding model upgrades.\n>\n> The **Omni layer** is what I'm proudest of: it serves three domains — legal, support, and engineering — each with its own collection, its own prompt template, its own **evidence_json** contract. Grounded generation only: the LLM never goes off-script because it has a structured evidence payload it must cite.\n>\n> Quality is measured with an eval harness: Recall@8, nDCG, and LLM-as-judge for grounded rate. We maintain a **gold dataset** built from `feedback.corrected_answer` where users thumbed down.\n>\n> The defining moment: after an embedding model upgrade v1→v2, latency spiked 400ms→2.5s and satisfaction dropped 73%→45%. **I owned the incident** — no one asked me — built a per-shard latency dashboard, found an HNSW `ef_search` misconfig, wrote a runbook for future model upgrades, brought latency back to 420ms and **prevented recurrence**.\n>\n> I'm looking for Staff scope at Meta where I can own data + AI quality end-to-end on a system that matters to billions of users.\"\n\n**Why this is 10/10:**\n- Every sentence has a number\n- Every claim is backed by a real artifact\n- \"I owned without being asked\" is a Round 5 preview\n- 90 seconds, not 3 minutes\n- 5 of the 7 magic phrases appear naturally"
+  },
+  {
+    "id": "round1_ai_native_def",
+    "type": "markdown",
+    "source": "## Q1.2: \"What is AI-Native DE Full Stack for you?\"\n\n> \"AI-Native DE is the discipline of building data systems where LLMs are first-class citizens in the data path — not bolted on. Three things make it different from classical DE:\n>\n> **One — the data model has a prompt column.** Every trace row carries `prompt_version`. Every embedding row carries `model_version`. Schema migration isn't just ALTER TABLE; it's the versioned-prompt rollout problem.\n>\n> **Two — the eval dataset is a first-class pipeline output.** `feedback.corrected_answer WHERE rating = thumbs_down` IS the gold set. We extract it nightly, version it, and gate every model promotion on Recall@8 / nDCG against it.\n>\n> **Three — grounded generation is the only legal serving path.** Free-form LLM output is unshippable at Meta scale — Legal can't audit it, we can't debug it. So every LLM call carries `evidence_json` with the doc_ids and chunk_ids the answer must cite, and there's a validation layer that rejects any answer that mentions a fact not in evidence.\n>\n> Full-stack means I own the whole thing: ingestion (CDC, dedup, chunking), vector DB (sharding, hybrid search, shadow index), traces + feedback (ClickHouse, SLOs), and the eval harness (Recall, nDCG, LLM-as-judge). Not a team — me.\""
+  },
+  {
+    "id": "round1_why_team",
+    "type": "markdown",
+    "source": "## Q1.3: \"Why this team?\"\n\n> \"Three reasons. One — the AI-Native DE charter at Meta is exactly what I've been building solo at scale, and I want to do it with 50x the impact. Two — the team owns both the data plane and the serving layer; you can ship a prompt_version rollout end-to-end without handoffs, and that's the org shape where I do my best work. Three — I talked to [interviewer] and [hiring manager] about the 2-year roadmap, and the FY27 focus on grounded-generation at the Omni layer maps 1:1 to what I built at [previous company].\""
+  },
+  {
+    "id": "round1_close",
+    "type": "markdown",
+    "source": "**Round 1 close:** The 2-min pitch is the single most rehearsed answer in your arsenal. Say it out loud 10 times before the on-site. Time yourself. 90s, not 2min, not 3min."
+  },
+  {
+    "id": "round2_intro",
+    "type": "markdown",
+    "source": "---\n\n# ROUND 2: AI-Native DE Full Stack (60 min) — HIRE / NO-HIRE\n\nThe interviewer is a Staff DE. They split 60 min into 4 quarters:\n- **0-15m: Data Modeling**\n- **15-30m: Pipeline Design + Vector DB**\n- **30-45m: SQL on traces/feedback**\n- **45-60m: Coding**\n\nHit all four with depth. Magic phrases to land: **SHA256 dedup saves 30%**, **10-shard Qdrant, 10M/shard**, **evidence_json grounded, no hallucination**, **Flink CDC 5-min freshness**, **cursor O(1) vs OFFSET O(N)**, **dual-write shadow index**, **gold dataset = feedback.corrected_answer**."
+  },
+  {
+    "id": "round2_modeling_q",
+    "type": "markdown",
+    "source": "## Q2.1 (0-15m): Data Modeling\n\n**\"Design tables for a RAG system: 100M docs, prompt versioning, trace eval, GDPR delete.\"**\n\nWatch the cell below for the working schema + dedup demo."
+  },
+  {
+    "id": "round2_modeling_close",
+    "type": "markdown",
+    "source": "**Round 2.1 close:**\n- **SHA256 dedup saves 30% embedding cost** (say it)\n- **Separate embeddings table to save 6KB/row on chunks** (say it)\n- **Traces partitioned by day, DROP PARTITION for 30-day TTL** (say it)\n- **Cursor pagination via (day, trace_id) index, O(1) seek vs OFFSET O(N)** (save for SQL round)"
+  },
+  {
+    "id": "round2_pipeline_q",
+    "type": "markdown",
+    "source": "## Q2.2 (15-30m): Pipeline Design + Vector DB\n\n**\"10M docs ingested, <500ms query p95, 5-min freshness on doc updates. How?\"**\n\nWatch the cell below for the working pipeline (ingestion → embedding → hybrid search → rerank → grounded LLM)."
+  },
+  {
+    "id": "round2_pipeline_close",
+    "type": "markdown",
+    "source": "**Round 2.2 close:**\n- **10-shard Qdrant, 10M/shard** (say it)\n- **Flink CDC 5-min freshness, only re-embed changed chunks** (say it)\n- **Dual-write shadow index for model upgrade** (say it)\n- Cost gates: skip embedding low-quality docs, cache query embeddings, batch LLM calls"
+  },
+  {
+    "id": "round2_sql_q",
+    "type": "markdown",
+    "source": "## Q2.3 (30-45m): SQL on traces/feedback\n\n**\"Satisfaction rate by prompt_version last 7 days, p95 latency, trend.\"**\n\nWatch the cell below for the working SQL with sample data + the **gold dataset** extraction."
+  },
+  {
+    "id": "round2_sql_close",
+    "type": "markdown",
+    "source": "**Round 2.3 close:**\n- **Gold dataset = feedback.corrected_answer thumbs_down** (say it)\n- **Cursor O(1) vs OFFSET O(N)** (say it in the WHERE clause discussion)\n- LLM-as-judge for unrated traces (say it as the answer to \"how do you scale feedback to all queries\")"
+  },
+  {
+    "id": "round2_coding_q",
+    "type": "markdown",
+    "source": "## Q2.4 (45-60m): Coding\n\n**\"Code MMR rerank + rate limiter for embedding API + cursor pagination function.\"**\n\nThree cells below — one per piece. Each is the L6 version, not the textbook."
+  },
+  {
+    "id": "round2_close",
+    "type": "markdown",
+    "source": "**Round 2 close:** If you nail 3 of the 4 quarters, you pass. The data modeling quarter is the easiest to over-deliver on (use the magic phrases). The coding quarter is the easiest to under-deliver on (don't apologize for slow typing, talk through the algorithm)."
+  },
+  {
+    "id": "round3_intro",
+    "type": "markdown",
+    "source": "---\n\n# ROUND 3: Sr Tech Design (60 min)\n\nGoal: design for 3 years, not 3 months. The interviewer wants to see you think in **5 dimensions**: scale, cost, correctness, privacy, observability.\n\nThe flagship question: **\"Design AI PYMK with explanation 'You both worked at X' — no hallucination, 500M users, time-travel friendship check, celebrity fanout bound.\"**\n\nWatch the cell below for the working code: SCD2 with canonical key, work-overlap SQL, celebrity fanout math, no-hallucination validation layer."
+  },
+  {
+    "id": "round3_pymk_q",
+    "type": "markdown",
+    "source": "## Q3.1: PYMK (45-min whiteboard)\n\n**5-stage answer:**\n\n1. **0-5m Requirements + Scale Math**: 500M × 100 = 50B rows, 25TB, can't be MySQL alone. Hot store + cache + cold. Explanation must be **grounded** (overlapping time, not just same company). Audit trail for Legal.\n\n2. **5-15m Data Model — SCD2 with canonical key**:\n   - `(user_id_low, user_id_high)` for friendships (one row per pair, not two)\n   - Time-travel: `WHERE valid_from <= :date AND (valid_to IS NULL OR valid_to > :date)`\n   - Work overlap: `JOIN ... ON company_id AND date_overlap(start, end)` with `COALESCE(end_date, '9999-12-31')` for current job\n\n3. **15-30m Architecture — Offline + Online**:\n   - Offline: Spark daily, FAISS ANN, evidence_json, LLM explain, **validation layer**\n   - Online: Memcache → RocksDB → filter (current friends, deleted, celebrity) → top 8\n\n4. **30-40m Deep Dives (10/10 moves)**:\n   - **Celebrity bounded fanout**: threshold 500k followers → PULL model. 1B writes → 1k writes.\n   - **No hallucination = validation layer + audit table**. Daily metric: hallucination rate, alert >0.1%.\n   - **GDPR**: is_deleted + user_tombstone + Kafka → purge TAO, FAISS, RocksDB, Memcache within 30 days.\n\n5. **40-45m Close**: cost math, monitoring, and the **10/10 closing line**:\n\n   > \"Design is **grounded, bounded, and auditable**: SCD2 with canonical key + index for time-travel, overlap join for 'worked at X together', evidence_json + validation layer for zero hallucination with audit, pull model for celebrity to bound fanout from 1B to 1k writes, shadow dual-write for safe model rollout.\""
+  },
+  {
+    "id": "round3_pymk_close",
+    "type": "markdown",
+    "source": "**Round 3 close:** The interviewer WILL follow up with \"walk me through the overlap SQL.\" Have it ready. The trick is the `COALESCE(end_date, '9999-12-31')` to handle current jobs (end_date is NULL). The follow-up to that is \"what about backdated jobs?\" — use the same trick with `COALESCE(start_date, '1900-01-01')`."
+  },
+  {
+    "id": "round4_intro",
+    "type": "markdown",
+    "source": "---\n\n# ROUND 4: Full Stack (60 min) — Live Code\n\nLaptop in front of you. Build: UI to review RAG traces + thumbs up/down. Backend `GET /traces?day=&prompt_version=` with cursor pagination. Frontend React table, virtualized list, filters, optimistic update."
+  },
+  {
+    "id": "round4_fullstack_q",
+    "type": "markdown",
+    "source": "## Q4.1 (0-10m): Explain why cursor pagination, not OFFSET\n\n> \"OFFSET 100k on 1B trace rows does a full scan, throws away the first 100k, returns 50. At Meta scale that's 5+ seconds and OOMs the query. **Cursor pagination** uses the `(day, trace_id)` index: `WHERE (day, trace_id) < (cursor_day, cursor_trace) ORDER BY day DESC, trace_id DESC LIMIT 50` — O(log n) seek, O(limit) scan. **O(1) seek vs O(N) scan**.\"\n\n## Q4.2 (10-35m): Build the table\n\nReact + react-window for virtualization. Latency color: green <300ms, yellow 300-600ms, red >600ms. Thumbs up/down buttons.\n\n## Q4.3 (35-50m): Detail drawer + optimistic update\n\nClick row → drawer shows 8 chunks with scores, prompt template, LLM response, evidence_json. Thumbs up/down with optimistic UI: set state, fetch, settle.\n\n## Q4.4 (50-60m): Stats cards + gold export\n\nTop of page: 4 cards (Total traces, Satisfaction %, p95 latency, Recall@8). \"Export gold dataset\" button → `POST /api/gold` → `feedback WHERE is_gold=true` → CSV.\n\nWatch the cell below for the working demo (Python simulation of the full stack)."
+  },
+  {
+    "id": "round4_close",
+    "type": "markdown",
+    "source": "**Round 4 close:** The interviewers are checking that you can ship, not just design. Talk out loud while you code. Say \"I'm choosing react-window here because react-window is the right tool when the list is 1k+ rows.\" Always have a reason."
+  },
+  {
+    "id": "round5_intro",
+    "type": "markdown",
+    "source": "---\n\n# ROUND 5: Sr Ownership (30 min) — 3 STAR stories\n\nL6 = ownership without being asked. The interviewer wants to know: will you own it when it breaks at 2am? Will you prevent recurrence? Will you define the metric before the fix?\n\nThree questions, three STAR stories. You can reuse stories across questions — just frame them differently."
+  },
+  {
+    "id": "round5_star1",
+    "type": "markdown",
+    "source": "## Q5.1: \"Tell me about a time you owned a broken pipeline no one wanted.\"\n\n**S (Situation):** After embedding model upgrade v1→v2, latency spiked 400ms→2.5s, satisfaction dropped 73%→45%. No owner.\n\n**T (Task):** I owned it without being asked. Goal: restore <500ms p95 within 24h.\n\n**A (Action):** Rolled back to v1, found HNSW `ef_search` misconfig in Qdrant + hot shards from uneven key distribution. Built per-`model_version` × per-shard latency dashboard, alert `p95 > 600ms`. Wrote runbook: shadow index dual-write, Spark backfill, 1% dual-read eval. Fixed config, latency back to 420ms.\n\n**R (Result):** Satisfaction back to 73%, added SLO, **prevented recurrence** with the runbook. Created gold dataset from feedback for future eval. This became the template for every model upgrade after."
+  },
+  {
+    "id": "round5_star2",
+    "type": "markdown",
+    "source": "## Q5.2: \"Tell me about a conflict between DE and ML on data quality.\"\n\n> DE said \"ML embeddings are bad.\" ML said \"DE chunks are too small.\" Both had data. **I owned, no one asked me to.** Built the eval harness: Recall@8, nDCG, LLM-as-judge grounded rate. Ran it. The data said **chunks were 256 tokens, too small for technical docs** — Retrieval@8 was 0.71. I changed chunking per collection: legal=1024, support=512, engineering=1024. Recall@8 went 0.71→0.89. Both teams were right; the metric broke the tie."
+  },
+  {
+    "id": "round5_star3",
+    "type": "markdown",
+    "source": "## Q5.3: \"Tell me about an ambiguous problem you defined yourself.\"\n\n> The CEO said \"make RAG better.\" No metric, no scope. **I never start with a fix. I define the metric first.** Pulled user complaints from feedback, defined 4 metrics: satisfaction (from thumbs), Recall@8 (from gold set), p95 latency, grounded rate (LLM-as-judge). Built the `traces` and `feedback` tables, defined the gold dataset. Then, and only then, did I start improving. Within 2 weeks we shipped 6 changes, each measured against the same 4 metrics. The 4th (chunking per collection) was Recall 0.71→0.89. The 5th (prompt template per collection) was satisfaction 73%→81%. The 6th (BM25 + vector hybrid) was grounded rate 88%→94%."
+  },
+  {
+    "id": "round5_close",
+    "type": "markdown",
+    "source": "**Round 5 close:**\n\n**Hire signal phrase bank** (drop in every STAR): \"I owned without being asked\", \"I defined the metric first\", \"I built a dashboard tracking X by Y\", \"I wrote a runbook preventing recurrence\", \"gold dataset from feedback.corrected_answer\".\n\n**Never say:** \"we\", \"the team\", \"they\". Always \"I owned\", \"I defined\", \"I built\". L6 = IC who owns, not the manager who delegates."
+  },
+  {
+    "id": "cheat_sheet",
+    "type": "markdown",
+    "source": "---\n\n# FINAL CHEAT SHEET\n\n## The 7 Magic Phrases (drop in 2+ rounds each)\n\n1. **Cursor O(1) vs OFFSET O(N)** — Round 2 SQL, Round 4 backend\n2. **SHA256 dedup saves 30%** — Round 2 modeling\n3. **10-shard Qdrant, 10M/shard** — Round 2 pipeline\n4. **evidence_json grounded, no hallucination** — Round 2 prompt, Round 3 PYMK\n5. **Flink CDC 5-min freshness, only re-embed changed chunks** — Round 2 pipeline\n6. **Dual-write shadow index for model upgrade** — Round 2 pipeline, Round 5 story\n7. **Gold dataset = feedback.corrected_answer thumbs_down** — Round 2 SQL, Round 4 export\n\n## The 5 Dimensions (touch all 5 in every answer)\n\n1. **Scale** — \"at 1B traces/day\", \"fanout O(N²) = 90k writes\", \"10M docs\"\n2. **Cost** — \"skip embedding low-quality docs\", \"separate embeddings table to save 6KB/row\"\n3. **Correctness** — \"idempotent writes\", \"versioned prompts\", \"grounded generation, no free LLM\"\n4. **Privacy** — \"GDPR tombstone + async purge\", \"check blocks table in gateway\"\n5. **Observability** — \"trace_id everywhere\", \"p95 by prompt_version dashboard\"\n\n## The 5 Never-Say Phrases\n\n- ❌ \"I'll use a bigger DB\" → say \"pre-aggregate, CDC, bounded fanout\"\n- ❌ \"I'll use Airflow\" → say \"Flink for streaming, Spark for batch\"\n- ❌ \"The LLM will figure it out\" → say \"grounded generation with evidence_json\"\n- ❌ \"We / the team\" (in STAR stories) → say \"I owned, I defined, I built\"\n- ❌ \"I'll just add an index\" (without showing you know the cost) → say \"covering index to avoid row fetch\"\n\n## The 5 Always-Say Phrases (for AI-Native)\n\n- ✅ Versioned prompts\n- ✅ Grounded generation (no free LLM in serving path)\n- ✅ Eval dataset from feedback\n- ✅ Shadow index for model upgrades\n- ✅ LLM-as-judge for online quality\n\n## The 10/10 Closing Line (Round 3 PYMK)\n\n> \"Design is **grounded, bounded, and auditable**: SCD2 with canonical key + index for time-travel, overlap join for 'worked at X together', evidence_json + validation layer for zero hallucination with audit, pull model for celebrity to bound fanout from 1B to 1k writes, shadow dual-write for safe model rollout.\"\n\n---\n\n**This loop = hire. Go ship the prep.**"
+  },
+  {
+    "id": "footer",
+    "type": "markdown",
+    "source": "---\n\n## How to Use This Notebook\n\n1. **Read top-to-bottom** before your on-site (45 min read)\n2. **Run all cells** to see the code demos (15 min)\n3. **Re-read Round 1 + cheat sheet** the morning of\n4. **Practice Round 1 pitch out loud** 10 times, time yourself at 90s\n\n## Companion Files\n\n- `../META_L6_STUDY_GUIDE.md` — original study guide\n- `../answers/FULL_ANSWERS_ALL_ROUNDS.md` — every answer script\n- `../article/META_L6_FULL_LOOP_MEDIUM_ARTICLE.md` — Medium-ready article\n- `../meta_l6_onsite_mock.ipynb` — the original 18-cell notebook\n\n---\n\n*Good luck. You have the artifacts. Now go ship it.*"
+  }
+]

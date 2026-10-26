@@ -55,6 +55,53 @@ One pane of glass: model registry, gateway with backend routing, and a fallback 
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not Vertex.** Vertex is a managed platform with
+  a model garden, an inference gateway, a feature
+  store, a training service, and a pipeline
+  orchestrator — all behind one auth. This is the
+  *gateway + registry + fallback* layer; the rest
+  of the Vertex surface is built on top of similar
+  primitives, but each is a separate problem.
+- **Not a model router only.** The registry is the
+  source of truth; the routing is downstream of the
+  lookup. Without the registry, the gateway is just
+  a switch statement.
+- **Not a free tier of a managed service.** A
+  fallback chain hides single-model outages but
+  doesn't eliminate them. The "weak model"
+  fallback is a *worse answer*, not a *correct
+  answer*. For SLAs that need 100% correct,
+  fall back to a verifier + retry, not a weaker
+  model.
+- **Not a cost-cutting tool by itself.** Cost
+  attribution per token is what makes the cost
+  visible; cutting cost is a separate decision
+  (route to a smaller model, batch, cache). The
+  gateway enables the cut; it doesn't make it.
+
+---
+
+## Related directories
+
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the production-shaped cousin; the gateway routes,
+  the control plane governs the lifecycle.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the "one model, one endpoint" inference layer
+  that the gateway routes *to*.
+- [`../38-multi-tenant-inference/`](../38-multi-tenant-inference/) —
+  the per-tenant cost / quota layer on top of the
+  gateway.
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework that measures whether the
+  fallback chain is actually delivering acceptable
+  quality on the model it falls back to.
+
 ---
 
 **Last updated:** 2026-10-12  

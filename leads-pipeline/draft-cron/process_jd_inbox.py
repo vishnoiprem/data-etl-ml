@@ -46,11 +46,14 @@ YOUR_COMPANY = os.getenv("YOUR_COMPANY", "Avilx")
 YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
 YOUR_WEBSITE = os.getenv("YOUR_WEBSITE", "https://avilx.com")
 YOUR_PHONE = os.getenv("YOUR_PHONE", "")
+# Default matches cover_letter.WHATSAPP so the rendered sig is consistent
+# across the two renderers. Empty default would render `wa.me/` (broken).
+YOUR_WHATSAPP = os.getenv("YOUR_WHATSAPP", "+6592716405").lstrip("+")
 
 PERSONAL_SIG = f"""{YOUR_NAME}
 {YOUR_COMPANY} — Global Build · Deploy · Engineers (AI · Data · ML · Cloud · Databricks · 7+ clouds)
 Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam
-📧 {YOUR_EMAIL} | 📱 {YOUR_PHONE} | 💬 WhatsApp: wa.me/{os.getenv('YOUR_WHATSAPP','').lstrip('+')} | 🌐 {YOUR_WEBSITE} | 🐦 @vishnoiprem"""
+📧 {YOUR_EMAIL} | 📱 {YOUR_PHONE} | 💬 WhatsApp: wa.me/{YOUR_WHATSAPP} | 🌐 {YOUR_WEBSITE} | 🐦 @vishnoiprem"""
 
 
 # ============== PARSING ==============
@@ -532,7 +535,7 @@ def generate_cover_letter(lead: dict) -> tuple[str, str]:
 
 Two angles: (1) I'm personally interested in the role — I've shipped {stack_text} at production scale. (2) Avilx can run a senior build pod (4-6 engineers, $40-70/hr blended) or staff aug ($50-100/hr) or principal architect seat ($120-180/hr) if {company} needs scale-up alongside this hire. Global delivery to China + APAC + US + EU, USD/EUR/CNY/SGD invoicing, Vietnam LLC, NDA + IP standard.
 
-Happy to share my resume (attached) and 1-2 relevant case studies on a 15-min call this week. WhatsApp me at wa.me/{os.getenv('YOUR_WHATSAPP','').lstrip('+')} or drop a time: hello@avilx.com
+Happy to share my resume (attached) and 1-2 relevant case studies on a 15-min call this week. WhatsApp me at wa.me/{YOUR_WHATSAPP} or drop a time: hello@avilx.com
 
 {PERSONAL_SIG}"""
 
@@ -545,8 +548,19 @@ def load_leads() -> list:
 
 
 def save_leads(leads: list):
-    with open(LEADS_FILE, "w") as f:
+    """Atomically write leads.json so a kill mid-dump doesn't corrupt the file.
+
+    Write to a sibling .tmp, fsync, then os.replace — same pattern used
+    elsewhere in the pipeline (autopilot.REPORT_FILE). A crash between
+    json.dump and the kernel flush would otherwise leave a half-written
+    file that load_leads() can't parse.
+    """
+    tmp = LEADS_FILE.with_suffix(".json.tmp")
+    with open(tmp, "w") as f:
         json.dump(leads, f, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, LEADS_FILE)
 
 
 def merge_lead(parsed: dict) -> bool:

@@ -89,10 +89,13 @@ def scrape_hn_who_is_hiring():
     """Fetch the latest Ask HN: Who is hiring? thread and parse top comments."""
     out = []
     try:
-        # Get the latest thread ID
+        # Get the latest thread ID. Firebase HN endpoint is generous but a
+        # 1-askstories + 30-items + 60-kids loop is ~91 requests in a tight
+        # burst — sleep between to stay well under any IP-based rate limit.
         r = http_get("https://hacker-news.firebaseio.com/v0/askstories.json")
         ids = r.json()[:30]
         for sid in ids:
+            time.sleep(MIN_INTERVAL)
             item = http_get(f"https://hacker-news.firebaseio.com/v0/item/{sid}.json").json()
             if not item:
                 continue
@@ -104,6 +107,7 @@ def scrape_hn_who_is_hiring():
             print(f"  [HN] thread: {item.get('title')} ({len(kids)} comments)")
             for kid in kids[:60]:  # cap
                 try:
+                    time.sleep(MIN_INTERVAL)
                     c = http_get(f"https://hacker-news.firebaseio.com/v0/item/{kid}.json").json()
                     if not c or c.get("deleted") or c.get("dead"):
                         continue

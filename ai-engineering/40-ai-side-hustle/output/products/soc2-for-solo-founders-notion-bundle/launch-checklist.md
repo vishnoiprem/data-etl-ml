@@ -1,10 +1,10 @@
-# Launch Checklist for Soc2 For Solo Founders Notion Bundle
+# Launch Checklist for SOC2 For Solo Founders Notion Bundle
 
 ## Today (Day 0)
 - [ ] Upload `deliverable.pdf` to Gumroad
 - [ ] Copy `sales-page.html` into the Gumroad description (or paste
       the markdown from `listing.md` if you don't want HTML)
-- [ ] Set price to $12
+- [ ] Set price to $29
 - [ ] Add a cover image (use Canva, 1280x720, with the title big)
 - [ ] Set the product URL slug to something memorable
 - [ ] Test the purchase flow with a $0 test product first

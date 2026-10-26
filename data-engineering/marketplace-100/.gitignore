@@ -1,0 +1,34 @@
+# Marketplace 100 — gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Databricks
+.databricks/
+.bundle/
+
+# OS
+.DS_Store
+.idea/
+.vscode/
+
+# Logs and fixtures
+*.log
+/tmp/
+fixtures/cache/
+
+# State — never commit a partially-run iterations table
+state/

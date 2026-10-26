@@ -70,6 +70,54 @@ The 30% failure rate is the deal. For a non-API legacy tool, 70% automation at 4
 pip install -r requirements.txt
 make demo
 ```
+
+---
+
+## What this is NOT
+
+- **Not production-safe for high-stakes workflows.**
+  The 30% failure rate is the deal. For a 4-hours/week
+  saved on a legacy CRM, that's a net positive. For
+  "moving money" or "filing a regulatory report,"
+  it would not be. The VLM hallucinates buttons;
+  modals appear unannounced; pages don't load in
+  time. Plan for the 30%, not the 70%.
+- **Not an API replacement.** The whole point of
+  this build is that the legacy tool has *no API*.
+  If the tool has an API, use it. Computer Use is
+  for the last-resort case where there is no
+  alternative.
+- **Not a security boundary.** The agent has
+  screen-level access; it can see and click
+  *anything* in the browser window. If the page
+  has session tokens, payment forms, or admin
+  controls, the agent can act on them. The
+  approval gate (in
+  [`../9-terminal-agent-claude-code/`](../9-terminal-agent-claude-code/))
+  is the only friction.
+- **Not a one-shot agent.** The screenshot →
+  action → verify loop runs once per step. A
+  long task is many steps; a stuck-in-a-loop is
+  the same risk as the terminal agent.
+
+---
+
+## Related directories
+
+- [`../13-browser-agent-comet-style/`](../13-browser-agent-comet-style/) —
+  the browser-only cousin: same shape, but
+  restricted to a browser context (no desktop
+  control). Safer default for web workflows.
+- [`../9-terminal-agent-claude-code/`](../9-terminal-agent-claude-code/) —
+  the terminal cousin: shell control instead of
+  screen control. Same planner-executor shape.
+- [`../11-general-agent-manus-style/`](../11-general-agent-manus-style/) —
+  the general-purpose cousin: any tool in the
+  allowlist, not just screen + mouse.
+- [`../16-autonomous-loop/`](../16-autonomous-loop/) —
+  the bounded-loop + budget + retry pattern; the
+  long-task stuck-detection lives here.
+
 ---
 
 **Last updated:** 2026-10-12  
