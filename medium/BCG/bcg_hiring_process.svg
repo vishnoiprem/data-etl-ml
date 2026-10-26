@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1260 560" width="1260" height="560" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+  </defs>
+  <rect width="1260" height="560" fill="#ffffff"/>
+  <text x="600" y="48" text-anchor="middle" font-size="26" font-weight="700" fill="#306FC7">BCG Platinion hiring process: 8 steps, 3 to 6 weeks</text>
+  <text x="600" y="76" text-anchor="middle" font-size="14" fill="#555">Typical and candidate-reported, not BCG-confirmed. Confirm the exact loop with your recruiter.</text>
+
+  <!-- Row 1 -->
+  <g>
+    <rect x="60" y="110" width="240" height="120" rx="10" fill="#306FC7"/>
+    <text x="180" y="142" text-anchor="middle" font-size="13" fill="#fff" opacity="0.85">ROUND 0</text>
+    <text x="180" y="168" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">CV screen</text>
+    <text x="180" y="194" text-anchor="middle" font-size="13" fill="#fff">Recruiter / talent team</text>
+    <text x="180" y="214" text-anchor="middle" font-size="13" fill="#fff">Sector + skill match</text>
+
+    <rect x="360" y="110" width="240" height="120" rx="10" fill="#306FC7"/>
+    <text x="480" y="142" text-anchor="middle" font-size="13" fill="#fff" opacity="0.85">ROUND 1 · 20-30 min</text>
+    <text x="480" y="168" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Recruiter call</text>
+    <text x="480" y="194" text-anchor="middle" font-size="13" fill="#fff">Motivation, level, logistics</text>
+    <text x="480" y="214" text-anchor="middle" font-size="13" fill="#fff">Red-flag check</text>
+
+    <rect x="660" y="110" width="240" height="120" rx="10" fill="#306FC7"/>
+    <text x="780" y="142" text-anchor="middle" font-size="13" fill="#fff" opacity="0.85">ROUND 2 · 30-45 min</text>
+    <text x="780" y="168" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Hiring manager</text>
+    <text x="780" y="194" text-anchor="middle" font-size="13" fill="#fff">Senior Manager / Principal</text>
+    <text x="780" y="214" text-anchor="middle" font-size="13" fill="#fff">Experience depth, ownership</text>
+
+    <rect x="960" y="110" width="240" height="120" rx="10" fill="#43938F"/>
+    <text x="1080" y="142" text-anchor="middle" font-size="13" fill="#fff" opacity="0.85">ROUND 3 · 45-60 min</text>
+    <text x="1080" y="168" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Architecture interview</text>
+    <text x="1080" y="194" text-anchor="middle" font-size="13" fill="#fff">AWS, Databricks, GenAI</text>
+    <text x="1080" y="214" text-anchor="middle" font-size="13" fill="#fff">Trade-offs, not tool lists</text>
+  </g>
+
+  <!-- Row 1 arrows -->
+  <g stroke="#444" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+    <line x1="302" y1="170" x2="356" y2="170"/>
+    <line x1="602" y1="170" x2="656" y2="170"/>
+    <line x1="902" y1="170" x2="956" y2="170"/>
+  </g>
+
+  <!-- Connector row 1 to row 2 -->
+  <path d="M1080,232 L1080,270 L180,270 L180,306" stroke="#444" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Row 2 -->
+  <g>
+    <rect x="60" y="310" width="240" height="120" rx="10" fill="#43938F"/>
+    <text x="180" y="342" text-anchor="middle" font-size="13" fill="#fff" opacity="0.85">ROUND 4 · 45-60 min</text>
+    <text x="180" y="368" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Case interview</text>
+    <text x="180" y="394" text-anchor="middle" font-size="13" fill="#fff">Principal / MD</text>
+    <text x="180" y="414" text-anchor="middle" font-size="13" fill="#fff">Tech-flavoured business case</text>
+
+    <rect x="360" y="310" width="240" height="120" rx="10" fill="#F6C24A"/>
+    <text x="480" y="342" text-anchor="middle" font-size="13" fill="#333">ROUND 5 · 30-60 min</text>
+    <text x="480" y="368" text-anchor="middle" font-size="18" font-weight="700" fill="#222">Executive brief</text>
+    <text x="480" y="394" text-anchor="middle" font-size="13" fill="#222">Reported for senior roles</text>
+    <text x="480" y="414" text-anchor="middle" font-size="13" fill="#222">Write it, then defend it</text>
+
+    <rect x="660" y="310" width="240" height="120" rx="10" fill="#F6C24A"/>
+    <text x="780" y="342" text-anchor="middle" font-size="13" fill="#333">ROUND 6 · 45-60 min</text>
+    <text x="780" y="368" text-anchor="middle" font-size="18" font-weight="700" fill="#222">Partner / MD</text>
+    <text x="780" y="394" text-anchor="middle" font-size="13" fill="#222">Presence, judgement</text>
+    <text x="780" y="414" text-anchor="middle" font-size="13" fill="#222">Commercial instinct, fit</text>
+
+    <rect x="960" y="310" width="240" height="120" rx="10" fill="#DA3832"/>
+    <text x="1080" y="342" text-anchor="middle" font-size="13" fill="#fff" opacity="0.85">ROUND 7 · days to weeks</text>
+    <text x="1080" y="368" text-anchor="middle" font-size="18" font-weight="700" fill="#fff">Decision and offer</text>
+    <text x="1080" y="394" text-anchor="middle" font-size="13" fill="#fff">Committee, references</text>
+    <text x="1080" y="414" text-anchor="middle" font-size="13" fill="#fff">Hire / no hire, and level</text>
+  </g>
+
+  <!-- Row 2 arrows -->
+  <g stroke="#444" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+    <line x1="302" y1="370" x2="356" y2="370"/>
+    <line x1="602" y1="370" x2="656" y2="370"/>
+    <line x1="902" y1="370" x2="956" y2="370"/>
+  </g>
+
+  <!-- Legend -->
+  <g font-size="14" fill="#333">
+    <rect x="190" y="480" width="18" height="18" rx="3" fill="#306FC7"/>
+    <text x="216" y="494">Screening</text>
+    <rect x="350" y="480" width="18" height="18" rx="3" fill="#43938F"/>
+    <text x="376" y="494">Technical and case</text>
+    <rect x="570" y="480" width="18" height="18" rx="3" fill="#F6C24A"/>
+    <text x="596" y="494">Executive and partner</text>
+    <rect x="810" y="480" width="18" height="18" rx="3" fill="#DA3832"/>
+    <text x="836" y="494">Decision</text>
+  </g>
+  <text x="600" y="535" text-anchor="middle" font-size="13" fill="#666">Expect 4 to 6 conversations. Level can differ from the level you applied for.</text>
+</svg>
