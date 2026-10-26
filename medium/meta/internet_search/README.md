@@ -40,3 +40,7 @@ Run date: 2026-10-04. Scope: real questions reported for Meta DE-PA, Singapore a
 - Older entries (2021, 2022) may not reflect the current blended product sense / data modeling / SQL / Python loop.
 
 This is a public repo: no personal data about any reader is stored here, and quotes are limited to question text with attribution.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

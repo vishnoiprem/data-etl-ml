@@ -142,3 +142,7 @@ docker compose down -v           # WARNING: deletes all stored ticks/bars/signal
 ```
 
 Restart any time with `bash scripts/1_start_containers.sh`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

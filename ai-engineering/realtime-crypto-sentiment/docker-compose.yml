@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: crypto-timescaledb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: crypto
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - crypto-pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard.Dockerfile
+    container_name: crypto-dashboard
+    restart: unless-stopped
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@timescaledb:5432/crypto
+    ports:
+      - "8501:8501"
+    profiles:
+      - dashboard
+
+volumes:
+  crypto-pgdata:

@@ -327,3 +327,7 @@ double-billed click costs a chargeback, an audit, and an advertiser."*
 idempotent batch reconciliation. The dashboard is the visible part, but the
 ledger is the part you get sued over, and everything else can be rebuilt from
 raw events by replay.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

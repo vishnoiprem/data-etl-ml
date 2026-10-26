@@ -49,3 +49,7 @@ By the end of Module 4 you can:
 ```
 
 (Full comparison in [`resources/vector-db-comparison.md`](../../resources/vector-db-comparison.md).)
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

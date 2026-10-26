@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free AI Prompts — AIForBiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
+      <div>
+        <a href="/">Home</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/admin">Admin</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="padding: 80px 0 40px;">
+      <div class="container">
+        <p class="kicker">Free tool · No signup required</p>
+        <h1 style="font-size: clamp(40px, 6vw, 64px);">AI prompts for your business.</h1>
+        <p class="sub">Pick a category, fill in the blanks, get a ready-to-use prompt. Copy and paste into ChatGPT or Claude.</p>
+      </div>
+    </section>
+
+    <section style="padding: 40px 0 100px;">
+      <div class="container">
+        <div class="prompt-tool">
+          <div class="form-section">
+            <label>1. Choose a category</label>
+            <select id="category"></select>
+
+            <label>2. Choose a prompt</label>
+            <select id="prompt-title"></select>
+
+            <div id="inputs"></div>
+
+            <button id="generate" class="btn btn-primary btn-lg">Generate Prompt →</button>
+          </div>
+
+          <div class="output-section">
+            <h3>Your Prompt</h3>
+            <pre id="output">Select a category and fill in the form to generate a prompt.</pre>
+            <button id="copy" class="btn btn-primary copy-btn">📋 Copy to Clipboard</button>
+          </div>
+        </div>
+
+        <div class="cta-link">
+          <p style="color: var(--gray-500); margin-bottom: 8px;">Want 100+ prompts + done-for-you templates?</p>
+          <a href="/pricing" class="btn btn-secondary">See Course Pricing →</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 AIForBiz · Made with ❤️ in Singapore</p>
+  </footer>
+
+  <script>
+    let allPrompts = {};
+
+    async function loadPrompts() {
+      const res = await fetch('/api/prompts');
+      allPrompts = await res.json();
+      const catSelect = document.getElementById('category');
+      catSelect.innerHTML = Object.keys(allPrompts).map(c =>
+        `<option value="${c}">${c.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>`
+      ).join('');
+      catSelect.dispatchEvent(new Event('change'));
+    }
+
+    document.getElementById('category').addEventListener('change', (e) => {
+      const cat = e.target.value;
+      const titleSelect = document.getElementById('prompt-title');
+      titleSelect.innerHTML = allPrompts[cat].map(p =>
+        `<option value="${p.title}">${p.title}</option>`
+      ).join('');
+      titleSelect.dispatchEvent(new Event('change'));
+    });
+
+    document.getElementById('prompt-title').addEventListener('change', async (e) => {
+      const cat = document.getElementById('category').value;
+      const title = e.target.value;
+      try {
+        const res = await fetch(`/api/prompts/${cat}/${encodeURIComponent(title)}`);
+        const data = await res.json();
+        const vars = [...data.prompt.matchAll(/\{(\w+)\}/g)].map(m => m[1]);
+        const uniqueVars = [...new Set(vars)];
+        document.getElementById('inputs').innerHTML = uniqueVars.length
+          ? uniqueVars.map(v => `
+              <label>${v.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</label>
+              <input id="var-${v}" placeholder="e.g. ${v === 'business_type' ? 'online clothing store' : '...'}">`).join('')
+          : '<p style="font-size: 14px; color: var(--gray-500); margin-top: 16px;">No inputs needed — click Generate.</p>';
+        document.getElementById('inputs').dataset.template = data.prompt;
+      } catch (e) {
+        document.getElementById('output').textContent = 'Error loading prompt. Try another.';
+      }
+    });
+
+    document.getElementById('generate').addEventListener('click', async () => {
+      const cat = document.getElementById('category').value;
+      const title = document.getElementById('prompt-title').value;
+      const inputs = document.querySelectorAll('#inputs input');
+      const params = new URLSearchParams();
+      inputs.forEach(i => { if (i.value) params.append(i.id.replace('var-', ''), i.value); });
+
+      const btn = document.getElementById('generate');
+      const orig = btn.textContent;
+      btn.textContent = 'Generating...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/prompts/${cat}/${encodeURIComponent(title)}?${params}`);
+        const data = await res.json();
+        document.getElementById('output').textContent = data.prompt || data.detail;
+      } finally {
+        btn.textContent = orig;
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('copy').addEventListener('click', async () => {
+      const text = document.getElementById('output').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('copy');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        btn.style.background = 'var(--gray-600)';
+        setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+      } catch (e) {
+        alert('Copy failed. Press Ctrl+C / Cmd+C manually.');
+      }
+    });
+
+    loadPrompts();
+  </script>
+</body>
+</html>

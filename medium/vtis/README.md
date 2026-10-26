@@ -66,3 +66,7 @@ Viet Thai International - VTI Group | LinkedIn
 About Viet Thai | Viet Thai International Careers
 How Highlands Coffee's App Is Transforming Customer Loyalty
 Revolutionizing Coffee Supply Chains with Real-Time Data Analytics
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

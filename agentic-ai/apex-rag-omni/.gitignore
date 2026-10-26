@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Audit log (writes only — never committed)
+audit/audit.jsonl
+
+# Test artifacts
+tests/_tmp_reports/
+
+# Eval reports (generated — local only)
+eval/reports/eval_*.json
+!eval/reports/.gitkeep
+
+# Production env (real secrets)
+.env.prod
+!.env.prod.example

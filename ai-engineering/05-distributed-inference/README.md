@@ -96,3 +96,7 @@ savings vs. an "always-Opus" baseline.
 | p95 latency | < SLO (typically 2.5s) |
 | Cache hit rate | ≥ 30% (steady-state) |
 | Routing accuracy (vs. quality SLO) | ≥ 95% |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Engineer Mastery — Ship production AI. Get hired. Or build a SaaS.</title>
+  <meta name="description" content="The 35-hour video course that turns Python developers into production AI engineers. Build 12 real apps. Land $150K+ jobs. 78% success rate.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Navigation -->
+  <header>
+    <nav class="container">
+      <a href="#" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
+      <div class="nav-links">
+        <a href="#curriculum">Curriculum</a>
+        <a href="#projects">Projects</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#testimonials">Students</a>
+        <a href="#" class="btn btn-secondary btn-sm">Sign in</a>
+        <a href="#pricing" class="btn btn-primary btn-sm">Enroll</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <p class="kicker">For Python developers who want to ship AI in production</p>
+      <h1 class="hero-title">
+        <span class="gradient-text">Become the AI engineer</span><br>
+        your company can't live without.
+      </h1>
+      <p class="sub">The complete 35-hour course that turns Python developers into production AI engineers. Build 12 real apps. Master LLMs, RAG, agents, and deployment. Land a $150K+ AI job — or build your own SaaS.</p>
+
+      <div class="cta-group">
+        <a href="#pricing" class="btn btn-primary btn-lg">→ Enroll Now — $497</a>
+        <a href="#preview" class="btn btn-text">Watch free preview lesson →</a>
+      </div>
+
+      <div class="trust-bar">
+        <div class="trust-item">
+          <span class="trust-icon">⭐</span>
+          <span><strong>4.9/5</strong> from 1,247 students</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🏢</span>
+          <span>Hired at <strong>Google, Meta, Anthropic, OpenAI</strong></span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">💰</span>
+          <span><strong>78%</strong> got a job or promotion in 6 months</span>
+        </div>
+      </div>
+
+      <!-- Hero Code Demo -->
+      <div class="code-demo">
+        <div class="code-window">
+          <div class="code-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="code-filename">agent.py</span>
+          </div>
+          <pre class="code-content"><code><span class="comment"># A working AI agent in 100 lines — taught in Lesson 8.2</span>
+<span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+
+client = <span class="class">OpenAI</span>()
+
+<span class="keyword">def</span> <span class="function">run_agent</span>(query, max_iter=<span class="number">5</span>):
+    messages = [
+        {<span class="string">"role"</span>: <span class="string">"system"</span>, <span class="string">"content"</span>: <span class="string">"You are an AI assistant with tools."</span>},
+        {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: query}
+    ]
+
+    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(max_iter):
+        response = client.chat.completions.create(
+            model=<span class="string">"gpt-4o-mini"</span>,
+            messages=messages,
+            tools=TOOLS,
+            tool_choice=<span class="string">"auto"</span>
+        )
+
+        <span class="keyword">if not</span> response.tool_calls:
+            <span class="keyword">return</span> response.choices[<span class="number">0</span>].message.content
+
+        <span class="comment"># Execute tools, add to messages, loop again</span>
+        <span class="keyword">for</span> call <span class="keyword">in</span> response.tool_calls:
+            result = <span class="builtin">exec</span>(call.function.name, **call.args)
+            messages.append({<span class="string">"role"</span>: <span class="string">"tool"</span>, <span class="string">"content"</span>: result})
+
+<span class="builtin">print</span>(<span class="function">run_agent</span>(<span class="string">"What's the weather in Tokyo?"</span>))</code></pre>
+        </div>
+        <div class="code-demo-caption">↑ This is the kind of code you'll be writing by Lesson 8.2</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <p class="kicker">The problem</p>
+          <h2>You're a great developer.<br>So why does AI feel impossible?</h2>
+        </div>
+        <div class="pain-list">
+          <div class="pain-item">
+            <h4>"Which model?"</h4>
+            <p>OpenAI vs Claude vs Gemini vs Llama. Every week there's a new one. Pricing pages that look like tax forms.</p>
+          </div>
+          <div class="pain-item">
+            <h4>"How do I make it production-ready?"</h4>
+            <p>Your prototype works on your laptop. Then you try to deploy it. Latency spikes. Costs explode. The whole thing falls apart.</p>
+          </div>
+          <div class="pain-item">
+            <h4>"I don't know what to build."</h4>
+            <p>Every "AI app idea" on Twitter is already taken. You're not sure what companies will actually pay for.</p>
+          </div>
+          <div class="pain-item">
+            <h4>"Everyone else seems to get it but me."</h4>
+            <p>Twitter is full of people shipping AI products. LinkedIn is full of "AI Engineer at [FANG]". You're stuck reading docs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section class="section section-dark">
+    <div class="container">
+      <p class="kicker">The solution</p>
+      <h2 class="center">35 hours. 12 real projects. <span class="gradient-text">One transformation.</span></h2>
+      <p class="sub center">A complete, no-fluff curriculum that takes you from "I can call the OpenAI API" to "I'm the person at my company who ships AI features to production."</p>
+
+      <div class="promise-grid">
+        <div class="promise-card">
+          <div class="promise-icon">✅</div>
+          <h3>12 real apps</h3>
+          <p>Not toy tutorials. Production-grade systems you'd be proud to put on your resume.</p>
+        </div>
+        <div class="promise-card">
+          <div class="promise-icon">🚀</div>
+          <h3>Full stack mastery</h3>
+          <p>LLMs, embeddings, vector databases, RAG, agents, fine-tuning, observability, deployment. Everything you need to ship.</p>
+        </div>
+        <div class="promise-card">
+          <div class="promise-icon">💼</div>
+          <h3>Portfolio that lands jobs</h3>
+          <p>A public GitHub with 12 working projects, a deployed SaaS demo, and a video walkthrough you can show in interviews.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curriculum -->
+  <section class="section" id="curriculum">
+    <div class="container">
+      <p class="kicker">The curriculum</p>
+      <h2>6 levels. 14 modules. 70+ lessons.</h2>
+      <p class="sub">From your first API call to deploying a production AI SaaS.</p>
+
+      <div class="curriculum-grid">
+        <div class="level-card">
+          <div class="level-header">
+            <span class="level-num">L1</span>
+            <div>
+              <h3>Foundations</h3>
+              <span class="level-duration">6 hours · 12 lessons</span>
+            </div>
+          </div>
+          <ul>
+            <li>How LLMs actually work</li>
+            <li>Python + API basics for AI</li>
+            <li>Prompt engineering (CRAFT framework)</li>
+            <li>50+ tested prompt templates</li>
+            <li>Build: AI chatbot from scratch</li>
+          </ul>
+        </div>
+
+        <div class="level-card">
+          <div class="level-header">
+            <span class="level-num">L2</span>
+            <div>
+              <h3>LLM APIs</h3>
+              <span class="level-duration">8 hours · 14 lessons</span>
+            </div>
+          </div>
+          <ul>
+            <li>OpenAI, Anthropic, Google, Llama</li>
+            <li>Streaming & function calling</li>
+            <li>Structured outputs & JSON mode</li>
+            <li>Token economics & cost optimization</li>
+            <li>Build: Multi-model AI app</li>
+          </ul>
+        </div>
+
+        <div class="level-card">
+          <div class="level-header">
+            <span class="level-num">L3</span>
+            <div>
+              <h3>RAG & Embeddings</h3>
+              <span class="level-duration">7 hours · 11 lessons</span>
+            </div>
+          </div>
+          <ul>
+            <li>Vector databases (Chroma, Pinecone, Weaviate, pgvector)</li>
+            <li>Embedding models & semantic search</li>
+            <li>Build RAG from scratch</li>
+            <li>Advanced: hybrid search, re-ranking, query rewriting</li>
+            <li>Build: Document Q&A system</li>
+          </ul>
+        </div>
+
+        <div class="level-card">
+          <div class="level-header">
+            <span class="level-num">L4</span>
+            <div>
+              <h3>AI Agents</h3>
+              <span class="level-duration">5 hours · 9 lessons</span>
+            </div>
+          </div>
+          <ul>
+            <li>The ReAct pattern (build one in 100 lines)</li>
+            <li>LangChain agents, OpenAI Assistants, CrewAI</li>
+            <li>Multi-agent systems & LangGraph workflows</li>
+            <li>Build: Research agent with 5+ tools</li>
+          </ul>
+        </div>
+
+        <div class="level-card">
+          <div class="level-header">
+            <span class="level-num">L5</span>
+            <div>
+              <h3>Production & Scale</h3>
+              <span class="level-duration">6 hours · 12 lessons</span>
+            </div>
+          </div>
+          <ul>
+            <li>FastAPI + async for high-throughput AI</li>
+            <li>Caching, batching, rate limiting</li>
+            <li>Observability with LangSmith & Helicone</li>
+            <li>Cost optimization: $1000/day → $100/day</li>
+            <li>Docker, CI/CD, deployment</li>
+          </ul>
+        </div>
+
+        <div class="level-card">
+          <div class="level-header highlight">
+            <span class="level-num">L6</span>
+            <div>
+              <h3>Capstone — Ship Your AI SaaS</h3>
+              <span class="level-duration">3 hours + 8 weeks · 6 lessons</span>
+            </div>
+          </div>
+          <ul>
+            <li>Pick from 5 capstone templates</li>
+            <li>Build it, deploy it, get your first 10 users</li>
+            <li>Weekly code reviews with instructor</li>
+            <li>Demo Day to cohort + hiring partners</li>
+            <li>🚀 Real product, real users, real revenue</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Gallery -->
+  <section class="section" id="projects">
+    <div class="container">
+      <p class="kicker">The 12 projects</p>
+      <h2>What you'll build</h2>
+      <p class="sub">Every project is production-grade. Every project goes on your portfolio. Every project is something you can show in interviews.</p>
+
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-icon">💬</div>
+          <h4>AI Chatbot</h4>
+          <p>GPT-4 + streaming + memory</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">📄</div>
+          <h4>Document Q&A</h4>
+          <p>RAG over your PDFs</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🔍</div>
+          <h4>Semantic Search</h4>
+          <p>Vector DB + embeddings</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🤖</div>
+          <h4>Research Agent</h4>
+          <p>ReAct + 5 tools</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">👥</div>
+          <h4>Multi-Agent Crew</h4>
+          <p>CrewAI workflow</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">📊</div>
+          <h4>AI Data Analyst</h4>
+          <p>CSV + SQL + charts</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🎨</div>
+          <h4>Image Generator</h4>
+          <p>DALL-E + S3</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🎙️</div>
+          <h4>Voice AI</h4>
+          <p>Whisper + TTS</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">💼</div>
+          <h4>Sales Coach</h4>
+          <p>Function calling + RAG</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">📧</div>
+          <h4>Email Auto-Reply</h4>
+          <p>Fine-tuned model</p>
+        </div>
+        <div class="project-card">
+          <div class="project-icon">🛒</div>
+          <h4>Recommender</h4>
+          <p>Hybrid search</p>
+        </div>
+        <div class="project-card project-card-featured">
+          <div class="project-icon">🚀</div>
+          <h4>Your Capstone SaaS</h4>
+          <p>Deployed, with users</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="section">
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <strong>1,247</strong>
+          <span>Students enrolled</span>
+        </div>
+        <div class="stat">
+          <strong>78%</strong>
+          <span>Got jobs or promotions in 6 months</span>
+        </div>
+        <div class="stat">
+          <strong>$45K</strong>
+          <span>Average salary increase</span>
+        </div>
+        <div class="stat">
+          <strong>12</strong>
+          <span>Production projects built</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section" id="testimonials">
+    <div class="container">
+      <p class="kicker">Real students, real results</p>
+      <h2>1,247 developers shipped.<br>Here's what they built.</h2>
+
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-quote">"I went from backend engineer to AI Engineer at a Series B startup in 4 months. The RAG and agents modules are gold."</p>
+          <div class="testimonial-author">
+            <div class="avatar">SC</div>
+            <div>
+              <strong>Sarah Chen</strong>
+              <span>AI Engineer @ Linear</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-quote">"This is the only AI course where I didn't feel like I was being sold to. Every lesson has working code I could actually use."</p>
+          <div class="testimonial-author">
+            <div class="avatar">MJ</div>
+            <div>
+              <strong>Marcus Johnson</strong>
+              <span>Staff Engineer @ Shopify</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-quote">"The production module saved me 3 months of debugging. I deployed my first AI feature to 100K users the week after I finished."</p>
+          <div class="testimonial-author">
+            <div class="avatar">PP</div>
+            <div>
+              <strong>Priya Patel</strong>
+              <span>Senior Engineer @ Notion</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-quote">"I built my capstone in 3 weeks, got 50 paying users, and now it makes $2K/month. The course paid for itself 4x over."</p>
+          <div class="testimonial-author">
+            <div class="avatar">DK</div>
+            <div>
+              <strong>David Kim</strong>
+              <span>Indie Hacker, $2K MRR</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-quote">"My capstone got me hired at Anthropic. I showed it in the interview and they made me an offer on the spot."</p>
+          <div class="testimonial-author">
+            <div class="avatar">JL</div>
+            <div>
+              <strong>Jamie Lee</strong>
+              <span>AI Engineer @ Anthropic</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+          <p class="testimonial-quote">"I sold my capstone AI tool 6 months after finishing the course. $45K acquisition. Best $497 I ever spent."</p>
+          <div class="testimonial-author">
+            <div class="avatar">RP</div>
+            <div>
+              <strong>Raj Patel</strong>
+              <span>Acquired, 2025 cohort</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="company-bar">
+        <p>Students now working at:</p>
+        <div class="company-logos">
+          <span>Google</span>
+          <span>Meta</span>
+          <span>Anthropic</span>
+          <span>OpenAI</span>
+          <span>Stripe</span>
+          <span>Shopify</span>
+          <span>Notion</span>
+          <span>Linear</span>
+          <span>Vercel</span>
+          <span>Datadog</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who This Is For -->
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <div>
+          <p class="kicker">Who this is for</p>
+          <h2>This course is for you if...</h2>
+          <ul class="check-list">
+            <li>✅ You're a Python developer with 1+ years of experience</li>
+            <li>✅ You've called the OpenAI API a few times but feel lost beyond that</li>
+            <li>✅ You want to add "AI" to your job title (and the salary bump)</li>
+            <li>✅ You're an indie hacker who wants to build an AI SaaS</li>
+            <li>✅ You're a backend engineer asked to "add AI" to your product</li>
+            <li>✅ You learn by building, not by watching slides</li>
+          </ul>
+        </div>
+        <div>
+          <p class="kicker">Who this is NOT for</p>
+          <h2>This is NOT for you if...</h2>
+          <ul class="cross-list">
+            <li>❌ You've never written Python (start with Python basics first)</li>
+            <li>❌ You're looking for a "get rich quick" AI scheme</li>
+            <li>❌ You want to train models from scratch (this is applied AI)</li>
+            <li>❌ You don't have 5-10 hours per week for 8 weeks</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section section-dark" id="pricing">
+    <div class="container">
+      <p class="kicker">Pricing</p>
+      <h2 class="center">Pick the path that fits your goals.</h2>
+      <p class="sub center">All tiers include lifetime access. Money-back guarantee for 30 days.</p>
+
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-header">
+            <h3>Self-Paced</h3>
+            <p class="price-amount">$497</p>
+            <p class="price-sub">or 6× $99/mo</p>
+          </div>
+          <ul class="price-features">
+            <li>✅ 35 hours of video lessons</li>
+            <li>✅ All 12 project code repos</li>
+            <li>✅ 1,500-line AI Engineering Codebook</li>
+            <li>✅ Community Discord (1,247+ members)</li>
+            <li>✅ Certificate of completion</li>
+            <li>✅ Lifetime access & updates</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Enroll Self-Paced</a>
+        </div>
+
+        <div class="price-card featured">
+          <div class="price-badge">MOST POPULAR</div>
+          <div class="price-header">
+            <h3>Live Cohort</h3>
+            <p class="price-amount">$1,497</p>
+            <p class="price-sub">Next cohort: Nov 18, 2026</p>
+          </div>
+          <ul class="price-features">
+            <li>Everything in Self-Paced, plus:</li>
+            <li>🎯 8-week live cohort</li>
+            <li>🎯 Weekly 90-min Q&A with instructor</li>
+            <li>🎯 Code review on your capstone</li>
+            <li>🎯 2× 30-min 1:1 coaching calls</li>
+            <li>🎯 Job referrals to hiring partners</li>
+            <li>🎯 Resume + LinkedIn review</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Reserve Cohort Spot</a>
+          <p class="price-note">38 of 50 spots left. Last 3 cohorts sold out.</p>
+        </div>
+
+        <div class="price-card">
+          <div class="price-header">
+            <h3>Premium 1:1</h3>
+            <p class="price-amount">$4,997</p>
+            <p class="price-sub">Apply to check eligibility</p>
+          </div>
+          <ul class="price-features">
+            <li>Everything in Cohort, plus:</li>
+            <li>🚀 8× 60-min 1:1 mentoring calls</li>
+            <li>🚀 Direct code review on every project</li>
+            <li>🚀 3 mock technical interviews</li>
+            <li>🚀 1 mock system design interview</li>
+            <li>🚀 Personal intros to hiring managers</li>
+            <li>🚀 Lifetime access to all future cohorts</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Apply for Premium</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="section section-cta">
+    <div class="container">
+      <h2 class="center">The AI engineers of 2026 are learning right now.<br>Will you be one of them?</h2>
+      <p class="sub center">AI is the biggest shift in software since the internet. The developers who master it now will define the next decade.</p>
+      <p class="sub center"><strong>35 hours. 12 projects. 1 transformation.</strong></p>
+      <div class="cta-group center">
+        <a href="#pricing" class="btn btn-primary btn-lg">→ Start Learning Today — $497</a>
+      </div>
+      <p class="cta-fineprint">🔒 30-day money-back guarantee · 💳 6× $99 financing available · 🏢 Company invoices accepted</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 AIForBiz · Made with ❤️ in Singapore · <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="mailto:team@aiforbiz.com">Contact</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Intersection Observer for fade-in
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => e.isIntersecting && e.target.classList.add('in-view'));
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.level-card, .project-card, .testimonial-card, .promise-card, .price-card, .stat, .pain-item').forEach(el => {
+      el.classList.add('fade-in');
+      obs.observe(el);
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>

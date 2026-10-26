@@ -26,7 +26,7 @@ from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    API_HOST, API_PORT, API_TITLE, API_VERSION, COUNTRIES
+    API_HOST, API_PORT, API_TITLE, API_VERSION, COUNTRIES, CORS_ALLOWED_ORIGINS
 )
 from scb_aml_platform.lucid_search.api.search_engine import LucidSearchEngine
 
@@ -45,9 +45,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # Restrict to an env-driven allowlist. Wildcard CORS on a search
+    # API for AML analysts is a real exposure (any origin can read
+    # entity data, including from a browser context).
+    allow_origins=CORS_ALLOWED_ORIGINS,
+    allow_methods=["GET"],  # search API is read-only
+    allow_headers=["Content-Type", "Authorization"],
+    allow_credentials=True,
+    max_age=600,
 )
 
 # Singleton search engine

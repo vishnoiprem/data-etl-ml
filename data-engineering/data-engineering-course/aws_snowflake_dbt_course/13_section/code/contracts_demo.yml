@@ -1,0 +1,30 @@
+# ============================================================================
+# 13_section / code / contracts_demo.yml
+# ----------------------------------------------------------------------------
+# Demo schema.yml with a model contract.
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+# ============================================================================
+
+version: 2
+
+models:
+  - name: transactions_demo
+    description: "Demo mart with a contract. Mirrors _contracts.yml in dbt_project."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: tx_hash
+        data_type: varchar
+        tests:
+          - not_null
+          - unique
+      - name: value_eth
+        data_type: float
+        tests:
+          - not_null
+      - name: tx_category
+        data_type: varchar
+        tests:
+          - accepted_values:
+              values: ["eth_transfer", "stablecoin_transfer", "contract_call", "contract_creation"]

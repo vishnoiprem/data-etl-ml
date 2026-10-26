@@ -1,0 +1,575 @@
+"""
+lead_store.py — Postgres-backed lead tracking for Avilx.
+
+Stores every lead + send attempt in Postgres so we can:
+- Dedup by email, phone, or (company, role)
+- Track send history and replies
+- Manage opt-outs (anti-spam compliance)
+- See open/click tracking if/when we add pixels
+
+Env vars (with defaults):
+  AVILX_DB_HOST     = localhost
+  AVILX_DB_PORT     = 5433
+  AVILX_DB_NAME     = avilx_leads
+  AVILX_DB_USER     = avilx
+  AVILX_DB_PASSWORD = avilx
+"""
+
+import os
+import secrets
+import string
+from contextlib import contextmanager
+from datetime import datetime
+from typing import Optional, List, Dict, Any
+
+try:
+    import psycopg2
+    import psycopg2.extras
+    from psycopg2 import errors as psycopg2_errors
+    HAVE_PG = True
+except ImportError:
+    HAVE_PG = False
+
+
+def _conn_params() -> dict:
+    return {
+        "host":     os.getenv("AVILX_DB_HOST", "localhost"),
+        "port":     int(os.getenv("AVILX_DB_PORT", "5433")),
+        "dbname":   os.getenv("AVILX_DB_NAME", "avilx_leads"),
+        "user":     os.getenv("AVILX_DB_USER", "avilx"),
+        "password": os.getenv("AVILX_DB_PASSWORD", "avilx"),
+    }
+
+
+def _check_pg():
+    if not HAVE_PG:
+        raise RuntimeError(
+            "psycopg2 not installed. Run: pip install psycopg2-binary"
+        )
+
+
+@contextmanager
+def get_cursor(dict_rows: bool = True):
+    """Context manager: with get_cursor() as cur: cur.execute(...)"""
+    _check_pg()
+    conn = psycopg2.connect(**_conn_params())
+    factory = psycopg2.extras.RealDictCursor if dict_rows else None
+    cur = conn.cursor(cursor_factory=factory)
+    try:
+        yield cur
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        cur.close()
+        conn.close()
+
+
+def _make_tracking_id(company: str) -> str:
+    """Generate a short, public tracking ID like 'avilxinc-7q3k9m' for the email link.
+
+    Keyspace: 8 (slug) + 6 (random from 36 chars) = 36^6 ≈ 2.2B combinations.
+    Birthday-bound collision probability is ~0.01% at 10k leads, ~0.1% at 30k.
+    Previously this was 4+4 = ~1.6M keyspace, which collides ~80% of the time
+    at 5k leads — see insert_lead's recovery branch.
+    """
+    base = "".join(c for c in company.lower() if c.isalnum())[:8] or "lead"
+    rand = "".join(secrets.choice(string.ascii_lowercase + string.digits) for _ in range(6))
+    return f"{base[:8]}-{rand}"
+
+
+def is_opted_out(email: str) -> bool:
+    """Return True if this email has unsubscribed."""
+    with get_cursor(dict_rows=False) as cur:
+        cur.execute("SELECT 1 FROM opt_outs WHERE email = %s", (email.lower(),))
+        return cur.fetchone() is not None
+
+
+def opt_out(email: str):
+    """Mark an email as opted out."""
+    with get_cursor(dict_rows=False) as cur:
+        cur.execute(
+            "INSERT INTO opt_outs (email) VALUES (%s) ON CONFLICT (email) DO NOTHING",
+            (email.lower(),),
+        )
+
+
+def find_duplicate(company: str, contact_email: str, role: str = None) -> Optional[Dict]:
+    """Return existing lead dict if we already have this lead.
+
+    Order (most specific → least):
+      0. (company, role, email) — all three match (exact collision)
+      1. (company, role)        — same role posted twice (most common dup)
+      2. (company, email)       — same recruiter, same company, different role
+      3. NEVER by email alone   — a recruiter changing jobs should NOT
+                                  be treated as a duplicate of their old lead.
+
+    Email-alone dedup was the original behavior and it was dangerous: any
+    recruiter who moved companies would be falsely deduplicated and never
+    re-contacted at their new address. We do not do that anymore.
+    """
+    if not company:
+        return None
+    with get_cursor() as cur:
+        # 0) Exact match on all three columns — most precise, no risk
+        # of returning a "similar" but different lead. Used by the
+        # insert_lead recovery branch when we know all three.
+        if role and contact_email:
+            cur.execute(
+                "SELECT * FROM leads "
+                "WHERE LOWER(company) = LOWER(%s) "
+                "  AND LOWER(role) = LOWER(%s) "
+                "  AND LOWER(contact_email) = LOWER(%s) "
+                "ORDER BY id DESC LIMIT 1",
+                (company, role, contact_email),
+            )
+            row = cur.fetchone()
+            if row:
+                return dict(row)
+        # 1) Same company + same role (most common)
+        if role:
+            cur.execute(
+                "SELECT * FROM leads "
+                "WHERE LOWER(company) = LOWER(%s) AND LOWER(role) = LOWER(%s) "
+                "ORDER BY id DESC LIMIT 1",
+                (company, role),
+            )
+            row = cur.fetchone()
+            if row:
+                return dict(row)
+        # 2) Same company + same email (recruiter stayed, role changed)
+        if contact_email:
+            cur.execute(
+                "SELECT * FROM leads "
+                "WHERE LOWER(company) = LOWER(%s) AND LOWER(contact_email) = LOWER(%s) "
+                "ORDER BY id DESC LIMIT 1",
+                (company, contact_email),
+            )
+            row = cur.fetchone()
+            if row:
+                return dict(row)
+        return None
+
+
+def find_by_email_any_company(email: str) -> Optional[Dict]:
+    """Optional escape hatch: look up by email across companies.
+
+    Use this ONLY when you intend to actually email that person (e.g. a
+    follow-up sequence). Do NOT use as a dedup key.
+    """
+    with get_cursor() as cur:
+        cur.execute(
+            "SELECT * FROM leads WHERE LOWER(contact_email) = LOWER(%s) "
+            "ORDER BY id DESC LIMIT 1",
+            (email,),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def insert_lead(lead: dict, source: str = "jd_inbox") -> int:
+    """Insert a new lead. Returns lead ID.
+
+    Catches UniqueViolation gracefully: if a parallel insert beat us to the
+    unique (company, email) row, we look up the existing row and return its
+    id instead of bubbling an opaque `duplicate key value` error.
+    """
+    tracking_id = _make_tracking_id(lead.get("company", "lead"))
+    company = lead.get("company", "Unknown")
+    role = lead.get("role", "Role TBD")
+    email = lead.get("contact_email")
+
+    # First pass: just the leads table insert
+    try:
+        with get_cursor() as cur:
+            cur.execute("""
+                INSERT INTO leads (
+                    tracking_id, company, role, contact_email, contact_phone,
+                    stack, rate, resume_file, source_url, source,
+                    cover_letter_subject, cover_letter_body, jd_text,
+                    apply_mode, status
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                RETURNING id
+            """, (
+                tracking_id,
+                company,
+                role,
+                email,
+                lead.get("contact_phone"),
+                lead.get("stack", ""),
+                lead.get("rate", "Not listed"),
+                lead.get("resume_file", "Prem_Resume_2026.pdf"),
+                lead.get("source_url", ""),
+                source,
+                lead.get("cover_letter_subject", ""),
+                lead.get("cover_letter_body", ""),
+                lead.get("jd_text", ""),
+                # apply_mode: default 'pitch_pod' (Avilx pod pitch)
+                # unless the caller explicitly opts into 'apply_personal'
+                # (Prem personally applying). The DB has a CHECK
+                # constraint accepting only these two values, plus a
+                # DEFAULT 'pitch_pod' as a last-resort guard.
+                (lead.get("apply_mode") or "pitch_pod").strip().lower()[:16],
+                "pending",
+            ))
+            lead_id = cur.fetchone()["id"]
+    except psycopg2_errors.UniqueViolation:
+        # Lost the race (or our own tracking_id collided with a different
+        # lead). First try to look up the exact row we tried to insert —
+        # if a different lead has the same tracking_id, find_duplicate()
+        # would return that other lead and the caller would mutate it
+        # by accident. Look up by tracking_id first, fall back to
+        # find_duplicate only if the tracking_id doesn't match anything.
+        with get_cursor() as cur:
+            cur.execute(
+                "SELECT id FROM leads WHERE tracking_id = %s",
+                (tracking_id,),
+            )
+            row = cur.fetchone()
+            if row:
+                return row["id"]
+        existing = find_duplicate(company, email or "", role)
+        if existing:
+            return existing["id"]
+        # Couldn't find it (very rare): re-raise so caller sees the error
+        raise
+
+    # Second pass: phone table (independent, won't lose the lead if it fails)
+    phone = (lead.get("contact_phone") or "").strip()
+    if phone:
+        try:
+            with get_cursor() as cur:
+                cur.execute("""
+                    INSERT INTO phones (phone, company, contact_email, lead_id)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (phone) DO UPDATE SET
+                        company = EXCLUDED.company,
+                        contact_email = EXCLUDED.contact_email,
+                        lead_id = EXCLUDED.lead_id
+                """, (phone, company, email, lead_id))
+        except psycopg2_errors.IntegrityError:
+            # Phone is best-effort metadata; racing with another lead is OK.
+            pass
+        except Exception as e:
+            # Surface programming / connection errors loudly so we notice
+            import sys
+            print(f"  ⚠️  phone insert failed for lead {lead_id}: {e}", file=sys.stderr)
+    return lead_id
+
+
+def update_status(lead_id: int, status: str, error: str = None):
+    """Update lead status (pending → sent_email, sent_email → replied, etc)."""
+    with get_cursor(dict_rows=False) as cur:
+        if status == "sent_email":
+            cur.execute(
+                "UPDATE leads SET status = %s, sent_at = NOW(), send_count = send_count + 1, last_error = %s WHERE id = %s",
+                (status, error, lead_id),
+            )
+        else:
+            cur.execute(
+                "UPDATE leads SET status = %s, last_error = %s WHERE id = %s",
+                (status, error, lead_id),
+            )
+
+
+def log_send(lead_id: int, to_email: str, subject: str, status: str, error: str = None, smtp_message_id: str = None):
+    """Append to send_log table."""
+    with get_cursor(dict_rows=False) as cur:
+        cur.execute("""
+            INSERT INTO send_log (lead_id, to_email, subject, status, error, smtp_message_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (lead_id, to_email, subject, status, error, smtp_message_id))
+
+
+def get_pending_leads() -> List[Dict]:
+    """Return all leads with status=pending and not opted out.
+
+    Excludes `bounced` addresses too — once a recipient server has told us
+    the address is dead, re-sending just spams the dead-letter office.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT l.* FROM leads l
+            WHERE l.status = 'pending'
+              AND LOWER(l.contact_email) NOT IN (SELECT email FROM opt_outs)
+              AND l.status != 'bounced'
+            ORDER BY l.id ASC
+        """)
+        return [dict(r) for r in cur.fetchall()]
+
+
+def get_pending_leads_fresh(since_hours: int = 24) -> List[Dict]:
+    """Like get_pending_leads but restricts to leads created in the last
+    `since_hours` (default 24). Used by the post-throttle recovery loop to
+    avoid touching backlog leads that may have stale contact info.
+
+    Pass `since_hours=0` to disable the filter (returns same as
+    get_pending_leads). Requires the leads_created_at_idx index (added
+    in schema.sql alongside this helper) to avoid a table scan.
+    """
+    with get_cursor() as cur:
+        if since_hours and since_hours > 0:
+            cur.execute("""
+                SELECT l.* FROM leads l
+                WHERE l.status = 'pending'
+                  AND l.created_at > NOW() - (%s || ' hours')::INTERVAL
+                  AND LOWER(l.contact_email) NOT IN (SELECT email FROM opt_outs)
+                ORDER BY l.id ASC
+            """, (str(since_hours),))
+        else:
+            cur.execute("""
+                SELECT l.* FROM leads l
+                WHERE l.status = 'pending'
+                  AND LOWER(l.contact_email) NOT IN (SELECT email FROM opt_outs)
+                ORDER BY l.id ASC
+            """)
+        return [dict(r) for r in cur.fetchall()]
+
+
+def was_recently_sent(email: str, hours: int = 24) -> bool:
+    """Return True if `email` was successfully sent to within the last
+    `hours`. Reads from `send_log` (populated by log_send).
+
+    Why this exists: Gmail's auto-throttle watches for repeated sends to
+    the same recipient. A 2nd send within 24h to the same address also
+    looks like spam to recipient servers, so we self-throttle.
+
+    A "send" here means status='success' in send_log. Failed attempts
+    don't count (so a transient SMTP error doesn't burn the tail window).
+    """
+    if not email or hours <= 0:
+        return False
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT 1 FROM send_log
+            WHERE LOWER(to_email) = LOWER(%s)
+              AND status = 'success'
+              AND sent_at > NOW() - (%s || ' hours')::INTERVAL
+            LIMIT 1
+        """, (email, str(hours)))
+        return cur.fetchone() is not None
+
+
+def count_sends_today() -> int:
+    """Count successful sends since 00:00 UTC today.
+
+    Used by the daily-cap check in email_guard.can_send_to. We count
+    successes (not attempts) because Gmail's quota is on accepted
+    recipients, not on SMTP connections.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM send_log
+            WHERE status = 'success'
+              AND sent_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC')
+        """)
+        return int(cur.fetchone()["n"] or 0)
+
+
+def count_sends_this_hour() -> int:
+    """Count successful sends in the last 60 minutes.
+
+    Lower-frequency than count_sends_today; protects against bursts
+    that would look bot-like to Gmail.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM send_log
+            WHERE status = 'success'
+              AND sent_at > NOW() - INTERVAL '1 hour'
+        """)
+        return int(cur.fetchone()["n"] or 0)
+
+
+def mark_bounced_by_id(lead_id: int, reason: str = "hard bounce") -> None:
+    """Transition a lead to status='bounced' with a reason.
+
+    Called from autopilot._send_one when SMTP rejects the recipient
+    (SMTPRecipientsRefused). Without this, a hard SMTP bounce gets
+    recorded as 'failed' and the lead is never blocked from retry,
+    which is the root cause of the 27% bounce-rate throttle.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            UPDATE leads
+            SET status = 'bounced',
+                last_error = %s
+            WHERE id = %s
+        """, (f"Bounce: {reason}", lead_id))
+
+
+def get_by_email(email: str) -> Optional[Dict]:
+    with get_cursor() as cur:
+        cur.execute("SELECT * FROM leads WHERE LOWER(contact_email) = LOWER(%s) ORDER BY id DESC LIMIT 1", (email,))
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
+def stats() -> Dict[str, Any]:
+    """Return high-level stats."""
+    with get_cursor() as cur:
+        cur.execute("SELECT status, COUNT(*) AS n FROM leads GROUP BY status ORDER BY status")
+        by_status = {r["status"]: r["n"] for r in cur.fetchall()}
+        cur.execute("SELECT COUNT(*) AS n FROM send_log WHERE sent_at > NOW() - INTERVAL '24 hours'")
+        sent_24h = cur.fetchone()["n"]
+        cur.execute("SELECT COUNT(*) AS n FROM opt_outs")
+        optouts = cur.fetchone()["n"]
+        cur.execute("SELECT COUNT(DISTINCT company) AS n FROM leads")
+        companies = cur.fetchone()["n"]
+        return {
+            "by_status": by_status,
+            "sent_last_24h": sent_24h,
+            "opt_outs": optouts,
+            "unique_companies": companies,
+        }
+
+
+def cli():
+    """Tiny CLI: `python3 -m db.lead_store status`."""
+    import sys
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "status"
+    if cmd == "status":
+        s = stats()
+        print("📊 Avilx leads DB")
+        print(f"   By status: {s['by_status']}")
+        print(f"   Sent (24h): {s['sent_last_24h']}")
+        print(f"   Opt-outs:  {s['opt_outs']}")
+        print(f"   Companies: {s['unique_companies']}")
+    elif cmd == "init":
+        with get_cursor(dict_rows=False) as cur:
+            with open(os.path.join(os.path.dirname(__file__), "schema.sql")) as f:
+                sql = f.read()
+            # psycopg2's execute() cannot run multi-statement strings
+            # (the schema file has CREATE TABLE + CREATE INDEX + a plpgsql
+            # trigger function with $$...$$ body). Split on `;\n` and run
+            # each non-empty statement separately.
+            for stmt in sql.split(";\n"):
+                s = stmt.strip()
+                if s:
+                    cur.execute(s)
+        print("✅ Schema applied")
+    elif cmd == "test":
+        try:
+            with get_cursor() as cur:
+                cur.execute("SELECT 1 AS ok")
+                print("✅ Connected:", cur.fetchone())
+        except Exception as e:
+            print(f"❌ Connection failed: {e}")
+
+
+# =========================================
+# LinkedIn DM tracking
+# =========================================
+
+def log_dm(handle: str, name: str = None, company: str = None, title: str = None,
+           region: str = None, template_used: str = None, dm_text: str = None,
+           linkedin_url: str = None) -> int:
+    """Log a new LinkedIn DM. Returns the DM id."""
+    handle = handle.lstrip("@").lower()
+    with get_cursor() as cur:
+        cur.execute("""
+            INSERT INTO linkedin_dms (handle, name, company, title, region, template_used, dm_text, linkedin_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (handle) DO UPDATE SET
+                name = COALESCE(EXCLUDED.name, linkedin_dms.name),
+                company = COALESCE(EXCLUDED.company, linkedin_dms.company),
+                title = COALESCE(EXCLUDED.title, linkedin_dms.title),
+                region = COALESCE(EXCLUDED.region, linkedin_dms.region),
+                template_used = COALESCE(EXCLUDED.template_used, linkedin_dms.template_used),
+                dm_text = COALESCE(EXCLUDED.dm_text, linkedin_dms.dm_text),
+                last_touch_at = NOW(),
+                touch_count = linkedin_dms.touch_count + 1
+            RETURNING id
+        """, (handle, name, company, title, region, template_used, dm_text, linkedin_url))
+        return cur.fetchone()["id"]
+
+
+def log_dm_followup(handle: str, message: str) -> int:
+    """Log a follow-up bump to an existing DM (day 3, day 7, etc)."""
+    handle = handle.lstrip("@").lower()
+    with get_cursor() as cur:
+        cur.execute("SELECT id FROM linkedin_dms WHERE handle = %s", (handle,))
+        row = cur.fetchone()
+        if not row:
+            raise ValueError(f"No DM found for handle @{handle}")
+        dm_id = row["id"]
+        cur.execute("""
+            INSERT INTO linkedin_followups (dm_id, message)
+            VALUES (%s, %s) RETURNING id
+        """, (dm_id, message))
+        cur.execute("""
+            UPDATE linkedin_dms SET touch_count = touch_count + 1, last_touch_at = NOW()
+            WHERE id = %s
+        """, (dm_id,))
+        return cur.fetchone()["id"]
+
+
+def update_dm_status(handle: str, status: str, notes: str = None):
+    """Mark a DM's status (sent → replied → meeting → won)."""
+    handle = handle.lstrip("@").lower()
+    with get_cursor(dict_rows=False) as cur:
+        if status == "replied":
+            cur.execute("""
+                UPDATE linkedin_dms SET status = %s, replied_at = NOW(), notes = COALESCE(%s, notes)
+                WHERE handle = %s
+            """, (status, notes, handle))
+        else:
+            cur.execute("""
+                UPDATE linkedin_dms SET status = %s, notes = COALESCE(%s, notes)
+                WHERE handle = %s
+            """, (status, notes, handle))
+
+
+def dm_stats() -> dict:
+    """Return LinkedIn DM campaign stats."""
+    with get_cursor() as cur:
+        cur.execute("SELECT status, COUNT(*) AS n FROM linkedin_dms GROUP BY status ORDER BY status")
+        by_status = {r["status"]: r["n"] for r in cur.fetchall()}
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM linkedin_dms
+            WHERE sent_at > NOW() - INTERVAL '7 days'
+        """)
+        sent_7d = cur.fetchone()["n"]
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM linkedin_dms
+            WHERE replied_at > NOW() - INTERVAL '7 days'
+        """)
+        replied_7d = cur.fetchone()["n"]
+        cur.execute("""
+            SELECT
+                COUNT(*) FILTER (WHERE status = 'sent') AS pending_reply,
+                COUNT(*) FILTER (WHERE status = 'replied') AS replied,
+                COUNT(*) FILTER (WHERE status IN ('intro','meeting','won')) AS advanced,
+                COUNT(*) AS total
+            FROM linkedin_dms
+            WHERE sent_at > NOW() - INTERVAL '14 days'
+        """)
+        funnel = dict(cur.fetchone())
+        return {
+            "by_status": by_status,
+            "sent_7d": sent_7d,
+            "replied_7d": replied_7d,
+            "funnel_14d": funnel,
+        }
+
+
+def list_pending_followups() -> list:
+    """Return DMs that need a follow-up bump (sent 3+ days ago, no reply)."""
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT handle, name, company, sent_at, touch_count, last_touch_at
+            FROM linkedin_dms
+            WHERE status = 'sent'
+              AND (
+                (touch_count = 1 AND sent_at < NOW() - INTERVAL '3 days')
+                OR (touch_count = 2 AND last_touch_at < NOW() - INTERVAL '4 days')
+                OR (touch_count = 3 AND last_touch_at < NOW() - INTERVAL '7 days')
+              )
+            ORDER BY sent_at
+        """)
+        return [dict(r) for r in cur.fetchall()]
+
+
+if __name__ == "__main__":
+    cli()
