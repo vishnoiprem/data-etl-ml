@@ -232,10 +232,12 @@ def run() -> pd.DataFrame:
 
     profiles[["crs", "trs", "nrs"]] = profiles[["crs", "trs", "nrs"]].fillna(10)
 
-    profiles["composite_aml_score"] = profiles.apply(
-        lambda r: composite_score(int(r["crs"]), int(r["trs"]), int(r["nrs"])),
-        axis=1
-    )
+    # Vectorised composite score. The previous row-wise apply(lambda)
+    # was 10-100x slower on large customer bases (the AML platform's
+    # 15-country scope makes this matter at production scale).
+    profiles["composite_aml_score"] = (
+        0.35 * profiles["crs"] + 0.40 * profiles["trs"] + 0.25 * profiles["nrs"]
+    ).round().astype(int).clip(0, 100)
     profiles["risk_band"] = profiles["composite_aml_score"].apply(risk_band)
 
     # Score distribution
