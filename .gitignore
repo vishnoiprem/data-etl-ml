@@ -110,6 +110,12 @@ ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_m
 medium/meta/coach/
 .claude/agents/
 
+# Nested git worktrees under .claude/worktrees/. These were previously
+# committed as gitlinks (mode 160000) pointing at commits that do not
+# exist in this repo, which broke `git submodule status`, `git fsck`
+# and fresh clones. Ignore them everywhere so they can never be re-added.
+**/.claude/worktrees/
+
 # Private interview stories (never commit)
 medium/katalon/*_PRIVATE.md
 
