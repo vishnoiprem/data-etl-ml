@@ -2,20 +2,20 @@
 
 # Embeddings & retrieval (LOCAL mode)
 sentence-transformers==5.6.0
-faiss-cpu==1.8.0
+faiss-cpu==1.15.1
 rank-bm25==0.2.2
 
 # Document processing
-pypdf==6.20.0
-markdown==3.8.1
-beautifulsoup4==4.12.0
+pypdf==6.21.2
+markdown==3.11.2
+beautifulsoup4==4.15.0
 
 # API
-fastapi==0.110.0
-uvicorn==0.29.0
+fastapi==0.161.1
+uvicorn==0.54.0
 
 # Tokenization (for token counting + chunking)
-tiktoken==0.6.0
+tiktoken==0.14.0
 
 # Eval
 numpy==1.26.0
