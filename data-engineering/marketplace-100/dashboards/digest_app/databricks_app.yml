@@ -1,0 +1,42 @@
+# Databricks App — Marketplace 100 digest
+#
+# Deploys the Streamlit app under dashboards/digest_app/ as
+# a Databricks App. Visit `https://<workspace>.cloud.databricks.com/apps/m100-digest`
+# after `databricks bundle deploy --target dev`.
+
+name: m100-digest
+description: Streamlit dashboard for the Marketplace 100 iterations table.
+
+runtime:
+  python_version: "3.11"
+
+# Mount the local dashboard code into the app's working dir
+files:
+  - source: dashboards/digest_app
+    dest: .
+
+# Serverless entry point
+command:
+  - streamlit
+  - run
+  - app.py
+  - --server.port=8080
+  - --server.address=0.0.0.0
+
+# Resources — read-only access to the iterations schema
+resources:
+  - name: iterations_schema
+    type: uc_schema
+    catalog: marketplace_100
+    schema: agents
+    permission: READ_ONLY
+
+# App-level environment
+env:
+  - name: M100_CATALOG
+    value: marketplace_100
+
+# Compute — serverless only
+compute:
+  size: SMALL
+  scale_to_zero: true
