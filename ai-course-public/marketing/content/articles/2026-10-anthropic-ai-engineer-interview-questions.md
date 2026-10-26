@@ -21,13 +21,13 @@ The 60-second pitch: **Anthropic is hiring engineers who can think about the sec
 | 1. **Resume screen** | Recruiter reviews. "Direct evidence of ability" beats credentials. | 1-2 weeks | ~30% advance |
 | 2. **Recruiter call** | 30-45 min. Motivation, background, high-level technical experience, safety interest. | 1-2 weeks | ~60% advance |
 | 3. **Hiring manager screen** | 30-45 min. Detailed discussion of past projects — including failures. | 1-2 weeks | ~50% advance |
-| 4. **Skills-based assessment** | Usually a 90-min timed coding challenge on CodeSignal. Multi-part problems testing modular solutions. (Performance engineering: 2-hr take-home on CUDA kernel optimization.) | 1-2 weeks | ~40% advance |
-| 5. **Final interviews (4-6 over 1-2 days)** | Coding → system design → ML theory → behavioral → **dedicated AI-safety round** → final leadership. | 2-3 weeks | ~30% advance |
+| 4. **Skills-based assessment** | 55-min CodeSignal OA (Jupyter-style notebook, progressive 4-level build of an in-memory DB / banking system). For research/ML infra roles: 2-hr CUDA kernel optimization take-home (role-dependent, not universal SWE). | 1-2 weeks | ~40% advance |
+| 5. **Final interviews (4-6 over 1-2 days)** | Coding → system design → ML theory → behavioral → **dedicated AI-safety round (pass/fail gate, separate interviewer)** → final leadership. | 2-3 weeks | ~30% advance |
 | 6. **Offer** | No salary negotiation. "The initial offer is the final offer." | — | — |
 
 **Cumulative pass rate (resume screen → offer): ~1%.** The safety round is the differentiator. Most strong engineering candidates pass coding + system design; the safety round is where offers are made or lost.
 
-**Comp:** Anthropic uses Profit Participation Units (PPUs) — equity-heavy, long-vest. Comp packages "are heavily weighted towards long-term equity." Per levels.fyi, senior SWE comp is $700K-$1.1M total, staff+ is $1.1M-$1.6M+ (similar to OpenAI's frontier-lab band).
+**Comp:** Anthropic uses Profit Participation Units (PPUs) — equity-heavy, long-vest. Anthropic has not converted to RSUs (still private as of 2026). Per Levels.fyi (Oct 2026): SWE median $883K, range $483K-$1.41M; Staff $1.13M+. Comp packages "are heavily weighted towards long-term equity." Sign-on and refresh grants are standard at Staff+; immigration sponsorship (O-1/H-1B) continues.
 
 ---
 
@@ -76,11 +76,11 @@ Anqi Silvia, a 2025 Anthropic SWE candidate, wrote a 3-part Medium series on her
 
 After reading ~15 first-person Anthropic interview reports from 2025-2026, the same 5 patterns show up in every successful and every failed loop:
 
-1. **The safety round is a separate interviewer, not a sub-question.** Prepare for it like any other round. Lead with a specific decision.
+1. **The safety round is a separate interviewer AND a pass/fail gate, not a sub-question weighted into the loop average.** Prepare for it like any other round. Lead with a specific decision.
 2. **The system design round goes 2-3× deeper than OpenAI's.** "Strip away features" is the prompt style. Pick the 1 feature to go deep on; don't try to cover the whole system.
-3. **The coding round is a multi-level build.** "Build a database → add transactions → add an index → add persistence" is the canonical sequence. Each level adds 15-20 min. The candidate who times the levels passes.
-4. **Comp negotiation is a non-starter.** "The initial offer is the final offer." Don't try to negotiate; try to get the right level up front.
-5. **AI safety is the company's reason for existing.** The candidate who can't say something specific about Constitutional AI, RLHF, or scalable oversight loses the safety round. Generic "I care about safety" answers fail.
+3. **The coding round is a multi-level build.** "Build an in-memory database / banking system → add transactions → add an index → add persistence" is the canonical 4-level sequence, run as a 55-min progressive build on CodeSignal. Each level adds ~12-15 min. The candidate who times the levels passes.
+4. **Comp negotiation is a non-starter.** "The initial offer is the final offer." Don't try to negotiate base; try to get the right level up front. Rare upward adjustments happen only via competing offers or level bump.
+5. **Constitutional AI is still Anthropic's flagship alignment approach, but the 2026 framing has evolved.** The May 2026 "Model Spec Midtraining" paper extends constitution-style training; internally, the "Constitutional AI" branding is intact but folded into broader "responsible scaling" framing. The candidate who cites the *2026* alignment work, not just the original Constitutional AI paper, wins the safety round. Generic "I care about safety" answers fail.
 
 ---
 
@@ -153,7 +153,7 @@ The strongest Anthropic candidates in 2026 are the ones who can say: "Constituti
 
 **Week 1 — Coding (8-10 hours):**
 - [ ] Do 20 LeetCode mediums in Python. Focus on: hash tables, graphs, BFS/DFS, sliding window, two pointers, intervals.
-- [ ] Build the canonical Anthropic coding question: a multi-level in-memory database (CRUD → transactions → indexing → persistence). Add tests at every level.
+- [ ] Build the canonical Anthropic coding question: a multi-level in-memory database / banking system (CRUD → transactions → indexing → persistence). Time yourself: ~12-15 min per level, total 55 min. Add tests at every level.
 - [ ] Build an LRU cache with persistence. Add tests for the eviction, the persistence, the concurrent access.
 
 **Week 2 — System design (8-10 hours):**
@@ -182,7 +182,23 @@ The strongest Anthropic candidates in 2026 are the ones who can say: "Constituti
 2. **System design goes 2-3× deeper than OpenAI's.** Pick the 1 feature to go deep on. Cut the rest by name. The "strip away features" style is Anthropic's signature.
 3. **Constitutional AI is a bet, not a destination.** The candidate who can defend a specific bet and name a specific alternative wins the safety round.
 4. **Multi-level coding is the test.** "Build a database → add transactions → add an index → add persistence" is the canonical sequence. Time the levels. The candidate who runs out of time on level 3 loses.
-5. **No salary negotiation.** "The initial offer is the final offer." Get the level right up front. The candidate who tries to negotiate loses leverage.
+5. **No salary negotiation.** "The initial offer is the final offer." Get the level right up front. The candidate who tries to negotiate base loses leverage.
+
+---
+
+## What failed Anthropic candidates said they did wrong
+
+Across 2025-2026 reports, the patterns differ from OpenAI in interesting ways. Anthropic's failures are less about "missed a buried invariant" and more about "missed the safety frame."
+
+**1. They treated the safety round as a sub-question.** Multiple 2026 reports describe candidates who thought the safety round was folded into behavioral, and didn't prepare a specific safety-decision story. Result: they got generic behavioral questions and a separate safety interviewer they hadn't drilled with. The safety round is pass/fail — failing it kills the offer regardless of how the rest went.
+
+**2. They under-explained Constitutional AI.** Candidates who recited the original 2022 paper lost to candidates who could also name the 2026 evolution (Model Spec Midtraining, May 2026) and a specific alternative. Anthropic interviewers in 2026 are testing whether you follow the *current* alignment work, not whether you memorized the original paper.
+
+**3. They tried to negotiate base.** 2026 reports confirm: the initial offer is the final offer. Candidates who tried to negotiate base got the same number back. The lever is the *level*, not the base — get the level right in the recruiter call, not at offer time.
+
+**4. They over-engineered the CodeSignal 4-level build.** 55 min for 4 levels = ~12-15 min each. Candidates who spent 25 min on level 1 (CRUD) had no time for levels 3 and 4 (indexing, persistence). The fix: budget 12 min per level, ship a working v1, name the upgrade.
+
+**5. They under-prepared the system design "strip away features" style.** Multiple 2026 reports describe candidates who designed the full system (channels, threads, reactions, presence) when the prompt explicitly said 1-on-1 only. The signal in the prompt is the test — read it twice.
 
 ---
 
@@ -218,7 +234,11 @@ The strongest Anthropic candidates in 2026 are the ones who can say: "Constituti
 - [Anqi Silvia — The Actual Concurrency Questions From My 2025 Anthropic Interview](https://medium.com/@anqi.silvia/the-actual-concurrency-questions-from-my-2025-anthropic-interview-0738b1738ab9) — the rate-limiter + producer-consumer details
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
 - [Anthropic Constitutional AI paper](https://www.anthropic.com/index/claudes-constitution) — the source for the safety round
+- [Anthropic — Model Spec Midtraining (May 2026)](https://alignment.anthropic.com/2026/msm/) — the 2026 evolution of Constitutional AI
 - [Levels.fyi — Anthropic compensation](https://www.levels.fyi/companies/anthropic/salaries) — the PPU-heavy comp structure
+- [Hello Interview — Anthropic Senior SWE Guide 2026](https://www.hellointerview.com/guides/anthropic/senior) — the 2026 system design + coding pattern
+- [Anthropic CodeSignal OA Tips (InterviewFox, Aug 2026)](https://interviewfox.ai/interview-questions/anthropic-codesignal-oa-tips/) — the 55-min progressive 4-level build
+- [Anthropic Interview Megathread 2026 (Reddit)](https://www.reddit.com/r/Hack2Hire/comments/1t6ncgs/anthropic_interview_process_experience_megathread/) — the 2026 loop experience aggregate
 - [Glassdoor — Anthropic Interview Experience & Questions (2026)](https://www.glassdoor.com/Interview/Anthropic-Interview-Questions-E8109027.htm) — the per-round pass rates
 
 *This is article 2 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1 (OpenAI) and 3 (Google DeepMind) are already live. Follow the publication to get the rest as they drop.*

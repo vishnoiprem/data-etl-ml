@@ -61,6 +61,55 @@ FSDP (Fully Sharded Data Parallel) splits model parameters, gradients, and optim
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not a training script.** This is a *memory
+  math* reference — given a model + GPU count, what
+  fits? The actual training loop (FSDP wrapping,
+  gradient checkpointing, FlashAttention integration,
+  NCCL setup) lives in PyTorch's
+  `torch.distributed.fsdp` and the
+  `accelerate` library. Use those; use this to
+  *plan* before you launch.
+- **Not a DeepSpeed comparison.** FSDP and DeepSpeed
+  ZeRO-3 do similar things; the choice usually comes
+  down to ecosystem (FSDP for native PyTorch,
+  DeepSpeed for Microsoft / Azure). The memory math
+  is the same.
+- **Not TP (tensor parallel).** TP splits individual
+  layers across GPUs; FSDP splits the optimizer state
+  and gradients. They're complementary: 7B on 8 GPUs
+  is often FSDP/8; 70B on 8 GPUs needs TP+FSDP. The
+  planning math doubles.
+- **Not a substitute for measuring.** The math is
+  close but not exact. Activation memory depends on
+  checkpointing, attention implementation, and
+  sequence length distribution. Always do a 1-step
+  dry run before launching a 7-day training job.
+
+---
+
+## Related directories
+
+- [`../25-deepseek-moe-train/`](../25-deepseek-moe-train/) —
+  the MoE training patterns that the FSDP math
+  extends to (router + expert parallelism on top
+  of FSDP).
+- [`../30-triton-kernels/`](../30-triton-kernels/) —
+  the kernel-level optimizations (fused RMSNorm,
+  FlashAttention) that cut the activation memory
+  this build accounts for.
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the deployment + canary + rollback patterns
+  for the *trained* model.
+- [`../33-mlflow-tracker/`](../33-mlflow-tracker/) —
+  the experiment-tracking layer that ingests
+  FSDP runs (per-GPU memory, NCCL overhead,
+  step time).
+
 ---
 
 **Last updated:** 2026-10-12  

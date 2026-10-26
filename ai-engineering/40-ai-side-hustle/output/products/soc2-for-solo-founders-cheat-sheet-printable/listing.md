@@ -1,11 +1,11 @@
-# Soc2 For Solo Founders Cheat Sheet (Printable)
+# SOC2 For Solo Founders Cheat Sheet (Printable)
 
-**$7**
+**$9**
 
-Pin it to your wall. Do the soc2 for solo founders thing.
+Pin it to your wall. Do the SOC2 thing.
 
 ## What you get
-- The printable itself (4 pages or equivalent)
+- The printable itself (6 pages or equivalent)
 - A 1-page quick-start guide
 - Lifetime updates
 

@@ -1,11 +1,11 @@
-# Soc2 For Solo Founders Notion Bundle
+# SOC2 For Solo Founders Notion Bundle
 
-**$12**
+**$29**
 
-10 plug-and-play soc2 for solo founders dashboards.
+10 plug-and-play SOC2 dashboards you can clone today.
 
 ## What you get
-- The template itself (0 pages or equivalent)
+- The template itself (15 pages or equivalent)
 - A 1-page quick-start guide
 - Lifetime updates
 

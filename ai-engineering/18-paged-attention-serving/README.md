@@ -58,6 +58,52 @@ python examples/serve_demo.py
 - Contiguous: 8 concurrent requests on a 24GB GPU, 47% utilization.
 - Paged: 18 concurrent requests on the same 24GB GPU, 81% utilization.
 - Tail latency at p99: 18% lower under paged (less OOM preemption).
+
+---
+
+## What this is NOT
+
+- **Not vLLM.** vLLM is a production serving engine
+  with continuous batching, prefix sharing, speculative
+  decoding, and CUDA-graph optimization. This
+  directory is the *core idea* in 50 lines: a
+  paged KV cache + a continuous-batching scheduler.
+  Use vLLM in production; use this build to
+  understand what's happening under the hood.
+- **Not a memory allocator.** PagedAttention is
+  specifically about KV cache paging during
+  autoregressive decode. It doesn't replace the
+  CUDA memory allocator for weights or activations.
+- **Not a model architecture change.** The model's
+  forward pass is unchanged; only the cache
+  layout changes. The model itself is oblivious to
+  whether the cache is paged or contiguous.
+- **Not a magic throughput boost.** The 2-4x
+  improvement is for *concurrent* requests on the
+  same GPU. For single-request serving (one prompt
+  at a time, low concurrency) the win is small
+  (~10-15% from less fragmentation, not 2-4x).
+
+---
+
+## Related directories
+
+- [`../30-triton-kernels/`](../30-triton-kernels/) —
+  the kernel-level cousin: PagedAttention is built
+  on fused Triton kernels for the attention +
+  paging ops.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the "one model, one endpoint" inference layer
+  that this build plugs into as the serving
+  engine.
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the deployment + canary + rollback patterns
+  that you apply *to* a vLLM-style service.
+- [`../36-together-gpu-cloud/`](../36-together-gpu-cloud/) —
+  the GPU-pool / multi-tenant serving platform
+  shape (Together / Fireworks / Anyscale) that
+  vLLM is the open-source building block of.
+
 ---
 
 **Last updated:** 2026-10-12  

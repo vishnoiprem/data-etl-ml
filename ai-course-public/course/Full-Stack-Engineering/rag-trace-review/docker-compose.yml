@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    ports: ["8000:8000"]
+    environment:
+      - RAG_DB_PATH=/data/rag_traces.db
+    volumes:
+      - ./data:/data
+  frontend:
+    build: ./frontend
+    ports: ["5173:5173"]
+    environment:
+      - VITE_API_BASE=http://localhost:8000
+    depends_on: [backend]
