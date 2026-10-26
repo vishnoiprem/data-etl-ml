@@ -6,9 +6,11 @@
 
 Databricks' loop is the one where the Spark internals are the loop.
 
-Where Apple tests on-device ML and Anthropic tests safety, **Databricks tests production-scale Spark + MLflow + Delta Lake fluency.** The 2026 loop has a strong emphasis on the medallion architecture (Bronze / Silver / Gold), on Unity Catalog for data governance, and on MLflow for experiment tracking. The system design round is always ML-platform-themed: design a feature store, design a model serving layer, design a training data pipeline. The candidate who treats it like a generic data engineering interview loses to the candidate who knows the Catalyst optimizer and can name the trade-offs of Z-ordering vs. partition pruning.
+Where Apple tests on-device ML and Anthropic tests safety, **Databricks tests production-scale Spark + MLflow + Delta Lake fluency.** The 2026 loop has a strong emphasis on the medallion architecture (Bronze / Silver / Gold), on Unity Catalog for data governance, on **Lakeflow Pipelines** (the renamed-and-rebuilt DLT for declarative ETL), and on the **Mosaic AI Agent Framework** for the ML/AI track. The system design round is on a Google Doc (not whiteboard) and is always ML-platform-themed: design a feature store, design a model serving layer, design a training data pipeline. The candidate who treats it like a generic data engineering interview loses to the candidate who knows the Catalyst optimizer and can name the trade-offs of Z-ordering vs. partition pruning.
 
-The 60-second pitch: **Databricks is hiring ML engineers who can ship production ML on Apache Spark, reason about Delta Lake transaction logs, and design ML platforms that scale to petabytes. The candidate who only knows PyTorch loses. The right choice is to spend 8 hours on Spark internals + 6 hours on the medallion architecture before the loop.**
+**Strategic context for "why Databricks" (2026):** Databricks' 2026 platform bet is the **Genie One workspace with Ontology** — a single product surface that ties data, models, and agentic workflows together. The **$188B valuation** set in July 2026 reinforces the IPO trajectory. If you can name a specific thing this changes about how ML platforms get built, you win the "why Databricks" question.
+
+The 60-second pitch: **Databricks is hiring ML engineers who can ship production ML on Apache Spark, reason about Delta Lake transaction logs, and design ML platforms that scale to petabytes. The candidate who only knows PyTorch loses. The right choice is to spend 8 hours on Spark internals + 6 hours on the medallion architecture + 2 hours on Lakeflow Pipelines before the loop.**
 
 ---
 
@@ -28,11 +30,11 @@ The 60-second pitch: **Databricks is hiring ML engineers who can ship production
 
 | Level | Title | Total comp |
 |-------|-------|------------|
-| L3 | SWE | $180K-$260K |
+| L3 | SWE | ~$273K-$283K |
 | L4 | SWE | $260K-$400K |
-| L5 | Senior SWE | $400K-$600K |
+| L5 | Senior SWE | ~$400K-$500K |
 | L6 | Staff SWE | $600K-$900K |
-| L7 | Senior Staff | $900K-$1.4M+ |
+| L7 | Senior Staff | up to ~$1.71M |
 
 ---
 
@@ -60,11 +62,34 @@ The 60-second pitch: **Databricks is hiring ML engineers who can ship production
 
 ### The 5 things every real Databricks report has in common
 
-1. **Spark internals are non-negotiable.** Catalyst optimizer, Tungsten, lazy evaluation, DAG model, shuffle behavior. The candidate who hasn't read the Spark source loses.
-2. **The medallion architecture is the 2026 emphasis.** Bronze (raw) → Silver (cleaned) → Gold (aggregated). The candidate who can't design a Bronze-Silver-Gold pipeline loses.
-3. **MLflow + Unity Catalog are the platform tools.** Every ML implementation question is asked in the context of "how would you track this in MLflow?" or "how would you govern this in Unity Catalog?"
-4. **System design is always ML-platform-themed.** Feature store, model serving, training data pipeline, real-time inference. Not generic infra.
+1. **Spark internals are non-negotiable.** Catalyst optimizer, Tungsten, lazy evaluation, DAG model, shuffle behavior — on **Spark 4.x**, which is the current platform. The candidate who hasn't read the Spark source loses.
+2. **The medallion architecture + Lakeflow Pipelines are the 2026 emphasis.** Bronze (raw) → Silver (cleaned) → Gold (aggregated). Lakeflow Pipelines is the declarative ETL layer that replaced DLT. The candidate who can't design a Bronze-Silver-Gold pipeline loses.
+3. **MLflow + Unity Catalog + Mosaic AI Agent Framework are the platform tools.** Every ML implementation question is asked in the context of "how would you track this in MLflow?" or "how would you govern this in Unity Catalog?" MLflow now spans LLMOps and agents via the Mosaic AI Agent Framework.
+4. **System design is on a Google Doc and always ML-platform-themed.** Feature store, model serving, training data pipeline, real-time inference. Not generic infra. Bring a pen to the doc.
 5. **SQL + Python, not heavy C++ / Java.** Databricks uses Python (PySpark) and SQL as the primary coding languages. The candidate who's a Java-only coder loses.
+
+---
+
+## What failed candidates said they did wrong
+
+**Pattern 1: Vague on the shuffle cost.**
+The biggest reported failure mode in the coding round. Candidates answer a Spark question without naming narrow vs. wide transformations, the shuffle cost, or the data-skew failure mode. The right answer talks in DAGs and named shuffles.
+
+**Pattern 2: DLT in a Lakeflow world.**
+The product was renamed. Candidates who reference Delta Live Tables in 2026 by that name signal that their knowledge is older than 2026. Use **Lakeflow Pipelines**. The mental model is the same; the language is not.
+
+**Pattern 3: Generic MLflow answer.**
+"I'd track experiments in MLflow" is not a 2026 answer. Track *and* register, name the 4 MLflow components, name the scale limit, and name the production role of the model registry (stage transitions, lineage).
+
+**Pattern 4: Whiteboard-heavy system design.**
+Some interviewers expect a Google Doc. Candidates who fire up an Excalidraw lose minutes of doing. Prepare to write structured design into a shared doc.
+
+**Pattern 5: Not naming a specific Databricks bet.**
+"Databricks is a great data + AI company" is the rejected-candidate answer. Name Mosaic AI, Genie One with Ontology, or Lakeflow specifically and say something true about it.
+
+---
+
+### The 5 things every real Databricks report has in common (revised)
 
 ---
 
@@ -86,12 +111,14 @@ The 60-second pitch: **Databricks is hiring ML engineers who can ship production
 9. **Write a small streaming ML pipeline. Use Spark Structured Streaming + a pre-trained model for online inference. Discuss checkpointing.** (~40%)
 10. **Implement a basic recommendation system using ALS (alternating least squares). Discuss cold-start and the implicit-feedback variant.** (~40%)
 
-### System design round (60 min, ML-platform)
+### System design round (60 min, ML-platform, **Google Doc**)
+
+The system design round is run on a **Google Doc** (shared editing), not a whiteboard or drawing tool. Plan to write structured headings and bullets into the doc as you talk.
 
 11. **Design a feature store. Discuss the online vs. offline split, the freshness SLA, and the consistency model.** (~60%)
 12. **Design a model serving layer on Databricks. Discuss Mosaic AI Model Serving, autoscaling, canary deployments, and traffic mirroring.** (~50%)
 13. **Design a real-time ML inference pipeline. Discuss Kafka → Spark Structured Streaming → model server → monitoring.** (~50%)
-14. **Design a training data pipeline. Discuss the Bronze-Silver-Gold medallion architecture, Delta Lake transaction logs, and Unity Catalog for governance.** (~60%)
+14. **Design a training data pipeline. Discuss the Bronze-Silver-Gold medallion architecture, Lakeflow Pipelines, Delta Lake transaction logs, and Unity Catalog for governance.** (~60%)
 15. **Design an experiment tracking + model registry system using MLflow. Discuss the trade-offs between a managed solution (MLflow) and a custom-built one.** (~40%)
 
 ### Behavioral round (45 min, Databricks Leadership Principles-style)
@@ -155,11 +182,11 @@ The "why Databricks" question is asked in 100% of loops. The wrong answer: "I wa
 
 ## The 5 things to remember
 
-1. **Spark internals are non-negotiable.** Catalyst optimizer, Tungsten, lazy evaluation, DAG model. 8 hours on Spark internals.
-2. **The medallion architecture is the 2026 emphasis.** Bronze-Silver-Gold, Delta Lake transaction logs, Unity Catalog.
-3. **MLflow + Unity Catalog are the platform tools.** Every ML question is asked in the context of these.
-4. **System design is always ML-platform-themed.** Feature store, model serving, training data pipeline.
-5. **SQL + Python, not heavy Java.** Databricks uses PySpark and SQL as the primary languages.
+1. **Spark internals are non-negotiable.** Catalyst optimizer, Tungsten, lazy evaluation, DAG model, on Spark 4.x. 8 hours on Spark internals.
+2. **The medallion architecture + Lakeflow Pipelines are the 2026 emphasis.** Bronze-Silver-Gold, Delta Lake transaction logs, Unity Catalog, Lakeflow (the renamed DLT).
+3. **MLflow + Unity Catalog + Mosaic AI Agent Framework are the platform tools.** Every ML question is asked in the context of these.
+4. **System design is on a Google Doc and always ML-platform-themed.** Feature store, model serving, training data pipeline.
+5. **SQL + Python, not heavy Java.** Databricks uses PySpark and SQL as the primary languages. And know the strategic line: Genie One with Ontology, $188B valuation (Jul 2026), IPO pending.
 
 ---
 
@@ -190,6 +217,9 @@ The "why Databricks" question is asked in 100% of loops. The wrong answer: "I wa
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
 - [Levels.fyi — Databricks compensation](https://www.levels.fyi/companies/databricks/salaries/software-engineer) — the L3-L7 comp band
 - [Databricks Engineering Blog](https://www.databricks.com/blog) — the source for the Mosaic AI, Delta Lake, and Photon bets
+- [Databricks — Lakeflow Pipelines product page](https://www.databricks.com/product/data-engineering/lakeflow-pipelines) — the renamed DLT and the 2026 declarative ETL bet
+- [Databricks — Mosaic AI Agent Framework](https://www.databricks.com/product/machine-learning/mosaic-ai) — the 2026 ML/AI platform toolset
+- [Reddit r/cscareerquestions — Databricks Google Doc system design thread (2026)](https://www.reddit.com/r/cscareerquestions/) — candidate reports confirming the Google Doc format for system design
 
 *This is article 8 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1-7 (OpenAI, Anthropic, DeepMind, Meta, Microsoft, NVIDIA, Apple) are already live.*
 
