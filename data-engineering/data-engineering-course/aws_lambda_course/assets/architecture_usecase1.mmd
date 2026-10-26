@@ -1,0 +1,17 @@
+graph LR
+    src["S3 (incoming JSON)"]:::src-- s3:ObjectCreated:* -->lfn["Lambda"]:::fn
+    lfn -- put_item --> ddb["DynamoDB table"]:::ddb
+    lfn -- async error --> dlq["SQS DLQ"]:::dlq
+    alarm["CloudWatch Alarm (Errors>=1)"]:::alarm -.-> lfn
+    sns["SNS topic (email opt-in)"]:::sns -- notify --> user["Operator email"]:::user
+    alarm --> sns
+    dlq -. redrive .-> dlqr["DLQ redrive Lambda"]:::dlqr
+
+    classDef src fill:#fde2e2,stroke:#a33,stroke-width:1px
+    classDef fn fill:#dfe7fd,stroke:#336,stroke-width:1px
+    classDef ddb fill:#e2fdef,stroke:#383,stroke-width:1px
+    classDef dlq fill:#fdf5e2,stroke:#a83,stroke-width:1px
+    classDef alarm fill:#f0e2fd,stroke:#73a,stroke-width:1px
+    classDef sns fill:#e2f3fd,stroke:#37a,stroke-width:1px
+    classDef user fill:#eee,stroke:#333,stroke-width:1px
+    classDef dlqr fill:#fdf5e2,stroke:#a83,stroke-width:1px

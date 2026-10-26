@@ -1,0 +1,14 @@
+# Tier-1: security pins (intentional)
+pip>=24.0
+setuptools>=68.0
+wheel>=0.41
+
+# Tier-2: SDKs
+dbt-core>=1.8,<2.0
+dbt-snowflake>=1.8,<2.0
+jinja2>=3.1
+pyyaml>=6.0
+
+# Tier-3: testing
+pytest>=8.0
+pytest-mock>=3.12

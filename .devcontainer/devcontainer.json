@@ -1,0 +1,33 @@
+{
+  "name": "leads-pipeline dev",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "python.testing.pytestEnabled": false,
+        "[python]": {
+          "editor.tabSize": 4,
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  },
+  "forwardPorts": [5433, 8080, 8501],
+  "portsAttributes": {
+    "5433": { "label": "Postgres (avilx-postgres)" },
+    "8080": { "label": "Adminer" },
+    "8501": { "label": "Streamlit dashboard" }
+  },
+  "remoteUser": "vscode"
+}

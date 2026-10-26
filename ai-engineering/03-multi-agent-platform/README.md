@@ -143,3 +143,7 @@ decision (approve / decline / refer-to-human) plus the full trace.
 | Agent task success | ≥ 90% |
 | Cost / decision | < $0.50 |
 | Human-review accuracy on sampled decisions | ≥ 98% |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

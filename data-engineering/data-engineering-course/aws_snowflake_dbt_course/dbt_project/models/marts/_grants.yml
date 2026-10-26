@@ -1,0 +1,22 @@
+# ============================================================================
+# models/marts/_grants.yml — project-level grants config.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# Lecture reference: L64-L66 "Grants". Demonstrates project-level
+# additive grants. dbt 1.12 disallows declaring the same model in
+# multiple schema.yml files, so per-model grants live in
+# _contracts.yml / _access.yml / _versions.yml; this file just sets
+# the project-wide default grants.
+# ============================================================================
+
+version: 2
+
+models:
+  # Project-wide default for ALL models in dbt_snowflake_dbt.marts
+  # (models without an explicit `grants:` block inherit this).
+  - name: marts
+    description: "Project-wide default grants applied to every marts/* model."
+    config:
+      grants:
+        select: ["transformer"]

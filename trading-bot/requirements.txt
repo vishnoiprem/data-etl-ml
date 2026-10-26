@@ -1,0 +1,6 @@
+psycopg2-binary>=2.9
+python-telegram-bot>=20.0
+alpaca-trade-api>=3.0
+yfinance>=0.2
+flask>=3.0
+numpy>=1.24

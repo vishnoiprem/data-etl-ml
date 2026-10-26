@@ -112,3 +112,7 @@ The natural next steps are:
 - **Evaluation at scale** (covered in `04-fm-evaluation/`)
 
 This track is the **builder's foundation** — the courses that turn "I can call an LLM" into "I can ship, eval, and operate an LLM application."
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

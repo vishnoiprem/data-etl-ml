@@ -32,3 +32,7 @@ By the end of Module 3 you can:
 6. **Generate** documentation, schema.yml, and lineage notes at >85% coverage with human refinement.
 7. **Reason** about self-healing pipelines — what to auto-retry, what to alert, what to escalate.
 8. **Verify** every AI-generated artifact against the same gates human code goes through.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

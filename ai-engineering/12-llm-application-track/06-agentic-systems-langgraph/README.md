@@ -41,3 +41,7 @@ LangGraph is the **stateful orchestration** framework. Where LangChain gives you
 ## The Lead Lesson
 
 > **Lesson 1 — [The agent loop, beyond ReAct](./01-beyond-react-agent.md)** — why ReAct (Course 5's pattern) is the wrong abstraction for production agents. Includes a complete LangGraph implementation of a research-agent with cycles, human approval, persistence, and the eval harness that gates it.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

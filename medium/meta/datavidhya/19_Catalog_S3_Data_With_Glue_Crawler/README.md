@@ -245,3 +245,7 @@ tables (`orders` and `customers`); the `orders` table has 6 columns with
 `order_date` overridden to `date`; an Athena SELECT-JOIN returns the
 expected per-customer totals. The driver and pytest suite exercise all
 three without AWS. The shell scripts are the live-account equivalent.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -31,3 +31,7 @@ By the end of Module 1 you can:
 5. **Defend** a "trust but verify" position: where AI accelerates, where it must be gated.
 6. **Operate** an AI-augmented workflow: spec → draft → review → test → ship.
 7. **Reason** about ethics, IP, privacy, hallucination, and bias risks specific to data systems.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

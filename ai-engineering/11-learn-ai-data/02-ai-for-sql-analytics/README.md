@@ -49,3 +49,7 @@ SQL is where AI gives the **most measurable, most immediate** productivity gain.
    └──────────────────────────────────────────────────────────┘
    The gap is not the model. It's the schema + semantic layer.
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

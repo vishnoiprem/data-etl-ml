@@ -41,3 +41,7 @@ Function calling (a.k.a. tool use) is the moment an LLM stops being a chatbot an
 ## The Lead Lesson
 
 > **Lesson 1 — [Function calling, end-to-end](./01-function-calling-end-to-end.md)** — the canonical build. A complete "ops assistant" that lets an SRE ask natural-language questions and have the LLM call real tools: `query_logs`, `get_metric`, `page_oncall`, `create_ticket`. Includes schema design, parallel execution, error handling, and the eval harness.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

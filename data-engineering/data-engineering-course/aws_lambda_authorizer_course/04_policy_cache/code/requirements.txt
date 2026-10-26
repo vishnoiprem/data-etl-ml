@@ -1,0 +1,2 @@
+# Code demo requirements — section 4
+pytest>=8.0

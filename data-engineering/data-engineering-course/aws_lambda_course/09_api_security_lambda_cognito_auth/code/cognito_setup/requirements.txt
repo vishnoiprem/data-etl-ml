@@ -1,0 +1,5 @@
+boto3>=1.34.0
+moto[cognitoidp]>=5.0.0
+joserfc>=0.9.0  # transitive of moto[cognitoidp]; pinned for reproducible test runs
+pytest>=8.0.0
+requests>=2.31.0
