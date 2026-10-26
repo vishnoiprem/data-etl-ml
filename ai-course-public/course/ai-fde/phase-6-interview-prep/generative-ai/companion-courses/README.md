@@ -37,16 +37,8 @@
 Phase 1-5 teaches the FDE pattern. The companion courses teach the technical craft. **The complete FDE candidate pairs both** — they can build the artifact (Ed's 8 projects) AND ship it to a customer (Phase 1-5's eval-set-as-spec, cost-ceiling-as-score, handoff-as-proof, state-externalization-as-precondition).
 
 **Build the artifact. Ship it to a customer. Hand it off. That's the FDE.**
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  

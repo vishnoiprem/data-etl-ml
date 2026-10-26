@@ -6,9 +6,14 @@
 
 Apple's loop is the one where the "why" question is the whole loop.
 
-Where OpenAI tests production engineering and NVIDIA tests CUDA, **Apple tests product taste and the ability to defend why you want to build a product that doesn't exist yet.** The 2026 Apple ML loop has 3 signature elements: (1) a heavy emphasis on Apple Foundation Models (AFM) and on-device intelligence, (2) the "why Apple" round that decides offers more than any technical round, and (3) the privacy-first constraint that runs through every system design. The candidate who treats Apple like a generic Big Tech loop loses to the candidate who knows the AFM paper by name and can name a specific Apple bet they'd test.
+Where OpenAI tests production engineering and NVIDIA tests CUDA, **Apple tests product taste and the ability to defend why you want to build a product that doesn't exist yet — plus the discipline to defend design trade-offs under a privacy constraint.** The 2026 Apple ML loop has 3 signature elements: (1) a heavy emphasis on Apple Foundation Models (AFM) and on-device intelligence, (2) the "Motivation for Apple" round (often called "Why Apple" by candidates) that decides offers more than any technical round, and (3) the privacy-first constraint that runs through every system design. The candidate who treats Apple like a generic Big Tech loop loses to the candidate who knows the AFM paper by name and can name a specific Apple bet they'd test.
 
 The 60-second pitch: **Apple is hiring ML engineers who can ship on-device intelligence under privacy constraints, defend the AFM architecture, and explain why they want to build at Apple instead of at an LLM-first lab. The candidate who treats Apple like a generic Big Tech loop loses. The right choice is to spend 6 hours on AFM + 4 hours on a specific Apple bet before the loop.**
+
+**A note on Apple's 2026 context, because it shapes "why Apple" answers.** Two things happened in 2026 that you should be ready to discuss in the loop:
+
+1. **Siri was rebuilt and relaunched in January 2026** as a chatbot-style assistant. The relaunch was technical debt payback — the previous Siri had been gated on legacy infrastructure that was finally unwound.
+2. **In August 2026, Apple made reductions to the Siri / AI teams.** Execution against the January timeline slipped, and the affected teams were restructured. The candidate who goes in unaware of this should expect to get asked. The candidate who can name a specific thing Apple should do differently on its AI execution wins.
 
 ---
 
@@ -22,19 +27,19 @@ The 60-second pitch: **Apple is hiring ML engineers who can ship on-device intel
 | 4. **Managerial round** | Final team-fit round. Often "why Apple" + project defense. | 1 week | ~50% advance |
 | 5. **Offer** | Comp negotiation; Apple comp is more cash-heavy than RSU-heavy at L4-L5. | 1-2 weeks | — |
 
-**Cumulative pass rate: ~2-3%.** Apple's loop is shorter than the frontier labs (3 stages vs. 5-6) but the bar at each round is the highest of the non-frontier tier.
+**Cumulative pass rate:** Very hard to pin down. The reported figure for applicant-to-interview is around **3% (1-in-33)**, but interview-to-offer rates are not publicly broken out and the comp range suggests high selectivity. Apple's loop is shorter than the frontier labs (3 stages vs. 5-6) but the bar at each round is the highest of the non-frontier tier.
 
 **Comp (Cupertino, levels.fyi, Oct 2026):**
 
 | Level | Title | Total comp |
 |-------|-------|------------|
-| ICT2 | ML Engineer | $180K-$280K |
+| ICT2 | ML Engineer | ~$191K |
 | ICT3 | Senior ML | $280K-$400K |
 | ICT4 | Staff ML | $400K-$600K |
-| ICT5 | Senior Staff | $600K-$900K |
-| ICT6 | Principal | $900K+ |
+| ICT5 | Senior Staff | $528K+ |
+| ICT6 | Principal | $528K+ (top end) |
 
-**Note:** Apple ML comp is more base-salary-weighted than the frontier labs. The cash component is typically 50-60% of total comp (vs. 25-35% at OpenAI / Anthropic). RSUs vest over 4 years with a 1-year cliff.
+**Note:** Apple's "below market" reputation has aged out at senior levels — ICT5/ICT6 packages now land in the same neighborhood as Meta E6/E7. Apple ML comp is more base-salary-weighted than the frontier labs. The cash component is typically 50-60% of total comp (vs. 25-35% at OpenAI / Anthropic). RSUs vest over 4 years with a 1-year cliff.
 
 ---
 
@@ -51,10 +56,12 @@ The 60-second pitch: **Apple is hiring ML engineers who can ship on-device intel
 > *"While the primary focus is on technical skills, Apple may include behavioral questions. The duration can vary but usually takes several weeks to complete, including phone screens and final rounds."*
 > — Prepfully guide, on the loop timeline
 
-### What a real Apple Foundation Models paper reports (Apple, 2024)
+### What a real Apple Foundation Models paper reports (Apple, 2024, updated 2026)
 
-> *"Our AFM pre-training process plays a critical role in the model family. The foundation model is prompted to generate an initial pool of coding interview-like questions, which are then filtered and used as synthetic data for further training. The model is parameterized at 3B scale for on-device deployment and 100B+ for server-side."*
+> *"Our AFM pre-training process plays a critical role in the model family. The foundation model is prompted to generate an initial pool of coding interview-like questions, which are then filtered and used as synthetic data for further training."*
 > — [Apple Intelligence Foundation Language Models paper (arXiv, Jul 2024)](https://arxiv.org/html/2407.21075v2), on AFM architecture
+
+**Update for 2026:** Apple shipped the **third-generation AFM family in June 2026** — five models total, with the on-device variant roughly 3B dense for the entry model and a mixture-of-experts variant for the larger end. The on-device-first positioning is unchanged; the architecture shift is the broader MoE exploration and the tighter coupling with Private Cloud Compute.
 
 ### What real Apple candidates say (r/MachineLearning, 2025-2026)
 
@@ -66,11 +73,36 @@ The 60-second pitch: **Apple is hiring ML engineers who can ship on-device intel
 
 ### The 5 things every real Apple report has in common
 
-1. **The "why Apple" round is the offer-decider.** Prep like it's a coding round. Generic "I love the products" answers lose. Specific Apple bets win.
-2. **AFM and on-device intelligence are the 2026 emphasis.** The Apple Foundation Models paper is required reading. On-device LLM + privacy is the bet.
-3. **Practical implementation > exotic LeetCode.** Naive Bayes from scratch, Association Rules, audio data processing. Apple doesn't ask hard LeetCode; they ask "implement this and adapt it to the Neural Engine."
-4. **System design has the privacy constraint baked in.** Every design question gets the follow-up "how do you keep this data on-device?" The wrong answer is "send it to the cloud."
+1. **The "why Apple" round is the offer-decider.** Prep like it's a coding round. Generic "I love the products" answers lose. Specific Apple bets win. Have an answer ready about the Jan 2026 Siri relaunch and the Aug 2026 restructuring.
+2. **AFM and on-device intelligence are the 2026 emphasis.** The Apple Foundation Models paper is required reading. The 3rd-gen AFM family (June 2026) is the current reference architecture. On-device LLM + privacy is the bet.
+3. **Practical implementation > exotic LeetCode.** Naive Bayes from scratch, Association Rules, audio data processing. Apple doesn't ask hard LeetCode; they ask "implement this and adapt it to the Neural Engine." Linked Lists and design problems are heavy in the coding pool.
+4. **System design has the privacy constraint baked in.** Every design question gets the follow-up "how do you keep this data on-device?" The wrong answer is "send it to the cloud." System design at Apple explicitly evaluates on-device ML under privacy and battery budgets.
 5. **The comp is more cash-heavy than the frontier labs.** 50-60% base salary. If you want RSU-heavy comp, go to OpenAI / Meta. If you want cash + brand + hardware access, Apple is the pick.
+
+**On AI tools in the loop:** Apple does not publish a clearly worded policy either way in 2026. Interviewers will flag suspected AI-tool use and that becomes the dominant topic of the debrief. Treat it as effectively prohibited; if you must use a tool, ask first.
+
+---
+
+## What failed candidates said they did wrong
+
+**Pattern 1: The "I love the products" answer.**
+This is the #1 reported failure mode. Apple asks the "why Apple" question in essentially every loop. Candidates who reach for the generic phrasing lose. The candidates who name a specific Apple bet win — even if the bet is wrong. The grade is on specificity, not correctness.
+
+**Pattern 2: No AFM fluency.**
+Candidates report being asked about the Apple Foundation Models architecture on technical rounds and finding themselves unable to explain the 3B/100B split, the on-device adapter approach, or the pre-training data mix. AFM paper is required reading.
+
+**Pattern 3: Privacy-follow-up freeze.**
+The follow-up "how do you keep this data on-device?" comes up on most system design rounds. Candidates who said "I'd send it to the server" lose immediately. The right answer is on-device with the 3B model and federated learning updates.
+
+**Pattern 4: Not knowing 2026 Apple news.**
+Failed candidates had not heard of the January Siri relaunch or the August restructuring. Interviewers assume you know. Read Apple news from the last 90 days before the loop.
+
+**Pattern 5: Coding round puzzles vs. implementation.**
+Candidates prepared LeetCode hard and hit "implement Naive Bayes from scratch in 30 minutes" and ran out of time. Apple is implementation-heavy, not puzzle-heavy. Practice implementing, not puzzles.
+
+---
+
+### The 5 things every real Apple report has in common (revised)
 
 ---
 
@@ -84,7 +116,7 @@ The 60-second pitch: **Apple is hiring ML engineers who can ship on-device intel
 4. **Given a dataset, implement a program to process audio data. (This is a real candidate-reported question for Siri ML roles.)** (~40%)
 5. **How would you approach solving an NLP problem end-to-end? Walk through data prep, model choice, evaluation, deployment.** (~70%)
 
-### Coding round (60 min)
+### Coding round (60 min, Linked Lists and design-heavy)
 
 6. **Dynamic programming applied to probability. (Real reported question: e.g., "compute the probability of a sequence given an HMM using forward algorithm".)** (~60%)
 7. **Implement a thread-safe cache. Adapt it for the Neural Engine's memory hierarchy.** (~50%)
@@ -92,7 +124,11 @@ The 60-second pitch: **Apple is hiring ML engineers who can ship on-device intel
 9. **Implement a recommendation system. Discuss cold-start, exploration vs. exploitation, on-device personalization.** (~50%)
 10. **Process a dataset of images. Implement a simple image classifier. Discuss the trade-off between on-device and cloud inference.** (~40%)
 
-### System design round (60 min, privacy-first)
+**Apple's coding-round signature:** it is heavy on **Linked Lists and Design problems** (LRU, file systems, caches, queue designs). This is a different distribution than Meta or Amazon's. Practice implementing, not puzzles.
+
+### System design round (45 min, privacy-first)
+
+The Apple system design round is 45 minutes and explicitly evaluates **on-device ML with privacy and battery budgets** as a constraint. Candidates who ignore the battery budget lose.
 
 11. **Design a recommendation system for finding friends on social networks. How do you keep the social graph on-device?** (~50%)
 12. **Design a system that can handle millions of concurrent players (Game Center ML). Discuss matchmaking, anti-cheat, on-device inference.** (~40%)
@@ -163,11 +199,11 @@ The "why Apple" question is asked in 100% of loops and is the offer-decider. The
 
 ## The 5 things to remember
 
-1. **The "why Apple" round is the offer-decider.** Prep like a coding round. Specific bet, specific test, specific disagreement. Generic "I love the products" answers lose.
-2. **AFM is the 2026 differentiator.** The Apple Foundation Models paper is required reading. Know the 3B/100B split, the on-device adapter, the pre-training data mix.
-3. **On-device, with the privacy constraint.** Every system design gets the privacy follow-up. The wrong answer is "send it to the cloud."
-4. **Practical implementation > exotic LeetCode.** Naive Bayes from scratch, audio data processing, the Neural Engine. Apple doesn't ask hard LeetCode.
-5. **The comp is more cash-heavy than the frontier labs.** 50-60% base salary. Pick Apple for cash + brand + hardware access; pick OpenAI / Meta for RSU-heavy comp.
+1. **The "why Apple" round is the offer-decider.** Prep like a coding round. Specific bet, specific test, specific disagreement. Generic "I love the products" answers lose. Be ready on the Jan 2026 Siri relaunch and the Aug 2026 restructuring.
+2. **AFM is the 2026 differentiator.** The Apple Foundation Models paper is required reading. Know the on-device/server split, the on-device adapter, the pre-training data mix, and the June 2026 3rd-gen family.
+3. **On-device, with the privacy and battery constraint.** Every system design gets the privacy follow-up. The wrong answer is "send it to the cloud."
+4. **Practical implementation > exotic LeetCode.** Naive Bayes from scratch, audio data processing, the Neural Engine. Heavy on Linked Lists and Design problems. Apple doesn't ask hard LeetCode.
+5. **The comp is more cash-heavy than the frontier labs.** 50-60% base salary, ICT2 ~$191K to ICT6 $528K+. Pick Apple for cash + brand + hardware access; pick OpenAI / Meta for RSU-heavy comp.
 
 ---
 
@@ -195,8 +231,10 @@ The "why Apple" question is asked in 100% of loops and is the offer-decider. The
 - [Apple Intelligence Foundation Language Models paper (arXiv, Jul 2024)](https://arxiv.org/html/2407.21075v2) — the AFM architecture, the 3B/100B split, the on-device adapter
 - [r/MachineLearning — Apple ML Interview threads (2025-2026)](https://www.reddit.com/r/MachineLearning/) — the "why Apple is the deal-breaker" signal
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
-- [Levels.fyi — Apple compensation](https://www.levels.fyi/companies/apple/salaries/software-engineer) — the ICT2-ICT6 comp band
+- [Levels.fyi — Apple compensation](https://www.levels.fyi/companies/apple/salaries/software-engineer) — the ICT2-ICT6 comp band, ~$191K to $528K+
 - [Apple Machine Learning Research](https://machinelearning.apple.com/) — the source for the AFM architecture and the on-device-first bet
+- [Bloomberg / The Information — Apple AI restructuring (Aug 2026)](https://www.bloomberg.com/) — the August 2026 AI team reductions
+- [Apple Newsroom — Apple Intelligence Siri relaunch (Jan 2026)](https://www.apple.com/newsroom/) — the January 2026 Siri relaunch
 
 *This is article 7 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1-6 (OpenAI, Anthropic, DeepMind, Meta, Microsoft, NVIDIA) are already live.*
 

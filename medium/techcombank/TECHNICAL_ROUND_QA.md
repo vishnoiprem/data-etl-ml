@@ -49,7 +49,7 @@ Never give a technical answer without landing one of these.
 
 | Metric | Number |
 |---|---|
-| Years / years leading | ~15 / ~7+ |
+| Years / years leading | ~15 / ~6+ (CV says "6+ years in senior managerial roles") |
 | Current org size / budget | ~30 people / ~$3M |
 | Business scale owned | $8bn revenue, 3 countries, ~200 stores, 5 DCs |
 | Daily data volume | 10bn+ rows/day |

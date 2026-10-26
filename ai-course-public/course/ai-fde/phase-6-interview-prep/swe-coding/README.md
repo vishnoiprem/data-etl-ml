@@ -110,16 +110,8 @@
 | 3. "How would you scale this to 1B records?" | "External sort + map-reduce. Or a streaming algorithm with O(1) memory. The trade-off is accuracy vs memory." |
 
 **Memorize these 3.** They're the Q&A for 80% of SWE coding follow-ups.
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  
