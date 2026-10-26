@@ -1,0 +1,16 @@
+# Caddyfile — front the FastAPI service for production SSE streaming.
+#
+# The dev uvicorn server buffers Server-Sent Events, which breaks
+# /draft/stream. Caddy (or any reverse proxy with `flush` semantics) passes
+# the `text/event-stream` content-type through unbuffered.
+#
+# Phase 3: the Phase 2 Dockerfile doesn't change; this Caddyfile only
+# matters when you `docker compose --profile prod up` to run with caddy.
+
+:8080 {
+    reverse_proxy pf-phase2:8000 {
+        # Pass through streaming responses without buffering.
+        flush_interval -1
+    }
+    encode zstd gzip
+}

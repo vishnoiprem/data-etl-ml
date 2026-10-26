@@ -93,3 +93,7 @@ You'll see structured events on the event bus, a deployment record, and a drift 
 | Auto-rollback rate (saves) | ≥ 1/month |
 | Drift alarms with > 0.8 precision | ≥ 90% |
 | Platform engineering NPS | ≥ +40 |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

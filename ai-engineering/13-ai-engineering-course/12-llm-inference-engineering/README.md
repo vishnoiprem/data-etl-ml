@@ -39,3 +39,7 @@ The deepest technical module: prefill vs decode, KV cache, KV cache compression,
 ## The Lead Lesson
 
 > **Lesson 1 — [LLM Inference Optimization](./01-llm-inference-optimization.md)** — the map. Worked example: take a 7B model, measure TTFT/TPOT/throughput at batch=1, then apply KV cache, then continuous batching, then speculative decoding, then quantization — measure each optimization, plot the cumulative improvement.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1,0 +1,41 @@
+.venv/
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*/*/*/__pycache__/
+
+.env
+.env.local
+*.log
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Streamlit / dashboard
+.streamlit/secrets.toml
+dashboard.Dockerfile.bak
+
+# Docker volumes
+docker-volumes/
+
+# TimescaleDB / Postgres local data
+data/
+
+# SQLite databases (test DB, live.db, seed DBs, etc.)
+*.db
+*.sqlite
+*.sqlite3
+
+# Models (downloaded at runtime by FinBERT)
+models/
+*.bin
+*.safetensors
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Prometheus client
+*.prom

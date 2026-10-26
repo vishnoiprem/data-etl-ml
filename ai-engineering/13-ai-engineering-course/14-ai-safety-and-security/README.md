@@ -25,3 +25,7 @@ Three lessons: how guardrails work, the prompt injection attack surface (and the
 ## The Lead Lesson
 
 > **Lesson 1 — [LLM Guardrails](./01-llm-guardrails.md)** — the practical layer. Worked example: build a guardrail pipeline (regex → classifier → LLM-judge) in front of a chat endpoint, attack it with 50 known-bad prompts, measure the catch rate and false-positive rate.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

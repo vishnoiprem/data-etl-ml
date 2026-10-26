@@ -1,0 +1,14 @@
+# dbt-generated artifacts (do not commit)
+target/
+dbt_packages/
+logs/
+user_logs/
+.state/
+
+# Python dbt model artifacts
+__pycache__/
+*.pyc
+
+# Local config
+.env
+.env.*

@@ -38,3 +38,7 @@ The agent curriculum: from "what is an AI agent" through function calling, the a
 ## The Lead Lesson
 
 > **Lesson 1 — [What is an AI Agent?](./01-what-is-an-ai-agent.md)** — the framing lesson. Worked example: build a minimal agent from scratch (no LangGraph), with a single tool, a single goal, a clear loop, and the eval that detects when it loops forever.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

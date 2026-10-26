@@ -27,3 +27,7 @@ Not every language model is a large text-generating LLM. This module covers the 
 ## The Lead Lesson
 
 > **Lesson 1 — [Small Language Models (SLMs)](./01-small-language-models.md)** — the most operationally important decision. Worked example: take a 7B model, quantize it to 4-bit, run it on a single consumer GPU, and benchmark its latency, throughput, and quality vs a 70B cloud model for a specific task — the cost/quality tradeoff with real numbers.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

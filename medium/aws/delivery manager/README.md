@@ -3,4 +3,7 @@ https://medium.com/@premvishnoi/role-senior-delivery-consultant-data-engineering
 
 
 https://medium.com/@premvishnoi/1-modern-data-platform-3114774a2e4f
+---
 
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

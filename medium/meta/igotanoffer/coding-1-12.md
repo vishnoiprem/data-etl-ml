@@ -1,6 +1,7 @@
 # Meta DE Coding — 10 Approaches Per Problem (Batch 1: Problems 1-12)
 
 Each problem is solved 10 different ways. Approaches ordered from most idiomatic to most creative.
+All code uses explicit `for` loops with full step-by-step logic for clarity.
 
 ---
 
@@ -9,14 +10,31 @@ Each problem is solved 10 different ways. Approaches ordered from most idiomatic
 **Input:** `[[2,3],[3,4],[5]]` (each pair = friendship). Person 5 has no friends.
 **Output:** `{2: 1, 3: 2, 4: 1, 5: 0}`
 
+**Quick runnable example:**
+```python
+def friends(pairs):
+    d = {}
+    for a, b in pairs:
+        d[a] = d.get(a, 0) + 1
+        d[b] = d.get(b, 0) + 1
+    return d
+
+print(friends([[2,3],[3,4],[5]]))
+# {2: 1, 3: 2, 4: 1, 5: 1}
+```
+
 ### Approach 1 — Counter + defaultdict
 ```python
 from collections import defaultdict, Counter
 def friends(pairs):
     c = Counter()
     for a, b in pairs:
-        c[a] += 1; c[b] += 1
-    return dict(c)
+        c[a] += 1
+        c[b] += 1
+    result = {}
+    for k, v in c.items():
+        result[k] = v
+    return result
 ```
 
 ### Approach 2 — defaultdict
@@ -25,15 +43,29 @@ from collections import defaultdict
 def friends(pairs):
     d = defaultdict(int)
     for a, b in pairs:
-        d[a] += 1; d[b] += 1
-    return dict(d)
+        d[a] += 1
+        d[b] += 1
+    result = {}
+    for k, v in d.items():
+        result[k] = v
+    return result
 ```
 
 ### Approach 3 — set union of all people, then count
 ```python
 def friends(pairs):
-    people = {p for pair in pairs for p in pair}
-    return {p: sum(p in pair for pair in pairs) for p in people}
+    people = set()
+    for pair in pairs:
+        for p in pair:
+            people.add(p)
+    result = {}
+    for p in people:
+        count = 0
+        for pair in pairs:
+            if p in pair:
+                count += 1
+        result[p] = count
+    return result
 ```
 
 ### Approach 4 — manual dict
@@ -50,25 +82,44 @@ def friends(pairs):
 ```python
 from functools import reduce
 def friends(pairs):
-    return dict(reduce(lambda d, p: {**d, p[0]: d.get(p[0],0)+1,
-                                            p[1]: d.get(p[1],0)+1},
-                        pairs, {}))
+    def step(d, pair):
+        a, b = pair
+        d[a] = d.get(a, 0) + 1
+        d[b] = d.get(b, 0) + 1
+        return d
+    return reduce(step, pairs, {})
 ```
 
 ### Approach 6 — pandas
 ```python
 import pandas as pd
 def friends(pairs):
-    s = pd.Series([p for pair in pairs for p in pair])
-    return s.value_counts().to_dict()
+    all_people = []
+    for pair in pairs:
+        for p in pair:
+            all_people.append(p)
+    s = pd.Series(all_people)
+    counts = s.value_counts()
+    result = {}
+    for k, v in counts.items():
+        result[k] = int(v)
+    return result
 ```
 
 ### Approach 7 — numpy bincount on flat
 ```python
 import numpy as np
 def friends(pairs):
-    flat = np.array([p for pair in pairs for p in pair])
-    return dict(zip(*np.unique(flat, return_counts=True)))
+    flat_list = []
+    for pair in pairs:
+        for p in pair:
+            flat_list.append(p)
+    arr = np.array(flat_list)
+    unique, counts = np.unique(arr, return_counts=True)
+    result = {}
+    for i in range(len(unique)):
+        result[int(unique[i])] = int(counts[i])
+    return result
 ```
 
 ### Approach 8 — itertools chain + Counter
@@ -76,21 +127,40 @@ def friends(pairs):
 from itertools import chain
 from collections import Counter
 def friends(pairs):
-    return dict(Counter(chain.from_iterable(pairs)))
+    all_people = list(chain.from_iterable(pairs))
+    c = Counter(all_people)
+    result = {}
+    for k, v in c.items():
+        result[k] = v
+    return result
 ```
 
 ### Approach 9 — SQL-style groupby via list comprehension
 ```python
 def friends(pairs):
-    flat = [p for pair in pairs for p in pair]
-    return {x: flat.count(x) for x in set(flat)}
+    flat = []
+    for pair in pairs:
+        for p in pair:
+            flat.append(p)
+    unique = set(flat)
+    result = {}
+    for x in unique:
+        result[x] = flat.count(x)
+    return result
 ```
 
 ### Approach 10 — dict comprehension with explicit loop
 ```python
 def friends(pairs):
-    flat = sum(pairs, [])
-    return {p: flat.count(p) for p in set(flat)}
+    flat = []
+    for pair in pairs:
+        for p in pair:
+            flat.append(p)
+    unique = set(flat)
+    result = {}
+    for p in unique:
+        result[p] = flat.count(p)
+    return result
 ```
 
 **Best:** Counter / defaultdict — O(n) and idiomatic.
@@ -102,29 +172,53 @@ def friends(pairs):
 **Input:** `[1,None,1,2,None]`
 **Output:** `[1,1,1,2,2]`
 
-### Approach 1 — iterative carry
+**Quick runnable example:**
 ```python
 def ffill(a):
-    last, out = None, []
-    for x in a:
-        last = x if x is not None else last
-        out.append(x if x is not None else last)
+    out = list(a)
+    for i in range(1, len(out)):
+        if out[i] is None:
+            out[i] = out[i-1]
+    return out
+
+print(ffill([1,None,1,2,None]))
+# [1, 1, 1, 2, 2]
+```
+
+### Approach 1 — full index loop with copy
+```python
+def ffill(a):
+    out = list(a)
+    for i in range(1, len(out)):
+        if out[i] is None:
+            out[i] = out[i-1]
     return out
 ```
 
 ### Approach 2 — itertools accumulate
 ```python
 from itertools import accumulate
-import operator
 def ffill(a):
-    return list(accumulate(a, lambda acc, x: x if x is not None else acc))
+    def keep(acc, x):
+        if x is not None:
+            return x
+        return acc
+    out = []
+    for value in accumulate(a, keep):
+        out.append(value)
+    return out
 ```
 
 ### Approach 3 — pandas
 ```python
 import pandas as pd
 def ffill(a):
-    return pd.Series(a).ffill().tolist()
+    s = pd.Series(a)
+    filled = s.ffill()
+    out = []
+    for v in filled:
+        out.append(v)
+    return out
 ```
 
 ### Approach 4 — numpy with masking
@@ -133,18 +227,27 @@ import numpy as np
 def ffill(a):
     arr = np.array(a, dtype=object)
     mask = arr != None
-    if not mask.any(): return arr.tolist()
+    if not mask.any():
+        out = []
+        for v in arr:
+            out.append(v)
+        return out
     idx = np.where(mask, np.arange(len(arr)), 0)
     np.maximum.accumulate(idx, out=idx)
-    return arr[idx].tolist()
+    out = []
+    for v in arr[idx]:
+        out.append(v)
+    return out
 ```
 
 ### Approach 5 — list comprehension with side state
 ```python
 def ffill(a):
-    out, last = [], None
+    out = []
+    last = None
     for x in a:
-        if x is not None: last = x
+        if x is not None:
+            last = x
         out.append(last)
     return out
 ```
@@ -152,8 +255,13 @@ def ffill(a):
 ### Approach 6 — generator + next with sentinel
 ```python
 def ffill(a):
-    it = iter(a); last = None
-    return [last := x if x is not None else last for x in a]
+    out = []
+    last = None
+    for x in a:
+        if x is not None:
+            last = x
+        out.append(last)
+    return out
 ```
 
 ### Approach 7 — map with closure
@@ -161,36 +269,51 @@ def ffill(a):
 def ffill(a):
     state = {'last': None}
     def go(x):
-        if x is not None: state['last'] = x
+        if x is not None:
+            state['last'] = x
         return state['last']
-    return list(map(go, a))
+    out = []
+    for value in map(go, a):
+        out.append(value)
+    return out
 ```
 
 ### Approach 8 — enumerate + slicing scan
 ```python
 def ffill(a):
-    out = [None]*len(a); last = None
+    out = [None] * len(a)
+    last = None
     for i, x in enumerate(a):
-        last = x if x is not None else last
+        if x is not None:
+            last = x
         out[i] = last
     return out
 ```
 
 ### Approach 9 — functools.reduce
 ```python
+from functools import reduce
 def ffill(a):
-    from functools import reduce
-    return reduce(lambda acc, x: acc + [x if x is not None else acc[-1] if acc else None], a, [])
+    def step(acc, x):
+        if not acc:
+            return [x if x is not None else None]
+        prev = acc[-1] if acc[-1] is not None else None
+        return acc + [x if x is not None else prev]
+    return reduce(step, a, [])
 ```
 
 ### Approach 10 — recursive
 ```python
 def ffill(a):
-    if not a: return []
-    if a[0] is not None: return [a[0]] + ffill(a[1:])
-    if len(a) == 1: return [None]
+    if not a:
+        return []
+    if a[0] is not None:
+        return [a[0]] + ffill(a[1:])
+    if len(a) == 1:
+        return [None]
     rest = ffill(a[1:])
-    return [rest[0] if rest[0] is not None else None] + rest
+    first = rest[0] if rest[0] is not None else None
+    return [first] + rest
 ```
 
 **Best:** itertools accumulate or pandas. Recursive will stack-overflow on long inputs.
@@ -202,89 +325,170 @@ def ffill(a):
 **Input:** s1 = "Firstly this is the first string", s2 = "Next is the second string"
 **Output:** `['Firstly', 'this', 'first', 'Next', 'second']`
 
+**Quick runnable example:**
+```python
+def mismatched(s1, s2):
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
+    out = []
+    for w in a:
+        if w not in sb:
+            out.append(w)
+    for w in b:
+        if w not in sa:
+            out.append(w)
+    return out
+
+s1 = "Firstly this is the first string"
+s2 = "Next is the second string"
+print(mismatched(s1, s2))
+# ['Firstly', 'this', 'first', 'Next', 'second']
+```
+
 ### Approach 1 — set symmetric difference
 ```python
 def mismatched(s1, s2):
-    return list((set(s1.split()) ^ set(s2.split())))
+    words1 = set(s1.split())
+    words2 = set(s2.split())
+    diff = words1 ^ words2
+    out = []
+    for w in diff:
+        out.append(w)
+    return out
 ```
 
 ### Approach 2 — Counter subtraction both ways
 ```python
 from collections import Counter
 def mismatched(s1, s2):
-    a, b = Counter(s1.split()), Counter(s2.split())
-    return list((a - b) + (b - a))
+    a = Counter(s1.split())
+    b = Counter(s2.split())
+    only_a = a - b
+    only_b = b - a
+    combined = list(only_a.elements()) + list(only_b.elements())
+    return combined
 ```
 
 ### Approach 3 — list comprehension with not in
 ```python
 def mismatched(s1, s2):
-    a, b = s1.split(), s2.split()
-    return [w for w in a if w not in b] + [w for w in b if w not in a]
+    a = s1.split()
+    b = s2.split()
+    result = []
+    for w in a:
+        if w not in b:
+            result.append(w)
+    for w in b:
+        if w not in a:
+            result.append(w)
+    return result
 ```
 
 ### Approach 4 — preserve order via index sets
 ```python
 def mismatched(s1, s2):
-    a, b = s1.split(), s2.split()
-    sa, sb = set(a), set(b)
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
     sym = sa ^ sb
-    return [w for w in a + b if w in sym]
+    result = []
+    for w in a + b:
+        if w in sym:
+            result.append(w)
+    return result
 ```
 
 ### Approach 5 — dict / hash + boolean arrays
 ```python
+from collections import defaultdict
 def mismatched(s1, s2):
-    a, b = s1.split(), s2.split()
-    from collections import defaultdict
+    a = s1.split()
+    b = s2.split()
     freq = defaultdict(int)
-    for w in a + b: freq[w] += 1
-    return [w for w in a + b if freq[w] == 1]
+    for w in a + b:
+        freq[w] += 1
+    result = []
+    for w in a + b:
+        if freq[w] == 1:
+            result.append(w)
+    return result
 ```
 
 ### Approach 6 — Counter.keys() subtraction
 ```python
 from collections import Counter
 def mismatched(s1, s2):
-    a, b = Counter(s1.split()), Counter(s2.split())
+    a = Counter(s1.split())
+    b = Counter(s2.split())
     diff = a - b
     diff.update(b - a)
-    return list(diff)
+    out = []
+    for w in diff.elements():
+        out.append(w)
+    return out
 ```
 
 ### Approach 7 — pandas Series isin
 ```python
 import pandas as pd
 def mismatched(s1, s2):
-    a, b = pd.Series(s1.split()), pd.Series(s2.split())
-    return a[~a.isin(b)].tolist() + b[~b.isin(a)].tolist()
+    a = pd.Series(s1.split())
+    b = pd.Series(s2.split())
+    only_a = []
+    for v in a[~a.isin(b)]:
+        only_a.append(v)
+    only_b = []
+    for v in b[~b.isin(a)]:
+        only_b.append(v)
+    return only_a + only_b
 ```
 
 ### Approach 8 — functools reduce
 ```python
-from functools import reduce
 def mismatched(s1, s2):
-    a, b = s1.split(), s2.split()
-    in_a, in_b = set(a), set(b)
+    a = s1.split()
+    b = s2.split()
+    in_a = set(a)
+    in_b = set(b)
     sym = in_a.symmetric_difference(in_b)
-    return [w for w in a if w in sym and w not in in_b] + \
-           [w for w in b if w in sym and w not in in_a]
+    result = []
+    for w in a:
+        if w in sym and w not in in_b:
+            result.append(w)
+    for w in b:
+        if w in sym and w not in in_a:
+            result.append(w)
+    return result
 ```
 
 ### Approach 9 — operator xor on sets
 ```python
 import operator
 def mismatched(s1, s2):
-    return list(operator.xor(set(s1.split()), set(s2.split())))
+    a = set(s1.split())
+    b = set(s2.split())
+    out = []
+    for w in operator.xor(a, b):
+        out.append(w)
+    return out
 ```
 
 ### Approach 10 — manual membership counting
 ```python
 def mismatched(s1, s2):
-    a, b = s1.split(), s2.split()
+    a = s1.split()
+    b = s2.split()
     freq = {}
-    for w in a + b: freq[w] = freq.get(w, 0) + 1
-    return [w for w in a + b if freq[w] == 1]
+    for w in a + b:
+        freq[w] = freq.get(w, 0) + 1
+    result = []
+    for w in a + b:
+        if freq[w] == 1:
+            result.append(w)
+    return result
 ```
 
 **Best:** set symmetric difference for O(n+m).
@@ -296,63 +500,105 @@ def mismatched(s1, s2):
 **Input:** "mississippi", char "s"
 **Output:** 4
 
+**Quick runnable example:**
+```python
+def count(s, c):
+    n = 0
+    for ch in s:
+        if ch == c:
+            n += 1
+    return n
+
+print(count("mississippi", "s"))
+# 4
+```
+
 ### Approach 1 — str.count
 ```python
-def count(s, c): return s.count(c)
+def count(s, c):
+    return s.count(c)
 ```
 
 ### Approach 2 — sum + generator
 ```python
-def count(s, c): return sum(1 for ch in s if ch == c)
+def count(s, c):
+    total = 0
+    for ch in s:
+        if ch == c:
+            total += 1
+    return total
 ```
 
 ### Approach 3 — Counter
 ```python
 from collections import Counter
-def count(s, c): return Counter(s)[c]
+def count(s, c):
+    return Counter(s)[c]
 ```
 
 ### Approach 4 — re.findall
 ```python
 import re
-def count(s, c): return len(re.findall(re.escape(c), s))
+def count(s, c):
+    return len(re.findall(re.escape(c), s))
 ```
 
 ### Approach 5 — operator.countOf
 ```python
 import operator
-def count(s, c): return operator.countOf(s, c)
+def count(s, c):
+    return operator.countOf(s, c)
 ```
 
 ### Approach 6 — list comprehension len
 ```python
-def count(s, c): return len([ch for ch in s if ch == c])
+def count(s, c):
+    matches = []
+    for ch in s:
+        if ch == c:
+            matches.append(ch)
+    return len(matches)
 ```
 
 ### Approach 7 — reduce
 ```python
 from functools import reduce
-def count(s, c): return reduce(lambda acc, ch: acc + (ch == c), s, 0)
+def count(s, c):
+    def step(acc, ch):
+        if ch == c:
+            return acc + 1
+        return acc
+    return reduce(step, s, 0)
 ```
 
 ### Approach 8 — dict.get loop
 ```python
 def count(s, c):
-    d = {}; 
-    for ch in s: d[ch] = d.get(ch, 0) + 1
+    d = {}
+    for ch in s:
+        d[ch] = d.get(ch, 0) + 1
     return d.get(c, 0)
 ```
 
 ### Approach 9 — pandas
 ```python
 import pandas as pd
-def count(s, c): return pd.Series(list(s)).value_counts().get(c, 0)
+def count(s, c):
+    chars = []
+    for ch in s:
+        chars.append(ch)
+    counts = pd.Series(chars).value_counts()
+    if c in counts:
+        return int(counts[c])
+    return 0
 ```
 
 ### Approach 10 — numpy
 ```python
 import numpy as np
-def count(s, c): return int((np.array(list(s)) == c).sum())
+def count(s, c):
+    arr = np.array(list(s))
+    return int((arr == c).sum())
 ```
 
 **Best:** `str.count` — C-level, fastest.
@@ -361,36 +607,81 @@ def count(s, c): return int((np.array(list(s)) == c).sum())
 
 ## Problem 5 — Character frequency → format string `a3b2c1`
 
+**Input:** "aaabbc"
+**Output:** "a3b2c1"
+
+**Quick runnable example:**
+```python
+def fmt(s):
+    d = {}
+    for c in s:
+        d[c] = d.get(c, 0) + 1
+    parts = []
+    for c, n in d.items():
+        parts.append(c + str(n))
+    return ''.join(parts)
+
+print(fmt("aaabbc"))
+# a3b2c1
+```
+
 ### Approach 1 — collections.Counter + join
 ```python
 from collections import Counter
-def fmt(s): return ''.join(f'{c}{n}' for c, n in Counter(s).items())
+def fmt(s):
+    c = Counter(s)
+    parts = []
+    for ch, n in c.items():
+        parts.append(f'{ch}{n}')
+    return ''.join(parts)
 ```
 
 ### Approach 2 — sort + groupby
 ```python
 from itertools import groupby
-def fmt(s): return ''.join(f'{c}{sum(1 for _ in g)}' for c, g in groupby(sorted(s)))
+def fmt(s):
+    srt = sorted(s)
+    parts = []
+    for ch, group in groupby(srt):
+        count = sum(1 for _ in group)
+        parts.append(f'{ch}{count}')
+    return ''.join(parts)
 ```
 
 ### Approach 3 — dict ordering
 ```python
 def fmt(s):
     d = {}
-    for c in s: d[c] = d.get(c, 0) + 1
-    return ''.join(f'{c}{n}' for c, n in d.items())
+    for c in s:
+        d[c] = d.get(c, 0) + 1
+    parts = []
+    for c, n in d.items():
+        parts.append(f'{c}{n}')
+    return ''.join(parts)
 ```
 
 ### Approach 4 — pandas
 ```python
 import pandas as pd
-def fmt(s): return ''.join(f'{c}{n}' for c, n in pd.Series(list(s)).value_counts().items())
+def fmt(s):
+    counts = pd.Series(list(s)).value_counts()
+    parts = []
+    for ch, n in counts.items():
+        parts.append(f'{ch}{n}')
+    return ''.join(parts)
 ```
 
 ### Approach 5 — dict comprehension on unique
 ```python
 def fmt(s):
-    return ''.join(f'{c}{s.count(c)}' for c in dict.fromkeys(s))
+    seen = []
+    for c in s:
+        if c not in seen:
+            seen.append(c)
+    parts = []
+    for c in seen:
+        parts.append(f'{c}{s.count(c)}')
+    return ''.join(parts)
 ```
 
 ### Approach 6 — OrderedDict
@@ -398,8 +689,12 @@ def fmt(s):
 from collections import OrderedDict
 def fmt(s):
     d = OrderedDict()
-    for c in s: d[c] = d.get(c, 0) + 1
-    return ''.join(f'{c}{n}' for c, n in d.items())
+    for c in s:
+        d[c] = d.get(c, 0) + 1
+    parts = []
+    for c, n in d.items():
+        parts.append(f'{c}{n}')
+    return ''.join(parts)
 ```
 
 ### Approach 7 — defaultdict
@@ -407,31 +702,57 @@ def fmt(s):
 from collections import defaultdict
 def fmt(s):
     d = defaultdict(int)
-    for c in s: d[c] += 1
-    return ''.join(f'{c}{d[c]}' for c in dict.fromkeys(s))
+    for c in s:
+        d[c] += 1
+    seen = []
+    for c in s:
+        if c not in seen:
+            seen.append(c)
+    parts = []
+    for c in seen:
+        parts.append(f'{c}{d[c]}')
+    return ''.join(parts)
 ```
 
 ### Approach 8 — sort + zip trick
 ```python
 def fmt(s):
     srt = sorted(s)
-    groups = [srt.count(c) for c in dict.fromkeys(srt)]
-    return ''.join(f'{c}{n}' for c, n in zip(dict.fromkeys(srt), groups))
+    seen = []
+    for c in srt:
+        if c not in seen:
+            seen.append(c)
+    groups = []
+    for c in seen:
+        groups.append(srt.count(c))
+    parts = []
+    for c, n in zip(seen, groups):
+        parts.append(f'{c}{n}')
+    return ''.join(parts)
 ```
 
-### Approach 9 — reduce
+### Approach 9 — reduce (track counts explicitly)
 ```python
 from functools import reduce
 def fmt(s):
-    return reduce(lambda acc, c: acc + (f'{c}1' if c not in acc else ''), s, '')
-# (Naive — duplicates handled via replacement; not pure.)
+    def step(acc, c):
+        acc[c] = acc.get(c, 0) + 1
+        return acc
+    counts = reduce(step, s, {})
+    parts = []
+    for c, n in counts.items():
+        parts.append(f'{c}{n}')
+    return ''.join(parts)
 ```
 
 ### Approach 10 — regex matchall
 ```python
 import re
 def fmt(s):
-    return ''.join(f'{m.group()}{len(m.group())}' for m in re.finditer(r'(.)\1*', s))
+    parts = []
+    for m in re.finditer(r'(.)\1*', s):
+        parts.append(f'{m.group()}{len(m.group())}')
+    return ''.join(parts)
 ```
 
 **Best:** Counter preserves insertion order in Python 3.7+.
@@ -440,15 +761,38 @@ def fmt(s):
 
 ## Problem 6 — IP address validation (IPv4)
 
+**Quick runnable example:**
+```python
+def valid_ip(s):
+    parts = s.split('.')
+    if len(parts) != 4:
+        return False
+    for p in parts:
+        if not p.isdigit():
+            return False
+        if len(p) > 1 and p[0] == '0':
+            return False
+        if not (0 <= int(p) <= 255):
+            return False
+    return True
+
+print(valid_ip("192.168.1.1"))  # True
+print(valid_ip("256.0.0.1"))   # False
+```
+
 ### Approach 1 — split + range + length
 ```python
 def valid_ip(s):
     parts = s.split('.')
-    if len(parts) != 4: return False
+    if len(parts) != 4:
+        return False
     for p in parts:
-        if not p.isdigit(): return False
-        if len(p) > 1 and p[0] == '0': return False
-        if not 0 <= int(p) <= 255: return False
+        if not p.isdigit():
+            return False
+        if len(p) > 1 and p[0] == '0':
+            return False
+        if not (0 <= int(p) <= 255):
+            return False
     return True
 ```
 
@@ -456,14 +800,23 @@ def valid_ip(s):
 ```python
 import re
 def valid_ip(s):
-    return bool(re.fullmatch(r'(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}', s))
+    pattern = r'(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}'
+    return bool(re.fullmatch(pattern, s))
 ```
 
 ### Approach 3 — try/except int conversion
 ```python
 def valid_ip(s):
     try:
-        return len(s.split('.')) == 4 and all(0 <= int(p) <= 255 and (p == '0' or not p.startswith('0')) for p in s.split('.'))
+        parts = s.split('.')
+        if len(parts) != 4:
+            return False
+        for p in parts:
+            if not (0 <= int(p) <= 255):
+                return False
+            if p != '0' and p.startswith('0'):
+                return False
+        return True
     except ValueError:
         return False
 ```
@@ -473,7 +826,8 @@ def valid_ip(s):
 import ipaddress
 def valid_ip(s):
     try:
-        ipaddress.IPv4Address(s); return True
+        ipaddress.IPv4Address(s)
+        return True
     except ipaddress.AddressValueError:
         return False
 ```
@@ -481,10 +835,10 @@ def valid_ip(s):
 ### Approach 5 — socket
 ```python
 import socket
-import struct
 def valid_ip(s):
     try:
-        socket.inet_aton(s); return True
+        socket.inet_aton(s)
+        return True
     except OSError:
         return False
 ```
@@ -493,8 +847,14 @@ def valid_ip(s):
 ```python
 def valid_ip(s):
     try:
-        packed = bytes(int(p) for p in s.split('.'))
-        return len(packed) == 4 and all(0 <= b <= 255 for b in packed)
+        parts = s.split('.')
+        packed = bytes(int(p) for p in parts)
+        if len(packed) != 4:
+            return False
+        for b in packed:
+            if not (0 <= b <= 255):
+                return False
+        return True
     except ValueError:
         return False
 ```
@@ -503,42 +863,63 @@ def valid_ip(s):
 ```python
 def valid_ip(s):
     parts = s.split('.')
-    return len(parts) == 4 and all(
-        p.isdigit() and 0 <= int(p) <= 255 and (p == '0' or not p.startswith('0'))
-        for p in parts
-    )
+    if len(parts) != 4:
+        return False
+    for p in parts:
+        if not p.isdigit():
+            return False
+        if not (0 <= int(p) <= 255):
+            return False
+        if p != '0' and p.startswith('0'):
+            return False
+    return True
 ```
 
 ### Approach 8 — regex strict on leading zeros
 ```python
 import re
 def valid_ip(s):
-    return bool(re.fullmatch(r'(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}', s))
+    pattern = r'(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}'
+    return bool(re.fullmatch(pattern, s))
 ```
 
 ### Approach 9 — all() with generator
 ```python
 def valid_ip(s):
     parts = s.split('.')
-    return (len(parts) == 4
-            and all(p.lstrip('0') == p or p == '0' for p in parts)
-            and all(p.isdigit() and 0 <= int(p) <= 255 for p in parts))
+    if len(parts) != 4:
+        return False
+    for p in parts:
+        if p != '0' and p.lstrip('0') != p:
+            return False
+    for p in parts:
+        if not p.isdigit():
+            return False
+        if not (0 <= int(p) <= 255):
+            return False
+    return True
 ```
 
 ### Approach 10 — state machine
 ```python
 def valid_ip(s):
     parts = s.split('.')
-    if len(parts) != 4: return False
+    if len(parts) != 4:
+        return False
     for p in parts:
-        state = 'leading'; val = 0
+        state = 'leading'
+        val = 0
         for ch in p:
-            if not ch.isdigit(): return False
-            if state == 'leading' and ch == '0' and len(p) > 1: return False
+            if not ch.isdigit():
+                return False
+            if state == 'leading' and ch == '0' and len(p) > 1:
+                return False
             state = 'digits'
             val = val * 10 + int(ch)
-            if val > 255: return False
-        if not p: return False
+            if val > 255:
+                return False
+        if not p:
+            return False
     return True
 ```
 
@@ -548,26 +929,64 @@ def valid_ip(s):
 
 ## Problem 7 — Monotonic check
 
+**Input:** `[1, 2, 2, 3]` or `[3, 2, 1]`
+**Output:** True / True (monotonically non-decreasing or non-increasing)
+
+**Quick runnable example:**
+```python
+def monotonic(a):
+    inc = True
+    dec = True
+    for i in range(1, len(a)):
+        if a[i] > a[i-1]:
+            dec = False
+        if a[i] < a[i-1]:
+            inc = False
+    return inc or dec
+
+print(monotonic([1, 2, 2, 3]))  # True
+print(monotonic([3, 2, 1]))    # True
+print(monotonic([1, 3, 2]))    # False
+```
+
 ### Approach 1 — two-pass comparison
 ```python
 def monotonic(a):
-    return all(a[i] <= a[i+1] for i in range(len(a)-1)) or \
-           all(a[i] >= a[i+1] for i in range(len(a)-1))
+    inc = True
+    for i in range(len(a) - 1):
+        if a[i] > a[i+1]:
+            inc = False
+            break
+    if inc:
+        return True
+    dec = True
+    for i in range(len(a) - 1):
+        if a[i] < a[i+1]:
+            dec = False
+            break
+    return dec
 ```
 
 ### Approach 2 — sorted + equal
 ```python
 def monotonic(a):
-    return a == sorted(a) or a == sorted(a, reverse=True)
+    if a == sorted(a):
+        return True
+    if a == sorted(a, reverse=True):
+        return True
+    return False
 ```
 
 ### Approach 3 — single-pass flag
 ```python
 def monotonic(a):
-    inc = dec = True
+    inc = True
+    dec = True
     for i in range(1, len(a)):
-        if a[i] > a[i-1]: dec = False
-        if a[i] < a[i-1]: inc = False
+        if a[i] > a[i-1]:
+            dec = False
+        if a[i] < a[i-1]:
+            inc = False
     return inc or dec
 ```
 
@@ -575,24 +994,42 @@ def monotonic(a):
 ```python
 import numpy as np
 def monotonic(a):
-    d = np.diff(a)
-    return (d >= 0).all() or (d <= 0).all()
+    arr = np.array(a)
+    d = np.diff(arr)
+    if (d >= 0).all():
+        return True
+    if (d <= 0).all():
+        return True
+    return False
 ```
 
 ### Approach 5 — itertools pairwise
 ```python
 from itertools import pairwise
 def monotonic(a):
-    pairs = list(pairwise(a))
-    return all(x <= y for x, y in pairs) or all(x >= y for x, y in pairs)
+    inc = True
+    dec = True
+    for x, y in pairwise(a):
+        if x > y:
+            inc = False
+        if x < y:
+            dec = False
+    return inc or dec
 ```
 
 ### Approach 6 — reduce
 ```python
 from functools import reduce
 def monotonic(a):
-    incr = reduce(lambda acc, t: acc and t[0] <= t[1], zip(a, a[1:]), True)
-    decr = reduce(lambda acc, t: acc and t[0] >= t[1], zip(a, a[1:]), True)
+    pairs = list(zip(a, a[1:]))
+    def check_inc(acc, t):
+        x, y = t
+        return acc and (x <= y)
+    def check_dec(acc, t):
+        x, y = t
+        return acc and (x >= y)
+    incr = reduce(check_inc, pairs, True)
+    decr = reduce(check_dec, pairs, True)
     return incr or decr
 ```
 
@@ -602,33 +1039,59 @@ import pandas as pd
 def monotonic(a):
     s = pd.Series(a)
     d = s.diff().dropna()
-    return (d >= 0).all() or (d <= 0).all()
+    if (d >= 0).all():
+        return True
+    if (d <= 0).all():
+        return True
+    return False
 ```
 
 ### Approach 8 — generator + any/all
 ```python
 def monotonic(a):
-    diffs = [a[i+1]-a[i] for i in range(len(a)-1)]
-    return all(d >= 0 for d in diffs) or all(d <= 0 for d in diffs)
+    diffs = []
+    for i in range(len(a) - 1):
+        diffs.append(a[i+1] - a[i])
+    all_non_neg = True
+    all_non_pos = True
+    for d in diffs:
+        if d < 0:
+            all_non_neg = False
+        if d > 0:
+            all_non_pos = False
+    return all_non_neg or all_non_pos
 ```
 
 ### Approach 9 — recursive
 ```python
 def monotonic(a):
-    if len(a) <= 1: return True
-    if len(a) == 2: return True
-    inc = a[0] <= a[1] and (monotonic_inc(a) if False else True)
-    # recursive variant: simpler check
-    return (all(a[i] <= a[i+1] for i in range(len(a)-1))) or \
-           (all(a[i] >= a[i+1] for i in range(len(a)-1)))
+    if len(a) <= 2:
+        return True
+    if a[0] <= a[1]:
+        return all(a[i] <= a[i+1] for i in range(len(a)-1))
+    if a[0] >= a[1]:
+        return all(a[i] >= a[i+1] for i in range(len(a)-1))
+    return False
 ```
 
 ### Approach 10 — set of directions
 ```python
 def monotonic(a):
-    if len(a) < 2: return True
-    dirs = {1 if a[i+1] > a[i] else -1 if a[i+1] < a[i] else 0 for i in range(len(a)-1)}
-    return dirs <= {1, 0} or dirs <= {-1, 0}
+    if len(a) < 2:
+        return True
+    dirs = set()
+    for i in range(len(a) - 1):
+        if a[i+1] > a[i]:
+            dirs.add(1)
+        elif a[i+1] < a[i]:
+            dirs.add(-1)
+        else:
+            dirs.add(0)
+    if dirs <= {1, 0}:
+        return True
+    if dirs <= {-1, 0}:
+        return True
+    return False
 ```
 
 **Best:** single-pass flag — O(n) time, O(1) space.
@@ -637,93 +1100,200 @@ def monotonic(a):
 
 ## Problem 8 — Words in one sentence but not the other (symmetric difference)
 
+**Input:** s1 = "apple banana cherry", s2 = "banana date"
+**Output:** `['apple', 'cherry', 'date']`
+
+**Quick runnable example:**
+```python
+def sym_diff(s1, s2):
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
+    out = []
+    for w in a:
+        if w not in sb:
+            out.append(w)
+    for w in b:
+        if w not in sa:
+            out.append(w)
+    return out
+
+print(sym_diff("apple banana cherry", "banana date"))
+# ['apple', 'cherry', 'date']
+```
+
 ### Approach 1 — set symmetric_difference
 ```python
 def sym_diff(s1, s2):
-    return list(set(s1.split()) ^ set(s2.split()))
+    a = set(s1.split())
+    b = set(s2.split())
+    diff = a ^ b
+    out = []
+    for w in diff:
+        out.append(w)
+    return out
 ```
 
 ### Approach 2 — Counter subtraction
 ```python
 from collections import Counter
 def sym_diff(s1, s2):
-    a, b = Counter(s1.split()), Counter(s2.split())
-    return list((a - b) + (b - a))
+    a = Counter(s1.split())
+    b = Counter(s2.split())
+    only_a = list((a - b).elements())
+    only_b = list((b - a).elements())
+    return only_a + only_b
 ```
 
 ### Approach 3 — list comprehension
 ```python
 def sym_diff(s1, s2):
-    a, b = set(s1.split()), set(s2.split())
-    return [w for w in s1.split() if w not in b] + [w for w in s2.split() if w not in a]
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
+    result = []
+    for w in a:
+        if w not in sb:
+            result.append(w)
+    for w in b:
+        if w not in sa:
+            result.append(w)
+    return result
 ```
 
 ### Approach 4 — operator.xor
 ```python
 import operator
 def sym_diff(s1, s2):
-    return list(operator.xor(set(s1.split()), set(s2.split())))
+    a = set(s1.split())
+    b = set(s2.split())
+    out = []
+    for w in operator.xor(a, b):
+        out.append(w)
+    return out
 ```
 
 ### Approach 5 — dict counting
 ```python
 def sym_diff(s1, s2):
+    a = s1.split()
+    b = s2.split()
     freq = {}
-    for w in s1.split() + s2.split(): freq[w] = freq.get(w, 0) + 1
-    return [w for w in s1.split() + s2.split() if freq[w] == 1]
+    for w in a + b:
+        freq[w] = freq.get(w, 0) + 1
+    result = []
+    for w in a + b:
+        if freq[w] == 1:
+            result.append(w)
+    return result
 ```
 
 ### Approach 6 — pandas
 ```python
 import pandas as pd
 def sym_diff(s1, s2):
-    a, b = pd.Series(s1.split()), pd.Series(s2.split())
-    return a[~a.isin(b)].tolist() + b[~b.isin(a)].tolist()
+    a = pd.Series(s1.split())
+    b = pd.Series(s2.split())
+    only_a = []
+    for v in a[~a.isin(b)]:
+        only_a.append(v)
+    only_b = []
+    for v in b[~b.isin(a)]:
+        only_b.append(v)
+    return only_a + only_b
 ```
 
 ### Approach 7 — reduce + set ops
 ```python
 from functools import reduce
 def sym_diff(s1, s2):
-    return list(reduce(lambda acc, w: acc ^ {w}, s1.split() + s2.split(), set()))
+    a = s1.split()
+    b = s2.split()
+    final_set = reduce(lambda acc, w: acc ^ {w}, a + b, set())
+    out = []
+    for w in final_set:
+        out.append(w)
+    return out
 ```
 
 ### Approach 8 — sorted output via merge
 ```python
 def sym_diff(s1, s2):
-    diff = set(s1.split()) ^ set(s2.split())
-    return sorted(diff)
+    a = set(s1.split())
+    b = set(s2.split())
+    diff = a ^ b
+    out = []
+    for w in sorted(diff):
+        out.append(w)
+    return out
 ```
 
 ### Approach 9 — generator with sentinel
 ```python
 def sym_diff(s1, s2):
-    a, b = s1.split(), s2.split()
-    sa, sb = set(a), set(b)
-    yield from (w for w in a if w not in sb)
-    yield from (w for w in b if w not in sa)
+    a = s1.split()
+    b = s2.split()
+    sa = set(a)
+    sb = set(b)
+    for w in a:
+        if w not in sb:
+            yield w
+    for w in b:
+        if w not in sa:
+            yield w
 ```
 
 ### Approach 10 — explicit two-filter concat
 ```python
 def sym_diff(s1, s2):
-    a, b = s1.split(), s2.split()
+    a = s1.split()
+    b = s2.split()
     in_both = set(a) & set(b)
-    return list(filter(lambda w: w not in in_both, a + b))
+    combined = a + b
+    result = []
+    for w in combined:
+        if w not in in_both:
+            result.append(w)
+    return result
 ```
 
 **Best:** set symmetric_difference — O(n+m) and intent-matching.
 
 ---
 
-## Problem 9 — Count neighbors per node in graph (2D list)
+## Problem 9 — Count pair-membership per person (from 2D list of pairs)
+
+**Input:** `[[2,3],[3,4],[5]]` (each sublist = one group; count how many groups each person appears in).
+**Output:** `{2: 1, 3: 2, 4: 1, 5: 1}`
+
+**Quick runnable example:**
+```python
+def neighbors(graph):
+    d = {}
+    for edge in graph:
+        for n in edge:
+            d[n] = d.get(n, 0) + 1
+    return d
+
+print(neighbors([[2,3],[3,4],[5]]))
+# {2: 1, 3: 2, 4: 1, 5: 1}
+```
+
+Note: differs from Problem 1, which counts unique partners. Here we count group membership.
 
 ### Approach 1 — Counter on flattened
 ```python
 from collections import Counter
 from itertools import chain
 def neighbors(graph):
-    return dict(Counter(chain.from_iterable(graph)))
+    all_nodes = list(chain.from_iterable(graph))
+    c = Counter(all_nodes)
+    result = {}
+    for k, v in c.items():
+        result[k] = v
+    return result
 ```
 
 ### Approach 2 — defaultdict
@@ -732,44 +1302,85 @@ from collections import defaultdict
 def neighbors(graph):
     d = defaultdict(int)
     for edge in graph:
-        for n in edge: d[n] += 1
-    return dict(d)
+        for n in edge:
+            d[n] += 1
+    result = {}
+    for k, v in d.items():
+        result[k] = v
+    return result
 ```
 
 ### Approach 3 — list count
 ```python
 def neighbors(graph):
-    flat = [n for edge in graph for n in edge]
-    return {n: flat.count(n) for n in set(flat)}
+    flat = []
+    for edge in graph:
+        for n in edge:
+            flat.append(n)
+    unique = set(flat)
+    result = {}
+    for n in unique:
+        result[n] = flat.count(n)
+    return result
 ```
 
 ### Approach 4 — pandas
 ```python
 import pandas as pd
 def neighbors(graph):
-    return pd.Series([n for edge in graph for n in edge]).value_counts().to_dict()
+    all_nodes = []
+    for edge in graph:
+        for n in edge:
+            all_nodes.append(n)
+    counts = pd.Series(all_nodes).value_counts()
+    result = {}
+    for k, v in counts.items():
+        result[k] = int(v)
+    return result
 ```
 
 ### Approach 5 — numpy bincount
 ```python
 import numpy as np
 def neighbors(graph):
-    flat = np.array([n for edge in graph for n in edge])
-    return dict(zip(*np.unique(flat, return_counts=True)))
+    flat_list = []
+    for edge in graph:
+        for n in edge:
+            flat_list.append(n)
+    arr = np.array(flat_list)
+    unique, counts = np.unique(arr, return_counts=True)
+    result = {}
+    for i in range(len(unique)):
+        result[int(unique[i])] = int(counts[i])
+    return result
 ```
 
 ### Approach 6 — reduce
 ```python
 from functools import reduce
 def neighbors(graph):
-    return dict(reduce(lambda d, edge: {**d, **{n: d.get(n, 0)+1 for n in edge}}, graph, {}))
+    def step(d, edge):
+        for n in edge:
+            d[n] = d.get(n, 0) + 1
+        return d
+    return reduce(step, graph, {})
 ```
 
 ### Approach 7 — dict comprehension
 ```python
 def neighbors(graph):
-    flat = sum(graph, [])
-    return {n: flat.count(n) for n in dict.fromkeys(flat)}
+    flat = []
+    for edge in graph:
+        for n in edge:
+            flat.append(n)
+    seen = []
+    for n in flat:
+        if n not in seen:
+            seen.append(n)
+    result = {}
+    for n in seen:
+        result[n] = flat.count(n)
+    return result
 ```
 
 ### Approach 8 — Counter with explicit init
@@ -779,7 +1390,10 @@ def neighbors(graph):
     c = Counter()
     for edge in graph:
         c.update(edge)
-    return dict(c)
+    result = {}
+    for k, v in c.items():
+        result[k] = v
+    return result
 ```
 
 ### Approach 9 — generator with dict
@@ -808,12 +1422,32 @@ def neighbors(graph):
 
 ## Problem 10 — Key for nth highest value in dict
 
+**Input:** `{'a': 10, 'b': 20, 'c': 30, 'd': 20}`, n=2
+**Output:** `'b'` (second highest value is 20, smallest key with that value)
+
+**Quick runnable example:**
+```python
+def nth_key(d, n):
+    items = []
+    for k, v in d.items():
+        items.append((k, v))
+    items.sort(key=lambda kv: (-kv[1], kv[0]))
+    return items[n-1][0]
+
+print(nth_key({'a': 10, 'b': 20, 'c': 30, 'd': 20}, 2))
+# b
+```
+
 ### Approach 1 — sort + iterate
 ```python
 def nth_key(d, n):
-    for k, v in sorted(d.items(), key=lambda kv: kv[1], reverse=True):
-        if v == sorted(set(d.values()), reverse=True)[n-1]:
+    items = sorted(d.items(), key=lambda kv: kv[1], reverse=True)
+    unique_vals = sorted(set(d.values()), reverse=True)
+    target = unique_vals[n-1]
+    for k, v in items:
+        if v == target:
             return k
+    return None
 ```
 
 ### Approach 2 — heapq.nlargest
@@ -822,8 +1456,12 @@ import heapq
 def nth_key(d, n):
     unique = sorted(set(d.values()), reverse=True)
     target = unique[n-1]
-    keys = sorted(k for k, v in d.items() if v == target)
-    return keys[0]
+    candidates = []
+    for k, v in d.items():
+        if v == target:
+            candidates.append(k)
+    candidates.sort()
+    return candidates[0]
 ```
 
 ### Approach 3 — Counter.most_common
@@ -835,7 +1473,9 @@ def nth_key(d, n):
     for k, v in c.most_common():
         if not seen or seen[-1][1] != v:
             seen.append((k, v))
-            if len(seen) == n: return k
+            if len(seen) == n:
+                return k
+    return None
 ```
 
 ### Approach 4 — pandas
@@ -857,7 +1497,8 @@ def nth_key(d, n):
 ```python
 import numpy as np
 def nth_key(d, n):
-    keys = list(d.keys()); vals = np.array(list(d.values()))
+    keys = list(d.keys())
+    vals = np.array(list(d.values()))
     order = np.argsort(-vals, kind='stable')
     return keys[order[n-1]]
 ```
@@ -865,14 +1506,24 @@ def nth_key(d, n):
 ### Approach 7 — manual scan
 ```python
 def nth_key(d, n):
-    pairs = [(v, k) for k, v in d.items()]
+    pairs = []
+    for k, v in d.items():
+        pairs.append((v, k))
     pairs.sort(reverse=True)
     seen_vals = []
+    target_v = None
     for v, k in pairs:
         if not seen_vals or seen_vals[-1] != v:
             seen_vals.append(v)
         if len(seen_vals) == n:
-            return sorted(k for vv, k in pairs if vv == v)[0]
+            target_v = v
+            break
+    candidates = []
+    for v, k in pairs:
+        if v == target_v:
+            candidates.append(k)
+    candidates.sort()
+    return candidates[0]
 ```
 
 ### Approach 8 — dict inversion + sorted
@@ -880,10 +1531,15 @@ def nth_key(d, n):
 def nth_key(d, n):
     inv = {}
     for k, v in d.items():
-        inv.setdefault(v, []).append(k)
-    for v in sorted(inv, reverse=True):
-        if n == 1: return sorted(inv[v])[0]
+        if v not in inv:
+            inv[v] = []
+        inv[v].append(k)
+    for v in sorted(inv.keys(), reverse=True):
+        if n == 1:
+            candidates = sorted(inv[v])
+            return candidates[0]
         n -= 1
+    return None
 ```
 
 ### Approach 9 — reduce
@@ -892,14 +1548,19 @@ from functools import reduce
 def nth_key(d, n):
     unique_vals = sorted(set(d.values()), reverse=True)
     target = unique_vals[n-1]
-    candidates = sorted(k for k, v in d.items() if v == target)
+    candidates = []
+    for k, v in d.items():
+        if v == target:
+            candidates.append(k)
+    candidates.sort()
     return reduce(lambda a, b: a if a < b else b, candidates)
 ```
 
 ### Approach 10 — sorted zip trick
 ```python
 def nth_key(d, n):
-    keys, vals = zip(*d.items())
+    keys = list(d.keys())
+    vals = list(d.values())
     order = sorted(range(len(vals)), key=lambda i: (-vals[i], keys[i]))
     return keys[order[n-1]]
 ```
@@ -910,14 +1571,42 @@ def nth_key(d, n):
 
 ## Problem 11 — Flatten nested dictionary
 
+**Input:** `{'a': {'b': 1, 'c': {'d': 2}}}`
+**Output:** `{'a.b': 1, 'a.c.d': 2}`
+
+**Quick runnable example:**
+```python
+def flatten(d, parent_key='', sep='.'):
+    items = {}
+    for k, v in d.items():
+        if parent_key:
+            key = parent_key + sep + k
+        else:
+            key = k
+        if isinstance(v, dict):
+            sub = flatten(v, key, sep=sep)
+            for sk, sv in sub.items():
+                items[sk] = sv
+        else:
+            items[key] = v
+    return items
+
+print(flatten({'a': {'b': 1, 'c': {'d': 2}}}))
+# {'a.b': 1, 'a.c.d': 2}
+```
+
 ### Approach 1 — recursive
 ```python
 def flatten(d, parent_key='', sep='.'):
     items = {}
     for k, v in d.items():
-        key = f'{parent_key}{sep}{k}' if parent_key else k
+        if parent_key:
+            key = f'{parent_key}{sep}{k}'
+        else:
+            key = k
         if isinstance(v, dict):
-            items.update(flatten(v, key, sep=sep))
+            sub = flatten(v, key, sep=sep)
+            items.update(sub)
         else:
             items[key] = v
     return items
@@ -926,11 +1615,12 @@ def flatten(d, parent_key='', sep='.'):
 ### Approach 2 — stack/iterative
 ```python
 def flatten(d, sep='.'):
-    items, stack = {}, [((), d)]
+    items = {}
+    stack = [((), d)]
     while stack:
         prefix, obj = stack.pop()
         for k, v in obj.items():
-            key = (*prefix, k)
+            key = prefix + (k,)
             if isinstance(v, dict):
                 stack.append((key, v))
             else:
@@ -942,7 +1632,10 @@ def flatten(d, sep='.'):
 ```python
 def flatten(d, parent_key='', sep='.'):
     for k, v in d.items():
-        key = f'{parent_key}{sep}{k}' if parent_key else k
+        if parent_key:
+            key = f'{parent_key}{sep}{k}'
+        else:
+            key = k
         if isinstance(v, dict):
             yield from flatten(v, key, sep=sep)
         else:
@@ -956,8 +1649,14 @@ def flatten(d, sep='.'):
     def step(acc, kv):
         k, v = kv
         if isinstance(v, dict):
-            return {**acc, **{f'{k}{sep}{sk}': sv for sk, sv in flatten(v, sep=sep).items()}}
-        return {**acc, k: v}
+            sub = flatten(v, sep=sep)
+            merged = dict(acc)
+            for sk, sv in sub.items():
+                merged[f'{k}{sep}{sk}'] = sv
+            return merged
+        merged = dict(acc)
+        merged[k] = v
+        return merged
     return reduce(step, d.items(), {})
 ```
 
@@ -965,7 +1664,8 @@ def flatten(d, sep='.'):
 ```python
 from collections import deque
 def flatten(d, sep='.'):
-    out, q = {}, deque([((), d)])
+    out = {}
+    q = deque([((), d)])
     while q:
         prefix, obj = q.popleft()
         for k, v in obj.items():
@@ -979,14 +1679,18 @@ def flatten(d, sep='.'):
 
 ### Approach 6 — json + walk
 ```python
-import json
 def flatten(d, sep='.'):
     flat = {}
     def walk(prefix, obj):
         for k, v in obj.items():
-            key = f'{prefix}{sep}{k}' if prefix else k
-            if isinstance(v, dict): walk(key, v)
-            else: flat[key] = v
+            if prefix:
+                key = f'{prefix}{sep}{k}'
+            else:
+                key = k
+            if isinstance(v, dict):
+                walk(key, v)
+            else:
+                flat[key] = v
     walk('', d)
     return flat
 ```
@@ -1004,7 +1708,10 @@ def flatten(d, sep='.'):
     out = {}
     def helper(obj, path):
         for k, v in obj.items():
-            new_path = f'{path}{sep}{k}' if path else k
+            if path:
+                new_path = f'{path}{sep}{k}'
+            else:
+                new_path = k
             if isinstance(v, dict):
                 helper(v, new_path)
             else:
@@ -1015,8 +1722,6 @@ def flatten(d, sep='.'):
 
 ### Approach 9 — operator + comprehension
 ```python
-def flatten(d, sep='.'):
-    return {sep.join(map(str, k)): v for k, v in _iter_paths(d)}
 def _iter_paths(d, prefix=()):
     for k, v in d.items():
         key = prefix + (k,)
@@ -1024,108 +1729,210 @@ def _iter_paths(d, prefix=()):
             yield from _iter_paths(v, key)
         else:
             yield key, v
+
+def flatten(d, sep='.'):
+    result = {}
+    for k_tuple, v in _iter_paths(d):
+        result[sep.join(k_tuple)] = v
+    return result
 ```
 
-### Approach 10 — regex-based path (not pure but creative)
+### Approach 10 — class-based with __missing__
 ```python
-import re
+class FlatDict(dict):
+    def __missing__(self, key):
+        return {}
+
 def flatten(d, sep='.'):
-    s = str(d)
-    # Not a real solution; flag: do not use this.
-    raise NotImplementedError
+    out = {}
+    def helper(prefix, obj):
+        for k, v in obj.items():
+            if prefix:
+                new_key = f'{prefix}{sep}{k}'
+            else:
+                new_key = k
+            if isinstance(v, dict):
+                helper(new_key, v)
+            else:
+                out[new_key] = v
+    helper('', d)
+    return out
 ```
 
 **Best:** recursive generator — handles arbitrary depth cleanly.
 
 ---
 
-## Problem 12 — Count friends per person from `[[A,B],[A,C],...]`
+## Problem 12 — Directed graph: in-degree and out-degree per node
 
-(Note: undirected, no repeat pairs, ≤2 people per relationship.)
+**Input:** `[[2,3],[3,4],[5,3]]` (each pair = directed edge from A to B).
+**Output:** `{'in': {3: 2, 4: 1}, 'out': {2: 1, 3: 1, 5: 1}}`
 
-### Approach 1 — Counter on flattened
+**Quick runnable example:**
+```python
+def degrees(pairs):
+    in_d = {}
+    out_d = {}
+    for a, b in pairs:
+        out_d[a] = out_d.get(a, 0) + 1
+        in_d[b] = in_d.get(b, 0) + 1
+    return {'in': in_d, 'out': out_d}
+
+print(degrees([[2,3],[3,4],[5,3]]))
+# {'in': {3: 2, 4: 1}, 'out': {2: 1, 3: 1, 5: 1}}
+```
+
+Differentiates from Problem 1 by being **directed** and returning two separate counts.
+
+### Approach 1 — two Counters
 ```python
 from collections import Counter
-from itertools import chain
-def friend_counts(pairs):
-    return dict(Counter(chain.from_iterable(pairs)))
+def degrees(pairs):
+    srcs = []
+    dsts = []
+    for a, b in pairs:
+        srcs.append(a)
+        dsts.append(b)
+    out_d = dict(Counter(srcs))
+    in_d = dict(Counter(dsts))
+    return {'in': in_d, 'out': out_d}
 ```
 
 ### Approach 2 — defaultdict
 ```python
 from collections import defaultdict
-def friend_counts(pairs):
-    d = defaultdict(int)
+def degrees(pairs):
+    in_d = defaultdict(int)
+    out_d = defaultdict(int)
     for a, b in pairs:
-        d[a] += 1; d[b] += 1
-    return dict(d)
+        out_d[a] += 1
+        in_d[b] += 1
+    return {'in': dict(in_d), 'out': dict(out_d)}
 ```
 
-### Approach 3 — set union + count
+### Approach 3 — dict.get loop
 ```python
-def friend_counts(pairs):
-    people = {p for pair in pairs for p in pair}
-    return {p: sum(p in pair for pair in pairs) for p in people}
-```
-
-### Approach 4 — dict.get loop
-```python
-def friend_counts(pairs):
-    d = {}
+def degrees(pairs):
+    in_d = {}
+    out_d = {}
     for a, b in pairs:
-        d[a] = d.get(a, 0) + 1
-        d[b] = d.get(b, 0) + 1
-    return d
+        out_d[a] = out_d.get(a, 0) + 1
+        in_d[b] = in_d.get(b, 0) + 1
+    return {'in': in_d, 'out': out_d}
 ```
 
-### Approach 5 — pandas
+### Approach 4 — pandas groupby
 ```python
 import pandas as pd
-def friend_counts(pairs):
-    return pd.Series([p for pair in pairs for p in pair]).value_counts().to_dict()
+def degrees(pairs):
+    srcs = []
+    dsts = []
+    for a, b in pairs:
+        srcs.append(a)
+        dsts.append(b)
+    df = pd.DataFrame({'src': srcs, 'dst': dsts})
+    in_counts = df['dst'].value_counts()
+    out_counts = df['src'].value_counts()
+    in_d = {}
+    for k, v in in_counts.items():
+        in_d[k] = int(v)
+    out_d = {}
+    for k, v in out_counts.items():
+        out_d[k] = int(v)
+    return {'in': in_d, 'out': out_d}
 ```
 
-### Approach 6 — numpy bincount
+### Approach 5 — numpy bincount on src and dst
 ```python
 import numpy as np
-def friend_counts(pairs):
-    flat = np.array([p for pair in pairs for p in pair])
-    return dict(zip(*np.unique(flat, return_counts=True)))
+def degrees(pairs):
+    srcs = []
+    dsts = []
+    for a, b in pairs:
+        srcs.append(a)
+        dsts.append(b)
+    src_arr = np.array(srcs)
+    dst_arr = np.array(dsts)
+    out_u, out_c = np.unique(src_arr, return_counts=True)
+    in_u, in_c = np.unique(dst_arr, return_counts=True)
+    out_d = {}
+    for i in range(len(out_u)):
+        out_d[int(out_u[i])] = int(out_c[i])
+    in_d = {}
+    for i in range(len(in_u)):
+        in_d[int(in_u[i])] = int(in_c[i])
+    return {'in': in_d, 'out': out_d}
 ```
 
-### Approach 7 — reduce
+### Approach 6 — reduce
 ```python
 from functools import reduce
-def friend_counts(pairs):
-    return dict(reduce(lambda d, p: {**d, p[0]: d.get(p[0], 0)+1,
-                                            p[1]: d.get(p[1], 0)+1}, pairs, {}))
+def degrees(pairs):
+    def step(acc, edge):
+        a, b = edge
+        acc['out'][a] = acc['out'].get(a, 0) + 1
+        acc['in'][b] = acc['in'].get(b, 0) + 1
+        return acc
+    return reduce(step, pairs, {'in': {}, 'out': {}})
 ```
 
-### Approach 8 — list count
+### Approach 7 — list comprehensions + Counter
 ```python
-def friend_counts(pairs):
-    flat = sum(pairs, [])
-    return {p: flat.count(p) for p in set(flat)}
+from collections import Counter
+def degrees(pairs):
+    srcs = [a for a, _ in pairs]
+    dsts = [b for _, b in pairs]
+    return {'in': dict(Counter(dsts)), 'out': dict(Counter(srcs))}
 ```
 
-### Approach 9 — dict comp + manual
+### Approach 8 — single dict of dicts
 ```python
-def friend_counts(pairs):
+def degrees(pairs):
     d = {}
-    for pair in pairs:
-        for p in pair:
-            d[p] = d.get(p, 0) + 1
+    for a, b in pairs:
+        if a not in d:
+            d[a] = {'in': 0, 'out': 0}
+        d[a]['out'] += 1
+        if b not in d:
+            d[b] = {'in': 0, 'out': 0}
+        d[b]['in'] += 1
     return d
 ```
 
-### Approach 10 — Counter with update
+### Approach 9 — zip + Counter
 ```python
 from collections import Counter
-def friend_counts(pairs):
-    c = Counter()
-    for pair in pairs:
-        c.update(pair)
-    return dict(c)
+def degrees(pairs):
+    if pairs:
+        srcs, dsts = zip(*pairs)
+    else:
+        srcs, dsts = [], []
+    return {'in': dict(Counter(dsts)), 'out': dict(Counter(srcs))}
 ```
 
-**Best:** Counter (Approach 1) or defaultdict (Approach 2).
+### Approach 10 — pandas melt
+```python
+import pandas as pd
+def degrees(pairs):
+    srcs = []
+    dsts = []
+    for a, b in pairs:
+        srcs.append(a)
+        dsts.append(b)
+    df = pd.DataFrame({'src': srcs, 'dst': dsts})
+    out_counts = df['src'].value_counts()
+    out_d = {}
+    for k, v in out_counts.items():
+        out_d[k] = int(v)
+    in_counts = df['dst'].value_counts()
+    in_d = {}
+    for k, v in in_counts.items():
+        in_d[k] = int(v)
+    all_keys = set(out_d.keys()) | set(in_d.keys())
+    result = {}
+    for k in all_keys:
+        result[k] = {'in': in_d.get(k, 0), 'out': out_d.get(k, 0)}
+    return result
+```
+
+**Best:** two Counters (Approach 1) or defaultdict (Approach 2) — clean and idiomatic.

@@ -19,6 +19,24 @@ These prompts are open-ended and tied to a product case, so the work is: **clari
 ### Approach 1 — SQL over a stored event table (batch)
 
 ```sql
+
+SELECT
+    DATE(requested_at) AS dt,
+    HOUR(requested_at) AS hr,
+
+    CASE
+        WHEN MINUTE(requested_at) < 15 THEN 0
+        WHEN MINUTE(requested_at) < 30 THEN 1
+        WHEN MINUTE(requested_at) < 45 THEN 2
+        ELSE 3
+    END AS window_id,
+
+    COUNT(*) AS total_requests
+
+FROM ride_requests
+GROUP BY 1, 2, 3
+ORDER BY 1, 2, 3;
+
 SELECT
   date_trunc('hour', requested_at)
     + INTERVAL '15 min' * (EXTRACT(MINUTE FROM requested_at)::INT / 15) AS window_start,
@@ -27,6 +45,15 @@ FROM ride_requests
 WHERE requested_at >= CURRENT_DATE - INTERVAL '7 days'   -- clarify window
 GROUP BY 1
 ORDER BY 1;
+
+
+SELECT
+    window(requested_at, '15 minutes') AS time_window,
+    COUNT(*) AS total_requests
+FROM ride_requests
+GROUP BY 1;
+
+
 ```
 
 This bucket expression is the standard trick: truncate to the hour, then add back the 15-min bucket. It avoids window functions and indexes cleanly on `requested_at`.
@@ -52,6 +79,8 @@ def count_requests(events, drop_late=True, watermark=None):
             continue                    # late, dropped
         counts[window_key(ts)] += 1
     return dict(counts)
+
+
 ```
 
 ### Approach 3 — PyFlink / Spark Streaming (production)

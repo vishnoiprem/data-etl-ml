@@ -1643,3 +1643,7 @@ Strong closing sentence:
 
 All technologies, scale calculations, SLO targets, team shapes, metrics, and roadmaps presented as recommendations or assumptions are interview proposals, not claims about Katalon’s internal implementation.
 w
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

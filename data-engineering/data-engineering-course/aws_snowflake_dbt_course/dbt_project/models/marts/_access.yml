@@ -1,0 +1,73 @@
+# ============================================================================
+# models/marts/_access.yml — model access + group + grants (single
+# canonical owner of non-versioned mart model declarations).
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# Lecture reference: L73-L76 "Model Access". Demonstrates:
+#   - `group:` for organizing models + permission boundaries
+#   - `access: private` — only models in the same group can ref() this
+#   - `access: protected` — same-group + explicitly-allowed namespaces
+#
+# In dbt 1.12, each model may only be declared in ONE schema.yml file.
+# This file owns the access + group + grants for transactions,
+# stablecoin_activity, fraud_score, and dag_demo. The activity model
+# is owned by _versions.yml. The contracts for transactions /
+# activity are demonstrated in 13_section/code/contracts_demo.yml.
+# ============================================================================
+
+version: 2
+
+groups:
+  - name: fraud_domain
+    owner:
+      name: "Fraud Analytics"
+      email: "fraud-analytics@example.com"
+  - name: mart_models
+    owner:
+      name: "Analytics Engineering"
+      email: "analytics-engineering@example.com"
+  - name: staging_models
+    owner:
+      name: "Analytics Engineering"
+      email: "analytics-engineering@example.com"
+  - name: engineering
+    owner:
+      name: "Engineering"
+      email: "engineering@example.com"
+
+models:
+  - name: transactions
+    description: "Enriched Ethereum transactions. Public mart. See 13_section/code/contracts_demo.yml for the contract example."
+    config:
+      access: public
+      group: mart_models
+
+  - name: stablecoin_activity
+    description: "Daily stablecoin activity. Public."
+    config:
+      access: public
+      group: mart_models
+      grants:
+        select: ["transformer", "analyst"]
+
+  - name: fraud_score
+    description: "Per-address fraud risk score. Private to the fraud_domain group."
+    config:
+      access: private
+      group: fraud_domain
+      grants:
+        select: ["fraud_investigator"]
+    columns:
+      - name: from_address
+        tests:
+          - not_null
+      - name: fraud_risk_score
+        tests:
+          - not_null
+
+  - name: dag_demo
+    description: "Joined view for the DAG demo. Protected — only the engineering group can ref() it."
+    config:
+      access: protected
+      group: engineering

@@ -1,0 +1,79 @@
+# ============================================================================
+# 18_section / code / dbt_ci_workflow.yml
+# ----------------------------------------------------------------------------
+# Demo GitHub Actions workflow for dbt CI (Slim CI).
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+# ============================================================================
+
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  dbt_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: pip install dbt-snowflake==1.8.0
+
+      - name: Download prod manifest
+        run: |
+          mkdir -p ./prod_manifest
+          aws s3 cp s3://${{ secrets.DBT_ARTIFACTS_BUCKET }}/prod/manifest.json ./prod_manifest/manifest.json
+
+      - name: dbt deps
+        run: dbt deps --project-dir dbt_project --profiles-dir dbt_project
+
+      - name: dbt parse
+        run: dbt parse --project-dir dbt_project --profiles-dir dbt_project --target dev
+
+      - name: dbt list (state:modified+)
+        run: |
+          dbt list --project-dir dbt_project --profiles-dir dbt_project \
+                   --select state:modified+ --state ./prod_manifest \
+                   --target dev
+
+      - name: dbt build (state:modified+, --defer)
+        run: |
+          dbt build --project-dir dbt_project --profiles-dir dbt_project \
+                    --select state:modified+ --state ./prod_manifest \
+                    --defer --defer-state ./prod_manifest \
+                    --target dev
+
+  dbt_deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: dbt_build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: pip install dbt-snowflake==1.8.0
+
+      - name: dbt build (prod)
+        run: |
+          dbt build --project-dir dbt_project --profiles-dir dbt_project \
+                    --target prod
+
+      - name: Upload prod manifest
+        run: |
+          aws s3 cp ./dbt_project/target/manifest.json \
+                  s3://${{ secrets.DBT_ARTIFACTS_BUCKET }}/prod/manifest.json

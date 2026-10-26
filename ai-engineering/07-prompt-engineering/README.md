@@ -94,3 +94,7 @@ The demo:
 | A/B experiments / quarter | ≥ 8 |
 | % experiments shipped without regression | ≥ 90% |
 | Avg quality lift on shipped wins | ≥ 5pp |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

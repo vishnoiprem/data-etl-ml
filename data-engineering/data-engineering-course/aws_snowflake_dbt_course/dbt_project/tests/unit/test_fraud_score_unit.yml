@@ -1,0 +1,37 @@
+# ============================================================================
+# tests/unit/test_fraud_score_unit.yml — dbt unit test for fraud_score.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# Lecture reference: L109 "dbt Unit Tests". A unit test defines mock
+# inputs (given), the model under test, and the expected output (expect).
+# dbt compares the actual model output to the expected output without
+# ever touching the warehouse.
+# ============================================================================
+
+version: 2
+
+unit_tests:
+  - name: test_high_risk_address
+    description: "Address with many counterparties + many txs should score high"
+    model: fraud_score
+    given:
+      - input: ref('transactions')
+        rows:
+          - {from_address: '0xaaa', to_address: '0xbbb', tx_hash: 'tx1', value_eth: 1.0, tx_fee_eth: 0.01, gas_used: 21000, block_timestamp: '2024-01-01 00:00:00', block_number: 1, tx_date: '2024-01-01', tx_category: 'eth_transfer'}
+          - {from_address: '0xaaa', to_address: '0xccc', tx_hash: 'tx2', value_eth: 2.0, tx_fee_eth: 0.01, gas_used: 21000, block_timestamp: '2024-01-02 00:00:00', block_number: 2, tx_date: '2024-01-02', tx_category: 'eth_transfer'}
+          - {from_address: '0xaaa', to_address: '0xddd', tx_hash: 'tx3', value_eth: 3.0, tx_fee_eth: 0.01, gas_used: 21000, block_timestamp: '2024-01-03 00:00:00', block_number: 3, tx_date: '2024-01-03', tx_category: 'eth_transfer'}
+    expect:
+      rows:
+        - {from_address: '0xaaa', distinct_counterparties: 3, tx_count: 3, total_value_eth: 6.0, fraud_risk_score: 3.0}
+
+  - name: test_low_risk_address
+    description: "Address with one counterparty + one tx should score low"
+    model: fraud_score
+    given:
+      - input: ref('transactions')
+        rows:
+          - {from_address: '0xeee', to_address: '0xfff', tx_hash: 'tx4', value_eth: 0.5, tx_fee_eth: 0.01, gas_used: 21000, block_timestamp: '2024-02-01 00:00:00', block_number: 4, tx_date: '2024-02-01', tx_category: 'eth_transfer'}
+    expect:
+      rows:
+        - {from_address: '0xeee', distinct_counterparties: 1, tx_count: 1, total_value_eth: 0.5, fraud_risk_score: 1.0}
