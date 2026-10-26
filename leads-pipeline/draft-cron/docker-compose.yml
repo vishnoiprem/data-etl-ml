@@ -29,6 +29,15 @@ services:
     volumes:
       - avilx_pg_data:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    # Healthcheck so dependent services (adminer, leads-pipeline) can
+    # wait for postgres to actually accept connections instead of racing
+    # the initdb on first boot (which can take 5-10s on Alpine).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avilx -d avilx_leads"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   adminer:
     image: adminer:latest
@@ -37,7 +46,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   # Opt-in: run the published leads-pipeline image once. Exits 0 on
   # success, so it's safe under `--profile agent up` (one-shot mode)
@@ -61,7 +71,8 @@ services:
       AVILX_DB_USER: avilx
       AVILX_DB_PASSWORD: avilx
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     # `--rm` only applies to `run`; for `up` we want a one-shot so
     # the compose process doesn't hang on autopilot forever.
     command: ["autopilot.py"]

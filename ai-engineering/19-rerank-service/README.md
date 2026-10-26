@@ -44,6 +44,53 @@ pip install -r requirements.txt
 make up
 python examples/with_rag.py
 ```
+
+---
+
+## What this is NOT
+
+- **Not a retrieval model.** The retriever (vector
+  search + BM25 hybrid) does the recall job; the
+  reranker does the precision job on the top-K the
+  retriever returned. Swap the retriever, keep the
+  reranker. Swap the reranker, keep the retriever.
+  They are independent.
+- **Not a generator.** The rerank service returns
+  *reordered chunks with scores* — not a final
+  answer. The generator (LLM call with the top chunks
+  in context) lives in the RAG platform that calls
+  this service.
+- **Not a free lunch.** The +35ms p95 and
+  $0.0003/query are real, but the *latency* cost is
+  paid per query. If the retriever is already at
+  90%+ recall, the reranker's value is small. The
+  pattern is highest-leverage when the retriever's
+  recall is < 85%.
+- **Not a Cohere-API replacement.** The default
+  cross-encoder here is `ms-marco-MiniLM` or
+  `BGE-reranker`, both open-source. You can swap to
+  Cohere's `rerank-english-v3.0` API for a better
+  baseline, at $2 / 1K searches.
+
+---
+
+## Related directories
+
+- [`../01-enterprise-rag-platform/`](../01-enterprise-rag-platform/) —
+  the RAG platform that calls this service as a
+  post-retrieval step.
+- [`../16-graph-rag/`](../16-graph-rag/) — the
+  graph-augmented retrieval layer; rerank still
+  applies, but the input candidates are graph
+  neighborhoods, not flat chunks.
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework that measures whether the
+  reranker is actually helping the end-to-end
+  answer quality.
+- [`../23-serverless-vector-store/`](../23-serverless-vector-store/) —
+  the vector store that produces the top-K the
+  reranker re-orders.
+
 ---
 
 **Last updated:** 2026-10-12  

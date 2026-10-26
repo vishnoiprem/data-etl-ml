@@ -41,6 +41,7 @@ import ssl
 import argparse
 import subprocess
 import urllib.parse
+import html as _html
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -1101,14 +1102,29 @@ def scrape_all():
     if use_parallel:
         with ThreadPoolExecutor(max_workers=len(SCRAPERS)) as pool:
             futures = {pool.submit(fn): name for name, fn in SCRAPERS}
-            for fut in as_completed(futures, timeout=timeout + 30):
-                name = futures[fut]
-                try:
-                    found = fut.result(timeout=timeout)
-                    print(f"  scrape.{name}: {len(found)} candidates")
-                    all_leads.extend(found)
-                except Exception as e:
-                    print(f"  scrape.{name} error: {type(e).__name__}: {str(e)[:80]}")
+            # Track unfinished futures so we can cancel them if the
+            # overall timeout fires. Without this, a stuck Playwright
+            # Chromium browser (used by scrape_x_com) outlives the
+            # Python process and becomes an orphan.
+            unfinished = set(futures)
+            try:
+                for fut in as_completed(futures, timeout=timeout + 30):
+                    unfinished.discard(fut)
+                    name = futures[fut]
+                    try:
+                        found = fut.result(timeout=timeout)
+                        print(f"  scrape.{name}: {len(found)} candidates")
+                        all_leads.extend(found)
+                    except Exception as e:
+                        print(f"  scrape.{name} error: {type(e).__name__}: {str(e)[:80]}")
+            except (TimeoutError, Exception) as e:
+                if str(e) == "" or "TimeoutError" in type(e).__name__:
+                    print(f"  scrape: overall timeout — cancelling "
+                          f"{len(unfinished)} unfinished scraper(s)")
+                else:
+                    print(f"  scrape: loop error: {type(e).__name__}: {str(e)[:80]}")
+            for fut in unfinished:
+                fut.cancel()
     else:
         for name, fn in SCRAPERS:
             try:
@@ -1285,98 +1301,29 @@ def _build_cover_letter(lead):
     """Render a short, role-aware cover letter.
 
     Branches on lead.apply_mode:
-      - 'solo'  → Prem personally applies (cover_letter.render_solo_*)
-      - 'pod'   → Avilx pod pitch (cover_letter.render_* — default)
+      - 'apply_personal' → Prem personally applies (cover_letter.render_solo_*)
+      - 'pitch_pod'      → Avilx pod pitch (cover_letter.render_* — default)
 
-    The new cover_letter.render_for_mode() dispatcher handles both
+    The cover_letter.render_for_mode() dispatcher handles both
     so this function is now a thin wrapper.
     """
     from cover_letter import render_for_mode
     return render_for_mode(lead)[:2]
-    company = (lead.get("company") or "").strip() or "your team"
-    role = (lead.get("role") or "this role").strip()
-    stack = _guess_stack(lead)
-    excerpt = (lead.get("raw_excerpt") or "").strip()
-    is_remote = "remote" in excerpt.lower() or "anywhere" in excerpt.lower()
-    remote_phrase = "remote" if is_remote else "global"
-    # Trim subject to ~60 chars
-    comp_short = company if len(company) <= 25 else company[:22] + "…"
-    role_short = role if len(role) <= 30 else role[:27] + "…"
-    subject = f"Avilx for {comp_short} — {role_short}"
-    if len(subject) > 70:
-        subject = subject[:67] + "…"
-
-    # Pull a verbatim phrase from the JD that mentions a key tool/area
-    verbatim = _pull_verbatim_phrase(excerpt)
-    stack_line = (
-        f"Stack overlap I noticed: {stack}." if stack and stack != "AI / ML"
-        else "Our pod is senior-only on the AI/Data/ML/Cloud side."
-    )
-
-    body = (
-        f"Hi {company} team,\n\n"
-        f"Saw the {role} role"
-        + (f' — {verbatim}' if verbatim else "")
-        + ". Quick context if useful: I'm Prem, I run Avilx (avilx.com), a "
-        f"global Build·Deploy·Engineers pod out of Ha Noi. 6-20 senior engineers, "
-        f"AI/Data/ML/Cloud, **Databricks Champion** team, 7+ clouds (AWS · Azure · "
-        f"GCP · Tencent · Alibaba), 8+ yrs avg, regulated-industry work.\n\n"
-        f"{stack_line}\n\n"
-        f"If your timeline is tight, happy to run a 4-week pilot pod or staff-aug "
-        f"a senior — 2-week kickoff, {remote_phrase} delivery, NDA + IP clean. "
-        f"15-min call this week worth it?\n\n"
-        f"{PERSONAL_SIG}"
-    )
-    return subject, body
-
-
-_VERBATIM_PHRASES = [
-    r"scaling (?:our )?RAG",
-    r"(?:production|prod) RAG",
-    r"agentic (?:KYC|workflow|AI)",
-    r"multi[- ]agent",
-    r"fine[- ]tun(?:e|ing)",
-    r"(?:real[- ]?time )?CDC (?:lakehouse|pipeline)",
-    r"Databricks (?:lakehouse|migration)",
-    r"vector (?:search|database|store)",
-    r"embedding (?:pipeline|model)",
-    r"LangChain|LlamaIndex",
-    r"(?:ML|model) (?:training|inference) (?:pipeline|infrastructure)",
-    r"on[- ]call|incident response",
-    r"SOC 2|HIPAA|PCI|MLPS 2\.0",
-    r"trading|fintech|banking",
-    r"recommendation (?:system|engine)",
-    r"fraud detection|risk scoring",
-]
-
-
-def _pull_verbatim_phrase(excerpt: str) -> str | None:
-    """Return the first matching phrase from the JD as a short verbatim
-    fragment, lowercased and stripped. Used to make the cover letter feel
-    like we read the JD."""
-    if not excerpt:
-        return None
-    for pat in _VERBATIM_PHRASES:
-        m = re.search(pat, excerpt, re.IGNORECASE)
-        if m:
-            phrase = m.group(0).strip().lower()
-            if len(phrase) > 60:
-                phrase = phrase[:57] + "…"
-            return phrase
-    return None
 
 
 # =============================================================
 # 5. EMAIL — send queued leads with daily cap
 # =============================================================
 
-def send_queued_emails(max_emails=None, dry=False, mode="pod"):
+def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
     """Pull pending email leads from Postgres, send up to max_emails, mark sent.
 
     mode:
-      'pod'  — default; only Avilx pod-pitch leads (mode='pod')
-      'solo' — only Prem-personal-apply leads (mode='solo')
-      'both' — both queues interleaved by lead id
+      'pitch_pod'      — default; only Avilx-pod-pitch leads
+                         (column value 'pitch_pod')
+      'apply_personal' — only Prem-personal-apply leads
+                         (column value 'apply_personal')
+      'both'           — both queues interleaved by lead id
 
     Each lead's stored cover_letter_subject/body (rendered at queue time,
     matching its apply_mode) is what actually gets sent — the mode arg
@@ -1389,33 +1336,94 @@ def send_queued_emails(max_emails=None, dry=False, mode="pod"):
     pending = [l for l in get_pending_leads()
                if l.get("contact_email") and l.get("apply_method") == "email"]
     pending = [l for l in pending if not is_opted_out(l["contact_email"])]
+    # BOUNCE_DENY filter: skip any email whose domain has bounced before
+    # (e.g. careers@<X> for companies without a real careers mailbox).
+    # This is the cheapest way to drop the bounce rate — SMTP RCPT TO
+    # validation won't help (Gmail accepts anything) and full SMTP
+    # probe-per-lead adds 1-2s per send.
+    #
+    # Match by REGISTERED domain (last 2 labels), not full domain —
+    # otherwise jobs@mail.workable.com would slip past a denylist
+    # entry for "workable.com". The find_more_leads scraper uses the
+    # same extraction (see _bounce_denied_domain there).
+    def _reg_domain(addr: str) -> str:
+        dom = addr.split("@", 1)[-1].lower()
+        return ".".join(dom.split(".")[-2:]) if "." in dom else dom
+    try:
+        from state.bounce_deny_store import BOUNCE_DENY
+        before = len(pending)
+        pending = [l for l in pending
+                   if _reg_domain(l["contact_email"]) not in BOUNCE_DENY]
+        skipped_bounce = before - len(pending)
+        if skipped_bounce:
+            print(f"  [bounce-deny] skipped {skipped_bounce} leads on denylisted domains")
+    except Exception as e:
+        # If the deny store is missing/broken, fail open — better to send
+        # a few extra emails than to silently block all sends.
+        print(f"  [bounce-deny] warn: {e}")
     # Apply mode filter at the cursor, not in Python — single round-trip.
     if mode != "both":
         pending = [l for l in pending
-                   if (l.get("apply_mode") or "pod") == mode]
+                   if (l.get("apply_mode") or "pitch_pod") == mode]
     pending = pending[:max_emails]
 
     sent, failed, bounced = 0, 0, 0
+    _MODE_LABELS = {
+        "pitch_pod": "POD-PITCH",
+        "apply_personal": "APPLY-PERSONAL",
+    }
     for lead in pending:
         if dry:
-            md = lead.get("apply_mode", "pod")
-            print(f"  [dry] [{md}] would email {lead['contact_email']} re: {lead['company']}")
+            md = lead.get("apply_mode", "pitch_pod")
+            label = _MODE_LABELS.get(md, md.upper())
+            print(f"  [dry] [{label}] would email {lead['contact_email']} re: {lead['company']}")
             sent += 1
             continue
         try:
             _send_one(lead)
             update_status(lead["id"], "sent_email")
+            # Append to send_log so the tail-log check (lib/email_guard)
+            # can dedup this recipient for the next 24h. Without this
+            # call, the guard would re-allow a recipient we just sent to.
+            try:
+                from db.lead_store import log_send
+                log_send(
+                    lead["id"],
+                    lead["contact_email"],
+                    lead.get("cover_letter_subject") or "",
+                    "success",
+                )
+            except Exception as _e:
+                # Never fail a send because of a log write
+                print(f"    ⚠️  log_send failed: {_e}")
             sent += 1
             print(f"  ✅ {lead['company']} → {lead['contact_email']}")
             if sent < len(pending):
                 time.sleep(DELAY_BETWEEN_EMAILS_SEC)
         except RecipientInvalid as e:
-            # _send_one already marked status='bounced' in the DB.
+            # Hard bounce from SMTP (or our own MX probe). Mark status='bounced'
+            # (NOT 'failed') so the lead is permanently blocked and the
+            # bounce flow can auto-add the domain to BOUNCE_DENY on the
+            # next IMAP poll. Without this routing, the 27% bounce rate
+            # throttle keeps re-triggering.
+            try:
+                from db.lead_store import mark_bounced_by_id
+                mark_bounced_by_id(lead["id"], reason=f"{e.code} {e.reason[:80]}")
+            except Exception as _e:
+                print(f"    ⚠️  mark_bounced_by_id failed: {_e}")
+                update_status(lead["id"], "failed", error=str(e))
             bounced += 1
             print(f"  🚫 {lead['company']} → {lead['contact_email']}  bounced: {e.code} {e.reason[:60]}")
             # No sleep — bounced sends are cheap, no need to throttle.
         except Exception as e:
             update_status(lead["id"], "failed", error=str(e))
+            try:
+                from db.lead_store import log_send
+                log_send(lead["id"], lead["contact_email"],
+                         lead.get("cover_letter_subject") or "",
+                         "fail", error=str(e)[:200])
+            except Exception:
+                pass
             failed += 1
             print(f"  ❌ {lead['company']} → {lead['contact_email']}  err: {e}")
     return sent, failed, bounced
@@ -1443,15 +1451,30 @@ def _pick_resume(lead) -> Optional[Path]:
         print(f"    ⚠️  resume_tailor failed for lead {lead.get('id')}: {e}",
               file=sys.stderr)
 
-    # 2) Lead's stored resume_file
+    # 2) Lead's stored resume_file. Defense-in-depth: refuse any
+    # path that resolves outside RESUME_DIR. resume_file comes from
+    # the leads table; today only trusted writers set it, but a
+    # future migration / backfill / compromised credentials could
+    # set it to /etc/passwd and exfiltrate via email attachment.
     rf = lead.get("resume_file")
     if rf:
-        p = RESUME_DIR / rf
-        if p.exists():
-            return p
-        # Sometimes resume_file is an absolute path
-        if Path(rf).exists():
-            return Path(rf)
+        try:
+            resume_root = RESUME_DIR.resolve()
+            # First try RESUME_DIR / rf (the common case)
+            p = (RESUME_DIR / rf).resolve()
+            if p.is_relative_to(resume_root) and p.exists():
+                return p
+            # If rf is an absolute path inside RESUME_DIR, accept it
+            p_abs = Path(rf).resolve()
+            if p_abs.is_relative_to(resume_root) and p_abs.exists():
+                return p_abs
+            # Path is outside RESUME_DIR — refuse silently rather
+            # than crash, so a single bad row doesn't break the loop.
+            import sys as _sys
+            print(f"    ⚠️  resume_file outside RESUME_DIR, skipping: {rf}",
+                  file=_sys.stderr)
+        except (OSError, ValueError):
+            pass
 
     # 3) Default fallback
     for name in ("Prem_Resume_2026.pdf", "Pv_Cv_Data_Ai_2026.pdf",
@@ -1492,7 +1515,12 @@ def _render_email_html(lead: dict) -> str:
             continue
         if "Prem Vishnoi" in chunk and "Avilx" in chunk and len(chunk) < 600:
             continue
-        html_chunk = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", chunk)
+        # Escape HTML FIRST so any < > & in the raw body become
+        # entities. The **bold** regex below still works because ** is
+        # not escaped, and the <strong> tags we add are then real tags,
+        # not user-controlled.
+        html_chunk = _html.escape(chunk, quote=False)
+        html_chunk = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", html_chunk)
         html_chunk = html_chunk.replace("\n", "<br>")
         paragraphs.append(f"<p>{html_chunk}</p>")
 
@@ -1713,16 +1741,40 @@ class RecipientInvalid(Exception):
 
 
 def _verify_recipient(addr: str, timeout: int = 15) -> None:
-    """Currently a no-op. Gmail's SMTP accepts any RCPT TO at send time.
+    """MX probe: does the domain in `addr` actually accept mail?
 
-    See the docstring on `RecipientInvalid` for why. The real bounce
-    detection is in `check_bounces.py` (IMAP poll on the sender inbox).
+    Why: Gmail's SMTP returns 250 ("accepted") for EVERY recipient, even
+    nonexistent addresses. Hard bounces come back hours later via IMAP.
+    By then we've already triggered Gmail's bounce-rate throttle. So we
+    do a real DNS MX lookup before sending and raise RecipientInvalid
+    on failure — the lead gets marked 'bounced' and the domain is added
+    to BOUNCE_DENY so we never try it again.
 
-    Kept as a stub so callers don't have to change if/when we add a
-    real verification step (e.g. SMTP MX probe or 3rd-party validator
-    like NeverBounce / ZeroBounce).
+    This is the in-loop equivalent of the pre-send `can_send_to` guard
+    in `lib/email_guard.py`. Both call _mx_probe; both short-circuit on
+    failure. Kept as a no-op when dnspython is missing or the env says
+    AVILX_SKIP_MX_PROBE=1.
     """
-    return
+    if os.getenv("AVILX_SKIP_MX_PROBE", "0") == "1":
+        return
+    try:
+        from lib.email_guard import _mx_probe
+    except Exception:
+        return  # lib/email_guard not importable → fail open
+    # Extract the registered domain
+    try:
+        dom = addr.split("@", 1)[1].strip()
+        # registered domain = last 2 labels
+        parts = dom.lower().split(".")
+        if len(parts) >= 2:
+            dom = ".".join(parts[-2:])
+    except Exception:
+        return  # malformed addr → SMTP will catch it
+    err = _mx_probe(dom, timeout=min(timeout, 3.0))
+    if err:
+        # Synthetic 5xx code so the existing RecipientInvalid handler
+        # in send_queued_emails routes it to mark_bounced_by_id.
+        raise RecipientInvalid(addr, 550, f"MX probe failed: {err}")
 
 
 def _send_one(lead):
@@ -1905,8 +1957,15 @@ def run_pipeline(args):
         report["email"] = {"sent": sent, "failed": failed, "bounced": bounced}
         print(f"  → sent {sent}, bounced {bounced}, failed {failed}")
     report["finished_at"] = datetime.now().isoformat()
-    with open(REPORT_FILE, "w") as f:
+    # Atomic write: dump to .tmp, fsync, then rename. Prevents a
+    # half-written JSON file from breaking the next run's parser if
+    # the process is killed mid-write.
+    _tmp = REPORT_FILE.with_suffix(".tmp")
+    with open(_tmp, "w") as f:
         json.dump(report, f, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(_tmp, REPORT_FILE)
     print(f"\n✅ Report → {REPORT_FILE}")
     return report
 
@@ -1923,10 +1982,14 @@ def main():
                    help="Skip cron lock (only for interactive debugging)")
     p.add_argument("--no-bounce-sync", action="store_true",
                    help="Skip the bounce-sync step at the start of the run")
-    p.add_argument("--mode", choices=("pod", "solo", "both"), default="pod",
-                   help="Outreach mode: 'pod' (Avilx pod pitch, default), "
-                        "'solo' (Prem personally applies), or 'both' "
-                        "(interleave pod + solo queues).")
+    p.add_argument("--mode",
+                   choices=("pitch_pod", "apply_personal", "both"),
+                   default="pitch_pod",
+                   help="Outreach mode: 'pitch_pod' (Avilx sells a senior "
+                        "engineering pod to the company — default), "
+                        "'apply_personal' (Prem personally applies for the "
+                        "role, with his own resume), or 'both' (interleave "
+                        "both queues).")
     args = p.parse_args()
 
     scrape_only = args.scrape or args.enrich

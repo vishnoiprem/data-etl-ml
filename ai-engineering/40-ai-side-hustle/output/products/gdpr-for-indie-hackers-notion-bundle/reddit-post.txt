@@ -1,0 +1,79 @@
+Title: I wrote GDPR For Indie Hackers Notion Bundle (15 pages, $29) — full Chapter 1 below
+
+Body:
+
+Hey r/[niche],
+
+I kept seeing the same questions in this sub, so I sat down and wrote
+the answer. 10 plug-and-play GDPR dashboards you can clone today.
+
+Below is Chapter 1 in full. The rest of the guide is $29 on
+Gumroad (link at the bottom). If Chapter 1 isn't useful, the rest
+won't be either — that's the test.
+
+---
+
+## What you get
+
+**1. Master Dashboard** — The landing page. Every active sub-processor, every open ROPA gap, every pending data subject request, and a green/red status indicator for all 6 documents. One glance = you know where you stand.
+
+**2. Document Vault** — All 6 GDPR documents pre-written and ready to customize (Privacy Policy, DPA, Data Flow Diagram, ROPA, Sub-processor List, Breach Runbook). Each is a Notion page with: scope, owner, last reviewed date, version. Add your company name + sign-off, done.
+
+**3. Sub-Processor Database** — One row per third-party vendor that touches personal data. Pre-populated with the 12 most common SaaS vendors (AWS, Stripe, OpenAI, etc.) and the DPA status field. Add your own, fill in the gap, move on.
+
+**4. ROPA Database** — Record of Processing Activities. One row per data category (user account, payment, analytics, etc.) with: lawful basis, retention period, security measures, sub-processors. Required by Article 30; pre-structured so you don't have to invent the schema.
+
+**5. Data Subject Request Tracker** — Database for every access, deletion, export, and correction request. Fields: request type, date received, user email, deadline (30 days), status, completion date. Pre-built views: pending (red), completed (green), overdue (orange).
+
+**6. Breach Response Runbook** — Notion page with the 6-step breach response process (Detect → Contain → Assess → Notify → Eradicate → Recover → Post-mortem). Laminated equivalent in the cheat sheet; the Notion version is the live one with editable fields.
+
+**7. Friday GDPR Review** — Templated page with the 8-item weekly checklist. Duplicate every Friday, walk through it, check the boxes. The auditor can pull 52 weeks of these in 5 minutes.
+
+**8. Privacy Policy Generator Output** — Pre-structured Notion page with all 11 sections required by GDPR Articles 13-14. The page is the Privacy Policy; export to HTML or markdown and publish.
+
+**9. DPA Template Database** — Master DPA template plus per-customer addendums. Each customer DPA is a Notion page linked to the sub-processor list and the data flow diagram. One folder, one place to find any DPA.
+
+**10. Data Flow Diagram Workspace** — draw.io diagram embedded in a Notion page. Shows every data flow: where customer data enters, where it's stored, where it's processed, where it leaves, who has access. Click any box to see the database it links to.
+
+**11. Cookie Consent Tracker** — Database of every cookie and tracker in use. Fields: name, purpose, provider, consent category (essential / analytics / marketing), banner status. Required for GDPR cookie consent; auto-flags any non-essential cookie without consent.
+
+**12. Marketing Email Audit** — Database of every email list, signup source, and consent mechanism. Required for GDPR Article 7 (consent). Pre-formatted to flag EU users without double opt-in.
+
+**13. Sub-Processor Change Log** — One row per sub-processor change (added, removed, DPA renewed). Pre-built view shows the last 12 months of changes; some customer contracts require 30-day advance notice.
+
+**14. Annual ROPA Review** — Templated page for the annual ROPA review. Walks through every data category, every lawful basis, every retention period. Pre-formatted to update the review date and identify gaps.
+
+**15. Customer DPA Question Bank** — 30 of the most common DPA questions from EU enterprise customers with the answer an enterprise privacy officer expects to hear. Read this before you sign your first B2B EU contract.
+
+---
+
+---
+
+**What else is inside (15 sections total):**
+
+- Master Dashboard
+- Document Vault
+- Sub-Processor Database
+- ROPA Database
+- Data Subject Request Tracker
+- Breach Response Runbook
+- Friday GDPR Review
+- Privacy Policy Generator Output
+
+**Who this is for:** the audience
+who keep saying "we'll get to it next quarter" and want a short,
+specific thing they can finish in a week.
+
+**Who this is NOT for:** if you want a 400-page textbook or a
+lawyer-reviewed policy doc, this isn't it. This is the 20-page
+"here's exactly what to do, with the templates" version.
+
+**Why I charge $29 and not $0:** the free version of this got
+12,000 downloads and a 3% read rate. The paid version has a 70%
+read-through because the people who paid actually open the file.
+This is a known conversion trick, and I'm fine using it.
+
+Full version ($29, instant download, 30-day no-questions refund):
+→ https://vishnoiprem.gumroad.com/l/gdpr-bundle
+
+— Prem

@@ -61,7 +61,13 @@ STACK_RE = re.compile(
 
 
 def _extract_stack_overlap(jd: str) -> list[str]:
-    """Pull a list of recognizable tech terms from a JD, in order, dedup."""
+    """Pull a list of recognizable tech terms from a JD, in order, dedup.
+
+    Hard-capped at 16 terms so a JD that happens to mention the entire
+    stack (e.g. an aggregator job post) doesn't produce an unbounded
+    list that overflows the rendered email. The renderer slices to 8
+    anyway, but a 200-term internal list wastes CPU on regex matches.
+    """
     if not jd:
         return []
     seen = set()
@@ -71,7 +77,73 @@ def _extract_stack_overlap(jd: str) -> list[str]:
         if term not in seen:
             seen.add(term)
             out.append(term)
+            if len(out) >= 16:
+                break
     return out
+
+
+# Phrases that, when matched in a JD, prove the reader "actually read it" and
+# give Prem/Avilx something specific to pivot from. Order matters: more
+# specific first (so we don't match "RAG" when "agentic KYC" is in the JD).
+_HOOK_PATTERNS = [
+    (r"agentic (?:KYC|workflow|AI|systems?)",        "agentic AI systems"),
+    (r"multi[- ]agent (?:orchestration|systems?)",  "multi-agent orchestration"),
+    (r"(?:production|prod)[- ]grade RAG",            "production-grade RAG"),
+    (r"(?:production|prod|scaling|production-grade)\s+RAG", "production RAG"),
+    (r"\bRAG\b",                                     "RAG"),
+    (r"vector (?:search|database|store)",            "vector search"),
+    (r"embedding (?:pipeline|model)",                "embedding pipelines"),
+    (r"fine[- ]tun(?:e|ing)",                        "fine-tuning"),
+    (r"Databricks (?:lakehouse|migration)",          "Databricks migration"),
+    (r"(?:real[- ]?time )?CDC (?:lakehouse|pipeline)", "CDC pipelines"),
+    (r"recommendation (?:system|engine)",            "recommendation systems"),
+    (r"(?:ML|model) (?:training|inference) (?:pipeline|infrastructure)",
+                                                    "ML training/inference infra"),
+    (r"(?:on[- ]call|incident response)",            "on-call/incident response"),
+    (r"SOC 2|HIPAA|PCI|MLPS 2\.0",                   "regulated compliance (SOC2/HIPAA/PCI)"),
+    (r"trading|fintech|banking",                     "trading/fintech systems"),
+    (r"LangChain|LlamaIndex",                        "LangChain/LlamaIndex"),
+    (r"PyTorch|TensorFlow|JAX",                      "PyTorch/TensorFlow"),
+    (r"(?:Kubernetes|k8s) (?:operator|controller)",  "K8s operators"),
+    (r"(?:event[- ]driven|event[- ]streaming) (?:architecture|pipeline)",
+                                                    "event-driven architecture"),
+    (r"low[- ]latency (?:trading|inference)",        "low-latency systems"),
+    (r"e[- ]commerce|marketplace",                   "e-commerce/marketplace"),
+    (r"China (?:market|GDPR|MLPS)",                  "China market (MLPS)"),
+]
+
+
+def _pick_hook(jd: str) -> str:
+    """Pull a short, JD-specific phrase that proves the email was personalized.
+
+    Returns "" if nothing matches — caller should fall back to the generic
+    opening. Pattern order is important: most-specific patterns first so
+    we don't match "RAG" when "agentic KYC" is in the JD.
+    """
+    if not jd:
+        return ""
+    for pat, label in _HOOK_PATTERNS:
+        if re.search(pat, jd, re.I):
+            return label
+    return ""
+
+
+def _hook_line(hook: str, lead: dict) -> str:
+    """Wrap a hook in a sentence that pivots to Prem/Avilx experience.
+
+    Falls back to "" if the hook is empty so callers can `if hook_line:`.
+    """
+    if not hook:
+        return ""
+    role = (lead.get("role") or "").lower()
+    # Solo mode — Prem personally applies
+    if (lead.get("apply_mode") or "") == "apply_personal":
+        return (f"That {hook} angle is exactly the work I do most often — "
+                f"I've shipped it in production at scale. ")
+    # Pod mode — Avilx pitches a pod
+    return (f"Re the {hook} angle: that's core to our pod's recent work — "
+            f"we've stood up production {hook} for several clients in 2026. ")
+
 
 
 def _trim(s: str, n: int) -> str:
@@ -80,13 +152,27 @@ def _trim(s: str, n: int) -> str:
     return s[: n - 1] + "…"
 
 
+def _render_template(template: str, values: dict) -> str:
+    """Substitute `{key}` placeholders in `template` with values from `values`.
+
+    Unlike str.format, this is safe with values that contain literal `{` or `}`:
+    we do a single-pass replace so the value text is never re-interpreted as
+    format syntax. Missing keys are left as-is so a typo is visible rather
+    than raising KeyError.
+    """
+    out = template
+    for k, v in values.items():
+        out = out.replace("{" + k + "}", "" if v is None else str(v))
+    return out
+
+
 def render_subject(lead: dict) -> str:
-    """Subject line — Avilx for {company} — {role}, trimmed to ≤70 chars."""
+    """Subject line — [Avilx Pod Pitch] Avilx for {company} — {role}, trimmed to ≤70 chars."""
     co = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
-    co_short = co if len(co) <= 25 else co[:22] + "…"
-    role_short = role if len(role) <= 30 else role[:27] + "…"
-    subj = f"{NAME} for {co_short} — {role_short}"
+    co_short = co if len(co) <= 18 else co[:15] + "…"
+    role_short = role if len(role) <= 25 else role[:22] + "…"
+    subj = f"[Avilx Pod Pitch] {NAME} for {co_short} — {role_short}"
     if len(subj) > 70:
         subj = subj[:67] + "…"
     return subj
@@ -99,11 +185,12 @@ def render_text_body(lead: dict) -> str:
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
     stack_str = ", ".join(stack[:8]) if stack else "the stack in your JD"
+    hook = _hook_line(_pick_hook(jd), lead)
 
     return (
         f"Hi {co} team,\n\n"
         f"Saw the {role} role — stack and scope look like a strong match. "
-        f"Quick context if useful: I'm {FOUNDER}, I run {NAME} ({WEBSITE}), a "
+        f"{hook}Quick context if useful: I'm {FOUNDER}, I run {NAME} ({WEBSITE}), a "
         f"global {TAGLINE} pod out of {HQ}. 6-20 senior engineers, "
         f"AI/Data/ML/Cloud, **Databricks Champion** team, 7+ clouds ({CLOUD_LIST}), "
         f"8+ yrs avg, regulated-industry work.\n\n"
@@ -157,18 +244,11 @@ def render_html_body(lead: dict) -> str:
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
     stack_str = ", ".join(stack[:8]) if stack else "the stack in your JD"
-    return _HTML_TEMPLATE.format(
-        name=NAME,
-        tagline=TAGLINE,
-        company=co,
-        role=role,
-        founder=FOUNDER,
-        website=WEBSITE,
-        hq=HQ,
-        stack_str=stack_str,
-        email=EMAIL,
-        whatsapp=WHATSAPP,
-    )
+    return _render_template(_HTML_TEMPLATE, dict(
+        name=NAME, tagline=TAGLINE, company=co, role=role,
+        founder=FOUNDER, website=WEBSITE, hq=HQ, stack_str=stack_str,
+        email=EMAIL, whatsapp=WHATSAPP,
+    ))
 
 
 def render(lead: dict) -> Tuple[str, str, str]:
@@ -185,13 +265,15 @@ def render(lead: dict) -> Tuple[str, str, str]:
 # can we talk?" — no pod mention, no pricing, no "happy to staff aug"
 # language. Resume PDF is still attached by autopilot._pick_resume().
 def render_solo_subject(lead: dict) -> str:
-    """Subject line — Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
+    """Subject line — [Personal Application] Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
     co = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
     co_short = co if len(co) <= 20 else co[:17] + "…"
     role_short = role if len(role) <= 30 else role[:27] + "…"
-    subj = f"{FOUNDER} for {co_short} — {role_short}"
+    subj = f"[Personal Application] {FOUNDER} for {co_short} — {role_short}"
     if len(subj) > 70:
+        # Trim from the middle — keep the [Personal Application] prefix intact
+        # so the mode is still visible in the inbox
         subj = subj[:67] + "…"
     return subj
 
@@ -205,11 +287,12 @@ def render_solo_text_body(lead: dict) -> str:
     stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
+    hook = _hook_line(_pick_hook(jd), lead)
 
     return (
         f"Hi {co} team,\n\n"
         f"I'm applying for the {role} role personally — not as a recruiter. "
-        f"I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
+        f"{hook}I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
         f"{CLOUD_LIST} plus Huawei, Oracle, and on-prem. Most recent work spans "
         f"RAG/agentic systems on Databricks, multi-tenant ML platforms, and "
         f"regulated-industry data (banking, healthcare, MLPS in China).\n\n"
@@ -234,12 +317,12 @@ def render_solo_html_body(lead: dict) -> str:
     stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
-    return _SOLO_HTML_TEMPLATE.format(
+    return _render_template(_SOLO_HTML_TEMPLATE, dict(
         name=FOUNDER, tagline=f"Solo application — {role} at {co}",
         cloud_list=CLOUD_LIST, hq=HQ, email=EMAIL, whatsapp=WHATSAPP,
         website=WEBSITE, co=co, role=role, stack_str=stack_str,
         remote_phrase=remote_phrase, brand=NAME,
-    )
+    ))
 
 
 _SOLO_HTML_TEMPLATE = """\
@@ -285,12 +368,24 @@ def render_solo(lead: dict) -> Tuple[str, str, str]:
 def render_for_mode(lead: dict) -> Tuple[str, str, str]:
     """Dispatch to the right renderer based on lead.apply_mode.
 
-    Defaults to 'pod' (Avilx pod pitch) if unset — preserves current behavior.
+    Modes:
+      'pitch_pod'       → Avilx company pitch (render_*) — default
+      'apply_personal'  → Prem personally applies for the role (render_solo_*)
+
+    Unknown / unset values fall through to 'pitch_pod' for backward
+    compatibility with leads created before the apply_mode column existed.
     """
-    mode = (lead.get("apply_mode") or "pod").strip().lower()
-    if mode == "solo":
+    mode = (lead.get("apply_mode") or "pitch_pod").strip().lower()
+    if mode == "apply_personal":
         return render_solo(lead)
     return render(lead)
+
+
+# Public mode constants for callers that want to set the column explicitly
+# (avoids typo-driven bugs like 'soloo' / 'soulo' silently becoming 'pod')
+MODE_PITCH_POD = "pitch_pod"
+MODE_APPLY_PERSONAL = "apply_personal"
+
 
 
 if __name__ == "__main__":
