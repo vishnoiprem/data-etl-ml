@@ -1,0 +1,146 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scb-aml-platform"
+version = "1.0.0"
+description = "Standard Chartered Bank AML Platform — T+1 15-country pipeline (portfolio/reference impl)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Prem Vishnoi", email = "vishnoiprem@gmail.com" }]
+keywords = ["aml", "anti-money-laundering", "spark", "fincrime", "pipeline", "compliance"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial",
+]
+
+# Runtime dependencies. Keep this list lean — only what the platform
+# actually imports. Trimmed from the original requirements.txt in P2.
+# The previous mega-list (Airflow, transformers, langchain, jupyter,
+# streamlit, etc.) was carrying ~70 unused packages, which inflated
+# the install footprint and attack surface.
+dependencies = [
+    # Core data
+    "pandas>=2.0,<3.0",
+    "numpy>=1.24,<2.0",
+    "pyarrow>=12.0,<18.0",
+    # Spark (used in spark/ jobs even though local[*] mode)
+    "pyspark==3.5.8",
+    # Fuzzy matching / entity resolution
+    "jellyfish==0.11.2",
+    "fuzzywuzzy==0.18.0",
+    "python-Levenshtein==0.21.1",
+    # Elasticsearch (Lucid Search)
+    "elasticsearch==8.9.0",
+    "elasticsearch-dsl==8.9.0",
+    # Kafka (ingestion simulation)
+    "kafka-python==2.0.2",
+    # Database / HDFS simulation
+    "sqlalchemy==1.4.52",  # last 1.4.x for legacy compatibility
+    "PyHive==0.7.0",
+    # Synthetic data
+    "faker==19.6.2",
+    # API (Lucid Search — FastAPI)
+    "fastapi==0.103.1",
+    "uvicorn==0.23.2",
+    "httpx==0.25.0",
+    # Utilities
+    "python-dotenv==1.0.0",
+    "pyyaml==6.0.1",
+    "click==8.1.7",
+    "rich==13.5.3",
+    "loguru==0.7.2",
+    "tqdm==4.66.1",
+]
+
+[project.optional-dependencies]
+# Airflow lives in a separate venv (see requirements-airflow.txt) because
+# Airflow 2.7 pins sqlalchemy<2.0. Do not add it here.
+airflow = [
+    "apache-airflow==3.3.2",
+]
+dev = [
+    "pytest==7.4.2",
+    "pytest-cov==4.1.0",
+    "pytest-asyncio==0.21.1",
+    "ruff==0.7.4",
+    "black==24.10.0",
+    "mypy==1.13.0",
+    "types-requests",
+    "detect-secrets==1.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/vishnoiprem/data-etl-ml"
+Repository = "https://github.com/vishnoiprem/data-etl-ml/tree/main/data-engineering/scb_aml_platform"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scb_aml_platform*"]
+exclude = ["tests*", "doc*", "data*", "output*", "logs*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests that need a real service (ES, Kafka)",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:elasticsearch.*",
+    "ignore::DeprecationWarning:loguru.*",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["scb_aml_platform", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "UP", # pyupgrade
+    "N",  # pep8-naming
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # function call in default argument (FastAPI patterns)
+    "RUF012", # mutable class attributes (used in dataclasses)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]  # asserts are fine in tests
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = ["tests/", "build/", "dist/"]

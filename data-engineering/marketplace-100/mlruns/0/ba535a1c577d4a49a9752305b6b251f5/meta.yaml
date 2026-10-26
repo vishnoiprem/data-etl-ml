@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/vishnoiprem/PycharmProjects/data-etl-ml/data-engineering/marketplace-100/mlruns/0/ba535a1c577d4a49a9752305b6b251f5/artifacts
+end_time: 1791938024509
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: ba535a1c577d4a49a9752305b6b251f5
+run_name: monitor-ep
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1791938024473
+status: 3
+tags: []
+user_id: vishnoiprem

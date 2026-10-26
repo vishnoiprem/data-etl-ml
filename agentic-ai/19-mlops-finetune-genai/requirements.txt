@@ -1,0 +1,39 @@
+# Pinned for reproducible installs. Floor-pinned where the major API is stable
+# (pydantic, fastapi, prometheus-client, evidently, mlflow); exact-pinned where
+# the inter-version compatibility between transformers / peft / trl / vllm / bitsandbytes
+# is fragile. Re-resolve with `pip-compile --upgrade` after testing.
+#
+# Verified compatible matrix (Oct 2026):
+#   transformers 4.45.x  <-> peft 0.13.x     <-> trl 0.12.x
+#   vllm 0.6.x          <-> torch 2.4.x      <-> xformers 0.0.28
+#   bitsandbytes 0.44.x  <-> accelerate 0.34.x
+
+# --- Model + training ---
+# torch: install via the CUDA 12.4 wheel in CI (see Dockerfile.train); listed here for tooling
+torch>=2.4.0,<2.5.0
+transformers>=4.45.0,<4.47.0
+peft>=0.13.0,<0.14.0
+trl>=0.12.0,<0.13.0
+bitsandbytes>=0.44.0,<0.45.0
+accelerate>=0.34.0,<0.36.0
+datasets>=3.2.0,<4.0.0
+
+# --- Inference (optional — `make test` does NOT require this) ---
+vllm>=0.6.0,<0.7.0
+
+# --- Tracking + serving + monitor ---
+mlflow>=2.18.0,<3.0.0
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+prometheus-client>=0.21.0
+evidently>=0.4.0,<0.6.0
+
+# --- Eval ---
+lm-eval>=0.4.0
+nltk>=3.9.0
+
+# --- Test scaffolding ---
+pytest>=8.3.0
+pytest-asyncio>=0.24.0

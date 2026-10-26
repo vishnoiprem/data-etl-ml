@@ -54,16 +54,8 @@ This section maps to **Phase 1 (Foundations) + Phase 2 (Applications) + Phase 3 
 ## The thesis
 
 **The 7 ingredients are necessary; the 5 guardrails are sufficient.** An agent without the 7 ingredients is not an agent. An agent with the 7 ingredients but without the 5 guardrails is a prototype that will fail in production. The FDE candidate who can name all 7 ingredients AND all 5 guardrails is the candidate who passes the centerpiece round.
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  
