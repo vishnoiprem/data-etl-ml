@@ -9,6 +9,7 @@ the demo shows real, readable content rather than placeholder text.
 from __future__ import annotations
 
 import json
+import os
 import re
 from typing import Protocol
 
@@ -428,12 +429,23 @@ class OpenAIRouter:
 
 
 def get_default_router() -> LLMRouter:
-    try:
-        return AnthropicRouter()
-    except Exception:  # noqa: BLE001
-        pass
-    try:
-        return OpenAIRouter()
-    except Exception:  # noqa: BLE001
-        pass
+    """Pick a router from the environment, falling back to the offline stub.
+
+    The SDK constructors don't validate keys (auth is deferred to the
+    first request), so the keys are checked here. Without this, an
+    installed SDK and no key would select a router that fails on every
+    call instead of falling back to the stub.
+    """
+    if os.environ.get("HUSTLE_LLM_PROVIDER", "").strip().lower() == "stub":
+        return StubRouter()
+    if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"):
+        try:
+            return AnthropicRouter()
+        except Exception:  # noqa: BLE001
+            pass
+    if os.environ.get("OPENAI_API_KEY"):
+        try:
+            return OpenAIRouter()
+        except Exception:  # noqa: BLE001
+            pass
     return StubRouter()
