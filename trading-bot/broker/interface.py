@@ -36,13 +36,6 @@ class FakeBroker:
     """In-process broker. Buys fill at signal_price, sells fill at
     current_price (whatever the caller passes). Tracks cash internally."""
 
-    def __init__(self, starting_cash: float = 100_000.0,
-                 commission_per_share: float = 0.0):
-        self._cash = starting_cash
-        self._positions: dict[str, int] = {}
-        self._commission = commission_per_share
-        self.fills: list[Fill] = []  # for assertions
-
     def buy(self, ticker: str, shares: int) -> Fill:
         # Use last-known price from price cache; fall back to $100 for tests
         price = self._prices.get(ticker, 100.0)
@@ -86,7 +79,14 @@ class FakeBroker:
         return dict(self._positions)
 
     # ---- test-only helpers -----------------------------------------------
-    _prices: dict[str, float] = {}
+    def __init__(self, starting_cash: float = 100_000.0, commission: float = 0.0):
+        # Per-instance price cache. A class-level dict would leak state
+        # between FakeBroker instances (test isolation bug).
+        self._prices: dict[str, float] = {}
+        self._cash = starting_cash
+        self._positions: dict[str, int] = {}
+        self._commission = commission
+        self.fills: list[Fill] = []
 
     def set_price(self, ticker: str, price: float) -> None:
         self._prices[ticker] = price

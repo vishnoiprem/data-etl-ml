@@ -125,3 +125,7 @@ only if every test passes.
 - For SQL interview prep: see `sql_interviews/`.
 - For behavioral: see `behavioral_interviews/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

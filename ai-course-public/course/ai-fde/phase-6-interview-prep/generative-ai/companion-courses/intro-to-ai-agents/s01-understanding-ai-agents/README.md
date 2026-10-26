@@ -41,3 +41,8 @@ This entire section maps to **Phase 1 (Foundations)** of the FDE curriculum. The
 - Sierra AI: § 2-3 take-home is "build + demo an agent"
 - OpenAI: warm-up is "what is the difference between an LLM call and an agent"
 - Databricks AI FDE: decomposition question #1 is "where does the agent boundary sit"
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

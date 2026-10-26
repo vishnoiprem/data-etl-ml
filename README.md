@@ -7,9 +7,23 @@
 >
 > 74 world-top reference patterns in the tables below. If you've used the system at Netflix, Stripe, Anthropic, Databricks, Bloomberg, or OpenAI, I can defend how I'd build it, run it, and cost it.
 
+> 💸 **Looking for a working AI revenue system, not just code?** Start with
+> [`ai-engineering/40-ai-side-hustle/`](ai-engineering/40-ai-side-hustle/) —
+> a self-contained 4-stream AI revenue factory (SEO content, micro-SaaS
+> scaffold, digital products, print-on-demand merch) that runs in
+> offline-stub mode so you can see the whole pipeline in 5 minutes.
+> That's the headline project. The 40+ projects below are the
+> infrastructure that backs it.
+
 <div align="left">
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![leads-ci](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-ci.yml)
+[![leads-cd](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/leads-cd.yml)
+[![release-please](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/release-please.yml)
+[![pip-audit](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml/badge.svg)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/pip-audit.yml)
+[![codeql](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/vishnoiprem/data-etl-ml/actions/workflows/codeql.yml)
+[![GHCR image](https://img.shields.io/badge/GHCR-ghcr.io%2Fvishnoiprem%2Fdata--etl--ml%2Fleads--pipeline-2496ED?logo=docker&logoColor=white)](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
 [![Made with Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.x-E25A1C?logo=apachespark&logoColor=white)](https://spark.apache.org/)
 [![Apache Flink](https://img.shields.io/badge/Apache%20Flink-Streaming-E6526F?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
@@ -239,7 +253,7 @@ Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker comp
 | 17 | **Capital One-style FinCrime data mesh** | Regulated data needs a contract, not just a schema. Domain-owned data products, contract tests on every change, lineage, and access control. It's heavier than a raw lake, but the audit team stops paging you at 11pm. | DataHub · Great Expectations · dbt · Lake Formation | [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) (reference impl) |
 | 18 | **Lyft-style streaming + batch hybrid** | I want one codebase, not two. Backfill and streaming share the same job definition, with time-travel for reconciliation when they disagree. The Kappa-leaning version, with a Batch escape hatch for the things streaming can't do cleanly. | Flink · Spark · Iceberg · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
 | 19 | **Cloudflare-style edge analytics** | Regional aggregation close to the user, late-merge reconciliation, tiered storage (hot → warm → cold). Useful when the volume is global and the budget isn't. The shape is closer to a CDN log pipeline than a typical warehouse job. | Kafka · Flink · R2 · ClickHouse | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
-| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/data-engineering/`](data-engineering/data-engineering/) (reference impl) |
+| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/`](data-engineering/) (reference impl) |
 | 21 | **Snowflake-style elastic warehouse** | Compute and storage decoupled, virtual warehouses that scale in seconds, and per-query credits. I rewrote our nightly batch as a virtual-warehouse-style fleet on Spark + Iceberg, with auto-suspend on idle and auto-resume on queue depth. The result: the same job ran in 12 minutes instead of 90, and the bill tracked the work. | Spark · Iceberg · S3 · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
 | 22 | **BigQuery-style serverless analytics** | No cluster to size, no warm-up cost, per-byte scanned billing. I built a Parquet-on-S3 + DuckDB + caching layer that approximates that ergonomics for sub-petabyte scale, with column-pruned reads and result caching keyed by query hash. Not BigQuery — but the same operating model. | DuckDB · Parquet · S3 · dbt | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
 | 23 | **Bloomberg-style market-data plant** | Tick capture, normalized symbology, a real-time reference data service, and a fan-out engine that serves the same tick to dozens of subscribers without re-parsing. The hard part is the symbology map — `ticker → FIGI → CUSIP` — and the fact that a single ticker can map to 4 underlying instruments. | Kafka · Flink · gRPC · Redis · Postgres | [`data-engineering/bloomberg-symbology/`](data-engineering/bloomberg-symbology/) |
@@ -546,6 +560,21 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 - **Writing / articles** → see [Writing & Interview Prep](#-writing--interview-prep) and `medium/`.
 - **Resume assets** → `Resume/`.
 
+### Top-level entry points (read me first if you land in a subdirectory)
+
+| Directory | What's inside | Read |
+|-----------|---------------|------|
+| `data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](data-engineering/README.md) |
+| `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](ai-engineering/README.md) |
+| `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](agentic-ai/README.md) |
+| `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](ml/README.md) |
+| `realtime-stock-pipeline/` | Kafka + Flink + Postgres + Grafana reference build | [realtime-stock-pipeline/README.md](realtime-stock-pipeline/README.md) |
+| `leads-pipeline/` | Cold-email + AI resume tailoring pipeline (the side hustle) | [leads-pipeline/README.md](leads-pipeline/README.md) |
+| `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
+| `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
+| `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
+| `postgres_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgres_cdc_kafka/README.md](postgres_cdc_kafka/README.md) |
+
 ---
 
 ## Repository Layout (Recommended)
@@ -592,7 +621,7 @@ data-etl-ml/
 │   ├── ml/   (deep_Learning, GenAI-Pinnacle, LLM, ai-agent, vector-ebedding, …)
 │   ├── ai-engineering/   (course sub-folders)
 │   ├── golang/order-etl-pipeline/
-│   └── postgress_cdc_kafka/
+│   └── postgres_cdc_kafka/
 ├── 03-content/                 # Writing & teaching
 │   └── medium/                 # Medium articles + interview guides
 ├── 04-career/                  # Resume assets
@@ -606,11 +635,11 @@ data-etl-ml/
 │   └── Senior Delivery Consultant - Data Engineering/
 ├── docs/                       # Screenshots, demo GIFs, social preview HTML
 │   └── assets/
-├── scripts/                    # repo_stats.sh and similar
+├── scripts/                    # repo_stats.sh, docker_start.sh, maintenance/
 ├── infra/                      # Top-level Docker, env, requirements
 │   ├── docker-compose.yml
 │   ├── requirements.txt
-│   └── clean_repo.sh
+│   └── (clean_repo.sh now lives in scripts/maintenance/)
 ├── .github/                    # REPO_ABOUT, SOCIAL_PREVIEW, issue/PR templates
 ├── LICENSE                     # MIT
 ├── CONTRIBUTING.md
@@ -627,7 +656,7 @@ data-etl-ml/
 4. Move `medium/` into `03-content/medium/`.
 5. Move `Resume/` into `04-career/Resume/`.
 6. Move scratch / template folders into `05-reference/`.
-7. Move `docker-compose.yml`, `clean_repo.sh`, `requirements.txt` to `infra/`.
+7. Move `docker-compose.yml`, `scripts/maintenance/clean_repo.sh`, `requirements.txt` to `infra/`.
 8. Add a short `README.md` to each top-level `0X-…` folder.
 
 ---
@@ -786,6 +815,20 @@ It runs end-to-end on synthetic data, has a README with run commands, has
 tests, has at least one observability hook (logging, metrics, or eval), and
 has a clear extension point (not a sealed demo).
 
+**Q: Is this code safe to run? What's the security posture?**
+Repo-wide security policy is in [SECURITY.md](SECURITY.md) and the latest
+audit findings are in [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md).
+The Dependabot digest (top of the GitHub security tab) lists the open
+advisories on the default branch; the audit doc tracks which have been
+fixed in this branch. There are no real customer / transactional / PII
+data committed here — anything in `leads-pipeline/draft-cron/.tailored_resumes/`
+or `.preview/` is git-ignored.
+
+The `leads-pipeline` container image is published to
+[GHCR](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
+on every push to `main`; see [`docs/CI_CD.md`](docs/CI_CD.md) for the
+release flow and image-tag conventions.
+
 ---
 
 ## Contact
@@ -816,4 +859,7 @@ rag retrieval augmented generation, langchain, langgraph, multi-agent,
 weaviate, pinecone, vector database, llmops, prompt engineering,
 hive, delta lake, iceberg, dbt, airflow, docker, terraform, mlops,
 anti money laundering, aml, sanctions screening, ofac, fincrime.
--->
+-->---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

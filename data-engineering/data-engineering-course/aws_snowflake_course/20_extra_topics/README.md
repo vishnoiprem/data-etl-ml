@@ -155,3 +155,7 @@ covered in the course.
 After L187, the course ends. The 4 quizzes for section 20
 (`section_20a.md`–`section_20d.md`) are split by sub-group so
 each stays manageable in one sitting.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

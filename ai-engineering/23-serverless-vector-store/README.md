@@ -54,3 +54,51 @@ pip install -r requirements.txt
 make build
 make query
 ```
+
+---
+
+## What this is NOT
+
+- **Not Pinecone.** Pinecone is a hosted service with
+  a proprietary index format, a managed control plane,
+  and a per-pod pricing model. This is the *shape* of
+  Pinecone — S3 for storage, Lambda for query, IVF
+  index for ANN — built with primitives you can swap.
+  The managed control plane and the proprietary index
+  are separate problems.
+- **Not a database.** It's a *vector search* store.
+  Metadata filtering, exact-match queries, range
+  scans, and joins all live in the database you
+  parallel-store next to the vectors (Postgres,
+  DynamoDB, S3 + Athena). Don't try to make the
+  vector store do SQL.
+- **Not a real-time ingest path.** The index build is
+  *offline* — 90s on 4 cores for 1M vectors. For
+  per-record real-time ingest you want a different
+  shape (HNSW on a hot host, or a hosted vector
+  store with streaming ingest).
+- **Not the right recall for every use case.** The
+  `nprobe=8` sweet spot gives 0.94 recall@10. For
+  high-stakes RAG (legal, medical) you want 0.99+;
+  bump `nprobe` to 32 and pay the latency.
+
+---
+
+## Related directories
+
+- [`../19-rerank-service/`](../19-rerank-service/) —
+  the rerank layer that runs *after* this store's
+  top-K, raising recall on the final answer.
+- [`../01-enterprise-rag-platform/`](../01-enterprise-rag-platform/) —
+  the RAG platform that consumes this store.
+- [`../16-graph-rag/`](../16-graph-rag/) — the
+  graph-augmented retrieval layer; useful when the
+  flat-vector recall isn't enough.
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the registry / deployment patterns that govern
+  when the index gets rebuilt.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -47,19 +47,37 @@ def cron_lock(name: str, _conn=None):
     The lock auto-releases when the connection closes (even on crash).
     """
     if not HAVE_PG:
-        # DB unavailable → fail-open with a warning
-        yield True
+        # DB unavailable → fail-CLOSED. Previously this yielded True,
+        # which let overlapping cron runs both enter the email-send
+        # phase and double-send. Better to refuse than to send twice.
+        print(
+            "cron_lock: psycopg2 unavailable — refusing to run without "
+            "advisory lock to avoid double-send",
+            file=sys.stderr,
+        )
+        yield False
         return
 
     key = _name_to_key(name)
     own_conn = _conn is None
-    conn = _conn or psycopg2.connect(
-        host=_env("AVILX_DB_HOST", "localhost"),
-        port=int(_env("AVILX_DB_PORT", "5433")),
-        dbname=_env("AVILX_DB_NAME", "avilx_leads"),
-        user=_env("AVILX_DB_USER", "avilx"),
-        password=_env("AVILX_DB_PASSWORD", "avilx"),
-    )
+    try:
+        conn = _conn or psycopg2.connect(
+            host=_env("AVILX_DB_HOST", "localhost"),
+            port=int(_env("AVILX_DB_PORT", "5433")),
+            dbname=_env("AVILX_DB_NAME", "avilx_leads"),
+            user=_env("AVILX_DB_USER", "avilx"),
+            password=_env("AVILX_DB_PASSWORD", "avilx"),
+            # Bound the time we can hang on an unreachable DB.
+            # Without this, a network partition would block the
+            # cron for the OS-default TCP timeout (often minutes).
+            connect_timeout=5,
+        )
+    except psycopg2.OperationalError as e:
+        print(f"cron_lock: could not connect to DB ({e.__class__.__name__}) — "
+              f"refusing to run without lock to avoid double-send",
+              file=sys.stderr)
+        yield False
+        return
     try:
         cur = conn.cursor()
         cur.execute("SELECT pg_try_advisory_lock(%s)", (key,))

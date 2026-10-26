@@ -13,3 +13,7 @@
 
 **Working demo:** `code/create_dashboard.py` (idempotent, `--dry-run`)
 + `code/test_create_dashboard.py` (4 moto tests).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

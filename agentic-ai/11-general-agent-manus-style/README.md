@@ -59,3 +59,54 @@ The 3rd one is the right behavior. The agent shouldn't book a $400 flight withou
 pip install -r requirements.txt
 make demo
 ```
+
+---
+
+## What this is NOT
+
+- **Not Manus.** Manus is a closed product with a
+  frontier model, a hosted browser sandbox, and a
+  polished UX. This is the *planner-executor +
+  verifier + guardrails* shape, built with
+  primitives you can swap. The closed-product
+  polish is a separate problem.
+- **Not AGI.** "General-purpose" means "can call
+  any tool in the allowlist" — not "can do anything
+  a human can." The 50-step / $2 / 30-min budget
+  is the explicit bound.
+- **Not a chat product.** There's no streaming UI,
+  no memory across sessions, no user accounts. The
+  agent is one-shot: hand it a goal, get a result.
+- **Not a payment authorization agent.** The
+  "book a flight" example is the *right* behavior:
+  the agent stopped, asked for approval, and the
+  user said no. Production payment agents need
+  stricter auth than a tool allowlist.
+
+---
+
+## Related directories
+
+- [`../8-swe-agent-devin-style/`](../8-swe-agent-devin-style/) —
+  the SWE-specific cousin: same planner-executor
+  shape, scoped to code, with a sandbox + test
+  runner.
+- [`../9-terminal-agent-claude-code/`](../9-terminal-agent-claude-code/) —
+  the terminal-specific cousin: agent in the
+  shell, same guardrails, shell-bound tools.
+- [`../10-ide-agent-cursor-style/`](../10-ide-agent-cursor-style/) —
+  the IDE-specific cousin: agent in the editor,
+  scoped to the current file and project.
+- [`../16-autonomous-loop/`](../16-autonomous-loop/) —
+  the bounded-loop + budget + retry pattern that
+  the executor loop in this build is a
+  generalized version of.
+- [`../15-multi-agent-debate/`](../15-multi-agent-debate/) —
+  the multi-agent verifier pattern; useful when a
+  single LLM call isn't a reliable signal for
+  "did this step work?"
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -123,3 +123,7 @@ The `KEY VALUE` is the only thing the tablet needs.
         -H "x-api-key: $KEY" \
         -d '{"defect_description": "smoke from cabinet on line 2"}'
    ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

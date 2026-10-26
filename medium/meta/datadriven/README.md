@@ -1117,3 +1117,7 @@ Seen
 The Shape of a Run
 Sr. Data Engineer (L5)
 Two log lines bracket every process. Pair them and the fleet's rhythm appears.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

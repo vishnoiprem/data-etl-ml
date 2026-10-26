@@ -25,3 +25,7 @@ the end of this section you'll be comfortable with: practice quiz — materializ
 Section 05 is **DRY principles — CTEs, dbt_project.yml configs, and your first dbt macros (with logging, run_query, and if-execute guards).**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

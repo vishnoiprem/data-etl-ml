@@ -151,3 +151,7 @@ on a whiteboard. That's the target.
 This module has no service. It's a meta-lesson. But the rest of the
 course does. Start with the **Read-Heavy** track — it's the
 foundation everything else builds on.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -205,3 +205,7 @@ When presenting this design, hit these beats in order:
 
 **Bonus:** Mention the **"peeking penalty"** in plain English — "if you check 20 times,
 your nominal 5% false-positive rate becomes ~30% without correction."
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

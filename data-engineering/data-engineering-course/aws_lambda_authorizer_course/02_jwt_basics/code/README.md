@@ -66,3 +66,7 @@ Expected test output: **5 passed**.
   Manager.
 - See `../lecture_scripts/L10_verifying_in_python.md` for the lecture
   that walks through this code.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

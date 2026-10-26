@@ -16,6 +16,11 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
 
+try:
+    from cover_letter import render_for_mode as _render_for_mode
+except Exception:  # pragma: no cover
+    _render_for_mode = None
+
 
 def _short_id() -> str:
     """Generate a short, URL-safe tracking id like 'dremio-3k9a'."""
@@ -23,7 +28,8 @@ def _short_id() -> str:
 
 
 # ============================================================
-# 50 leads from lead-finder-scout (Oct 11, 2026)
+# 50 leads from lead-finder-scout (Oct 11, 2026) +
+#  5 senior remote AI leads from lead-finder-scout (Oct 12, 2026)
 # Each lead: company, role, jd_text, source_url, source
 # Email is None for all (ATS-gated). We derive a candidate.
 # ============================================================
@@ -76,6 +82,13 @@ LEADS = [
     {"company": "Teneo",                      "role": "AI/ML Engineering Senior Consultant",                       "contact_email": "careers@teneo.com",      "source_url": "https://www.teneo.com/careers/open-positions/", "source": "teneo.com", "jd_text": "Hiring at Consultant and Senior Consultant levels. AI engineer focus. Should understand ML disciplines."},
     {"company": "Bold Metrics",               "role": "Data Engineer | Remote (USA, MN)",                          "contact_email": "careers@boldmetrics.com","source_url": "https://hnhiring.com/locations/remote/months/january-2022", "source": "hnhiring", "jd_text": "Data Engineer. Remote USA/MN. Senior data engineering."},
     {"company": "Pairio",                     "role": "Senior Swift Engineer",                                     "contact_email": "careers@pairio.com",     "source_url": "https://hnhiring.com/search?technologies=ruby&locations=remote", "source": "hnhiring", "jd_text": "AI security focus: prompt injection, data isolation between customers, sensitive data. Senior Swift engineer at AI platform."},
+
+    # === lead-finder-scout Oct 12, 2026 — top 5 senior remote AI/ML/data ===
+    {"company": "Mastra",        "role": "AI Engineer (Open-source agent framework)",     "contact_email": "jobs@ashbyhq.com",          "source_url": "https://jobs.ashbyhq.com/mastra/531a3fe8-556f-4b83-bee7-20374f67f980", "source": "hn_algolia_24h", "jd_text": "Open-source TypeScript framework for building AI agents. Shipped agents and agentic applications into production. Global remote AMER/EMEA. Senior+ AI/agent engineering."},
+    {"company": "Axmed",         "role": "AI Engineer (Agentic Systems)",                  "contact_email": "careers@axmed.com",         "source_url": "https://axmed.teamtailor.com/jobs/8175859-ai-engineer",            "source": "hn_algolia_24h", "jd_text": "Python, LangChain/LangGraph/LlamaIndex/CrewAI, LLM APIs. Healthcare supply-chain procurement agent platform. Regulated industry, global emerging-market rollout."},
+    {"company": "Namespace",     "role": "Engineering Lead (Infra/AI)",                     "contact_email": "hannah@namespacelabs.com",  "source_url": "https://news.ycombinator.com/item?id=49922569",                  "source": "hn_algolia_24h", "jd_text": "Building a global, vertically integrated infra stack (custom server racks, hypervisor, scheduler) to power software development for SpaceXAI, Ramp, Sierra. Senior infra/MLOps."},
+    {"company": "OneChronos",   "role": "Engineering Manager, Data Platform",              "contact_email": "careers@onechronos.com",    "source_url": "https://hnhiring.com/locations/remote",                          "source": "hnhiring_24h",  "jd_text": "$180,000-$250,000. Python, SQL, Rust, TypeScript; Temporal/Airflow/Dagster; Parquet/Arrow. Trading infra firm. Include 'HackerNews' in subject."},
+    {"company": "Manifest",      "role": "Senior Infrastructure Engineer (FedRAMP a plus)", "contact_email": "careers@manifest.com",      "source_url": "https://job-boards.greenhouse.io/manifest/jobs/4399435009",       "source": "hnhiring_24h",  "jd_text": "$150K-$210K + equity. K8s, Terraform/Helm, CI/CD; FedRAMP/air-gapped a plus. US remote. Senior infra engineering with regulated exposure."},
 ]
 
 
@@ -86,6 +99,17 @@ JUNK_EMAIL_RE = re.compile(
 )
 JUNK_COMPANY_RE = re.compile(
     r"^(?:TestCo|OldCo|DemoCo|SampleCo|FakeCo)[-_]?[a-f0-9]+$", re.I
+)
+# Generic ATS / no-recruiter inboxes: mailing these is wasted because no
+# human reads careers@ or jobs@ — it goes straight to a Workday/Greenhouse
+# upload queue and gets auto-acknowledged (or auto-rejected) without ever
+# being read. We only filter on the LOCAL part of the email so a
+# legitimate "alex@careers.sequoia.com" still passes.
+ATS_INBOX_RE = re.compile(
+    r"^(?:careers|jobs|talent|recruiting|recruitment|hr|hello|hiring|"
+    r"apply|applications?|no-reply|noreply|donotreply|privacy|support|info|"
+    r"contact|admin|press|partnerships|sales|marketing)@",
+    re.I,
 )
 
 
@@ -98,7 +122,29 @@ def is_junk(lead: dict) -> bool:
         return True
     if "test" in co.lower() and len(co) < 12:
         return True
+    if em and ATS_INBOX_RE.match(em):
+        # Generic ATS inbox: filter out unless the domain looks like a
+        # small-company founder-style address (rare, but e.g.
+        # careers@early-stage-startup.io). Heuristic: the company name
+        # is < 25 chars and not on the public-companies blocklist.
+        return True
     return False
+
+
+# Public companies where the careers@ inbox is virtually never read by a
+# human and ATS uploads are the only realistic application path. These
+# should not be cold-pitched even if their email is technically valid —
+# the pod model only works with a real contact.
+_ATS_BLACKLIST = {
+    "airbnb", "snowflake", "scale ai", "anthropic", "mistral ai",
+    "perplexity", "cohere", "hugging face", "jetbrains", "samsara",
+    "prudential financial", "toptal", "tether operations limited",
+}
+
+
+def is_ats_giant(lead: dict) -> bool:
+    co = (lead.get("company") or "").strip().lower()
+    return co in _ATS_BLACKLIST
 
 
 def main():
@@ -120,6 +166,7 @@ def main():
     inserted = 0
     skipped_dup = 0
     skipped_junk = 0
+    skipped_ats = 0
     errors = 0
     queue_seen = set()
     for lead in LEADS:
@@ -131,6 +178,10 @@ def main():
             skipped_dup += 1
             print(f"  ⏭  DUP   {co[:30]:30s} {em}")
             continue
+        if is_ats_giant(lead):
+            skipped_ats += 1
+            print(f"  ⏭  ATS   {co[:30]:30s} (careers-only inbox, no human reads it)")
+            continue
         if is_junk(lead):
             skipped_junk += 1
             print(f"  ⏭  JUNK  {co[:30]:30s} {em}")
@@ -138,20 +189,47 @@ def main():
         # build a short tracking id like 'dremio-3k9a'
         slug = re.sub(r"[^a-z0-9]+", "-", co.lower())[:12].strip("-") or "lead"
         tid = f"{slug}-{_short_id()}"
+        # Render cover letter at insert time so the lead has a real
+        # [Avilx Pod Pitch] subject + personalized body. Without this
+        # the lead row stores NULL cover_letter_* and _send_one falls
+        # back to "Avilx × {company}", which lacks the mode prefix.
+        if _render_for_mode is not None:
+            try:
+                _subj, _body = _render_for_mode({
+                    "company": co,
+                    "role": role,
+                    "jd_text": lead.get("jd_text", "") or "",
+                    "apply_mode": "pitch_pod",
+                })
+            except Exception:
+                _subj, _body = "", ""
+        else:
+            _subj, _body = "", ""
         try:
             with ls.get_cursor() as cur:
+                # Target the partial unique index on (company, email,
+                # role) so we DON'T silently skip on tracking_id
+                # collisions. WHERE must match the index predicate for
+                # PG to infer the right index (PG 11+ syntax).
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email,
-                         source_url, jd_text, source, status,
+                         source_url, jd_text, source, status, apply_mode,
+                         cover_letter_subject, cover_letter_body,
                          created_at, updated_at)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending',
+                            'pitch_pod', %s, %s,
                             NOW(), NOW())
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
+                    WHERE contact_email IS NOT NULL
+                      AND role IS NOT NULL
+                      AND role != ''
+                    DO NOTHING
                     RETURNING id
                 """, (
                     tid, co, role, em,
                     lead["source_url"], lead["jd_text"], lead["source"],
+                    _subj, _body,
                 ))
                 row = cur.fetchone()
             if row:
@@ -166,7 +244,7 @@ def main():
             print(f"  ❌ ERR   {co[:30]:30s} {e}")
 
     print()
-    print(f"📊 Summary: inserted={inserted}, dup={skipped_dup}, junk={skipped_junk}, errors={errors}")
+    print(f"📊 Summary: inserted={inserted}, dup={skipped_dup}, ats={skipped_ats}, junk={skipped_junk}, errors={errors}")
     return 0
 
 

@@ -133,12 +133,20 @@ See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full document.
 
 ## Paired learning resources
 
-- **Lesson labs** — [`../../practice/level-3-prompt-engineering/`](../../practice/level-3-prompt-engineering/) covers the prompt patterns this starter uses
+- **Lesson labs** — [`../../practice/level-2-prompt-engineering/`](../../practice/level-2-prompt-engineering/) covers the CRAFT, few-shot, CoT, and structured-output prompt patterns this starter uses
 - **Codebook** — [`../../workbooks/ai-engineer-codebook.md`](../../workbooks/ai-engineer-codebook.md) § 3 covers CRAFT and outline patterns
 - **Exercises** — [`../../workbooks/exercises/section-3-prompt-engineering-exercises.md`](../../workbooks/exercises/section-3-prompt-engineering-exercises.md) extends what you build here
 
 ---
 
-## License
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
 
-MIT — use freely in your own products.
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -72,3 +72,7 @@ pipeline. The pipeline uses the **S3 event-source mapping** you
 learned about in L20 — so if the distinction between sync, async,
 and poll-based invocations is not yet automatic, work through
 L20–L21 again before moving on.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

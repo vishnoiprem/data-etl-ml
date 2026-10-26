@@ -87,3 +87,8 @@ cd projects/03-distilled-slm && python3 slm/eval.py --baseline ../../phase-2-cor
 The 4 projects are the work. The 5 case studies are the *lessons*. The portfolio is the *narrative*. The runbook (Phase 3, `../phase-3-deployment/consulting/04-runbook.md`) is the *operational continuity*.
 
 The artifact that goes on the FDE's LinkedIn is `case-studies/PORTFOLIO-NARRATIVE.md` (the 1-page version). The artifact that goes in a job interview is the same file (the 3-page version, with code links). The artifact that goes in the 10-minute live demo is `case-studies/CAPSTONE-PRESENTATION.md` + the running services.
+
+---
+
+**Last updated:** 2026-10-21
+**License:** MIT — use freely in your own courses, prototypes, and products.  

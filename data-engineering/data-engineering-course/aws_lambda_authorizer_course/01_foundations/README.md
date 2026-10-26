@@ -33,3 +33,7 @@ By the end of these four lectures you'll be able to:
 - This section has no runnable code; the first hands-on lab is in
   section 2 (`02_jwt_basics/code/jwt_verify.py`).
 - The quiz for this section is in `../quizzes/section_1.md`.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

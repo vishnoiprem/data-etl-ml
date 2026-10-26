@@ -15,3 +15,7 @@ By the end of this section you should understand *what* CloudWatch is,
 *why* it exists alongside other AWS services, and *where* to find each
 sub-service in the console. Sections 2–6 then dive into the sub-services
 one by one; section 7 puts them together into real-world patterns.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

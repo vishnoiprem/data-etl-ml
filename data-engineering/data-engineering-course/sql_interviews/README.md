@@ -77,3 +77,7 @@ By the end of the track you will:
    approximate answers.
 5. Read execution plans at a high level and call out where a
    query is doing unnecessary work.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

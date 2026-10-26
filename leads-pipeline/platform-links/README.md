@@ -63,3 +63,7 @@
 
 **Total setup time: ~6 hours** for a complete platform presence.
 After that, daily 60-90 min to scan + submit.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

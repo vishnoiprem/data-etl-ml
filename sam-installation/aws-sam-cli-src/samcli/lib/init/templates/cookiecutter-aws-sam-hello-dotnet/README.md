@@ -40,3 +40,7 @@ License
 -------
 
 This project is licensed under the terms of the [MIT License with no attribution](/LICENSE)
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

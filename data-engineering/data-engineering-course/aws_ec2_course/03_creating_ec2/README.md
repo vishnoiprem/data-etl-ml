@@ -83,3 +83,7 @@ Section 4 (`04_ec2_pricing/`) covers the **money**: on-demand, reserved
 instances, savings plans, and spot. Section 3 shows you how to
 *create* an instance; section 4 shows you how to *price* one before
 you click "Launch".
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

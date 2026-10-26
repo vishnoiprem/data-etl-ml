@@ -66,3 +66,56 @@ Per-tenant routing, cost attribution that lands in the same dashboard as p95 lat
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not OpenAI / Anthropic.** Those are the
+  closed-weights API providers; their
+  multi-tenant gateway is the production version
+  of this pattern. This is the *allow()
+  decision* in ~100 lines.
+- **Not a billing system.** The gateway knows
+  the *budget*; it doesn't issue invoices. The
+  billing integration (Stripe, invoicing, dunning)
+  is a separate system that consumes the per-tenant
+  usage report.
+- **Not an auth layer.** The `tenant_id` is
+  assumed; the gateway doesn't verify the
+  caller. Pair it with an auth middleware (JWT
+  verification, API key check) before the
+  gateway in the request path.
+- **Not a substitute for the per-request budget
+  guard.** The per-tenant daily budget is
+  *cumulative*; the per-request budget guard
+  (in
+  [`../26-mistral-self-host/`](../26-mistral-self-host/))
+  is *per-call*. They protect against different
+  failure modes — one tenant with a 200K-context
+  paste (per-request) vs one team that slowly
+  burns through the daily budget (per-tenant).
+  You need both.
+
+---
+
+## Related directories
+
+- [`../24-vertex-style-platform/`](../24-vertex-style-platform/) —
+  the multi-backend gateway that this per-tenant
+  fairness layer builds on top of.
+- [`../26-mistral-self-host/`](../26-mistral-self-host/) —
+  the per-request budget guard that complements
+  this per-tenant cumulative limit.
+- [`../36-together-gpu-cloud/`](../36-together-gpu-cloud/) —
+  the GPU pool / autoscaler that the per-tenant
+  load shaping feeds into.
+- [`../../data-engineering/multi-tenant-isolation/`](../../data-engineering/multi-tenant-isolation/) —
+  the broader multi-tenant patterns (Postgres
+  RLS, per-tenant keys) that the tenant-id
+  here assumes.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -24,3 +24,7 @@ event-driven rules (EventBridge).
 | Project | Stack summary | Tests |
 |---|---|---|
 | `code/app-sync-sfn/` | AppSync GraphQL API + 1 resolver Lambda + Step Functions state machine | 7 Jest assertions on schema + state machine |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

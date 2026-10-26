@@ -18,7 +18,7 @@ Each rule returns a list of RuleAlert records.
 
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -53,13 +53,27 @@ class RuleAlert:
     country_code: str
     trigger_value: float = 0.0
     trigger_unit: str = ""
-    created_date: str = field(default_factory=lambda: datetime.utcnow().strftime("%Y-%m-%d"))
+    created_date: str = field(default_factory=lambda: datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     status: str = "open"
 
 
 def _make_alert_id(rule_id: str, customer_id: str) -> str:
-    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
-    return f"ALT_{rule_id}_{customer_id[:8]}_{ts}"
+    """Generate a unique alert ID.
+
+    The previous version used a per-second timestamp + customer_id prefix,
+    which collided when a customer triggered the same rule twice in the
+    same second (not unusual for high-volume CTR scenarios). Now includes
+    a monotonic sequence number + microsecond precision, so two alerts
+    generated in the same call are guaranteed distinct.
+    """
+    # Module-level sequence counter survives across calls in the same
+    # process. Wrap with a lock if you call this from multiple threads.
+    _make_alert_id._seq += 1
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+    return f"ALT_{rule_id}_{customer_id[:8]}_{ts}_{_make_alert_id._seq:04d}"
+
+
+_make_alert_id._seq = 0  # type: ignore[attr-defined]
 
 
 # ─────────────────────────────────────────────

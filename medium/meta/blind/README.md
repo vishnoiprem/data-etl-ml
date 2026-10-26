@@ -248,3 +248,7 @@ Quantify everything. "Improved performance by 40%" beats "made it faster".
 5. When you can solve any of these in <8 minutes cold, you're ready.
 
 The clock is the boss.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

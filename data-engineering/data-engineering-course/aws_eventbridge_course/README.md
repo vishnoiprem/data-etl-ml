@@ -86,3 +86,7 @@ aws_eventbridge_course/
 3. Work through the sections in order — each one builds on the previous.
 4. Run the section's `code/` tests after reading the lecture.
 5. Take the section quiz in `quizzes/section_N.md` before moving on.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -82,3 +82,7 @@ The vision track. From a single conv layer to ResNet-152. From image classificat
 ## Lead lesson
 
 See `01-building-a-cnn-from-scratch.md` for the full worked example: build a CNN in NumPy (forward pass only, for intuition), then build and train the real one in PyTorch on CIFAR-10, hitting 75% accuracy.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

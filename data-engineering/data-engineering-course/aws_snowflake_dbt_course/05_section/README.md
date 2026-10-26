@@ -33,3 +33,7 @@ the end of this section you'll be comfortable with: dry principles, macros.
 Section 06 is **dbt run, dbt test, dbt docs, dbt seed, plus compile/ls/clean/build — the daily-driver command set.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

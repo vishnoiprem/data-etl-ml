@@ -128,3 +128,7 @@ L36 closes the course with:
   thank-you from the author.
 
 Welcome to the next pattern you build.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -33,3 +33,7 @@ This module covers the full adaptation stack: from full fine-tuning to LoRA to p
 ## The Lead Lesson
 
 > **Lesson 1 — [How Does Fine-Tuning Work?](./01-how-does-fine-tuning-work.md)** — the foundational lesson. Worked example: take a 7B base model, fine-tune it on a 10K-example instruction dataset, compare full fine-tuning vs LoRA on (a) quality on a held-out set, (b) GPU memory, (c) wall-clock time. Numbers, not vibes.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

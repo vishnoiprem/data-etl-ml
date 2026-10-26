@@ -27,3 +27,7 @@ and a production one.
 The `hello-cdk/` stack already has 5 fine-grained assertions (L24
 style) in its own test file; the snapshot demo adds an alternative
 style for comparison.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

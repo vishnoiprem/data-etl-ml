@@ -54,3 +54,8 @@ This section maps to **Phase 2 (Applications) + Phase 4 (Capstone)** of the FDE 
 ## The thesis
 
 **The right agent is the simplest agent that solves the problem.** A reactive one-shot agent is better than a proactive loop when the task is single-step. A single-purpose agent is better than a general-purpose agent when the tool list is bounded. A single agent is better than a multi-agent system when the state fits in one prompt. **The FDE picks the simplest topology that satisfies the 4-axis rubric (tool count, plan depth, agent count, latency budget) and adds complexity only when the rubric demands it.**
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

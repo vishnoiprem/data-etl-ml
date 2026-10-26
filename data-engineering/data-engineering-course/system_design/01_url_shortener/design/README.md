@@ -161,3 +161,7 @@ In production:
 | `code/loadtest.py` | Synthetic read-heavy load tester. |
 | `tests/test_service.py` | Unit tests for the core service. |
 | `tests/test_app.py` | HTTP-level tests using Flask's test client. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

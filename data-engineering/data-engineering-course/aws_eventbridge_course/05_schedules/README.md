@@ -76,3 +76,7 @@ python3 -m pytest 05_schedules/code/test_schedule_cron.py -v
 
 See `../quizzes/section_5.md` for 10 questions on Scheduler, cron
 syntax, rate expressions, time zones, and flexible windows.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -27,3 +27,7 @@ the end of this section you'll be comfortable with: git basics + branching + prs
 Section 10 is **Python models — `def model(dbt, session)` and the package/execution constraints you need to know for the exam.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

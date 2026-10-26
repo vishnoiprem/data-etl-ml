@@ -36,3 +36,7 @@ export AWS_REGION=us-east-1
 python list_s3_buckets.py
 # -> {"count": N, "buckets": [{"name": ..., "region": ..., "created_at": ...}, ...]}
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

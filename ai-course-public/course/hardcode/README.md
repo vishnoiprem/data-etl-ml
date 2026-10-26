@@ -141,7 +141,18 @@ If you finish a `practice/` lab and want to see "how do I actually ship this?", 
 | Reliable business outcomes | 11, 12, 17, 18 |
 
 ---
-
-**Last updated:** 2026-10-09
 **Style:** Production-grade, multi-file, async, observable
 **Goal:** You finish this track and you can build + ship any AI system to production.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

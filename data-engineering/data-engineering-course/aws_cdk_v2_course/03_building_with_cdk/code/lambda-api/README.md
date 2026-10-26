@@ -35,3 +35,7 @@ npx cdk destroy
 | `cdk.json` | Tells the CDK CLI how to run the app |
 | `tsconfig.json` | TypeScript compiler options |
 | `package.json` | npm deps (`aws-cdk-lib`, `constructs`, `jest`, ...) |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

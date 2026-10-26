@@ -308,3 +308,7 @@ A reliable system stays correct under failure.
   to find weaknesses.
 - **Observability**: metrics, logs, traces. If you can't see it, you
   can't fix it.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -187,7 +187,11 @@ Phase 1-5 made you a builder. Phase 6 makes you a candidate. The 4-step framewor
 
 ---
 
-**Last updated:** 2026-10-09
 **Length:** ~3 weeks full-time prep (assuming Phase 1-5 portfolio is complete)
 **Cost:** $0 (reuses the Phase 1-5 portfolio)
 **Goal:** You can put "FDE @ Anthropic / OpenAI / Palantir" on your LinkedIn.
+
+---
+
+**Last updated:** 2026-10-21
+**License:** MIT — use freely in your own courses, prototypes, and products.  

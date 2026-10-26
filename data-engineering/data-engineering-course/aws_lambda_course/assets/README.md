@@ -101,3 +101,7 @@ re-render is needed for GitHub viewing.
 | `mermaid.live` | Quick interactive view in a browser |
 | VS Code + `bierner.markdown-mermaid` | Inline preview in `.md` |
 | Marp / Quarto | Slide-deck embedding |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -32,3 +32,7 @@ If you have **40 minutes**, also do L22 and run `code/pricing_calc.py` against t
 ## Quiz
 
 After L22, take `../../quizzes/section_4.md`. The pass bar is **7 out of 10**. If you miss more than three, re-read L19 and re-run `pricing_calc.py` — the questions are designed to be answerable directly from the calculator output.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

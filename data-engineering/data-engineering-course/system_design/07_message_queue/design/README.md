@@ -359,3 +359,7 @@ We pick at-least-once, document the requirement, and use Snowflake
 - The service does *not* run a background thread — consume is
   request-driven, which keeps the API fully synchronous and
   testable.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

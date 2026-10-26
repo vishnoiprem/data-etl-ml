@@ -150,3 +150,7 @@ or set the env vars above.
 ## License
 
 MIT. No warranty. Not financial advice.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

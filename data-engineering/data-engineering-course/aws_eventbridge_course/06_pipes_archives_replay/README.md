@@ -81,3 +81,7 @@ python3 -m pytest 06_pipes_archives_replay/code/test_archive_replay.py -v
 
 See `../quizzes/section_6.md` for 10 questions on Pipes vs
 Rules, partial batch response, archives, and replay.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

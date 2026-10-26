@@ -66,3 +66,7 @@ including 3 dedicated to event-pattern JSON syntax).
 Section 4 — **Targets (L16–L20)** — adds the destination side of the
 rule: Lambda, SQS, SNS, Step Functions, dead-letter queues, retry
 policy.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

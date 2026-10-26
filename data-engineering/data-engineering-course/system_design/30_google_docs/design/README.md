@@ -155,3 +155,7 @@ accepted.
 | `code/app.py` | Flask HTTP API with SSE stream. |
 | `tests/test_service.py` | Insert/delete, version counter, op log, conflict resolution. |
 | `tests/test_app.py` | HTTP smoke for editing + snapshot. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

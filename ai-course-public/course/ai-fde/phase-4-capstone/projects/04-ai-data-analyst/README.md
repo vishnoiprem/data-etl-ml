@@ -235,3 +235,8 @@ blocklist patterns, the sandbox limits, and how to add a new one.
 - [`../01-mcp-drafter/`](../01-mcp-drafter/) — the MCP server (the same `tracker.lookup` tool could be exposed to the analyst for "join against the shipments table")
 - [`../02-multi-agent-dispatcher/`](../02-multi-agent-dispatcher/) — the multi-agent orchestrator (the analyst could be a 4th agent in a future customer)
 - [`../03-distilled-slm/`](../03-distilled-slm/) — the SLM (the code-generation prompt is small enough to be served by a 1.5B model, but Phase 5)
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

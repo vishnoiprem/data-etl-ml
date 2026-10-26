@@ -4,15 +4,37 @@ tests/test_resume_tailor.py — smoke tests for resume_tailor.py.
 Run:  python3 -m tests.test_resume_tailor
 """
 
+import os
 import re
 import sys
 import shutil
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent))
 
-from resume_tailor import (  # noqa
+
+# ── Self-contained: set up a fake source resume BEFORE importing
+#    resume_tailor, because resume_tailor.py reads RESUME_DIR at import
+#    time (it's a module-level constant, not a per-call lookup).
+#    On the GitHub Actions Ubuntu runner the default RESUME_DIR
+#    (~/PycharmProjects/data-etl-ml/Resume) doesn't exist, which made
+#    tailor_resume() return None and the test exit 1 — failing the
+#    leads-ci job for the last 5 runs.
+_RESUME_FAKE_DIR = Path(tempfile.mkdtemp(prefix="test_resume_"))
+os.environ["RESUME_DIR"] = str(_RESUME_FAKE_DIR)
+# Create a minimal docx that python-docx can open + write back.
+try:
+    from docx import Document
+    _doc = Document()
+    _doc.add_paragraph("Test headline paragraph")
+    _doc.add_paragraph("Test summary paragraph two for length padding.")
+    _doc.save(str(_RESUME_FAKE_DIR / "Pv_Cv_Data_Ai_2026.docx"))
+except ImportError:
+    pass  # docx not available — test_tailor_resume_writes_file will skip
+
+from resume_tailor import (  # noqa: E402
     classify_jd, HEADLINES, SUMMARIES, SKILL_RANK_HINTS,
     tailor_resume, HAVE_DOCX,
 )
@@ -104,6 +126,11 @@ def main():
     r2 = test_headline_and_summary_for_each_family()
     r3 = test_tailor_resume_writes_file()
     all_ok = r1 and r2 and r3
+    # Clean up the temp resume dir created at import time
+    try:
+        shutil.rmtree(_RESUME_FAKE_DIR, ignore_errors=True)
+    except Exception:
+        pass
     print(f"\n{'✅ ALL PASS' if all_ok else '❌ SOME FAILED'}")
     sys.exit(0 if all_ok else 1)
 

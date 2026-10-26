@@ -71,3 +71,7 @@ The site uses a dark navy + green palette (trust + growth). To change:
 - No JavaScript
 - Loads in <100ms on any device
 - Lighthouse score: 95+ on all metrics
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

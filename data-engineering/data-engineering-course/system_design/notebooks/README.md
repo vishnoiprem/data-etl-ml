@@ -24,3 +24,7 @@ jupyter notebook
 
 If you don't want to install Jupyter, the same logic lives in plain
 `.py` files alongside each notebook — open them in any editor.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

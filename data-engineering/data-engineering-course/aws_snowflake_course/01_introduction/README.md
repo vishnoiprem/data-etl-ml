@@ -44,3 +44,7 @@ trial with $400 of credits, walk through the Snowflake UI
 (worksheets, databases, warehouses), and set up our first
 virtual warehouse. By L14 you'll know how to size a warehouse,
 set a scaling policy, and monitor usage.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -22,3 +22,7 @@ request.
 `diagrams/jwt_validation_flow.mmd` — sequence: Client → API Gateway
 → Cognito User Pool (JWKS fetch) → Lambda authorizer (validate JWT)
 → Allow/Deny.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -53,3 +53,8 @@ This section maps to **Phase 2 (Applications) + Phase 4 (Capstone)** of the FDE 
 ## The thesis
 
 **The right pattern is the simplest one that solves the problem.** Single agent for 80% of FDE use cases. Sequential pipeline for workflows with clear handoffs. Orchestrator for multi-role workflows. Parallel fan-out for concurrent sub-tasks. HTN for hierarchical plans. Human-in-the-loop for irreversible side effects. **The FDE candidate who can name all 6 patterns and explain the escalation rule is the candidate who can architect a production system.**
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

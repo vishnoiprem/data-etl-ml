@@ -106,6 +106,10 @@ Phase 1 is the on-ramp. After it, you can go to:
 
 ---
 
-**Last updated:** 2026-10-09
 **Tone:** hands-on, FDE-style, with practical code in every lesson
 **Goal:** You finish Phase 1 and you can walk into a customer's office on Monday.
+
+---
+
+**Last updated:** 2026-10-21
+**License:** MIT — use freely in your own courses, prototypes, and products.

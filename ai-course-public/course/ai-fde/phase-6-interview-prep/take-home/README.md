@@ -127,3 +127,8 @@
 4. **Rehearse the 40-minute presentation.** The live demo is the highest-leverage 10 minutes.
 5. **Rehearse with an AI assistant.** Have it score you on the 5 anti-patterns.
 6. **Use the cost model + runbook as the closing line.** "Total cost: $X/month at Y QPS, under the $Z/month ceiling. The runbook is 1 page; the handoff is the 5-question test." That's the FDE answer.
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

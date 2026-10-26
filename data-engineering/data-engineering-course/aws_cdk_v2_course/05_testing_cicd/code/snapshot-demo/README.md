@@ -17,3 +17,7 @@ ls test/__snapshots__/                      # new .snap file
 
 The first run creates `__snapshots__/hello-cdk.snapshot.test.ts.snap`.
 The second run compares; pass the `-u` flag to update.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

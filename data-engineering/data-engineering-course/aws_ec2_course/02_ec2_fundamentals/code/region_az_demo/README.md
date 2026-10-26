@@ -120,3 +120,7 @@ print(mapping["us-east-1a"])   # e.g. "use1-az1"
 - L06 — Regions and Availability Zones (`../../lecture_scripts/L06_regions_and_azs.md`)
 - L08 — Section recap (`../../lecture_scripts/L08_section_recap.md`)
 - AWS: [AZ IDs and account-specific mapping](https://docs.aws.amazon.com/ram/latest/userguide/working-with-az-ids.html)
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

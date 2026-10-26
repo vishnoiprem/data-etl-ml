@@ -28,8 +28,8 @@ jobs:
     name: Audit root requirements
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -38,10 +38,15 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pip-audit==2.10.1
           python -m pip_audit --version
-          # Audit direct deps only (avoids torch/CUDA resolution failures on CI)
-          python -m pip_audit -r requirements.txt --no-deps --disable-pip --format json \
+          # Audit direct deps only (avoids torch/CUDA resolution failures on CI).
+          # Dedupe by package name (first occurrence wins) — pip-audit aborts on
+          # duplicate pins and would otherwise write an empty JSON file.
+          mkdir -p .audit
+          grep -E '^[A-Za-z0-9_.\-]+==[0-9]' requirements.txt \
+            | awk -F'==' '!seen[$1]++' > .audit/root-pinned.txt || true
+          python -m pip_audit -r .audit/root-pinned.txt --no-deps --disable-pip --format json \
               --output .audit/root.json || true
-          python -m pip_audit -r requirements.txt --no-deps --disable-pip --format columns || true
+          python -m pip_audit -r .audit/root-pinned.txt --no-deps --disable-pip --format columns || true
 
   audit-projects:
     name: Audit per-project manifests
@@ -57,9 +62,10 @@ jobs:
           - ai-engineering/05-distributed-inference/requirements.txt
           - ai-engineering/16-graph-rag/requirements.txt
           - ai-engineering/16-graph-rag/requirements-dev.txt
+          - leads-pipeline/draft-cron/requirements.txt
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -68,8 +74,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pip-audit==2.10.1
           if [ -f "${{ matrix.manifest }}" ]; then
-            python -m pip_audit -r "${{ matrix.manifest }}" \
-                --no-deps --disable-pip --format columns || true
+            mkdir -p .audit
+            base=$(echo "${{ matrix.manifest }}" | tr '/' '_')
+            grep -E '^[A-Za-z0-9_.\-]+==[0-9]' "${{ matrix.manifest }}" \
+              | awk -F'==' '!seen[$1]++' > ".audit/${base}-pinned.txt" || true
+            if [ -s ".audit/${base}-pinned.txt" ]; then
+              python -m pip_audit -r ".audit/${base}-pinned.txt" \
+                  --no-deps --disable-pip --format columns || true
+            else
+              echo "::notice::${{ matrix.manifest }} has no pinned deps to audit"
+            fi
           else
             echo "::notice::${{ matrix.manifest }} not found — skipping"
           fi
@@ -80,14 +94,17 @@ jobs:
     needs: [audit-root, audit-projects]
     if: always()
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Build SARIF
         run: |
           python -m pip install --quiet pip-audit==2.10.1
-          python -m pip_audit -r requirements.txt --no-deps --disable-pip \
+          mkdir -p .audit
+          grep -E '^[A-Za-z0-9_.\-]+==[0-9]' requirements.txt \
+            | awk -F'==' '!seen[$1]++' > .audit/sarif-pinned.txt || true
+          python -m pip_audit -r .audit/sarif-pinned.txt --no-deps --disable-pip \
               --format sarif --output .audit/pip-audit.sarif || true
       - name: Upload to code-scanning
         if: hashFiles('.audit/pip-audit.sarif') != ''

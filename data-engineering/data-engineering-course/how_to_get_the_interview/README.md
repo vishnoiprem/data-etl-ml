@@ -159,3 +159,7 @@ do less work in your job search while getting more responses.
 - For the interviews themselves: see `data-engineering-course/system_design/` and `data-engineering-course/behavioral_interviews/`.
 - For data engineering foundations: see `data-engineering/data-enginnering-cloudvala/`.
 - Author articles: <https://medium.com/@premvishnoi>
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

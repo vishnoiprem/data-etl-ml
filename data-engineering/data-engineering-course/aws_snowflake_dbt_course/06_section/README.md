@@ -30,3 +30,7 @@ the end of this section you'll be comfortable with: dbt run, test, docs, seed, c
 Section 07 is **dbt_project.yml configs in depth — hierarchical configs, custom schemas, variables, and the `alias` config.**.
 
 **Author:** Prem Vishnoi — pvishnoi@avilx.com
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

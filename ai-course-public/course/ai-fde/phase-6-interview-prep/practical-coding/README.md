@@ -124,3 +124,8 @@
 | 3. "What's the bug you fixed, and how would you prevent it?" | "The bug was a race condition in the rate limiter — the in-process dict wasn't thread-safe. The fix was to add a lock. The prevention is to use Redis (Phase 5 P1) for cross-worker consistency. The postmortem is in the repo." |
 
 **Memorize these 3.** They're the Q&A for 80% of practical-coding follow-ups.
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

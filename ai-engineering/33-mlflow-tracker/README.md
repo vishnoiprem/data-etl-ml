@@ -64,3 +64,51 @@ Every run, every hyperparameter, every metric, every artifact — queryable. The
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not W&B / MLflow / Neptune.** Those are hosted
+  experiment-tracking platforms with a UI, team
+  features, and a managed ClickHouse. This is the
+  *schema* (Run → Config + Metrics + Artifacts) in
+  pure stdlib, so you can see what those platforms
+  are doing. Use them in production.
+- **Not a real-time metrics store.** The tracker is
+  for *query* ("which run had the best recall?"),
+  not *push* ("alert me when loss spikes"). For
+  real-time, use Prometheus + Grafana.
+- **Not a model registry.** The tracker stores
+  *artifact paths*; the model registry holds the
+  model *metadata + promotion state*. The two
+  integrate (the registry points to the artifact
+  in S3, the tracker records which run produced
+  it), but they're different concerns.
+- **Not a substitute for discipline.** The
+  "persist on every log" rule is the only thing
+  standing between a 2-hour run and a 1-hour
+  crash. The schema doesn't enforce it; the
+  developer does.
+
+---
+
+## Related directories
+
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework whose `RunRecord` is the
+  per-run row the tracker persists.
+- [`../37-frontier-research-pipeline/`](../37-frontier-research-pipeline/) —
+  the research pipeline that produces the runs
+  the tracker queries.
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the deployment + canary + rollback patterns
+  that consume the tracker's `best()` query.
+- [`../28-rlhf-dpo-train/`](../28-rlhf-dpo-train/) —
+  the alignment training whose ablation sweeps
+  land as many runs in the tracker.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

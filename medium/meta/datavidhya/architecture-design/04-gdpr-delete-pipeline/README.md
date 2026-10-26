@@ -229,3 +229,7 @@ python pyspark/audit_report.py --user-id user_42 --output report.pdf
 6. **Aggregates** — derived data may still re-identify; regenerate or suppress
 7. **30-day SLA** — workflow orchestration with Temporal/Airflow; SLA monitoring
 8. **ML implications** — embeddings must be regenerated; models don't need retraining
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -26,3 +26,7 @@ This module covers the sampling layer: temperature, top-k, top-p, and token stre
 ## The Lead Lesson
 
 > **Lesson 1 — [Temperature](./01-temperature.md)** — the most over-discussed, under-understood knob. Worked example: same prompt, four temperatures (0.0, 0.3, 0.7, 1.2). Show the softmax distributions, the probability spread, and the resulting text quality/diversity tradeoff with measured numbers.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

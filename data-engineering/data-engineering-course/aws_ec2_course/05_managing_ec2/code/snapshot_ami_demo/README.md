@@ -109,3 +109,7 @@ waiter when one is available.
 - `snapshot_ami_demo.py` — the script.
 - `test_snapshot_ami_demo.py` — 4 pytest tests using `@mock_aws`.
 - `README.md` — this file.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -60,3 +60,51 @@ The full alignment path: SFT → reward model → policy with KL constraint. DPO
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not a PPO-with-reward-model implementation.** DPO
+  is the modern replacement. PPO needs a separate
+  reward model, rollouts, and a value head; DPO
+  drops all three. If you have a PPO setup, keep it;
+  if you're starting new, start with DPO.
+- **Not SFT.** RLHF / DPO is the *second* stage of
+  alignment. The first is supervised fine-tuning on
+  instruction-response data. Don't cold-start from
+  a base LM with DPO.
+- **Not a magic alignment fix.** DPO optimizes a
+  *preference* signal; if the preference data is
+  noisy or the "good" side is genuinely bad, DPO
+  will faithfully align to a bad target. The
+  preference data is the ceiling.
+- **Not reasoning alignment.** For math / code /
+  multi-step reasoning, RL with a *verifiable*
+  reward (RLOO, GRPO) often beats DPO. DPO is
+  best for "this style of answer is better" tasks
+  where there's no objective correctness signal.
+
+---
+
+## Related directories
+
+- [`../29-fsdp-flash-train/`](../29-fsdp-flash-train/) —
+  the distributed-training patterns (FSDP, FlashAttention)
+  that this single-GPU build is a stripped-down
+  version of.
+- [`../31-constitutional-ai/`](../31-constitutional-ai/) —
+  the alternative alignment approach (RLAIF with a
+  constitution instead of human preferences).
+- [`../25-deepseek-moe-train/`](../25-deepseek-moe-train/) —
+  the MoE training patterns that you'd combine
+  with DPO for a DeepSeek-style model.
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework that measures whether the
+  DPO-trained model is actually better than the
+  SFT-only baseline.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

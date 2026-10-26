@@ -63,3 +63,7 @@ After the lectures, take [`../quizzes/section_4.md`](../quizzes/section_4.md)
 Section 5 — **EventBridge Scheduler (L21–L24)** — uses a different
 trigger: not an event, but **time**. Cron + rate expressions, flexible
 windows, time zones, one-off invocations.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

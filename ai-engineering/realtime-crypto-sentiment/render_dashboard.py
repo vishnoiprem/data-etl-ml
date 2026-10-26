@@ -27,6 +27,31 @@ def banner(title: str, emoji: str) -> None:
     print("=" * 78)
 
 
+def _print_per_tag_hourly(min_tweets: int = 5) -> None:
+    """Per-tag hourly avg sentiment (last 48h), one row per hour.
+    Filters out symbols with fewer than `min_tweets` total to suppress
+    noisy single-tweet spikes from the table.
+    """
+    sym = app._per_symbol_buckets_df(60, 48)
+    if sym.empty:
+        return
+    keep = sym.groupby("symbol")["n"].sum()
+    keep = keep[keep >= min_tweets].index.tolist()
+    sym = sym[sym["symbol"].isin(keep)]
+    if sym.empty:
+        return
+    pv = sym.pivot_table(index="bucket", columns="symbol", values="avg_sent", aggfunc="mean")
+    pv = pv.fillna(0).round(2)
+    cols = list(pv.columns)
+    header = "  " + "bucket (UTC)".ljust(20) + "  " + "  ".join(f"{c:>7s}" for c in cols)
+    print(header)
+    print("  " + "-" * len(header))
+    for ts, row in pv.iterrows():
+        ts_str = ts.strftime("%Y-%m-%d %H:%M") if hasattr(ts, "strftime") else str(ts)[:16]
+        vals = "  ".join(f"{row[c]:+7.2f}" for c in cols)
+        print(f"  {ts_str:20s}  {vals}")
+
+
 # ── Tab 1: Overview ────────────────────────────────────────────────────
 banner("TAB 1 — OVERVIEW", "📊")
 k = app._kpis()
@@ -142,22 +167,7 @@ else:
 
     print()
     print("  Per-tag hourly avg sentiment (last 48h, symbols with ≥5 tweets):")
-    sym = app._per_symbol_buckets_df(60, 48)
-    if not sym.empty:
-        keep = sym.groupby("symbol")["n"].sum()
-        keep = keep[keep >= 5].index.tolist()
-        sym = sym[sym["symbol"].isin(keep)]
-        if not sym.empty:
-            pv = sym.pivot_table(index="bucket", columns="symbol", values="avg_sent", aggfunc="mean")
-            pv = pv.fillna(0).round(2)
-            cols = list(pv.columns)
-            header = "  " + "bucket (UTC)".ljust(20) + "  " + "  ".join(f"{c:>7s}" for c in cols)
-            print(header)
-            print("  " + "-" * len(header))
-            for ts, row in pv.iterrows():
-                ts_str = ts.strftime("%Y-%m-%d %H:%M") if hasattr(ts, "strftime") else str(ts)[:16]
-                vals = "  ".join(f"{row[c]:+7.2f}" for c in cols)
-                print(f"  {ts_str:20s}  {vals}")
+    _print_per_tag_hourly()
 
     # ── Top-10 daily topics (new section) ────────────────────────────
     print()
@@ -205,24 +215,11 @@ else:
         for _, r in reach.iterrows():
             print(f"    {r['symbol']:20s}  {int(r['total_reach']):>10,} followers")
 
+    # Per-tag hourly avg sentiment (also printed inside Tab 5; this
+    # second appearance gives terminal users context right after the
+    # daily-aggregate leaderboards).
     print()
-    print("  Per-tag hourly avg sentiment (last 48h, symbols with ≥5 tweets):")
-    sym = app._per_symbol_buckets_df(60, 48)
-    if not sym.empty:
-        keep = sym.groupby("symbol")["n"].sum()
-        keep = keep[keep >= 5].index.tolist()
-        sym = sym[sym["symbol"].isin(keep)]
-        if not sym.empty:
-            pv = sym.pivot_table(index="bucket", columns="symbol", values="avg_sent", aggfunc="mean")
-            pv = pv.fillna(0).round(2)
-            cols = list(pv.columns)
-            header = "  " + "bucket (UTC)".ljust(20) + "  " + "  ".join(f"{c:>7s}" for c in cols)
-            print(header)
-            print("  " + "-" * len(header))
-            for ts, row in pv.iterrows():
-                ts_str = ts.strftime("%Y-%m-%d %H:%M") if hasattr(ts, "strftime") else str(ts)[:16]
-                vals = "  ".join(f"{row[c]:+7.2f}" for c in cols)
-                print(f"  {ts_str:20s}  {vals}")
+    _print_per_tag_hourly()
 
 
 print()

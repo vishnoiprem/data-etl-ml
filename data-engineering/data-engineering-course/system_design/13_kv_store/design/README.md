@@ -171,3 +171,7 @@ system this would be a gRPC fan-out; the design point is identical.
 | `code/app.py` | Flask HTTP service: put/get endpoints, cluster mgmt, metrics. |
 | `tests/test_service.py` | Ring distribution, replication, fallback tests. |
 | `tests/test_app.py` | HTTP-level tests for put/get/cluster endpoints. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

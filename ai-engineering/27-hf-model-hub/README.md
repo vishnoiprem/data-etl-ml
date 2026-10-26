@@ -67,3 +67,60 @@ A registry with versioning, an eval table per version, download stats, and a lic
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not the public Hugging Face Hub.** HF is a
+  hosted platform with a community, a model
+  browser, and a multi-tenant serving layer.
+  This is the *registry + versioning + license
+  gate* pattern, sized for one team's private
+  hub. Use the public HF Hub for open-source
+  distribution; use this for the private one.
+- **Not a model registry in the MLflow sense.**
+  This is a *content* registry (versions,
+  artifacts, license, eval tables). The
+  MLflow-style *lifecycle* registry (staging →
+  production, promotion gates, rollback) is
+  [`../17-mlops-control-plane/`](../17-mlops-control-plane/).
+  The two integrate (the lifecycle registry
+  references the artifacts from this hub) but
+  they're different concerns.
+- **Not a substitute for legal review.** The
+  license allowlist / blocklist is a *technical*
+  enforcement; the legal team still needs to
+  review new licenses before they go on the
+  allowlist. The gate stops accidental
+  commercial-serve of an NC model; it doesn't
+  tell you whether a custom license is OK.
+- **Not a serving system.** The hub returns a
+  `serve_url` (an artifact URI); the actual
+  serving is done by
+  [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/)
+  or
+  [`../36-together-gpu-cloud/`](../36-together-gpu-cloud/).
+
+---
+
+## Related directories
+
+- [`../17-mlops-control-plane/`](../17-mlops-control-plane/) —
+  the lifecycle registry (staging / production /
+  promotion gates) that this content registry
+  feeds.
+- [`../33-mlflow-tracker/`](../33-mlflow-tracker/) —
+  the experiment-tracking layer that records
+  which run produced which model version.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the inference service that the `serve_url`
+  points to.
+- [`../32-llm-eval-harness/`](../32-llm-eval-harness/) —
+  the eval framework whose `RunRecord` becomes
+  the `eval_table` row per model version.
+
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -265,3 +265,8 @@ service (and is sketched in `ARCHITECTURE.md` § 1).
 - [`../02-multi-agent-dispatcher/`](../02-multi-agent-dispatcher/) — the next project, which uses this MCP server inside a LangGraph orchestrator
 - [`../03-distilled-slm/`](../03-distilled-slm/) — the project that fine-tunes a 1.5B model on Mei's drafts
 - [`../04-ai-data-analyst/`](../04-ai-data-analyst/) — the fresh-engagement project (different customer, different security model)
+
+---
+
+**Last updated:** 2026-10-21  
+**License:** MIT — use freely in your own courses, prototypes, and products.

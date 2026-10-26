@@ -119,3 +119,7 @@ The minimal IAM policy for the IAM principal running this script is:
 The NLB has one node per subnet, each in a different AZ. The target
 group is the indirection layer; the NLB only ever sees the target
 group, not specific instances.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

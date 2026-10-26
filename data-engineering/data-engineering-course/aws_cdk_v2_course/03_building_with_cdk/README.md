@@ -24,3 +24,7 @@ serverless CRUD API.
 | Project | Stack summary | Tests |
 |---|---|---|
 | `code/lambda-api/` | Lambda (Node 20) + API GW REST + S3 asset bucket + IAM role | 8 Jest assertions on the synthesized template |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

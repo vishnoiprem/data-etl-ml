@@ -48,3 +48,7 @@ provider in our multi-cloud pipeline. We sign up for
 the GCP free trial, create a GCS bucket, register a
 service account, grant it `Storage Object Viewer`, and
 create the `STORAGE INTEGRATION` for GCS.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

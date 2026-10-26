@@ -237,3 +237,7 @@ When presenting this design:
 6. **Multiple consumers** — same data, different SLAs, same storage
 7. **Storage optimization** — Z-order, compaction, TTL by tier
 8. **Cost story** — bot events in cheap tier; Bronze has aggressive TTL
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -52,3 +52,7 @@ Section 14 is **Time Travel** — the killer Snowflake recovery
 feature. We use `AT | BEFORE` offsets, `UNDROP`, and the
 `DATA_RETENTION_TIME_IN_DAYS` parameter to round out the
 data-protection story.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  
