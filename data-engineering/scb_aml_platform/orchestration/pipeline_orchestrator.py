@@ -17,7 +17,7 @@ Run: python pipeline_orchestrator.py [--date YYYYMMDD]
 
 import sys
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from loguru import logger
@@ -36,7 +36,7 @@ def step(name: str, simulated_time: str):
 
 
 def run_pipeline(run_date: str = None):
-    start = datetime.utcnow()
+    start = datetime.now(timezone.utc)
     if run_date is None:
         run_date = start.strftime("%Y%m%d")
 
@@ -114,7 +114,7 @@ def run_pipeline(run_date: str = None):
     logger.success("Lucid Search Index Refresh Complete [07:00 SLA MET]")
 
     # ── PIPELINE COMPLETE
-    elapsed = (datetime.utcnow() - start).total_seconds()
+    elapsed = (datetime.now(timezone.utc) - start).total_seconds()
     logger.info(f"""
 ╔══════════════════════════════════════════════════════════╗
 ║   PIPELINE COMPLETE — T+1 SLA                           ║

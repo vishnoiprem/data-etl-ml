@@ -1,0 +1,35 @@
+# TLS + login + API-key injection in one place.
+# {$DOMAIN}: your hostname (e.g. rag.example.com). Use `localhost` to try it locally.
+# Users log in with HTTP basic auth; the API key never reaches the browser.
+{$DOMAIN} {
+	encode zstd gzip
+
+	basic_auth {
+		{$APEX_BASIC_USER} {$APEX_BASIC_HASH}
+	}
+
+	handle_path /api/* {
+		reverse_proxy api:8000 {
+			header_up X-API-Key {$APEX_PROXY_KEY}
+			flush_interval -1          # do not buffer the SSE token stream
+			transport http {
+				read_timeout 120s
+			}
+		}
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		X-Frame-Options DENY
+	}
+
+	request_body {
+		max_size 6MB
+	}
+}

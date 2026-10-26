@@ -26,6 +26,14 @@ The 60-second pitch: **OpenAI is hiring production-flavored generalists who can 
 
 **Cumulative pass rate (recruiter call → offer): ~1-2%.** OpenAI sees ~50-100K applications per quarter and hires ~200-300 engineers per year. The bar is real.
 
+**Level calibration (do this BEFORE the recruiter call):** OpenAI downlevels aggressively. The litmus tests:
+
+- **L3 vs. L4:** can you defend why you'd be effective on day 1 with no ramp-up? L4. "With 2-3 months of ramp-up," L3.
+- **L4 vs. L5:** can you point to a system you *designed* (not just built) that other teams have adopted? L5.
+- **L5 vs. L6:** have you been the tech lead for a 6+ month project that crossed team boundaries? L6.
+
+If the recruiter pushes for a lower level than you calibrated, push back once with a specific scope claim. Never accept a downlevel that wasn't offered — and the committee can promote mid-loop if your signal is strong enough.
+
 **Comp (US, levels.fyi, Oct 2026):**
 
 | Level | Title | Total comp | Base | Stock/yr |
@@ -34,9 +42,12 @@ The 60-second pitch: **OpenAI is hiring production-flavored generalists who can 
 | L3 | SWE | $337K | $216K | $120K |
 | L4 | Senior SWE | $786K | $313K | $473K |
 | L5 | Staff SWE | $962K | $358K | $604K |
-| L7 | Principal | $1.89M | — | — |
+| L6 | Senior Staff | $1.1-1.4M | — | — |
+| L7 | Principal / Fellow | $1.89M | — | — |
 
-**US median: $875K.** 4-year vest, 25% per year. OpenAI "has a reputation for downleveling candidates coming in" — a Staff at Meta often gets hired at L4 or L5, not L6. Don't anchor to your current title.
+**US median: $875K.** 4-year vest, 25% per year, **6-month cliff** (changed from 12mo in April 2025). OpenAI "has a reputation for downleveling candidates coming in" — a Staff at Meta often gets hired at L4 or L5, not L6. Don't anchor to your current title.
+
+**The October 2025 restructuring context:** OpenAI's PPUs converted to conventional RSUs at the Oct 2025 $500B tender (~$6.6B raised). The nonprofit OpenAI Foundation retained a ~$130B stake. Sign-on bonuses are rare for standard hires but exist for senior candidates countering outside offers — in Aug 2025, OpenAI issued ~$1.5M retention grants to ~1,000 staff specifically to counter Meta poach attempts. Spot multi-million-dollar sign-ons appear in similar situations. Standard hires don't get sign-on.
 
 ---
 
@@ -101,6 +112,27 @@ After reading ~20 first-person OpenAI interview reports from 2026, the same 5 pa
 
 ---
 
+## What failed candidates said they did wrong (the 5 patterns)
+
+Across 2025-2026 reports from candidates who were rejected, the same 5 patterns show up. These are not abstract failure modes — these are the specific things people wrote in the post-loop threads.
+
+**1. They solved the shape but missed a buried invariant.** Multiple 2026 phone-screen rejections describe candidates who recognized the problem class, picked a reasonable data structure, and got most tests passing — but missed a single re-ordering rule buried in the prompt.
+
+> *"When a task is put back in the queue, it has to be ordered by its original enqueue time. I missed this one, so the unit tests did not all pass, and that ended in tragedy."*
+> — PracHub, OpenAI phone-screen rejection, Oct 2026
+
+The fix: read the prompt twice. List every invariant, every ordering rule, every cooldown. Write a test for each one *before* you code.
+
+**2. They over-narrated the project deep-dive.** Several r/OfferEngineering threads describe candidates steamrolling 8 minutes of project monologue, then getting cut off on follow-ups they should have anticipated. The fix: 1 sentence on what you built, 1 sentence with the result, 2 min on architecture, then stop and let the interviewer drive.
+
+**3. They over-engineered the system design on the first pass.** Candidates who try to write the fully-extended version on the first pass consistently run out of time. A second pattern: applying generic web architecture (REST + Postgres + a queue) to problems that need ChatGPT-specific design (multi-tenant chat backends, conversation state, content moderation, token-based billing).
+
+**4. They couldn't survive the behavioral follow-up.** "A weak values or behavioral round can override a strong technical round." The failure mode: candidates give polished, rehearsed STAR stories but cannot answer a *follow-up* on a decision they made. The fix: every story should have one detail you didn't fully understand at the time, one moment you changed your mind, and one specific thing you'd do differently.
+
+**5. They psych-ed themselves out of a working answer.** A 2025 r/leetcode self-sabotage thread describes a candidate who, mid-coding-round, abandoned the algorithm they had working because they read the interviewer's expression as cold. The candidate later learned the interviewer had rated them positively on the exact problem they abandoned. **The fix:** commit to your answer. If you have a working solution in 25 min, do not throw it out to chase a cleverer one.
+
+---
+
 ## The 15 most-asked questions at OpenAI (2026)
 
 These are the questions candidates report being asked in the 4-6 hour final loop. Grouped by round. The frequency is the % of candidates who report seeing a question in this family — not the exact verbatim.
@@ -111,6 +143,7 @@ These are the questions candidates report being asked in the 4-6 hour final loop
 2. **Implement a token bucket rate limiter, then extend it to handle per-user + per-tenant limits.** (~60%)
 3. **Write a URL parser that handles edge cases (empty path, unicode, malformed inputs), then add tests.** (~50%)
 4. **Implement DPO loss given a batch of preferred and dispreferred completions; extend to handle ties.** (~40%, research-engineer track)
+   - *Note: in the original Rafailov et al. 2023 paper, "ties" (y_w = y_l) yield a log-ratio of 0, contributing nothing to the loss. The standard practice is to drop ties or keep them as zero-loss examples. There is no canonical "weighted averaging over separate preferred/dispreferred pairs" treatment for ties in base DPO. Length-Controlled DPO (Park et al. 2024) is the cleaner published fix for the related length-bias problem.*
 5. **Build a credit-tracking service that supports resumable iterators and partial failures.** (~35%)
 
 ### System design round (1 hour, Excalidraw)
@@ -156,11 +189,13 @@ OpenAI explicitly tests intellectual honesty. The research defense question (#12
 
 ### Meta-answer 4: "Why OpenAI, specifically"
 
-This is asked in 100% of loops, in some form. The wrong answer: "I want to work on AGI." The right answer: a specific OpenAI bet you disagree with or want to test, plus a specific OpenAI bet you believe in and want to scale. Example: "I'm skeptical of the current RLHF-only alignment path — I'd want to test whether constitutional methods close the gap on the evals I've seen. And I believe deeply in the cost-curve story: if we can get inference 10× cheaper, we unlock a category of products that don't exist yet. The first is where I'd want to be a skeptic; the second is where I'd want to be a builder." **Specificity beats sincerity.**
+This is asked in 100% of loops, in some form. The wrong answer: "I want to work on AGI." The right answer: a specific OpenAI bet you disagree with or want to test, plus a specific OpenAI bet you believe in and want to scale. Example: "I'm skeptical of pure-RLHF alignment — I'd want to test whether deliberative alignment (the o-series approach) generalizes beyond the safety policy the model was trained against, or whether it just memorizes a list of rules. And I believe in the inference cost-curve story: 10× cheaper inference unlocks a category of products that don't exist yet — DevDay 2026 made this explicit with GPT-6.1 Sol at 1/5 the per-token cost. The first is where I'd want to be a skeptic; the second is where I'd want to be a builder." **Specificity beats sincerity.**
+
+**Note on the 2026 strategic landscape:** Constitutional AI was primarily an Anthropic framing; in 2026, OpenAI's flagship alignment approach is **deliberative alignment** (CoT-based reasoning about safety policies), layered on top of RLHF. AI safety via debate is dormant in OpenAI's public roadmap. The big 2026 bets are Codex (agentic coding), enterprise (Altman's publicly stated #1 2026 priority), and inference cost-per-token collapse enabling agentic products. Name a current bet, not a 2023 one.
 
 ### Meta-answer 5: "AI tools are a feature, not a cheat"
 
-In 2026, OpenAI's policy is explicit: **"Expectations for AI and other tools vary by interview."** Some rounds allow them, some don't. The optional agentic round is testing whether you can use them *well*. The wrong answer in the agentic round: prompt the tool, paste the output, hope it works. The right answer: prompt the tool, read the diff, catch the bug the tool introduced, explain why you caught it. **The 2026 candidate who refuses to use AI tools in the rounds that allow them looks like a 2023 candidate. The candidate who uses them without thinking looks like a 2025 candidate. The candidate who uses them thoughtfully and catches their mistakes looks like a 2026 candidate.**
+In 2026, OpenAI's policy is explicit: **"Expectations for AI and other tools vary by interview: some formats intentionally allow them, while others are designed to assess your independent problem-solving without AI tools."** Some rounds allow them, some don't — the default action is to ask your recruiter. The optional agentic round is testing whether you can use them *well*. The wrong answer in the agentic round: prompt the tool, paste the output, hope it works. The right answer: prompt the tool, read the diff, catch the bug the tool introduced, explain why you caught it. **The 2026 candidate who refuses to use AI tools in the rounds that allow them looks like a 2023 candidate. The candidate who uses them without thinking looks like a 2025 candidate. The candidate who uses them thoughtfully and catches their mistakes looks like a 2026 candidate.** The agentic round is graded on *supervision judgment* — letting the agent run unsupervised is the red flag, not a deliberately planted bug.
 
 ---
 
@@ -254,6 +289,17 @@ The loop doesn't care how smart you are. It cares how prepared you are. Run the 
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
 - [GitHub — AI Engineer Interview Questions (14 companies)](https://github.com/ombharatiya/AI-Engineer-Interview-Questions) — the cross-company coding question bank
 - [Sundeep Teki — The Ultimate AI Research Scientist Interview Guide (2026)](https://www.sundeepteki.org/advice/the-ultimate-ai-research-scientist-interview-guide-cracking-anthropic-openai-google-deepmind-top-ai-labs-in-2026) — the DPO coding question, the research-defense structure
+- [PracHub — OpenAI phone screen rejection: fault-tolerant queue (Oct 2026)](https://prachub.com/interview-experiences/openai-software-engineer-interview-experience-phone-screen-failed-on-a-fault-tolerant-queue-and-a-typing-race-design) — the "missed invariant" failure pattern
+- [r/InterviewCoderHQ — OpenAI SWE loop breakdown](https://www.reddit.com/r/InterviewCoderHQ/comments/1rhfjpw/openai_swe_interview_experience_full_loop/) — full loop walkthrough
+- [r/leetcode — Self-sabotage at OpenAI interview (Mar 2025)](https://www.reddit.com/r/leetcode/comments/1j8x3og/selfsabotage_at_openai_interview/) — the "abandoned working answer" failure pattern
+- [OpenAI — Deliberative Alignment (2024)](https://openai.com/index/deliberative-alignment/) — OpenAI's current flagship alignment approach
+- [OpenAI — DevDay 2026 Recap](https://openai.com/index/devday-2026-recap/) — GPT-6.1 Sol, Codex, agentic coding as 2026 bets
+- [r/OfferEngineering — OpenAI Senior SWE Interview (Sep 2026)](https://www.reddit.com/r/OfferEngineering/comments/1vstgty/openai_senior_software_engineer_interview/) — additional 2026 loop report
+- [HeroHunt — What OpenAI and Anthropic Pay Engineers (2026)](https://www.herohunt.ai/blog/what-openai-and-anthropic-pay-engineers-2026/) — the 2025 PPU→RSU conversion, retention grants
+- [AceRound — OpenAI AI Interview Policy (Sep 2026)](https://www.aceround.app/blog/openai-ai-interview-policy/) — round-by-round AI tool policy
+- [Levels.fyi — OpenAI L4 SWE](https://www.levels.fyi/companies/openai/salaries/software-engineer/levels/l4) — L4 comp detail
+- [Rafailov et al. — Direct Preference Optimization (2023)](https://arxiv.org/abs/2305.18290) — the original DPO paper
+- [Park et al. — Length-Controlled DPO (2024)](https://arxiv.org/abs/2403.07359) — the fix for DPO's length bias
 
 *This is article 1 of 10 in the "Top 100 AI/ML Interview Questions" series. The 9 other articles cover Anthropic, Google DeepMind, Meta AI, Microsoft AI, NVIDIA, Apple, Databricks, Stripe, and Netflix. Follow the publication to get them as they drop.*
 

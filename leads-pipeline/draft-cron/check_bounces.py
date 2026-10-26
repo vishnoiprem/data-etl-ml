@@ -255,6 +255,26 @@ def mark_bounced(bounce_map: dict, dry: bool = False) -> dict:
                 ("bounced", f"Bounce: {reason}", row["id"]),
             )
             counts["marked"] += 1
+            # Auto-extend BOUNCE_DENY: the next time the loop sees this
+            # domain, it will skip without even attempting SMTP. The
+            # wrapped try/except means a JSON write failure here cannot
+            # break the bounce flow (we still marked the lead).
+            try:
+                from state.bounce_deny_store import add as _deny_add
+                dom = email_addr.split("@", 1)[1].lower() if "@" in email_addr else ""
+                # registered domain (last 2 labels)
+                parts = dom.split(".")
+                if len(parts) >= 2:
+                    reg = ".".join(parts[-2:])
+                else:
+                    reg = dom
+                if reg:
+                    added = _deny_add(reg)
+                    if added:
+                        print(f"      [deny] auto-added {reg} to BOUNCE_DENY")
+            except Exception as _e:
+                # Best-effort — don't break the bounce flow on JSON write failure
+                pass
             print(f"  🚫 lead #{row['id']:>3}  {row['company'][:25]:25s}  "
                   f"{email_addr:30s}  → bounced  ({reason[:60]})")
     return counts

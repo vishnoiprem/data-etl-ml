@@ -25,7 +25,7 @@ Output: data/processed/screening_alerts.parquet
 import sys
 import hashlib
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 import jellyfish
@@ -146,7 +146,7 @@ def screen_against_list(customers: pd.DataFrame, sanctions: pd.DataFrame) -> pd.
                     "date_of_birth": str(cust.get("date_of_birth", "")),
                     "country_code": cust.get("country_code", ""),
                     "disposition": "pending",
-                    "screening_date": datetime.utcnow().strftime("%Y-%m-%d"),
+                    "screening_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 })
 
     return pd.DataFrame(results)
@@ -194,7 +194,7 @@ def apply_pep_relationship_inference(
         pep_assoc_flags["match_score"] = 65
         pep_assoc_flags["match_type"] = "relationship_inference"
         pep_assoc_flags["disposition"] = "pending"
-        pep_assoc_flags["screening_date"] = datetime.utcnow().strftime("%Y-%m-%d")
+        pep_assoc_flags["screening_date"] = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
         screening_results = pd.concat(
             [screening_results, pep_assoc_flags], ignore_index=True

@@ -60,16 +60,8 @@ The 6th lecture — the integration of the 5 pillars into a single operational s
 ## Read next
 
 `L8-1-the-infrastructure-stack.md` — the 4 pillars + the 6 layers of agent infrastructure. The reference architecture that every FDE should be able to draw on a whiteboard in 5 minutes.
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  
