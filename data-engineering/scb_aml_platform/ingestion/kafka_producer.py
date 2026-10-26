@@ -15,7 +15,7 @@ import sys
 import json
 import time
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -73,7 +73,7 @@ def stream_wire_transfers(n: int = 50, delay_ms: int = 100):
 
     for _, row in sample.iterrows():
         msg = row.to_dict()
-        msg["event_time"] = datetime.utcnow().isoformat()
+        msg["event_time"] = datetime.now(timezone.utc).isoformat()
         msg["kafka_partition_key"] = row.get("sender_country", "SG")
 
         producer.send(
@@ -105,7 +105,7 @@ def stream_large_cash_transactions(n: int = 30, delay_ms: int = 200):
 
     for _, row in sample.iterrows():
         msg = row.to_dict()
-        msg["event_time"] = datetime.utcnow().isoformat()
+        msg["event_time"] = datetime.now(timezone.utc).isoformat()
         msg["exceeds_ctr"] = float(row.get("amount_usd", 0)) >= CTR_THRESHOLD_USD
         producer.send(KAFKA_TOPIC_TXN, value=msg)
         time.sleep(delay_ms / 1000.0)

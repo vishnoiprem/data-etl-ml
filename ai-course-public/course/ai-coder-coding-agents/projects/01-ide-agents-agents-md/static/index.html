@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Kanban Board</h1>
+      <form id="new-card-form" class="new-card">
+        <input
+          id="new-card-title"
+          type="text"
+          placeholder="New card title…"
+          autocomplete="off"
+          required
+        />
+        <button type="submit">Add</button>
+      </form>
+    </header>
+
+    <main id="board" class="board" aria-label="Kanban board">
+      <!-- Columns are rendered by app.js from the COLUMNS constant. -->
+    </main>
+
+    <template id="card-template">
+      <article class="card" draggable="true">
+        <h3 class="card-title"></h3>
+        <p class="card-description"></p>
+        <button class="card-delete" type="button" aria-label="Delete card">&times;</button>
+      </article>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
