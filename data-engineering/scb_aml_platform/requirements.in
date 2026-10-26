@@ -18,7 +18,7 @@ python-Levenshtein==0.21.1
 
 # Elasticsearch (Lucid Search)
 elasticsearch==8.9.0
-elasticsearch-dsl==8.9.0
+elasticsearch-dsl==8.18.0
 
 # Kafka (ingestion simulation)
 kafka-python==2.0.2
@@ -31,14 +31,14 @@ PyHive==0.7.0
 faker==19.6.2
 
 # API (Lucid Search — FastAPI)
-fastapi==0.103.1
-uvicorn==0.23.2
-httpx==0.25.0
+fastapi==0.161.1
+uvicorn==0.54.0
+httpx==0.28.1
 
 # Utilities
-python-dotenv==1.0.0
-pyyaml==6.0.1
-click==8.1.7
+python-dotenv==1.2.4
+pyyaml==6.0.3
+click==8.5.0
 rich==13.5.3
-loguru==0.7.2
-tqdm==4.66.1
+loguru==0.7.3
+tqdm==4.70.1
