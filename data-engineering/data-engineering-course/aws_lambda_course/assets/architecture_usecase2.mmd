@@ -1,0 +1,20 @@
+graph LR
+    client["Client"]:::client -- HTTPS --> apigw["API Gateway"]:::apigw
+    apigw -- /health --> hfn["Health Lambda"]:::hfn
+    apigw -- /items (Cognito) --> cognito["Cognito User Pool"]:::cognito
+    apigw -- /items (signed) --> lfn["Items Lambda"]:::lfn
+    lfn -- CRUD --> s3["S3 (items/)"]:::s3
+    waf["WAFv2 WebACL (rate-based)"]:::waf -- attached --> apigw
+    throttle["Throttling 100/200"]:::throttle -. stage : metrics
+    cloudwatch["CloudWatch Metrics"]:::cw -.-> apigw
+    cloudwatch -.-> lfn
+
+    classDef client fill:#eee,stroke:#333,stroke-width:1px
+    classDef apigw fill:#dfe7fd,stroke:#336,stroke-width:1px
+    classDef cognito fill:#fde2e2,stroke:#a33,stroke-width:1px
+    classDef lfn fill:#dfe7fd,stroke:#336,stroke-width:1px
+    classDef hfn fill:#e2fdef,stroke:#383,stroke-width:1px
+    classDef s3 fill:#fdf5e2,stroke:#a83,stroke-width:1px
+    classDef waf fill:#f0e2fd,stroke:#73a,stroke-width:1px
+    classDef throttle fill:#e2f3fd,stroke:#37a,stroke-width:1px
+    classDef cw fill:#eee,stroke:#333,stroke-width:1px

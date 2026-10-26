@@ -25,3 +25,7 @@ The research frontier: JEPA (predict in embedding space, not pixel space), world
 ## The Lead Lesson
 
 > **Lesson 1 — [JEPA](./01-jepa.md)** — the most-discussed frontier idea. Worked example: implement a tiny I-JEPA from scratch, train it on CIFAR-10 patches, show that the learned embeddings capture semantic similarity (rotation, occlusion, color).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

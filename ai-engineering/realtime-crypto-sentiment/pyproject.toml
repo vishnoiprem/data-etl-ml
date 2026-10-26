@@ -1,0 +1,16 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# BLE001: pipeline stages wrap broad `except Exception` to keep the
+# scheduler alive — each stage is independently retried. Catching the
+# specific exception class would be brittle (third-party libs raise
+# their own hierarchies).
+# DTZ003: `datetime.utcnow()` is used in scheduler + signal timestamps
+# that are written to a tz-naive TimescaleDB column. Switching to
+# `datetime.now(UTC)` would require a schema change to TIMESTAMPTZ.
+# S110: the SIGINT/SIGTERM handler does best-effort cleanup of the
+# asyncio loop on shutdown; logging is already covered by the
+# surrounding `logger.info("pipeline: SIGINT/SIGTERM, shutting down")`.
+ignore = ["BLE001", "DTZ003", "S110"]

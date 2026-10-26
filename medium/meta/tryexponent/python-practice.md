@@ -26,6 +26,17 @@ def second_letter_counts(strings):
             continue
         second_letters.append(words[0][1])
     return dict(Counter(second_letters))
+
+def second_letter_counts(strings):
+    d = {}
+    for s in strings:
+        w = s.split()
+        if w and len(w[0]) > 1:
+            c = w[0][1]
+            d[c] = d.get(c,0) + 1
+    return d
+
+
 ```
 
 **Edge cases:** empty string → split returns `[]` → skipped. Single-char first word → skipped. Multiple spaces → `split()` handles it (no empty strings).
@@ -58,6 +69,9 @@ def process_csv(path):
     except FileNotFoundError:
         print("file not found")
         return None
+
+
+
 ```
 
 **Edge cases:** wrong path → prints "file not found". Missing column → uses `.get` style guard. Encoding errors → re-raise or log; per the prompt we only catch `FileNotFoundError`.
@@ -89,6 +103,65 @@ def second_highest_per_dept(employees):
         unique_sorted = sorted(set(salaries), reverse=True)
         result[dept] = unique_sorted[1] if len(unique_sorted) >= 2 else None
     return result
+
+import csv
+
+def read_csv(path="data.csv"):
+    try:
+        with open(path, "r") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                print(row)  # <-- this is your "process"
+
+    except FileNotFoundError:
+        print("file not found")
+
+read_csv()
+
+
+
+
+def read_csv(path="data.csv"):
+    try:
+        with open(path) as f:
+            return list(csv.DictReader(f))
+    except FileNotFoundError:
+        print("file not found")
+        return []
+
+def second_highest_per_dept(employees):
+    by_dept = {} # normal dict
+
+    # 1. Group
+    for e in employees:
+        dept = e["dept"]
+        if dept not in by_dept:
+            by_dept[dept] = []
+        by_dept[dept].append(e["salary"])
+
+    # 2. Find 2nd highest
+    result = {}
+    for dept, salaries in by_dept.items():
+        unique = sorted(set(salaries), reverse=True)
+        if len(unique) >= 2:
+            result[dept] = unique[1]
+        else:
+            result[dept] = None
+
+    return result
+
+# TEST
+employees = [
+    {"dept": "Eng", "salary": 100},
+    {"dept": "Eng", "salary": 200},
+    {"dept": "Eng", "salary": 300},
+    {"dept": "HR", "salary": 500},
+    {"dept": "HR", "salary": 400},
+]
+
+print(second_highest_per_dept(employees))
+# {'Eng': 200, 'HR': 400}
+
 ```
 
 **Edge cases:** single-employee dept → `None`. All same salary → `None` after `set()`. Empty input → empty dict.

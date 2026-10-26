@@ -37,3 +37,7 @@ This is the heart of the curriculum. Every modern AI system is a Transformer var
 ## The Lead Lesson
 
 > **Lesson 1 — [What is Generative AI?](./01-what-is-generative-ai.md)** — the framing lesson. Worked example: build a tiny character-level Transformer from scratch in PyTorch (4 layers, 4 heads, ~10M params) and train it on Shakespeare. Show the loss curve, sample text at different temperatures, and visualize the attention patterns.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -41,3 +41,7 @@ Prompt engineering at scale is not about clever wording. It's about **templated,
 ## The Lead Lesson
 
 > **Lesson 1 — [Prompts as code](./01-prompts-as-code.md)** — the discipline of treating prompts as production assets. Includes a worked example that builds a customer-email classification system with templated prompts, dynamically-loaded few-shot examples, version-controlled system prompts, and a 4-way A/B test (zero-shot vs few-shot vs CoT vs JSON-mode).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

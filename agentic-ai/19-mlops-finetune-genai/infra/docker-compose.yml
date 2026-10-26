@@ -1,0 +1,103 @@
+# Compose file for the full MLOps stack.
+#
+# Topology (matches the house pattern from `realtime-stock-pipeline/docker-compose.yml`):
+#   mlflow    — sqlite-backed tracking server + artifacts volume
+#   vllm      — OpenAI-compat inference with --enable-lora
+#   prometheus — scrape vllm + alert on SLO breaches
+#   grafana   — provisioned dashboards (auto-loads on first boot)
+#
+# Service ordering: mlflow must be healthy before vllm scrapes its adapter registry.
+# vllm must be ready before prometheus starts scraping.
+#
+# Run: `make serve` (which calls this file). Tear down: `make clean`.
+
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.18.0
+    container_name: mlflow
+    command: >
+      mlflow server
+        --host 0.0.0.0
+        --port 5000
+        --backend-store-uri sqlite:////mlflow/mlflow.db
+        --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/api/2.0/mlflow/experiments/list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  vllm:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.serve
+    image: mlops-finetune-genai-vllm:latest
+    container_name: vllm
+    command: >
+      python -m agent.serve --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+      - "9090:9090"   # Prometheus exposition from the same FastAPI process
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT_NAME: mlops-finetune-genai
+      MODEL_NAME: ${MODEL_NAME:-meta-llama/Llama-3.1-8B-Instruct}
+      HUGGINGFACE_TOKEN: ${HUGGINGFACE_TOKEN:-}
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    volumes:
+      - artifacts:/artifacts
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    ports:
+      - "9091:9090"     # host:container — host 9091 avoids conflict with vllm's exporter
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      vllm:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  mlflow_data:
+  artifacts:
+  prometheus_data:
+  grafana_data:

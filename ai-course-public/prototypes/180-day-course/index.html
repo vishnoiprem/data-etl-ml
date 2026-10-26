@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Daily — 180 Days of Hands-On AI Projects</title>
+  <meta name="description" content="A 6-month course for tech people. One small project every day. 180 real AI applications built on real data systems.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Navigation -->
+  <header>
+    <nav class="container">
+      <a href="#" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AI Daily</span>
+      </a>
+      <div class="nav-links">
+        <a href="#calendar">180-Day Plan</a>
+        <a href="#systems">Data Systems</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#" class="btn btn-secondary btn-sm">Sign in</a>
+        <a href="#pricing" class="btn btn-primary btn-sm">Enroll</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <p class="kicker">For tech people who learn by building</p>
+      <h1 class="hero-title">
+        <span class="gradient-text">180 days.</span> 180 AI projects.<br>
+        <span class="gradient-text">6 data systems.</span> 1 transformation.
+      </h1>
+      <p class="sub">One small hands-on project, every single day, for 6 months. Connect AI to real databases, real APIs, real queues, real files. By Day 180, you'll have shipped 180 working AI applications and a SaaS with paying users.</p>
+
+      <div class="cta-group">
+        <a href="#pricing" class="btn btn-primary btn-lg">→ Start Day 1 — $997</a>
+        <a href="#calendar" class="btn btn-text">See the full 180-day plan →</a>
+      </div>
+
+      <div class="trust-bar">
+        <div class="trust-item">
+          <span class="trust-icon">📅</span>
+          <span><strong>180</strong> daily projects</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">🗄️</span>
+          <span><strong>6</strong> real data systems</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">⏱️</span>
+          <span><strong>30-90 min</strong> per day</span>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon">💰</span>
+          <span><strong>$0-10/mo</strong> infra cost</span>
+        </div>
+      </div>
+
+      <!-- Hero visual: Day counter -->
+      <div class="day-counter">
+        <div class="counter-ring">
+          <svg viewBox="0 0 200 200" class="ring-svg">
+            <circle cx="100" cy="100" r="90" class="ring-bg"/>
+            <circle cx="100" cy="100" r="90" class="ring-fg" id="ring-progress"/>
+          </svg>
+          <div class="counter-center">
+            <div class="counter-day" id="counter-day">0</div>
+            <div class="counter-label">of 180</div>
+          </div>
+        </div>
+        <div class="counter-info">
+          <h3>Track your progress</h3>
+          <p>Each project you complete is a real, deployed AI application. Mark them done and watch your portfolio grow.</p>
+          <div class="counter-actions">
+            <button class="btn btn-secondary btn-sm" onclick="incrementDay()">+ Complete today</button>
+            <button class="btn btn-text" onclick="resetDay()">Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The 6 Data Systems -->
+  <section class="section" id="systems">
+    <div class="container">
+      <p class="kicker">The 6 data systems</p>
+      <h2>You'll master AI integration with the systems companies actually use.</h2>
+      <p class="sub">Each month focuses on one real data system. Every project connects to it. By Day 180, you'll be fluent in AI + production data infrastructure.</p>
+
+      <div class="systems-grid">
+        <div class="system-card" style="--accent: #0071E3;">
+          <div class="system-month">Month 1</div>
+          <div class="system-icon">🗄️</div>
+          <h3>PostgreSQL</h3>
+          <p>SQL generation, schema understanding, pgvector, RAG over SQL data. The universal backend.</p>
+          <div class="system-tech">Neon · Supabase · pgvector</div>
+        </div>
+
+        <div class="system-card" style="--accent: #34C759;">
+          <div class="system-month">Month 2</div>
+          <div class="system-icon">🌐</div>
+          <h3>REST APIs</h3>
+          <p>Function calling, OAuth, webhooks, async, rate limiting. Every SaaS is an API.</p>
+          <div class="system-tech">GitHub · Stripe · Slack · Notion</div>
+        </div>
+
+        <div class="system-card" style="--accent: #FF9500;">
+          <div class="system-month">Month 3</div>
+          <div class="system-icon">📚</div>
+          <h3>Documents & Search</h3>
+          <p>RAG, semantic search, hybrid search, document parsing. Most real data is unstructured.</p>
+          <div class="system-tech">Elasticsearch · MongoDB · PDFs</div>
+        </div>
+
+        <div class="system-card" style="--accent: #AF52DE;">
+          <div class="system-month">Month 4</div>
+          <div class="system-icon">📁</div>
+          <h3>Files & Media</h3>
+          <p>Images, audio, video, PDFs at scale. Whisper, DALL-E, GPT-4V, OCR.</p>
+          <div class="system-tech">S3 · R2 · Whisper · GPT-4V</div>
+        </div>
+
+        <div class="system-card" style="--accent: #FF2D55;">
+          <div class="system-month">Month 5</div>
+          <div class="system-icon">⚡</div>
+          <h3>Real-Time Streams</h3>
+          <p>Event-driven AI, Kafka, Redis Streams, async pipelines. Production AI is reactive.</p>
+          <div class="system-tech">Kafka · Redis · RabbitMQ</div>
+        </div>
+
+        <div class="system-card" style="--accent: #FFD60A;">
+          <div class="system-month">Month 6</div>
+          <div class="system-icon">🎯</div>
+          <h3>Vector Search</h3>
+          <p>Production vector DBs, hybrid search, re-ranking, multi-modal, evaluation.</p>
+          <div class="system-tech">Pinecone · Weaviate · Qdrant</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 180-Day Calendar -->
+  <section class="section section-dark" id="calendar">
+    <div class="container">
+      <p class="kicker">The full curriculum</p>
+      <h2 class="center">The 180-day plan</h2>
+      <p class="sub center">Click any day to see the project spec. Hover for the concept. Use the filters to focus on what you want to learn.</p>
+
+      <!-- Filters -->
+      <div class="calendar-filters">
+        <button class="filter-chip active" data-month="all">All 180</button>
+        <button class="filter-chip" data-month="1">Month 1 · PostgreSQL</button>
+        <button class="filter-chip" data-month="2">Month 2 · APIs</button>
+        <button class="filter-chip" data-month="3">Month 3 · Documents</button>
+        <button class="filter-chip" data-month="4">Month 4 · Media</button>
+        <button class="filter-chip" data-month="5">Month 5 · Streams</button>
+        <button class="filter-chip" data-month="6">Month 6 · Vectors</button>
+      </div>
+
+      <div id="calendar-grid" class="calendar-grid">
+        <!-- Generated by JS -->
+      </div>
+
+      <div class="calendar-legend">
+        <div class="legend-item"><span class="dot" style="background: #0071E3;"></span> PostgreSQL</div>
+        <div class="legend-item"><span class="dot" style="background: #34C759;"></span> REST APIs</div>
+        <div class="legend-item"><span class="dot" style="background: #FF9500;"></span> Documents</div>
+        <div class="legend-item"><span class="dot" style="background: #AF52DE;"></span> Media</div>
+        <div class="legend-item"><span class="dot" style="background: #FF2D55;"></span> Streams</div>
+        <div class="legend-item"><span class="dot" style="background: #FFD60A;"></span> Vectors</div>
+        <div class="legend-item"><span class="dot weekend"></span> Weekend project</div>
+        <div class="legend-item"><span class="dot capstone"></span> Capstone</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Day 1 Example -->
+  <section class="section">
+    <div class="container">
+      <p class="kicker">What a day looks like</p>
+      <h2>The "Day 1" experience</h2>
+
+      <div class="day-card">
+        <div class="day-header">
+          <div class="day-num">Day 1</div>
+          <div class="day-meta">
+            <strong>30 min</strong> · <strong>Easy</strong> · <strong>Postgres</strong>
+          </div>
+        </div>
+        <h3>Text-to-SQL Generator</h3>
+        <p class="day-concept">💡 <strong>Concept:</strong> LLMs can translate natural language to SQL if you give them the schema. This is the foundation of "AI for databases."</p>
+
+        <h4>🛠️ Project</h4>
+        <p>Build a function that takes a question in English and returns a valid SQL query.</p>
+
+        <h4>Code</h4>
+        <div class="code-block">
+          <pre><code><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI
+<span class="keyword">from</span> db <span class="keyword">import</span> query
+
+client = <span class="class">OpenAI</span>()
+
+<span class="keyword">def</span> <span class="function">text_to_sql</span>(question):
+    response = client.chat.completions.create(
+        model=<span class="string">"gpt-4o-mini"</span>,
+        messages=[
+            {<span class="string">"role"</span>: <span class="string">"system"</span>, <span class="string">"content"</span>: <span class="string">"You are a SQL expert. Schema: users, orders, products. Return only SQL."</span>},
+            {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: question}
+        ],
+        temperature=<span class="number">0</span>
+    )
+    <span class="keyword">return</span> response.choices[<span class="number">0</span>].message.content
+
+<span class="builtin">print</span>(<span class="function">text_to_sql</span>(<span class="string">"How many users signed up this month?"</span>))</code></pre>
+        </div>
+
+        <div class="day-actions">
+          <div>
+            <h4>🌙 Reflection</h4>
+            <ul>
+              <li>What did you build?</li>
+              <li>What was hard?</li>
+              <li>What would you change?</li>
+            </ul>
+          </div>
+          <div>
+            <h4>🚀 Deploy</h4>
+            <ul>
+              <li>Push to GitHub</li>
+              <li>Add a README</li>
+              <li>Post on Twitter with #buildinpublic</li>
+            </ul>
+          </div>
+          <div>
+            <h4>💪 Stretch</h4>
+            <ul>
+              <li>Add Streamlit UI</li>
+              <li>Block DROP/DELETE for safety</li>
+              <li>Add query explanation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Outcomes -->
+  <section class="section">
+    <div class="container">
+      <p class="kicker">By Day 180</p>
+      <h2>What you'll have built</h2>
+      <div class="outcomes-grid">
+        <div class="outcome-card">
+          <div class="outcome-num">180</div>
+          <p>deployed AI projects</p>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-num">6</div>
+          <p>monthly capstones</p>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-num">1</div>
+          <p>live SaaS with users</p>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-num">180</div>
+          <p>public GitHub repos</p>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-num">1,500+</div>
+          <p>hours of hands-on practice</p>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-num">1</div>
+          <p>portfolio that lands jobs</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section section-dark" id="pricing">
+    <div class="container">
+      <p class="kicker">Pricing</p>
+      <h2 class="center">Pick your path</h2>
+      <p class="sub center">All tiers include the 180 projects. Higher tiers add mentorship and accountability.</p>
+
+      <div class="pricing-grid">
+        <div class="price-card">
+          <h3>Self-Paced</h3>
+          <p class="price-amount">$997</p>
+          <p class="price-sub">or 12× $99/mo</p>
+          <ul class="price-features">
+            <li>✅ All 180 project specs</li>
+            <li>✅ Full code for every project</li>
+            <li>✅ 180 video walkthroughs</li>
+            <li>✅ Private Discord (500+ learners)</li>
+            <li>✅ Lifetime access + free updates</li>
+            <li>✅ Certificate of completion</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Enroll Self-Paced</a>
+        </div>
+
+        <div class="price-card featured">
+          <div class="price-badge">MOST POPULAR</div>
+          <h3>Cohort</h3>
+          <p class="price-amount">$1,997</p>
+          <p class="price-sub">Next cohort: Jan 6, 2026</p>
+          <ul class="price-features">
+            <li>Everything in Self-Paced, plus:</li>
+            <li>🎯 6 monthly group calls (90 min)</li>
+            <li>🎯 Code review on monthly projects</li>
+            <li>🎯 Cohort Slack channel</li>
+            <li>🎯 Job referrals to hiring partners</li>
+            <li>🎯 Demo Day presentation slot</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Reserve Cohort Spot</a>
+          <p class="price-note">38 of 50 spots left. Last 3 cohorts sold out.</p>
+        </div>
+
+        <div class="price-card">
+          <h3>Premium 1:1</h3>
+          <p class="price-amount">$4,997</p>
+          <p class="price-sub">Apply to check eligibility</p>
+          <ul class="price-features">
+            <li>Everything in Cohort, plus:</li>
+            <li>🚀 12 weekly 1:1 calls (30 min)</li>
+            <li>🚀 Capstone project mentorship</li>
+            <li>🚀 Mock interview at Day 180</li>
+            <li>🚀 Personal intros to hiring managers</li>
+            <li>🚀 Lifetime access to all future cohorts</li>
+          </ul>
+          <a href="#" class="btn btn-secondary">Apply for Premium</a>
+        </div>
+      </div>
+
+      <p class="pricing-fineprint">
+        🔒 30-day money-back guarantee · 💳 Financing available · 🏢 Company invoices accepted · 💰 $0-10/mo infra cost
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <p class="kicker">FAQ</p>
+      <h2>Common questions</h2>
+
+      <div class="faq-grid">
+        <div class="faq-item">
+          <h4>I only have 30 min/day. Can I do this?</h4>
+          <p>Yes. 80% of projects take 30-45 min. The 20% that take longer are clearly marked so you can plan ahead.</p>
+        </div>
+        <div class="faq-item">
+          <h4>I'm not a Python dev. Can I use JS/TS?</h4>
+          <p>The starter code is Python, but concepts are language-agnostic. JS/TS students get a parallel track in the community.</p>
+        </div>
+        <div class="faq-item">
+          <h4>What if I miss a day?</h4>
+          <p>No penalty. Self-paced. Most students miss 5-10 days over 6 months (vacations, emergencies). Catch up on weekends.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Do I need to deploy everything?</h4>
+          <p>Strongly recommended. Local-only is fine for learning, but "I deployed 180 things" is a much stronger portfolio.</p>
+        </div>
+        <div class="faq-item">
+          <h4>What cloud costs should I expect?</h4>
+          <p>$0-10/month. All 6 data systems have free tiers. Production SaaS at Day 180: budget $20-50/mo.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Time-to-first-value?</h4>
+          <p>30 minutes. By end of Day 1, you have a working AI app. By end of Week 1, 7 working apps. By end of Month 1, a portfolio piece.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Can I expense through my employer?</h4>
+          <p>Yes. We provide invoices. Most companies have a $1,500-3,000/year learning budget.</p>
+        </div>
+        <div class="faq-item">
+          <h4>How is this different from AI Engineer Mastery?</h4>
+          <p>Different format. AI Engineer Mastery is 35 hours of structured curriculum. AI Daily is 180 days of hands-on practice. They're complementary.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="section section-cta">
+    <div class="container">
+      <h2 class="center">The AI engineers of 2026 are building right now.<br>Will you be one of them?</h2>
+      <p class="sub center">180 days from now, you'll have 180 deployed AI projects, 6 monthly capstones, 1 live SaaS, and a portfolio that lands jobs.</p>
+      <div class="cta-group center">
+        <a href="#pricing" class="btn btn-primary btn-lg">→ Start Day 1 — $997</a>
+      </div>
+      <p class="cta-fineprint">🔒 30-day refund · 💳 12× $99 financing · 🏢 Invoices accepted</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 AIForBiz · Made with ❤️ in Singapore · <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="mailto:team@aiforbiz.com">Contact</a></p>
+    </div>
+  </footer>
+
+  <!-- Day detail modal -->
+  <div class="modal" id="day-modal" onclick="if(event.target === this) closeModal()">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

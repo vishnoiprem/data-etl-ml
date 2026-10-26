@@ -142,3 +142,7 @@ These are the choices I made that you should question and form your own opinion 
 - **No `users.email` UNIQUE** in some sample data inserts (to allow test data) — production schemas should have it.
 
 If you disagree with any of these, that's good. The interview answer is always **why**, not what.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

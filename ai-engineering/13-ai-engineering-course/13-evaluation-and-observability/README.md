@@ -26,3 +26,7 @@ The eval + observability stack: LLM evaluation methods, LLM-as-judge patterns, a
 ## The Lead Lesson
 
 > **Lesson 1 — [LLM Evaluation](./01-llm-evaluation.md)** — the foundational lesson. Worked example: build a 200-query eval set, run four evaluator types (code-based, embedding-distance, LLM-as-judge, human spot-check), compare two model versions on the same set, produce a regression report.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -182,3 +182,7 @@ email RLIKE '^[a-z]+@dataplatform\\.com$'   -- correct in SQL text
 The DataFrame API takes the pattern verbatim, so `F.col("email").rlike(r"...\.com$")`
 needs only the single backslash. `26`, `34` and `75` all hit this; `75` asserts
 both behaviours side by side.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

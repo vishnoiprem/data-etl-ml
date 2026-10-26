@@ -40,3 +40,7 @@ A structured question bank spanning all 17 prior modules: ML foundations, deep l
 | Evaluation | How do you build an LLM eval set? What's wrong with using the same model as a judge? |
 | Safety | Walk me through a prompt-injection attack and the defenses that work. |
 | System Design | Design a real-time voice AI agent at 10K concurrent calls. |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

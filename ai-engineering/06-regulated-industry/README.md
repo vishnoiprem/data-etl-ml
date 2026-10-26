@@ -118,3 +118,7 @@ The demo:
 | Audit-log gap detection | 100% |
 | Control-mapping coverage | 100% of in-scope controls |
 | Mean time to evidence pack (per audit) | < 1 day |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

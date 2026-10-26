@@ -10,7 +10,7 @@ Here: reads dummy Parquet files and writes partitioned ORC-like Parquet
 
 import sys
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -52,7 +52,7 @@ def ingest_customers(run_date: str):
         subset = df[df["country_code"] == country].copy()
         if subset.empty:
             continue
-        subset["load_timestamp"] = datetime.utcnow().isoformat()
+        subset["load_timestamp"] = datetime.now(timezone.utc).isoformat()
         subset["source_file"] = f"core_banking.customer_master.{run_date}"
         path = _partition_path(country, "customer_master", run_date)
         _write_partition(subset, path, f"customers/{country}")
@@ -67,7 +67,7 @@ def ingest_accounts(run_date: str):
         subset = df[df["country_code"] == country].copy()
         if subset.empty:
             continue
-        subset["load_timestamp"] = datetime.utcnow().isoformat()
+        subset["load_timestamp"] = datetime.now(timezone.utc).isoformat()
         path = _partition_path(country, "account_master", run_date)
         _write_partition(subset, path, f"accounts/{country}")
 
@@ -81,7 +81,7 @@ def ingest_transactions(run_date: str):
         subset = df[df["country_code"] == country].copy()
         if subset.empty:
             continue
-        subset["load_timestamp"] = datetime.utcnow().isoformat()
+        subset["load_timestamp"] = datetime.now(timezone.utc).isoformat()
         path = _partition_path(country, "fact_transaction", run_date)
         _write_partition(subset, path, f"transactions/{country}")
 
@@ -95,7 +95,7 @@ def ingest_wire_transfers(run_date: str):
         subset = df[df["sender_country"] == country].copy()
         if subset.empty:
             continue
-        subset["load_timestamp"] = datetime.utcnow().isoformat()
+        subset["load_timestamp"] = datetime.now(timezone.utc).isoformat()
         path = _partition_path(country, "wire_transfer", run_date)
         _write_partition(subset, path, f"wire/{country}")
 
@@ -104,7 +104,7 @@ def ingest_sanctions_list(run_date: str):
     """Daily sanctions list refresh from OFAC/UN/EU feeds."""
     logger.info("=== External: Ingesting sanctions lists ===")
     df = pd.read_parquet(DUMMY_DIR / "sanctions_list.parquet")
-    df["load_timestamp"] = datetime.utcnow().isoformat()
+    df["load_timestamp"] = datetime.now(timezone.utc).isoformat()
     # Sanctions list is not country-partitioned — stored in /raw/global/
     path = HDFS_ROOT / "raw" / "global" / "sanctions_list" / run_date[:4] / run_date[4:6] / run_date[6:]
     _write_partition(df, path, "sanctions_list/global")
@@ -113,7 +113,7 @@ def ingest_sanctions_list(run_date: str):
 def run_all(run_date: str = None):
     """Run full Sqoop ingestion cycle."""
     if run_date is None:
-        run_date = datetime.utcnow().strftime("%Y%m%d")
+        run_date = datetime.now(timezone.utc).strftime("%Y%m%d")
 
     logger.info(f"Starting Sqoop ingestion run for date: {run_date}")
     ingest_customers(run_date)

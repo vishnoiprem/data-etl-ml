@@ -1,0 +1,282 @@
+name: leads-ci
+
+# CI for leads-pipeline/draft-cron
+# - Runs the 6 in-repo test modules against a Postgres service
+#   container on a fresh Ubuntu runner
+# - Lints the modified source files
+# - Triggers on push to main + active feature branches, and on PR
+#   to main
+
+on:
+  push:
+    branches: [main, feature/agent-coding-11oct, feature/auto-pilot-ai-leads-loop]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save runner minutes on
+# force-pushes. For pushes we cancel; for PRs we also cancel so a
+# reviewer re-triggering doesn't double-bill.
+concurrency:
+  group: leads-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: avilx
+          POSTGRES_PASSWORD: avilx
+          POSTGRES_DB: avilx_test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U avilx"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: leads-pipeline/draft-cron/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r leads-pipeline/draft-cron/requirements.txt
+          pip install flake8 pytest
+
+      - name: Init test schema
+        env:
+          AVILX_DB_HOST: localhost
+          AVILX_DB_PORT: 5433
+          AVILX_DB_NAME: avilx_test
+          AVILX_DB_USER: avilx
+          AVILX_DB_PASSWORD: avilx
+          PGPASSWORD: avilx
+        run: |
+          psql -h localhost -p 5433 -U avilx -d avilx_test -f leads-pipeline/draft-cron/db/schema.sql
+
+      - name: Run tests
+        env:
+          AVILX_DB_HOST: localhost
+          AVILX_DB_PORT: 5433
+          AVILX_DB_NAME: avilx_test
+          AVILX_DB_USER: avilx
+          AVILX_DB_PASSWORD: avilx
+        run: |
+          cd leads-pipeline/draft-cron
+          set -e
+          for t in test_dedup_key test_dedup test_parser test_resume_tailor test_better_email test_bounce_deny_persistence test_hnhiring_parse; do
+            echo "===> $t"
+            PYTHONPATH=. python -m tests.$t
+          done
+
+      - name: Lint (advisory)
+        continue-on-error: true
+        run: |
+          cd leads-pipeline/draft-cron
+          # Advisory only — flake8 reports style issues but does not
+          # fail the build. Promote to a hard failure once the
+          # existing F401/E741/W292 warnings are fixed in a follow-up
+          # commit. Allow E501 (we set 110), W503 (old style), E731.
+          flake8 --max-line-length 110 --extend-ignore E501,W503,E731 \
+            find_more_leads.py find_clients.py refine_pipeline.py \
+            backfill_emails.py cover_letter.py dashboard.py \
+            bin/loop_status.py bin/loop_bounce_sync.py \
+            state/bounce_deny_store.py \
+            resume_tailor.py \
+            || echo "::warning::Lint advisories above — see https://github.com/vishnoiprem/data-etl-ml/issues"
+
+  # Mirror the CD build so a broken Dockerfile can't reach main.
+  # This is the cheapest way to make sure leads-cd will succeed.
+  dockerfile-build:
+    name: Build Dockerfile (CD guard)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Read version
+        id: version
+        run: |
+          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          else
+            V="0.0.0+${GITHUB_SHA::7}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${V}"
+
+      # Build the image with plain `docker build` (no buildx).
+      # The smoke test is intentionally part of the same step:
+      # we observed that on hosted runners, the image built
+      # by `docker build` is sometimes not visible to
+      # `docker images` in a *subsequent* step (the build
+      # context is gone, the buildkit cache may have been
+      # GC'd, the docker daemon may have rotated, etc.). By
+      # building AND running in the same step we sidestep
+      # every inter-step visibility issue.
+      #
+      # We tried four different buildx-based patterns
+      # (build-push-action with/without `load`, setup-buildx
+      # with `driver: docker`, `docker buildx build --driver
+      # docker --load` directly) and each hit a different
+      # runner-specific failure. Plain `docker build` + an
+      # in-step `docker run` is the most reliable pattern
+      # we found.
+      #
+      # DOCKER_BUILDKIT=0 forces the legacy builder, which
+      # always writes the image to the daemon's image store
+      # before the build command returns — the same image
+      # is then immediately runnable in the same shell.
+      #
+      # Trade-off: no `cache-from: type=gha` (only buildx
+      # supports GHA cache as a backend), so every build is
+      # cold — ~30s. The leads-cd workflow is unaffected
+      # (it still uses buildx + cache-to gha).
+      - name: Build and smoke test
+        run: |
+          set -euo pipefail
+          TAG="leads-pipeline:ci-${GITHUB_SHA}"
+          export DOCKER_BUILDKIT=0
+          docker build \
+            --tag "$TAG" \
+            --build-arg "VERSION=${VERSION}" \
+            --file leads-pipeline/draft-cron/Dockerfile \
+            leads-pipeline/draft-cron
+          # Verify the image is visible to the daemon before
+          # we try to run it — fail fast with a clear error
+          # if it isn't, so the next failure mode is obvious
+          # in the run log.
+          if ! docker images --format '{{.Repository}}:{{.Tag}}' \
+              | grep -qx "$TAG"; then
+            echo "::error::image $TAG not in local daemon after build"
+            docker images
+            exit 1
+          fi
+          # Smoke test: run the in-image healthcheck script.
+          # This exercises the same import path that
+          # production healthchecks will use.
+          echo "Image to test: $TAG"
+          docker run --rm --entrypoint /bin/sh \
+            "$TAG" \
+            /usr/local/bin/docker-healthcheck.sh
+          echo "smoke test exit=$?"
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Image size budget
+        env:
+          MAX_MB: 300
+          IMAGE_TAG: leads-pipeline:ci-${{ github.sha }}
+        run: |
+          # Read the size in bytes from the docker daemon and fail
+          # the build if the image is larger than MAX_MB megabytes.
+          # Current measured size: ~164 MB. Budget 300 MB so future
+          # deps additions have ~2x headroom before failing CI.
+          SIZE_BYTES=$(docker image inspect "$IMAGE_TAG" \
+            --format='{{.Size}}')
+          SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
+          echo "image size: ${SIZE_MB} MB (budget: ${MAX_MB} MB)"
+          if [ "${SIZE_MB}" -gt "${MAX_MB}" ]; then
+            echo "::error::image is ${SIZE_MB} MB which exceeds the ${MAX_MB} MB budget."
+            echo "::error::Likely cause: a large file was added to the build context."
+            echo "::error::Check leads-pipeline/draft-cron/.dockerignore first."
+            exit 1
+          fi
+          echo "✅ size budget OK"
+
+  # Vulnerability scan: build the same image dockerfile-build just
+  # produced, then run grype against it. Currently ADVISORY
+  # ONLY (no build failure on any severity) — see the grype
+  # step for rationale. The SARIF report is still uploaded to
+  # the Security tab and findings show in GitHub's
+  # vulnerability graph + Dependabot feed.
+  #
+  # Grype updates its vulnerability database on every run, so
+  # a newly-disclosed CVE will surface in the Security tab
+  # within ~24h of disclosure even if no code changed.
+  vuln-scan:
+    name: Vulnerability scan
+    runs-on: ubuntu-latest
+    needs: dockerfile-build
+    # Skip if the build failed or was cancelled — nothing to scan.
+    if: needs.dockerfile-build.result == 'success'
+    permissions:
+      contents: read
+      # security-events: write is needed to upload the SARIF.
+      security-events: write
+    steps:
+      - uses: actions/checkout@v5
+
+      # Re-build locally so this job doesn't need to share the
+      # docker daemon with dockerfile-build. ~5s with GHA cache.
+      # Uses plain `docker build` for the same reason as the
+      # CD-guard job: buildx is fragile on hosted runners,
+      # plain `docker build` puts the image directly into the
+      # host daemon, and grype (which inspects images from the
+      # daemon) gets the right view.
+      - name: Read version
+        id: version
+        run: |
+          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          else
+            V="0.0.0+${GITHUB_SHA::7}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+
+      - name: Build (no push) for vuln scan
+        run: |
+          set -euo pipefail
+          export DOCKER_BUILDKIT=0
+          docker build \
+            --tag "leads-pipeline:scan-${GITHUB_SHA}" \
+            --build-arg "VERSION=${VERSION}" \
+            --file leads-pipeline/draft-cron/Dockerfile \
+            leads-pipeline/draft-cron
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
+      - name: Run grype
+        uses: anchore/scan-action@v6
+        with:
+          image: leads-pipeline:scan-${{ github.sha }}
+          # Advisory only. The leads-pipeline is a portfolio
+          # project, not a production service, and the
+          # python:3.12-slim runtime base pulls in critical
+          # CVEs in OS packages (glibc, openssl, libsqlite3)
+          # that are out of our control until upstream debian
+          # ships a fix — failing CI on those would mean
+          # every PR is red for ~3-6 months at a time. The
+          # SARIF report is still uploaded to the Security
+          # tab, so all findings (Negligible → Critical)
+          # remain visible in GitHub's vulnerability graph
+          # and the Dependabot alert feed.
+          #
+          # If/when the leads-pipeline graduates to a
+          # production deployment, change `fail-build: true`
+          # + a `severity-cutoff: high` (or critical) to
+          # gate merges on real risk.
+          severity-cutoff: critical
+          fail-build: false
+          output-format: sarif
+          output-file: grype.sarif
+
+      - name: Upload SARIF to Code Scanning
+        if: always() && hashFiles('grype.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: grype.sarif
+          category: leads-pipeline-grype
