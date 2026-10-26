@@ -62,6 +62,19 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Load accepted-risk allowlist
+        id: allowlist
+        run: |
+          # Packages with advisories that have been reviewed and accepted, with
+          # the rationale documented in docs/audits/SECURITY_ROUND_3.md. Each
+          # entry is "package:advisory-id". Keeping this explicit (rather than
+          # disabling the gate) means a NEW advisory on an accepted package
+          # still fails CI.
+          {
+            echo 'chromadb:PYSEC-2026-3813'
+            echo 'chromadb:PYSEC-2026-3814'
+          } > accepted-risk.txt
+          cat accepted-risk.txt
       - name: Install pip-audit
         run: |
           python -m pip install --upgrade pip
@@ -72,9 +85,15 @@ jobs:
             echo "::notice::${{ matrix.manifest }} not present in this PR — skipping"
             exit 0
           fi
-          # Extract just pinned (==) lines for pip-audit (it requires exact pins)
+          # Extract just pinned (==) lines for pip-audit (it requires exact pins).
+          # Dedupe by package name, keeping the FIRST occurrence. A manifest may
+          # pin the same package twice with different versions (e.g. a
+          # "security overrides" block plus an older pin further down); pip-audit
+          # aborts on duplicates and writes an empty JSON file, which used to
+          # crash the parser below and fail every PR that touched a manifest.
           tmp=$(mktemp)
-          grep -E '^[A-Za-z0-9_.\-]+==[0-9]' "${{ matrix.manifest }}" > "$tmp" || true
+          grep -E '^[A-Za-z0-9_.\-]+==[0-9]' "${{ matrix.manifest }}" \
+            | awk -F'==' '!seen[$1]++' > "$tmp" || true
           if [ ! -s "$tmp" ]; then
             echo "::notice::${{ matrix.manifest }} has no pinned deps to audit"
             rm -f "$tmp"
@@ -85,21 +104,60 @@ jobs:
           python -m pip_audit -r "$tmp" --no-deps --disable-pip --format json > audit.json
           rc=$?
           set -e
+          if [ "$rc" -ne 0 ] && [ ! -s audit.json ]; then
+            echo "::error::pip-audit failed to produce results for ${{ matrix.manifest }} (exit $rc)"
+            python -m pip_audit -r "$tmp" --no-deps --disable-pip --format columns || true
+            rm -f audit.json "$tmp"
+            exit 1
+          fi
           python - <<'PYEOF'
           import json, sys, os
-          with open('audit.json') as f:
-              data = json.load(f)
+          try:
+              with open('audit.json') as f:
+                  data = json.load(f)
+          except Exception as e:
+              print(f'::error::Could not parse pip-audit output: {e}', file=sys.stderr)
+              sys.exit(1)
+          # Accepted-risk allowlist: "package:advisory-id" lines. A listed
+          # advisory is reported as a warning and does not block. Any NEW
+          # advisory on the same package still blocks.
+          allowed = set()
+          if os.path.exists('accepted-risk.txt'):
+              for line in open('accepted-risk.txt'):
+                  line = line.strip()
+                  if line and not line.startswith('#'):
+                      allowed.add(line)
+          # pip-audit's JSON schema has no "severity" field, so we cannot
+          # filter by severity here. Instead we treat any advisory with NO
+          # available fix version as a blocker (those are the unfixable ones),
+          # and report fixable advisories as warnings so they still surface.
           blockers = []
+          warnings = []
+          accepted = []
           for dep in data.get('dependencies', []):
               for v in dep.get('vulns', []):
+                  name = dep['name']
+                  ver = dep.get('version')
+                  vid = v.get('id')
                   fix = (v.get('fix_versions') or [])
-                  sev = (v.get('severity') or '').upper()
-                  if sev in ('HIGH', 'CRITICAL') and not fix:
-                      blockers.append((dep['name'], v.get('id'), sev))
+                  if f'{name}:{vid}' in allowed:
+                      accepted.append((name, ver, vid))
+                  elif not fix:
+                      blockers.append((name, ver, vid))
+                  else:
+                      warnings.append((name, ver, vid, fix))
+          if accepted:
+              print(f'::notice::{len(accepted)} advisories accepted as known risk (not blocking)')
+              for name, ver, vid in accepted:
+                  print(f'::notice file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — accepted risk')
+          if warnings:
+              print(f'::warning::{len(warnings)} advisories with a fix available (not blocking)')
+              for name, ver, vid, fix in warnings[:20]:
+                  print(f'::warning file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — fix: {",".join(fix)}')
           if blockers:
-              print('::error::Blocking security findings:', file=sys.stderr)
-              for name, vid, sev in blockers:
-                  print(f'::error file=${{ matrix.manifest }}::{sev} {name} {vid} (no fix version available)', file=sys.stderr)
+              print('::error::Blocking security findings (no fix version available):', file=sys.stderr)
+              for name, ver, vid in blockers:
+                  print(f'::error file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} (no fix version available)', file=sys.stderr)
               sys.exit(1)
           PYEOF
           rm -f audit.json "$tmp"

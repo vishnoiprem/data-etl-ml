@@ -6,9 +6,11 @@
 
 Meta's loop is the one where the Jedi round matters.
 
-Where OpenAI tests production-engineering instincts, Anthropic tests safety reasoning, and DeepMind tests research depth, **Meta tests product sense + the behavioral round is weighted as heavily as the technical rounds.** A Meta interviewer is "literally trained to give good hints" — and the worst thing you can do is sit silent for 5 minutes and then produce a perfect solution. The Jedi round is not a soft-skill round. It's the round that decides offers.
+Where OpenAI tests production-engineering instincts, Anthropic tests safety reasoning, and DeepMind tests research depth, **Meta tests product sense + the behavioral round is weighted as heavily as the technical rounds.** A Meta interviewer is "literally trained to give good hints" — and the worst thing you can do is sit silent for 5 minutes and then produce a perfect solution.
 
-In 2026, Meta added a new round: a 60-min **AI-assisted coding round** where you work in an IDE-like environment with an existing multi-file codebase (a few hundred lines) and use Llama 4 or GPT-4o mini to review code, fix bugs, add features, and discuss scaling. This is the round that catches 2023 candidates — the ones who refuse to use AI tools in the loop. The 2026 candidate uses them thoughtfully and catches the tool's mistakes.
+**A note on the term "Jedi."** Candidates use "the Jedi round" as shorthand for Meta's behavioral loop, but Meta itself does not use that name in its official interview-prep material. It shows up in candidate community circles because the round probes traits that candidates have historically associated with the archetype. In your prep, call it *the behavioral round* — and know that what actually gets graded is the same regardless of what you call it.
+
+In 2026, Meta has an **AI-enabled coding round**: a ~60-min CoderPad exercise where you may use Claude, GPT, Gemini, or Meta AI to write code. It replaces one of the two coding rounds on loops where it's present, and it is graded on your prompting, verification, and ownership of the output — not on typing speed. Important caveat: it is **not universal.** Plenty of Meta SWE loops in 2026 still run two classic coding rounds. Ask your recruiter which configuration you have before you prep for it.
 
 The 60-second pitch: **Meta is hiring research engineers who can think about how their work lands in a product, debug a real codebase with an AI tool, and tell a specific story about conflict, failure, and data-influenced decisions. The candidate who treats the Jedi round as a formality loses. The right choice is to prep STAR stories like you'd prep coding.**
 
@@ -20,7 +22,7 @@ The 60-second pitch: **Meta is hiring research engineers who can think about how
 |-------|--------------|------|-----------|
 | 1. **Recruiter screen** | 30 min. Background, level calibration. | 1-2 weeks | ~50% advance |
 | 2. **Technical phone screen (TPS)** | 45 min on CoderPad. 2 LeetCode easy/medium. Code execution often disabled. | 1-2 weeks | ~40% advance |
-| 3. **Onsite loop (4-5 rounds in 1 day)** | 2 coding → 1 system design (E5+) → 1 Jedi behavioral → 1 AI-assisted coding (new 2026). E6+ may have a Leadership Assessment round before the loop. | 1-2 days | ~30% advance |
+| 3. **Onsite loop (4-5 rounds in 1 day)** | Typically 2 coding → 1 system design (E5+) → 1 behavioral (often nicknamed "the Jedi" in candidate communities) → 1 AI-enabled coding where configured. E6+ may have a Leadership Assessment round before the loop. | 1-2 days | ~30% advance |
 | 4. **Hiring committee** | Packet goes to committee. Vote. 1-2 weeks. | 1-2 weeks | ~60% advance |
 | 5. **Team match** | If committee passes, you get matched to a team. | 1-3 weeks | — |
 | 6. **Offer** | Comp negotiation is real and expected. | 1 week | — |
@@ -33,11 +35,13 @@ The 60-second pitch: **Meta is hiring research engineers who can think about how
 |-------|-------|------------|
 | E3 | SWE | $180K-$220K |
 | E4 | SWE | $250K-$350K |
-| E5 | Senior SWE | $350K-$500K |
-| E6 | Staff SWE | $500K-$800K |
-| E7 | Senior Staff | $700K-$1.2M+ |
+| E5 | Senior SWE | ~$300K-$400K |
+| E6 | Staff SWE | ~$500K-$700K |
+| E7 | Senior Staff | ~$1M+ |
 
-**Note:** Meta comp is heavily equity-weighted (RSUs). At E6+, the bulk of your comp is in stock that vests over 4 years. Comp negotiation is real — come with a competing offer from OpenAI / Anthropic / Google.
+**Note on the numbers:** Earlier drafts of this series quoted E5 at $350K-$500K. That was high. 6figr's IC5 median for Meta sits closer to **$321K**, and Levels.fyi's E5 aggregate is in the same neighborhood. If you are E5, budget in the low-to-mid $300Ks, not the high $400Ks, or you will negotiate against a phantom number and lose. Meta comp is heavily equity-weighted (RSUs) and E6+ packages are substantially wider than E5. Comp negotiation is real — come with a competing offer from OpenAI / Anthropic / Google.
+
+**Strategic context for "why Meta" (2026):** Meta reorganized its AI research efforts in mid-2025 under **Meta Superintelligence Labs (MSL)**, led by Alexandr Wang, which now produces the **Muse** model family. **FAIR** continues as the fundamental-research org. Knowing which org a given team sits under — and being able to say something specific about each — is exactly the kind of signal that separates a generic answer from a real one.
 
 ---
 
@@ -72,11 +76,37 @@ The 60-second pitch: **Meta is hiring research engineers who can think about how
 
 ### The 5 things every real Meta report has in common
 
-1. **The Jedi round is the offer-decider.** Prep STAR stories like you'd prep coding. Specific conflict, specific failure, specific data-influenced decision. Generic answers lose.
+1. **The behavioral round is the offer-decider.** Prep STAR stories like you'd prep coding. Specific conflict, specific failure, specific data-influenced decision. Generic answers lose.
 2. **Hints are part of the test.** A Meta interviewer is "literally trained to give good hints." If you're stuck, ask. Don't sit silent for 5 min.
-3. **The AI-assisted coding round (new 2026) is a thinking test, not a typing test.** Use Llama 4 or GPT-4o mini thoughtfully. Catch the tool's mistakes. Explain your reasoning.
+3. **The AI-enabled coding round (where configured) is a thinking test, not a typing test.** Use Claude/GPT/Gemini/Meta AI thoughtfully. Catch the tool's mistakes. Explain your reasoning — and verify before you say you're done.
 4. **System design is product-heavy.** "Design News Feed", "Design Instagram", "Design Messenger/WhatsApp." The candidate who can name the trade-off (chronological vs. ranked, fan-out vs. fan-in) wins.
 5. **Comp negotiation is expected.** Come with a competing offer. The E6+ comp band is wide; you want to land at the top.
+
+---
+
+## What failed candidates said they did wrong
+
+The single most useful thing you can do before a Meta loop is read what people who *didn't* get offers said they did wrong. Here are the five patterns that come up repeatedly in post-mortems from rejected Meta candidates.
+
+**Pattern 1: Silent during the coding round.**
+Meta interviewers are explicitly trained to drop hints, and candidates report that taking the hint — or at least reacting to it — was the difference between a hire and a no-hire. Sitting silent for five minutes and then producing a perfect answer scores *worse* than producing an imperfect answer while narrating. The hint is not a gift; it's a test of whether you actually collaborate.
+
+**Pattern 2: Treating the behavioral round as a formality.**
+This is the most common pre-mortem from rejected Meta candidates. You passed the coding rounds and then ran out of steam on the "tell me about a conflict" question and reached for a generic answer. Meta weighs this round equally with the technical ones. A vague "we had a disagreement and we talked it out" is a red flag — it signals you either can't handle conflict or you can't remember a real example.
+
+**Pattern 3: Not researching the specific team.**
+Meta is now split enough across MSL, FAIR, GenAI, Reality Labs, and the consumer-app orgs that a generic "I'm excited about Meta's AI mission" answer lands flat. Candidates report that they didn't know which org the role sat in, couldn't name a recent Meta AI paper, and had nothing specific to say. Do 2 hours of team-specific research before the loop.
+
+**Pattern 4: Overconfident, unspecific system design.**
+Rejected candidates frequently name the architecture ("I'd use a Redis cache and a ranker") without ever naming the scale, the failure mode, or the trade-off they rejected. Meta's rubric rewards reasoning about trade-offs, not listing services.
+
+**Pattern 5: Not catching the AI tool's mistake (AI-enabled round).**
+The newer failure mode. Candidates who used the LLM as an oracle — pasting output, running it, and moving on — scored below candidates who read the diff, spotted the bug the tool introduced, and explained why they caught it. The grade is on verification and ownership, not on tool usage.
+
+> *"I was flustered during the SQL portion. I wrote two queries, but didn't fully understand the data model."*
+> — [r/OfferEngineering — Meta Data Engineer interview, full loop (Mar 2026)](https://www.reddit.com/r/OfferEngineering/comments/1s2z2p1/meta_data_engineer_interview_full_loop_questions/)
+
+The thread is worth reading in full. The lesson generalizes beyond data roles: **understanding the data model is the thing being tested, and you cannot fake it under time pressure.**
 
 ---
 
@@ -128,15 +158,15 @@ News Feed is the canonical Meta system design. The wrong answer: "I would design
 
 ### Meta-answer 3: "Conflict, named specifically"
 
-The Jedi conflict question is asked in 100% of loops. The wrong answer: "I'm easy to work with; I usually just go along." The right answer: a specific conflict you had, what you disagreed on, how you resolved it, and what the outcome was. The example from the Meta guide: the senior engineer who wanted a complex caching solution; you proposed a simpler one. You built benchmarks. His was 5% faster but used 20% more memory. **Name the conflict, name the disagreement, name the data that resolved it, name the outcome.**
+The conflict question is asked in 100% of behavioral rounds. The wrong answer: "I'm easy to work with; I usually just go along." The right answer: a specific conflict you had, what you disagreed on, how you resolved it, and what the outcome was. The example from the Meta guide: the senior engineer who wanted a complex caching solution; you proposed a simpler one. You built benchmarks. His was 5% faster but used 20% more memory. **Name the conflict, name the disagreement, name the data that resolved it, name the outcome.**
 
 ### Meta-answer 4: "Failure, with the lesson"
 
-The Jedi failure question is asked in 100% of loops. The wrong answer: "I don't really fail." The right answer: a specific failure, what you learned, and what you do differently now. The example from the Meta guide: the bug that only manifested with a specific data format and caused the pipeline to fail silently overnight. **Name the failure, name the data format, name the silent failure mode, name the lesson (add data-format tests for every pipeline).**
+The failure question is asked in 100% of behavioral rounds. The wrong answer: "I don't really fail." The right answer: a specific failure, what you learned, and what you do differently now. The example from the Meta guide: the bug that only manifested with a specific data format and caused the pipeline to fail silently overnight. **Name the failure, name the data format, name the silent failure mode, name the lesson (add data-format tests for every pipeline).**
 
 ### Meta-answer 5: "AI tools, with the catch"
 
-The new AI-assisted coding round (2026) is graded on whether you can use the tool thoughtfully. The wrong answer: prompt the tool, paste the output, hope it works. The right answer: prompt the tool, read the diff, catch the bug the tool introduced (e.g., the tool added a feature that breaks the existing API contract), explain why you caught it. **The 2026 candidate uses the tool like a junior engineer: with supervision. The 2023 candidate refuses to use it. The 2025 candidate trusts it. The 2026 candidate uses it and catches the mistakes.**
+The AI-enabled coding round (where configured) is graded on whether you can use the tool thoughtfully. The wrong answer: prompt the tool, paste the output, hope it works. The right answer: prompt the tool, read the diff, catch the bug the tool introduced (e.g., the tool added a feature that breaks the existing API contract), explain why you caught it. **The 2026 candidate uses the tool like a junior engineer: with supervision. The 2023 candidate refuses to use it. The 2025 candidate trusts it. The 2026 candidate uses it, verifies it, and catches the mistakes.**
 
 ---
 
@@ -168,11 +198,11 @@ The new AI-assisted coding round (2026) is graded on whether you can use the too
 
 ## The 5 things to remember
 
-1. **The Jedi round is the offer-decider.** Prep STAR stories like you'd prep coding. Generic answers lose.
+1. **The behavioral round is the offer-decider.** Prep STAR stories like you'd prep coding. Generic answers lose. (Candidate circles call it "the Jedi round"; Meta's own materials just call it the behavioral round.)
 2. **Hints are part of the test.** Ask when you're stuck. Don't sit silent. The interviewer is "literally trained to give good hints."
-3. **The AI-assisted coding round (new 2026) is a thinking test, not a typing test.** Use the tool, catch its mistakes, explain your reasoning.
+3. **The AI-enabled coding round (where configured) is a thinking test, not a typing test.** Use the tool, catch its mistakes, explain your reasoning. Confirm with your recruiter whether your loop has it.
 4. **News Feed is the canonical system design.** Practice it. The hybrid fan-out / fan-in answer is the Meta-standard.
-5. **Comp negotiation is expected.** Come with a competing offer. E6+ comp is wide; you want to land at the top.
+5. **Comp negotiation is expected — with realistic numbers.** E5 is closer to ~$321K median than to $500K. Come with a competing offer and a comp model grounded in actual bands.
 
 ---
 
@@ -203,6 +233,10 @@ The new AI-assisted coding round (2026) is graded on whether you can use the too
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
 - [Levels.fyi — Meta compensation](https://www.levels.fyi/companies/meta/salaries/software-engineer) — the E3-E7 comp band
 - [Glassdoor — Meta Interview Experience & Questions (2026)](https://www.glassdoor.com/Interview/Meta-Interview-Questions-E40772.htm) — the per-round pass rates, the process structure
+- [6figr — Meta compensation by level](https://6figr.com/employer-company/meta) — the E5 median around $321K (IC5) that earlier drafts of this article overstated
+- [Reddit r/cscareerquestions — Meta AI-enabled coding round thread (2026)](https://www.reddit.com/r/cscareerquestions/) — candidate reports of AI-assisted coding rounds on actual 2026 loops
+- [Levels.fyi — Meta AI Software Engineer compensation](https://www.levels.fyi/companies/meta/salaries/ai-software-engineer) — AI-track comp band, separate from generic SWE
+- [Meta AI — Metamate / MSL newsroom](https://ai.meta.com/blog/) — the source for MSL, the Muse model family, and the FAIR vs. MSL organizational split
 
 *This is article 4 of 10 in the "Top 100 AI/ML Interview Questions" series. Articles 1-3 (OpenAI, Anthropic, DeepMind) are already live.*
 

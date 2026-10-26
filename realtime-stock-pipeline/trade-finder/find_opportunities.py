@@ -75,9 +75,18 @@ RANKED_JSON = DATA_DIR / "latest_ranked.json"
 
 # Country-level economics: tariff rate (avg MFN), shipping $ per kg,
 # platform fee (Amazon FBA, eBay final-value, Etsy, etc.).
+#
+# India tariff: the COUNTRY_META value for IN is the EFFECTIVE total
+# customs burden = BCD (10-20% for consumer goods) + IGST (18%) + Social
+# Welfare Surcharge (1-10%) + cess. The "tariff_avg = 0.10" the previous
+# version used was the BCD only — under-modeled IGST + SWS. The real
+# total for finished consumer electronics is closer to 0.30-0.45.
+# We use 0.35 as a realistic avg for the price-band this finder covers.
+# If the buyer only wants BCD for "rough" planning, override with
+# --india-tariff 0.10.
 COUNTRY_META = {
     "CN": {"name": "China",     "currency": "CNY", "tariff_avg": 0.075, "ship_per_kg": 4.5},
-    "IN": {"name": "India",     "currency": "INR", "tariff_avg": 0.10,  "ship_per_kg": 5.0},
+    "IN": {"name": "India",     "currency": "INR", "tariff_avg": 0.35,  "ship_per_kg": 5.0},
     "VN": {"name": "Vietnam",   "currency": "VND", "tariff_avg": 0.08,  "ship_per_kg": 4.8},
     "TR": {"name": "Türkiye",   "currency": "TRY", "tariff_avg": 0.06,  "ship_per_kg": 3.5},
     "MX": {"name": "Mexico",    "currency": "MXN", "tariff_avg": 0.05,  "ship_per_kg": 2.8},
@@ -96,6 +105,8 @@ COUNTRY_META = {
 # Platform fee schedules (destination marketplace)
 PLATFORM_FEES = {
     "amazon_fba": 0.33,  # referral + FBA pick & pack (avg)
+    "amazon_in":  0.22,  # Amazon India referral + closing + shipping fee (avg for non-FBA seller-fulfilled)
+    "flipkart":   0.18,  # Flipkart commission + fixed fee (avg across categories)
     "ebay":       0.13,  # final-value fee avg
     "etsy":       0.12,  # transaction + listing
     "shopify":    0.029, # Shopify Payments
@@ -110,79 +121,79 @@ PRODUCTS: list[dict] = [
     # name, category, kg/unit, source prices (CN/IN/VN/TR/MX/BD/ID/TH), dest prices (US/DE/UK/AU/JP/CA/AE)
     {"name": "wireless earbuds",      "cat": "electronics", "kg": 0.10,
      "src": {"CN": 3.50, "IN": 4.20, "VN": 3.80, "TR": 4.50, "MX": 5.10, "BD": 4.00, "ID": 4.10, "TH": 4.30},
-     "dst": {"US": 18.0, "DE": 22.0, "UK": 21.0, "AU": 26.0, "JP": 24.0, "CA": 23.0, "AE": 20.0}},
+     "dst": {"US": 18.0, "DE": 22.0, "UK": 21.0, "AU": 26.0, "JP": 24.0, "CA": 23.0, "AE": 20.0, "IN": 7.2}},
     {"name": "smart watch",           "cat": "electronics", "kg": 0.12,
      "src": {"CN": 7.20, "IN": 8.50, "VN": 7.80, "TR": 9.00, "MX": 9.50, "BD": 8.00, "ID": 8.20, "TH": 8.40},
-     "dst": {"US": 32.0, "DE": 38.0, "UK": 36.0, "AU": 44.0, "JP": 40.0, "CA": 38.0, "AE": 34.0}},
+     "dst": {"US": 32.0, "DE": 38.0, "UK": 36.0, "AU": 44.0, "JP": 40.0, "CA": 38.0, "AE": 34.0, "IN": 12.8}},
     {"name": "led strip light 5m",    "cat": "home",        "kg": 0.20,
      "src": {"CN": 1.20, "IN": 1.50, "VN": 1.30, "TR": 1.60, "MX": 1.80, "BD": 1.40, "ID": 1.45, "TH": 1.50},
-     "dst": {"US": 9.0, "DE": 11.0, "UK": 10.0, "AU": 13.0, "JP": 12.0, "CA": 11.0, "AE": 10.0}},
+     "dst": {"US": 9.0, "DE": 11.0, "UK": 10.0, "AU": 13.0, "JP": 12.0, "CA": 11.0, "AE": 10.0, "IN": 4.05}},
     {"name": "yoga mat",              "cat": "fitness",     "kg": 1.20,
      "src": {"CN": 3.80, "IN": 4.20, "VN": 4.00, "TR": 4.50, "MX": 4.80, "BD": 3.90, "ID": 4.00, "TH": 4.10},
-     "dst": {"US": 18.0, "DE": 22.0, "UK": 21.0, "AU": 26.0, "JP": 24.0, "CA": 23.0, "AE": 20.0}},
+     "dst": {"US": 18.0, "DE": 22.0, "UK": 21.0, "AU": 26.0, "JP": 24.0, "CA": 23.0, "AE": 20.0, "IN": 9.0}},
     {"name": "reusable water bottle", "cat": "lifestyle",   "kg": 0.30,
      "src": {"CN": 1.50, "IN": 1.80, "VN": 1.60, "TR": 1.90, "MX": 2.00, "BD": 1.70, "ID": 1.75, "TH": 1.80},
-     "dst": {"US": 12.0, "DE": 14.0, "UK": 13.0, "AU": 16.0, "JP": 15.0, "CA": 14.0, "AE": 13.0}},
+     "dst": {"US": 12.0, "DE": 14.0, "UK": 13.0, "AU": 16.0, "JP": 15.0, "CA": 14.0, "AE": 13.0, "IN": 6.0}},
     {"name": "phone case silicone",   "cat": "accessories", "kg": 0.05,
      "src": {"CN": 0.45, "IN": 0.55, "VN": 0.50, "TR": 0.60, "MX": 0.65, "BD": 0.50, "ID": 0.52, "TH": 0.55},
-     "dst": {"US": 4.5, "DE": 5.5, "UK": 5.0, "AU": 6.5, "JP": 6.0, "CA": 5.5, "AE": 5.0}},
+     "dst": {"US": 4.5, "DE": 5.5, "UK": 5.0, "AU": 6.5, "JP": 6.0, "CA": 5.5, "AE": 5.0, "IN": 2.02}},
     {"name": "bluetooth speaker",     "cat": "electronics", "kg": 0.40,
      "src": {"CN": 5.20, "IN": 6.00, "VN": 5.50, "TR": 6.20, "MX": 6.50, "BD": 5.60, "ID": 5.80, "TH": 5.90},
-     "dst": {"US": 24.0, "DE": 28.0, "UK": 27.0, "AU": 32.0, "JP": 30.0, "CA": 28.0, "AE": 26.0}},
+     "dst": {"US": 24.0, "DE": 28.0, "UK": 27.0, "AU": 32.0, "JP": 30.0, "CA": 28.0, "AE": 26.0, "IN": 9.6}},
     {"name": "linen bedsheet set",    "cat": "home",        "kg": 1.50,
      "src": {"CN": 8.50, "IN": 7.80, "VN": 8.20, "TR": 9.20, "MX": 9.80, "BD": 7.20, "ID": 8.00, "TH": 8.40},
-     "dst": {"US": 38.0, "DE": 44.0, "UK": 42.0, "AU": 50.0, "JP": 46.0, "CA": 44.0, "AE": 40.0}},
+     "dst": {"US": 38.0, "DE": 44.0, "UK": 42.0, "AU": 50.0, "JP": 46.0, "CA": 44.0, "AE": 40.0, "IN": 17.1}},
     {"name": "kids educational toy",  "cat": "toys",        "kg": 0.50,
      "src": {"CN": 2.80, "IN": 3.20, "VN": 2.90, "TR": 3.40, "MX": 3.70, "BD": 2.90, "ID": 3.00, "TH": 3.10},
-     "dst": {"US": 14.0, "DE": 17.0, "UK": 16.0, "AU": 20.0, "JP": 18.0, "CA": 17.0, "AE": 15.0}},
+     "dst": {"US": 14.0, "DE": 17.0, "UK": 16.0, "AU": 20.0, "JP": 18.0, "CA": 17.0, "AE": 15.0, "IN": 6.3}},
     {"name": "pet harness",            "cat": "pet",         "kg": 0.20,
      "src": {"CN": 1.80, "IN": 2.10, "VN": 1.90, "TR": 2.20, "MX": 2.40, "BD": 2.00, "ID": 2.05, "TH": 2.10},
-     "dst": {"US": 11.0, "DE": 13.0, "UK": 12.0, "AU": 15.0, "JP": 14.0, "CA": 13.0, "AE": 12.0}},
+     "dst": {"US": 11.0, "DE": 13.0, "UK": 12.0, "AU": 15.0, "JP": 14.0, "CA": 13.0, "AE": 12.0, "IN": 5.5}},
     {"name": "ceramic coffee mug",     "cat": "home",        "kg": 0.45,
      "src": {"CN": 1.20, "IN": 1.40, "VN": 1.25, "TR": 1.50, "MX": 1.65, "BD": 1.30, "ID": 1.35, "TH": 1.40},
-     "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0}},
+     "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0, "IN": 3.6}},
     {"name": "kitchen knife set",      "cat": "kitchen",     "kg": 0.80,
      "src": {"CN": 6.50, "IN": 7.20, "VN": 6.80, "TR": 7.60, "MX": 8.20, "BD": 6.70, "ID": 7.00, "TH": 7.20},
-     "dst": {"US": 32.0, "DE": 38.0, "UK": 36.0, "AU": 44.0, "JP": 40.0, "CA": 38.0, "AE": 34.0}},
+     "dst": {"US": 32.0, "DE": 38.0, "UK": 36.0, "AU": 44.0, "JP": 40.0, "CA": 38.0, "AE": 34.0, "IN": 14.4}},
     {"name": "bamboo cutlery set",     "cat": "kitchen",     "kg": 0.30,
      "src": {"CN": 1.10, "IN": 1.30, "VN": 1.15, "TR": 1.40, "MX": 1.55, "BD": 1.20, "ID": 1.25, "TH": 1.30},
-     "dst": {"US": 7.0, "DE": 9.0, "UK": 8.0, "AU": 11.0, "JP": 10.0, "CA": 9.0, "AE": 8.0}},
+     "dst": {"US": 7.0, "DE": 9.0, "UK": 8.0, "AU": 11.0, "JP": 10.0, "CA": 9.0, "AE": 8.0, "IN": 3.15}},
     {"name": "resistance bands",       "cat": "fitness",     "kg": 0.40,
      "src": {"CN": 1.40, "IN": 1.70, "VN": 1.50, "TR": 1.80, "MX": 1.95, "BD": 1.55, "ID": 1.60, "TH": 1.65},
-     "dst": {"US": 9.0, "DE": 11.0, "UK": 10.0, "AU": 13.0, "JP": 12.0, "CA": 11.0, "AE": 10.0}},
+     "dst": {"US": 9.0, "DE": 11.0, "UK": 10.0, "AU": 13.0, "JP": 12.0, "CA": 11.0, "AE": 10.0, "IN": 4.5}},
     {"name": "car phone mount",        "cat": "automotive",  "kg": 0.25,
      "src": {"CN": 1.80, "IN": 2.10, "VN": 1.90, "TR": 2.20, "MX": 2.40, "BD": 2.00, "ID": 2.05, "TH": 2.10},
-     "dst": {"US": 11.0, "DE": 13.0, "UK": 12.0, "AU": 15.0, "JP": 14.0, "CA": 13.0, "AE": 12.0}},
+     "dst": {"US": 11.0, "DE": 13.0, "UK": 12.0, "AU": 15.0, "JP": 14.0, "CA": 13.0, "AE": 12.0, "IN": 5.5}},
     {"name": "smart plug wifi",        "cat": "home",        "kg": 0.10,
      "src": {"CN": 1.50, "IN": 1.80, "VN": 1.60, "TR": 1.90, "MX": 2.00, "BD": 1.70, "ID": 1.75, "TH": 1.80},
-     "dst": {"US": 8.5, "DE": 10.0, "UK": 9.5, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0}},
+     "dst": {"US": 8.5, "DE": 10.0, "UK": 9.5, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0, "IN": 3.83}},
     {"name": "leather journal",        "cat": "stationery",  "kg": 0.30,
      "src": {"IN": 3.50, "CN": 3.80, "VN": 3.60, "TR": 3.90, "MX": 4.20, "BD": 3.30, "ID": 3.60, "TH": 3.70},
-     "dst": {"US": 14.0, "DE": 17.0, "UK": 16.0, "AU": 20.0, "JP": 18.0, "CA": 17.0, "AE": 15.0}},
+     "dst": {"US": 14.0, "DE": 17.0, "UK": 16.0, "AU": 20.0, "JP": 18.0, "CA": 17.0, "AE": 15.0, "IN": 7.7}},
     {"name": "magnetic phone charger", "cat": "electronics", "kg": 0.10,
      "src": {"CN": 2.20, "IN": 2.60, "VN": 2.35, "TR": 2.80, "MX": 3.00, "BD": 2.50, "ID": 2.55, "TH": 2.60},
-     "dst": {"US": 13.0, "DE": 15.0, "UK": 14.0, "AU": 17.0, "JP": 16.0, "CA": 15.0, "AE": 14.0}},
+     "dst": {"US": 13.0, "DE": 15.0, "UK": 14.0, "AU": 17.0, "JP": 16.0, "CA": 15.0, "AE": 14.0, "IN": 5.2}},
     {"name": "postpartum belly band",  "cat": "wellness",    "kg": 0.25,
      "src": {"CN": 2.80, "IN": 3.20, "VN": 2.90, "TR": 3.40, "MX": 3.70, "BD": 3.00, "ID": 3.10, "TH": 3.20},
-     "dst": {"US": 14.0, "DE": 17.0, "UK": 16.0, "AU": 20.0, "JP": 18.0, "CA": 17.0, "AE": 15.0}},
+     "dst": {"US": 14.0, "DE": 17.0, "UK": 16.0, "AU": 20.0, "JP": 18.0, "CA": 17.0, "AE": 15.0, "IN": 7.0}},
     {"name": "bamboo cutting board",   "cat": "kitchen",     "kg": 0.90,
      "src": {"CN": 3.20, "IN": 3.60, "VN": 3.30, "TR": 3.80, "MX": 4.10, "BD": 3.40, "ID": 3.50, "TH": 3.60},
-     "dst": {"US": 16.0, "DE": 19.0, "UK": 18.0, "AU": 22.0, "JP": 20.0, "CA": 19.0, "AE": 17.0}},
+     "dst": {"US": 16.0, "DE": 19.0, "UK": 18.0, "AU": 22.0, "JP": 20.0, "CA": 19.0, "AE": 17.0, "IN": 7.2}},
     {"name": "canvas tote bag",        "cat": "fashion",     "kg": 0.20,
      "src": {"CN": 1.40, "IN": 1.60, "VN": 1.45, "TR": 1.70, "MX": 1.85, "BD": 1.50, "ID": 1.55, "TH": 1.60},
-     "dst": {"US": 9.0, "DE": 11.0, "UK": 10.0, "AU": 13.0, "JP": 12.0, "CA": 11.0, "AE": 10.0}},
+     "dst": {"US": 9.0, "DE": 11.0, "UK": 10.0, "AU": 13.0, "JP": 12.0, "CA": 11.0, "AE": 10.0, "IN": 4.5}},
     {"name": "wooden hair brush",      "cat": "beauty",      "kg": 0.15,
      "src": {"CN": 1.20, "IN": 1.40, "VN": 1.25, "TR": 1.50, "MX": 1.65, "BD": 1.30, "ID": 1.35, "TH": 1.40},
-     "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0}},
+     "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0, "IN": 4.4}},
     {"name": "reusable shopping bag",  "cat": "lifestyle",   "kg": 0.10,
      "src": {"CN": 0.60, "IN": 0.75, "VN": 0.65, "TR": 0.80, "MX": 0.90, "BD": 0.70, "ID": 0.75, "TH": 0.78},
-     "dst": {"US": 5.0, "DE": 6.0, "UK": 5.5, "AU": 7.0, "JP": 6.5, "CA": 6.0, "AE": 5.5}},
+     "dst": {"US": 5.0, "DE": 6.0, "UK": 5.5, "AU": 7.0, "JP": 6.5, "CA": 6.0, "AE": 5.5, "IN": 2.5}},
     {"name": "essential oil diffuser", "cat": "wellness",    "kg": 0.50,
      "src": {"CN": 4.50, "IN": 5.20, "VN": 4.80, "TR": 5.40, "MX": 5.80, "BD": 4.90, "ID": 5.00, "TH": 5.10},
-     "dst": {"US": 22.0, "DE": 26.0, "UK": 25.0, "AU": 30.0, "JP": 28.0, "CA": 26.0, "AE": 24.0}},
+     "dst": {"US": 22.0, "DE": 26.0, "UK": 25.0, "AU": 30.0, "JP": 28.0, "CA": 26.0, "AE": 24.0, "IN": 11.0}},
     {"name": "compression socks",      "cat": "fashion",     "kg": 0.10,
      "src": {"CN": 1.10, "IN": 1.30, "VN": 1.15, "TR": 1.40, "MX": 1.55, "BD": 1.20, "ID": 1.25, "TH": 1.30},
-     "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0}},
+     "dst": {"US": 8.0, "DE": 10.0, "UK": 9.0, "AU": 12.0, "JP": 11.0, "CA": 10.0, "AE": 9.0, "IN": 4.0}},
     {"name": "stainless steel straw",  "cat": "lifestyle",   "kg": 0.05,
      "src": {"CN": 0.40, "IN": 0.50, "VN": 0.42, "TR": 0.55, "MX": 0.60, "BD": 0.45, "ID": 0.48, "TH": 0.50},
      "dst": {"US": 4.0, "DE": 5.0, "UK": 4.5, "AU": 6.0, "JP": 5.5, "CA": 5.0, "AE": 4.5}},
@@ -276,7 +287,14 @@ class Opportunity:
 
 
 def _platform_for(dest: str, category: str) -> str:
-    """Pick the highest-volume destination platform by category."""
+    """Pick the highest-volume destination platform by category + market.
+    India is treated specially — the dominant marketplaces are Amazon.in
+    and Flipkart, not the Western ones."""
+    if dest == "IN":
+        # Flipkart leads in fashion/lifestyle; Amazon.in leads elsewhere.
+        if category in ("fashion", "beauty", "lifestyle"):
+            return "flipkart"
+        return "amazon_in"
     if category in ("electronics", "home", "kitchen", "automotive", "accessories"):
         return "amazon_fba"
     if category in ("fashion", "beauty"):
@@ -300,10 +318,17 @@ def _build_opportunities(fx: dict[str, float]) -> list[Opportunity]:
             # The product table is already USD-equivalent wholesale; jitter for market drift.
             src_usd = _jitter(src_price, 0.07)
             for dst, dst_price in p["dst"].items():
-                # The destination price is in destination-country currency on
-                # the local marketplace. Convert via FX to USD.
-                dst_currency = COUNTRY_META[dst]["currency"]
-                dst_usd = _jitter(dst_price / fx.get(dst_currency, 1.0), 0.05)
+                # The destination price in PRODUCTS is the *USD-equivalent*
+                # retail price on the local marketplace (i.e. what the
+                # local buyer pays, expressed in USD using the FX-implied
+                # parity). The table already encodes per-market price
+                # level differences (e.g. IN is ~45% of US). Do NOT
+                # divide by FX here — the table is USD-denominated. The
+                # previous version divided by fx[dst_currency] under the
+                # assumption dst_price was in local currency, which
+                # produced absurd results (IN prices showed as $0.02)
+                # because INR/VND/IDR/BDT FX rates are 83-25000.
+                dst_usd = _jitter(dst_price, 0.05)
                 weight = p["kg"]
                 # Shipping: source-country rate × weight
                 ship = round(COUNTRY_META[src]["ship_per_kg"] * weight * random.uniform(0.95, 1.10), 2)
@@ -379,6 +404,58 @@ def _filter_and_rank(opps: list[Opportunity], min_margin: float = 0.35) -> list[
     qualified = [o for o in opps if o.margin_pct >= min_margin and o.margin_usd > 0]
     qualified.sort(key=lambda o: -o.score)
     return qualified
+
+
+# --------------------------------------------------------------------------- #
+# Anti-repeat: suppress duplicate email drafts when the top recommendation
+# is materially the same as last cycle. The user runs the autopilot on a
+# loop; without this, every cycle writes "deploy $5K for 500 units of
+# smartwatch fitness band" even when nothing has changed. Over 1000
+# cycles that becomes ~$5M of *intent* with 0 actual movement — a paper
+# capital pile-up. The markdown report and JSON are still emitted every
+# cycle (always useful) but the outreach emails are gated.
+# --------------------------------------------------------------------------- #
+
+LAST_EMITTED_PATH = DATA_DIR / ".last_emitted.json"
+ANTI_REPEAT_TOLERANCE = 0.05  # ±5% on price + capital counts as "same"
+
+
+def _load_last_emitted() -> dict | None:
+    if not LAST_EMITTED_PATH.exists():
+        return None
+    try:
+        return json.loads(LAST_EMITTED_PATH.read_text())
+    except Exception:
+        return None
+
+
+def _save_last_emitted(top: Opportunity) -> None:
+    LAST_EMITTED_PATH.write_text(json.dumps({
+        "ts_utc": datetime.now(timezone.utc).isoformat(),
+        "product": top.product,
+        "route": f"{top.source_country}->{top.dest_country}",
+        "dest_price_usd": top.dest_price_usd,
+        "capital_for_500u": top.capital_for_500u,
+        "margin_usd": top.margin_usd,
+    }, indent=2))
+
+
+def _is_same_as_last(top: Opportunity) -> bool:
+    last = _load_last_emitted()
+    if not last:
+        return False
+    if last.get("product") != top.product:
+        return False
+    if last.get("route") != f"{top.source_country}->{top.dest_country}":
+        return False
+    # Compare the two numeric axes that drive the recommendation.
+    last_price = float(last.get("dest_price_usd", 0))
+    last_cap = float(last.get("capital_for_500u", 0))
+    if last_price <= 0 or last_cap <= 0:
+        return False
+    price_drift = abs(top.dest_price_usd - last_price) / last_price
+    cap_drift = abs(top.capital_for_500u - last_cap) / last_cap
+    return price_drift <= ANTI_REPEAT_TOLERANCE and cap_drift <= ANTI_REPEAT_TOLERANCE
 
 
 # --------------------------------------------------------------------------- #
@@ -493,8 +570,35 @@ def _write_markdown_report(opps: list[Opportunity], fx: dict[str, float]) -> Pat
 
 
 def _write_outreach_emails(opps: list[Opportunity]) -> list[Path]:
-    """For the top 3, write a 'sourcing services' outreach draft."""
+    """For the top 3, write a 'sourcing services' outreach draft.
+
+    Anti-repeat: if the top opportunity is materially identical to the
+    one we last wrote emails about (same product, same route, price &
+    capital within ±5%), we still want *some* audit trail but we don't
+    want 1000 copies of the same email in `reports/`. We write a single
+    `.skipped_<ts>.txt` marker instead.
+    """
     out: list[Path] = []
+    if not opps:
+        return out
+    top = opps[0]
+    if _is_same_as_last(top):
+        ts = datetime.now().strftime("%Y%m%d-%H%M")
+        marker = REPORTS_DIR / f"skipped_{ts}_emails-suppressed_anti-repeat.txt"
+        marker.write_text(
+            f"Emails suppressed (anti-repeat) @ {datetime.now().isoformat()}\n"
+            f"Top opportunity is materially identical to last cycle:\n"
+            f"  product:      {top.product}\n"
+            f"  route:        {top.source_country}->{top.dest_country}\n"
+            f"  dest price:   ${top.dest_price_usd:.2f} (within ±5% of last)\n"
+            f"  capital/500u: ${top.capital_for_500u:,.0f} (within ±5% of last)\n"
+            f"\nThis is the autopilot's 'investment should be less' guard.\n"
+            f"To force a re-emit, delete data/.last_emitted.json.\n"
+        )
+        if _write_outreach_emails._verbose is not False:
+            print(f"[anti-repeat] emails suppressed — {marker.name}")
+        out.append(marker)
+        return out
     ts = datetime.now().strftime("%Y%m%d-%H%M")
     for i, o in enumerate(opps[:3]):
         src_name = COUNTRY_META[o.source_country]["name"]
@@ -533,24 +637,45 @@ def _write_outreach_emails(opps: list[Opportunity]) -> list[Path]:
         p = REPORTS_DIR / f"email_{ts}_{i+1:02d}_{o.product.replace(' ','_')}_{o.source_country}to{o.dest_country}.txt"
         p.write_text(body)
         out.append(p)
+    _save_last_emitted(top)
     return out
+
+
+# Module-level flag for the anti-repeat note (set by run_once based on --quiet)
+_write_outreach_emails._verbose = True
 
 
 # --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
 
-def run_once(verbose: bool = True) -> list[Opportunity]:
+def run_once(verbose: bool = True,
+             origin: str | None = None,
+             dest: str | None = None,
+             min_margin: float = 0.35,
+             capital_units: int = 500) -> list[Opportunity]:
+    # Thread verbose to the anti-repeat note in _write_outreach_emails.
+    _write_outreach_emails._verbose = verbose
     if verbose:
         print(f"\n=== Trade-finder run @ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===")
     fx = _fetch_fx()
     if verbose:
         print(f"FX rates loaded: {len(fx)} currencies")
     all_opps = _build_opportunities(fx)
-    qualified = _filter_and_rank(all_opps)
+    # Apply origin/dest filters (None = no filter, "ALL" = no filter)
+    if origin and origin.upper() != "ALL":
+        all_opps = [o for o in all_opps if o.source_country == origin.upper()]
+    if dest and dest.upper() != "ALL":
+        all_opps = [o for o in all_opps if o.dest_country == dest.upper()]
+    # Re-compute capital_for_500u with the user-specified batch size.
+    for o in all_opps:
+        o.capital_for_500u = round(o.landed_cost_usd * capital_units, 2)
+        # Re-rank rich_score with the new capital
+        o.rich_score = _rich_score(o)
+    qualified = _filter_and_rank(all_opps, min_margin=min_margin)
     if verbose:
         print(f"Routes evaluated: {len(all_opps)}")
-        print(f"Qualified (margin≥35%): {len(qualified)}")
+        print(f"Qualified (margin≥{min_margin*100:.0f}%): {len(qualified)}")
     _write_products_csv(all_opps)
     _write_ranked_json(qualified, fx)
     md = _write_markdown_report(qualified, fx)
@@ -577,17 +702,44 @@ def main(argv: list[str] | None = None) -> int:
                    help="Re-run every --interval-min minutes.")
     p.add_argument("--interval-min", type=int, default=60)
     p.add_argument("--quiet", action="store_true")
+    p.add_argument("--origin", type=str, default=None,
+                   help="Filter to one source country (e.g. CN, VN, IN). Default: all.")
+    p.add_argument("--dest", type=str, default=None,
+                   help="Filter to one destination country (e.g. US, IN, UK). Default: all.")
+    p.add_argument("--min-margin", type=float, default=0.35,
+                   help="Min margin%% filter as a decimal (0.35 = 35%%). "
+                        "Use 0.15 for India (heavy tariffs eat most margin).")
+    p.add_argument("--capital-units", type=int, default=500,
+                   help="Batch size for capital_for_Nu calculation (default 500).")
+    p.add_argument("--reset-anti-repeat", action="store_true",
+                   help="Delete data/.last_emitted.json so the next cycle "
+                        "re-emits emails even if the recommendation is unchanged.")
     args = p.parse_args(argv)
 
+    if args.reset_anti_repeat and LAST_EMITTED_PATH.exists():
+        LAST_EMITTED_PATH.unlink()
+        print(f"[reset] removed {LAST_EMITTED_PATH}")
+
+    run_kwargs = dict(
+        verbose=not args.quiet,
+        origin=args.origin,
+        dest=args.dest,
+        min_margin=args.min_margin,
+        capital_units=args.capital_units,
+    )
+
     if not args.loop:
-        run_once(verbose=not args.quiet)
+        run_once(**run_kwargs)
         return 0
 
     print(f"=== Trade-finder LOOP @ {datetime.now().isoformat()} ===")
-    print(f"    interval: {args.interval_min} min")
+    print(f"    interval:   {args.interval_min} min")
+    print(f"    filters:     origin={args.origin or 'ALL'} dest={args.dest or 'ALL'}")
+    print(f"    min_margin:  {args.min_margin*100:.0f}%")
+    print(f"    batch size:  {args.capital_units}u")
     try:
         while True:
-            run_once(verbose=not args.quiet)
+            run_once(**run_kwargs)
             print(f"next pass in {args.interval_min} min… (Ctrl-C to stop)")
             time.sleep(args.interval_min * 60)
     except KeyboardInterrupt:
