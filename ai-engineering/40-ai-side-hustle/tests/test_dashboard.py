@@ -2,12 +2,23 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
 from dashboard import compute, render
 from ledger import Ledger
+
+
+def _ago(days: int) -> str:
+    """ISO timestamp `days` days before now, so tests stay inside the 14-day window."""
+    return (datetime.now(timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0)
+            - timedelta(days=days)).isoformat()
+
+
+def _ago_day(days: int) -> str:
+    return _ago(days)[:10]
 
 
 @pytest.fixture
@@ -43,16 +54,16 @@ def test_compute_aggregates_per_stream(ledger: Ledger):
 
 
 def test_compute_identifies_best_and_worst_day(ledger: Ledger):
-    ledger.record("seo", 10, occurred_at="2026-10-10T12:00:00+00:00")
-    ledger.record("saas", 99, occurred_at="2026-10-11T12:00:00+00:00")
-    ledger.record("product", 30, occurred_at="2026-10-12T12:00:00+00:00")
+    ledger.record("seo", 10, occurred_at=_ago(4))
+    ledger.record("saas", 99, occurred_at=_ago(3))
+    ledger.record("product", 30, occurred_at=_ago(2))
     data = compute(ledger)
-    assert data["best_day"]["day"] == "2026-10-11"
-    assert data["worst_day"]["day"] == "2026-10-10"
+    assert data["best_day"]["day"] == _ago_day(3)
+    assert data["worst_day"]["day"] == _ago_day(4)
 
 
 def test_compute_avg_per_active_day_excludes_zero_days(ledger: Ledger):
-    ledger.record("seo", 100, occurred_at="2026-10-10T12:00:00+00:00")
+    ledger.record("seo", 100, occurred_at=_ago(4))
     data = compute(ledger)
     # One active day, so per-active == total
     assert data["avg_per_active_day"] == 100
@@ -80,13 +91,13 @@ def test_render_handles_empty_ledger(ledger: Ledger):
 
 
 def test_daily_buckets_show_up_in_render(ledger: Ledger):
-    ledger.record("seo", 10, occurred_at="2026-10-10T12:00:00+00:00")
+    ledger.record("seo", 10, occurred_at=_ago(4))
     text = render(compute(ledger))
-    assert "2026-10-10" in text
+    assert _ago_day(4) in text
 
 
 def test_render_includes_sparkline(ledger: Ledger):
-    ledger.record("seo", 10, occurred_at="2026-10-10T12:00:00+00:00")
-    ledger.record("saas", 25, occurred_at="2026-10-12T12:00:00+00:00")
+    ledger.record("seo", 10, occurred_at=_ago(4))
+    ledger.record("saas", 25, occurred_at=_ago(2))
     text = render(compute(ledger))
     assert "sparkline" in text
