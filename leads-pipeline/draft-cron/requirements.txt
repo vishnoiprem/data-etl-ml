@@ -10,7 +10,7 @@
 # Keep this list in sync with anything the tests + their transitive
 # imports pull in.
 python-dotenv>=1.0.0   # process_jd_inbox.py, autopilot.py, check_bounces.py
-psycopg2-binary>=2.9   # db/lead_store.py (imported by every DB-touching test)
+psycopg2-binary>=2.9.13   # db/lead_store.py (imported by every DB-touching test)
 requests>=2.28         # find_more_leads.py (imported by insert_leads tests)
 python-docx>=1.0       # resume_tailor.py (optional — HAVE_DOCX guards skip when missing, but the test writes a real source docx)
 dnspython>=2.4          # lib/email_guard.py MX probe (test_pre_send_guards patches dns.resolver)
