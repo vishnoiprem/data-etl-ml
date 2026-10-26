@@ -65,11 +65,11 @@ When the moderator opens the floor or invites questions from the audience, **be 
 
 > "Thank you — Prem Vishnoi, currently leading data and AI platform engineering at Makro, with prior roles at Lazada and Standard Chartered. My question is for [name the person you addressed it to].
 >
-> The bank's published 2026 strategy puts data and AI at the core of customer experience — and I noticed TCB ChatB@nk is already in production on GenAI, which tells me Techcombank is past the experimentation phase and into delivery. **What's the one decision the data platform is currently blocking that, if unblocked, would unlock the most business value in the next twelve months?** I'd love to know where the choke point really is — because that's where I would start."
+> The bank's published 2026 strategy puts data and AI at the core of customer experience — and I noticed Techcombank adopted Databricks and is building GenAI on Amazon Bedrock, which tells me you are past the experimentation phase and into scaling. **What's the one decision the data platform is currently blocking that, if unblocked, would unlock the most business value in the next twelve months?** I'd love to know where the choke point really is — because that's where I would start."
 
 **Why this works:**
 - ✅ Short intro with pedigree signals (Makro / Lazada / SCB)
-- ✅ References something specific from their published strategy (TCB ChatB@nk) — signals homework
+- ✅ References something specific from their published strategy (Databricks adoption) — signals homework
 - ✅ The question is the killer "Q12" question from the battle card
 - ✅ Forward-looking ("next twelve months") — signals builder, not auditor
 - ✅ Names a person on the panel (creates a 1:1 moment)
@@ -82,7 +82,7 @@ When you approach a senior leader at the reception (the CDO, the Head of Data En
 
 > "**[Observe]** I really enjoyed the strategy spotlight — the framing around data and AI as the core driver of customer experience is exactly how I think about platform work.
 >
-> **[Compliment, briefly]** I noticed TCB ChatB@nk is already in production — that takes real conviction. Not many banks in the region have shipped that.
+> **[Compliment, briefly]** I noticed you moved to Databricks in 2024 — that takes real conviction. Not many banks in the region have consolidated 50+ systems onto one platform.
 >
 > **[Question]** If you have a minute, I'd love your view on one thing: from where you sit, what is the single decision the data platform is currently blocking? Not the wish list — the one thing. Because that's what I would want to ship in my first ninety days."
 
@@ -323,18 +323,18 @@ At the reception, you have ~100 minutes (19:20–21:00). You cannot talk to ever
 
 1. **Techcombank 2025 Annual Report** — search "Techcombank annual report 2025 PDF" on Google. Skim the CEO letter, the strategy section, and the technology / digital section.
 2. **Jens Lottner's recent public appearances** — YouTube search "Jens Lottner Techcombank 2026". Watch the 2 most recent. Listen for: his language, his priorities, his pet phrases. Use them.
-3. **DMA 2025 / 2026 report** — the Digital Made in Asia ranking. Techcombank is #1. Find any commentary on what that means for the bank's data/AI strategy.
-4. **One Techcombank press release on GenAI / TCB ChatB@nk** — so you can mention it conversationally without sounding like you memorised a PDF.
+3. **Decision Lab 2025 Bank Satisfaction Ranking** — Techcombank #1 overall. Find commentary on what drove it.
+4. **Techcombank + Databricks press release (Oct 2024) and the 6M26 results release** — so you can mention it conversationally without sounding like you memorised a PDF.
 
 ## Numbers to verify (10 min)
 
-- [ ] CEO name and tenure (Jens Lottner, since Jan 2024)
-- [ ] Customer count (14.5M+)
-- [ ] Digital banking users (15.5M+)
-- [ ] DMA ranking (#1 digital satisfaction)
+- [ ] CEO name and tenure (Jens Lottner, since Aug 2020; 2nd term 2025–2030)
+- [ ] Customer count (18.2M at 6M26)
+- [ ] Digital acquisition (66.3% of new retail customers, 6M26)
+- [ ] Decision Lab 2025 (#1 bank satisfaction)
 - [ ] The 6 strategic enablers (you have these in §2 of battle card)
-- [ ] BSS 4.0 completion (yes, completed)
-- [ ] TCB ChatB@nk (yes, in production)
+- [ ] Core banking: Temenos T24 (BSS 4.0 unverified — don't cite)
+- [ ] Databricks adopted Oct 2024; GenAI on Amazon Bedrock (verify)
 - [ ] The 4 data/AI investment pillars (lakehouse, credit scoring, NBO, GenAI)
 
 ## Rehearse (30 min, with a timer)
@@ -465,7 +465,7 @@ If you walk out and they remember nothing else, these are the two sentences that
 | I admire Techcombank's strategy | Tôi rất ngưỡng mộ chiến lược của Techcombank | toy rat nungung maw chyen luwku kwa Techcombank | When praising the bank |
 | I respect the digital transformation | Tôi rất ngưỡng mộ quá trình chuyển đổi số | toy rat nungung maw gwah ching chwen doy show | When praising tech strategy |
 | The team has done impressive work | Đội ngũ đã làm việc rất ấn tượng | doy ngoo da lam vyek rat an tuwng | When praising execution |
-| I'm impressed by TCB ChatB@nk | Tôi ấn tượng với TCB ChatB@nk | toy an tuwng vuy TCB ChatB@nk | When referencing the GenAI chatbot |
+| I'm impressed by your Databricks adoption | Tôi ấn tượng với việc Techcombank áp dụng Databricks | toy an tuwng vuy … Databricks | When referencing the data platform |
 
 ## N3. Role-related
 
@@ -735,7 +735,7 @@ If you have (or can quickly write) a Medium post on the Makro lakehouse, **pin i
 # 🎯 FINAL REMINDERS
 
 1. **Be the most prepared, not the loudest.** Three other people will be loud. You'll win by being the most specific.
-2. **One concrete observation beats ten generic statements.** The DMA ranking. The BSS 4.0 completion. TCB ChatB@nk. Pick two, not all three.
+2. **One concrete observation beats ten generic statements.** The Decision Lab #1. The Databricks adoption. The 30M-customer 2030 target. Pick two, not all three.
 3. **Help someone else.** Offer to introduce a candidate to a contact if you overhear a fit. Counter-intuitive, but it's read as senior behaviour and it's remembered.
 4. **Close every loop.** If you say "I'll send you the link", send it within 24 hours. Three of the four candidates won't.
 5. **Breathe.** You are one of four. You have done the work. They invited you for a reason. Trust the prep.

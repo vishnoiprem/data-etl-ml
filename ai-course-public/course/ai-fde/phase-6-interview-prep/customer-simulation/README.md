@@ -418,16 +418,8 @@ These are the 5 things the customer-simulation candidate should do differently, 
 **The candidate who can stay calm with a frustrated executive, scope live, push back without damaging the relationship, and know when to say no — that candidate can do the FDE job.** All other rounds test technical skill; this one tests customer judgment.
 
 **General prep gets you past the resume screen. Customer-simulation prep gets you past the AWS / Anthropic / Sierra AI loop.**
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  

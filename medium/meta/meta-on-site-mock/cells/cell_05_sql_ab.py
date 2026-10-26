@@ -1,4 +1,6 @@
 # L6 add-on: A/B test by prompt_version
+import pandas as pd
+
 ab_sql = """
 SELECT
     t.prompt_version,

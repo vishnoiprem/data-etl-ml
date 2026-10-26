@@ -1,3 +1,5 @@
+import numpy as np
+
 def pure_relevance_top_k(query_emb, chunk_embs, chunks, k=3):
     """Baseline: just take top-k by cosine sim, no diversity."""
     sims = chunk_embs @ query_emb
