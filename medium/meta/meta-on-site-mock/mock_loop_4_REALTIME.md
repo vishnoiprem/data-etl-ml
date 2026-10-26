@@ -25,7 +25,7 @@ INGEST (CDC)                    PROCESS (FLINK)
 ┌────────────┐                          ┌─────────────────────┐
 │ Other DBs  │─────────────────────────▶│ Flink Job           │
 │ MySQL,etc  │                          │ - watermark 5 sec   │
-└────────────┘                          │ - exactly-once      │
+└────────────┘                          │ - at-least-once     │
                                         │ - backpressure      │
                                         │ - checkpoint 60s    │
                                         └──────────┬──────────┘
@@ -77,7 +77,7 @@ User Query ──▶ Embed (50ms) ──▶ Qdrant search (150ms)
 >
 > Real-time costs ~10x more than batch. It's only worth it when the SLA demands it (e.g., 'new doc must be searchable within 5 minutes')."
 
-**L6 Keywords:** backpressure, exactly-once, 10x cost, SLA-driven, trace_id.
+**L6 Keywords:** backpressure, idempotent sink, 10x cost, SLA-driven, trace_id.
 
 ---
 
@@ -89,7 +89,7 @@ User Query ──▶ Embed (50ms) ──▶ Qdrant search (150ms)
 >
 > 1. **Bounded buffer + drop oldest** — if queue is full, drop the oldest event. Good for telemetry where losing 0.1% is OK.
 >
-> 2. **Flow control** — Kafka consumer with `max.poll.records=100` and `fetch.max.bytes=1MB`. Slow down the producer if consumer can't keep up.
+> 2. **Flow control** — Kafka consumer with `fetch.max.bytes=1MB` and `fetch.min.bytes` to tune fetch size for throughput vs latency. `max.poll.interval.ms` bounds liveness; `max.in.flight.requests.per.connection` with `enable.idempotence=true` on the producer side throttles in-flight writes when the broker signals pressure.
 >
 > 3. **Adaptive concurrency** — Flink checkpointing, if checkpoint duration > 60s, reduce parallelism. Auto-scales back when load drops.
 >
@@ -170,7 +170,8 @@ Postgres WAL ──▶ Debezium ──▶ Kafka (1000 partitions)
                             │ Flink Source         │
                             │ - 100 parallelism     │
                             │ - watermark 5 sec     │
-                            │ - exactly-once        │
+                            │ - at-least-once       │
+                            │   (idempotent sink)   │
                             └──────────┬───────────┘
                                        │
                                        ▼
@@ -207,11 +208,15 @@ env = StreamExecutionEnvironment.get_execution_environment()
 env.enable_checkpointing(60_000)  # checkpoint every 60s
 env.get_checkpoint_config().set_min_pause_between_checkpoints(30_000)
 
-# Source: Kafka with exactly-once
+# Source: Kafka — at-least-once with idempotent sink (Qdrant upsert by doc_id)
+# Note: true EOS in Flink requires KafkaSource with offset+partition metadata;
+# set_value_only_deserializer throws that away, so we don't claim exactly-once here.
 kafka_source = KafkaSource.builder() \
     .set_bootstrap_servers("kafka:9092") \
     .set_group_id("rag_ingest") \
     .set_topics("commit_event") \
+    .set_starting_offsets(KafkaSourceOffsetsInitializer.committed_offsets()) \
+    .set_boundedness(Boundedness.CONTINUOUS_UNBOUNDED) \
     .set_value_only_deserializer(SimpleStringSchema()) \
     .build()
 
@@ -234,31 +239,36 @@ env.execute("rag_realtime_ingest")
 ```python
 import time
 from threading import Semaphore
+from openai import OpenAI
 
-# 5k RPS limit, semaphore 50 to allow bursts up to 50 concurrent
+# Layered defense:
+# - api_semaphore caps concurrent in-flight requests (cost control: at most 50 parallel calls).
+# - min_interval enforces the upstream 5k RPS QPS contract regardless of concurrency.
 api_semaphore = Semaphore(50)
 last_call_time = [0.0]
 min_interval = 1.0 / 5000  # 0.0002 sec between calls
+
+client = OpenAI()
 
 
 def rate_limited_embed(text: str, max_retries: int = 3) -> list:
     for attempt in range(max_retries):
         try:
             with api_semaphore:
-                # Enforce minimum interval between calls
+                # Enforce minimum interval between calls (QPS contract)
                 now = time.time()
                 elapsed = now - last_call_time[0]
                 if elapsed < min_interval:
                     time.sleep(min_interval - elapsed)
                 last_call_time[0] = time.time()
 
-                response = openai.Embedding.create(
+                response = client.embeddings.create(
                     model="text-embedding-3-large",
                     input=text,
                 )
-                return response["data"][0]["embedding"]
+                return response.data[0].embedding
 
-        except openai.error.RateLimitError:
+        except openai.RateLimitError:
             if attempt == max_retries - 1:
                 raise
             time.sleep(2 ** attempt)  # 1s, 2s, 4s
@@ -389,15 +399,15 @@ QUERY PATH (p95 < 500ms)
         │
         ▼
    ┌─────────────────────────────────────┐
-   │ Parallel search:                    │
-   │  - ES keyword (200ms)               │
+   │ Parallel search (max of 3):         │
+   │  - ES keyword (180ms)               │
    │  - Qdrant semantic (150ms)          │
-   │  - ClickHouse time-travel (200ms)   │
+   │  - ClickHouse time-travel (180ms)   │
    └────────────────┬────────────────────┘
                     │ Top 50 each
                     ▼
             ┌──────────────┐
-            │ Dedup + Merge│
+            │ Dedup + Merge│ (40ms)
             └──────┬───────┘
                    │ Top 30
                    ▼
@@ -413,6 +423,7 @@ QUERY PATH (p95 < 500ms)
                            │
                            ▼
                    Total: ~450ms p95
+                   (30ms embed + 200ms search + 50ms rerank + 200ms LLM)
                    Grounded to log line + trace ID + doc chunk
 ```
 
