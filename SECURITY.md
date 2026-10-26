@@ -68,6 +68,87 @@ This repository contains **no production credentials, secrets, or real keys**. A
 - Vendored source in `sam-installation/aws-sam-cli-src/` is **not** developed in this repository. Do not modify it directly — pull upstream fixes.
 - GitHub Actions are pinned to major versions (`@v4`); for production hardening, **pin by SHA** rather than version tag.
 
+## Container Image (`leads-pipeline`)
+
+The `leads-pipeline` Docker image is published to
+`ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline` on every push to
+`main` by `.github/workflows/leads-cd.yml`. A separate
+`release-please` workflow drives semver releases (see
+`.github/workflows/release-please.yml`); when a release PR is
+merged, `leads-cd` is re-dispatched with a `latest-vX.Y.Z` tag so
+production consumers can pin to a specific release.
+
+**Vulnerabilities in the image** — report via the GitHub Security
+Advisories flow (link above). The CD workflow will pick up the
+patch and publish a new `latest` tag automatically.
+
+**Pulling a patched version:**
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
+```
+
+For reproducibility / supply-chain hardening, pin to a SHA tag:
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:main-abc1234
+```
+
+For a semver-pinned version (post-release-please):
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest-v1.2.3
+```
+
+**Image hardening** (see `leads-pipeline/draft-cron/Dockerfile`):
+
+- Runs as non-root user `avilx` (uid 1001)
+- Uses `python:3.12-slim` base (no compilers, no extra packages)
+- Excludes `.tailored_resumes/`, `*.log`, `*.csv`, `.git/`, `tests/`
+  via `.dockerignore`
+- Capped at 300 MB by the `leads-ci` workflow's size-budget step
+- `leads-cd`'s `verify` job re-pulls the published image and runs
+  a Python import smoke test, so a broken manifest can't silently
+  land in GHCR
+- Each release ships an SPDX 2.3 SBOM as a workflow artifact
+  (downloadable from the `leads-cd` run page, 30-day retention)
+- `org.opencontainers.image.version` label is stamped from the
+  in-tree `VERSION` file at build time
+- Every published tag is signed with **cosign keyless** (OIDC +
+  GitHub Actions workload identity). Verify any pull:
+  ```bash
+  cosign verify \
+    --certificate-identity-regexp 'https://github.com/vishnoiprem/data-etl-ml' \
+    --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+    ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
+  ```
+- GHCR's built-in scanner continuously reviews the published tags,
+  and `leads-ci`'s `vuln-scan` job re-runs grype on every PR and
+  uploads the SARIF to the Security tab. grype is currently
+  **advisory only** (no build failure on any severity) — the
+  `python:3.12-slim` base image frequently ships Critical CVEs in
+  OS packages (glibc, openssl, libsqlite3) that are out of our
+  control until upstream debian ships a fix, so failing CI on
+  those would mean every PR is red for months at a time. The
+  findings still surface in GitHub's vulnerability graph and
+  Dependabot alert feed. If/when the leads-pipeline graduates to
+  a production deployment, flip `fail-build: true` and a sensible
+  `severity-cutoff` to gate merges on real risk.
+
+**Static analysis** — `.github/workflows/codeql.yml` runs
+GitHub's CodeQL on `leads-pipeline/draft-cron/` (the only
+production-shaped Python in the repo) on every change to that
+tree and weekly Mondays 06:30 UTC. Findings (SQL injection,
+unsafe deserialisation, weak crypto, …) upload to the
+Security tab as SARIF under the `leads-pipeline-codeql`
+category. Complements grype, which only inspects the runtime
+deps — CodeQL looks at the source itself.
+
 ## License & Disclaimer
 
 This software is provided "as is", without warranty of any kind. See [LICENSE](LICENSE) for full text.
+
+---
+
+**Last updated:** 2026-10-12
+**License:** MIT — use freely in your own courses, prototypes, and products.

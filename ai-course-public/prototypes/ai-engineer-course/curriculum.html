@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curriculum — AI Engineer Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Curriculum-specific */
+    .curriculum-page { padding: 60px 0 100px; }
+    .curriculum-header { text-align: center; margin-bottom: 60px; }
+    .progress-overview {
+      max-width: 600px; margin: 40px auto 0; padding: 24px;
+      background: var(--white); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow); border: 1px solid var(--gray-200);
+    }
+    .progress-bar { height: 12px; background: var(--gray-200); border-radius: 980px; overflow: hidden; margin: 16px 0 12px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green) 0%, #4CD964 100%); border-radius: 980px; transition: width 0.6s var(--ease); }
+    .progress-stats { display: flex; justify-content: space-between; color: var(--gray-500); font-size: 14px; }
+    .progress-stats strong { color: var(--gray-700); }
+
+    .modules-grid { display: grid; gap: 20px; }
+    .module-card {
+      background: var(--white); border-radius: var(--radius-lg);
+      border: 1px solid var(--gray-200); overflow: hidden;
+      box-shadow: var(--shadow-sm); transition: all 0.3s var(--ease);
+    }
+    .module-card:hover { box-shadow: var(--shadow); }
+    .module-header {
+      display: flex; align-items: center; gap: 20px;
+      padding: 24px 28px; cursor: pointer; user-select: none;
+      transition: background 0.2s;
+    }
+    .module-header:hover { background: var(--gray-50); }
+    .module-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0;
+    }
+    .module-info { flex: 1; min-width: 0; }
+    .module-info h3 { font-size: 22px; margin-bottom: 4px; }
+    .module-info .module-meta { color: var(--gray-500); font-size: 14px; }
+    .module-info .module-meta span { margin-right: 16px; }
+    .module-progress { display: flex; align-items: center; gap: 12px; }
+    .module-progress-bar { width: 80px; height: 6px; background: var(--gray-200); border-radius: 980px; overflow: hidden; }
+    .module-progress-fill { height: 100%; background: var(--green); border-radius: 980px; transition: width 0.4s var(--ease); }
+    .module-progress-text { font-size: 13px; color: var(--gray-500); font-weight: 600; min-width: 30px; text-align: right; }
+    .module-toggle {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gray-100); display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s var(--ease), background 0.2s;
+      font-size: 14px; color: var(--gray-500);
+    }
+    .module-card.expanded .module-toggle { transform: rotate(180deg); background: var(--blue); color: var(--white); }
+    .module-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s var(--ease);
+    }
+    .module-card.expanded .module-body { max-height: 2000px; }
+    .lessons-list { padding: 0 28px 24px; border-top: 1px solid var(--gray-100); }
+    .lesson-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 0; border-bottom: 1px solid var(--gray-100);
+      transition: opacity 0.2s;
+    }
+    .lesson-row:last-child { border-bottom: none; }
+    .lesson-checkbox {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--gray-300); cursor: pointer;
+      flex-shrink: 0; transition: all 0.2s var(--ease);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--white);
+    }
+    .lesson-checkbox:hover { border-color: var(--green); }
+    .lesson-row.completed .lesson-checkbox { background: var(--green); border-color: var(--green); }
+    .lesson-row.completed .lesson-checkbox::after { content: "✓"; color: var(--white); font-weight: 700; font-size: 14px; }
+    .lesson-info { flex: 1; min-width: 0; }
+    .lesson-title { display: flex; align-items: center; gap: 10px; }
+    .lesson-title strong { color: var(--gray-700); font-size: 15px; font-weight: 600; }
+    .lesson-row.completed .lesson-title strong { text-decoration: line-through; opacity: 0.6; }
+    .lesson-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+    .tag-code { background: #E3F2FD; color: #0066CC; }
+    .tag-video { background: #F3E5F5; color: #7B1FA2; }
+    .tag-project { background: #E8F5E9; color: #2E7D32; }
+    .tag-quiz { background: #FFF3E0; color: #E65100; }
+    .lesson-meta { color: var(--gray-500); font-size: 13px; margin-top: 4px; }
+    .lesson-action { display: flex; gap: 8px; }
+    .lesson-action a, .lesson-action button {
+      padding: 6px 14px; border-radius: 980px; font-size: 12px;
+      text-decoration: none; border: 1px solid var(--gray-200);
+      color: var(--gray-600); background: var(--white);
+      transition: all 0.2s; cursor: pointer; font-family: inherit; font-weight: 500;
+    }
+    .lesson-action a:hover, .lesson-action button:hover { border-color: var(--blue); color: var(--blue); }
+    .lesson-action .primary { background: var(--blue); color: var(--white); border-color: var(--blue); }
+    .lesson-action .primary:hover { background: var(--blue-dark); color: var(--white); }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 32px; padding: 16px;
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid var(--gray-200); box-shadow: var(--shadow-sm);
+    }
+    .filter-chip {
+      padding: 8px 16px; border-radius: 980px; font-size: 13px;
+      border: 1px solid var(--gray-200); background: var(--white);
+      color: var(--gray-600); cursor: pointer; transition: all 0.2s;
+      font-weight: 500; font-family: inherit;
+    }
+    .filter-chip:hover { border-color: var(--blue); color: var(--blue); }
+    .filter-chip.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+    .filter-search {
+      flex: 1; min-width: 200px; padding: 8px 16px;
+      border: 1px solid var(--gray-200); border-radius: 980px;
+      font-size: 13px; font-family: inherit;
+    }
+    .filter-search:focus { outline: none; border-color: var(--blue); }
+
+    /* Stats bar */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-pill {
+      background: var(--white); padding: 20px;
+      border-radius: var(--radius); border: 1px solid var(--gray-200);
+      text-align: center;
+    }
+    .stat-pill strong { display: block; font-size: 28px; color: var(--blue); font-weight: 700; }
+    .stat-pill span { color: var(--gray-500); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    @media (max-width: 700px) {
+      .module-header { padding: 16px 20px; gap: 14px; }
+      .module-icon { width: 44px; height: 44px; font-size: 22px; }
+      .module-info h3 { font-size: 18px; }
+      .lessons-list { padding: 0 20px 20px; }
+      .lesson-action { display: none; }
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <header>
+    <nav class="container">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="curriculum.html" style="color: var(--blue); font-weight: 600;">Curriculum</a>
+        <a href="index.html#projects">Projects</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="playground.html">Playground</a>
+        <a href="#" class="btn btn-secondary btn-sm">Sign in</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="curriculum-page">
+    <div class="container">
+      <div class="curriculum-header">
+        <p class="kicker">Complete curriculum</p>
+        <h1>70+ lessons. 12 projects. <span class="gradient-text">One transformation.</span></h1>
+        <p class="sub center">Click any module to expand. Mark lessons complete to track your progress.</p>
+
+        <div class="progress-overview">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <strong style="font-size: 18px;">Your Progress</strong>
+            <span id="progress-pct" style="color: var(--green); font-weight: 700; font-size: 18px;">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+          </div>
+          <div class="progress-stats">
+            <span><strong id="completed-count">0</strong> of <strong id="total-count">70</strong> lessons completed</span>
+            <span><strong id="time-remaining">35h</strong> remaining</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-pill">
+          <strong>6</strong>
+          <span>Levels</span>
+        </div>
+        <div class="stat-pill">
+          <strong>14</strong>
+          <span>Modules</span>
+        </div>
+        <div class="stat-pill">
+          <strong>70+</strong>
+          <span>Lessons</span>
+        </div>
+        <div class="stat-pill">
+          <strong>35h</strong>
+          <span>Total content</span>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="video">📹 Video</button>
+        <button class="filter-chip" data-filter="code">💻 Code</button>
+        <button class="filter-chip" data-filter="project">🚀 Project</button>
+        <button class="filter-chip" data-filter="quiz">📝 Quiz</button>
+        <button class="filter-chip" data-filter="incomplete">⏳ Incomplete only</button>
+        <input type="search" class="filter-search" id="search" placeholder="Search lessons...">
+      </div>
+
+      <div class="modules-grid" id="modules-grid">
+        <!-- Modules will be rendered by JS -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 AIForBiz · Made with ❤️ in Singapore · <a href="index.html">Home</a> · <a href="playground.html">Playground</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Complete curriculum data
+    const curriculum = {
+      levels: [
+        {
+          id: 'L1', name: 'Foundations', icon: '🧠', color: '#0071E3', duration: '6h',
+          modules: [
+            {
+              id: 'M1', title: 'How AI Actually Works', lessons: 8, duration: '2h 15m',
+              lessons_data: [
+                { id: '1.1', title: 'What is an LLM? (and what it isn\'t)', type: 'video', duration: '14:32' },
+                { id: '1.2', title: 'Transformers, attention, and tokens', type: 'video', duration: '18:45' },
+                { id: '1.3', title: 'How ChatGPT was trained', type: 'video', duration: '12:20' },
+                { id: '1.4', title: 'Why hallucinations happen', type: 'video', duration: '09:15' },
+                { id: '1.5', title: 'Quiz: LLM fundamentals', type: 'quiz', duration: '10 questions' },
+                { id: '1.6', title: 'Hands-on: Run Llama 3 locally', type: 'code', duration: '25:00' },
+                { id: '1.7', title: 'Project: Build a basic chatbot', type: 'project', duration: '1h' },
+                { id: '1.8', title: 'Code review: Refactor your chatbot', type: 'video', duration: '15:30' },
+              ]
+            },
+            {
+              id: 'M2', title: 'Python for AI Engineering', lessons: 6, duration: '1h 45m',
+              lessons_data: [
+                { id: '2.1', title: 'Setting up your dev environment', type: 'video', duration: '08:30' },
+                { id: '2.2', title: 'Async Python for AI apps', type: 'code', duration: '22:15' },
+                { id: '2.3', title: 'Type hints and Pydantic', type: 'video', duration: '16:00' },
+                { id: '2.4', title: 'Testing AI applications', type: 'code', duration: '18:45' },
+                { id: '2.5', title: 'Quiz: Python patterns', type: 'quiz', duration: '8 questions' },
+                { id: '2.6', title: 'Project: Async OpenAI client', type: 'project', duration: '45m' },
+              ]
+            },
+            {
+              id: 'M3', title: 'Prompt Engineering Mastery', lessons: 7, duration: '2h',
+              lessons_data: [
+                { id: '3.1', title: 'The CRAFT framework', type: 'video', duration: '15:00' },
+                { id: '3.2', title: 'Few-shot prompting', type: 'code', duration: '12:30' },
+                { id: '3.3', title: 'Chain-of-thought', type: 'video', duration: '14:20' },
+                { id: '3.4', title: 'System prompts that actually work', type: 'code', duration: '20:00' },
+                { id: '3.5', title: '50 production-tested prompts', type: 'video', duration: '25:00' },
+                { id: '3.6', title: 'Quiz: Prompt engineering', type: 'quiz', duration: '12 questions' },
+                { id: '3.7', title: 'Project: Prompt library CLI', type: 'project', duration: '1h 15m' },
+              ]
+            }
+          ]
+        },
+        {
+          id: 'L2', name: 'LLM APIs', icon: '🔌', color: '#34C759', duration: '8h',
+          modules: [
+            {
+              id: 'M4', title: 'OpenAI API Deep Dive', lessons: 6, duration: '1h 50m',
+              lessons_data: [
+                { id: '4.1', title: 'Chat completions API', type: 'video', duration: '16:00' },
+                { id: '4.2', title: 'Streaming responses', type: 'code', duration: '14:30' },
+                { id: '4.3', title: 'Function calling', type: 'code', duration: '22:00' },
+                { id: '4.4', title: 'Structured outputs & JSON mode', type: 'video', duration: '18:30' },
+                { id: '4.5', title: 'Cost optimization strategies', type: 'video', duration: '15:00' },
+                { id: '4.6', title: 'Project: Multi-feature AI app', type: 'project', duration: '2h' },
+              ]
+            },
+            {
+              id: 'M5', title: 'Anthropic Claude API', lessons: 5, duration: '1h 30m',
+              lessons_data: [
+                { id: '5.1', title: 'Claude\'s unique features', type: 'video', duration: '14:00' },
+                { id: '5.2', title: 'Prompt caching (90% cost reduction)', type: 'code', duration: '20:00' },
+                { id: '5.3', title: 'Tool use with Claude', type: 'code', duration: '18:30' },
+                { id: '5.4', title: 'When to use Claude vs GPT', type: 'video', duration: '12:00' },
+                { id: '5.5', title: 'Project: Build a Claude app', type: 'project', duration: '1h 30m' },
+              ]
+            },
+            {
+              id: 'M6', title: 'Open Source: Llama, Mistral, Gemma', lessons: 5, duration: '1h 40m',
+              lessons_data: [
+                { id: '6.1', title: 'Why open source LLMs matter', type: 'video', duration: '10:00' },
+                { id: '6.2', title: 'Running Llama 3 locally', type: 'code', duration: '18:00' },
+                { id: '6.3', title: 'Ollama + Python', type: 'code', duration: '15:30' },
+                { id: '6.4', title: 'Self-hosting for privacy', type: 'video', duration: '20:00' },
+                { id: '6.5', title: 'Project: Open-source AI app', type: 'project', duration: '1h 30m' },
+              ]
+            }
+          ]
+        },
+        {
+          id: 'L3', name: 'RAG & Embeddings', icon: '🔍', color: '#FF9500', duration: '7h',
+          modules: [
+            {
+              id: 'M7', title: 'Embeddings & Vector Search', lessons: 5, duration: '1h 30m',
+              lessons_data: [
+                { id: '7.1', title: 'What are embeddings?', type: 'video', duration: '12:00' },
+                { id: '7.2', title: 'OpenAI embeddings API', type: 'code', duration: '15:00' },
+                { id: '7.3', title: 'Semantic search from scratch', type: 'code', duration: '25:00' },
+                { id: '7.4', title: 'Choosing embedding models', type: 'video', duration: '14:00' },
+                { id: '7.5', title: 'Quiz: Embeddings', type: 'quiz', duration: '8 questions' },
+              ]
+            },
+            {
+              id: 'M8', title: 'Vector Databases', lessons: 6, duration: '1h 45m',
+              lessons_data: [
+                { id: '8.1', title: 'Pinecone, Chroma, Weaviate, pgvector', type: 'video', duration: '16:00' },
+                { id: '8.2', title: 'Chroma for prototypes', type: 'code', duration: '18:00' },
+                { id: '8.3', title: 'Pinecone for production', type: 'code', duration: '20:00' },
+                { id: '8.4', title: 'pgvector for SQL pros', type: 'code', duration: '17:30' },
+                { id: '8.5', title: 'When to use which', type: 'video', duration: '12:00' },
+                { id: '8.6', title: 'Project: Multi-DB comparison', type: 'project', duration: '1h' },
+              ]
+            },
+            {
+              id: 'M9', title: 'RAG Production Patterns', lessons: 6, duration: '2h',
+              lessons_data: [
+                { id: '9.1', title: 'Build RAG from scratch', type: 'code', duration: '28:00' },
+                { id: '9.2', title: 'LangChain RAG chains', type: 'code', duration: '22:00' },
+                { id: '9.3', title: 'Hybrid search (BM25 + vectors)', type: 'code', duration: '20:00' },
+                { id: '9.4', title: 'Re-ranking with Cohere', type: 'video', duration: '15:00' },
+                { id: '9.5', title: 'RAGAS evaluation', type: 'code', duration: '18:00' },
+                { id: '9.6', title: 'Project: Document Q&A SaaS', type: 'project', duration: '2h' },
+              ]
+            }
+          ]
+        },
+        {
+          id: 'L4', name: 'AI Agents', icon: '🤖', color: '#AF52DE', duration: '5h',
+          modules: [
+            {
+              id: 'M10', title: 'The ReAct Pattern', lessons: 5, duration: '1h 30m',
+              lessons_data: [
+                { id: '10.1', title: 'What is an AI agent?', type: 'video', duration: '11:00' },
+                { id: '10.2', title: 'Building a ReAct agent in 100 lines', type: 'code', duration: '25:00' },
+                { id: '10.3', title: 'Tool design best practices', type: 'video', duration: '16:00' },
+                { id: '10.4', title: 'Error handling & retries', type: 'code', duration: '15:00' },
+                { id: '10.5', title: 'Project: Research agent', type: 'project', duration: '2h' },
+              ]
+            },
+            {
+              id: 'M11', title: 'Multi-Agent Systems', lessons: 4, duration: '1h 30m',
+              lessons_data: [
+                { id: '11.1', title: 'CrewAI: Role-based agents', type: 'code', duration: '20:00' },
+                { id: '11.2', title: 'LangGraph: Stateful workflows', type: 'code', duration: '24:00' },
+                { id: '11.3', title: 'OpenAI Assistants API', type: 'video', duration: '18:00' },
+                { id: '11.4', title: 'Project: Multi-agent system', type: 'project', duration: '2h' },
+              ]
+            }
+          ]
+        },
+        {
+          id: 'L5', name: 'Production & Scale', icon: '🚀', color: '#FF2D55', duration: '6h',
+          modules: [
+            {
+              id: 'M12', title: 'FastAPI for AI Apps', lessons: 5, duration: '1h 45m',
+              lessons_data: [
+                { id: '12.1', title: 'Async FastAPI', type: 'code', duration: '22:00' },
+                { id: '12.2', title: 'Streaming responses (SSE)', type: 'code', duration: '20:00' },
+                { id: '12.3', title: 'Authentication & rate limiting', type: 'code', duration: '18:00' },
+                { id: '12.4', title: 'Background jobs with Celery', type: 'video', duration: '16:00' },
+                { id: '12.5', title: 'Project: Production AI API', type: 'project', duration: '2h 30m' },
+              ]
+            },
+            {
+              id: 'M13', title: 'Observability & Cost', lessons: 4, duration: '1h 30m',
+              lessons_data: [
+                { id: '13.1', title: 'LangSmith tracing', type: 'code', duration: '18:00' },
+                { id: '13.2', title: 'Helicone for cost tracking', type: 'code', duration: '15:00' },
+                { id: '13.3', title: 'Caching & batching', type: 'code', duration: '20:00' },
+                { id: '13.4', title: 'Cost optimization playbook', type: 'video', duration: '22:00' },
+              ]
+            }
+          ]
+        },
+        {
+          id: 'L6', name: 'Capstone', icon: '🎯', color: '#FFD60A', duration: '3h + 8w',
+          modules: [
+            {
+              id: 'M14', title: 'Ship Your AI SaaS', lessons: 6, duration: '8 weeks',
+              lessons_data: [
+                { id: '14.1', title: 'Pick your capstone', type: 'video', duration: '15:00' },
+                { id: '14.2', title: 'Week 1-2: Idea & validation', type: 'video', duration: '20:00' },
+                { id: '14.3', title: 'Week 3-4: Build MVP', type: 'code', duration: '30:00' },
+                { id: '14.4', title: 'Week 5-6: Launch & iterate', type: 'video', duration: '25:00' },
+                { id: '14.5', title: 'Week 7-8: Polish & demo', type: 'code', duration: '30:00' },
+                { id: '14.6', title: 'Demo Day presentation', type: 'project', duration: '2h' },
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    // State management
+    let state = JSON.parse(localStorage.getItem('ai-engineer-progress') || '{}');
+    let currentFilter = 'all';
+    let currentSearch = '';
+
+    function saveState() {
+      localStorage.setItem('ai-engineer-progress', JSON.stringify(state));
+      updateProgress();
+    }
+
+    function toggleLesson(id) {
+      state[id] = !state[id];
+      saveState();
+      render();
+    }
+
+    function isCompleted(id) { return !!state[id]; }
+
+    function getTotalLessons() {
+      return curriculum.levels.reduce((sum, l) =>
+        sum + l.modules.reduce((s, m) => s + m.lessons_data.length, 0), 0);
+    }
+
+    function getCompletedCount() {
+      return Object.values(state).filter(Boolean).length;
+    }
+
+    function updateProgress() {
+      const total = getTotalLessons();
+      const done = getCompletedCount();
+      const pct = total ? Math.round((done / total) * 100) : 0;
+      document.getElementById('progress-pct').textContent = pct + '%';
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('completed-count').textContent = done;
+      document.getElementById('total-count').textContent = total;
+      const remainingHours = Math.max(0, 35 - (done / total * 35)).toFixed(1);
+      document.getElementById('time-remaining').textContent = remainingHours + 'h';
+    }
+
+    function moduleCompletedCount(module) {
+      return module.lessons_data.filter(l => isCompleted(l.id)).length;
+    }
+
+    function render() {
+      const grid = document.getElementById('modules-grid');
+      grid.innerHTML = '';
+
+      curriculum.levels.forEach(level => {
+        const levelCard = document.createElement('div');
+        levelCard.style.cssText = 'background: var(--gray-50); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; border: 1px solid var(--gray-200);';
+
+        const levelHeader = document.createElement('div');
+        levelHeader.style.cssText = 'display: flex; align-items: center; gap: 16px; margin-bottom: 20px;';
+        levelHeader.innerHTML = `
+          <div style="width: 56px; height: 56px; border-radius: 14px; background: ${level.color}; display: flex; align-items: center; justify-content: center; font-size: 28px;">${level.icon}</div>
+          <div>
+            <h2 style="font-size: 24px; margin: 0;">Level ${level.id}: ${level.name}</h2>
+            <p style="color: var(--gray-500); font-size: 14px; margin: 4px 0 0;">${level.duration} · ${level.modules.length} modules</p>
+          </div>
+        `;
+        levelCard.appendChild(levelHeader);
+
+        level.modules.forEach(module => {
+          const visibleLessons = module.lessons_data.filter(l => {
+            if (currentFilter === 'all' || currentFilter === 'incomplete') return true;
+            if (currentFilter === 'incomplete') return !isCompleted(l.id);
+            return l.type === currentFilter;
+          }).filter(l => !currentSearch || l.title.toLowerCase().includes(currentSearch.toLowerCase()));
+
+          if (visibleLessons.length === 0) return;
+
+          const completed = moduleCompletedCount(module);
+          const total = module.lessons_data.length;
+          const pct = total ? Math.round((completed / total) * 100) : 0;
+
+          const card = document.createElement('div');
+          card.className = 'module-card expanded';
+
+          const lessonsHtml = visibleLessons.map(lesson => {
+            const completed = isCompleted(lesson.id);
+            return `
+              <div class="lesson-row ${completed ? 'completed' : ''}" data-lesson-id="${lesson.id}">
+                <div class="lesson-checkbox" onclick="toggleLesson('${lesson.id}')"></div>
+                <div class="lesson-info">
+                  <div class="lesson-title">
+                    <strong>${lesson.title}</strong>
+                    <span class="lesson-tag tag-${lesson.type}">${lesson.type}</span>
+                  </div>
+                  <div class="lesson-meta">${lesson.id} · ${lesson.duration}</div>
+                </div>
+                <div class="lesson-action">
+                  <a href="playground.html?lesson=${lesson.id}">Open</a>
+                  <a href="#" class="primary">Watch</a>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          card.innerHTML = `
+            <div class="module-header" onclick="this.parentElement.classList.toggle('expanded')">
+              <div class="module-icon" style="background: ${level.color}20; color: ${level.color};">${level.icon}</div>
+              <div class="module-info">
+                <h3>${module.title}</h3>
+                <div class="module-meta">
+                  <span>${module.lessons} lessons</span>
+                  <span>${module.duration}</span>
+                </div>
+              </div>
+              <div class="module-progress">
+                <div class="module-progress-bar"><div class="module-progress-fill" style="width: ${pct}%"></div></div>
+                <div class="module-progress-text">${pct}%</div>
+              </div>
+              <div class="module-toggle">▼</div>
+            </div>
+            <div class="module-body">
+              <div class="lessons-list">${lessonsHtml}</div>
+            </div>
+          `;
+
+          levelCard.appendChild(card);
+        });
+
+        grid.appendChild(levelCard);
+      });
+    }
+
+    // Filter handlers
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.filter;
+        render();
+      });
+    });
+
+    document.getElementById('search').addEventListener('input', e => {
+      currentSearch = e.target.value;
+      render();
+    });
+
+    render();
+    updateProgress();
+  </script>
+</body>
+</html>

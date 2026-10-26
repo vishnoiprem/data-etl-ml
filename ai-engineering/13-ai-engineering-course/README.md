@@ -129,3 +129,7 @@ The natural next steps:
 - **Regulated AI** (`06-regulated-industry/`)
 
 This course is the **theoretical + applied foundation**. The other tracks are the **production build-out**.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

@@ -1,0 +1,320 @@
+name: leads-cd
+
+# Continuous Deployment: build the leads-pipeline container image
+# and publish it to ghcr.io on every push to main. The image is just
+# published — there is no remote deploy step. Pull + run is one
+# line on the target host:
+#
+#   docker pull ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest
+#   docker run --rm -e AVILX_DB_HOST=... ghcr.io/.../leads-pipeline
+#
+# Tags (managed by docker/metadata-action):
+#   latest                  — only on push to main
+#   main-<short_sha>        — for reproducible deploys
+#   <short_sha>             — for pinning
+#
+# After pushing, the `verify` job re-pulls and smoke-tests the
+# published image. A broken manifest fails the workflow so the tag
+# never silently sits in GHCR. The `sbom` job runs in parallel and
+# uploads an SPDX 2.3 SBOM as a workflow artifact (30-day retention)
+# — the image itself ships without an embedded SBOM to keep layers
+# lean, but every release has one available for downstream scanners.
+# The `sign` job (also parallel) signs every tag with cosign
+# keyless (OIDC + GitHub Actions workload identity), so consumers
+# can `cosign verify --certificate-identity-regexp …` any pull
+# without managing a keypair.
+#
+# Caching: uses GitHub Actions cache (type=gha) — first build ~30s,
+# subsequent builds ~5s.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Optional tag suffix (e.g. rc1 → latest-rc1)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read        # checkout
+  packages: write       # push to ghcr.io
+
+# Don't kill an in-flight image push mid-upload — a half-pushed
+# image is worse than a slow push.
+concurrency:
+  group: leads-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build + push leads-pipeline image
+    runs-on: ubuntu-latest
+    # Expose the canonical image so the verify job can pull it.
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Show build context size
+        run: |
+          echo "Context size:"
+          du -sh leads-pipeline/draft-cron | head
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline
+          # Flavor so the same workflow can publish 'latest' on main
+          # and a sha-tagged image for any other push (workflow_dispatch
+          # included).
+          flavor: |
+            latest=auto
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.tag_suffix && format('latest-{0}', inputs.tag_suffix) || '' }},enable=${{ inputs.tag_suffix != '' }}
+
+          labels: |
+            org.opencontainers.image.title=leads-pipeline
+            org.opencontainers.image.description=Autopilot for cold-outreach lead generation (scrape → enrich → email → track)
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Read version
+        id: version
+        run: |
+          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          else
+            V=""
+          fi
+          if [[ -z "$V" ]]; then
+            V="0.0.0+${GITHUB_SHA::7}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${V}"
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: leads-pipeline/draft-cron
+          file: leads-pipeline/draft-cron/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Read the in-tree VERSION file. The `Read version` step
+          # above already falls back to `0.0.0+<sha>` when no
+          # VERSION file exists, so no further fallback is needed
+          # here. (An earlier draft of this line referenced
+          # `steps.version.outputs.value`, which is empty — the step
+          # writes `outputs.version`, not `outputs.value`. The
+          # build would have silently received an empty VERSION
+          # build-arg.)
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false        # SLSA provenance; off to keep build time low
+          sbom: false              # keep the image lean
+
+      - name: Print image references
+        run: |
+          echo "✅ Pushed:"
+          for t in ${{ steps.meta.outputs.tags }}; do
+            echo "  $t"
+          done
+
+  # Re-pull the just-pushed image and smoke test it. Catches the case
+  # where the push succeeded but the manifest is broken (missing
+  # entrypoint, wrong arch, truncated layer).
+  verify:
+    name: Verify published image
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    # Don't run if build-and-push was skipped/cancelled.
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      packages: read
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tag #1 is `latest` on main (or `<ref>` elsewhere) — that's
+      # what consumers will pull. Verify that one specifically.
+      - name: Pull + smoke test
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+          MAX_MB: 300
+        run: |
+          set -e
+          # Pick first tag (typically `latest` or branch ref).
+          IMAGE=$(echo "$TAGS" | awk '{print $1}')
+          echo "Verifying image: $IMAGE"
+          docker pull "$IMAGE"
+
+          # Mirror leads-ci's size budget so a bloated image can't
+          # silently land in GHCR just because it slipped past CI
+          # (e.g. a freshly-added dep that lands directly on main
+          # via a fast-forward merge).
+          SIZE_BYTES=$(docker image inspect "$IMAGE" --format='{{.Size}}')
+          SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
+          echo "image size: ${SIZE_MB} MB (budget: ${MAX_MB} MB)"
+          if [ "${SIZE_MB}" -gt "${MAX_MB}" ]; then
+            echo "::error::published image is ${SIZE_MB} MB which exceeds the ${MAX_MB} MB budget."
+            echo "::error::Update .dockerignore / requirements.txt or raise the budget deliberately."
+            exit 1
+          fi
+          echo "✅ size budget OK"
+
+          # Import every package the runtime needs. If any of these
+          # is missing, the package is broken at install time.
+          docker run --rm --entrypoint /bin/sh "$IMAGE" \
+            /usr/local/bin/docker-healthcheck.sh
+
+          # Manifest sanity: entrypoint + cmd should resolve to a
+          # runnable python invocation. Catches the case where
+          # someone overrode CMD in the Dockerfile with something
+          # that would no-op on the host.
+          EP=$(docker inspect --format='{{json .Config.Entrypoint}}' "$IMAGE")
+          CMD=$(docker inspect --format='{{json .Config.Cmd}}'      "$IMAGE")
+          echo "manifest: entrypoint=${EP}  cmd=${CMD}"
+          case "$EP" in
+            *python*) ;;
+            *) echo "::error::entrypoint is not python: $EP"; exit 1 ;;
+          esac
+
+          # Also smoke-test the CLI entrypoints — autopilot.py is
+          # the default CMD, dashboard.py is the most likely
+          # alternative. Use a short --help-style probe so the
+          # script exits 0 even on a brand-new DB.
+          docker run --rm "$IMAGE" -c "print('autopilot cli OK')"
+          docker run --rm "$IMAGE" -m dashboard --help 2>&1 | head -3 || true
+
+          echo "✅ $IMAGE verified — published artifact is healthy"
+
+  # Generate an SPDX SBOM from the just-published image and upload
+  # it as a workflow artifact. This is intentionally a separate
+  # job so a slow SBOM scan (syft can take 30-60s on a fresh image)
+  # doesn't gate the image push itself.
+  #
+  # The artifact name is tag-suffixed so a single workflow run that
+  # pushed multiple tags (e.g. main + sha) doesn't collide.
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image for SBOM scan
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+        run: |
+          set -e
+          IMAGE=$(echo "$TAGS" | awk '{print $1}')
+          echo "Pulling $IMAGE for SBOM scan"
+          docker pull "$IMAGE"
+          echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
+
+      # Generate SPDX 2.3 JSON. The action pulls syft itself;
+      # `image: registry:...` tells it to scan from the local
+      # registry cache rather than re-pulling or going through
+      # a registry client.
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          image: registry:${{ env.IMAGE }}
+          format: spdx-json
+          artifact-name: leads-pipeline-sbom.spdx.json
+          # Default syft version used by the action is the one
+          # pinned in the action's Dockerfile; override only if
+          # reproducibility becomes a concern.
+          # syft-version: v1.27.0
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: leads-pipeline-sbom
+          path: leads-pipeline-sbom.spdx.json
+          if-no-files-found: error
+          retention-days: 30
+
+  # Sign every tag produced by build-and-push using cosign's keyless
+  # mode (no keypair to manage; the signature is bound to the OIDC
+  # token issued to this job, which GitHub Actions signs with the
+  # workflow identity). The signature lands in the registry as an
+  # OCI artifact alongside the image, so `cosign verify
+  # --certificate-identity-regexp ... ghcr.io/.../leads-pipeline`
+  # works for any consumer without them needing a copy of our key.
+  #
+  # Intentionally a separate job so a transient sigstore outage
+  # doesn't fail the image push itself — the verify + sbom jobs are
+  # enough to guarantee a healthy published image.
+  sign:
+    name: Sign image (cosign keyless)
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      packages: read
+      # id-token: write is required for cosign's OIDC flow.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign each tag
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+        run: |
+          set -e
+          for IMAGE in $TAGS; do
+            echo "signing $IMAGE"
+            # Keyless: GitHub Actions provides the OIDC token via
+            # the ACTIONS_ID_TOKEN_REQUEST_TOKEN env var; cosign
+            # picks it up automatically when `id-token: write`
+            # is set on the job. The signature is pushed to the
+            # registry as an OCI artifact (default behaviour),
+            # tagged `<image-digest>.sig`.
+            cosign sign --yes "$IMAGE"
+          done

@@ -1,0 +1,64 @@
+# Prometheus alert rules — SLOs for the fine-tuned served model.
+#
+# SLOs encoded here:
+#   - Error rate < 5%
+#   - p95 latency < 1.2s
+#   - Drift score < 0.3 (we relax above the README threshold to give prod a grace band)
+#   - vLLM up >= 1 instance
+#
+# The `for:` field gives the burn-rate a chance to settle; this avoids pager
+# storms on a single transient 4xx.
+
+groups:
+  - name: mlops-finetune-genai
+    interval: 30s
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(vllm_requests_total{status=~"error.*"}[5m]))
+            / clamp_min(sum(rate(vllm_requests_total[5m])), 1)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "vLLM error rate > 5%"
+          description: |
+            Error ratio over the last 5m is above 5%. Inspect the vLLM container
+            logs and the last few audit entries in MLflow.
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(vllm_request_latency_seconds_bucket[10m])) by (le)) > 1.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "vLLM p95 latency > 1.2s"
+          description: |
+            p95 latency has been over 1.2s for 10m. Likely candidates: contiguous
+            batching is starved (single-request traffic), or eviction pressure
+            on the adapter slot.
+
+      - alert: ModelDriftHigh
+        expr: model_drift_score > 0.3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model drift score > 0.3"
+          description: |
+            Evidently drift score has exceeded the gate threshold. Trigger a
+            re-evaluation cycle and consider rolling forward the adapter.
+
+      - alert: VllmDown
+        expr: up{job="vllm"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "vLLM serving is down"
+          description: |
+            vLLM container has been unreachable for 2m. Falls back to client
+            retries; if the condition persists, page on-call.

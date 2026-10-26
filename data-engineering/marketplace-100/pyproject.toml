@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "m100"
+version = "0.1.0"
+description = "Marketplace 100 — autonomous Databricks agent"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Prem Vishnoi", email = "premvishnoisoft@gmail.com" },
+]
+
+# Runtime deps. Versions are minimums — bump as needed.
+# `databricks-sdk` covers workspace + marketplace API + Lakebase.
+# `mlflow` is the Databricks-bundled one in the runtime, but
+# the local smoke test installs it standalone.
+# `databricks-langchain` and `databricks-agents` provide the
+# Mosaic AI Agent Framework.
+dependencies = [
+  "databricks-sdk>=0.40.0",
+  "databricks-connect>=15.4.0",
+  "mlflow>=2.20.0",
+  "databricks-langchain>=0.1.0",
+  "databricks-agents>=0.1.0",
+  "lightgbm>=4.3.0",
+  "sentence-transformers>=3.0.0",
+  "psycopg[binary]>=3.1.0",
+  "pyyaml>=6.0",
+  "tenacity>=8.2.0",
+  "streamlit>=1.30.0",
+  "delta-spark>=3.0.0",
+  "pyspark>=3.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-mock>=3.12.0",
+  "responses>=0.25.0",
+  "freezegun>=1.4.0",
+  "ruff>=0.5.0",
+]
+
+[project.scripts]
+m100-driver = "m100.driver:main"
+m100-smoke = "m100.smoke:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["m100*"]
+
+[tool.setuptools.package-data]
+m100 = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra -q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501", "B008", "B905"]

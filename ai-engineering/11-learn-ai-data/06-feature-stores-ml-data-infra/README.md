@@ -49,3 +49,7 @@ By the end of Module 6 you can:
    │   The feature store's job is to make them agree.             │
    └──────────────────────────────────────────────────────────────┘
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

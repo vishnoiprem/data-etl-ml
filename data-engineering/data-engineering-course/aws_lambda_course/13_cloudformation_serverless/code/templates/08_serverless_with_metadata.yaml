@@ -1,0 +1,233 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  L70 full-stack template — adds a Metadata block to group parameters
+  in the console wizard. Deploy the same way as 07.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Environment"
+        Parameters:
+          - EnvironmentName
+          - StageName
+      - Label:
+          default: "Storage"
+        Parameters:
+          - BucketName
+    ParameterLabels:
+      EnvironmentName:
+        default: "Which environment is this?"
+      BucketName:
+        default: "S3 bucket for the Lambda"
+      StageName:
+        default: "API Gateway stage"
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Default: dev
+    Description: Deployment environment.
+
+  BucketName:
+    Type: String
+    Description: S3 bucket the Lambda reads/writes.
+    AllowedPattern: "^[a-z0-9][a-z0-9-]{2,62}$"
+    ConstraintDescription: Lowercase letters, digits, and dashes. 3-63 chars.
+
+  StageName:
+    Type: String
+    Default: prod
+    AllowedPattern: "^[a-z0-9]+$"
+    Description: API Gateway stage.
+
+Resources:
+  ServerlessBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: environment
+          Value: !Ref EnvironmentName
+        - Key: course
+          Value: aws-lambda-serverless
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "serverless-${EnvironmentName}-lambda-exec"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+  LambdaS3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "serverless-${EnvironmentName}-s3-policy"
+      Roles:
+        - !Ref LambdaExecutionRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:ListBucket
+            Resource:
+              - !Sub "arn:aws:s3:::${BucketName}"
+              - !Sub "arn:aws:s3:::${BucketName}/*"
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "*"
+
+  GetObjectFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "serverless-${EnvironmentName}-get-object"
+      Runtime: python3.11
+      Handler: get_object.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref ServerlessBucket
+          ENVIRONMENT: !Ref EnvironmentName
+      Code:
+        S3Bucket: !Ref CodeAssetsBucket
+        S3Key: lambdas/get_object.zip
+
+  PutObjectFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "serverless-${EnvironmentName}-put-object"
+      Runtime: python3.11
+      Handler: put_object.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref ServerlessBucket
+          ENVIRONMENT: !Ref EnvironmentName
+      Code:
+        S3Bucket: !Ref CodeAssetsBucket
+        S3Key: lambdas/put_object.zip
+
+  CodeAssetsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub "serverless-cfn-assets-${EnvironmentName}-${AWS::AccountId}-${AWS::Region}"
+
+  ServerlessApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "serverless-${EnvironmentName}-api"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  ObjectsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ParentId: !GetAtt ServerlessApi.RootResourceId
+      PathPart: objects
+
+  ObjectKeyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ParentId: !Ref ObjectsResource
+      PathPart: "{proxy+}"
+
+  GetObjectMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ResourceId: !Ref ObjectKeyResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetObjectFunction.Arn}/invocations"
+
+  PutObjectMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ResourceId: !Ref ObjectKeyResource
+      HttpMethod: PUT
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutObjectFunction.Arn}/invocations"
+
+  GetInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetObjectFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*/GET/objects/*"
+
+  PutInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PutObjectFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*/PUT/objects/*"
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - GetObjectMethod
+      - PutObjectMethod
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      Description: !Sub "Initial ${EnvironmentName} deployment."
+
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: !Ref StageName
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${ServerlessApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+    Description: Invoke URL for the API.
+  BucketName:
+    Value: !Ref ServerlessBucket
+    Description: S3 bucket the Lambda reads/writes.
+  EnvironmentName:
+    Value: !Ref EnvironmentName
+    Description: Environment tag applied to the stack.
