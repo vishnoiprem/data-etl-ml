@@ -1,5 +1,5 @@
 # 🗂️ TECHCOMBANK OCT 23 ROADSHOW — MASTER INDEX
-### For Prem Vishnoi | Director, Data Engineering | Last updated: Oct 14, 2026
+### For Prem Vishnoi | Director, Data Engineering | Last updated: Oct 19, 2026 (numbers fact-checked — see DEEP_DIVE §21)
 
 > **This is the entry point.** All prep materials live in this directory. Read this file first; it tells you what to read when.
 
@@ -18,7 +18,7 @@
 **Source materials (do not edit, reference only):**
 - `Director, Data Engineering (40000058).pdf` — The job description
 - `Prem_CV_Techcombank_Data_AI.pdf` — Your tailored CV
-- `techcomebacnk.pdf` — Company PDF (source of ground truth)
+- `techcomebacnk.pdf` — ⚠️ actually a printout of your own Q&A doc, NOT a company document. Ground truth = TECHCOMBANK_DEEP_DIVE.md §21
 - `TECHNICAL_ROUND_QA.md` — Technical Q&A prep
 - `resume.md` — Resume source
 - `Editing For a Senior Delivery Consultant — Data Engineering (AWS Professional Services)…pdf` — Related AWS role
@@ -29,11 +29,11 @@
 
 | Day | Action |
 |---|---|
-| **Oct 14 (today)** | Read MASTER_INDEX (now). Read DEEP_DIVE §1, 7, 8, 10 (40 min). Read REVENUE_BUSINESS_PLAN in full (15 min). Read C_SUITE_QUESTIONS §1-2 (10 min). |
+| **Oct 14 (today)** | Read MASTER_INDEX (now). Read DEEP_DIVE §1, 7, 8, 10 (40 min). Read DEEP_DIVE §6 (financials) in full (15 min). Read C_LEVEL_COMMUNICATION_PLAYBOOK §1-2 (10 min). |
 | **Oct 15-16** | Read full DEEP_DIVE (1.5 hours). Read DEEP_DIVE §19 (10 conversation hooks) twice. |
-| **Oct 17-18** | Read full LEADERSHIP_MAP (30 min). Rehearse 30s + 60s pitches out loud 5x each (20 min). |
-| **Oct 19-20** | Re-read C_SUITE_QUESTIONS. Rehearse killer question 5x in different tones (15 min). |
-| **Oct 21** | Verify all ~figures in DEEP_DIVE §6 against the latest Techcombank annual report (1 hour). |
+| **Oct 17-18** | Read DEEP_DIVE §4 leadership + §21 fact-check (30 min). Rehearse 30s + 60s pitches out loud 5x each (20 min). |
+| **Oct 19-20** | Re-read C_LEVEL_COMMUNICATION_PLAYBOOK. Rehearse killer question 5x in different tones (15 min). |
+| **Oct 21** | Check the 9M26 results (released Oct 20) and update DEEP_DIVE §21 numbers (1 hour). |
 | **Oct 22** | Read BATTLE_CARD §3 (12 panel Q&A) + §5 (networking). Read PREP_PACK §E (cheat sheet) + §A (pitches) + §L (2 sentences). Publish 1 Medium / LinkedIn post (the "value drop" link). Print cheat sheet on index card. Send "looking forward" email to recruiter. Pack bag per PREP_PACK §H. |
 | **Oct 23 (event day)** | Arrive 30 min early. Re-read cheat sheet once. Be the 2nd or 3rd to ask the panel question. Execute reception plan. Within 21:00-22:00, write down every conversation + 1 follow-up. Within 12h, send LinkedIn requests. Within 24h, send thank-you emails. |
 
@@ -58,8 +58,8 @@
 |---|---|
 | **15 years** | Your experience |
 | **15+ countries** | SCB AML coverage |
-| **14.5M+** | Techcombank customers (verify) |
-| **15.5M+** | Techcombank digital users (verify) |
+| **~18.2M** | Techcombank customers at 6M26 (18.0M at FY25; 15.4M at FY24) |
+| **30M / 4× TOI** | Techcombank 2030 targets (reported; verify wording) |
 | **10B rows/day** | Your Makro lakehouse |
 | **5 days → 2 hours** | Month-end close (Makro) |
 | **40%** | Cloud cost takeout (Makro) |
@@ -67,9 +67,9 @@
 | **$3M** | Budget (Makro) |
 | **100M+ events/day** | Lazada |
 | **50+ exec dashboards** | Makro |
-| **#1 DMA** | Techcombank digital satisfaction |
-| **2024** | Jens Lottner as CEO |
-| **1989** | Techcombank founded |
+| **#1 Decision Lab 2025** | Bank Satisfaction Ranking, Techcombank #1 overall (Apr 2025) |
+| **Aug 2020 / Aug 2025** | Jens Lottner CEO start / 2nd term (2025–2030) |
+| **1993** | Techcombank founded |
 | **2018** | Techcombank IPO |
 
 ---
@@ -90,11 +90,13 @@
 1. **Data lakehouse** (the foundation — your core delivery)
 2. **AI-powered credit scoring**
 3. **Hyper-personalised NBO at tens of millions**
-4. **GenAI in production** (TCB ChatB@nk, virtual assistant, Text-to-SQL)
+4. **GenAI in production** (customer assistants, internal copilots, Text-to-SQL — Techcombank is already on Databricks + AWS Bedrock)
 
 ---
 
 ## 👥 The C-Suite Power Map (who to find at the reception)
+
+> **Update 20 Oct:** the confirmed agenda lists the CEO (Dr. Jens Lottner), Chief People Officer (Ms. Veo Nguyen), Chief CIBG Officer (Ms. Phan Thi Hai Yen), Chief Private Banking Officer (Ms. Nguyen Van Linh), Techcom Securities Chairman (Mr. Nguyen Xuan Minh) and BOD Senior Advisor (Mr. Raymundo Yu). **No data leaders are named.** Start with the Chief People Officer and ask who runs data. Talking points per leader: BATTLE_CARD §5.0. Event: Fri 23 Oct, 18:00–21:00, reception 19:20–21:00. The table below is the fallback if data leaders turn up.
 
 | Priority | Person | Find for |
 |---|---|---|
@@ -129,7 +131,7 @@
 ## 🎯 Final reminders
 
 1. **Be the most prepared, not the loudest.** Three other people will be loud. You'll win by being the most specific.
-2. **One concrete observation beats ten generic statements.** DMA. BSS 4.0. TCB ChatB@nk. Pick two, not all three.
+2. **One concrete observation beats ten generic statements.** Databricks (Oct 2024), Decision Lab #1, the 30M-customer 2030 target. Pick two, not all three.
 3. **Close every loop.** Say what you'll do. Do it. Three of the four candidates won't.
 4. **Breathe.** You are one of four. You have done the work. They invited you for a reason. Trust the prep.
 
