@@ -1,0 +1,22 @@
+%% Diagram: Snowpipe auto-ingest architecture (sequence)
+%% Source lecture: Snowflake Complete Masterclass - Section 11 (Snowpipe)
+%% Description:  S3 object_created event → SQS (via notification integration)
+%%               → Snowflake-managed serverless pipe → target table.
+%%               The pipe runs COPY INTO every ~1 minute; no warehouse billed.
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+```mermaid
+sequenceDiagram
+    actor Producer
+    participant S3 as S3 Bucket
+    participant SQS as SQS Queue<br/>(notification integration)
+    participant SP  as Snowpipe (serverless)
+    participant TBL as Target Table
+
+    Producer->>S3: PUT new file orders_2026_10_10.csv
+    S3-->>SQS: S3 Event Notification<br/>s3:ObjectCreated:*
+    SQS-->>SP: ReceiveMessage<br/>(auto-poll by Snowflake)
+    SP->>S3: GET file (via storage integration)
+    S3-->>SP: file bytes
+    SP->>TBL: COPY INTO<br/>(auto, ~1 min latency)
+    SP-->>SQS: DeleteMessage
+```

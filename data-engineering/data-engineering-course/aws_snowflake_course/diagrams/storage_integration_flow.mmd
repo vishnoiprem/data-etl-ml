@@ -1,0 +1,24 @@
+%% Diagram: Snowflake → S3 storage integration flow (sequence)
+%% Source lecture: Snowflake Complete Masterclass - Section 8 (AWS)
+%% Description:  A `DESC STORAGE INTEGRATION` returns the IAM user + external-id
+%%               that must be added to the IAM role's trust policy.  Snowflake
+%%               then assumes that role to access the bucket — no static keys.
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant SF as Snowflake
+    participant IAM as AWS IAM Role<br/>(trust policy)
+    participant S3 as S3 Bucket
+
+    U->>SF: CREATE STORAGE INTEGRATION S3_INT<br/>STORAGE_AWS_ROLE_ARN=...
+    SF-->>U: DESC STORAGE INTEGRATION<br/>SF_AWS_IAM_USER_ARN + SF_AWS_EXTERNAL_ID
+    U->>IAM: Update trust policy:<br/>Principal=SF user, Condition sts:ExternalId
+    U->>SF: CREATE STAGE s3_stage<br/>STORAGE_INTEGRATION = S3_INT
+    U->>SF: COPY INTO t FROM @s3_stage
+    SF->>IAM: AssumeRole (web identity)
+    IAM-->>SF: temp credentials
+    SF->>S3: GET / LIST / PUT
+    S3-->>SF: object data
+    SF-->>U: rows loaded
+```

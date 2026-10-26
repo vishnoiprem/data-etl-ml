@@ -30,3 +30,7 @@ This is the production engineering layer for agents. Harness engineering, loop e
 ## The Lead Lesson
 
 > **Lesson 1 — [Harness Engineering](./01-harness-engineering.md)** — the often-missed layer. Worked example: build a minimal agent harness from scratch (no framework), with retry, timeout, observability hooks, cost tracking, and an eval that catches regressions.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

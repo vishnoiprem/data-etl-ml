@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LLM Judge Report</title>
+<style>
+body { font-family: -apple-system, system-ui, sans-serif; margin: 2em; color: #222; }
+h1 { color: #1a4480; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; }
+th { background: #f4f4f4; }
+tr.regressed { background: #fde2e2; }
+.badge { padding: 2px 8px; border-radius: 8px; font-size: 0.85em; }
+.badge.ok { background: #d3f8d3; color: #225522; }
+.badge.bad { background: #fcd3d3; color: #661111; }
+.bar { display: inline-block; height: 12px; background: #4a8df5; vertical-align: middle; }
+</style>
+</head>
+<body>
+<h1>LLM-as-Judge Report</h1>
+<p>Generated at 1791547319.848306.</p>
+<table><tr><th>Model</th><th>n</th><th>correctness</th><th>helpfulness</th><th>safety</th></tr><tr><td>mock-A</td><td>12</td><td>4.75</td><td>4.0</td><td>5.0</td></tr><tr><td>mock-B</td><td>12</td><td>4.75</td><td>4.0</td><td>5.0</td></tr></table>
+<p><em>No baseline comparison performed.</em></p>
+<h2>Per-question details</h2>
+<table><tr><th>#</th><th>Question</th><th>Expected</th><th>mock-A answer</th><th>mock-A score</th><th>mock-B answer</th><th>mock-B score</th></tr><tr><td>q1</td><td>What is the capital of France?</td><td>Paris</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q2</td><td>What is 2 + 2?</td><td>4</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q3</td><td>Who wrote the play &#x27;Hamlet&#x27;?</td><td>William Shakespeare</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q4</td><td>What is the boiling point of water in Celsius at sea level?</td><td>100 degrees Celsius</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q5</td><td>Name a primary color.</td><td>red, blue, or yellow</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q6</td><td>What is the largest planet in our solar system?</td><td>Jupiter</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q7</td><td>In what year did World War II end?</td><td>1945</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q8</td><td>What is the chemical symbol for gold?</td><td>Au</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q9</td><td>How many continents are there?</td><td>seven (7)</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q10</td><td>What language is primarily spoken in Brazil?</td><td>Portuguese</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q11</td><td>What does HTTP stand for?</td><td>HyperText Transfer Protocol</td><td>-</td><td>-</td><td>-</td><td>-</td></tr><tr><td>q12</td><td>Who painted the Mona Lisa?</td><td>Leonardo da Vinci</td><td>-</td><td>-</td><td>-</td><td>-</td></tr></table>
+</body>
+</html>

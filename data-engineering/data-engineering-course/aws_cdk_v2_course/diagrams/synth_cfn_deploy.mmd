@@ -1,0 +1,24 @@
+%%{init: {"sequence": {"htmlLabels": true, "mirrorActors": true}}}%%
+sequenceDiagram
+    autonumber
+    participant Dev as Developer
+    participant CLI as CDK CLI<br/>(cdk)
+    participant App as CDK App<br/>(bin/app.ts)
+    participant Synth as Synthesizer
+    participant CFN as CloudFormation
+    participant AWS as AWS Account
+
+    Dev->>CLI: cdk synth MyStack
+    CLI->>App: instantiate App
+    App->>Synth: traverse construct tree
+    Synth-->>App: synthesize(stack) per Stack
+    App-->>CLI: CloudFormation templates<br/>(JSON/YAML in cdk.out/)
+    CLI-->>Dev: cdk.out/MyStack.template.json
+
+    Dev->>CLI: cdk deploy MyStack
+    CLI->>CFN: validate + diff templates
+    CLI->>CFN: CreateChangeSet + ExecuteChangeSet
+    CFN->>AWS: Create/Update resources
+    AWS-->>CFN: stack CREATE_COMPLETE
+    CFN-->>CLI: outputs + status
+    CLI-->>Dev: ✅ MyStack deployed

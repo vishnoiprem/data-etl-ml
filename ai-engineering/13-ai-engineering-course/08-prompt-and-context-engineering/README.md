@@ -27,3 +27,7 @@ Prompt engineering is the discipline of getting the most out of an LLM by what y
 ## The Lead Lesson
 
 > **Lesson 1 — [Chain-of-Thought Prompting](./01-chain-of-thought.md)** — the technique that unlocked reasoning in LLMs. Worked example: take GSM8K-style math problems, compare (a) zero-shot, (b) zero-shot-CoT, (c) few-shot-CoT on accuracy and cost. Show the actual reasoning traces from each approach.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

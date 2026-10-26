@@ -83,3 +83,7 @@ The NLP track. From character-level RNNs to transformers to speech recognition. 
 ## Lead lesson
 
 See `01-lstm-for-text-generation.md` for the full worked example: train an LSTM on Shakespeare, generate new text in his style. Compare against a vanilla RNN — see how LSTM's gating solves vanishing gradients.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

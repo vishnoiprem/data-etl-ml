@@ -138,3 +138,7 @@ Bedrock now also supports fine-tuning Claude Haiku, Llama 3, and Titan directly 
 | Adapter size | ≤ 100 MB | Adapter artifact on S3 |
 | Inference latency (p95) | ≤ 1.5 s | SageMaker endpoint metric |
 | Quality regression on general tasks | < 5% drop | MMLU-style held-out probe |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

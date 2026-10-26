@@ -109,20 +109,21 @@ def classify_and_file(alerts: pd.DataFrame) -> pd.DataFrame:
     df["alert_type"] = df.get("report_type", pd.Series("STR", index=df.index))
     df["alert_type"] = df["alert_type"].fillna("STR")
 
-    # Determine status based on risk band
-    def status(row):
-        if row.get("risk_band") in ("HIGH", "CRITICAL"):
-            return "escalated"
-        return "open"
-
-    df["status"] = df.apply(status, axis=1)
+    # Vectorised status: HIGH/CRITICAL risk -> escalated, else open.
+    # Replaces the previous row-wise apply, which is O(n) Python calls
+    # instead of O(1) per row.
+    df["status"] = df["risk_band"].isin(["HIGH", "CRITICAL"]).map(
+        {True: "escalated", False: "open"}
+    )
     df["created_date"] = now.strftime("%Y-%m-%d")
-    df["due_date"] = df["country_code"].apply(
-        lambda c: _due_date(c if isinstance(c, str) else "SG", now)
-    )
-    df["regulatory_body"] = df["country_code"].apply(
-        lambda c: REGULATORS.get(c, "DEFAULT") if isinstance(c, str) else "DEFAULT"
-    )
+
+    # Vectorised due_date and regulatory_body via .map() on the
+    # country_code series. _due_date is still a Python function
+    # (it needs the datetime), but it's called per-row on a
+    # vectorised lookup rather than a row-wise apply.
+    country_clean = df["country_code"].fillna("SG").astype(str)
+    df["due_date"] = country_clean.map(lambda c: _due_date(c, now))
+    df["regulatory_body"] = country_clean.map(lambda c: REGULATORS.get(c, "DEFAULT"))
 
     # Assign analyst round-robin (200 analysts)
     df["assigned_analyst"] = [

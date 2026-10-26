@@ -33,3 +33,7 @@ Before any depth, six words come up in every AI Engineering conversation. If you
 ## The Lead Lesson
 
 > **Lesson 1 — [The six words](./01-the-six-words.md)** — crisp, analogy-first definitions of each. Worked example: build a one-page system that uses all six together (a quantized local LLM answering questions from a RAG knowledge base via MCP, wrapped in an agent loop with optional fine-tuning).
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

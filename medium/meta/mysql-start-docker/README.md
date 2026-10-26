@@ -101,3 +101,7 @@ docker exec mysql-meta-interview sh -c 'mysqldump -umeta_interview -pmeta_interv
 # Restore
 cat backup.sql | docker exec -i mysql-meta-interview sh -c 'mysql -umeta_interview -pmeta_interview meta_interview'
 ```
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

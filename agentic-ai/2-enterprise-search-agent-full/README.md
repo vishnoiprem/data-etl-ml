@@ -191,3 +191,7 @@ TF-IDF rebuilt in memory at startup (needs a real index with incremental sync); 
 - Push ACLs into the retrieval engine as a pre-filter and derive `user_groups` from a validated token.
 - Add a cross-encoder reranker and measure the precision@1 lift before keeping it.
 - Add OpenTelemetry spans per trajectory step, idempotency keys on non-idempotent tools, and a labelled evaluation set in CI so ranking changes have to prove themselves.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

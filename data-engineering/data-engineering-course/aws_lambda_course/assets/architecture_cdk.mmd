@@ -1,0 +1,25 @@
+graph LR
+    app["bin/serverless-app.ts"]:::app --> stack["lib/serverless-stack.ts (ServerlessStack)"]:::stack
+    stack --> bkt["s3.Bucket (versioned, SSE-S3, blocked)"]:::bkt
+    stack --> role["iam.Role (inline S3 Get/Put on bucket)"]:::role
+    stack --> getf["lambda.Function (get-object)"]:::getf
+    stack --> putf["lambda.Function (put-object)"]:::putf
+    role --> getf
+    role --> putf
+    bkt --> getf
+    bkt --> putf
+    stack --> api["apigateway.RestApi (CORS, prod stage)"]:::api
+    api -- GET /objects/{key} --> getf
+    api -- PUT /objects/{key} --> putf
+    synth["cdk synth"]:::synth --> cfn["CloudFormation template"]:::cfn
+    stack --> synth
+
+    classDef app fill:#eee,stroke:#333,stroke-width:1px
+    classDef stack fill:#dfe7fd,stroke:#336,stroke-width:1px
+    classDef bkt fill:#fdf5e2,stroke:#a83,stroke-width:1px
+    classDef role fill:#f0e2fd,stroke:#73a,stroke-width:1px
+    classDef getf fill:#e2fdef,stroke:#383,stroke-width:1px
+    classDef putf fill:#e2fdef,stroke:#383,stroke-width:1px
+    classDef api fill:#e2f3fd,stroke:#37a,stroke-width:1px
+    classDef synth fill:#eee,stroke:#333,stroke-width:1px
+    classDef cfn fill:#fde2e2,stroke:#a33,stroke-width:1px

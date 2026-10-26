@@ -1,0 +1,65 @@
+# ============================================================================
+# models/staging/_sources.yml — dbt sources for the Ethereum raw data.
+# ----------------------------------------------------------------------------
+# Author: Prem Vishnoi <pvishnoi@avilx.com>
+#
+# The raw tables live in the `RAW.ETHEREUM` Snowflake database+schema
+# (loaded via COPY INTO in the lecture L08 exercise). Sources here let
+# staging models use `{{ source('ethereum', 'transactions') }}` instead
+# of hardcoded refs.
+# ============================================================================
+
+version: 2
+
+sources:
+  - name: ethereum
+    description: "Raw Ethereum blockchain data loaded into Snowflake via COPY INTO."
+    database: "{{ var('ethereum_source_database') }}"
+    schema: "{{ var('ethereum_raw_schema') }}"
+    config:
+      freshness:
+        warn_after: { count: 6, period: hour }
+        error_after: { count: 24, period: hour }
+    loaded_at_field: "block_timestamp"
+    tables:
+      - name: raw_transactions
+        description: "One row per Ethereum transaction. Loaded hourly from a public S3 feed."
+        columns:
+          - name: hash
+            description: "Transaction hash (primary key)."
+            tests:
+              - not_null
+              - unique
+          - name: from_address
+            description: "EOA that initiated the transaction."
+            tests:
+              - not_null
+          - name: to_address
+            description: "EOA or contract that received the transaction. NULL for contract creation."
+          - name: value
+            description: "ETH transferred in wei (1 ETH = 1e18 wei)."
+            tests:
+              - not_null
+          - name: block_timestamp
+            description: "When the block was mined."
+            tests:
+              - not_null
+          - name: gas_used
+            description: "Total gas consumed."
+          - name: gas_price
+            description: "Gas price in wei."
+
+      - name: raw_blocks
+        description: "One row per Ethereum block. Used to enrich transactions with block-level data."
+        columns:
+          - name: block_number
+            description: "Block height (primary key)."
+            tests:
+              - not_null
+              - unique
+          - name: block_timestamp
+            description: "When the block was mined."
+            tests:
+              - not_null
+          - name: miner
+            description: "Address that earned the block reward."

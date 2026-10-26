@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AIForBiz Course Platform</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>🚀 AIForBiz Course Platform</h1>
+      <p id="user-info">Sign in to track your progress</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Sign Up -->
+    <section id="signup-section" class="card">
+      <h2>Start Learning</h2>
+      <form id="signup-form">
+        <input type="text" id="name" placeholder="Your name" required />
+        <input type="email" id="email" placeholder="your@email.com" required />
+        <button type="submit">Get Access</button>
+      </form>
+      <p id="signup-msg"></p>
+    </section>
+
+    <!-- Course Stats -->
+    <section class="stats">
+      <div class="stat"><strong id="stat-modules">0</strong><span>Modules</span></div>
+      <div class="stat"><strong id="stat-lessons">0</strong><span>Lessons</span></div>
+      <div class="stat"><strong id="stat-hours">0</strong><span>Hours</span></div>
+      <div class="stat"><strong id="stat-progress">0%</strong><span>Your Progress</span></div>
+    </section>
+
+    <!-- Modules -->
+    <section id="course"></section>
+
+    <!-- Leaderboard -->
+    <section class="card">
+      <h2>🏆 Top Students</h2>
+      <ol id="leaderboard"></ol>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
