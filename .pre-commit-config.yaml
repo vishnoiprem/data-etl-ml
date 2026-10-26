@@ -32,6 +32,8 @@ repos:
         exclude: |
           (?x)^(
             leads-pipeline/draft-cron/.*\.html
+            realtime-stock-pipeline/trade-finder/logs/.*\.stdout
+            realtime-stock-pipeline/trade-finder/reports/email_.*\.txt
           )$
       - id: mixed-line-ending
         args: ["--fix=lf"]
@@ -64,3 +66,30 @@ repos:
     hooks:
       - id: shellcheck
         files: ^leads-pipeline/draft-cron/.*\.(sh|bash)$
+
+  # ── Secret / credential detection ──────────────────────────
+  # Catches AWS access keys (AKIA[0-9A-Z]{16}), the matching
+  # 40-char base64 secret, GCP service-account JSON blobs, GitHub
+  # PATs (ghp_/gho_/ghs_/ghr_), Slack tokens, and generic
+  # high-entropy strings. Backed up by the in-repo regression
+  # test agentic-ai/5-amazon-transcribe/tests/test_no_hardcoded_aws_keys.py
+  # which the leads-ci job also runs. Two layers because pre-commit
+  # only fires when `pre-commit install` was run locally.
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        # The baseline file is committed and contains only
+        # fingerprint hashes (no secret material). On first
+        # install, generate it locally with:
+        #   detect-secrets scan > .secrets.baseline
+        # Then audit / accept the legitimate findings with
+        #   detect-secrets audit .secrets.baseline
+        exclude: |
+          (?x)^(
+            \.secrets\.baseline
+            | .*/__pycache__/.*
+            | .*\.min\.(js|css)
+            | aws/dist/awscli/.*
+          )$

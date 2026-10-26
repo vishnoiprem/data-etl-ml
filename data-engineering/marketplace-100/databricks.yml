@@ -1,0 +1,157 @@
+# Databricks Asset Bundle — Marketplace 100
+#
+# Defines every resource the 100-iteration pipeline needs:
+#   - driver Job (the 100-loop controller)
+#   - Lakeflow pipeline (deployed per-iteration as a pipeline_task)
+#   - Lakebase Postgres instance (state + ops log)
+#   - digest Databricks App (Streamlit dashboard)
+#
+# Validate:  databricks bundle validate
+# Deploy dev: databricks bundle deploy --target dev
+# Trigger:   databricks bundle run m100_driver_job
+#
+# Free Edition posture:
+#   * No all-purpose clusters — only serverless Jobs / DLT.
+#   * Foundation Model API (not dedicated serving endpoints).
+#   * One Lakebase project, scale-to-zero.
+
+bundle:
+  name: marketplace-100
+  uuid: m100-2026-q4
+  description: 100 marketplace datasets, 1 self-driving agent, zero Airflow.
+
+variables:
+  catalog:
+    description: Unity Catalog name (must already exist in the workspace).
+    default: marketplace_100
+  lakebase_name:
+    description: Lakebase project name.
+    default: marketplace-100-state
+  max_iterations:
+    description: Total iterations the driver will run.
+    default: 100
+  stagger_seconds:
+    description: Sleep between iterations. Free Edition needs ~60-300s to avoid throttle.
+    default: 120
+  quality_threshold:
+    description: Minimum agent quality_score for a result to be accepted.
+    default: 0.4
+  max_retries:
+    description: Per-iteration retries before giving up and moving on.
+    default: 2
+
+# ============================================================
+# Targets — one per environment. `dev` uses Free Edition.
+# ============================================================
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://${workspace_host}
+    run_as:
+      user_name: ${workspace_user}
+  prod:
+    mode: production
+    workspace:
+      host: https://${workspace_host}
+    run_as:
+      service_principal_name: marketplace-100-sp
+
+# ============================================================
+# Resources
+# ============================================================
+
+# Driver Job — the 100-iteration loop controller.
+# For_each_task is intentionally NOT used: we want one
+# long-lived task that drives itself (so the agent can
+# self-evaluate and decide the next listing within the
+# same task). Resumable via Delta state.
+resources:
+  jobs:
+    m100_driver_job:
+      name: marketplace-100-driver
+      description: >-
+        Drives the 100-iteration Marketplace loop. Resumes from
+        Delta state on crash. Self-evaluates per iteration; bails
+        on quality_score < ${var.quality_threshold}.
+      max_concurrent_runs: 1
+      timeout_seconds: 0
+      schedule:
+        # One run per day, 03:00 UTC, so the Free Edition
+        # daily budget regenerates between runs. Combined
+        # with the per-iteration sleep, this keeps the
+        # total cost under the $0-20/mo ceiling.
+        quartz_cron_expression: "0 0 3 * * ?"
+        timezone_id: "UTC"
+      parameters:
+        - name: max_iterations
+          default: ${var.max_iterations}
+        - name: stagger_seconds
+          default: ${var.stagger_seconds}
+        - name: quality_threshold
+          default: ${var.quality_threshold}
+        - name: max_retries
+          default: ${var.max_retries}
+      tasks:
+        - task_key: driver
+          description: Run the iteration loop.
+          # Serverless: no cluster specification.
+          # Python wheel is built and uploaded by `databricks bundle deploy`.
+          python_wheel_task:
+            package_name: m100
+            entry_point: driver
+            parameters:
+              - "--max-iterations={{job.parameters.max_iterations}}"
+              - "--stagger-seconds={{job.parameters.stagger_seconds}}"
+              - "--quality-threshold={{job.parameters.quality_threshold}}"
+              - "--max-retries={{job.parameters.max_retries}}"
+
+  pipelines:
+    m100_lakeflow:
+      name: marketplace-100-lakeflow
+      description: >-
+        Per-iteration Lakeflow Declarative Pipeline. Deployed as
+        a `pipeline_task` by the driver; the pipeline itself is
+        not long-lived (the driver re-creates it on every run
+        to stay under the Free Edition 1-pipeline quota).
+      catalog: ${var.catalog}
+      target: silver
+      channel: PREVIEW
+      edition: ADVANCED
+      # No clusters — serverless only.
+
+  database_instances:
+    m100_lakebase:
+      name: ${var.lakebase_name}
+      description: >-
+        Lakebase (Postgres-compatible) instance for the
+        per-iteration ops log. Scale-to-zero. The driver
+        connects via psycopg2.
+      capacity: CU_1
+      # Single-node, no HA — Free Edition posture.
+
+# ============================================================
+# Genie space — natural-language Q&A over the iterations table.
+#
+# Lets users ask "which categories produced the highest
+# quality_score?" or "what listing had the biggest silver
+# table?" and get SQL + chart answers back.
+#
+# Note: Genie spaces are configured via the Workspace UI
+# (they're not first-class DAB resources as of writing). The
+# resource block below is the DABs-defined pattern; in v1 we
+# fall back to a Databricks App dashboard and a Genie space
+# is provisioned by running `genie provision --table
+# marketplace_100.agents.iterations` once after first deploy.
+# ============================================================
+
+# ============================================================
+# Permissions — give the dev user everything; the SP gets
+# a tighter set.
+# ============================================================
+permissions:
+  - service_principal_name: marketplace-100-sp
+    level: CAN_MANAGE_RUN
+  - user_name: ${workspace_user}
+    level: CAN_MANAGE

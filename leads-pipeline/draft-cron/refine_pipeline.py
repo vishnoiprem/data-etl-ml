@@ -281,11 +281,16 @@ def find_more_leads(verbose=True):
     p = HERE / "find_more_leads.py"
     if not p.exists():
         return
-    r = subprocess.run(
-        [sys.executable, str(p)],
-        cwd=str(HERE),
-        capture_output=True, text=True, timeout=180,
-    )
+    try:
+        r = subprocess.run(
+            [sys.executable, str(p)],
+            cwd=str(HERE),
+            capture_output=True, text=True, timeout=180,
+        )
+    except subprocess.TimeoutExpired:
+        if verbose:
+            print(f"    [find_more_leads] timeout after 180s — skipping")
+        return
     if verbose and r.returncode == 0:
         # tail summary line
         for line in r.stdout.splitlines()[-3:]:
@@ -301,11 +306,16 @@ def find_more_clients(verbose=True):
     p = HERE / "find_clients.py"
     if not p.exists():
         return
-    r = subprocess.run(
-        [sys.executable, str(p)],
-        cwd=str(HERE),
-        capture_output=True, text=True, timeout=180,
-    )
+    try:
+        r = subprocess.run(
+            [sys.executable, str(p)],
+            cwd=str(HERE),
+            capture_output=True, text=True, timeout=180,
+        )
+    except subprocess.TimeoutExpired:
+        if verbose:
+            print(f"    [find_clients] timeout after 180s — skipping")
+        return
     if verbose and r.returncode == 0:
         for line in r.stdout.splitlines()[-3:]:
             print(f"    {line}")

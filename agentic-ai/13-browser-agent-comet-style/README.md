@@ -76,6 +76,59 @@ cd extension
 ## See also
 
 - [`06-regulated-industry/`](../06-regulated-industry/) — the same shape for server-side, with audit log.
+
+---
+
+## What this is NOT
+
+- **Not Comet.** Comet is a closed product with a
+  hosted model, a multi-tab UX, and a polished
+  browser shell. This is the *MV3 extension +
+  in-browser LLM + privacy gate* shape, built with
+  primitives you can swap (WebLLM → any in-browser
+  model; the privacy gate is plain JS).
+- **Not a server-side agent.** Everything runs in
+  the browser; nothing leaves the user's machine
+  except the user-clicked "send" action. The
+  server-side equivalent (with full audit log) lives
+  in
+  [`../06-regulated-industry/`](../06-regulated-industry/).
+- **Not a privacy-by-policy system.** The URL
+  allowlist is *enforced in the extension code*,
+  not promised in a privacy policy. The "0
+  exfiltrations" number is a property of the code,
+  not a contract. The user can read the code
+  and verify.
+- **Not a general-purpose agent.** This is
+  *read-only* summarization + citation extraction
+  + user-clicked "send." It doesn't fill forms,
+  click buttons, or take actions on the page.
+  For that, see the Computer Use build in
+  [`../17-computer-use-agent/`](../17-computer-use-agent/).
+
+---
+
+## Related directories
+
+- [`../06-regulated-industry/`](../06-regulated-industry/) —
+  the server-side equivalent with full audit
+  log + per-tenant retention. The shape is the
+  same; the privacy boundary moves from the
+  browser to the server.
+- [`../17-computer-use-agent/`](../17-computer-use-agent/) —
+  the cousin that *does* take actions (move the
+  mouse, click, type). Same planner shape, no
+  privacy boundary.
+- [`../12-customer-service-agent/`](../12-customer-service-agent/) —
+  the cousin on the *server* side: same
+  privacy-by-design (idempotency keys, audit
+  log) for a payments company.
+- [`../16-autonomous-loop/`](../16-autonomous-loop/) —
+  the bounded-loop + budget + retry pattern; not
+  directly relevant here (the extension is
+  one-shot) but useful for the server-side
+  agent that wraps this.
+
 ---
 
 **Last updated:** 2026-10-12  

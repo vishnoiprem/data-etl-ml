@@ -15,7 +15,7 @@ If ES is not available, data is saved to JSON files for inspection.
 import sys
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 from loguru import logger
@@ -165,7 +165,7 @@ def index_entity_master(client):
         merge_key = "entity_id" if "entity_id" in df.columns else "customer_id"
         df = df.merge(risk, left_on=merge_key, right_on="customer_id", how="left")
 
-    df["updated_at"] = datetime.utcnow().isoformat()
+    df["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     # Rename for ES schema
     if "customer_id" in df.columns and "entity_id" not in df.columns:

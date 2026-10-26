@@ -1,0 +1,241 @@
+# ============================================================
+# BOOTSTRAP: install PySpark if missing, start SparkSession
+# ============================================================
+import sys, subprocess
+try:
+    from pyspark.sql import SparkSession
+    from pyspark.sql import functions as F
+    from pyspark.sql import types as T
+except Exception:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "pyspark==3.5.1"])
+    from pyspark.sql import SparkSession
+    from pyspark.sql import functions as F
+    from pyspark.sql import types as T
+
+try:
+    spark
+    print("Using existing SparkSession")
+except NameError:
+    spark = (SparkSession.builder
+             .master("local[*]")
+             .appName("ctwa-meta-l6-mock")
+             .config("spark.sql.shuffle.partitions", "4")
+             .config("spark.ui.showConsoleProgress", "false")
+             .getOrCreate())
+    spark.sparkContext.setLogLevel("ERROR")
+    print("Started new SparkSession")
+
+print("Spark version:", spark.version)
+
+clicks = [
+    ("c1", "ad_10", "adv_1", "2026-05-01 10:00:00", "2026-05-01"),
+    ("c2", "ad_10", "adv_1", "2026-05-01 10:05:00", "2026-05-01"),
+    ("c3", "ad_11", "adv_1", "2026-05-01 11:00:00", "2026-05-01"),
+    ("c4", "ad_20", "adv_2", "2026-05-01 12:00:00", "2026-05-01"),
+]
+threads = [
+    ("t1", "adv_1", "c1", "2026-05-01 10:01:00"),
+    ("t2", "adv_1", "c2", "2026-05-01 10:06:00"),
+    ("t3", "adv_1", None, "2026-05-01 10:30:00"),
+    ("t4", "adv_2", "c4", "2026-05-01 12:01:00"),
+]
+# Merchant events include an order_id so we can deduplicate business orders.
+conversions = [
+    ("conv1", "order1", "t1", "ORDER_PLACED", "2026-05-01 10:20:00", "2026-05-01 10:21:00", 100.0),
+    ("conv2", "order2", "t2", "ORDER_PLACED", "2026-05-03 09:00:00", "2026-05-03 09:10:00", 50.0),
+    ("conv3", "order3", "t3", "ORDER_PLACED", "2026-05-01 11:00:00", "2026-05-01 11:01:00", 30.0),
+    # Replay of the same event: must not double count
+    ("conv1", "order1", "t1", "ORDER_PLACED", "2026-05-01 10:20:00", "2026-05-01 10:22:00", 100.0),
+]
+spend = [("ad_10", "2026-05-01", 30.0), ("ad_11", "2026-05-01", 10.0), ("ad_20", "2026-05-01", 20.0)]
+
+click_schema = "click_id string, ad_id string, advertiser_id string, click_time string, ds string"
+thread_schema = "thread_id string, advertiser_id string, attributed_click_id string, thread_start_time string"
+conv_schema = "conversion_id string, order_id string, thread_id string, conversion_type string, conversion_time string, ingestion_time string, order_value_usd double"
+spend_schema = "ad_id string, ds string, spend_usd double"
+
+(spark.createDataFrame(clicks, click_schema)
+ .withColumn("click_time", F.to_timestamp("click_time"))
+ .createOrReplaceTempView("fct_ad_clicks"))
+(spark.createDataFrame(threads, thread_schema)
+ .withColumn("thread_start_time", F.to_timestamp("thread_start_time"))
+ .createOrReplaceTempView("fct_wa_threads"))
+(spark.createDataFrame(conversions, conv_schema)
+ .withColumn("conversion_time", F.to_timestamp("conversion_time"))
+ .withColumn("ingestion_time", F.to_timestamp("ingestion_time"))
+ .createOrReplaceTempView("raw_merchant_conversions"))
+spark.createDataFrame(spend, spend_schema).createOrReplaceTempView("fct_ad_spend")
+
+for table in ["fct_ad_clicks", "fct_wa_threads", "raw_merchant_conversions", "fct_ad_spend"]:
+    print(table)
+    spark.table(table).show(truncate=False)
+
+# Dedup replayed conversion events by conversion_id (latest ingestion wins).
+spark.sql("""
+CREATE OR REPLACE TEMP VIEW merchant_events_dedup AS
+SELECT conversion_id, order_id, thread_id, conversion_type, conversion_time, order_value_usd
+FROM (
+  SELECT *, ROW_NUMBER() OVER (PARTITION BY conversion_id ORDER BY ingestion_time DESC) AS rn
+  FROM raw_merchant_conversions
+) x WHERE rn = 1
+""")
+
+# In this sample, each order has one ORDER_PLACED event. A production pipeline
+# should first resolve updates/refunds/cancellations to latest order state.
+roas_sql = """
+WITH click_base AS (
+  SELECT click_id, ad_id, advertiser_id, click_time, ds
+  FROM fct_ad_clicks
+  WHERE ds = '2026-05-01'
+),
+thread_links AS (
+  SELECT c.ad_id, c.click_id, c.click_time, t.thread_id
+  FROM click_base c
+  JOIN fct_wa_threads t
+    ON t.attributed_click_id = c.click_id
+   AND t.advertiser_id = c.advertiser_id
+   AND t.thread_start_time >= c.click_time
+   AND t.thread_start_time < c.click_time + INTERVAL 7 DAYS
+),
+order_attribution AS (
+  SELECT DISTINCT l.ad_id, l.click_id, m.order_id, m.order_value_usd
+  FROM thread_links l
+  JOIN merchant_events_dedup m
+    ON m.thread_id = l.thread_id
+   AND m.conversion_type = 'ORDER_PLACED'
+   AND m.conversion_time >= l.click_time
+   AND m.conversion_time < l.click_time + INTERVAL 7 DAYS
+),
+click_counts AS (
+  SELECT ad_id, COUNT(DISTINCT click_id) AS clicks
+  FROM click_base GROUP BY ad_id
+),
+thread_counts AS (
+  SELECT ad_id, COUNT(DISTINCT thread_id) AS attributed_threads
+  FROM thread_links GROUP BY ad_id
+),
+order_counts AS (
+  SELECT ad_id, COUNT(DISTINCT click_id) AS converted_clicks,
+         COUNT(DISTINCT order_id) AS orders, SUM(order_value_usd) AS reported_revenue
+  FROM order_attribution GROUP BY ad_id
+),
+spend AS (
+  SELECT ad_id, SUM(spend_usd) AS ad_spend
+  FROM fct_ad_spend WHERE ds = '2026-05-01' GROUP BY ad_id
+)
+SELECT c.ad_id, c.clicks, COALESCE(t.attributed_threads,0) AS attributed_threads,
+       COALESCE(o.converted_clicks,0) AS converted_clicks,
+       COALESCE(o.orders,0) AS orders,
+       ROUND(1.0 * COALESCE(o.converted_clicks,0) / NULLIF(c.clicks,0),4) AS conversion_rate,
+       COALESCE(o.reported_revenue,0.0) AS reported_revenue,
+       COALESCE(s.ad_spend,0.0) AS ad_spend,
+       ROUND(COALESCE(o.reported_revenue,0.0) / NULLIF(s.ad_spend,0),4) AS reported_roas
+FROM click_counts c
+LEFT JOIN thread_counts t ON c.ad_id=t.ad_id
+LEFT JOIN order_counts o ON c.ad_id=o.ad_id
+LEFT JOIN spend s ON c.ad_id=s.ad_id
+ORDER BY c.ad_id
+"""
+result = spark.sql(roas_sql)
+result.show(truncate=False)
+rows = {r['ad_id']: r.asDict() for r in result.collect()}  # small test output ONLY
+assert rows['ad_10']['clicks'] == 2
+assert rows['ad_10']['attributed_threads'] == 2
+assert rows['ad_10']['converted_clicks'] == 2
+assert float(rows['ad_10']['reported_revenue']) == 150.0
+assert float(rows['ad_10']['reported_roas']) == 5.0
+assert rows['ad_11']['converted_clicks'] == 0
+assert rows['ad_20']['converted_clicks'] == 0
+print('Q1 PASS')
+
+messages = [
+    ("m1", "t1", "user", "2026-05-01 10:01:00"),
+    ("m2", "t1", "business", "2026-05-01 10:04:00"),  # pass: 3 min
+    ("m3", "t2", "user", "2026-05-01 10:06:00"),
+    ("m4", "t2", "business", "2026-05-01 10:14:00"), # fail: 8 min
+    ("m5", "t3", "user", "2026-05-01 10:30:00"),    # no reply
+    ("m6", "t4", "user", "2026-05-01 12:01:00"),
+    ("m7", "t4", "business", "2026-05-01 12:03:00"), # pass: 2 min
+]
+(spark.createDataFrame(messages, "message_id string, thread_id string, sender_type string, message_time string")
+ .withColumn("message_time", F.to_timestamp("message_time"))
+ .createOrReplaceTempView("fct_wa_messages_meta"))
+
+sla_sql = """
+WITH first_user AS (
+ SELECT thread_id, MIN(message_time) AS first_user_time
+ FROM fct_wa_messages_meta WHERE sender_type='user' GROUP BY thread_id
+),
+first_business AS (
+ SELECT u.thread_id, u.first_user_time, MIN(m.message_time) AS first_business_reply
+ FROM first_user u
+ LEFT JOIN fct_wa_messages_meta m
+   ON m.thread_id=u.thread_id AND m.sender_type='business'
+  AND m.message_time >= u.first_user_time
+ GROUP BY u.thread_id, u.first_user_time
+)
+SELECT t.advertiser_id, COUNT(*) AS eligible_threads,
+       SUM(CASE WHEN f.first_business_reply <= f.first_user_time + INTERVAL 5 MINUTES
+                THEN 1 ELSE 0 END) AS replied_within_5m,
+       ROUND(100.0 * SUM(CASE WHEN f.first_business_reply <= f.first_user_time + INTERVAL 5 MINUTES
+                              THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0),2) AS pct_replied_5m
+FROM first_business f
+JOIN fct_wa_threads t ON t.thread_id=f.thread_id
+WHERE f.first_user_time + INTERVAL 5 MINUTES <= TIMESTAMP '2026-05-03 00:00:00'
+GROUP BY t.advertiser_id
+ORDER BY t.advertiser_id
+"""
+sla_result = spark.sql(sla_sql)
+sla_result.show(truncate=False)
+sla_rows = {r['advertiser_id']:r.asDict() for r in sla_result.collect()}
+# Fix: cast Decimal to float before comparing (ROUND returns Decimal in Spark)
+assert int(sla_rows['adv_1']['eligible_threads']) == 3
+assert int(sla_rows['adv_1']['replied_within_5m']) == 1
+assert abs(float(sla_rows['adv_1']['pct_replied_5m']) - 33.33) < 0.01
+assert abs(float(sla_rows['adv_2']['pct_replied_5m']) - 100.0) < 0.01
+print('Q2 PASS')
+
+from datetime import datetime, timedelta
+
+def find_ghosted_threads(messages, now):
+    first_user = {}
+    for msg in messages:
+        if msg["sender_type"] != "user":
+            continue
+        tid, ts = msg["thread_id"], msg["message_time"]
+        if tid not in first_user or ts < first_user[tid]:
+            first_user[tid] = ts
+
+    first_reply = {}
+    for msg in messages:
+        if msg["sender_type"] != "business":
+            continue
+        tid, ts = msg["thread_id"], msg["message_time"]
+        if tid not in first_user or ts < first_user[tid]:
+            continue
+        if tid not in first_reply or ts < first_reply[tid]:
+            first_reply[tid] = ts
+
+    ghosted = set()
+    for tid, started in first_user.items():
+        deadline = started + timedelta(hours=24)
+        if now >= deadline and (tid not in first_reply or first_reply[tid] > deadline):
+            ghosted.add(tid)
+    return ghosted
+
+parse = lambda x: datetime.fromisoformat(x)
+test_messages = [
+    {"thread_id":"t1", "sender_type":"user", "message_time":parse("2026-05-01 10:00")},
+    {"thread_id":"t1", "sender_type":"business", "message_time":parse("2026-05-01 10:04")},
+    {"thread_id":"t2", "sender_type":"user", "message_time":parse("2026-05-01 10:00")},
+    {"thread_id":"t3", "sender_type":"user", "message_time":parse("2026-05-01 10:00")},
+    {"thread_id":"t3", "sender_type":"business", "message_time":parse("2026-05-02 11:00")},
+    {"thread_id":"t4", "sender_type":"user", "message_time":parse("2026-05-03 10:00")},
+]
+assert find_ghosted_threads(test_messages, parse("2026-05-02 09:00")) == set()
+assert find_ghosted_threads(test_messages, parse("2026-05-03 12:00")) == {"t2","t3"}
+assert find_ghosted_threads([], parse("2026-05-03 12:00")) == set()
+print('Python Q3 PASS:', find_ghosted_threads(test_messages, parse("2026-05-03 12:00")))
+
+spark.stop()
+print("\n=== ALL TESTS PASSED ===")
