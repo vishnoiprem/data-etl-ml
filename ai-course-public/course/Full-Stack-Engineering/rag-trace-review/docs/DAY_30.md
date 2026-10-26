@@ -286,14 +286,35 @@ def test_pacific_atlantic():
 ```python
 def clone_graph(node):
     if not node: return None
-    seen: dict[int, "Node"] = {}
+    # Key on object identity, not value — graphs can have duplicate values
+    seen: dict[int, "Node"] = {id(node): Node(node.val)}
     def dfs(u):
-        if u.val in seen: return seen[u.val]
-        copy = Node(u.val)
-        seen[u.val] = copy
-        copy.neighbors = [dfs(v) for v in u.neighbors]
-        return copy
+        for v in u.neighbors:
+            if id(v) not in seen:
+                seen[id(v)] = Node(v.val)
+                dfs(v)  # recurse first to populate v's neighbors
+            seen[id(u)].neighbors.append(seen[id(v)])
+        return seen[id(u)]
     return dfs(node)
+```
+
+- **Time:** O(V + E). **Space:** O(V).
+- **Key insight:** key the visited map by `id(node)`, not `node.val` — different nodes can have the same value.
+- **Alternative (cleaner, iterative BFS):**
+```python
+from collections import deque
+def clone_graph(node):
+    if not node: return None
+    seen = {id(node): Node(node.val)}
+    q = deque([node])
+    while q:
+        u = q.popleft()
+        for v in u.neighbors:
+            if id(v) not in seen:
+                seen[id(v)] = Node(v.val)
+                q.append(v)
+            seen[id(u)].neighbors.append(seen[id(v)])
+    return seen[id(node)]
 ```
 
 **Time: 90 min**

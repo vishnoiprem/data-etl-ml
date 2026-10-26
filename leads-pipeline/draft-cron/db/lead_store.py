@@ -299,6 +299,106 @@ def get_pending_leads() -> List[Dict]:
         return [dict(r) for r in cur.fetchall()]
 
 
+def get_pending_leads_fresh(since_hours: int = 24) -> List[Dict]:
+    """Like get_pending_leads but restricts to leads created in the last
+    `since_hours` (default 24). Used by the post-throttle recovery loop to
+    avoid touching backlog leads that may have stale contact info.
+
+    Pass `since_hours=0` to disable the filter (returns same as
+    get_pending_leads). Requires the leads_created_at_idx index (added
+    in schema.sql alongside this helper) to avoid a table scan.
+    """
+    with get_cursor() as cur:
+        if since_hours and since_hours > 0:
+            cur.execute("""
+                SELECT l.* FROM leads l
+                WHERE l.status = 'pending'
+                  AND l.created_at > NOW() - (%s || ' hours')::INTERVAL
+                  AND LOWER(l.contact_email) NOT IN (SELECT email FROM opt_outs)
+                ORDER BY l.id ASC
+            """, (str(since_hours),))
+        else:
+            cur.execute("""
+                SELECT l.* FROM leads l
+                WHERE l.status = 'pending'
+                  AND LOWER(l.contact_email) NOT IN (SELECT email FROM opt_outs)
+                ORDER BY l.id ASC
+            """)
+        return [dict(r) for r in cur.fetchall()]
+
+
+def was_recently_sent(email: str, hours: int = 24) -> bool:
+    """Return True if `email` was successfully sent to within the last
+    `hours`. Reads from `send_log` (populated by log_send).
+
+    Why this exists: Gmail's auto-throttle watches for repeated sends to
+    the same recipient. A 2nd send within 24h to the same address also
+    looks like spam to recipient servers, so we self-throttle.
+
+    A "send" here means status='success' in send_log. Failed attempts
+    don't count (so a transient SMTP error doesn't burn the tail window).
+    """
+    if not email or hours <= 0:
+        return False
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT 1 FROM send_log
+            WHERE LOWER(to_email) = LOWER(%s)
+              AND status = 'success'
+              AND sent_at > NOW() - (%s || ' hours')::INTERVAL
+            LIMIT 1
+        """, (email, str(hours)))
+        return cur.fetchone() is not None
+
+
+def count_sends_today() -> int:
+    """Count successful sends since 00:00 UTC today.
+
+    Used by the daily-cap check in email_guard.can_send_to. We count
+    successes (not attempts) because Gmail's quota is on accepted
+    recipients, not on SMTP connections.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM send_log
+            WHERE status = 'success'
+              AND sent_at >= date_trunc('day', NOW() AT TIME ZONE 'UTC')
+        """)
+        return int(cur.fetchone()["n"] or 0)
+
+
+def count_sends_this_hour() -> int:
+    """Count successful sends in the last 60 minutes.
+
+    Lower-frequency than count_sends_today; protects against bursts
+    that would look bot-like to Gmail.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            SELECT COUNT(*) AS n FROM send_log
+            WHERE status = 'success'
+              AND sent_at > NOW() - INTERVAL '1 hour'
+        """)
+        return int(cur.fetchone()["n"] or 0)
+
+
+def mark_bounced_by_id(lead_id: int, reason: str = "hard bounce") -> None:
+    """Transition a lead to status='bounced' with a reason.
+
+    Called from autopilot._send_one when SMTP rejects the recipient
+    (SMTPRecipientsRefused). Without this, a hard SMTP bounce gets
+    recorded as 'failed' and the lead is never blocked from retry,
+    which is the root cause of the 27% bounce-rate throttle.
+    """
+    with get_cursor() as cur:
+        cur.execute("""
+            UPDATE leads
+            SET status = 'bounced',
+                last_error = %s
+            WHERE id = %s
+        """, (f"Bounce: {reason}", lead_id))
+
+
 def get_by_email(email: str) -> Optional[Dict]:
     with get_cursor() as cur:
         cur.execute("SELECT * FROM leads WHERE LOWER(contact_email) = LOWER(%s) ORDER BY id DESC LIMIT 1", (email,))

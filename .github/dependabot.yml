@@ -217,7 +217,7 @@ updates:
       prefix: "chore(ml)"
       include: "scope"
 
-  # ai-course-public (NEW: 2026-10-15 — added to address 645-alert backlog)
+  # ai-course-public (NEW)
   - package-ecosystem: "pip"
     directory: "/ai-course-public"
     schedule:
