@@ -1,4 +1,6 @@
 # L6 add-on: build the gold eval set from corrected_answer
+import pandas as pd
+
 gold_sql = """
 SELECT
     t.query,

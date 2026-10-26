@@ -70,7 +70,7 @@
 
 > "At APEX-RAG, I extended from text-only to multimodal for 10M enterprise PDFs. The challenge: **table chunking.** If I split a table row-by-row, I lose the header context — 'What is Q3 revenue?' becomes 'What is Q3 revenue when the column header is on page 5?'
 >
-> My solution: a **table-aware chunker** that keeps the header + 5 rows as a JSON object `{header: [...], rows: [[...]]}`. Text I chunk at 512 tokens. Images go through CLIP embedding. I dedupe images by **perceptual hash (pHash)** before embedding — saved 40% cost = $200k.
+> My solution: a **table-aware chunker** that keeps the header + 5 rows as a JSON object `{header: [...], rows: [[...]]}`. Text I chunk at 512 tokens. Images go through CLIP embedding. I dedupe images by **perceptual hash (pHash)** before embedding — 100M PDFs × 50 images avg = 5B raw images; pHash at 40% dedup leaves 3B unique, saving $40k on the $100k image-embedding bucket."
 >
 > Three collections in Qdrant: text_chunks, table_chunks, image_chunks, cross-referenced by doc_id. Query path is hybrid search across all three."
 
@@ -82,17 +82,21 @@
 
 **L6 Answer (60 sec):**
 
-> "Three cost buckets, all tracked in ClickHouse `traces` table:
+> "Three cost buckets, all tracked in ClickHouse `traces` table. **Corpus: 100M documents. Monthly query volume: 1B.**
 >
 > 1. **Ingestion:** $0.0042/query × 100M docs = **$420k one-time** + $50k/month incremental via Flink CDC.
 > 2. **Retrieval:** $0.0001 per Qdrant query × 1B queries/month = **$100k/month.**
-> 3. **Generation:** $0.003 per LLM call × 1B = **$3M/month** — the biggest line item.
+> 3. **Generation:** $0.003 per LLM call × 1B = **$350k/month** — broken down as:
+>    - Text embeddings: **$350k** (70%)
+>    - Image embeddings (post-pHash): **$100k** (20%)
+>    - Vision-LLM (captioning): **$50k** (10%)
+>    - **Total: $500k/month** — biggest line item is text embeddings at $350k.
 >
-> Goal: **p50 cost per query <$0.005.** Semantic cache saves 30% on LLM cost = **$900k/month saved.**
+> Goal: **p50 cost per query <$0.005.** Semantic cache saves 30% on LLM cost = **$150k/month saved.**
 >
 > I track per-query cost by modality: text vs table vs image, and alert if cost increases >10% week-over-week."
 
-**L6 Keywords:** three buckets, $3M/month, semantic cache $900k, per-modality cost, alert >10%.
+**L6 Keywords:** three buckets, $500k/month, text embeddings $350k biggest line item, semantic cache $150k, per-modality cost, alert >10%.
 
 ---
 
@@ -227,7 +231,7 @@ PDF S3 ──▶ PyMuPDF Parser ──▶ Branch by Type
 6. **Batch 1000** at a time for API rate limits, **semaphore 100** concurrent
 7. **Failure:** retry 3x with exponential backoff, send to DLQ `pdfs_failed`
 
-**Cost math:** 10M PDFs × 10 chunks avg = 100M chunks. Dedup saves 40% on images = $200k.
+**Cost math:** 100M PDFs × 10 chunks avg = 1B text chunks (text embeddings: $350k). Images: 100M × 50 avg = 5B raw → pHash 40% dedup → 3B unique (image embeddings: $100k). Total monthly: $500k (text 70% / image 20% / vision-LLM 10%).
 
 ---
 
@@ -258,10 +262,10 @@ ORDER BY total_cost DESC;
 **Output (expected):**
 | modality | chunk_count | total_cost | avg_cost | pct_total |
 |----------|-------------|------------|----------|-----------|
-| text     | 80,000,000  | $336,000   | $0.0042  | 70%       |
-| image    | 50,000,000  | $50,000    | $0.0010  | 10%       |
-| table    | 10,000,000  | $84,000    | $0.0084  | 18%       |
-| **TOTAL**| 140,000,000 | **$470,000** | -      | 100%      |
+| text     | 80,000,000  | $350,000   | $0.0044  | 70%       |
+| image    | 3,000,000   | $100,000   | $0.0333  | 20%       |
+| table    | 1,000,000   | $50,000    | $0.0500  | 10%       |
+| **TOTAL**| 84,000,000  | **$500,000** | -      | 100%      |
 
 **Q: Find tables containing "Q3 revenue"**
 
@@ -418,7 +422,7 @@ def extract_pdf_multimodal(pdf_path: str) -> Dict:
 
 1. **Grounded generation**: LLM only answers from `evidence_json`, refuses if not in evidence
 2. **Citation format**: `table:row:col` is citable, parseable, verifiable
-3. **OCR fallback**: Tesseract for scanned PDFs (5% of corpus)
+3. **OCR fallback**: PyMuPDF returns empty text in ~5% of pages (scanned PDFs); those route to Tesseract
 4. **Freshness**: Flink CDC on S3 PDF events → re-parse → re-embed
 5. **Scale**: 100M PDFs × 100 chunks = 10B chunks, 50 Qdrant shards, 200M/shard
 
@@ -444,7 +448,7 @@ def extract_pdf_multimodal(pdf_path: str) -> Dict:
 2. **gpt-4 → gpt-3.5** for simple queries (LLM classifier routes) → $2M → $400k, Recall dropped 0.89→0.85
 3. **Top-20 → Top-8** context chunks → $500k saved, Recall 0.85→0.83
 
-**R:** $1.5M → $750k/month (50% reduction). Recall 0.83 still above 0.80 SLA. **Tradeoff: 6% Recall drop for 50% cost.** Owner happy, users happy, finance happy.
+**R:** $1.5M → $750k/month (50% reduction). Recall 0.83 still above 0.80 SLA. **Tradeoff: 2.4% relative recall drop (0.85→0.83) for 50% cost.** Owner happy, users happy, finance happy.
 
 ---
 
