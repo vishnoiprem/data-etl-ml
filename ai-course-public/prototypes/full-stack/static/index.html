@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI for Small Business Owners — Save 10+ Hours Every Week</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <header>
+    <nav class="container">
+      <a href="/" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">AIForBiz</span>
+      </a>
+      <div>
+        <a href="/prompts">Free Prompts</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/admin">Admin</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <p class="kicker">For business owners in 🇸🇬 🇹🇼 🇻🇳</p>
+      <h1>Save <span style="background: linear-gradient(135deg, #0071E3, #5856D6, #FF2D55); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">10+ hours</span><br>every week with AI.</h1>
+      <p class="sub">A practical 7-day system to automate customer emails, content, and admin — built for non-tech business owners across Asia.</p>
+
+      <form id="signup" class="hero-form">
+        <input type="email" id="email" placeholder="your@email.com" required>
+        <button type="submit" class="btn btn-primary">Get Free Pack →</button>
+      </form>
+      <p id="msg"></p>
+
+      <div class="hero-stats">
+        <div><strong>10+ hrs</strong><span>Saved per week</span></div>
+        <div><strong>7 days</strong><span>To results</span></div>
+        <div><strong>$0</strong><span>Extra tools</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="label">What You'll Learn</div>
+        <h2>Four things to automate first.</h2>
+        <p class="lede">These four workflows alone will save you 10+ hours per week. Most students see results in 48 hours.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card fade-in">
+          <h3>📧 Auto-reply</h3>
+          <p>Build a customer service system that handles 80% of questions automatically. Save 2-3 hours daily.</p>
+        </div>
+        <div class="card fade-in">
+          <h3>📝 Content machine</h3>
+          <p>Generate 30 days of LinkedIn, Instagram, and email posts in 1 hour. Engagement up 40%.</p>
+        </div>
+        <div class="card fade-in">
+          <h3>💼 Replace your VA</h3>
+          <p>AI handles admin tasks: scheduling, follow-ups, data entry. Save $500-2000/month.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <div class="label">Testimonials</div>
+        <h2>Loved by business owners.</h2>
+        <p class="lede">4.8 stars · 127 reviews · 250+ students across Asia.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="card fade-in" style="background: linear-gradient(135deg, var(--gray-700), var(--black)); color: white; border: none;">
+          <p style="font-size: 17px; line-height: 1.5; color: white; margin-bottom: 16px;">"I went from 70-hour weeks to 40. The customer service prompts alone were worth 10x the price."</p>
+          <p style="font-size: 14px; color: rgba(255,255,255,0.6);"><strong style="color: white;">Sarah Tan</strong> · Singapore</p>
+        </div>
+        <div class="card fade-in">
+          <p style="font-size: 17px; line-height: 1.5; margin-bottom: 16px;">"Created 60 days of content in one Saturday. Engagement up 40%. The content calendar is gold."</p>
+          <p style="font-size: 14px; color: var(--gray-500);"><strong style="color: var(--gray-700);">Mike Chen</strong> · Ho Chi Minh City</p>
+        </div>
+        <div class="card fade-in">
+          <p style="font-size: 17px; line-height: 1.5; margin-bottom: 16px;">"I was terrified of AI. Built my entire system in one weekend. If I can do it, anyone can."</p>
+          <p style="font-size: 14px; color: var(--gray-500);"><strong style="color: var(--gray-700);">Priya R.</strong> · Taipei</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container" style="text-align: center; max-width: 600px;">
+      <div class="fade-in">
+        <div class="label" style="font-size: 13px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 12px;">Get Started Today</div>
+        <h2>Ready to save 10+ hours a week?</h2>
+        <p class="lede" style="margin: 16px auto 40px;">Join 250+ business owners. Risk-free with 14-day money-back guarantee.</p>
+        <a href="/pricing" class="btn btn-primary btn-lg">See Pricing →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 AIForBiz · <a href="/admin">Admin Dashboard</a> · Made with ❤️ in Singapore</p>
+  </footer>
+
+  <script>
+    document.getElementById('signup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const msg = document.getElementById('msg');
+      const btn = e.target.querySelector('button');
+      const origText = btn.textContent;
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      try {
+        await fetch('/api/signup', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({email, source: 'landing_page'})
+        });
+        msg.textContent = '✓ Check your email! Redirecting...';
+        msg.style.color = 'var(--green)';
+        setTimeout(() => location.href = '/prompts', 1500);
+      } catch (err) {
+        msg.textContent = 'Something went wrong. Try again?';
+        msg.style.color = 'var(--red)';
+        btn.textContent = origText;
+        btn.disabled = false;
+      }
+    });
+
+    // Fade-in on scroll
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => e.isIntersecting && e.target.classList.add('in-view'));
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  </script>
+</body>
+</html>

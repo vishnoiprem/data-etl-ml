@@ -1,0 +1,82 @@
+# Avilx leads tracking — Postgres + Adminer (optional UI) + the
+# leads-pipeline image published by `.github/workflows/leads-cd.yml`.
+#
+# Usage:
+#   docker compose up -d                    # start postgres + adminer
+#   docker compose down                     # stop
+#   docker compose logs -f postgres         # view logs
+#   docker compose --profile agent up -d   # also run leads-pipeline once
+#   docker compose --profile agent run --rm leads-pipeline   # one-shot
+#
+# Adminer UI: http://localhost:8080  (user=avilx, pass=avilx, db=avilx_leads)
+#
+# The `leads-pipeline` service is opt-in (behind the `agent` profile)
+# so a fresh `docker compose up -d` doesn't accidentally trigger an
+# autopilot run on the host. Pull the image with
+# `docker compose --profile agent pull leads-pipeline` first.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: avilx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: avilx
+      POSTGRES_PASSWORD: avilx
+      POSTGRES_DB: avilx_leads
+    ports:
+      - "5433:5432"   # use 5433 to avoid clashing with any local postgres
+    volumes:
+      - avilx_pg_data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    # Healthcheck so dependent services (adminer, leads-pipeline) can
+    # wait for postgres to actually accept connections instead of racing
+    # the initdb on first boot (which can take 5-10s on Alpine).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avilx -d avilx_leads"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  adminer:
+    image: adminer:latest
+    container_name: avilx-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Opt-in: run the published leads-pipeline image once. Exits 0 on
+  # success, so it's safe under `--profile agent up` (one-shot mode)
+  # or `run --rm` for an interactive iteration loop.
+  #
+  # Override the tag by setting `LEADS_IMAGE` in the shell, e.g.:
+  #   LEADS_IMAGE=ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:main-deadbeef \
+  #     docker compose --profile agent run --rm leads-pipeline
+  leads-pipeline:
+    image: ${LEADS_IMAGE:-ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline:latest}
+    container_name: avilx-leads-pipeline
+    profiles: ["agent"]
+    environment:
+      # The published image already defaults to AVILX_DB_HOST=localhost
+      # (the schema when it talks to a co-located postgres container),
+      # but compose networking names the service `postgres` — override
+      # so `docker compose ... run --rm leads-pipeline` Just Works.
+      AVILX_DB_HOST: postgres
+      AVILX_DB_PORT: "5432"
+      AVILX_DB_NAME: avilx_leads
+      AVILX_DB_USER: avilx
+      AVILX_DB_PASSWORD: avilx
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # `--rm` only applies to `run`; for `up` we want a one-shot so
+    # the compose process doesn't hang on autopilot forever.
+    command: ["autopilot.py"]
+    restart: "no"
+
+volumes:
+  avilx_pg_data:

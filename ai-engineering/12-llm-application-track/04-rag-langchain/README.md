@@ -41,3 +41,7 @@ This course assumes you already understand what RAG is (Module 5 of `11-learn-ai
 ## The Lead Lesson
 
 > **Lesson 1 — [RAG in LangChain, end-to-end](./01-rag-langchain-end-to-end.md)** — the canonical build. A complete RAG system over 5K internal docs (Notion + S3 PDFs), with hybrid retrieval, Cohere rerank, citations, ACL, and an eval harness. Includes the 4 design decisions that decide quality.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

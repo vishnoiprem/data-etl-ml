@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  L65 standalone template — REST API with two resources (/objects and
+  /objects/{proxy+}) and no methods. Methods are added in L66.
+  Deploy with:
+    aws cloudformation deploy \
+      --stack-name l65-sandbox \
+      --template-file 04_rest_api_resources.yaml
+
+Resources:
+  ServerlessApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: l65-serverless-api
+      Description: Serverless CRUD API on top of Lambda + S3.
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Tags:
+        - Key: lecture
+          Value: L65
+        - Key: course
+          Value: aws-lambda-serverless
+
+  ObjectsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ParentId: !GetAtt ServerlessApi.RootResourceId
+      PathPart: objects
+
+  ObjectKeyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ServerlessApi
+      ParentId: !Ref ObjectsResource
+      PathPart: "{proxy+}"
+
+Outputs:
+  RestApiId:
+    Value: !Ref ServerlessApi
+    Description: ID of the REST API.
+  RootResourceId:
+    Value: !GetAtt ServerlessApi.RootResourceId
+    Description: Root resource ID of the REST API.
+  ObjectsResourceId:
+    Value: !Ref ObjectsResource
+    Description: ID of the /objects resource.
+  ObjectKeyResourceId:
+    Value: !Ref ObjectKeyResource
+    Description: ID of the /objects/{proxy+} resource.

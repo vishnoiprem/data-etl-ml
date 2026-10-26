@@ -1,0 +1,29 @@
+%%{init: {"flowchart": {"htmlLabels": true}} }%%
+sequenceDiagram
+    autonumber
+    participant Client as Browser / Mobile App
+    participant APIGW as API Gateway<br/>(Cognito User Pool Authorizer)
+    participant JWKS as Cognito User Pool<br/>JWKS endpoint
+    participant Lambda as Backend Lambda<br/>(optional)
+    participant DB as App backend
+
+    Note over Client,JWKS: 1. User signs in (Hosted UI or initiate_auth)
+    Client->>APIGW: GET /items<br/>Authorization: Bearer <id_token>
+
+    Note over APIGW: 2. Authorizer needs the signing key
+    APIGW->>JWKS: GET /.well-known/jwks.json<br/>(cached, ~5 min TTL)
+    JWKS-->>APIGW: 200 { "keys": [{ "kid": "abc", "n": "...", "e": "AQAB" }] }
+
+    Note over APIGW: 3. Verify signature with the JWK
+    Note over APIGW: 4. Check claims: exp, iss, aud, token_use
+    Note over APIGW: 5. Extract sub / cognito:groups / scope
+
+    alt token valid
+        APIGW->>Lambda: invoke with x-amzn-oidc-* headers
+        Lambda->>DB: business logic
+        DB-->>Lambda: data
+        Lambda-->>APIGW: 200 + JSON
+        APIGW-->>Client: 200 OK + body
+    else token missing / invalid / expired
+        APIGW-->>Client: 401 Unauthorized<br/>(WWW-Authenticate: Bearer)
+    end

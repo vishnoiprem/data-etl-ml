@@ -84,3 +84,7 @@ Each project includes a one-page **Working Backwards** doc (PR/FAQ style):
 - Internal FAQ on architecture / cost / risk
 
 This is the artifact you'd review with a Bar Raiser before any code is written.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

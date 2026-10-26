@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Document Q&A</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      color: #222;
+      line-height: 1.6;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 32px; }
+    .card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    input[type=text], input[type=password], input[type=email] {
+      width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;
+    }
+    button {
+      background: #2c3e50; color: white; border: none; padding: 10px 20px;
+      border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 8px;
+    }
+    button:hover { background: #34495e; }
+    button:disabled { background: #95a5a6; cursor: not-allowed; }
+    .upload-area {
+      border: 2px dashed #ccc; border-radius: 8px; padding: 40px;
+      text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .upload-area:hover { border-color: #2c3e50; background: #fafbfc; }
+    .citation {
+      background: #f8f9fa; border-left: 3px solid #2c3e50;
+      padding: 8px 12px; margin-top: 8px; font-size: 13px; color: #555;
+    }
+    .citation-title { font-weight: 600; color: #2c3e50; }
+    .answer { background: #ecf0f1; padding: 16px; border-radius: 4px; margin: 12px 0; }
+    .hidden { display: none; }
+    .error { color: #c0392b; padding: 8px; background: #fadbd8; border-radius: 4px; margin: 8px 0; }
+    .success { color: #27ae60; padding: 8px; background: #d5f4e6; border-radius: 4px; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📄 AI Document Q&A</h1>
+    <p class="subtitle">Upload PDFs. Ask questions. Get cited answers.</p>
+
+    <!-- Auth section -->
+    <div id="auth-section" class="card">
+      <h2>Sign in or sign up</h2>
+      <input type="email" id="email" placeholder="you@example.com" />
+      <input type="password" id="password" placeholder="Password" />
+      <div>
+        <button onclick="signup()">Sign up</button>
+        <button onclick="login()">Log in</button>
+      </div>
+      <div id="auth-error"></div>
+    </div>
+
+    <!-- App section (hidden until logged in) -->
+    <div id="app-section" class="hidden">
+      <div class="card">
+        <h2>Upload a PDF</h2>
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+          <p>📤 Click to upload a PDF (max 50MB)</p>
+          <input type="file" id="file-input" accept=".pdf" style="display:none" onchange="uploadFile()" />
+        </div>
+        <div id="upload-status"></div>
+      </div>
+
+      <div class="card">
+        <h2>Ask a question</h2>
+        <input type="text" id="question" placeholder="What is the cancellation policy?" />
+        <button onclick="ask()">Ask</button>
+        <div id="answer"></div>
+      </div>
+
+      <div class="card">
+        <h2>Your documents</h2>
+        <div id="documents"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+
+    if (token) {
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('app-section').classList.remove('hidden');
+      loadDocuments();
+    }
+
+    async function api(path, opts = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(path, { ...opts, headers });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || 'Request failed');
+      }
+      return res.json();
+    }
+
+    function showError(elId, msg) {
+      document.getElementById(elId).innerHTML = `<div class="error">${msg}</div>`;
+    }
+    function showSuccess(elId, msg) {
+      document.getElementById(elId).innerHTML = `<div class="success">${msg}</div>`;
+    }
+
+    async function signup() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const r = await api('/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) });
+        token = r.token;
+        localStorage.setItem('token', token);
+        location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const r = await api('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+        token = r.token;
+        localStorage.setItem('token', token);
+        location.reload();
+      } catch (e) { showError('auth-error', e.message); }
+    }
+
+    async function uploadFile() {
+      const file = document.getElementById('file-input').files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const r = await api('/upload', { method: 'POST', body: formData, headers: {} });
+        showSuccess('upload-status', `Uploaded "${r.title}" (${r.num_chunks} chunks)`);
+        loadDocuments();
+      } catch (e) { showError('upload-status', e.message); }
+    }
+
+    async function ask() {
+      const question = document.getElementById('question').value;
+      if (!question) return;
+      try {
+        const r = await api('/chat', { method: 'POST', body: JSON.stringify({ question }) });
+        let html = `<div class="answer"><strong>Answer:</strong> ${r.answer}</div>`;
+        if (r.citations.length) {
+          html += '<strong>Sources:</strong>';
+          r.citations.forEach((c, i) => {
+            html += `<div class="citation"><div class="citation-title">[${i+1}] ${c.document_title}, page ${c.page} (score: ${c.score.toFixed(3)})</div>${c.text}</div>`;
+          });
+        }
+        html += `<p style="color:#888;font-size:12px;margin-top:8px">${r.latency_ms}ms</p>`;
+        document.getElementById('answer').innerHTML = html;
+      } catch (e) { showError('answer', e.message); }
+    }
+
+    async function loadDocuments() {
+      try {
+        const docs = await api('/documents');
+        document.getElementById('documents').innerHTML = docs.length
+          ? docs.map(d => `<p>📄 ${d.title} — ${d.num_chunks} chunks (${d.status})</p>`).join('')
+          : '<p>No documents yet. Upload one above.</p>';
+      } catch (e) { showError('documents', e.message); }
+    }
+  </script>
+</body>
+</html>

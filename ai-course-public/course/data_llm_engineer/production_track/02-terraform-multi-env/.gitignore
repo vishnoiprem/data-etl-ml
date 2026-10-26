@@ -1,0 +1,13 @@
+# Terraform working dirs and local state. NEVER commit state — it contains
+# resource attributes and (if misconfigured) secrets in plaintext.
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Variable files may contain account IDs and ARNs. Commit only the example.
+envs/*.tfvars
+!envs/example.tfvars
+
+# Plan files can embed sensitive values in cleartext.
+*.tfplan

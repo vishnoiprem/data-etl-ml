@@ -320,3 +320,7 @@ table for your machine, and paste it under this section.
 - `05-distributed-inference/` — model routing + caching for the generation step
 - `06-regulated-industry/` — guardrails, redaction, audit (drop-in for this project's answer)
 - `08-llmops-platform/` — composes the other projects; the eventual home for this one
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

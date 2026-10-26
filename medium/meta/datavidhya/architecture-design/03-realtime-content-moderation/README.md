@@ -216,3 +216,7 @@ python python/feedback_loop.py --labels sample_data/human_labels.jsonl
 6. **Appeals** — different reviewer required, two-reviewer rule for severe class
 7. **Auditability** — every decision traceable for legal/regulatory compliance
 8. **Cost story** — humans only see borderline content; safe content auto-approved
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

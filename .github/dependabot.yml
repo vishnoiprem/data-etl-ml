@@ -217,6 +217,32 @@ updates:
       prefix: "chore(ml)"
       include: "scope"
 
+  # ai-course-public (NEW)
+  - package-ecosystem: "pip"
+    directory: "/ai-course-public"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "ai-course-public"
+    commit-message:
+      prefix: "chore(course)"
+      include: "scope"
+    groups:
+      python-security:
+        applies-to: security-updates
+        patterns: ["*"]
+      python-minor-and-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
   # ⚠ Vendored AWS SAM CLI source — DISABLED.
   # Pull upstream fixes from https://github.com/aws/aws-sam-cli instead.
 
@@ -289,3 +315,51 @@ updates:
       github-actions-security:
         applies-to: security-updates
         patterns: ["*"]
+
+  # leads-pipeline/draft-cron (CD runtime manifest)
+  - package-ecosystem: "pip"
+    directory: "/leads-pipeline/draft-cron"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+      - "python"
+      - "leads-pipeline"
+    commit-message:
+      prefix: "chore(leads)"
+      include: "scope"
+    groups:
+      leads-security:
+        applies-to: security-updates
+        patterns:
+          - "psycopg2-binary"
+          - "requests"
+          - "python-docx"
+          - "python-dotenv"
+      leads-minor-and-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
+  # Docker base image (Dockerfile in leads-pipeline/draft-cron)
+  - package-ecosystem: "docker"
+    directory: "/leads-pipeline/draft-cron"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "security"
+      - "docker"
+      - "leads-pipeline"
+    commit-message:
+      prefix: "chore(leads)"
+      include: "scope"
