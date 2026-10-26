@@ -89,3 +89,7 @@ Course 1 teaches you what a neural network **is**. Course 2 teaches you how to m
 ## Lead lesson
 
 See `01-logistic-regression-from-scratch.md` for the full worked example: build a logistic regression classifier on the "cats vs non-cats" dataset, implement forward + backward prop in NumPy, hit 70% accuracy.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

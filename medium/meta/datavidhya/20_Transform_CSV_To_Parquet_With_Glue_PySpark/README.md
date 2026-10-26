@@ -246,3 +246,7 @@ The lab's "lab complete" check is: the curated Glue table
 `C055` as the top customer with $4799.90. The driver and pytest suite
 exercise all four without AWS. The shell scripts are the live-account
 equivalent.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

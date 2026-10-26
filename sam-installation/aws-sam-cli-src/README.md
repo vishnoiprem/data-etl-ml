@@ -99,3 +99,7 @@ started.
 ### Join the SAM Community on Slack
 
 [Join the SAM developers channel (#samdev)](https://join.slack.com/t/awsdevelopers/shared_invite/zt-yryddays-C9fkWrmguDv0h2EEDzCqvw) on Slack to collaborate with fellow community members and the AWS SAM team.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

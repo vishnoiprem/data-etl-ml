@@ -174,3 +174,7 @@ Start from `rag_agent.py` and swap one layer at a time:
   (`cl.Message.stream_token()` in Chainlit, SSE in FastAPI).
 - **Watch it reason** — `verbose=True` prints the ReAct Thought/Action/Observation trace to the
   console. Read it when an answer looks wrong; it usually shows the retrieval missed, not the model.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

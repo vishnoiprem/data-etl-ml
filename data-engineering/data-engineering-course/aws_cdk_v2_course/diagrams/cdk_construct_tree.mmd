@@ -1,0 +1,44 @@
+%%{init: {"flowchart": {"htmlLabels": true, "curve": "linear"}}}%%
+flowchart TD
+    App["CDK App<br/>(bin/app.ts)"]
+    StackA["Stack<br/>HelloCdkStack"]
+    StackB["Stack<br/>LambdaApiStack"]
+    StackC["Stack<br/>AppSyncSfnStack"]
+
+    L1A["L1 Construct<br/>CfnBucket"]
+    L2A["L2 Construct<br/>Bucket (s3.Bucket)"]
+    L3A["L3 Construct<br/>StaticWebsite"]
+
+    L1B["L1 Construct<br/>CfnFunction"]
+    L2B["L2 Construct<br/>Function (lambda.Function)"]
+    L3B["L3 Construct<br/>LambdaRestApi"]
+
+    L1C["L1 Construct<br/>CfnGraphQLApi"]
+    L2C["L2 Construct<br/>GraphqlApi"]
+    L3C["L3 Construct<br/>(none yet)"]
+
+    App --> StackA
+    App --> StackB
+    App --> StackC
+
+    StackA --> L1A
+    StackA --> L2A
+    StackA --> L3A
+    StackB --> L1B
+    StackB --> L2B
+    StackB --> L3B
+    StackC --> L1C
+    StackC --> L2C
+    StackC -.->|"no L3 available"| L3C
+
+    classDef app fill:#ffe6cc,stroke:#d79b00;
+    classDef stack fill:#dae8fc,stroke:#6c8ebf;
+    classDef l1 fill:#f5f5f5,stroke:#666666;
+    classDef l2 fill:#d5e8d4,stroke:#82b366;
+    classDef l3 fill:#fff2cc,stroke:#d6b656;
+
+    class App app;
+    class StackA,StackB,StackC stack;
+    class L1A,L1B,L1C l1;
+    class L2A,L2B,L2C l2;
+    class L3A,L3B,L3C l3;

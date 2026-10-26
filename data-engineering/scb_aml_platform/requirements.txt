@@ -1,77 +1,19 @@
-# SCB AML Platform — Python Dependencies
-# PyCharm: pip install -r requirements.txt
+# SCB AML Platform — runtime dependencies
 #
-# NOTE: apache-airflow is NOT included here because it conflicts with
-#       sqlalchemy>=2.0 (airflow 2.7 requires sqlalchemy<2.0).
-#       For Airflow, see requirements-airflow.txt (separate install).
-#       The platform runs fully via pipeline_orchestrator.py without Airflow.
-apache-airflow==2.7.3
-
-
-# ── Security overrides (Tier 1) — transitive pins, do not remove
-# See docs/SECURITY_AUDIT.md for the upstream CVEs.
-urllib3==2.8.0
-pyjwt==2.10.1
-werkzeug==3.1.9
-starlette==0.41.0
-python-multipart==0.0.20
-anyio==4.14.2
-soupsieve==2.7
-multidict==6.7.0
-mistune==3.1.0
-tornado==6.5.9
-jupyterlab==4.6.4
-jupyter-server==2.21.0
-notebook==7.0.0
-
-
-# ── Core Data Processing
-pyspark==3.3.2
-pandas==2.0.3
-numpy==1.24.4
-pyarrow==12.0.1
-
-# ── Fuzzy Matching / Entity Resolution
-jellyfish==0.11.2
-fuzzywuzzy==0.18.0
-python-Levenshtein==0.21.1
-
-# ── Elasticsearch (Lucid Search)
-elasticsearch==8.9.0
-elasticsearch-dsl==8.9.0
-
-# ── Kafka (ingestion simulation)
-kafka-python==2.0.2
-
-# ── Database / HDFS simulation (SQLite-based local Hive)
-sqlalchemy==1.4.52  # last 1.4.x (Airflow 2.7 compat)
-
-PyHive==0.7.0
-
-# ── Data Generation (dummy data)
-faker==19.6.2
-
-# ── API (Lucid Search — FastAPI)
-fastapi==0.103.1
-uvicorn==0.23.2
-httpx==0.25.0
-
-# ── Utilities
-python-dotenv==1.0.0
-pyyaml==6.0.1
-click==8.1.7
-rich==13.5.3
-loguru==0.7.2
-tqdm==4.66.1
-
-# ── Testing
-pytest==7.4.2
-pytest-cov==4.1.0
-pytest-asyncio==0.21.1
-
-# ── Notebooks
-jupyter==1.0.0
-ipykernel==6.25.2
-matplotlib==3.7.3
-seaborn==0.12.2
-plotly==5.17.0
+# This file is kept for compatibility with tooling that scans for
+# `requirements*.txt` (e.g. pip-audit, Dependabot, GitHub security
+# alerts). The authoritative dependency list lives in `pyproject.toml`.
+#
+# Install with:
+#   pip install -e ".[dev]"          # core + test/lint deps
+#   pip install -e ".[dev,airflow]"  # adds Airflow (separate venv recommended)
+#
+# For Airflow, use requirements-airflow.txt in a dedicated virtualenv
+# because Airflow 2.7 pins sqlalchemy<2.0, which conflicts with
+# modern client libraries. See README.md "Airflow setup" section.
+#
+# The dependency list was previously a ~87-package mega-list that
+# included Airflow, transformers, langchain, jupyter, streamlit, etc.
+# — none of which the platform actually imports. It has been
+# trimmed to ~25 packages that are actually used.
+-r ./requirements.in

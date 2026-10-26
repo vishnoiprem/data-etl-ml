@@ -65,7 +65,6 @@ Each problem is solved using a mix of these primitives:
 | 24 | Smallest from digits | Count zeros, place smallest non-zero first |
 
 ### SQL
-
 | # | Problem | Best approach |
 |---|---------|---------------|
 | 25 | Top 10 entities | CTE + `ROW_NUMBER` |

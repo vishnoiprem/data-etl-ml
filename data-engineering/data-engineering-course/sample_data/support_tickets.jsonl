@@ -1,0 +1,500 @@
+{"ticket_id": 1, "user_id": 164, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-29T00:47:00Z", "status": "pending"}
+{"ticket_id": 2, "user_id": 58, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-03-13T23:06:00Z", "status": "open"}
+{"ticket_id": 3, "user_id": 152, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-08-08T01:01:00Z", "status": "pending"}
+{"ticket_id": 4, "user_id": 60, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-09-20T19:01:00Z", "status": "pending"}
+{"ticket_id": 5, "user_id": 184, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-12-04T22:34:00Z", "status": "pending"}
+{"ticket_id": 6, "user_id": 115, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-11-03T08:51:00Z", "status": "pending"}
+{"ticket_id": 7, "user_id": 179, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-08-08T10:17:00Z", "status": "pending"}
+{"ticket_id": 8, "user_id": 196, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-06-24T03:05:00Z", "status": "open"}
+{"ticket_id": 9, "user_id": 92, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-06-28T19:16:00Z", "status": "closed"}
+{"ticket_id": 10, "user_id": 138, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-03-05T12:05:00Z", "status": "resolved"}
+{"ticket_id": 11, "user_id": 161, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-11-18T11:36:00Z", "status": "open"}
+{"ticket_id": 12, "user_id": 12, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-12-10T07:49:00Z", "status": "open"}
+{"ticket_id": 13, "user_id": 60, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-02-23T12:17:00Z", "status": "resolved"}
+{"ticket_id": 14, "user_id": 42, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-07-11T11:13:00Z", "status": "open"}
+{"ticket_id": 15, "user_id": 156, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-11-27T05:34:00Z", "status": "pending"}
+{"ticket_id": 16, "user_id": 119, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-07-16T08:59:00Z", "status": "pending"}
+{"ticket_id": 17, "user_id": 176, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-06-18T01:14:00Z", "status": "resolved"}
+{"ticket_id": 18, "user_id": 103, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-19T02:13:00Z", "status": "resolved"}
+{"ticket_id": 19, "user_id": 55, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-07T15:25:00Z", "status": "pending"}
+{"ticket_id": 20, "user_id": 68, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-03-13T07:47:00Z", "status": "resolved"}
+{"ticket_id": 21, "user_id": 192, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-11-01T13:57:00Z", "status": "closed"}
+{"ticket_id": 22, "user_id": 93, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-04-24T04:32:00Z", "status": "open"}
+{"ticket_id": 23, "user_id": 194, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-01-26T03:09:00Z", "status": "closed"}
+{"ticket_id": 24, "user_id": 153, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-02-04T12:24:00Z", "status": "closed"}
+{"ticket_id": 25, "user_id": 136, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-05-10T17:55:00Z", "status": "open"}
+{"ticket_id": 26, "user_id": 175, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-06T08:49:00Z", "status": "open"}
+{"ticket_id": 27, "user_id": 76, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-08-14T05:29:00Z", "status": "resolved"}
+{"ticket_id": 28, "user_id": 129, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-04-03T16:58:00Z", "status": "resolved"}
+{"ticket_id": 29, "user_id": 164, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-09-21T19:12:00Z", "status": "resolved"}
+{"ticket_id": 30, "user_id": 196, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-03-24T17:49:00Z", "status": "open"}
+{"ticket_id": 31, "user_id": 154, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-06-17T15:01:00Z", "status": "resolved"}
+{"ticket_id": 32, "user_id": 79, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-04T01:15:00Z", "status": "open"}
+{"ticket_id": 33, "user_id": 22, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-09-10T02:48:00Z", "status": "pending"}
+{"ticket_id": 34, "user_id": 33, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-12-09T15:35:00Z", "status": "resolved"}
+{"ticket_id": 35, "user_id": 136, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-11-12T13:13:00Z", "status": "pending"}
+{"ticket_id": 36, "user_id": 183, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-06-11T12:42:00Z", "status": "closed"}
+{"ticket_id": 37, "user_id": 133, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-08-23T03:15:00Z", "status": "open"}
+{"ticket_id": 38, "user_id": 87, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-01-12T18:35:00Z", "status": "pending"}
+{"ticket_id": 39, "user_id": 2, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-02-08T22:40:00Z", "status": "pending"}
+{"ticket_id": 40, "user_id": 18, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-01-18T10:04:00Z", "status": "pending"}
+{"ticket_id": 41, "user_id": 72, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-12-14T15:13:00Z", "status": "pending"}
+{"ticket_id": 42, "user_id": 186, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-10-24T18:30:00Z", "status": "closed"}
+{"ticket_id": 43, "user_id": 105, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-04-09T03:06:00Z", "status": "resolved"}
+{"ticket_id": 44, "user_id": 109, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-08-02T14:55:00Z", "status": "open"}
+{"ticket_id": 45, "user_id": 16, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-28T23:21:00Z", "status": "pending"}
+{"ticket_id": 46, "user_id": 50, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-04-09T17:28:00Z", "status": "closed"}
+{"ticket_id": 47, "user_id": 47, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-05-24T14:15:00Z", "status": "closed"}
+{"ticket_id": 48, "user_id": 141, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-22T01:41:00Z", "status": "open"}
+{"ticket_id": 49, "user_id": 24, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-05-03T05:26:00Z", "status": "closed"}
+{"ticket_id": 50, "user_id": 55, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-07-27T01:10:00Z", "status": "open"}
+{"ticket_id": 51, "user_id": 100, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-05-17T14:18:00Z", "status": "closed"}
+{"ticket_id": 52, "user_id": 40, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-04-09T09:13:00Z", "status": "open"}
+{"ticket_id": 53, "user_id": 192, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-06-12T01:03:00Z", "status": "closed"}
+{"ticket_id": 54, "user_id": 129, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-03T05:03:00Z", "status": "open"}
+{"ticket_id": 55, "user_id": 48, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-02-07T19:04:00Z", "status": "closed"}
+{"ticket_id": 56, "user_id": 31, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-10-23T07:37:00Z", "status": "open"}
+{"ticket_id": 57, "user_id": 159, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-02-13T13:42:00Z", "status": "resolved"}
+{"ticket_id": 58, "user_id": 67, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-04-16T21:45:00Z", "status": "pending"}
+{"ticket_id": 59, "user_id": 68, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-07-24T04:42:00Z", "status": "closed"}
+{"ticket_id": 60, "user_id": 81, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-02-09T00:29:00Z", "status": "open"}
+{"ticket_id": 61, "user_id": 19, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-10-07T06:32:00Z", "status": "pending"}
+{"ticket_id": 62, "user_id": 90, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-07T07:23:00Z", "status": "pending"}
+{"ticket_id": 63, "user_id": 113, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-10-10T22:19:00Z", "status": "open"}
+{"ticket_id": 64, "user_id": 171, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-10-15T09:59:00Z", "status": "pending"}
+{"ticket_id": 65, "user_id": 68, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-03-01T03:47:00Z", "status": "pending"}
+{"ticket_id": 66, "user_id": 70, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-05-26T19:13:00Z", "status": "pending"}
+{"ticket_id": 67, "user_id": 176, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-11-26T08:32:00Z", "status": "resolved"}
+{"ticket_id": 68, "user_id": 14, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-19T20:27:00Z", "status": "open"}
+{"ticket_id": 69, "user_id": 1, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-22T04:40:00Z", "status": "pending"}
+{"ticket_id": 70, "user_id": 190, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-08-18T17:45:00Z", "status": "open"}
+{"ticket_id": 71, "user_id": 29, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-02-10T22:57:00Z", "status": "open"}
+{"ticket_id": 72, "user_id": 95, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-10-30T17:09:00Z", "status": "pending"}
+{"ticket_id": 73, "user_id": 11, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-06-09T11:57:00Z", "status": "resolved"}
+{"ticket_id": 74, "user_id": 54, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-12-21T07:42:00Z", "status": "resolved"}
+{"ticket_id": 75, "user_id": 200, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-10-18T13:39:00Z", "status": "pending"}
+{"ticket_id": 76, "user_id": 42, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-04-02T13:01:00Z", "status": "resolved"}
+{"ticket_id": 77, "user_id": 106, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-12-14T23:51:00Z", "status": "resolved"}
+{"ticket_id": 78, "user_id": 41, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-13-01T03:24:00Z", "status": "closed"}
+{"ticket_id": 79, "user_id": 57, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-04-14T14:22:00Z", "status": "pending"}
+{"ticket_id": 80, "user_id": 58, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-01-14T21:12:00Z", "status": "resolved"}
+{"ticket_id": 81, "user_id": 72, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-07T08:22:00Z", "status": "closed"}
+{"ticket_id": 82, "user_id": 174, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-10-06T10:01:00Z", "status": "resolved"}
+{"ticket_id": 83, "user_id": 46, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-10-29T08:02:00Z", "status": "closed"}
+{"ticket_id": 84, "user_id": 89, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-12T13:38:00Z", "status": "open"}
+{"ticket_id": 85, "user_id": 99, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-10-27T06:16:00Z", "status": "closed"}
+{"ticket_id": 86, "user_id": 1, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-09-28T17:43:00Z", "status": "resolved"}
+{"ticket_id": 87, "user_id": 111, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-02-07T21:58:00Z", "status": "resolved"}
+{"ticket_id": 88, "user_id": 170, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-05T23:57:00Z", "status": "resolved"}
+{"ticket_id": 89, "user_id": 171, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-08-01T10:25:00Z", "status": "pending"}
+{"ticket_id": 90, "user_id": 50, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-08-07T21:24:00Z", "status": "resolved"}
+{"ticket_id": 91, "user_id": 104, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-10-12T00:19:00Z", "status": "pending"}
+{"ticket_id": 92, "user_id": 111, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-28T19:41:00Z", "status": "closed"}
+{"ticket_id": 93, "user_id": 114, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-18T21:13:00Z", "status": "closed"}
+{"ticket_id": 94, "user_id": 189, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-28T21:05:00Z", "status": "resolved"}
+{"ticket_id": 95, "user_id": 24, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-05-02T21:19:00Z", "status": "pending"}
+{"ticket_id": 96, "user_id": 38, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-01-14T01:15:00Z", "status": "open"}
+{"ticket_id": 97, "user_id": 117, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-08-04T20:36:00Z", "status": "closed"}
+{"ticket_id": 98, "user_id": 127, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-07-26T07:09:00Z", "status": "open"}
+{"ticket_id": 99, "user_id": 200, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-09T07:11:00Z", "status": "closed"}
+{"ticket_id": 100, "user_id": 13, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-10-17T07:58:00Z", "status": "closed"}
+{"ticket_id": 101, "user_id": 35, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-29T21:33:00Z", "status": "resolved"}
+{"ticket_id": 102, "user_id": 194, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-18T19:52:00Z", "status": "closed"}
+{"ticket_id": 103, "user_id": 141, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-08-20T05:47:00Z", "status": "closed"}
+{"ticket_id": 104, "user_id": 67, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-05-08T20:17:00Z", "status": "closed"}
+{"ticket_id": 105, "user_id": 161, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-05-04T08:28:00Z", "status": "resolved"}
+{"ticket_id": 106, "user_id": 61, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-05-21T10:20:00Z", "status": "open"}
+{"ticket_id": 107, "user_id": 36, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-03-19T07:24:00Z", "status": "pending"}
+{"ticket_id": 108, "user_id": 17, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-04T13:21:00Z", "status": "closed"}
+{"ticket_id": 109, "user_id": 107, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-02-03T06:53:00Z", "status": "closed"}
+{"ticket_id": 110, "user_id": 198, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-11-01T22:01:00Z", "status": "closed"}
+{"ticket_id": 111, "user_id": 123, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-01-05T11:19:00Z", "status": "closed"}
+{"ticket_id": 112, "user_id": 138, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-10-11T19:57:00Z", "status": "closed"}
+{"ticket_id": 113, "user_id": 57, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-05-21T13:31:00Z", "status": "closed"}
+{"ticket_id": 114, "user_id": 87, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-12-14T21:51:00Z", "status": "pending"}
+{"ticket_id": 115, "user_id": 120, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-03-07T19:34:00Z", "status": "closed"}
+{"ticket_id": 116, "user_id": 152, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-10-20T21:01:00Z", "status": "closed"}
+{"ticket_id": 117, "user_id": 35, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-08-28T05:03:00Z", "status": "closed"}
+{"ticket_id": 118, "user_id": 84, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-04-20T14:20:00Z", "status": "closed"}
+{"ticket_id": 119, "user_id": 72, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-08-07T08:53:00Z", "status": "closed"}
+{"ticket_id": 120, "user_id": 5, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-10-08T01:22:00Z", "status": "open"}
+{"ticket_id": 121, "user_id": 200, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-05T01:48:00Z", "status": "pending"}
+{"ticket_id": 122, "user_id": 52, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-01-12T19:09:00Z", "status": "pending"}
+{"ticket_id": 123, "user_id": 122, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-12-14T03:36:00Z", "status": "closed"}
+{"ticket_id": 124, "user_id": 180, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-13T11:10:00Z", "status": "open"}
+{"ticket_id": 125, "user_id": 200, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-03-25T09:06:00Z", "status": "open"}
+{"ticket_id": 126, "user_id": 80, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-10-26T21:58:00Z", "status": "closed"}
+{"ticket_id": 127, "user_id": 184, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-04-13T02:37:00Z", "status": "open"}
+{"ticket_id": 128, "user_id": 179, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-06-06T21:38:00Z", "status": "open"}
+{"ticket_id": 129, "user_id": 89, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-04T13:42:00Z", "status": "open"}
+{"ticket_id": 130, "user_id": 130, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-12-03T10:00:00Z", "status": "closed"}
+{"ticket_id": 131, "user_id": 28, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-08-13T11:40:00Z", "status": "pending"}
+{"ticket_id": 132, "user_id": 112, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-04-02T23:33:00Z", "status": "closed"}
+{"ticket_id": 133, "user_id": 120, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-08-15T23:37:00Z", "status": "resolved"}
+{"ticket_id": 134, "user_id": 63, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-02-16T08:56:00Z", "status": "pending"}
+{"ticket_id": 135, "user_id": 193, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-08-29T18:39:00Z", "status": "resolved"}
+{"ticket_id": 136, "user_id": 8, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-09-15T10:11:00Z", "status": "pending"}
+{"ticket_id": 137, "user_id": 91, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-14T10:17:00Z", "status": "resolved"}
+{"ticket_id": 138, "user_id": 143, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-01-07T16:12:00Z", "status": "pending"}
+{"ticket_id": 139, "user_id": 185, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-07-30T15:35:00Z", "status": "closed"}
+{"ticket_id": 140, "user_id": 166, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-13-06T15:28:00Z", "status": "open"}
+{"ticket_id": 141, "user_id": 76, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-04-25T12:44:00Z", "status": "resolved"}
+{"ticket_id": 142, "user_id": 170, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-29T11:30:00Z", "status": "resolved"}
+{"ticket_id": 143, "user_id": 109, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-10-13T10:22:00Z", "status": "resolved"}
+{"ticket_id": 144, "user_id": 79, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-05-10T07:07:00Z", "status": "resolved"}
+{"ticket_id": 145, "user_id": 31, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-10-06T22:11:00Z", "status": "pending"}
+{"ticket_id": 146, "user_id": 190, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-09-09T08:46:00Z", "status": "resolved"}
+{"ticket_id": 147, "user_id": 26, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-04-11T09:14:00Z", "status": "pending"}
+{"ticket_id": 148, "user_id": 78, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-01-09T22:34:00Z", "status": "resolved"}
+{"ticket_id": 149, "user_id": 12, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-01-29T17:18:00Z", "status": "closed"}
+{"ticket_id": 150, "user_id": 27, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-01-08T18:18:00Z", "status": "closed"}
+{"ticket_id": 151, "user_id": 113, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-26T05:03:00Z", "status": "closed"}
+{"ticket_id": 152, "user_id": 30, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-02-05T12:31:00Z", "status": "open"}
+{"ticket_id": 153, "user_id": 39, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-03-18T18:19:00Z", "status": "pending"}
+{"ticket_id": 154, "user_id": 31, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-10-17T13:38:00Z", "status": "pending"}
+{"ticket_id": 155, "user_id": 199, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-09-29T12:28:00Z", "status": "resolved"}
+{"ticket_id": 156, "user_id": 151, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-08-11T09:36:00Z", "status": "open"}
+{"ticket_id": 157, "user_id": 157, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-02-22T06:40:00Z", "status": "resolved"}
+{"ticket_id": 158, "user_id": 170, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-02-13T05:15:00Z", "status": "open"}
+{"ticket_id": 159, "user_id": 41, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-01-03T13:28:00Z", "status": "closed"}
+{"ticket_id": 160, "user_id": 75, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-01-18T07:18:00Z", "status": "closed"}
+{"ticket_id": 161, "user_id": 19, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-12-23T07:59:00Z", "status": "pending"}
+{"ticket_id": 162, "user_id": 109, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-02-30T17:14:00Z", "status": "resolved"}
+{"ticket_id": 163, "user_id": 37, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-08T01:10:00Z", "status": "resolved"}
+{"ticket_id": 164, "user_id": 113, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-05T14:44:00Z", "status": "closed"}
+{"ticket_id": 165, "user_id": 70, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-09-18T17:31:00Z", "status": "open"}
+{"ticket_id": 166, "user_id": 154, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-01-22T13:47:00Z", "status": "resolved"}
+{"ticket_id": 167, "user_id": 7, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-02-18T07:43:00Z", "status": "open"}
+{"ticket_id": 168, "user_id": 196, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-16T08:36:00Z", "status": "pending"}
+{"ticket_id": 169, "user_id": 121, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-09-27T20:28:00Z", "status": "pending"}
+{"ticket_id": 170, "user_id": 150, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-08-15T20:52:00Z", "status": "open"}
+{"ticket_id": 171, "user_id": 121, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-06-30T13:21:00Z", "status": "open"}
+{"ticket_id": 172, "user_id": 42, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-06-20T13:44:00Z", "status": "resolved"}
+{"ticket_id": 173, "user_id": 170, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-07-27T17:02:00Z", "status": "open"}
+{"ticket_id": 174, "user_id": 81, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-05-11T10:07:00Z", "status": "open"}
+{"ticket_id": 175, "user_id": 169, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-10-09T14:26:00Z", "status": "pending"}
+{"ticket_id": 176, "user_id": 133, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-07-07T19:48:00Z", "status": "closed"}
+{"ticket_id": 177, "user_id": 195, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-01-28T06:17:00Z", "status": "pending"}
+{"ticket_id": 178, "user_id": 74, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-08-16T22:31:00Z", "status": "open"}
+{"ticket_id": 179, "user_id": 162, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-11-13T07:45:00Z", "status": "resolved"}
+{"ticket_id": 180, "user_id": 142, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-01-09T17:26:00Z", "status": "pending"}
+{"ticket_id": 181, "user_id": 30, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-08-28T03:41:00Z", "status": "closed"}
+{"ticket_id": 182, "user_id": 184, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-01T16:45:00Z", "status": "closed"}
+{"ticket_id": 183, "user_id": 124, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-09-03T07:29:00Z", "status": "pending"}
+{"ticket_id": 184, "user_id": 99, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-04-09T19:32:00Z", "status": "open"}
+{"ticket_id": 185, "user_id": 71, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-04T10:59:00Z", "status": "resolved"}
+{"ticket_id": 186, "user_id": 1, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-26T23:19:00Z", "status": "closed"}
+{"ticket_id": 187, "user_id": 39, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-20T17:30:00Z", "status": "resolved"}
+{"ticket_id": 188, "user_id": 142, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-10T12:29:00Z", "status": "pending"}
+{"ticket_id": 189, "user_id": 179, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-05-04T18:24:00Z", "status": "closed"}
+{"ticket_id": 190, "user_id": 12, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-06-14T23:30:00Z", "status": "closed"}
+{"ticket_id": 191, "user_id": 170, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-05T04:31:00Z", "status": "pending"}
+{"ticket_id": 192, "user_id": 129, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-11-04T10:55:00Z", "status": "closed"}
+{"ticket_id": 193, "user_id": 26, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-10-01T14:00:00Z", "status": "closed"}
+{"ticket_id": 194, "user_id": 168, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-21T02:30:00Z", "status": "resolved"}
+{"ticket_id": 195, "user_id": 160, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-12-26T12:41:00Z", "status": "resolved"}
+{"ticket_id": 196, "user_id": 173, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-10-05T12:20:00Z", "status": "open"}
+{"ticket_id": 197, "user_id": 159, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-07T07:40:00Z", "status": "pending"}
+{"ticket_id": 198, "user_id": 192, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-02-18T13:06:00Z", "status": "closed"}
+{"ticket_id": 199, "user_id": 43, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-27T09:57:00Z", "status": "open"}
+{"ticket_id": 200, "user_id": 84, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-01-30T09:22:00Z", "status": "closed"}
+{"ticket_id": 201, "user_id": 38, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-07T16:26:00Z", "status": "pending"}
+{"ticket_id": 202, "user_id": 44, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-04-01T02:39:00Z", "status": "pending"}
+{"ticket_id": 203, "user_id": 128, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-10-30T04:14:00Z", "status": "resolved"}
+{"ticket_id": 204, "user_id": 118, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-05-12T21:00:00Z", "status": "resolved"}
+{"ticket_id": 205, "user_id": 174, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-10-11T05:04:00Z", "status": "resolved"}
+{"ticket_id": 206, "user_id": 151, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-05T20:27:00Z", "status": "closed"}
+{"ticket_id": 207, "user_id": 78, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-04-13T12:54:00Z", "status": "open"}
+{"ticket_id": 208, "user_id": 61, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-07-17T18:22:00Z", "status": "resolved"}
+{"ticket_id": 209, "user_id": 180, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-06-03T00:53:00Z", "status": "resolved"}
+{"ticket_id": 210, "user_id": 3, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-10-21T21:49:00Z", "status": "closed"}
+{"ticket_id": 211, "user_id": 74, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-04-29T19:51:00Z", "status": "pending"}
+{"ticket_id": 212, "user_id": 163, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-04-09T19:16:00Z", "status": "open"}
+{"ticket_id": 213, "user_id": 161, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-02T01:19:00Z", "status": "open"}
+{"ticket_id": 214, "user_id": 149, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-08T23:08:00Z", "status": "resolved"}
+{"ticket_id": 215, "user_id": 84, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-08-04T05:12:00Z", "status": "resolved"}
+{"ticket_id": 216, "user_id": 136, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-09-18T08:53:00Z", "status": "resolved"}
+{"ticket_id": 217, "user_id": 124, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-06-03T23:55:00Z", "status": "open"}
+{"ticket_id": 218, "user_id": 120, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-02-10T04:48:00Z", "status": "closed"}
+{"ticket_id": 219, "user_id": 143, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-07-09T02:50:00Z", "status": "open"}
+{"ticket_id": 220, "user_id": 68, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-06T03:29:00Z", "status": "resolved"}
+{"ticket_id": 221, "user_id": 150, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-17T20:23:00Z", "status": "pending"}
+{"ticket_id": 222, "user_id": 121, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-01-14T19:56:00Z", "status": "resolved"}
+{"ticket_id": 223, "user_id": 157, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-04-25T20:04:00Z", "status": "resolved"}
+{"ticket_id": 224, "user_id": 167, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-08-01T03:08:00Z", "status": "open"}
+{"ticket_id": 225, "user_id": 78, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-09-14T03:06:00Z", "status": "pending"}
+{"ticket_id": 226, "user_id": 100, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-24T11:42:00Z", "status": "closed"}
+{"ticket_id": 227, "user_id": 151, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-03-21T13:41:00Z", "status": "closed"}
+{"ticket_id": 228, "user_id": 158, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-07-30T08:02:00Z", "status": "pending"}
+{"ticket_id": 229, "user_id": 114, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-19T07:54:00Z", "status": "open"}
+{"ticket_id": 230, "user_id": 176, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-07-10T17:57:00Z", "status": "open"}
+{"ticket_id": 231, "user_id": 102, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-05-23T06:07:00Z", "status": "open"}
+{"ticket_id": 232, "user_id": 170, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-04-20T20:40:00Z", "status": "open"}
+{"ticket_id": 233, "user_id": 13, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-06-22T07:08:00Z", "status": "pending"}
+{"ticket_id": 234, "user_id": 18, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-10-15T06:37:00Z", "status": "pending"}
+{"ticket_id": 235, "user_id": 85, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-17T19:00:00Z", "status": "pending"}
+{"ticket_id": 236, "user_id": 34, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-10-08T08:51:00Z", "status": "open"}
+{"ticket_id": 237, "user_id": 170, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-01-15T04:00:00Z", "status": "pending"}
+{"ticket_id": 238, "user_id": 151, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-17T00:11:00Z", "status": "open"}
+{"ticket_id": 239, "user_id": 33, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-08-07T16:07:00Z", "status": "closed"}
+{"ticket_id": 240, "user_id": 115, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-07T16:37:00Z", "status": "closed"}
+{"ticket_id": 241, "user_id": 129, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-04-25T19:02:00Z", "status": "resolved"}
+{"ticket_id": 242, "user_id": 118, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-01T00:03:00Z", "status": "closed"}
+{"ticket_id": 243, "user_id": 110, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-23T03:31:00Z", "status": "open"}
+{"ticket_id": 244, "user_id": 21, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-06-16T19:09:00Z", "status": "pending"}
+{"ticket_id": 245, "user_id": 71, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-11-21T20:37:00Z", "status": "resolved"}
+{"ticket_id": 246, "user_id": 98, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-11-07T16:18:00Z", "status": "closed"}
+{"ticket_id": 247, "user_id": 26, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-13-01T03:54:00Z", "status": "pending"}
+{"ticket_id": 248, "user_id": 111, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-23T07:26:00Z", "status": "closed"}
+{"ticket_id": 249, "user_id": 103, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-04T23:06:00Z", "status": "closed"}
+{"ticket_id": 250, "user_id": 81, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-12-12T08:23:00Z", "status": "closed"}
+{"ticket_id": 251, "user_id": 18, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-02-18T02:05:00Z", "status": "open"}
+{"ticket_id": 252, "user_id": 191, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-07-12T04:35:00Z", "status": "resolved"}
+{"ticket_id": 253, "user_id": 172, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-03-04T13:22:00Z", "status": "open"}
+{"ticket_id": 254, "user_id": 74, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-11-09T09:22:00Z", "status": "pending"}
+{"ticket_id": 255, "user_id": 40, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-12-08T15:14:00Z", "status": "resolved"}
+{"ticket_id": 256, "user_id": 143, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-07-10T03:48:00Z", "status": "pending"}
+{"ticket_id": 257, "user_id": 110, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-19T19:39:00Z", "status": "open"}
+{"ticket_id": 258, "user_id": 156, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-08T22:17:00Z", "status": "pending"}
+{"ticket_id": 259, "user_id": 70, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-13-01T09:58:00Z", "status": "resolved"}
+{"ticket_id": 260, "user_id": 2, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-04-04T04:36:00Z", "status": "open"}
+{"ticket_id": 261, "user_id": 37, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-11-26T00:05:00Z", "status": "pending"}
+{"ticket_id": 262, "user_id": 97, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-08-06T14:21:00Z", "status": "resolved"}
+{"ticket_id": 263, "user_id": 80, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-06-18T18:38:00Z", "status": "open"}
+{"ticket_id": 264, "user_id": 40, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-03-22T19:03:00Z", "status": "resolved"}
+{"ticket_id": 265, "user_id": 114, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-10T13:31:00Z", "status": "closed"}
+{"ticket_id": 266, "user_id": 107, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-05-21T06:48:00Z", "status": "open"}
+{"ticket_id": 267, "user_id": 89, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-08-12T03:18:00Z", "status": "closed"}
+{"ticket_id": 268, "user_id": 135, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-12-13T09:02:00Z", "status": "closed"}
+{"ticket_id": 269, "user_id": 154, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-01-30T00:13:00Z", "status": "pending"}
+{"ticket_id": 270, "user_id": 197, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-03-12T08:18:00Z", "status": "open"}
+{"ticket_id": 271, "user_id": 2, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-09-16T23:27:00Z", "status": "pending"}
+{"ticket_id": 272, "user_id": 98, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-04T22:14:00Z", "status": "resolved"}
+{"ticket_id": 273, "user_id": 19, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-07-25T23:02:00Z", "status": "open"}
+{"ticket_id": 274, "user_id": 118, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-02-11T10:36:00Z", "status": "closed"}
+{"ticket_id": 275, "user_id": 182, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-11-29T13:18:00Z", "status": "closed"}
+{"ticket_id": 276, "user_id": 6, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-06-18T05:51:00Z", "status": "closed"}
+{"ticket_id": 277, "user_id": 177, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-07T02:27:00Z", "status": "pending"}
+{"ticket_id": 278, "user_id": 112, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-11-03T12:33:00Z", "status": "closed"}
+{"ticket_id": 279, "user_id": 80, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-06-25T07:21:00Z", "status": "open"}
+{"ticket_id": 280, "user_id": 131, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-11-26T03:33:00Z", "status": "pending"}
+{"ticket_id": 281, "user_id": 199, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-06-30T11:46:00Z", "status": "pending"}
+{"ticket_id": 282, "user_id": 27, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-03-16T08:12:00Z", "status": "pending"}
+{"ticket_id": 283, "user_id": 195, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-07T02:11:00Z", "status": "closed"}
+{"ticket_id": 284, "user_id": 194, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-10-20T18:28:00Z", "status": "resolved"}
+{"ticket_id": 285, "user_id": 161, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-06-13T04:28:00Z", "status": "closed"}
+{"ticket_id": 286, "user_id": 114, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-11-25T09:50:00Z", "status": "open"}
+{"ticket_id": 287, "user_id": 91, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-09-21T02:19:00Z", "status": "closed"}
+{"ticket_id": 288, "user_id": 10, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-01T11:53:00Z", "status": "open"}
+{"ticket_id": 289, "user_id": 166, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-18T19:38:00Z", "status": "closed"}
+{"ticket_id": 290, "user_id": 119, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-10-29T17:50:00Z", "status": "closed"}
+{"ticket_id": 291, "user_id": 147, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-05T06:20:00Z", "status": "closed"}
+{"ticket_id": 292, "user_id": 129, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-03-19T01:28:00Z", "status": "resolved"}
+{"ticket_id": 293, "user_id": 183, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-02-15T16:41:00Z", "status": "open"}
+{"ticket_id": 294, "user_id": 64, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-13-04T14:28:00Z", "status": "pending"}
+{"ticket_id": 295, "user_id": 94, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-07-12T09:24:00Z", "status": "resolved"}
+{"ticket_id": 296, "user_id": 174, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-11-08T01:50:00Z", "status": "open"}
+{"ticket_id": 297, "user_id": 85, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-02-20T17:43:00Z", "status": "resolved"}
+{"ticket_id": 298, "user_id": 65, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-12-08T19:55:00Z", "status": "resolved"}
+{"ticket_id": 299, "user_id": 21, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-30T21:09:00Z", "status": "resolved"}
+{"ticket_id": 300, "user_id": 168, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-12-29T21:25:00Z", "status": "open"}
+{"ticket_id": 301, "user_id": 80, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-18T12:41:00Z", "status": "pending"}
+{"ticket_id": 302, "user_id": 172, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-13-01T23:43:00Z", "status": "open"}
+{"ticket_id": 303, "user_id": 166, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-12-15T13:32:00Z", "status": "open"}
+{"ticket_id": 304, "user_id": 93, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-06-10T05:13:00Z", "status": "closed"}
+{"ticket_id": 305, "user_id": 50, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-04-27T04:09:00Z", "status": "resolved"}
+{"ticket_id": 306, "user_id": 26, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-09-21T17:53:00Z", "status": "open"}
+{"ticket_id": 307, "user_id": 170, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-06-24T19:08:00Z", "status": "closed"}
+{"ticket_id": 308, "user_id": 40, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-03-25T05:53:00Z", "status": "pending"}
+{"ticket_id": 309, "user_id": 185, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-16T01:26:00Z", "status": "pending"}
+{"ticket_id": 310, "user_id": 114, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-11-14T09:48:00Z", "status": "pending"}
+{"ticket_id": 311, "user_id": 137, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-05-04T09:51:00Z", "status": "pending"}
+{"ticket_id": 312, "user_id": 95, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-19T18:28:00Z", "status": "resolved"}
+{"ticket_id": 313, "user_id": 200, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-07-17T16:33:00Z", "status": "pending"}
+{"ticket_id": 314, "user_id": 52, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-11-11T04:55:00Z", "status": "open"}
+{"ticket_id": 315, "user_id": 165, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-09-08T11:35:00Z", "status": "open"}
+{"ticket_id": 316, "user_id": 73, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-02-14T05:17:00Z", "status": "pending"}
+{"ticket_id": 317, "user_id": 112, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-02-18T07:52:00Z", "status": "resolved"}
+{"ticket_id": 318, "user_id": 7, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-04T01:25:00Z", "status": "resolved"}
+{"ticket_id": 319, "user_id": 61, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-07-19T02:23:00Z", "status": "open"}
+{"ticket_id": 320, "user_id": 82, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-02-22T22:41:00Z", "status": "pending"}
+{"ticket_id": 321, "user_id": 36, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-01-21T09:58:00Z", "status": "pending"}
+{"ticket_id": 322, "user_id": 195, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-13-03T15:28:00Z", "status": "open"}
+{"ticket_id": 323, "user_id": 21, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-01-11T08:13:00Z", "status": "closed"}
+{"ticket_id": 324, "user_id": 29, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-05-29T07:19:00Z", "status": "open"}
+{"ticket_id": 325, "user_id": 62, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-08-06T20:50:00Z", "status": "closed"}
+{"ticket_id": 326, "user_id": 17, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-28T15:38:00Z", "status": "open"}
+{"ticket_id": 327, "user_id": 162, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-09-25T18:15:00Z", "status": "resolved"}
+{"ticket_id": 328, "user_id": 110, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-01-02T19:22:00Z", "status": "closed"}
+{"ticket_id": 329, "user_id": 48, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-12-12T21:05:00Z", "status": "resolved"}
+{"ticket_id": 330, "user_id": 18, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-01T17:32:00Z", "status": "open"}
+{"ticket_id": 331, "user_id": 100, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-09-02T01:40:00Z", "status": "resolved"}
+{"ticket_id": 332, "user_id": 65, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-01-10T11:50:00Z", "status": "resolved"}
+{"ticket_id": 333, "user_id": 62, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-08T20:06:00Z", "status": "resolved"}
+{"ticket_id": 334, "user_id": 35, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-01-24T11:34:00Z", "status": "pending"}
+{"ticket_id": 335, "user_id": 200, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-22T14:44:00Z", "status": "pending"}
+{"ticket_id": 336, "user_id": 35, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-02-04T22:49:00Z", "status": "open"}
+{"ticket_id": 337, "user_id": 76, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-04-15T01:50:00Z", "status": "open"}
+{"ticket_id": 338, "user_id": 81, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-10T16:25:00Z", "status": "closed"}
+{"ticket_id": 339, "user_id": 65, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-01-20T20:12:00Z", "status": "resolved"}
+{"ticket_id": 340, "user_id": 200, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-01-26T20:21:00Z", "status": "open"}
+{"ticket_id": 341, "user_id": 95, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-08-15T12:47:00Z", "status": "closed"}
+{"ticket_id": 342, "user_id": 87, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-04-07T15:44:00Z", "status": "resolved"}
+{"ticket_id": 343, "user_id": 133, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-05-18T02:46:00Z", "status": "open"}
+{"ticket_id": 344, "user_id": 111, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-11-10T05:34:00Z", "status": "resolved"}
+{"ticket_id": 345, "user_id": 27, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-02-12T10:42:00Z", "status": "resolved"}
+{"ticket_id": 346, "user_id": 115, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-11-10T22:27:00Z", "status": "closed"}
+{"ticket_id": 347, "user_id": 90, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-20T01:46:00Z", "status": "closed"}
+{"ticket_id": 348, "user_id": 71, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-11-29T01:04:00Z", "status": "resolved"}
+{"ticket_id": 349, "user_id": 132, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-12-19T05:01:00Z", "status": "closed"}
+{"ticket_id": 350, "user_id": 9, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-03-06T02:15:00Z", "status": "resolved"}
+{"ticket_id": 351, "user_id": 99, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-10-22T01:38:00Z", "status": "closed"}
+{"ticket_id": 352, "user_id": 95, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-12T14:48:00Z", "status": "pending"}
+{"ticket_id": 353, "user_id": 136, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-07-09T12:20:00Z", "status": "pending"}
+{"ticket_id": 354, "user_id": 30, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-01-15T23:11:00Z", "status": "closed"}
+{"ticket_id": 355, "user_id": 144, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-02T08:49:00Z", "status": "closed"}
+{"ticket_id": 356, "user_id": 55, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-11-15T09:44:00Z", "status": "pending"}
+{"ticket_id": 357, "user_id": 32, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-03-11T02:28:00Z", "status": "closed"}
+{"ticket_id": 358, "user_id": 23, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-12-21T10:42:00Z", "status": "open"}
+{"ticket_id": 359, "user_id": 141, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-10-09T09:57:00Z", "status": "pending"}
+{"ticket_id": 360, "user_id": 183, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-13-05T22:40:00Z", "status": "resolved"}
+{"ticket_id": 361, "user_id": 131, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-04-26T03:12:00Z", "status": "pending"}
+{"ticket_id": 362, "user_id": 127, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-01-15T11:35:00Z", "status": "resolved"}
+{"ticket_id": 363, "user_id": 120, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-10-14T04:39:00Z", "status": "open"}
+{"ticket_id": 364, "user_id": 80, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-07-25T22:46:00Z", "status": "closed"}
+{"ticket_id": 365, "user_id": 197, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-08-01T18:04:00Z", "status": "resolved"}
+{"ticket_id": 366, "user_id": 165, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-09T14:29:00Z", "status": "resolved"}
+{"ticket_id": 367, "user_id": 33, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-10-14T20:37:00Z", "status": "pending"}
+{"ticket_id": 368, "user_id": 111, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-09-19T01:53:00Z", "status": "pending"}
+{"ticket_id": 369, "user_id": 78, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-03-26T05:20:00Z", "status": "resolved"}
+{"ticket_id": 370, "user_id": 133, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-05-27T02:16:00Z", "status": "resolved"}
+{"ticket_id": 371, "user_id": 33, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-11-22T09:39:00Z", "status": "open"}
+{"ticket_id": 372, "user_id": 129, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-11-30T05:37:00Z", "status": "pending"}
+{"ticket_id": 373, "user_id": 44, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-09T19:46:00Z", "status": "resolved"}
+{"ticket_id": 374, "user_id": 145, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-01-23T00:05:00Z", "status": "resolved"}
+{"ticket_id": 375, "user_id": 167, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-04-19T18:26:00Z", "status": "open"}
+{"ticket_id": 376, "user_id": 128, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-11-23T17:18:00Z", "status": "closed"}
+{"ticket_id": 377, "user_id": 63, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-22T12:19:00Z", "status": "open"}
+{"ticket_id": 378, "user_id": 177, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-02-02T05:28:00Z", "status": "closed"}
+{"ticket_id": 379, "user_id": 119, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-04-16T10:38:00Z", "status": "resolved"}
+{"ticket_id": 380, "user_id": 184, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-06-15T23:55:00Z", "status": "closed"}
+{"ticket_id": 381, "user_id": 34, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-07-11T16:35:00Z", "status": "resolved"}
+{"ticket_id": 382, "user_id": 62, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-08-30T03:17:00Z", "status": "pending"}
+{"ticket_id": 383, "user_id": 37, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-02-21T01:18:00Z", "status": "closed"}
+{"ticket_id": 384, "user_id": 64, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-03-23T10:59:00Z", "status": "resolved"}
+{"ticket_id": 385, "user_id": 49, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-03-23T15:32:00Z", "status": "closed"}
+{"ticket_id": 386, "user_id": 79, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-09-16T00:05:00Z", "status": "closed"}
+{"ticket_id": 387, "user_id": 62, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-04-22T18:22:00Z", "status": "open"}
+{"ticket_id": 388, "user_id": 73, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-09-15T19:56:00Z", "status": "resolved"}
+{"ticket_id": 389, "user_id": 138, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-01-06T03:27:00Z", "status": "resolved"}
+{"ticket_id": 390, "user_id": 187, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-07-09T12:23:00Z", "status": "closed"}
+{"ticket_id": 391, "user_id": 14, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-23T17:12:00Z", "status": "resolved"}
+{"ticket_id": 392, "user_id": 19, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-07-19T16:28:00Z", "status": "resolved"}
+{"ticket_id": 393, "user_id": 160, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-12-20T19:07:00Z", "status": "open"}
+{"ticket_id": 394, "user_id": 101, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-07-13T10:35:00Z", "status": "pending"}
+{"ticket_id": 395, "user_id": 51, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-11-10T16:25:00Z", "status": "open"}
+{"ticket_id": 396, "user_id": 12, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-01-21T04:45:00Z", "status": "closed"}
+{"ticket_id": 397, "user_id": 133, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-25T04:38:00Z", "status": "pending"}
+{"ticket_id": 398, "user_id": 84, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-11-15T10:10:00Z", "status": "resolved"}
+{"ticket_id": 399, "user_id": 152, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-24T16:53:00Z", "status": "closed"}
+{"ticket_id": 400, "user_id": 182, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-10-20T09:30:00Z", "status": "resolved"}
+{"ticket_id": 401, "user_id": 85, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-16T03:26:00Z", "status": "resolved"}
+{"ticket_id": 402, "user_id": 186, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-24T20:01:00Z", "status": "closed"}
+{"ticket_id": 403, "user_id": 68, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-12-07T18:36:00Z", "status": "open"}
+{"ticket_id": 404, "user_id": 150, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-09-07T05:33:00Z", "status": "closed"}
+{"ticket_id": 405, "user_id": 38, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-20T07:02:00Z", "status": "open"}
+{"ticket_id": 406, "user_id": 49, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-01-11T14:20:00Z", "status": "pending"}
+{"ticket_id": 407, "user_id": 106, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-12-25T06:26:00Z", "status": "closed"}
+{"ticket_id": 408, "user_id": 189, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-03T22:08:00Z", "status": "pending"}
+{"ticket_id": 409, "user_id": 144, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-18T21:30:00Z", "status": "closed"}
+{"ticket_id": 410, "user_id": 81, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-03-30T14:58:00Z", "status": "resolved"}
+{"ticket_id": 411, "user_id": 140, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-07-03T21:49:00Z", "status": "closed"}
+{"ticket_id": 412, "user_id": 50, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-05-08T08:35:00Z", "status": "pending"}
+{"ticket_id": 413, "user_id": 77, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-05-29T22:13:00Z", "status": "resolved"}
+{"ticket_id": 414, "user_id": 123, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-30T17:59:00Z", "status": "resolved"}
+{"ticket_id": 415, "user_id": 32, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-10-25T21:34:00Z", "status": "closed"}
+{"ticket_id": 416, "user_id": 89, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-16T09:02:00Z", "status": "open"}
+{"ticket_id": 417, "user_id": 89, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-08-18T20:16:00Z", "status": "pending"}
+{"ticket_id": 418, "user_id": 52, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-07T08:59:00Z", "status": "resolved"}
+{"ticket_id": 419, "user_id": 36, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-02-27T19:47:00Z", "status": "pending"}
+{"ticket_id": 420, "user_id": 63, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-01-27T21:57:00Z", "status": "pending"}
+{"ticket_id": 421, "user_id": 164, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-05-01T01:06:00Z", "status": "resolved"}
+{"ticket_id": 422, "user_id": 184, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-09-03T03:43:00Z", "status": "open"}
+{"ticket_id": 423, "user_id": 141, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-03-22T13:41:00Z", "status": "closed"}
+{"ticket_id": 424, "user_id": 167, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-04-14T09:20:00Z", "status": "open"}
+{"ticket_id": 425, "user_id": 197, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-02-17T20:36:00Z", "status": "open"}
+{"ticket_id": 426, "user_id": 45, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-08-05T05:59:00Z", "status": "closed"}
+{"ticket_id": 427, "user_id": 127, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-04-07T23:55:00Z", "status": "open"}
+{"ticket_id": 428, "user_id": 3, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-06-04T18:38:00Z", "status": "resolved"}
+{"ticket_id": 429, "user_id": 73, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-24T20:34:00Z", "status": "closed"}
+{"ticket_id": 430, "user_id": 35, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-09-20T14:17:00Z", "status": "open"}
+{"ticket_id": 431, "user_id": 85, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-03-25T23:29:00Z", "status": "pending"}
+{"ticket_id": 432, "user_id": 4, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-06-24T09:36:00Z", "status": "pending"}
+{"ticket_id": 433, "user_id": 157, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-11-29T12:52:00Z", "status": "resolved"}
+{"ticket_id": 434, "user_id": 23, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-07-27T21:06:00Z", "status": "pending"}
+{"ticket_id": 435, "user_id": 123, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-06-17T07:00:00Z", "status": "closed"}
+{"ticket_id": 436, "user_id": 61, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-08-20T08:21:00Z", "status": "open"}
+{"ticket_id": 437, "user_id": 67, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-12-06T11:44:00Z", "status": "open"}
+{"ticket_id": 438, "user_id": 171, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-03-02T14:19:00Z", "status": "closed"}
+{"ticket_id": 439, "user_id": 176, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-09-19T22:49:00Z", "status": "open"}
+{"ticket_id": 440, "user_id": 164, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-06-03T11:39:00Z", "status": "pending"}
+{"ticket_id": 441, "user_id": 35, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-09-06T04:29:00Z", "status": "resolved"}
+{"ticket_id": 442, "user_id": 107, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-13-01T17:58:00Z", "status": "pending"}
+{"ticket_id": 443, "user_id": 196, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-08T21:48:00Z", "status": "open"}
+{"ticket_id": 444, "user_id": 135, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-08-20T16:45:00Z", "status": "open"}
+{"ticket_id": 445, "user_id": 145, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-02-29T01:53:00Z", "status": "pending"}
+{"ticket_id": 446, "user_id": 147, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-06T04:10:00Z", "status": "closed"}
+{"ticket_id": 447, "user_id": 30, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-12-20T06:45:00Z", "status": "closed"}
+{"ticket_id": 448, "user_id": 24, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-09-23T14:51:00Z", "status": "closed"}
+{"ticket_id": 449, "user_id": 34, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-09-24T13:29:00Z", "status": "open"}
+{"ticket_id": 450, "user_id": 144, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-08-28T21:51:00Z", "status": "open"}
+{"ticket_id": 451, "user_id": 102, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-05-12T00:47:00Z", "status": "open"}
+{"ticket_id": 452, "user_id": 12, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-08-08T11:44:00Z", "status": "open"}
+{"ticket_id": 453, "user_id": 18, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-09-03T01:18:00Z", "status": "pending"}
+{"ticket_id": 454, "user_id": 197, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-03-11T20:46:00Z", "status": "resolved"}
+{"ticket_id": 455, "user_id": 98, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-08-21T12:24:00Z", "status": "pending"}
+{"ticket_id": 456, "user_id": 168, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-30T03:11:00Z", "status": "closed"}
+{"ticket_id": 457, "user_id": 136, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-03-07T23:14:00Z", "status": "open"}
+{"ticket_id": 458, "user_id": 77, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-08-29T21:46:00Z", "status": "closed"}
+{"ticket_id": 459, "user_id": 137, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-07-16T07:15:00Z", "status": "resolved"}
+{"ticket_id": 460, "user_id": 40, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-05-23T06:59:00Z", "status": "open"}
+{"ticket_id": 461, "user_id": 170, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-08-06T19:49:00Z", "status": "pending"}
+{"ticket_id": 462, "user_id": 53, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-02-06T03:38:00Z", "status": "closed"}
+{"ticket_id": 463, "user_id": 154, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-16T22:55:00Z", "status": "pending"}
+{"ticket_id": 464, "user_id": 190, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-01-24T12:28:00Z", "status": "pending"}
+{"ticket_id": 465, "user_id": 194, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-01-30T04:32:00Z", "status": "pending"}
+{"ticket_id": 466, "user_id": 188, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-10-26T10:36:00Z", "status": "resolved"}
+{"ticket_id": 467, "user_id": 61, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-06T04:42:00Z", "status": "pending"}
+{"ticket_id": 468, "user_id": 106, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-06-05T08:03:00Z", "status": "pending"}
+{"ticket_id": 469, "user_id": 161, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-12-19T13:35:00Z", "status": "open"}
+{"ticket_id": 470, "user_id": 89, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-12-01T21:24:00Z", "status": "resolved"}
+{"ticket_id": 471, "user_id": 179, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-08-05T13:09:00Z", "status": "closed"}
+{"ticket_id": 472, "user_id": 48, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-10-07T15:15:00Z", "status": "resolved"}
+{"ticket_id": 473, "user_id": 182, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-03-15T14:58:00Z", "status": "closed"}
+{"ticket_id": 474, "user_id": 107, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-10-17T16:08:00Z", "status": "pending"}
+{"ticket_id": 475, "user_id": 66, "subject": "Refund request", "body": "The package never arrived. Tracking shows delivered but it's not here.", "created_at": "2024-04-16T10:41:00Z", "status": "closed"}
+{"ticket_id": 476, "user_id": 95, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-02-19T17:46:00Z", "status": "open"}
+{"ticket_id": 477, "user_id": 69, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-07-15T21:38:00Z", "status": "open"}
+{"ticket_id": 478, "user_id": 19, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-04-08T18:46:00Z", "status": "pending"}
+{"ticket_id": 479, "user_id": 123, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-04-18T10:19:00Z", "status": "pending"}
+{"ticket_id": 480, "user_id": 49, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-03-02T23:48:00Z", "status": "pending"}
+{"ticket_id": 481, "user_id": 179, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-11-11T22:13:00Z", "status": "pending"}
+{"ticket_id": 482, "user_id": 142, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-06-16T09:24:00Z", "status": "resolved"}
+{"ticket_id": 483, "user_id": 79, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-05-15T11:32:00Z", "status": "closed"}
+{"ticket_id": 484, "user_id": 26, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-09-02T10:58:00Z", "status": "resolved"}
+{"ticket_id": 485, "user_id": 81, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-08-03T01:36:00Z", "status": "pending"}
+{"ticket_id": 486, "user_id": 5, "subject": "Feature request", "body": "It would be great if you added dark mode.", "created_at": "2024-05-15T17:59:00Z", "status": "closed"}
+{"ticket_id": 487, "user_id": 76, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-03-20T06:21:00Z", "status": "closed"}
+{"ticket_id": 488, "user_id": 146, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-05-07T15:35:00Z", "status": "resolved"}
+{"ticket_id": 489, "user_id": 196, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-09-12T23:41:00Z", "status": "closed"}
+{"ticket_id": 490, "user_id": 44, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-07-02T05:08:00Z", "status": "closed"}
+{"ticket_id": 491, "user_id": 48, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-10-09T20:03:00Z", "status": "open"}
+{"ticket_id": 492, "user_id": 20, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-12-14T01:48:00Z", "status": "closed"}
+{"ticket_id": 493, "user_id": 36, "subject": "Wrong item", "body": "I'd like to return an item I bought last week.", "created_at": "2024-11-24T07:04:00Z", "status": "open"}
+{"ticket_id": 494, "user_id": 56, "subject": "Order not received", "body": "Hi, I have an issue with my recent order. Can you help?", "created_at": "2024-09-20T14:23:00Z", "status": "closed"}
+{"ticket_id": 495, "user_id": 169, "subject": "App crash", "body": "The mobile app crashes when I open the cart.", "created_at": "2024-09-11T00:00:00Z", "status": "closed"}
+{"ticket_id": 496, "user_id": 4, "subject": "Password reset", "body": "Please reset my password.", "created_at": "2024-01-10T16:46:00Z", "status": "resolved"}
+{"ticket_id": 497, "user_id": 5, "subject": "Billing question", "body": "I was charged twice for the same order.", "created_at": "2024-09-19T22:43:00Z", "status": "pending"}
+{"ticket_id": 498, "user_id": 28, "subject": "Login issue", "body": "I can't log in. It says my password is wrong.", "created_at": "2024-02-21T16:09:00Z", "status": "pending"}
+{"ticket_id": 499, "user_id": 159, "subject": "Account locked", "body": "My account is locked. What do I do?", "created_at": "2024-10-01T08:52:00Z", "status": "resolved"}
+{"ticket_id": 500, "user_id": 102, "subject": "Promo code not working", "body": "The promo code SAVE10 isn't working at checkout.", "created_at": "2024-02-12T11:25:00Z", "status": "pending"}

@@ -31,3 +31,7 @@ By the end of this module, you'll be able to explain supervised vs unsupervised 
 ## The Lead Lesson
 
 > **Lesson 1 — [What is Machine Learning?](./01-what-is-machine-learning.md)** — the canonical 30-minute ML primer. Worked example: train a tiny linear-regression classifier from scratch in NumPy, with the full training loop, loss curve, and the precision/recall numbers — so you see every concept (model, loss, gradient, regularization, eval) running on real data.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

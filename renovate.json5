@@ -1,0 +1,92 @@
+{
+  // Renovate config — runs alongside Dependabot (not a replacement).
+  // Why both: Dependabot is enabled and has the canonical pip/gh-actions/
+  // docker ecosystems configured. Renovate adds:
+  //   1. Per-package grouping with automerge for low-risk patch updates
+  //   2. A dashboard issue summarising pending PRs (created/updated
+  //      weekly, never stale beyond 7 days)
+  //   3. Custom regex manager for in-line `pip install foo==1.2.3`
+  //      lines inside any *.py or *.sh (Dependabot can't see these)
+  //   4. Lock-file maintenance for the leads-pipeline requirements.txt
+  //
+  // To enable: install the Renovate GitHub App on this repo, point it
+  // at this file, and disable only the duplicated Dependabot updaters
+  // (e.g. github-actions) — keep pip + docker which Dependabot handles
+  // more reliably for that ecosystem today.
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":automergeMinor",
+    ":automergePatch",
+    "group:allNonMajor",
+    "schedule:weekends"
+  ],
+  "timezone": "Asia/Kolkata",
+  "schedule": ["before 9am on monday"],
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "prConcurrentLimit": 10,
+  "labels": ["dependencies", "renovate"],
+
+  // Match the same files Dependabot already covers so we don't
+  // open duplicate PRs.
+  "enabledManagers": ["pip_requirements", "github-actions", "dockerfile", "regex"],
+
+  "packageRules": [
+    // Security updates always PR, never automerge.
+    {
+      "matchCategories": ["security"],
+      "automerge": false,
+      "labels": ["dependencies", "renovate", "security"]
+    },
+    // leads-pipeline runtime deps: minor + patch automerge if
+    // tests pass, but never a major bump unattended.
+    {
+      "matchPaths": ["leads-pipeline/draft-cron/requirements.txt"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "labels": ["dependencies", "renovate", "leads-pipeline"]
+    },
+    // GitHub Actions: patch-only automerge, majors always PR.
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "labels": ["dependencies", "renovate", "github-actions"]
+    },
+    // Docker base images (python:3.12-slim): never automerge —
+    // major bumps need manual review because of multi-stage
+    // Dockerfile changes.
+    {
+      "matchManagers": ["dockerfile"],
+      "automerge": false
+    }
+  ],
+
+  "customManagers": [
+    // Catch inline `pip install foo==1.2.3` lines in any *.py or
+    // *.sh — these are the ones the leads-pipeline bootstrappers
+    // (e.g. scripts/install.sh) use when requirements.txt isn't
+    // the source of truth.
+    {
+      "customType": "regex",
+      "fileMatch": [".*\\.(py|sh)$"],
+      "matchStrings": [
+        "pip install (?<depName>[a-zA-Z0-9_.-]+)==(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
+      "datasourceTemplate": "pypi"
+    }
+  ],
+
+  // Lock file maintenance: weekly, separate from regular PRs so
+  // the dashboard doesn't conflate the two.
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on sunday"],
+    "automerge": true
+  },
+
+  // Issue-based dashboard ("Renovate Dashboard"). Configures
+  // what's reported. The issue is created lazily on the first run.
+  "dashboard": true,
+  "prCreation": "approval-required"
+}

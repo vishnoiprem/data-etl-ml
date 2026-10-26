@@ -224,3 +224,7 @@ The lab's "lab complete" check is: 9 active customers in
 `timestamp`, top-3 by `created_at` DESC = `[Leo, Kim, Ivan]`. The
 driver and pytest suite exercise all four without AWS. The shell
 scripts are the live-account equivalent.
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  

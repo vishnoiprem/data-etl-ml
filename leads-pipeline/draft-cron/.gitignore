@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Secrets — never commit
+.env
+*.env.local
+*credentials*
+*secrets*
+
+# Runtime state (JSON files written by running scripts)
+state/bounce_deny.json
+state/imap_last_uid.json
+# X.com auth cookies — contains real session secrets (gitignored).
+# x_cookies.example.json is committed as a template only.
+state/x_cookies.json
+
+# PID files
+*.pid
+/tmp/auto_loop.*.pid
+
+# Logs
+*.log
+/tmp/auto_loop.log
+
+# Test outputs
+auto_log.csv
+autopilot_report.json
+last_report.json
+hn_data.html
+hn_ai.html
+aijobs.html
+hn_thread.json
+
+# Resumes (large, generated)
+resumes/
+output/

@@ -1,0 +1,28 @@
+%% incremental_merge.mmd
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+%% Lecture reference: L25 "Incremental Materialization", L26 "Incremental Strategies"
+
+sequenceDiagram
+    participant dbt
+    participant Source as source table
+    participant Target as {{ this }}
+
+    Note over dbt: First run<br/>(full refresh)
+    dbt->>Target: CREATE TABLE AS<br/>(all rows from source)
+    Target-->>dbt: 1,000,000 rows inserted
+
+    Note over dbt: Second run<br/>(incremental)
+    dbt->>Source: SELECT * WHERE updated_at > (max from target)
+    Source-->>dbt: 50,000 new/updated rows
+    dbt->>dbt: is_incremental() == TRUE
+
+    alt strategy: merge
+        dbt->>Target: MERGE INTO target<br/>USING source ON unique_key<br/>WHEN MATCHED THEN UPDATE<br/>WHEN NOT MATCHED THEN INSERT
+        Target-->>dbt: 50,000 rows merged
+    else strategy: append
+        dbt->>Target: INSERT INTO target SELECT ...
+        Target-->>dbt: 50,000 rows appended
+    else strategy: delete+insert
+        dbt->>Target: DELETE WHERE updated_at < (new max)
+        dbt->>Target: INSERT new rows
+    end

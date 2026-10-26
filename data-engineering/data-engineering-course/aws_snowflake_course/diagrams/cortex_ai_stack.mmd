@@ -1,0 +1,31 @@
+%% Diagram: Snowflake Cortex AI product family (tree)
+%% Source lecture: Snowflake Complete Masterclass - Section 12 (Cortex AI/ML)
+%% Description:  Cortex is the umbrella brand.  Functions are callable from SQL,
+%%               the rest are dedicated products.  All run on shared infrastructure
+%%               and bill through Snowflake credits.
+%% Author: Prem Vishnoi <pvishnoi@avilx.com>
+```mermaid
+graph TD
+    CX["🧠 Snowflake Cortex"]
+    FX["📐 Cortex Functions (SQL)<br/>SENTIMENT · SUMMARIZE · TRANSLATE<br/>EXTRACT_ANSWER · CLASSIFY_TEXT · COMPLETE"]
+    SR["🔍 Cortex Search<br/>(hybrid RAG over unstructured data)"]
+    AN["📊 Cortex Analyst<br/>(text → SQL via semantic model)"]
+    ML["🛠️ Cortex ML<br/>(forecasting, anomaly, classification)"]
+    NB["📓 Notebooks on Snowpark<br/>(Python, Scala, Java)"]
+    ST["🎈 Streamlit in Snowflake<br/>(internal apps, no egress)"]
+
+    CX --> FX
+    CX --> SR
+    CX --> AN
+    CX --> ML
+    CX --> NB
+    CX --> ST
+
+    style CX fill:#E0F2FE,stroke:#0369A1
+    style FX fill:#FEF3C7,stroke:#B45309
+    style SR fill:#DCFCE7,stroke:#166534
+    style AN fill:#FCE7F3,stroke:#9D174D
+    style ML fill:#EDE9FE,stroke:#5B21B6
+    style NB fill:#FFE4E6,stroke:#9F1239
+    style ST fill:#DBEAFE,stroke:#1E40AF
+```

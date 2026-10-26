@@ -215,3 +215,7 @@ The `src/eval/ragas_eval.py` module implements (1) and (2). See `scripts/evaluat
 | p95 latency | < 2.5 s | CloudWatch |
 | Cost per answer | < $0.02 | Cost attribution dashboard |
 | Index freshness | < 15 min lag | EventBridge → indexing latency |
+---
+
+**Last updated:** 2026-10-12  
+**License:** MIT — use freely in your own courses, prototypes, and products.  
