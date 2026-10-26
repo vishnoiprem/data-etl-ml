@@ -61,6 +61,51 @@ Bare-metal GPU access plus a serverless inference layer on top, with a queue-dep
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not Together / Fireworks / Anyscale.** Each of
+  these is a hosted platform with a global GPU
+  fleet, a billing layer, and a control plane. This
+  is the *autoscaler + scheduler* pattern, sized for
+  one team's pool.
+- **Not Kubernetes-only.** The scheduler here is a
+  pure-Python tick() that decides scale-up /
+  scale-down. K8s with a custom HPA + a Cluster
+  Autoscaler can do the same thing; the *signals*
+  (queue + p99) and the *cooldowns* (30-60s up,
+  5-15 min down) are the same.
+- **Not a single-tenant fix.** A single team with
+  steady load can just size the pool once. The
+  autoscaler is for *bursty, multi-tenant* serving,
+  where the queue and the SLA vary together.
+- **Not a substitute for the model warm-pool.** A
+  GPU that takes 90s to load a 70B model is not a
+  "scale-up" — it's a missed SLA. The autoscaler
+  assumes the cold-start is acceptable; for
+  inline / Copilot-style latency budgets, you
+  need a pre-warmed pool.
+
+---
+
+## Related directories
+
+- [`../18-paged-attention-serving/`](../18-paged-attention-serving/) —
+  the per-GPU efficiency pattern (PagedAttention
+  + continuous batching) that determines what
+  utilization the scheduler targets.
+- [`../38-multi-tenant-inference/`](../38-multi-tenant-inference/) —
+  the per-tenant fairness + quota layer that
+  builds on top of the scheduler here.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the "one model, one endpoint" inference layer
+  that the pool serves.
+- [`../26-mistral-self-host/`](../26-mistral-self-host/) —
+  the self-hosting pattern (prefix cache + budget
+  guard) that the per-GPU serving configures.
+
 ---
 
 **Last updated:** 2026-10-12  

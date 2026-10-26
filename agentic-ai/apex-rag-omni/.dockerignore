@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.venv
+data
+audit/audit.jsonl
+tests
+frontend
+eval/reports
+.git
+.env

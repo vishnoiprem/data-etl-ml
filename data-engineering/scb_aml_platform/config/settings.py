@@ -115,6 +115,20 @@ API_PORT = 8000
 API_TITLE = "Lucid Search — SCB AML Entity Search"
 API_VERSION = "1.0.0"
 
+# Comma-separated list of allowed CORS origins. Override via the
+# CORS_ALLOWED_ORIGINS env var in production to point at the
+# analyst dashboard host. Wildcard (*) is intentionally not supported
+# here because Lucid Search returns entity / sanctions / network data
+# that should not be readable from arbitrary browser origins.
+CORS_ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:8000",
+    ).split(",")
+    if o.strip()
+]
+
 # ─────────────────────────────────────────────
 # LOGGING
 # ─────────────────────────────────────────────

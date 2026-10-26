@@ -72,6 +72,56 @@ The first version didn't have the consent gate. The agent refunded $40 to a cust
 pip install -r requirements.txt
 make demo
 ```
+
+---
+
+## What this is NOT
+
+- **Not a deflection bot.** Sierra's positioning is
+  "resolve, not deflect." The 60% auto-resolve is
+  *closed tickets*, not "we told the customer to
+  call back." A deflection bot (send-to-FAQ) ships
+  in 50 lines; this is a 60% deflection-*killer* in
+  600.
+- **Not a no-human system.** The 8% escalated +
+  32% human-handoff = 40% of tickets still touch a
+  human. The agent is the *first responder*, not
+  the *only responder*. The action graph decides
+  which actions need which gate.
+- **Not safe without idempotency keys.** The
+  "duplicate refund" lesson is the canonical
+  failure: the agent refunds $40 to a customer
+  who was already refunded 6 hours earlier. Every
+  state-changing action needs an idempotency key
+  and a "have we done this before?" check.
+- **Not a generic chatbot.** The action graph
+  encodes *company-specific* policy: what's
+  reversible, what's the dollar cap, which
+  customer tier gets which treatment. A
+  one-size-fits-all chatbot has no place to
+  encode this; this build does.
+
+---
+
+## Related directories
+
+- [`../14-hiring-agent/`](../14-hiring-agent/) —
+  the outbound cousin: same shape (skill extract
+  → score → draft → log) on outbound candidates
+  instead of inbound tickets.
+- [`../15-multi-agent-debate/`](../15-multi-agent-debate/) —
+  the verifier pattern; useful for high-stakes
+  triage decisions where a single LLM call isn't
+  reliable.
+- [`../../data-engineering/event-sourced-audit/`](../../data-engineering/event-sourced-audit/) —
+  the append-only audit log pattern that this
+  build's `audit/log.py` is a specialized
+  version of.
+- [`../../data-engineering/multi-tenant-isolation/`](../../data-engineering/multi-tenant-isolation/) —
+  the per-tenant isolation that the customer-tier
+  logic in the action graph is a stripped-down
+  version of.
+
 ---
 
 **Last updated:** 2026-10-12  
