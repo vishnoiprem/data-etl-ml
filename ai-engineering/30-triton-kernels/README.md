@@ -55,6 +55,54 @@ When PyTorch is too slow and CUDA is too verbose, Triton hits the middle. This i
 pip install -r requirements.txt
 make smoke    # NumPy correctness check
 ```
+
+---
+
+## What this is NOT
+
+- **Not a CUDA replacement.** Triton is a Python-embedded
+  DSL that lowers to PTX; it doesn't replace the
+  CUDA toolchain, it sits on top of it. For
+  hand-written CUDA with shared memory and warp-level
+  primitives, Triton is the wrong tool.
+- **Not a model implementation.** This directory
+  ships *one* fused kernel (RMSNorm) as a worked
+  example. A real LLM has hundreds of kernels; the
+  library you ship with (FlashAttention, xFormers,
+  vLLM) covers the common ones. You only write
+  Triton for the 1-2% of ops that are hot and not
+  already covered.
+- **Not arch-portable.** A kernel tuned for A100 is
+  not optimal on H100 or B200. `triton.autotune`
+  helps, but the *block size* and *warp layout* are
+  arch-specific. Don't expect the same kernel to be
+  fast on every GPU in your fleet.
+- **Not a debugging tool.** Triton bugs are silent
+  (numerical drift, off-by-one masking, race
+  conditions on shared memory). You need a real GPU
+  to test, and the test must compare to a known
+  reference (NumPy / PyTorch naive), not another
+  Triton kernel.
+
+---
+
+## Related directories
+
+- [`../29-fsdp-flash-train/`](../29-fsdp-flash-train/) —
+  the training-side cousin (FSDP, FlashAttention);
+  FlashAttention is the canonical "Triton done
+  right" example.
+- [`../25-deepseek-moe-train/`](../25-deepseek-moe-train/) —
+  the MoE training patterns where custom Triton
+  kernels (e.g. grouped GEMM) become worth the
+  engineering cost.
+- [`../18-paged-attention-serving/`](../18-paged-attention-serving/) —
+  the serving-side cousin (vLLM, PagedAttention);
+  another canonical Triton-built project.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the inference service that runs the kernels
+  behind a `/predict` endpoint.
+
 ---
 
 **Last updated:** 2026-10-12  

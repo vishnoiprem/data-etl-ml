@@ -64,6 +64,52 @@ Sub-200ms TTFB streaming TTS. The latency budget is dominated by the first-frame
 pip install -r requirements.txt
 make smoke
 ```
+
+---
+
+## What this is NOT
+
+- **Not ElevenLabs.** ElevenLabs is a closed
+  product with a frontier voice model, a voice
+  marketplace, and a hosted streaming endpoint.
+  This is the *TTFB + chunk-streaming* pattern in
+  100 lines.
+- **Not a batch TTS engine.** Streaming is the
+  point. For pre-rendered audio (audiobooks,
+  podcasts), batch-synthesize the whole file and
+  skip the streaming overhead. The TTFB optimization
+  is wasted when the entire file is the deliverable.
+- **Not a real-time conversation system.** TTFB
+  < 200ms is good; it's not 50ms. For
+  sub-100ms turn-taking in a phone call, you
+  need a different stack (streaming ASR + TTS
+  + VAD, all in one pipeline).
+- **Not voice cloning without consent.** The
+  "30-60s of clean reference audio" is the
+  technical floor. The legal / ethical floor is
+  "you have permission from the speaker to
+  clone their voice." Both are required.
+
+---
+
+## Related directories
+
+- [`../22-whisper-streaming-stt/`](../22-whisper-streaming-stt/) —
+  the streaming STT cousin: same TTFB pattern
+  on the input side. Together they form the
+  voice-assistant loop.
+- [`../20-cog-style-inference-api/`](../20-cog-style-inference-api/) —
+  the inference service that the TTS endpoint
+  plugs into.
+- [`../36-together-gpu-cloud/`](../36-together-gpu-cloud/) —
+  the GPU pool / autoscaler that the
+  conversational TTS workload needs (bursty,
+  latency-sensitive).
+- [`../18-paged-attention-serving/`](../18-paged-attention-serving/) —
+  the per-GPU efficiency pattern; TTS models
+  benefit from the same PagedAttention / KV-cache
+  management as LLMs.
+
 ---
 
 **Last updated:** 2026-10-12  

@@ -1,4 +1,4 @@
-python-dotenv==1.0.1
-sagemaker==2.227.0
+python-dotenv==1.2.2
+sagemaker==3.8.0
 boto3==1.34.152
-datasets==2.18.0
+datasets==5.0.1

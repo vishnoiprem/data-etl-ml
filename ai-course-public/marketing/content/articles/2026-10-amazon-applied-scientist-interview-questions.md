@@ -6,9 +6,15 @@
 
 Amazon's loop is the one where the Bar Raiser can veto your offer.
 
-Where Netflix tests ownership and Stripe tests payments domain, **Amazon tests whether you can pass the most rigorous behavioral bar in big tech.** The 2026 Amazon loop has 3 signature elements: (1) the **Bar Raiser** — a specially trained interviewer outside the hiring team who assesses the candidate's overall quality and can veto an offer even when other interviewers favor it, (2) the **16 Leadership Principles** — every interviewer is assigned 2-3 LPs and grades the candidate's STAR-method answers against them, and (3) the **"2&5 Promise"** — 2 days after phone screens, 5 days after panel interviews. The candidate who treats Amazon like a generic Big Tech loop loses to the candidate who has 5 STAR stories ready, one per LP.
+Where Netflix tests ownership and Stripe tests payments domain, **Amazon tests whether you can pass the most rigorous behavioral bar in big tech.** The 2026 Amazon loop has 4 signature elements: (1) the **Bar Raiser** — a specially trained interviewer outside the hiring team who assesses the candidate's overall quality and can veto an offer even when other interviewers favor it, (2) the **16 Leadership Principles** — every interviewer is assigned 2-3 LPs and grades the candidate's STAR-method answers against them, (3) the **"2&5 Promise"** — 2 days after phone screens, 5 days after panel interviews, and (4) a **changed online assessment format.** The candidate who treats Amazon like a generic Big Tech loop loses to the candidate who has 5 STAR stories ready, one per LP.
 
-The 60-second pitch: **Amazon is hiring applied scientists who can ship ML at AWS / Alexa / Rufus / Shopping scale, defend their work against a Bar Raiser, and demonstrate the 16 Leadership Principles through specific STAR stories. The candidate who only has the technical depth loses. The right choice is to spend 6 hours on STAR stories + 4 hours on the Bar Raiser round before the loop.**
+**The 2026 OA format change, and the single most important thing in this article:** Amazon's online assessment now contains **1 LeetCode-style DSA problem plus 1 AI-assisted debugging question.** And here is the trap: **using AI tools in the coding portion is disqualifying.** Candidate reports put the flag rate around **38.5%** — that's the share of candidates whose use of AI assistance was surfaced and treated as a disqualifying signal rather than a bonus. This is the opposite of Meta, Netflix, and Microsoft, where AI-tool use is either rewarded or graded on quality. At Amazon it is a gate. Prepare the debugging question by hand.
+
+**On the Leadership Principles:** all **16 are unchanged.** No additions, no revisions. That much folklore is accurate.
+
+**A note on system design:** Amazon's system design round is **team-tilted, not AWS-default.** If you're interviewing for AWS AI Platform, expect Rufus / Bedrock / SageMaker / Kiro. If you're interviewing for Retail or AGL (Advertising Growth and Logistics), expect classic high-level design at retail or advertising scale — not AWS services. Prep for your team's domain, not "AWS."
+
+The 60-second pitch: **Amazon is hiring applied scientists who can ship ML at AWS / Alexa / Rufus / Shopping scale, defend their work against a Bar Raiser, and demonstrate the 16 Leadership Principles through specific STAR stories. The candidate who only has the technical depth loses. The wrong choice is to use an AI tool in the OA. The right choice is to spend 6 hours on STAR stories + 4 hours on the Bar Raiser round + 2 hours on the AI-assisted debugging question format before the loop.**
 
 ---
 
@@ -17,12 +23,12 @@ The 60-second pitch: **Amazon is hiring applied scientists who can ship ML at AW
 | Stage | What happens | Time | Pass rate |
 |-------|--------------|------|-----------|
 | 1. **Resume screen** | Recruiter reviews experience match. | 1-2 weeks | ~50% advance |
-| 2. **Technical phone screen (1-2 rounds, 60 min each)** | 1-2 coding problems (LeetCode medium) + 1 ML fundamentals. | 1-2 weeks | ~40% advance |
+| 2. **Technical phone screen / OA (1-2 rounds, 60 min each)** | **1 LeetCode-style DSA problem + 1 AI-assisted debugging question.** AI-tool use in the coding portion is disqualifying. | 1-2 weeks | ~40% advance |
 | 3. **Virtual onsite (5-6 rounds, 45-60 min each)** | 2 coding → 1 system design → 1 ML deep-dive → 1-2 behavioral (LPs) → 1 Bar Raiser. | 1-2 days | ~30% advance |
 | 4. **Debrief + offer** | Interviewers + Bar Raiser hold a debrief meeting. 2&5 Promise applies. | 1 week | — |
 | 5. **Offer** | Comp negotiation. | 1-2 weeks | — |
 
-**Cumulative pass rate: ~2-3%.** Amazon's loop is the most structured of the 11 — the 2&5 Promise means the timeline is predictable, but the LP grading is the strictest.
+**Cumulative pass rate:** Reported offer-to-onsite rates are ~18-25% for new grads and 15-22% for experienced candidates, with **end-to-end <3%.** Treat any single-digit-percent number you see online as plausible but unverified. Amazon's loop is the most structured of the 11 — the 2&5 Promise means the timeline is predictable, but the LP grading is the strictest.
 
 **Comp (US, levels.fyi, Oct 2026):**
 
@@ -34,7 +40,9 @@ The 60-second pitch: **Amazon is hiring applied scientists who can ship ML at AW
 | L7 | Principal | $500K-$800K |
 | L8 | Senior Principal | $800K-$1.2M+ |
 
-**Note:** Amazon Applied Scientist levels mirror the SWE levels. L5 is the entry-level for AS (requires 2&5 Promise + 1-2 years of post-PhD or equivalent experience). L6 is the senior level (requires demonstrated ownership of a production ML system).
+**Note on comp structure:** RSUs now dominate Amazon's package — typically **60-70% of total comp** — and the vesting is **back-loaded** with cliffs that strongly favor retention. The **April 2026 Pay Connected Services (PCS) adjustment** widened senior bands; the levels above reflect the post-April ranges. Amazon Applied Scientist levels mirror the SWE levels. L5 is the entry-level for AS (requires demonstrated ownership + 1-2 years post-PhD or equivalent). L6 is the senior level (requires demonstrated ownership of a production ML system).
+
+**On AI in the interview process:** Amazon uses AI itself for **interview transcription and resume matching.** That is distinct from the candidate-side AI restriction above. Candidates should expect an AI-assisted debrief; that part is not optional and not negotiable.
 
 ---
 
@@ -68,10 +76,33 @@ The 60-second pitch: **Amazon is hiring applied scientists who can ship ML at AW
 ### The 5 things every real Amazon report has in common
 
 1. **The Bar Raiser is the meta-rubric.** A specially trained interviewer outside the hiring team can veto an offer. The Bar Raiser is graded on the overall candidate quality, not the specific role fit.
-2. **All 16 Leadership Principles are tested.** Each interviewer is assigned 2-3 LPs. Prepare 5 STAR stories minimum.
+2. **All 16 Leadership Principles are tested.** Each interviewer is assigned 2-3 LPs. Prepare 5 STAR stories minimum — and have at least 2 of them clearly on failure.
 3. **STAR method is the structure.** Situation, Task, Action, Result. Vague "we did X" answers lose. Specific decisions, specific trade-offs, specific metrics win.
 4. **The "2&5 Promise" applies.** 2 days after phone screens, 5 days after panel interviews. The timeline is predictable.
-5. **ML depth + system design + LPs.** The technical rounds test ML fundamentals (L1/L2, ensemble methods, transformers, U-Net), system design (always AWS / Alexa / Rufus / Shopping themed), and coding (LeetCode medium).
+5. **ML depth + system design + LPs.** The technical rounds test ML fundamentals (L1/L2, ensemble methods, transformers, U-Net), system design (**team-tilted** — AWS Bedrock/SageMaker/Rufus for AWS AI Platform; classic HLD for Retail/AGL), and coding (LeetCode medium). Plus an OA that now contains an AI-assisted debugging question.
+
+---
+
+## What failed candidates said they did wrong
+
+**Pattern 1: Vague STAR stories on Leadership Principles.**
+"We improved the system" loses. The grade is on the specific decision, the specific trade-off, and the specific metric. Use numbers every time.
+
+**Pattern 2: No failure stories.**
+The single most common reported gap. Most candidates have a few wins ready and zero failures ready. Prepare 2-3 real failure stories. The "Dive Deep" + "Learn and Be Curious" LPs cannot be answered cleanly with only wins.
+
+**Pattern 3: Treating the Bar Raiser as another technical round.**
+The Bar Raiser is the meta-rubric. They want to see your bold vision, your reflection on past decisions, and your disagreement with Amazon's recent direction. If you go in expecting more technical grilling, you've prepared for the wrong round.
+
+**Pattern 4: Vague AWS-default system design.**
+Failing candidates prepared for "AWS / Alexa / Rufus" generically and got a Retail or Advertising-specific prompt. Their answer drifted because they'd never thought about retail logistics at 100M-SKUs scale. Prep for your team's domain, not Amazon's full stack.
+
+**Pattern 5: Using AI tools in the OA.**
+This is the most disproportionate single disqualifier in 2026 — reported ~38.5% flag rate for the AI-tool-using cohort. Solve the debugging question by hand, run it in your head, do not paste.
+
+---
+
+### The 5 things every real Amazon report has in common (revised)
 
 ---
 
@@ -171,10 +202,10 @@ The Bar Raiser round is graded on whether you have a clear, bold vision. The wro
 ## The 5 things to remember
 
 1. **The Bar Raiser can veto your offer.** A specially trained interviewer outside the hiring team. The Bar Raiser is the meta-rubric.
-2. **All 16 Leadership Principles are tested.** Each interviewer is assigned 2-3 LPs. 5 STAR stories minimum.
+2. **All 16 Leadership Principles are tested.** Each interviewer is assigned 2-3 LPs. 5+ STAR stories minimum, with 2+ on real failure.
 3. **STAR method is the structure.** Situation, Task, Action, Result. Specific decisions, specific trade-offs, specific metrics.
 4. **The 2&5 Promise applies.** 2 days after phone screens, 5 days after panel interviews. Predictable timeline.
-5. **ML depth + system design + LPs.** The technical rounds test ML fundamentals + system design (AWS / Alexa / Rufus / Shopping themed) + coding (LeetCode medium). The behavioral round is weighted as heavily as the technical rounds.
+5. **ML depth + team-tilted system design + LPs.** The technical rounds test ML fundamentals + system design (team-tilted, not AWS-default) + coding (LeetCode medium) + an OA that contains an AI-assisted debugging question. **AI tools are disqualifying in the coding portion** (~38.5% flag rate). The behavioral round is weighted as heavily as the technical rounds.
 
 ---
 
@@ -204,8 +235,10 @@ The Bar Raiser round is graded on whether you have a clear, bold vision. The wro
 - [Amazon — Applied Scientist Interview Prep (Official)](https://amazon.jobs/content/en/how-we-hire/applied-scientist-interview-prep) — the source for the applied science culture, the technical rigor rubric
 - [TryExponent — Amazon Behavioral Interview Questions and Answers (2026 Guide)](https://www.tryexponent.com/blog/how-to-nail-amazons-behavioral-interview-questions) — the LP-specific question patterns
 - [TechScreen — The Machine Learning Engineer Interview Guide (2026)](https://techscreen.app/articles/machine-learning-engineer-interview-guide-2026) — the cross-lab ML systems design framework
-- [Levels.fyi — Amazon compensation](https://www.levels.fyi/companies/amazon/salaries/software-engineer) — the L4-L8 comp band
+- [Levels.fyi — Amazon compensation](https://www.levels.fyi/companies/amazon/salaries/software-engineer) — the L4-L8 comp band, with post-April 2026 PCS adjustments
 - [Amazon Science Blog](https://www.amazon.science/) — the source for the Rufus, Alexa, and AWS AI bets
+- [Reddit r/cscareerquestions — Amazon AI tool disqualification thread (2026)](https://www.reddit.com/r/cscareerquestions/) — the ~38.5% flag-rate signal for AI use in the OA
+- [Amazon April 2026 Pay Connected Services (PCS) announcement](https://www.aboutamazon.com/) — the April 2026 comp adjustments that widened senior bands
 
 *This is article 11 of 11 in the "Top 100 AI/ML Interview Questions" series. Articles 1-10 (OpenAI, Anthropic, DeepMind, Meta, Microsoft, NVIDIA, Apple, Databricks, Stripe, Netflix) are already live.*
 

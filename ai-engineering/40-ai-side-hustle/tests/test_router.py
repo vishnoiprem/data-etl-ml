@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 
-from router import StubRouter
+from router import StubRouter, _smart_title
 
 
 def test_stub_seo_article_mentions_keyword():
@@ -72,3 +73,33 @@ def test_stub_seo_routes_by_system_not_prompt():
 def test_stub_falls_back_to_generic_for_unknown_system():
     out = StubRouter().complete("hello", system="you are something else")
     assert isinstance(out, str)
+
+
+# --- _smart_title -----------------------------------------------------
+
+def test_smart_title_preserves_acronyms():
+    assert _smart_title("soc2 for solo founders") == "SOC2 For Solo Founders"
+    assert _smart_title("hipaa compliance for indie hackers") == "HIPAA Compliance For Indie Hackers"
+    assert _smart_title("gdpr playbook") == "GDPR Playbook"
+
+
+def test_smart_title_normal_title():
+    assert _smart_title("the short guide") == "The Short Guide"
+    assert _smart_title("productivity for founders") == "Productivity For Founders"
+
+
+def test_smart_title_preserves_punctuation():
+    assert _smart_title("soc2, hipaa, gdpr, oh my") == "SOC2, HIPAA, GDPR, Oh My"
+
+
+def test_stub_product_json_uses_smart_title():
+    """The product stub must produce titles with acronyms uppercase."""
+    out = StubRouter().json(
+        "Topic: soc2 for solo founders",
+        schema_hint='{"products": [{"title": str, "format": str, "price_usd": int, "page_count": int, "hook": str}]}',
+    )
+    products = out["products"]
+    titles = [p["title"] for p in products]
+    assert any("SOC2" in t for t in titles), f"no SOC2 found in {titles}"
+    # And the broken 'Soc2' should not appear
+    assert not any("Soc2" in t for t in titles), f"old bad casing in {titles}"
