@@ -253,7 +253,7 @@ Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker comp
 | 17 | **Capital One-style FinCrime data mesh** | Regulated data needs a contract, not just a schema. Domain-owned data products, contract tests on every change, lineage, and access control. It's heavier than a raw lake, but the audit team stops paging you at 11pm. | DataHub · Great Expectations · dbt · Lake Formation | [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) (reference impl) |
 | 18 | **Lyft-style streaming + batch hybrid** | I want one codebase, not two. Backfill and streaming share the same job definition, with time-travel for reconciliation when they disagree. The Kappa-leaning version, with a Batch escape hatch for the things streaming can't do cleanly. | Flink · Spark · Iceberg · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
 | 19 | **Cloudflare-style edge analytics** | Regional aggregation close to the user, late-merge reconciliation, tiered storage (hot → warm → cold). Useful when the volume is global and the budget isn't. The shape is closer to a CDN log pipeline than a typical warehouse job. | Kafka · Flink · R2 · ClickHouse | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
-| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/data-engineering/`](data-engineering/data-engineering/) (reference impl) |
+| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/`](data-engineering/) (reference impl) |
 | 21 | **Snowflake-style elastic warehouse** | Compute and storage decoupled, virtual warehouses that scale in seconds, and per-query credits. I rewrote our nightly batch as a virtual-warehouse-style fleet on Spark + Iceberg, with auto-suspend on idle and auto-resume on queue depth. The result: the same job ran in 12 minutes instead of 90, and the bill tracked the work. | Spark · Iceberg · S3 · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
 | 22 | **BigQuery-style serverless analytics** | No cluster to size, no warm-up cost, per-byte scanned billing. I built a Parquet-on-S3 + DuckDB + caching layer that approximates that ergonomics for sub-petabyte scale, with column-pruned reads and result caching keyed by query hash. Not BigQuery — but the same operating model. | DuckDB · Parquet · S3 · dbt | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
 | 23 | **Bloomberg-style market-data plant** | Tick capture, normalized symbology, a real-time reference data service, and a fan-out engine that serves the same tick to dozens of subscribers without re-parsing. The hard part is the symbology map — `ticker → FIGI → CUSIP` — and the fact that a single ticker can map to 4 underlying instruments. | Kafka · Flink · gRPC · Redis · Postgres | [`data-engineering/bloomberg-symbology/`](data-engineering/bloomberg-symbology/) |
@@ -573,7 +573,7 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 | `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
 | `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
 | `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
-| `postgress_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgress_cdc_kafka/README.md](postgress_cdc_kafka/README.md) |
+| `postgres_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgres_cdc_kafka/README.md](postgres_cdc_kafka/README.md) |
 
 ---
 
@@ -621,7 +621,7 @@ data-etl-ml/
 │   ├── ml/   (deep_Learning, GenAI-Pinnacle, LLM, ai-agent, vector-ebedding, …)
 │   ├── ai-engineering/   (course sub-folders)
 │   ├── golang/order-etl-pipeline/
-│   └── postgress_cdc_kafka/
+│   └── postgres_cdc_kafka/
 ├── 03-content/                 # Writing & teaching
 │   └── medium/                 # Medium articles + interview guides
 ├── 04-career/                  # Resume assets
@@ -635,11 +635,11 @@ data-etl-ml/
 │   └── Senior Delivery Consultant - Data Engineering/
 ├── docs/                       # Screenshots, demo GIFs, social preview HTML
 │   └── assets/
-├── scripts/                    # repo_stats.sh and similar
+├── scripts/                    # repo_stats.sh, docker_start.sh, maintenance/
 ├── infra/                      # Top-level Docker, env, requirements
 │   ├── docker-compose.yml
 │   ├── requirements.txt
-│   └── clean_repo.sh
+│   └── (clean_repo.sh now lives in scripts/maintenance/)
 ├── .github/                    # REPO_ABOUT, SOCIAL_PREVIEW, issue/PR templates
 ├── LICENSE                     # MIT
 ├── CONTRIBUTING.md
@@ -656,7 +656,7 @@ data-etl-ml/
 4. Move `medium/` into `03-content/medium/`.
 5. Move `Resume/` into `04-career/Resume/`.
 6. Move scratch / template folders into `05-reference/`.
-7. Move `docker-compose.yml`, `clean_repo.sh`, `requirements.txt` to `infra/`.
+7. Move `docker-compose.yml`, `scripts/maintenance/clean_repo.sh`, `requirements.txt` to `infra/`.
 8. Add a short `README.md` to each top-level `0X-…` folder.
 
 ---

@@ -10,6 +10,9 @@ PIP    ?= $(PYTHON) -m pip
 help:                       ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "Tip: copy .env.example to .env to set ANTHROPIC_API_KEY or OPENAI_API_KEY."
+	@echo "Without a key, the StubRouter is used and \`make demo\` still works."
 
 install:                    ## pip install -r requirements.txt
 	$(PIP) install -r requirements.txt

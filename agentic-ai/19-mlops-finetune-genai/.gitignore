@@ -1,0 +1,31 @@
+# Local-only artifacts (recreated by `make up` / `make train`)
+data/
+mlruns/
+sft-output/
+artifacts/
+vllm-cache/
+eval-output/
+.cache/
+*.parquet
+*.bin
+*.safetensors
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Logs
+*.log
+mlflow.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+.huggingface/
+
+# Un-ignore the Grafana dashboards we ship (the repo-root .gitignore has
+# a generic `*.json` rule that catches these — we want to ship the dashboards
+# so Grafana provisions them on first boot).
+!infra/grafana/**/*.json

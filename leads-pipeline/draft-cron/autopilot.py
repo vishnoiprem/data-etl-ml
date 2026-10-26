@@ -1382,17 +1382,48 @@ def send_queued_emails(max_emails=None, dry=False, mode="pitch_pod"):
         try:
             _send_one(lead)
             update_status(lead["id"], "sent_email")
+            # Append to send_log so the tail-log check (lib/email_guard)
+            # can dedup this recipient for the next 24h. Without this
+            # call, the guard would re-allow a recipient we just sent to.
+            try:
+                from db.lead_store import log_send
+                log_send(
+                    lead["id"],
+                    lead["contact_email"],
+                    lead.get("cover_letter_subject") or "",
+                    "success",
+                )
+            except Exception as _e:
+                # Never fail a send because of a log write
+                print(f"    ⚠️  log_send failed: {_e}")
             sent += 1
             print(f"  ✅ {lead['company']} → {lead['contact_email']}")
             if sent < len(pending):
                 time.sleep(DELAY_BETWEEN_EMAILS_SEC)
         except RecipientInvalid as e:
-            # _send_one already marked status='bounced' in the DB.
+            # Hard bounce from SMTP (or our own MX probe). Mark status='bounced'
+            # (NOT 'failed') so the lead is permanently blocked and the
+            # bounce flow can auto-add the domain to BOUNCE_DENY on the
+            # next IMAP poll. Without this routing, the 27% bounce rate
+            # throttle keeps re-triggering.
+            try:
+                from db.lead_store import mark_bounced_by_id
+                mark_bounced_by_id(lead["id"], reason=f"{e.code} {e.reason[:80]}")
+            except Exception as _e:
+                print(f"    ⚠️  mark_bounced_by_id failed: {_e}")
+                update_status(lead["id"], "failed", error=str(e))
             bounced += 1
             print(f"  🚫 {lead['company']} → {lead['contact_email']}  bounced: {e.code} {e.reason[:60]}")
             # No sleep — bounced sends are cheap, no need to throttle.
         except Exception as e:
             update_status(lead["id"], "failed", error=str(e))
+            try:
+                from db.lead_store import log_send
+                log_send(lead["id"], lead["contact_email"],
+                         lead.get("cover_letter_subject") or "",
+                         "fail", error=str(e)[:200])
+            except Exception:
+                pass
             failed += 1
             print(f"  ❌ {lead['company']} → {lead['contact_email']}  err: {e}")
     return sent, failed, bounced
@@ -1710,16 +1741,40 @@ class RecipientInvalid(Exception):
 
 
 def _verify_recipient(addr: str, timeout: int = 15) -> None:
-    """Currently a no-op. Gmail's SMTP accepts any RCPT TO at send time.
+    """MX probe: does the domain in `addr` actually accept mail?
 
-    See the docstring on `RecipientInvalid` for why. The real bounce
-    detection is in `check_bounces.py` (IMAP poll on the sender inbox).
+    Why: Gmail's SMTP returns 250 ("accepted") for EVERY recipient, even
+    nonexistent addresses. Hard bounces come back hours later via IMAP.
+    By then we've already triggered Gmail's bounce-rate throttle. So we
+    do a real DNS MX lookup before sending and raise RecipientInvalid
+    on failure — the lead gets marked 'bounced' and the domain is added
+    to BOUNCE_DENY so we never try it again.
 
-    Kept as a stub so callers don't have to change if/when we add a
-    real verification step (e.g. SMTP MX probe or 3rd-party validator
-    like NeverBounce / ZeroBounce).
+    This is the in-loop equivalent of the pre-send `can_send_to` guard
+    in `lib/email_guard.py`. Both call _mx_probe; both short-circuit on
+    failure. Kept as a no-op when dnspython is missing or the env says
+    AVILX_SKIP_MX_PROBE=1.
     """
-    return
+    if os.getenv("AVILX_SKIP_MX_PROBE", "0") == "1":
+        return
+    try:
+        from lib.email_guard import _mx_probe
+    except Exception:
+        return  # lib/email_guard not importable → fail open
+    # Extract the registered domain
+    try:
+        dom = addr.split("@", 1)[1].strip()
+        # registered domain = last 2 labels
+        parts = dom.lower().split(".")
+        if len(parts) >= 2:
+            dom = ".".join(parts[-2:])
+    except Exception:
+        return  # malformed addr → SMTP will catch it
+    err = _mx_probe(dom, timeout=min(timeout, 3.0))
+    if err:
+        # Synthetic 5xx code so the existing RecipientInvalid handler
+        # in send_queued_emails routes it to mark_bounced_by_id.
+        raise RecipientInvalid(addr, 550, f"MX probe failed: {err}")
 
 
 def _send_one(lead):
