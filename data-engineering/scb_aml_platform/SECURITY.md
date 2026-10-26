@@ -1,8 +1,8 @@
 # SCB AML Platform — Security Posture
 
 > Project-specific security notes. See the repo-level
-> [`SECURITY.md`](../../../SECURITY.md) for the overall policy and
-> [`VULNERABILITY_AUDIT.md`](../../../VULNERABILITY_AUDIT.md) for the
+> [`SECURITY.md`](../../SECURITY.md) for the overall policy and
+> [`VULNERABILITY_AUDIT.md`](../../docs/audits/VULNERABILITY_AUDIT.md) for the
 > current audit status.
 
 ## Threat model
@@ -84,6 +84,6 @@ datetime.
 ## Reporting vulnerabilities
 
 If you find a security issue, follow the process in
-[`SECURITY.md`](../../../SECURITY.md#reporting-vulnerabilities) at
+[`SECURITY.md`](../../SECURITY.md#reporting-vulnerabilities) at
 the repo root. Please **do not** open a public GitHub issue for
 security findings.

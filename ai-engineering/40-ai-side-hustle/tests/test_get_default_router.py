@@ -71,6 +71,7 @@ def test_anthropic_wins_when_available(fresh_router, monkeypatch):
         def __init__(self, *a, **kw):
             raise RuntimeError("should not be called")
 
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
     monkeypatch.setattr(fresh_router, "AnthropicRouter", _AnthropicFake)
     monkeypatch.setattr(fresh_router, "OpenAIRouter", _OpenAIFake)
 
@@ -88,6 +89,8 @@ def test_openai_used_when_anthropic_unavailable(fresh_router, monkeypatch):
         name = "openai"
         def __init__(self, *a, **kw): pass
 
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setattr(fresh_router, "AnthropicRouter", _AnthropicBroken)
     monkeypatch.setattr(fresh_router, "OpenAIRouter", _OpenAIFake)
 
@@ -95,41 +98,49 @@ def test_openai_used_when_anthropic_unavailable(fresh_router, monkeypatch):
     assert r.name == "openai"
 
 
-def test_stub_used_when_anthropic_key_missing(fresh_router, monkeypatch):
-    """If the SDK is installed but the API key is missing, the
-    Anthropic *constructor* may succeed (it just defers the auth
-    check to the first call) but a future .messages.create() will
-    fail. The current code can't tell 'missing key' from 'key
-    set' at construction time, so this test documents the
-    actual behavior: a missing key still picks the Anthropic
-    router, and the first call will raise.
-
-    In practice, the buyer sees a clean 'authentication error'
-    on the first .complete() call rather than a silent fallback.
-    This is correct — silent fallback to stub would hide the
-    real configuration problem.
-
-    The test asserts the *current* behavior so a future refactor
-    that adds explicit key-checking (and falls back to stub on
-    missing key) updates this test deliberately.
-    """
-    class _AnthropicNoKey:
-        name = "anthropic"
-        def __init__(self, *a, **kw): pass
-        def complete(self, *a, **kw): raise RuntimeError("auth required")
-
-    class _OpenAINoKey:
+def test_stub_used_when_keys_missing_even_if_sdks_install(fresh_router, monkeypatch):
+    """SDK installed but no key: the SDK constructors succeed (auth is
+    deferred to the first call), so the router must check the env itself
+    and fall back to the stub instead of picking a router that fails on
+    every request."""
+    class _Constructs:
+        name = "should-not-be-picked"
         def __init__(self, *a, **kw): pass
 
-    monkeypatch.setattr(fresh_router, "AnthropicRouter", _AnthropicNoKey)
-    monkeypatch.setattr(fresh_router, "OpenAIRouter", _OpenAINoKey)
+    monkeypatch.setattr(fresh_router, "AnthropicRouter", _Constructs)
+    monkeypatch.setattr(fresh_router, "OpenAIRouter", _Constructs)
 
     r = fresh_router.get_default_router()
-    # The Anthropic router is selected; the missing key surfaces
-    # only on first .complete() call, not on construction.
-    assert r.name == "anthropic"
-    with pytest.raises(RuntimeError, match="auth required"):
-        r.complete("test prompt")
+    assert r.name == "stub"
+
+
+def test_openai_picked_when_only_openai_key_set(fresh_router, monkeypatch):
+    class _Anthropic:
+        name = "anthropic"
+        def __init__(self, *a, **kw): pass
+
+    class _OpenAI:
+        name = "openai"
+        def __init__(self, *a, **kw): pass
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setattr(fresh_router, "AnthropicRouter", _Anthropic)
+    monkeypatch.setattr(fresh_router, "OpenAIRouter", _OpenAI)
+
+    assert fresh_router.get_default_router().name == "openai"
+
+
+def test_provider_override_forces_stub(fresh_router, monkeypatch):
+    """HUSTLE_LLM_PROVIDER=stub wins even when a key is set."""
+    class _Anthropic:
+        name = "anthropic"
+        def __init__(self, *a, **kw): pass
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+    monkeypatch.setenv("HUSTLE_LLM_PROVIDER", "stub")
+    monkeypatch.setattr(fresh_router, "AnthropicRouter", _Anthropic)
+
+    assert fresh_router.get_default_router().name == "stub"
 
 
 def test_stub_used_when_both_keys_missing_and_sdks_missing(fresh_router, monkeypatch):

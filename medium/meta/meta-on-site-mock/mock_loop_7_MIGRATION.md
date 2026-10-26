@@ -20,7 +20,7 @@ New Doc → Kafka → Flink → Write to v1 collection (prod)
                        → Write to v2_shadow collection (new)
 
 
-PHASE 2: BACKFILL (Day 1-10)
+PHASE 2: BACKFILL (Day 1-7)
 ────────────────────────────
 
 Spark job: 10% backfill daily, 10 days = 100% migrated
@@ -64,11 +64,12 @@ embedding_v2_enabled feature flag = false
 
 COST CONTROL
 ────────────
-- v2 is 3x more expensive per embedding
-- 1B chunks × $0.003 = $3M one-time backfill
+- v1 = $0.001/embedding, v2 = $0.003/embedding (3x more expensive)
+- Full backfill: 1B chunks × $0.003 = $3M one-time backfill
 - Wait, that's too much! OPTION:
-  - Selective backfill: only top 10M most-queried docs (90% of traffic)
-  - Cost: $30k instead of $3M
+  - Selective warm-start: only top 10M most-queried docs (90% of traffic)
+  - Cost: 10M × $0.003 = $30k instead of $3M
+  - Annual savings: v2 3x cost × 152M incremental queries/yr × $0.001 delta = $456k/year saved
 ```
 
 ---
@@ -109,7 +110,7 @@ COST CONTROL
 
 **A:** Dual-write via Kafka, Spark backfill, shadow read 7 days, cutover when Qdrant Recall > ES. Kept ES as backup 2 weeks. Feature flag rollback in 5 min.
 
-**R:** Zero downtime, latency 1.2s → 420ms, cost $50k → $12k/month ($456k/year saved). Runbook used by 2 teams.
+**R:** Zero downtime, latency 1.2s → 420ms, cost $50k → $12k/month ($456k/year saved: v2 3x cost × 152M incremental queries/yr × $0.001 delta). Runbook used by 2 teams.
 
 ---
 
@@ -213,20 +214,37 @@ Compare daily, alert if Recall drop > 2%
 ### Q3 SQL (10 min) - Shadow vs Prod Comparison
 
 ```sql
--- Compare shadow vs prod over last 7 days
+-- Per-query dual-read comparison: v1 vs v2_shadow side-by-side
 SELECT
-  model_version,
-  COUNT(*)                          AS query_count,
-  AVG(recall_at_8)                  AS avg_recall,
-  PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms) AS p95_latency,
-  AVG(cost_usd)                     AS avg_cost,
-  -- Win/loss: how often does shadow match or beat prod
-  SUM(CASE WHEN recall_at_8 >= 0.85 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS pct_above_sla
-FROM traces
-WHERE `timestamp` >= NOW() - INTERVAL '7' DAY
-  AND model_version IN ('v1', 'v2_shadow')
-GROUP BY model_version
-ORDER BY avg_recall DESC;
+  a.user_id,
+  a.score                          AS v1_score,
+  b.score                          AS v2_score,
+  ABS(a.score - b.score)           AS score_delta,
+  a.recall_at_8                    AS v1_recall,
+  b.recall_at_8                    AS v2_recall,
+  ABS(a.recall_at_8 - b.recall_at_8) AS recall_delta,
+  a.latency_ms                     AS v1_latency_ms,
+  b.latency_ms                     AS v2_latency_ms
+FROM results_v1 a
+JOIN results_v2 b
+  ON a.user_id = b.user_id
+ AND a.query_id = b.query_id
+WHERE a.`timestamp` >= NOW() - INTERVAL '7' DAY
+  AND (ABS(a.score - b.score) > 0.1
+       OR ABS(a.recall_at_8 - b.recall_at_8) > 0.02)
+ORDER BY score_delta DESC;
+
+-- Aggregate win/loss for promotion decision
+SELECT
+  COUNT(*) AS dual_read_count,
+  AVG(CASE WHEN b.recall_at_8 >= a.recall_at_8 THEN 1 ELSE 0 END) AS v2_win_rate,
+  AVG(ABS(a.score - b.score)) AS avg_score_delta,
+  AVG(b.latency_ms - a.latency_ms) AS latency_delta_ms
+FROM results_v1 a
+JOIN results_v2 b
+  ON a.user_id = b.user_id
+ AND a.query_id = b.query_id
+WHERE a.`timestamp` >= NOW() - INTERVAL '7' DAY;
 ```
 
 **Decision:** if `v2_shadow.avg_recall >= v1.avg_recall` for 7 days → promote.
@@ -334,16 +352,17 @@ KEY DESIGN DECISIONS
 PHASES
 ──────
 
-Phase 0: SELECTIVE BACKFILL
+Phase 0: SELECTIVE WARM-START (pre-migration, before Day 1)
   - Query traces for last 30 days
   - Top 10M docs by query count = 90% of traffic
-  - Backfill these first, ignore cold 990M
+  - Pre-embed these first into docs_v2_shadow, ignore cold 990M
+  - (Distinct from Phase 2: this is a targeted preload, not a full re-embed sweep)
 
 Phase 1: DUAL-WRITE (Day 1)
   - Flink writes new docs to BOTH v1 and v2_shadow
   - Verification: count matches every 5 min
 
-Phase 2: BACKFILL (Day 1-7)
+Phase 2: FULL BACKFILL (Day 1-7)
   - Spark: read top 10M from v1, re-embed with v2, write to v2_shadow
   - Estimated time: 10M docs × 5ms = 50k machine-seconds
   - 100 Spark cores → 8 min
@@ -421,9 +440,17 @@ const ModelUpgradeDashboard = () => {
                    && comparison?.days_above_threshold >= 7;
 
   const promote = async () => {
+    // Safety: require dual-read agreement > 99% for 24h, dry-run diff visible,
+    // and staged rollout 1% → 10% → 100% with auto-rollback on metric regression
+    if (comparison?.dual_read_agreement_24h < 0.99
+        || !comparison?.dry_run_diff_viewed
+        || !confirm("Stage rollout: 1% → 10% → 100% with auto-rollback on regression. Proceed?")) {
+      alert("Promote blocked: requires dual-read agreement > 99% for 24h, dry-run diff reviewed, and staged rollout confirmation.");
+      return;
+    }
     setActionPending(true);
     await fetch("/api/upgrade/promote", { method: "POST" });
-    alert("v2 promoted to 100%");
+    alert("v2 promoted to 100% via staged rollout");
   };
 
   const rollback = async () => {
