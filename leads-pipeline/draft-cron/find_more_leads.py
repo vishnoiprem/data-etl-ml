@@ -30,6 +30,16 @@ from urllib.parse import urlparse, urljoin
 
 import requests
 from html import unescape
+import traceback
+
+# Render cover letters at insert time so leads have a real [Avilx Pod Pitch]
+# subject prefix (otherwise _send_one falls back to "Avilx × {company}",
+# which lacks the mode tag and weakens open rates).
+try:
+    from cover_letter import render_for_mode as _render_for_mode
+except Exception:  # pragma: no cover — guard so a missing cover_letter.py
+                   # doesn't break the whole scraper pipeline
+    _render_for_mode = None
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
@@ -111,7 +121,7 @@ SOURCES = {
     },
     "hnhiring": {
         "type": "rss",
-        "url": "httpshnhiring.com/rss".replace("httpshnhiring", "https://hnhiring"),
+        "url": "https://hnhiring.com/rss",
     },
     "workatastartup": {
         "type": "rss",
@@ -465,7 +475,45 @@ def derive_email_from_company(company):
     reg = ".".join(domain.split(".")[-2:]) if domain.count(".") >= 1 else domain
     if reg in BOUNCE_DENY:
         return None
+    # Bounced-recently self-heal: if this domain has bounced at least
+    # once in the last 30 days, return None. The first time we tried it,
+    # the MX probe caught it; this check makes sure we don't try it
+    # again from the scraper (which is upstream of the SMTP path).
+    if _domain_bounced_recently(reg, days=30):
+        return None
     return f"careers@{domain}"
+
+
+def _domain_bounced_recently(domain: str, days: int = 30) -> bool:
+    """True if `domain` has ≥1 bounce in the last `days`.
+
+    Reads from the leads table. Cached for 1h per process to avoid
+    hammering the DB on every lead insert.
+    """
+    if not domain:
+        return False
+    now = time.time()
+    cache = _domain_bounced_recently._cache
+    if domain in cache and cache[domain][1] > now - 3600:
+        return cache[domain][0]
+    try:
+        from db.lead_store import get_cursor
+        with get_cursor() as cur:
+            cur.execute("""
+                SELECT 1 FROM leads
+                WHERE status = 'bounced'
+                  AND LOWER(contact_email) LIKE %s
+                  AND updated_at > NOW() - (%s || ' days')::INTERVAL
+                LIMIT 1
+            """, (f"%@{domain}", str(days)))
+            hit = cur.fetchone() is not None
+    except Exception:
+        hit = False  # fail open
+    cache[domain] = (hit, now)
+    return hit
+
+
+_domain_bounced_recently._cache = {}  # type: ignore[attr-defined]
 
 
 def scrape_remoteok():
@@ -1219,12 +1267,41 @@ def insert_leads(leads, dry=False):
             continue
         try:
             tid = short_id(co, role, em)
+            # Render the cover letter at insert time so the lead row
+            # carries a [Avilx Pod Pitch] subject + personalized body.
+            # Falls back to empty strings if cover_letter isn't importable.
+            # Without this, _send_one falls back to "Avilx × {company}"
+            # which lacks the mode prefix and tanks open rates.
+            if _render_for_mode is not None:
+                try:
+                    _subj, _body = _render_for_mode({
+                        "company": co,
+                        "role": role,
+                        "jd_text": ld.get("jd_text", "") or "",
+                        "apply_mode": "pitch_pod",
+                    })
+                except Exception:
+                    _subj, _body = "", ""
+            else:
+                _subj, _body = "", ""
             with get_cursor() as cur:
+                # ON CONFLICT targets the partial unique index
+                # `leads_company_email_role_unique` (defined in db/schema.sql).
+                # The WHERE predicate MUST match the index's predicate
+                # for PG to infer the right index — without it, you get
+                # "there is no unique or exclusion constraint matching
+                # the ON CONFLICT specification". This syntax requires
+                # PG 11+; older versions would need a different dedup
+                # approach (e.g. pre-SELECT only, no ON CONFLICT).
                 cur.execute("""
                     INSERT INTO leads
                         (tracking_id, company, role, contact_email, source_url,
-                         jd_text, source, status, created_at, updated_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', NOW(), NOW())
+                         jd_text, source, status, apply_mode,
+                         cover_letter_subject, cover_letter_body,
+                         created_at, updated_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', 'pitch_pod',
+                            %s, %s,
+                            NOW(), NOW())
                     ON CONFLICT (LOWER(company), LOWER(contact_email), LOWER(role))
                     WHERE contact_email IS NOT NULL
                       AND role IS NOT NULL
@@ -1234,7 +1311,8 @@ def insert_leads(leads, dry=False):
                 """, (tid, co[:80], role[:120], em,
                       ld.get("source_url", "")[:500],
                       (ld.get("jd_text") or "")[:1500],
-                      ld.get("source", "auto")))
+                      ld.get("source", "auto"),
+                      _subj, _body))
                 row = cur.fetchone()
             if row:
                 inserted += 1
@@ -1245,6 +1323,18 @@ def insert_leads(leads, dry=False):
         except Exception as e:
             errs += 1
             print(f"  ❌ {co[:30]} {e}")
+            # Log full traceback so silent SQL/DB regressions are visible.
+            # Without this, a broken ON CONFLICT or schema mismatch would
+            # just look like a flood of one-line errors and the operator
+            # would have no way to see the underlying cause.
+            try:
+                _err_log = HERE / "queue_errors.log"
+                with open(_err_log, "a") as _ef:
+                    _ef.write(f"[{datetime.now().isoformat()}] {co!r} {em!r}\n")
+                    _ef.write(traceback.format_exc())
+                    _ef.write("\n")
+            except Exception:
+                pass
     return inserted, skipped, errs
 
 
