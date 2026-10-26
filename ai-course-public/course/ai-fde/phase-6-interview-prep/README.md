@@ -186,19 +186,12 @@ Phase 1-5 made you a builder. Phase 6 makes you a candidate. The 4-step framewor
 **You don't interview for an FDE role. You interview the role. The right company lets you do the work Phase 1-5 trained you for: ship a system, hand it off, and train the next 3 FDEs.**
 
 ---
+
 **Length:** ~3 weeks full-time prep (assuming Phase 1-5 portfolio is complete)
 **Cost:** $0 (reuses the Phase 1-5 portfolio)
 **Goal:** You can put "FDE @ Anthropic / OpenAI / Palantir" on your LinkedIn.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
 
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21
 **License:** MIT — use freely in your own courses, prototypes, and products.  
