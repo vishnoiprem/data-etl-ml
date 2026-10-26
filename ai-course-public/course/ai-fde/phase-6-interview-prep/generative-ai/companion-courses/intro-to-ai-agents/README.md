@@ -98,16 +98,8 @@ Example: `L1-1-what-is-an-agent.md`, `L7-4-n8n-first-workflow.md`. Each file is 
 Total: ~205K words across 65 files. Each lecture is 3-4K words, structured as: FDE framing → 3 things you'll learn → concept → pattern → code → production addendum → cross-references → 3 interview questions → read next.
 
 **S1-9 are closed.** **S10 is a growing section** — start with L10-1 (the 5 trading workflows + 5 guardrails), then add L10-2 (options/derivatives workflows), L10-3 (multi-strategy portfolio workflows), etc. Use the directory as a self-paced FDE study guide. Replace the lecture titles with the source's exact titles when the source lecture list is available.
+
 ---
 
-**Last updated:** 2026-10-12  
+**Last updated:** 2026-10-21  
 **License:** MIT — use freely in your own courses, prototypes, and products.
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.
-
----
-
-**Last updated:** 2026-10-12  
-**License:** MIT — use freely in your own courses, prototypes, and products.  

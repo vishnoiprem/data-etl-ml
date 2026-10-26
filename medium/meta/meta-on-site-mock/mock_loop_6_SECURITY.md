@@ -86,9 +86,9 @@ Notification to user + security team
 >
 > 3. **Audit:** Every access is logged with `user_id`, `doc_ids`, `permission_used`. Suspicious patterns (e.g., user accessing 100 private docs in 1 hour) trigger alerts.
 >
-> Why filter before LLM? It saves LLM cost (smaller context) AND prevents leak via embedding inversion attacks — if the unfiltered embeddings leak, an attacker could reconstruct content. Filter at the storage layer."
+> Why filter before LLM? It saves LLM cost (smaller context) AND prevents three real leak vectors: (1) PII leak in retrieved context if an unauthorized user gets through, (2) prompt injection where a malicious chunk hijacks the model, (3) training data extraction where leaked content ends up in fine-tunes. Filter at the storage layer, not in Python."
 
-**L6 Keywords:** three layers, filter BEFORE LLM, audit log, embedding inversion.
+**L6 Keywords:** three layers, filter BEFORE LLM, audit log, defense in depth.
 
 ---
 
@@ -96,7 +96,7 @@ Notification to user + security team
 
 **L6 STAR (75 sec):**
 
-**S:** User requested GDPR delete. Their data spread across Qdrant (20 shards), Postgres, S3, ClickHouse traces. 5-day SLA, complex because of shards.
+**S:** User requested GDPR delete. Their data spread across Qdrant (20 shards), Postgres, S3, ClickHouse traces. 5-min rollback SLA, complex because of shards.
 
 **T:** Delete everywhere within 5 minutes, full audit trail.
 
@@ -615,7 +615,7 @@ Suspicious patterns:
 3. Aggregated statistics (query length, topic) kept for 30 days with PII scrubbed.
 4. PM agreed.
 
-**R:** Privacy compliant, analytics still work, avoided potential $500k GDPR fine. Privacy by design.
+**R:** Privacy compliant, analytics still work, avoided potential GDPR fines (up to 4% of global revenue). Privacy by design.
 
 ---
 

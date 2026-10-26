@@ -1,4 +1,6 @@
 # Q4 SQL answer: measure RAG quality from traces + feedback
+import pandas as pd
+
 eval_sql = """
 SELECT
     DATE(t.created_at) AS day,
