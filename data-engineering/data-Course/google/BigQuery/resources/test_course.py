@@ -121,6 +121,17 @@ class FakeClient:
     def get_table(self, table_id):
         return SimpleNamespace(full_table_id=table_id, table_type="TABLE")
 
+    def insert_rows_json(self, table_ref, rows, row_ids=None, **kwargs):
+        self.inserted = getattr(self, "inserted", [])
+        self.inserted.append((table_ref, rows, row_ids))
+        return []
+
+    def dataset(self, dataset_id):
+        return SimpleNamespace(
+            dataset_id=dataset_id,
+            table=lambda t: f"{dataset_id}.{t}",
+        )
+
     def list_datasets(self, project=None):
         return []
 
@@ -371,17 +382,27 @@ def _():
         for c in nb["cells"]
         if c["cell_type"] == "code" and "def capacity_vs_on_demand" in "".join(c["source"])
     )
-    ns: dict = {}
+    ns: dict = {"fmt_cost": lambda x: f"${x:.2f}"}
     exec(src, ns)
     fn = ns["capacity_vs_on_demand"]
 
-    # Cheap on-demand + many slots -> capacity wins
-    r = fn(500, slots=1000)
-    assert r["cheaper"] == "capacity", r
-    # Expensive on-demand + few slots -> on-demand wins
-    r = fn(10000, slots=100)
+    # At $0.04/slot-hour, one slot for a month (720 h) costs $28.80.
+    r = fn(1000, slots=100)
+    assert r["slot_hours"] == 100 * 720
+    assert r["capacity_cost"] == 100 * 720 * 0.04 == 2880.0, r
     assert r["cheaper"] == "on-demand", r
-    # Breakeven must be between the two
+
+    # Capacity wins once the on-demand bill exceeds the committed slot cost.
+    r = fn(5000, slots=100)
+    assert r["cheaper"] == "capacity", r
+
+    # Expensive on-demand + few slots -> on-demand wins
+    r = fn(500, slots=100)
+    assert r["cheaper"] == "on-demand", r
+
+    # Breakeven slots = on_demand / (rate * hours_per_month)
+    r = fn(2880, slots=100)
+    assert abs(r["breakeven_slots"] - 100.0) < 0.01, r
     assert 0 < r["breakeven_slots"] < 10_000
 
 
@@ -404,6 +425,7 @@ def _():
         },
         "T": "`p.d.t`",
         "functools": __import__("functools"),
+        "run_query": lambda sql, *a, **k: [(1,)],
     }
     exec(src, ns)
 
@@ -442,7 +464,11 @@ def _():
         for c in nb["cells"]
         if c["cell_type"] == "code" and "def row_hash" in "".join(c["source"])
     )
-    ns: dict = {"dt": __import__("datetime"), "hashlib": __import__("hashlib")}
+    ns: dict = {
+        "dt": __import__("datetime"),
+        "hashlib": __import__("hashlib"),
+        "client": FakeClient(),
+    }
     exec(src, ns)
     h1 = ns["row_hash"]("a", 1)
     h2 = ns["row_hash"]("a", 1)
@@ -466,7 +492,7 @@ def _():
         def query(self, sql, **kw):
             return FakeJob([(0,)], 0)
 
-    ns: dict = {"client": QC()}
+    ns: dict = {"client": QC(), "PROJECT_ID": "test-project"}
     exec(src, ns)
     checks = {"no_nulls": "SELECT COUNT(*) FROM t WHERE x IS NULL"}
     out = ns["run_dq_gates"](checks)
