@@ -6,7 +6,7 @@
 
 - The five properties that define an RDD, and how the lineage graph makes it fault tolerant
 - `persist` vs `checkpoint` vs `localCheckpoint` — and when lineage truncation is mandatory
-- Why Catalyst makes DataFrames 5–100× faster than the equivalent RDD code
+- Why Catalyst makes DataFrames several times faster than the equivalent RDD code
 - The honest answer to "when should I actually use an RDD?"
 - How to write vectorized `pandas_udf` UDFs with Arrow, and when they beat Python UDFs
 - Why `df.rdd.map(...)` is a self-inflicted wound, and what to do instead
@@ -148,7 +148,7 @@ stage 50 does not require re-running stages 1–49.
 | Serialization | Java/Pickle | Columnar (Tungsten) | Columnar (Tungsten) |
 | Language | Python, Scala, Java, R | Python, Scala, Java, R, SQL | Scala, Java |
 | UDF support | Python UDFs | Python UDFs, `pandas_udf`, native SQL | Scala/Java typed UDFs, `pandas_udf` |
-| Typical speed | Slow (5–100× slower than DataFrame) | Fast | Fast |
+| Typical speed | Slow (~9× slower than DataFrame for a group-and-sum; the gap widens with scale) | Fast | Fast |
 | Use it when | You need fine-grained control over partitioning, custom binary/record processing, non-tabular data, or a library API that only accepts RDDs | **Almost always** | Scala/Java teams wanting compile-time safety |
 
 Note the "Dataset" column: **`Dataset` is a Scala/Java API.** There is no Python
@@ -314,8 +314,9 @@ model fights you, and where you want explicit control over when work happens.
 
 - ❌ You just want to `map` and `filter` a table. Use `select`/`withColumn` and `filter`.
 - ❌ You want to join. DataFrame joins are Catalyst-optimized; RDD joins are not.
-- ❌ You want a groupBy. `reduceByKey` on an RDD is 10–100× slower than a DataFrame
-  `groupBy` with the same logic.
+- ❌ You want a groupBy. `reduceByKey` on an RDD is roughly **9× slower** than a DataFrame
+  `groupBy` with the same logic (measured on 2M rows, `local[4]`), because the RDD path
+  pays Python object serialization for every intermediate record.
 - ❌ The data is tabular and you want to write it out. RDDs lose the schema on write.
 
 💡 **A good heuristic:** if you can describe the operation in terms of *rows and columns*,
@@ -371,8 +372,8 @@ def write_partition(iterator):
 
 df.foreachPartition(write_partition)
 
-# ✅ toPandas(n) for a bounded sample
-sample = df.toPandas(n=10000)
+# ✅ bound the result first, then convert (Spark 3.5 has no toPandas(n=...))
+sample = df.limit(10000).toPandas()
 ```
 
 `toLocalIterator()` is the correct answer when you genuinely need row-by-row processing in

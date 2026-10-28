@@ -496,17 +496,44 @@ df.filter(F.col("amount") > 100).count()            # reuses the cache
 default for `cache()` is `MEMORY_AND_DISK` too, since Spark 2.0). `persist()` with no
 argument in PySpark also defaults to `MEMORY_AND_DISK`.
 
-| Storage level | Memory | Disk | Serialized | Notes |
-|---------------|--------|------|------------|-------|
-| `MEMORY_ONLY` | ✅ | ❌ | ❌ | Fastest. Spills to disk if the block doesn't fit — and that spill is *not* stored. Recomputed on demand. |
-| `MEMORY_ONLY_SER` | ✅ | ❌ | ✅ | Compressed in memory. Less memory, slower reads. |
-| `MEMORY_AND_DISK` | ✅ | ✅ | ❌ | **The default, and the right default.** Only the parts that don't fit go to disk. |
-| `MEMORY_AND_DISK_SER` | ✅ | ✅ | ✅ | Most memory-efficient, CPU cost of (de)serialization. |
-| `DISK_ONLY` | ❌ | ✅ | ✅ | Only for very large cached data. |
-| `DISK_ONLY_2` | ❌ | ✅ | ✅ | Two copies on disk — survives one disk failure. |
-| `MEMORY_ONLY_2`, `MEMORY_AND_DISK_2` | ✅ | ✅ | — | Two replicas on two executors — survives executor loss. |
-| `NONE` | — | — | — | Don't cache; recompute every time. |
-| `OFF_HEAP` | ✅ (off-heap) | ✅ | ✅ | For datasets larger than the heap. Expert territory. |
+**The exact PySpark `StorageLevel` constants** (verified against Spark 3.5):
+
+| PySpark constant | Printed as | Memory | Disk | Serialized | Notes |
+|------------------|------------|--------|------|------------|-------|
+| `MEMORY_ONLY` | `Memory Serialized 1x Replicated` | ✅ | ❌ | ✅ | Compressed in memory. Spills to disk if the block doesn't fit — and that spill is *not* stored. Recomputed on demand. |
+| `MEMORY_AND_DISK` | `Disk Memory Serialized 1x Replicated` | ✅ | ✅ | ✅ | **The default, and the right default.** Only the parts that don't fit go to disk. |
+| `MEMORY_AND_DISK_DESER` | `Disk Memory Deserialized 1x Replicated` | ✅ | ✅ | ❌ | Uncompressed objects in memory. Fastest to read; most memory-hungry. |
+| `DISK_ONLY` | `Disk Serialized 1x Replicated` | ❌ | ✅ | ✅ | Only for very large cached data. |
+| `DISK_ONLY_2` | `Disk Serialized 2x Replicated` | ❌ | ✅ | ✅ | Two copies on disk — survives one disk failure. |
+| `DISK_ONLY_3` | `Disk Serialized 3x Replicated` | ❌ | ✅ | ✅ | Three copies. |
+| `MEMORY_ONLY_2` | `Memory Serialized 2x Replicated` | ✅ | ❌ | ✅ | Two replicas — survives executor loss. |
+| `MEMORY_AND_DISK_2` | `Disk Memory Serialized 2x Replicated` | ✅ | ✅ | ✅ | Two replicas of everything — survives executor loss. |
+| `OFF_HEAP` | `Disk Memory OffHeap Serialized 1x Replicated` | ✅ (off-heap) | ✅ | ✅ | For datasets larger than the heap. Expert territory. |
+| `NONE` | `Serialized 1x Replicated` | — | — | — | Don't cache; recompute every time. |
+
+⚠️ **The PySpark names differ from the Scala names, and the difference is a trap.** Many
+blog posts and older tutorials list Scala's constants — `MEMORY_ONLY_SER`,
+`MEMORY_AND_DISK_SER`, and `MEMORY_AND_DISK` (deserialized). In **PySpark those do not
+exist**:
+
+```python
+from pyspark import StorageLevel
+StorageLevel.MEMORY_ONLY_SER        # AttributeError: type object 'StorageLevel'
+                                    #   has no attribute 'MEMORY_ONLY_SER'
+```
+
+⚠️ **And note the surprise in `MEMORY_ONLY`:** in PySpark it is the **Serialized** level
+(`Memory Serialized`), *not* the deserialized one. Scala's `MEMORY_ONLY` means
+deserialized; PySpark's does not. The deserialized variant in PySpark is
+`MEMORY_AND_DISK_DESER`. If you are porting Scala code, this is where it breaks.
+
+💡 **In practice, you should use one of exactly three levels:**
+
+| Use | Level |
+|-----|-------|
+| The default — you want the standard behaviour | `StorageLevel.MEMORY_AND_DISK` |
+| You want the fastest reads and the data fits in memory | `StorageLevel.MEMORY_AND_DISK_DESER` |
+| You want to survive executor loss and the data is huge | `StorageLevel.DISK_ONLY_2` or `MEMORY_AND_DISK_2` |
 
 ⚠️ **"Cache or you'll recompute" is a real, measurable, expensive mistake.** The classic
 failure mode:
@@ -585,13 +612,39 @@ table.
 ### `toPandas()` and the driver-memory boundary
 
 ```python
-pdf = df.toPandas()             # entire DataFrame into driver memory as a pandas DataFrame
-pdf = df.toPandas(n=100)        # first n rows only
+pdf = df.toPandas()                          # entire DataFrame into driver memory
+
+# Spark 3.5 has NO toPandas(n=...) — take a bounded sample FIRST:
+sample = df.limit(100).toPandas()            # first 100 rows only
 ```
 
 `toPandas()` **collects the whole result to the driver** and converts it. It uses Arrow when
 `spark.sql.execution.arrow.pyspark.enabled=true` (much faster and more memory-efficient than
 the legacy path), but it is still a full pull into a single process.
+
+⚠️ **`toPandas(n=...)` does not exist in Spark 3.5.** The `n` argument was added in
+**Spark 4.0**. Calling it on the Dataproc 2.2 image raises:
+
+```
+TypeError: PandasConversionMixin.toPandas() got an unexpected keyword argument 'n'
+```
+
+On Spark 3.5, bound the result **before** converting — with `limit()`, `sample()`, or a
+filter — so the driver never receives more than you intended:
+
+```python
+df.limit(100).toPandas()
+df.sample(withReplacement=False, fraction=0.01).toPandas()
+df.filter(F.col("order_date") == "2026-01-01").toPandas()
+```
+
+💡 **A safer pattern that cannot blow up the driver** — iterate instead of collecting:
+
+```python
+# Memory-safe: one partition at a time, never all of it at once
+for pdf in df.toLocalIterator():     # returns pandas DataFrames, one per partition
+    process(pdf)
+```
 
 ⚠️ **`toPandas()` is the most common cause of driver OOM in this ecosystem.** It is fine for
 a 10 MB result. It is fatal for a 10 GB one. If the driver heap is 8 GB and your result is
@@ -1056,9 +1109,13 @@ pdf = df.toPandas()
 print(type(pdf), pdf.shape)
 print(pdf.dtypes)
 
-# The n-argument version only pulls n rows
-small = df.toPandas(n=3)
+# Spark 3.5: bound the result BEFORE converting — there is no toPandas(n=...)
+small = df.limit(3).toPandas()
 print(small.shape)
+
+# The memory-safe alternative: iterate one partition at a time
+for row in df.toLocalIterator():
+    print(row["order_id"], row["amount"])
 ```
 
 ### Step 10 — Submit it to Dataproc

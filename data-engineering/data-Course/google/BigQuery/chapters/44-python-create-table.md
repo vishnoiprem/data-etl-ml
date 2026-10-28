@@ -391,6 +391,30 @@ except NotFound:
 2. **Schema round-trip.** Write `schema_to_json(table)` that exports a table's schema back to the
    JSON format your loader accepts, including nested fields. Prove the round trip is lossless.
 
+   ⚠️ **Both directions must be recursive.** A non-recursive `schema_from_json` that rebuilds only
+   one level of nesting will silently drop the children of a `RECORD` that contains another
+   `RECORD` — and a "lossless" check that only compares top-level field names will still pass.
+   Compare **every field name at every level**, and compare nesting **depth**:
+
+   ```python
+   def depth(fields):
+       if not fields:
+           return 0
+       return 1 + max(depth(f.fields) for f in fields)
+
+
+   def field_names(fields):
+       names = []
+       for f in fields or []:
+           names.append(f.name)
+           names.extend(field_names(f.fields))
+       return names
+
+
+   assert field_names(original) == field_names(round_tripped), "field names lost"
+   assert depth(original) == depth(round_tripped), "nesting depth lost"
+   ```
+
 3. **CSV → Parquet → table.** Build a pipeline that converts a CSV in GCS to Parquet and loads
    it, and compare load times against a direct CSV load.
 
