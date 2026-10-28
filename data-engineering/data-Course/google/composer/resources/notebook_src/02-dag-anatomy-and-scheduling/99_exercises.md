@@ -1,0 +1,5 @@
+## Exercises
+
+1. **Schedule simulator extension.** Extend `parse_schedule` to handle `"@hourly"` and a 5-field cron of the form `"0 * * * *"` (hourly). Then simulate a `@hourly` DAG with `start_date=2026-01-15`, `now=2026-01-15 06:30`, `catchup=True`, and report how many runs are created and what their logical dates are.
+2. **Harder — a week of catchup.** Simulate `start_date="2026-01-01"`, `schedule="@daily"`, `now="2026-01-08 12:00"` with `catchup=True`. List every logical date. Then explain, in prose, what would happen to a BigQuery table if each of those runs did a `WRITE_TRUNCATE` load, and what would happen if each did a `WRITE_APPEND`.
+3. **Harder — partition math.** Using `logical_date_window` and `partition_for_date` from `pipeline_logic`, write a function `partitions_for_backfill(start, end)` that returns the list of partition decorators for every daily interval in `[start, end)`. For `start="2026-01-13"` and `end="2026-01-16"`, what should it return, and why is the last element exclusive?
