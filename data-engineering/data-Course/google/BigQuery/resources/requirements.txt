@@ -1,0 +1,18 @@
+# Core — required for every chapter
+google-cloud-bigquery>=3.11.0
+google-cloud-storage>=2.14.0
+google-cloud-pubsub>=2.21.0
+
+# Data handling
+pandas>=2.1.0
+pyarrow>=14.0.0
+db-dtypes>=1.2.0
+numpy>=1.26.0
+
+# Notebooks
+jupyterlab>=4.0.0
+ipykernel>=6.29.0
+jupyterlab-git>=0.50.0
+
+# Environment
+python-dotenv>=1.0.0

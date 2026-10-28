@@ -1,9 +1,13 @@
-# Prem Vishnoi — Data, ETL, ML & AI Engineer for Hire
+# Prem Vishnoi — Data, ETL, ML and AI Exprt
 
 > **I ship production data pipelines and LLM systems for banks, fintechs, and AI startups.**
+> 
 > 8+ years · Standard Chartered AML · 15 countries · 50M+ daily transactions · T+1 SLA.
+> 
 > Plus a full LLM stack: RAG, agents, eval, cost-per-query dashboards.
+> 
 > **Apache Spark · Flink · Kafka · AWS Bedrock · LangChain · LangGraph · RAG · Multi-Agent**
+> 
 >
 > 74 world-top reference patterns in the tables below. If you've used the system at Netflix, Stripe, Anthropic, Databricks, Bloomberg, or OpenAI, I can defend how I'd build it, run it, and cost it.
 
@@ -42,7 +46,7 @@
 
 ---
 
-## 👋 If you're hiring, looking for a contractor, or want to chat about a project — start here.
+## 👋 If you are hiring or building, looking for a contractor, or want to chat about a project — start here.
 
 I take on 3 kinds of work. Pick the one that fits you.
 
