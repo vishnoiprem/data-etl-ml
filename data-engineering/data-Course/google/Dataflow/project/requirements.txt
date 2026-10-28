@@ -1,0 +1,17 @@
+# Core — Apache Beam with the GCP extras
+apache-beam[gcp]>=2.53.0
+
+# Google Cloud clients used by the sinks and the setup helpers
+google-cloud-bigquery>=3.11.0
+google-cloud-storage>=2.14.0
+google-cloud-pubsub>=2.21.0
+google-cloud-dataflow>=0.13.0
+
+# Testing
+pytest>=8.0.0
+
+# Notebook environment
+jupyterlab>=4.0.0
+ipykernel>=6.29.0
+nbformat>=5.9.0
+nbclient>=0.8.0
