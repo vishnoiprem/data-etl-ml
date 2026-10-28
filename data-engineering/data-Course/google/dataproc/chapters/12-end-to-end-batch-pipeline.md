@@ -9,8 +9,7 @@
 - Two orchestrators — **Dataproc Workflows** (YAML, one auto-provisioned cluster) and **Cloud Composer** (Airflow DAGs) — and when each is the right tool
 - How to write a real, runnable `job_pipeline.py` with staged functions, a `--run-date` argument, structured logging, per-stage timing, and guaranteed `spark.stop()`
 - **Idempotency**: partition overwrite by run date, `partitionOverwriteMode=DYNAMIC`, write-then-swap, and why a rerun of the same date must produce the same result
-- **Data quality gates** that physically prevent a bad load from reaching BigQuery
-- Error handling, task retries, atomic GCS writes, and how to make a failed workflow resumable
+- **Data quality gates** that physically prevent a bad load from reaching BigQuery, plus error handling, task retries, and resumability
 - Cost optimization and observability: preemptible workers, shuffle partition tuning, `maxBytesBilled`, Cloud Logging filters, and custom Cloud Monitoring metrics
 
 ---
@@ -203,7 +202,7 @@ jobs:
       args:
         - "gs://your-bucket/jobs/job_pipeline.py"
         - "--run-date"
-        - "${DATAPROC_WORKFLOW_GS_URI}"   # substituted per run
+        - "${run_date}"
       pythonFileUris:
         - "gs://your-bucket/jobs/lib/quality.py"
       properties:
@@ -211,6 +210,21 @@ jobs:
         spark.sql.sources.partitionOverwriteMode: "DYNAMIC"
         spark.executor.instances: "8"
         spark.executor.memory: "4g"
+
+  # A JVM/Scala job in the same workflow. Same `spark:` block; the presence
+  # of mainJarFileUri + mainClass is what distinguishes it from PySpark.
+  - jobName: "build-lookup-index"
+    labels:
+      pipeline: "daily-orders"
+      stage: "index"
+    spark:
+      args:
+        - "gs://your-bucket/jobs/build_index.py"
+        - "${run_date}"
+      mainJarFileUri: "gs://your-bucket/jars/example.jar"
+      mainClass: "com.example.BuildIndex"
+      properties:
+        spark.executor.instances: "4"
 
   - jobName: "publish-gold"
     labels:
@@ -230,10 +244,10 @@ jobs:
 ```
 
 Note the shape carefully: the `spark:` block takes `args`, `pythonFileUris`,
-`properties`, and (for JVM jobs) `mainJarFileUri`. There is **no** `pysparkSubmit` key —
-the workflow template API uses the same `spark` block for PySpark and JVM jobs, and
-distinguishes them by whether you supply `mainJarFileUri`/`mainClass` (JVM) or not
-(PySpark). Getting this wrong yields a workflow that submits successfully and then fails
+`properties`, and (for JVM jobs) `mainJarFileUri` + `mainClass`. There is **no**
+`pysparkSubmit` key — the workflow template API uses the same `spark` block for PySpark
+and JVM jobs, and distinguishes them by whether you supply `mainJarFileUri`/`mainClass`
+(JVM) or not (PySpark). Getting this wrong yields a workflow that submits successfully and then fails
 with a confusing `mainClass not found` or `mainJarFileUri is required`.
 
 Submitting it:
@@ -243,6 +257,7 @@ gcloud dataproc workflow submit \
   --region=us-central1 \
   --workflows.gcs_uri=gs://your-bucket/workflows/DataprocWorkflow.yaml \
   --name=orders-daily-2026-10-28 \
+  --parameters=run_date=2026-10-28 \
   --labels=pipeline=daily-orders,run_date=2026-10-28
 ```
 
@@ -310,8 +325,11 @@ use that.)
 ```python
 # dags/daily_orders_pipeline.py
 import datetime as dt
+
 from airflow import DAG
 from airflow.providers.google.cloud.operators.dataproc import (
+    DataprocCreateClusterOperator,
+    DataprocDeleteClusterOperator,
     DataprocSubmitJobOperator,
 )
 
@@ -319,15 +337,17 @@ PROJECT_ID = "your-project-id"
 REGION = "us-central1"
 JOB_BUCKET = "gs://your-bucket/jobs"
 
+
 def ds_nodash(ds):
-    """Airflow logical date (2026-10-28) → compact form for the run date."""
+    """Airflow logical date (2026-10-28) → compact form for a cluster name."""
     return ds.replace("-", "")
+
 
 with DAG(
     dag_id="daily_orders_pipeline",
     description="GCS → Dataproc → BigQuery daily orders pipeline",
-    schedule_interval="0 2 * * *",   # Airflow 2.0–2.3
-    # schedule="0 2 * * *",          # Airflow 2.4+ (use this name going forward)
+    schedule="0 2 * * *",          # Airflow 2.4+
+    # schedule_interval="0 2 * * *",  # Airflow 2.0–2.3 (renamed in 2.4)
     start_date=dt.datetime(2026, 1, 1),
     catchup=False,
     max_active_runs=1,
@@ -339,7 +359,29 @@ with DAG(
     },
 ) as dag:
 
-    # ── Job 1: bronze + silver + gold load, single entry point script ──────────
+    # ── 1. Create a temporary cluster for this run ──────────────────────────
+    create_cluster = DataprocCreateClusterOperator(
+        task_id="create_cluster",
+        project_id=PROJECT_ID,
+        region=REGION,
+        cluster_name="orders-{{ ds_nodash }}",
+        image_version="2.2-debian12",
+        config={
+            "masterConfig": {"machineType": "n2-standard-4", "numInstances": 1},
+            "workerConfig": {
+                "machineType": "n2-standard-4",
+                "numInstances": 2,
+                "secondaryWorkerConfig": {
+                    "numInstances": 4,
+                    "type": "SPOT",           # preemptible workers
+                },
+            },
+            "configBucket": "your-bucket",
+            "labels": {"pipeline": "daily_orders"},
+        },
+    )
+
+    # ── 2. Run the pipeline (extract → transform → quality → load) ─────────
     run_pipeline = DataprocSubmitJobOperator(
         task_id="run_pipeline",
         project_id=PROJECT_ID,
@@ -360,84 +402,10 @@ with DAG(
                 },
             }
         },
-        # The cluster is created by the operator's own lifecycle management
-        # (see the cluster_operator below) or by a workflow template.
         labels={"pipeline": "daily_orders", "run_date": "{{ ds }}"},
     )
-```
 
-`"{{ ds }}"` is the Airflow **logical date** template — a `YYYY-MM-DD` string. It is
-resolved by Airflow at task-instance time, so the DAG body is rendered per run. In Airflow
-2.2+ the templated field on `DataprocSubmitJobOperator` for the job config is `job_config`,
-and Jinja templates inside it are rendered.
-
-⚠️ **Airflow's `schedule_interval` vs `schedule`.** In Airflow 2.0–2.3 the parameter is
-`schedule_interval`; in Airflow 2.4+ it was renamed to `schedule` and `schedule_interval`
-is deprecated (still accepted, but emits a deprecation warning). For new code targeting
-Composer 2, use `schedule`. For code that must run on 2.0–2.3, use `schedule_interval`.
-They are mutually exclusive — passing both raises an error.
-
-For a pipeline that needs a **temporary cluster per run**, the pattern is
-create → submit → delete:
-
-```python
-from airflow.providers.google.cloud.operators.dataproc import (
-    DataprocCreateClusterOperator,
-    DataprocDeleteClusterOperator,
-    DataprocSubmitJobOperator,
-)
-import datetime as dt
-
-with DAG(
-    dag_id="daily_orders_pipeline",
-    schedule="0 2 * * *",
-    start_date=dt.datetime(2026, 1, 1),
-    catchup=False,
-    max_active_runs=1,
-    tags=["dataproc", "etl"],
-) as dag:
-
-    create_cluster = DataprocCreateClusterOperator(
-        task_id="create_cluster",
-        project_id=PROJECT_ID,
-        region=REGION,
-        cluster_name="orders-{{ ds_nodash }}",
-        image_version="2.2-debian12",
-        config={
-            "masterConfig": {
-                "machineType": "n2-standard-4",
-                "numInstances": 1,
-            },
-            "workerConfig": {
-                "machineType": "n2-standard-4",
-                "numInstances": 2,
-                "secondaryWorkerConfig": {
-                    "numInstances": 4,
-                    "type": "SPOT",           # preemptible
-                },
-            },
-            "configBucket": "your-bucket",
-            "labels": {"pipeline": "daily_orders"},
-        },
-    )
-
-    run_pipeline = DataprocSubmitJobOperator(
-        task_id="run_pipeline",
-        project_id=PROJECT_ID,
-        region=REGION,
-        job_config={
-            "spark": {
-                "args": [
-                    "gs://your-bucket/jobs/job_pipeline.py",
-                    "--run-date", "{{ ds }}",
-                ],
-                "properties": {
-                    "spark.sql.shuffle.partitions": "200",
-                },
-            }
-        },
-    )
-
+    # ── 3. Tear the cluster down, whatever happened ─────────────────────────
     delete_cluster = DataprocDeleteClusterOperator(
         task_id="delete_cluster",
         project_id=PROJECT_ID,
@@ -449,11 +417,28 @@ with DAG(
     create_cluster >> run_pipeline >> delete_cluster
 ```
 
+`"{{ ds }}"` is the Airflow **logical date** template — a `YYYY-MM-DD` string, resolved by
+Airflow at task-instance time. The `job_config` field on `DataprocSubmitJobOperator` is
+templated, so Jinja inside it is rendered per run. That is how a single DAG body handles
+every run date without any code change.
+
+⚠️ **Airflow's `schedule_interval` vs `schedule`.** In Airflow 2.0–2.3 the parameter is
+`schedule_interval`; in Airflow 2.4+ it was renamed to `schedule` and `schedule_interval`
+is deprecated (still accepted, but emits a deprecation warning). For new code targeting
+Composer 2, use `schedule`. For code that must run on 2.0–2.3, use `schedule_interval`.
+They are mutually exclusive — passing both raises an error.
+
 💡 **`trigger_rule="all_done"` on the delete task is essential.** With the default
 `all_success`, a failed pipeline leaves the cluster running and billing you until someone
 notices. `all_done` means the cluster is torn down regardless of the upstream outcome.
 (A safer variant is `trigger_rule="all_done"` plus a `DataprocDeleteClusterOperator` with
 a `timeout` so a hung delete does not block the DAG forever.)
+
+💡 **To submit to an *existing* cluster instead of managing one, drop the create and
+delete tasks and set `region` plus a `cluster_name` on the submit operator.** For a
+"submit to a persistent cluster" model, use `DataprocSubmitJobOperator` with the
+`gcp_conn_id` and an explicit `cluster_name` — but note this couples the DAG to a
+long-lived cluster, which is a cost and an operational decision, not a default.
 
 💡 **`max_active_runs=1` is a correctness setting, not a politeness setting.** If two
 runs of the same DAG overlap, they may process the same run date concurrently and race on
@@ -714,37 +699,45 @@ Stage order:
 
 import argparse
 import datetime as dt
-import json
 import logging
-import os
 import sys
 import time
 import uuid
 
-from pyspark.sql import SparkSession, functions as F, types as T
-from pyspark.sql.utils import AnalysisException
+from pyspark.sql import SparkSession, Window, functions as F, types as T
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Logging: structured, single-line, greppable. Everything carries run_id.
+# Logging: structured, single-line, greppable. Every record carries run_id,
+# run_date, and the current stage, so Cloud Logging can filter on them.
 # ─────────────────────────────────────────────────────────────────────────────
 LOG_FORMAT = (
     "%(asctime)s %(levelname)-8s [%(name)s] "
     "run_id=%(run_id)s run_date=%(run_date)s stage=%(stage)s :: %(message)s"
 )
 
-
-class RunContext:
-    """Context injected into every log record for this pipeline execution."""
-
-    def __init__(self, run_id: str, run_date: str, stage: str = "init"):
-        self.run_id = run_id
-        self.run_date = run_date
-        self.stage = stage
+# Mutable context for the current execution, shared by all loggers.
+CTX = {"run_id": "-", "run_date": "-", "stage": "init"}
 
 
-def get_logger(name: str) -> logging.Logger:
-    """Return a logger that always has run_id/run_date/stage attached."""
-    ctx = getattr(get_logger, "_ctx", None) or RunContext("-", "-")
+class ContextLogger(logging.LoggerAdapter):
+    """
+    Adapter that injects the run context into every log record.
+
+    LoggerAdapter.process() merges self.extra into the record's `extra`
+    dict; overriding it lets us pull the *current* values from CTX on
+    every call, so a stage change is reflected in subsequent lines.
+    """
+
+    def process(self, msg, kwargs):
+        extra = dict(self.extra or {})
+        extra.update(CTX)
+        extra.update(kwargs.get("extra") or {})
+        kwargs["extra"] = extra
+        return msg, kwargs
+
+
+def get_logger(name: str) -> ContextLogger:
+    """Return a context-aware logger writing to stdout."""
     logger = logging.getLogger(name)
     if not logger.handlers:
         handler = logging.StreamHandler(sys.stdout)
@@ -752,30 +745,13 @@ def get_logger(name: str) -> logging.Logger:
         logger.addHandler(handler)
         logger.setLevel(logging.INFO)
         logger.propagate = False
-    # Attach the context as a filter so it applies to every record
-    for h in logger.handlers:
-        if not any(isinstance(f, RunContextFilter) for f in h.filters):
-            h.addFilter(RunContextFilter())
-    return logger
-
-
-class RunContextFilter(logging.Filter):
-    """Injects the current run context onto each LogRecord."""
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        ctx = getattr(get_logger, "_ctx", None) or RunContext("-", "-")
-        record.run_id = ctx.run_id
-        record.run_date = ctx.run_date
-        record.stage = ctx.stage
-        return True
+    return ContextLogger(logger, {})
 
 
 def set_stage(stage: str) -> None:
     """Advance the run context to a new stage (affects subsequent log lines)."""
-    ctx = getattr(get_logger, "_ctx", None)
-    if ctx is not None:
-        ctx.stage = stage
-    logging.getLogger("pipeline").info("── stage %s ──", stage)
+    CTX["stage"] = stage
+    get_logger("pipeline").info("── stage %s ──", stage)
 
 
 def elapsed(t0: float) -> float:
@@ -904,7 +880,7 @@ def write_gate_report(spark, run_date, summary, config):
     rows = [
         {
             "run_date": run_date,
-            "run_id": getattr(get_logger, "_ctx").run_id,
+            "run_id": CTX["run_id"],
             "gate": name,
             "passed": passed,
             "detail": detail,
@@ -1020,6 +996,7 @@ def transform_bronze_to_silver(spark, run_date, config) -> str:
         if c not in available:
             select_cols.append(F.lit(None).cast(target_schema[c].dataType).alias(c))
 
+
     silver_df = bronze_df.select(*select_cols)
 
     # ── 2. Data cleaning rules ─────────────────────────────────────────────
@@ -1046,7 +1023,7 @@ def transform_bronze_to_silver(spark, run_date, config) -> str:
     before_dedup = silver_df.count()
     silver_df = (
         silver_df.withColumn("_rn", F.row_number().over(
-            W = F.Window().partitionBy("order_id").orderBy(F.col("order_ts").desc_nulls_last())
+            Window.partitionBy("order_id").orderBy(F.col("order_ts").desc_nulls_last())
         ))
         .filter(F.col("_rn") == 1)
         .drop("_rn")
@@ -1144,7 +1121,7 @@ def main() -> int:
         return 2
 
     run_id = f"{uuid.uuid4().hex[:8]}-{dt.datetime.utcnow():%Y%m%dT%H%M%SZ}"
-    get_logger._ctx = RunContext(run_id=run_id, run_date=args.run_date, stage="init")
+    CTX.update(run_id=run_id, run_date=args.run_date, stage="init")
     log = get_logger("pipeline")
 
     config = {
@@ -1395,7 +1372,7 @@ gcloud dataproc jobs submit pyspark gs://$BUCKET/jobs/job_pipeline.py \
 
 `spark.properties`:
 
-```properties
+```text
 spark.executor.instances=4
 spark.executor.cores=2
 spark.executor.memory=4g
@@ -1482,45 +1459,35 @@ gcloud scheduler jobs create http daily-orders-workflow \
   --location=us-central1 \
   --schedule="0 2 * * *" \
   --time-zone="America/Los_Angeles" \
-  --description="Trigger the daily orders Dataproc workflow" \
   --uri="https://workflows.googleapis.com/v1/projects/$PROJECT_ID/locations/$REGION/workflows:submit" \
   --http-method=POST \
   --headers="Content-Type=application/json" \
   --body='{
     "templateUri": "gs://BUCKET/workflows/DataprocWorkflow.yaml",
-    "operation": {
-      "operationTimeout": "6h",
-      "labels": {"pipeline": "daily-orders"}
-    },
+    "operation": {"operationTimeout": "6h"},
     "labels": {"pipeline": "daily-orders"},
-    "parameters": {"run_date": "'$(date -u +%Y-%m-%d)'"}
+    "parameters": {"run_date": "RUN_DATE_PLACEHOLDER"}
   }'
 ```
 
 ⚠️ **The `run_date` in a Cloud Scheduler body must be computed at request time**, not at
-creation time. `--body` is a literal string, so `$(date ...)` inside a single-quoted
-string is evaluated by the shell *when you create the job* — it becomes a fixed date and
-the schedule will reprocess that same date forever. Use the `date` shell substitution
-outside the quotes, or use a placeholder that the workflow resolves. The most robust
-option is to omit `run_date` from the body and let the pipeline default to
-"yesterday" computed inside the job, or to use Composer, where `{{ ds }}` is resolved
-per run by Airflow.
+creation time. `--body` is a literal string, so `$(date ...)` inside single quotes is
+evaluated by the shell *when you create the job* — it becomes a fixed date and the
+schedule reprocesses that same date forever. The reliable fix is to let the pipeline
+default to "yesterday" when `--run-date` is omitted, or to use Composer, where `{{ ds }}`
+is resolved per run by Airflow.
 
 **Option B — Cloud Scheduler → Composer DAG (recommended for anything non-trivial).**
 
 ```bash
-gcloud composer environments describe composer-env \
-  --region=$REGION --format="value(config.webServerAccessControl)"
-
-# The Airflow REST API for triggering a DAG with a logical date
+# Trigger the DAG with a specific logical date (this is also your backfill tool)
 gcloud composer environments run daily_orders_pipeline \
   --region=$REGION \
   --run-date="$RUN_DATE"
-```
 
-`gcloud composer environments run` triggers the DAG with a specific logical date, which
-is exactly what you want for backfills. For a pure cron trigger, point Cloud Scheduler at
-the Airflow REST API with a bearer token from the Composer service account.
+# The DAG's own `schedule="0 2 * * *"` handles the recurring trigger.
+# Cloud Scheduler is only needed for a cron cadence Airflow can't express.
+```
 
 💡 **Composer gives you `{{ ds }}` for free** — the logical date is resolved per run and
 is always the intended data date, with no shell-quoting hazards. This is the main
@@ -1540,73 +1507,51 @@ Monitoring API:
 
 ```python
 # lib/monitoring.py
-from google.cloud import monitoring_v3
-from google.api.distribution_pb2 import Distribution
-from google.api.metric_pb2 import Metric
-from google.api.label_pb2 import Label
-from google.api.monitored_resource_pb2 import MonitoredResource
-from google.protobuf.timestamp_pb2 import Timestamp
+"""Emit custom pipeline metrics to Cloud Monitoring."""
 import time
 
-
-def build_client(project_id: str):
-    return monitoring_v3.MetricServiceClient()
-
-
-def monitored_resource(project_id: str, cluster_name: str) -> MonitoredResource:
-    """Dataproc clusters expose this monitored resource type."""
-    return MonitoredResource({
-        "type": "cloud_dataproc_cluster",
-        "labels": {
-            "project_id": project_id,
-            "location": "global",
-            "cluster_name": cluster_name,
-        },
-    })
+from google.api.metric_pb2 import Metric
+from google.cloud import monitoring_v3
+from google.protobuf.timestamp_pb2 import Timestamp
 
 
-def write_gauge(client, project_id, cluster_name, metric_type, value, labels):
-    """Write a single-point GAUGE measurement to Cloud Monitoring."""
-    now = time.time()
-    series = monitoring_v3.TimeSeries()
-    series.metric.type = metric_type
-    for k, v in labels.items():
-        series.metric.labels[k] = v
-    series.resource.type = "cloud_dataproc_cluster"
-    series.resource.labels["project_id"] = project_id
-    series.resource.labels["location"] = "global"
-    series.resource.labels["cluster_name"] = cluster_name
-    series.metric.kind = Metric.GAUGE
-    series.metric.value_type = Metric.ValueType.INT64
-    series.points[0].value.int64_value = int(value)
-    series.points[0].interval.end_time = Timestamp(seconds=int(now))
-
-    client.create_time_series(
-        name=client.project_path(project_id),
-        time_series=[series],
-    )
-
-
-def write_pipeline_metrics(project_id, cluster_name, run_date, run_id, metrics):
+def write_pipeline_metrics(project_id, cluster_name, run_date, metrics):
     """
-    metrics: dict like {"rows_in": 1000, "rows_out": 980, "bytes_written": 12345}
-    Emitted as custom metrics:
+    Write one GAUGE time series per metric to the Cloud Monitoring API.
+
+    metrics: {"rows_in": 1000, "rows_out": 980, "bytes_written": 12345}
+    Produces:
       custom.googleapis.com/pipeline/rows_in
       custom.googleapis.com/pipeline/rows_out
       custom.googleapis.com/pipeline/bytes_written
+
+    The monitored resource type is "cloud_dataproc_cluster"; Dataproc
+    clusters surface there with a global location label.
     """
-    client = build_client(project_id)
-    labels = {"run_date": run_date, "run_id": run_id}
+    client = monitoring_v3.MetricServiceClient()
+
     for name, value in metrics.items():
-        write_gauge(
-            client, project_id, cluster_name,
-            f"custom.googleapis.com/pipeline/{name}",
-            value, labels,
+        series = monitoring_v3.TimeSeries()
+        series.metric.type = f"custom.googleapis.com/pipeline/{name}"
+        series.metric.kind = Metric.GAUGE
+        series.metric.value_type = Metric.ValueType.INT64
+        # Bounded cardinality: run_date, never run_id.
+        series.metric.labels["run_date"] = run_date
+        series.resource.type = "cloud_dataproc_cluster"
+        series.resource.labels["project_id"] = project_id
+        series.resource.labels["location"] = "global"
+        series.resource.labels["cluster_name"] = cluster_name
+        series.points[0].value.int64_value = int(value)
+        series.points[0].interval.end_time = Timestamp(seconds=int(time.time()))
+
+        client.create_time_series(
+            name=client.project_path(project_id),
+            time_series=[series],
         )
 ```
 
-The service account running the job needs `roles/monitoring.metricWriter` on the project
-(plus the Dataproc worker's default scopes must include `cloud-platform`):
+The service account running the job needs `roles/monitoring.metricWriter` on the project,
+and the Dataproc worker's default scopes must include `cloud-platform`:
 
 ```bash
 gcloud projects add-iam-policy-binding $PROJECT_ID \
@@ -1637,7 +1582,7 @@ the job immediately. It **relaunches the task** on another executor, up to
 `spark.task.maxFailures` attempts (default **4**). Only when that limit is exhausted does
 the stage fail.
 
-```properties
+```text
 spark.task.maxFailures=6
 ```
 
@@ -1954,15 +1899,12 @@ GROUP BY stage ORDER BY avg_s DESC;
 - The **medallion architecture** exists for four engineering reasons: re-runnability (bronze is your replay buffer), schema evolution (raw is stored verbatim; silver pins a stable schema), debuggability (bisect which layer broke), and isolation of raw from clean (an access-control boundary).
 - **Dataproc Workflows** are a declarative YAML of an ordered job list on one auto-provisioned cluster. **Cloud Composer** adds branching, fan-out, cross-DAG triggers, backfills, and a real UI. Use workflows for straight-line ETL; use Composer when you need logic.
 - The workflow YAML uses a top-level `jobs:` list with `jobName`, `labels`, and a **`spark:`** block containing `args`, `pythonFileUris`, `properties`, and (for JVM jobs) `mainJarFileUri`. There is **no `pysparkSubmit` key**. Submit with `gcloud dataproc workflow submit --region=... --workflows.gcs_uri=gs://... --name=...`.
-- The modern Composer operator is **`DataprocSubmitJobOperator`** from `airflow.providers.google.cloud.operators.dataproc`. Use `schedule_interval` on Airflow 2.0–2.3 and `schedule` on 2.4+. Always set `catchup=False` and `max_active_runs=1`.
+- The modern Composer operator is **`DataprocSubmitJobOperator`** from `airflow.providers.google.cloud.operators.dataproc`. Use `schedule_interval` on Airflow 2.0–2.3 and `schedule` on 2.4+. Always set `catchup=False` and `max_active_runs=1`, and `trigger_rule="all_done"` on the cluster-delete task.
 - **Idempotency is the central requirement.** Re-running the same run date must produce the identical result. `mode("overwrite")` + `partitionOverwriteMode=DYNAMIC` replaces only the target partition; `STATIC` destroys every other date.
 - On the BigQuery side, the gold table must be **partitioned by `dt`** and loaded with `writeDisposition=WRITE_TRUNCATE` so a rerun replaces that partition instead of appending into it. `WRITE_TRUNCATE` on an *unpartitioned* table wipes the whole table.
 - `spark.task.maxFailures` (default 4) is Spark's task-level retry. It is the mechanism that makes Spot/preemptible workers viable — raise it to 6 for GCS-backed pipelines. The **driver** is not covered by it; the orchestrator's retry covers that.
-- Quality gates must run **before** the load. Row-count drop threshold, null-rate threshold, schema conformance, and reconciliation total. A failed gate raises, the `finally` block stops Spark, and BigQuery is never touched.
-- Keep `run_id` (one execution) and `run_date` (one logical date) separate. `run_date` drives partition paths; `run_id` drives logs, metrics, and staging paths.
-- Cost levers that actually matter: **ephemeral cluster per run**, **Spot secondary workers**, `spark.sql.shuffle.partitions` tuned to ~2–3× total cores with **AQE enabled**, and `maxBytesBilled` as a hard circuit breaker on the load.
-- Observability means logging **rows in/out, bytes written, and duration per stage** with a `run_id`, filtering via Cloud Logging labels (not text grepping), and emitting custom metrics to Cloud Monitoring — plus a `pipeline_runs` table for history. Never use a high-cardinality `run_id` label on a monitored metric.
-- Remember `gcloud dataproc jobs submit pyspark` is the current command. `gcloud dataproc clusters submit` is obsolete.
+- Quality gates must run **before** the load. Row-count drop threshold, null-rate threshold, schema conformance, and reconciliation total. A failed gate raises, the `finally` block stops Spark, and BigQuery is never touched. Keep `run_id` (one execution) and `run_date` (one logical date) separate.
+- Cost levers that actually matter: **ephemeral cluster per run**, **Spot secondary workers**, `spark.sql.shuffle.partitions` tuned to ~2–3× total cores with **AQE enabled**, and `maxBytesBilled` as a hard circuit breaker on the load. Remember `gcloud dataproc jobs submit pyspark` is the current command — `gcloud dataproc clusters submit` is obsolete.
 
 ---
 
@@ -1997,24 +1939,22 @@ GROUP BY stage ORDER BY avg_s DESC;
    the chapter — it is the difference between a pipeline that fails safely and one that
    fails silently.
 
-4. **Port the workflow to Cloud Composer.** Create a Composer DAG that reproduces the
-   `DataprocWorkflow.yaml` behaviour: create a temporary cluster (`n2-standard-4` master,
-   2 on-demand workers, 4 Spot secondary workers, image `2.2-debian12`), submit the
-   pipeline job, and delete the cluster. Use `{{ ds }}` for the run date,
-   `schedule="0 2 * * *"`, `catchup=False`, `max_active_runs=1`, and
+4. **Port the workflow to Cloud Composer, then do a cost audit.** Create a Composer DAG
+   that reproduces the `DataprocWorkflow.yaml` behaviour: create a temporary cluster
+   (`n2-standard-4` master, 2 on-demand workers, 4 Spot secondary workers, image
+   `2.2-debian12`), submit the pipeline job, and delete the cluster. Use `{{ ds }}` for
+   the run date, `schedule="0 2 * * *"`, `catchup=False`, `max_active_runs=1`, and
    `trigger_rule="all_done"` on the delete task. Then run `gcloud composer environments
    run daily_orders_pipeline --region=REGION --run-date=2026-10-28` to backfill a
-   specific date. Finally, explain in writing why you would or would not keep *both*
-   the Dataproc Workflow and the Composer DAG in this repository, and what would break
-   if you scheduled both.
+   specific date. Finally, explain in writing why you would or would not keep *both* the
+   Dataproc Workflow and the Composer DAG in this repository, and what would break if you
+   scheduled both.
 
-5. **Cost audit.** Run the pipeline on a 10-worker on-demand cluster and record the
-   wall-clock time and the Dataproc cost for the run. Then repeat on a 2-worker
-   on-demand + 8-Spot cluster with `spark.task.maxFailures=8` and
-   `spark.sql.shuffle.partitions=100`. Compare cost per run, run time, and the number of
-   task failures. Explain, using the Spark UI stage timeline, where the extra
-   parallelism went. Then estimate the monthly cost of the pipeline at 1 run/day with
-   each configuration, and identify the single change that would cut the bill the most.
+   Then run the pipeline on a 10-worker on-demand cluster and record the wall-clock time
+   and the Dataproc cost. Repeat on a 2-worker on-demand + 8-Spot cluster with
+   `spark.task.maxFailures=8` and `spark.sql.shuffle.partitions=100`. Compare cost per
+   run, run time, and task failures; use the Spark UI stage timeline to show where the
+   extra parallelism went; and identify the single change that would cut the bill most.
 
 ---
 

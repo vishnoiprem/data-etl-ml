@@ -165,6 +165,47 @@ repeatedly.**
                             └───────────────────────────┘         │
 ```
 
+### Three Spark 3.5 API traps you will hit in this chapter
+
+These are not hypothetical. Each one will throw at runtime, and each has a
+one-line fix. They are listed up front so you can recognise them immediately.
+
+| Trap | What happens | The fix |
+|------|--------------|---------|
+| `F.try_cast(...)` | `AttributeError` — the Python wrapper is not exposed in every 3.5 build | `F.expr("try_cast(col AS int)")` — the SQL function *is* guaranteed |
+| `try_to_date(col, fmt)` | `UNRESOLVED_ROUTINE` — Spark 3.5 added `try_cast` and `try_to_timestamp`, but **not** `try_to_date` | `F.expr("try_cast(col AS DATE)")` |
+| `F.concat_ws("; ", ...)` with all-null args | Returns an **empty string**, not null — so `.isNull()` is `False` and every row looks "rejected" | Wrap it: `F.nullif(F.concat_ws(...), F.lit(""))` |
+
+⚠️ **The `concat_ws` one is the most dangerous**, because it does not fail — it
+silently reclassifies every row in the pipeline. We build the reject reason by
+concatenating conditional strings:
+
+```python
+F.concat_ws(
+    "; ",
+    F.when(cond1, F.lit("BAD_AMOUNT"))
+     .when(cond2, F.lit("BAD_DATE"))
+     .otherwise(F.lit(None).cast("string")),
+)
+```
+
+For a **good** row every argument is null, and `concat_ws` returns `""`. Then
+`F.col("reject_reason").isNull()` is `False` — so a perfectly valid transaction is
+classified as invalid. The pipeline does not crash; it just quarantines 100% of
+its data. `F.nullif(..., F.lit(""))` restores the null.
+
+💡 **A useful habit: verify the functions you rely on actually exist in the build
+you are targeting.** The one-liner below belongs in a smoke test:
+
+```python
+for fn in ("try_cast", "try_to_timestamp", "try_to_date"):
+    try:
+        spark.sql(f"SELECT {fn}('2024-01-01', 'yyyy-MM-dd')")
+        print(f"{fn}: available")
+    except Exception:
+        print(f"{fn}: NOT available in this build")
+```
+
 ---
 
 ## 🛠️ Hands-On: The retail sales analytics pipeline
@@ -506,16 +547,19 @@ def apply_business_rules(clean: DataFrame) -> DataFrame:
         )
         .withColumn(
             "reject_reason",
-            F.concat_ws(
-                "; ",
-                F.when(F.col("order_id").isNull() | (F.col("order_id") == ""), F.lit("MISSING_ORDER_ID"))
-                 .when(F.col("order_ts").isNull(), F.lit("BAD_TIMESTAMP"))
-                 .when(F.col("store_id").isNull() | (F.col("store_id") == ""), F.lit("MISSING_STORE_ID"))
-                 .when(F.col("product_id").isNull() | (F.col("product_id") == ""), F.lit("MISSING_PRODUCT_ID"))
-                 .when(F.col("quantity").isNull(), F.lit("BAD_QUANTITY"))
-                 .when(F.col("unit_price").isNull(), F.lit("BAD_UNIT_PRICE"))
-                 .when(F.col("net_amount") < 0, F.lit("NEGATIVE_AMOUNT"))
-                 .otherwise(F.lit(None).cast("string")),
+            F.nullif(
+                F.concat_ws(
+                    "; ",
+                    F.when(F.col("order_id").isNull() | (F.col("order_id") == ""), F.lit("MISSING_ORDER_ID"))
+                     .when(F.col("order_ts").isNull(), F.lit("BAD_TIMESTAMP"))
+                     .when(F.col("store_id").isNull() | (F.col("store_id") == ""), F.lit("MISSING_STORE_ID"))
+                     .when(F.col("product_id").isNull() | (F.col("product_id") == ""), F.lit("MISSING_PRODUCT_ID"))
+                     .when(F.col("quantity").isNull(), F.lit("BAD_QUANTITY"))
+                     .when(F.col("unit_price").isNull(), F.lit("BAD_UNIT_PRICE"))
+                     .when(F.col("net_amount") < 0, F.lit("NEGATIVE_AMOUNT"))
+                     .otherwise(F.lit(None).cast("string")),
+                ),
+                F.lit(""),   # concat_ws returns "" (not null) when all args are null
             ),
         )
         .withColumn("is_valid", F.col("reject_reason").isNull())
@@ -560,8 +604,8 @@ def conform_dimensions(products: DataFrame, stores: DataFrame) -> tuple[DataFram
         .withColumn("category_name", F.trim(F.col("category_name")))
         .withColumn("brand", F.trim(F.col("brand")))
         .withColumn("unit_cost", F.expr("try_cast(unit_cost AS decimal(18,2))"))
-        .withColumn("valid_from", F.expr("try_to_date(valid_from, 'yyyy-MM-dd')"))
-        .withColumn("valid_to", F.expr("try_to_date(valid_to, '9999-12-31')"))
+        .withColumn("valid_from", F.expr("try_cast(valid_from AS DATE)"))
+        .withColumn("valid_to", F.expr("try_cast(valid_to AS DATE)"))
         .withColumn("is_current", F.expr("try_cast(is_current AS boolean)"))
         .filter(F.col("is_current") == F.lit(True))
         .dropDuplicates(subset=["product_id"])
@@ -569,6 +613,7 @@ def conform_dimensions(products: DataFrame, stores: DataFrame) -> tuple[DataFram
             "product_sk",
             F.pmod(F.hash("product_id"), F.lit(2147483647)),
         )
+        .withColumn("loaded_at", F.current_timestamp())
     )
 
     store_dim = (
@@ -580,8 +625,8 @@ def conform_dimensions(products: DataFrame, stores: DataFrame) -> tuple[DataFram
         .withColumn("city", F.trim(F.col("city")))
         .withColumn("state", F.trim(F.col("state")))
         .withColumn("store_format", F.trim(F.col("store_format")))
-        .withColumn("valid_from", F.expr("try_to_date(valid_from, 'yyyy-MM-dd')"))
-        .withColumn("valid_to", F.expr("try_to_date(valid_to, '9999-12-31')"))
+        .withColumn("valid_from", F.expr("try_cast(valid_from AS DATE)"))
+        .withColumn("valid_to", F.expr("try_cast(valid_to AS DATE)"))
         .withColumn("is_current", F.expr("try_cast(is_current AS boolean)"))
         .filter(F.col("is_current") == F.lit(True))
         .dropDuplicates(subset=["store_id"])
@@ -589,6 +634,7 @@ def conform_dimensions(products: DataFrame, stores: DataFrame) -> tuple[DataFram
             "store_sk",
             F.pmod(F.hash("store_id"), F.lit(2147483647)),
         )
+        .withColumn("loaded_at", F.current_timestamp())
     )
     return product_dim, store_dim
 
@@ -681,41 +727,63 @@ def run_quality_checks(
     raw: DataFrame,
     parsed: DataFrame,
     valid: DataFrame,
-    rejected: DataFrame,
+    validation_rejected: DataFrame,
+    revenue_rows: DataFrame,
     fact: DataFrame,
     mart: DataFrame,
 ) -> dict:
     """
     Count every stage and assert the invariants. Returns the metrics dict so
     the caller can log and persist them.
+
+    The invariants are written against the *stage boundaries*, not against a
+    single "rejected" bucket, because rows can leave the pipeline at two
+    different points:
+
+        parsed  --(validation)-->  valid  +  validation_rejected
+        valid   --(revenue filter + dedupe + dim join)-->  fact  +  orphans
+
+    Checking "valid + rejected == parsed" against a combined rejected bucket
+    would be wrong, because the dimension-orphan rejects were never part of
+    "valid" in the first place.
     """
     raw_n = raw.count()
     parsed_n = parsed.count()
     valid_n = valid.count()
-    rejected_n = rejected.count()
+    validation_rejected_n = validation_rejected.count()
+    revenue_n = revenue_rows.count()
     fact_n = fact.count()
 
-    LOG.info("Row counts: raw=%d parsed=%d valid=%d rejected=%d fact=%d",
-             raw_n, parsed_n, valid_n, rejected_n, fact_n)
-
-    # --- Invariant 1: nothing lost between parsed and the valid/rejected split
-    assert valid_n + rejected_n == parsed_n, (
-        f"ROW LOSS: valid({valid_n}) + rejected({rejected_n}) != parsed({parsed_n})"
+    LOG.info(
+        "Row counts: raw=%d parsed=%d valid=%d validation_rejected=%d "
+        "revenue=%d fact=%d",
+        raw_n, parsed_n, valid_n, validation_rejected_n, revenue_n, fact_n,
     )
 
-    # --- Invariant 2: no duplicate order_id in the fact table
+    # --- Invariant 1: the validation split loses nothing
+    assert valid_n + validation_rejected_n == parsed_n, (
+        f"ROW LOSS: valid({valid_n}) + validation_rejected({validation_rejected_n}) "
+        f"!= parsed({parsed_n})"
+    )
+
+    # --- Invariant 2: the fact table is a subset of the revenue rows
+    assert fact_n <= revenue_n, (
+        f"ROW GAIN: fact({fact_n}) > revenue_rows({revenue_n})"
+    )
+
+    # --- Invariant 3: no duplicate order_id in the fact table
     distinct_orders = fact.select("order_id").distinct().count()
     assert distinct_orders == fact_n, (
         f"DUPLICATE ORDER_IDS: {fact_n - distinct_orders} extra rows in fact_sales"
     )
 
-    # --- Invariant 3: no null keys
+    # --- Invariant 4: no null keys
     null_keys = fact.filter(
         F.col("order_id").isNull() | F.col("store_id").isNull() | F.col("product_id").isNull()
     ).count()
     assert null_keys == 0, f"NULL KEYS: {null_keys} fact rows have a null key"
 
-    # --- Invariant 4: referential integrity against the dimensions
+    # --- Invariant 5: referential integrity against the dimensions
     orphan_products = fact.filter(F.col("category_id").isNull()).count()
     orphan_stores = fact.filter(F.col("region_id").isNull()).count()
     LOG.info("Referential integrity: %d rows without a product match, %d without a store match",
@@ -744,14 +812,15 @@ def run_quality_checks(
         "raw_rows": raw_n,
         "parsed_rows": parsed_n,
         "valid_rows": valid_n,
-        "rejected_rows": rejected_n,
+        "validation_rejected_rows": validation_rejected_n,
+        "revenue_rows": revenue_n,
         "fact_rows": fact_n,
         "fact_net_total": fact_total,
         "mart_net_total": mart_total,
     }
 
 
-def reconcile_to_source(raw: DataFrame, fact: DataFrame, raw_amounts: float) -> None:
+def reconcile_to_source(raw: DataFrame, fact: DataFrame) -> None:
     """
     Compare the sum of order amounts in the curated table against the sum
     computed directly from the raw CSV strings.
@@ -920,12 +989,12 @@ def main(argv=None) -> int:
         parsed = apply_business_rules(cleaned)
 
         valid = parsed.filter(F.col("is_valid"))
-        rejected = parsed.filter(~F.col("is_valid")).select(
+        validation_rejected = parsed.filter(~F.col("is_valid")).select(
             "order_id", "order_ts", "store_id", "product_id", "quantity",
             "unit_price", "discount_amount", "tax_amount", "status",
             "promo_code", "reject_reason", "source_file",
         )
-        LOG.info("Rejected %d rows from validation.", rejected.count())
+        LOG.info("Rejected %d rows from validation.", validation_rejected.count())
 
         # Revenue filter: only COMPLETED transactions count.
         revenue_rows = valid.filter(F.col("status") == REVENUE_STATUS)
@@ -950,7 +1019,9 @@ def main(argv=None) -> int:
         )
         orphan_rejects = enriched.filter(F.col("reject_reason").isNotNull())
         fact = enriched.filter(F.col("reject_reason").isNull()).drop("reject_reason")
-        rejected = rejected.unionByName(
+
+        # The combined quarantine set: everything that failed at either stage.
+        rejected = validation_rejected.unionByName(
             orphan_rejects.select(
                 "order_id", "order_ts", "store_id", "product_id", "quantity",
                 "unit_price", "discount_amount", "tax_amount", "status",
@@ -969,8 +1040,10 @@ def main(argv=None) -> int:
         mart = build_daily_mart(fact).withColumn("loaded_at", F.current_timestamp())
 
         # --- 3. QUALITY GATE --------------------------------------------
-        metrics = run_quality_checks(raw, parsed, valid, rejected, fact, mart)
-        reconcile_to_source(raw, fact, metrics["fact_net_total"])
+        metrics = run_quality_checks(
+            raw, parsed, valid, validation_rejected, revenue_rows, fact, mart
+        )
+        reconcile_to_source(raw, fact)
 
         # --- 4. LOAD ----------------------------------------------------
         fact_for_bq = fact.select(
@@ -985,6 +1058,26 @@ def main(argv=None) -> int:
                           staging_bucket)
         write_to_bigquery(mart, args.output_project, "mart.daily_store_category_sales",
                           staging_bucket)
+
+        # The conformed dimensions are published alongside the fact table so
+        # that downstream consumers never have to read the raw SCD2 CSVs.
+        write_to_bigquery(
+            product_dim.select(
+                "product_sk", "product_id", "product_name", "category_id",
+                "category_name", "brand", "unit_cost", "valid_from", "valid_to",
+                "is_current", "loaded_at",
+            ),
+            args.output_project, "curated.dim_product", staging_bucket,
+        )
+        write_to_bigquery(
+            store_dim.select(
+                "store_sk", "store_id", "store_name", "region_id", "region_name",
+                "city", "state", "store_format", "valid_from", "valid_to",
+                "is_current", "loaded_at",
+            ),
+            args.output_project, "curated.dim_store", staging_bucket,
+        )
+
         write_rejected(spark, rejected, args.output_project, staging_bucket, run_date)
 
         LOG.info("Pipeline completed successfully. Metrics: %s", metrics)
@@ -1321,7 +1414,9 @@ loss* bug, not a cost bug. Verify your disposition before the first production r
 - **Start with the questions, not the schema.** Seven explicit analytical questions, each with a grain and an owner, determine every downstream design decision.
 - **Three tiers, three purposes:** `curated` holds the auditable conformed facts and dimensions; `mart` holds the pre-aggregated answers to the questions you know you will ask repeatedly.
 - **Partition BigQuery by date, cluster by the columns you filter and group by.** Partitioning is a hard limit on scan; clustering is a soft filter that skips blocks.
-- **Use `F.expr("try_cast(col AS type)")`, not `F.try_cast(...)`.** The SQL function is guaranteed in Spark 3.5; the Python wrapper is not present in every build.
+- **Use `F.expr("try_cast(col AS type)")`, not `F.try_cast(...)`.** The SQL function is guaranteed in Spark 3.5; the Python wrapper is not present in every build. Spark 3.5 also has **no `try_to_date`** — use `try_cast(col AS DATE)`.
+- **`F.concat_ws` returns an empty string, not null, when every argument is null.** Wrap conditional-reason builders in `F.nullif(..., F.lit(""))` or your `.isNull()` check silently rejects every row.
+- **Write your invariants against stage boundaries, not a single "rejected" bucket.** Rows leave the pipeline at more than one point (validation, dimension join), so `accepted + rejected == parsed` is only true when the buckets line up.
 - **Never drop a bad row — quarantine it.** Rejected rows go to a table, are counted, and are reconciled. A silent drop is invisible; a quarantined row is a reportable data-quality incident.
 - **Assertions are what make a pipeline trustworthy.** `valid + rejected == parsed` and `fact_total ≈ mart_total` are cheap checks that catch the two most common classes of bug: row loss and double counting.
 - **Dedupe deterministically.** `row_number` with `order_ts DESC` and a stable tiebreaker on `source_file` guarantees the same row wins every time. A non-deterministic dedupe breaks idempotency.
@@ -1349,11 +1444,11 @@ loss* bug, not a cost bug. Verify your disposition before the first production r
 
 - BigQuery DDL reference — https://cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language
 - BigQuery partitioning and clustering — https://cloud.google.com/bigquery/docs/partitioned-tables
-- BigQuery cost optimization — https://cloud.google.com/bigquery/docs/best-practices-cost-optimization
+- BigQuery cost optimization — https://cloud.google.com/bigquery/docs/best-practices
 - Dataproc job submission (`pyspark`) — https://cloud.google.com/sdk/gcloud/reference/dataproc/jobs/submit/pyspark
-- Dataproc image versions — https://cloud.google.com/dataproc/docs/concepts/versioning/dataproc-image-versions
+- Dataproc image versions — https://cloud.google.com/dataproc/docs/concepts/versioning
 - BigQuery Storage Write API (direct write) — https://cloud.google.com/bigquery/docs/write-api
-- Spark SQL performance tuning guide — https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html
-- Spark broadcast joins — https://spark.apache.org/docs/3.5.3/sql-performance-tuning.html#join-strategy
+- Spark SQL performance tuning guide — https://archive.apache.org/dist/spark/docs/3.5.3/sql-performance-tuning.html
+- Spark broadcast joins — https://archive.apache.org/dist/spark/docs/3.5.3/sql-performance-tuning.html#join-strategy
 - Dataproc pricing — https://cloud.google.com/dataproc/pricing
 - The Data Warehouse Toolkit (dimensional modeling) — https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/

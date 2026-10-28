@@ -158,6 +158,38 @@ dimension would mean joining a PII-bearing table into the pipeline for no analyt
 Under "minimum necessary", `member_id` is treated as an opaque grouping key and nothing more.
 This is a deliberate demonstration of compliance-aware design, not an omission.
 
+### Four Spark 3.5 API traps you will hit in this chapter
+
+Each of these throws at runtime — or, worse, fails silently — and each has a
+one-line fix. They are listed up front so you can recognise them on sight.
+
+| Trap | What happens | The fix |
+|------|--------------|---------|
+| `F.try_cast(...)` | `AttributeError` — the Python wrapper is not exposed in every 3.5 build | `F.expr("try_cast(col AS int)")` |
+| `try_to_date(col, fmt)` | `UNRESOLVED_ROUTINE` — 3.5 added `try_cast` and `try_to_timestamp`, but **not** `try_to_date` | `F.expr("try_cast(col AS DATE)")` |
+| `F.concat_ws("; ", ...)` with all-null args | Returns an **empty string**, not null — so `.isNull()` is `False` and every row looks "rejected" | `F.nullif(F.concat_ws(...), F.lit(""))` |
+| Format string with literal quotes inside `F.expr` | `PARSE_SYNTAX_ERROR` — the SQL string literal is itself single-quoted | Double-quote the outer literal: `F.expr("try_to_timestamp(c, \"yyyy-MM-dd'T'HH:mm:ss'Z'\")")` |
+
+⚠️ **The quote-escaping trap is specific to `F.expr`.** The Java format pattern
+`yyyy-MM-dd'T'HH:mm:ss'Z'` contains single quotes to mark `T` and `Z` as literals.
+Inside `F.expr("...")` those single quotes terminate the SQL string literal, so the
+parser sees `'yyyy-MM-dd'` followed by garbage. The outer literal must be
+double-quoted so the inner ones survive:
+
+```python
+# ❌ PARSE_SYNTAX_ERROR: Syntax error at or near 'T'
+F.expr("try_to_timestamp(submitted_at, 'yyyy-MM-dd'T'HH:mm:ss'Z')")
+
+# ✅ Correct — outer literal is double-quoted
+F.expr("try_to_timestamp(submitted_at, \"yyyy-MM-dd'T'HH:mm:ss'Z'\")")
+```
+
+💡 **`F.to_timestamp(col, fmt)` takes the format as a Python string, not a SQL
+literal** — so it has no quoting problem at all. Use it when the format is known
+and you do not need the "invalid becomes null" behaviour; reach for
+`F.expr("try_to_timestamp(...)")` only when you specifically want a null instead
+of an error.
+
 ---
 
 ## 🛠️ Hands-On: The healthcare claims processing pipeline
@@ -546,11 +578,14 @@ def parse_claims(raw: DataFrame) -> DataFrame:
         .withColumn("provider_npi", F.trim(F.col("provider_npi")))
         .withColumn(
             "service_date",
-            F.expr("try_to_date(service_date, 'yyyy-MM-dd')"),
+            F.expr("try_cast(service_date AS DATE)"),
         )
         .withColumn(
             "submitted_at",
-            F.expr("try_to_timestamp(submitted_at, 'yyyy-MM-dd'T'HH:mm:ss'Z')"),
+            # NOTE: the outer SQL string literal is double-quoted so the
+            # Java pattern's own single quotes ('T' and 'Z' literals) survive
+            # the Spark SQL parser. A single-quoted outer literal breaks it.
+            F.expr("try_to_timestamp(submitted_at, \"yyyy-MM-dd'T'HH:mm:ss'Z'\")"),
         )
         .withColumn(
             "claim_amount",
@@ -593,25 +628,37 @@ def validate_claims(parsed: DataFrame, run_date: date) -> tuple[DataFrame, DataF
         parsed
         .withColumn(
             "reject_reason",
-            F.concat_ws(
-                "; ",
-                F.when(F.col("claim_id").isNull() | (F.col("claim_id") == ""), F.lit("MISSING_CLAIM_ID"))
-                 .when(F.col("provider_npi").isNull() | (F.col("provider_npi") == ""), F.lit("MISSING_PROVIDER_NPI"))
-                 .when(F.col("member_id").isNull() | (F.col("member_id") == ""), F.lit("MISSING_MEMBER_ID"))
-                 .when(F.col("service_date").isNull(), F.lit("BAD_SERVICE_DATE"))
-                 .when(F.col("service_date") > today, F.lit("FUTURE_SERVICE_DATE"))
-                 .when(F.col("claim_amount").isNull(), F.lit("UNPARSEABLE_AMOUNT"))
-                 .when(F.col("claim_amount") < F.lit(MIN_CLAIM_AMOUNT), F.lit("AMOUNT_BELOW_MINIMUM"))
-                 .when(F.col("claim_amount") > F.lit(MAX_CLAIM_AMOUNT), F.lit("AMOUNT_ABOVE_MAXIMUM"))
-                 .when(F.col("dx_code_count") == 0, F.lit("NO_DIAGNOSIS_CODES"))
-                 .otherwise(F.lit(None).cast("string")),
+            F.nullif(
+                F.concat_ws(
+                    "; ",
+                    F.when(F.col("claim_id").isNull() | (F.col("claim_id") == ""), F.lit("MISSING_CLAIM_ID"))
+                     .when(F.col("provider_npi").isNull() | (F.col("provider_npi") == ""), F.lit("MISSING_PROVIDER_NPI"))
+                     .when(F.col("member_id").isNull() | (F.col("member_id") == ""), F.lit("MISSING_MEMBER_ID"))
+                     .when(F.col("service_date").isNull(), F.lit("BAD_SERVICE_DATE"))
+                     .when(F.col("service_date") > today, F.lit("FUTURE_SERVICE_DATE"))
+                     .when(F.col("claim_amount").isNull(), F.lit("UNPARSEABLE_AMOUNT"))
+                     .when(F.col("claim_amount") < F.lit(MIN_CLAIM_AMOUNT), F.lit("AMOUNT_BELOW_MINIMUM"))
+                     .when(F.col("claim_amount") > F.lit(MAX_CLAIM_AMOUNT), F.lit("AMOUNT_ABOVE_MAXIMUM"))
+                     .when(F.col("dx_code_count") == 0, F.lit("NO_DIAGNOSIS_CODES"))
+                     .otherwise(F.lit(None).cast("string")),
+                ),
+                F.lit(""),   # concat_ws returns "" (not null) when all args are null
             ),
         )
         .withColumn("is_valid", F.col("reject_reason").isNull())
     )
 
     accepted = classified.filter(F.col("is_valid")).drop("is_valid")
-    rejected = classified.filter(~F.col("is_valid")).drop("is_valid")
+    # Project to the common quarantine shape so every reject stream can be
+    # combined with unionByName without a schema mismatch.
+    rejected = (
+        classified.filter(~F.col("is_valid"))
+        .drop("is_valid")
+        .select(
+            "claim_id", "member_id", "provider_npi", "service_date",
+            "claim_amount", "reject_reason", "source_file",
+        )
+    )
     return accepted, rejected
 
 
@@ -664,12 +711,15 @@ def validate_diagnosis_codes(accepted: DataFrame, icd10: DataFrame) -> tuple[Dat
         .join(F.broadcast(ref), exploded.dx_code == ref.ref_code, "left")
         .withColumn(
             "dx_reject_reason",
-            F.concat_ws(
-                "; ",
-                F.when(~format_ok, F.lit("MALFORMED_ICD10_CODE"))
-                 .when(F.col("ref_code").isNull(), F.lit("ICD10_NOT_IN_REFERENCE"))
-                 .when(F.col("ref_is_valid") == F.lit(False), F.lit("ICD10_RETIRED_CODE"))
-                 .otherwise(F.lit(None).cast("string")),
+            F.nullif(
+                F.concat_ws(
+                    "; ",
+                    F.when(~format_ok, F.lit("MALFORMED_ICD10_CODE"))
+                     .when(F.col("ref_code").isNull(), F.lit("ICD10_NOT_IN_REFERENCE"))
+                     .when(F.col("ref_is_valid") == F.lit(False), F.lit("ICD10_RETIRED_CODE"))
+                     .otherwise(F.lit(None).cast("string")),
+                ),
+                F.lit(""),   # concat_ws returns "" (not null) when all args are null
             ),
         )
         .withColumn("is_dx_valid", F.col("dx_reject_reason").isNull())
@@ -711,12 +761,13 @@ def conform_dimensions(providers: DataFrame, icd10: DataFrame) -> tuple[DataFram
         .withColumn("provider_type", F.upper(F.trim(F.col("provider_type"))))
         .withColumn("city", F.trim(F.col("city")))
         .withColumn("state", F.trim(F.col("state")))
-        .withColumn("contract_start", F.expr("try_to_date(contract_start, 'yyyy-MM-dd')"))
-        .withColumn("contract_end", F.expr("try_to_date(contract_end, '9999-12-31')"))
+        .withColumn("contract_start", F.expr("try_cast(contract_start AS DATE)"))
+        .withColumn("contract_end", F.expr("try_cast(contract_end AS DATE)"))
         .withColumn("is_active", F.expr("try_cast(is_active AS boolean)"))
         .filter(F.col("is_active") == F.lit(True))
         .dropDuplicates(subset=["provider_npi"])
         .withColumn("provider_sk", F.pmod(F.hash("provider_npi"), F.lit(2147483647)))
+        .withColumn("loaded_at", F.current_timestamp())
     )
 
     diagnosis_dim = (
@@ -727,14 +778,20 @@ def conform_dimensions(providers: DataFrame, icd10: DataFrame) -> tuple[DataFram
         .withColumn("chapter", F.trim(F.col("chapter")))
         .withColumn("is_valid", F.expr("try_cast(is_valid AS boolean)"))
         .dropDuplicates(subset=["icd10_code"])
+        .withColumn("loaded_at", F.current_timestamp())
     )
     return provider_dim, diagnosis_dim
 
 
-def build_fact(valid_rows: DataFrame, provider_dim: DataFrame) -> DataFrame:
+def build_fact(valid_rows: DataFrame, provider_dim: DataFrame) -> tuple[DataFrame, DataFrame]:
     """
     Collapse the exploded diagnosis rows back to one row per claim, keeping
     the primary diagnosis as the headline code.
+
+    Returns (fact, orphan_rejects). A claim whose provider is not in the
+    provider master cannot be conformed and cannot be paid, so it is routed
+    to quarantine rather than loaded with a null provider key. That keeps
+    the referential-integrity assertion on the fact table meaningful.
     """
     per_claim = (
         valid_rows
@@ -750,7 +807,7 @@ def build_fact(valid_rows: DataFrame, provider_dim: DataFrame) -> DataFrame:
         )
     )
 
-    return (
+    enriched = (
         per_claim
         .join(
             F.broadcast(provider_dim.select(
@@ -762,6 +819,16 @@ def build_fact(valid_rows: DataFrame, provider_dim: DataFrame) -> DataFrame:
         )
         .withColumn("loaded_at", F.current_timestamp())
     )
+
+    enriched = enriched.withColumn(
+        "reject_reason",
+        F.when(F.col("provider_sk").isNull(), F.lit("UNKNOWN_PROVIDER"))
+         .otherwise(F.lit(None).cast("string")),
+    )
+
+    orphans = enriched.filter(F.col("reject_reason").isNotNull())
+    fact = enriched.filter(F.col("reject_reason").isNull()).drop("reject_reason")
+    return fact, orphans
 
 
 # ---------------------------------------------------------------------------
@@ -841,19 +908,29 @@ def run_quality_checks(
     raw: DataFrame,
     parsed: DataFrame,
     accepted: DataFrame,
-    rejected: DataFrame,
+    validation_rejected: DataFrame,
     fact: DataFrame,
     spend: DataFrame,
 ) -> dict:
+    """
+    Count every stage and assert the invariants.
+
+    The invariants are written against the *stage boundaries*. A claim can
+    leave the pipeline at three points — validation, diagnosis-code
+    validation, and the provider dimension join — so a single combined
+    "rejected" bucket cannot be reconciled against "accepted" without
+    double counting.
+    """
     raw_n = safe_log_counts("raw claims", raw)
     parsed_n = safe_log_counts("parsed claims", parsed)
     accepted_n = safe_log_counts("accepted claims", accepted)
-    rejected_n = safe_log_counts("rejected claims", rejected)
+    validation_rejected_n = safe_log_counts("validation-rejected claims", validation_rejected)
     fact_n = safe_log_counts("fact claims", fact)
 
-    # --- Invariant 1: nothing lost between parsed and the split
-    assert accepted_n + rejected_n == parsed_n, (
-        f"ROW LOSS: accepted({accepted_n}) + rejected({rejected_n}) != parsed({parsed_n})"
+    # --- Invariant 1: the validation split loses nothing
+    assert accepted_n + validation_rejected_n == parsed_n, (
+        f"ROW LOSS: accepted({accepted_n}) + validation_rejected({validation_rejected_n}) "
+        f"!= parsed({parsed_n})"
     )
 
     # --- Invariant 2: one row per claim in the fact table
@@ -907,7 +984,7 @@ def run_quality_checks(
         "raw_rows": raw_n,
         "parsed_rows": parsed_n,
         "accepted_rows": accepted_n,
-        "rejected_rows": rejected_n,
+        "validation_rejected_rows": validation_rejected_n,
         "fact_rows": fact_n,
         "fact_total": fact_total,
         "mart_total": spend_total,
@@ -1017,9 +1094,13 @@ def main(argv=None) -> int:
 
         valid_rows, invalid_rows, _, bad_only = validate_diagnosis_codes(accepted, icd10_raw)
 
+        # The quarantine set has a common shape. Normalise every reject
+        # stream to it before combining, so the union is type-safe.
+        validation_rejected = rejected.withColumn("reject_reason", F.col("reject_reason"))
+
         # Claims whose diagnosis codes are ALL invalid are also quarantined.
         if not bad_only.isEmpty():
-            rejected = rejected.unionByName(
+            validation_rejected = validation_rejected.unionByName(
                 bad_only.join(
                     parsed.select(
                         "claim_id", "member_id", "provider_npi", "service_date",
@@ -1038,7 +1119,16 @@ def main(argv=None) -> int:
         LOG.info("Dimensions: %d providers, %d icd10 codes",
                  provider_dim.count(), diagnosis_dim.count())
 
-        fact = build_fact(valid_rows, provider_dim)
+        fact, orphan_rejects = build_fact(valid_rows, provider_dim)
+        LOG.info("Orphan provider matches: %d rows", orphan_rejects.count())
+
+        # Combine every reject stream into the single quarantine table.
+        rejected = validation_rejected.unionByName(
+            orphan_rejects.select(
+                "claim_id", "member_id", "provider_npi", "service_date",
+                "claim_amount", "reject_reason", "source_file",
+            )
+        )
 
         spend = (
             build_provider_spend(fact)
@@ -1058,7 +1148,9 @@ def main(argv=None) -> int:
         )
 
         # --- 3. QUALITY GATE --------------------------------------------
-        metrics = run_quality_checks(raw, parsed, accepted, rejected, fact, spend)
+        metrics = run_quality_checks(
+            raw, parsed, accepted, validation_rejected, fact, spend
+        )
         LOG.info("Metrics: %s", metrics)
 
         # --- 4. LOAD ----------------------------------------------------
@@ -1391,7 +1483,9 @@ requirement and which you cannot reconstruct after the fact.
 - **Use synthetic data for learning and for CI.** This chapter's data is generated. Real claim data requires a BAA, CMEK, scoped service accounts, and audit logging before a single line of this code runs.
 - **Never log PII.** Log counts, business identifiers, and error classes. Cloud Logging is a different security boundary from BigQuery with a longer retention.
 - **An array of structs needs `explode`; JSON-in-a-string needs `from_json` first.** These are different problems: `from_json` with an explicit `StructType` turns the string into a struct; `explode` then flattens a real array into rows.
-- **Use `F.expr("try_cast(...)")` for all conversions** — the SQL function is guaranteed in Spark 3.5, the Python wrapper is not.
+- **Use `F.expr("try_cast(...)")` for all conversions** — the SQL function is guaranteed in Spark 3.5, the Python wrapper is not. There is **no `try_to_date`** in 3.5; use `try_cast(col AS DATE)`.
+- **In `F.expr`, double-quote the outer string literal** when the format pattern contains single quotes (`"try_to_timestamp(c, \"yyyy-MM-dd'T'HH:mm:ss'Z'\")"`). Single-quoting the outer literal breaks the SQL parser.
+- **`F.concat_ws` returns an empty string, not null, when every argument is null.** Wrap conditional-reason builders in `F.nullif(..., F.lit(""))` or your `.isNull()` check silently rejects every row.
 - **Quarantine, never silently drop.** A rejected claim goes to `quarantine.rejected_claims` with a reason, and the job still succeeds. Content problems and invariant violations are different failure modes.
 - **Explode changes your row count.** One claim with three diagnosis codes becomes three rows. Track counts at every stage or the reconciliation will lie to you.
 - **A rolling z-score is a window with an explicit frame.** `rowsBetween(-29, 0)` over `partitionBy("provider_npi").orderBy("service_date")` gives a 30-day baseline including today; `rowsBetween(-30, -1)` excludes it.
@@ -1439,11 +1533,11 @@ requirement and which you cannot reconstruct after the fact.
 - Google Cloud HIPAA compliance and BAA — https://cloud.google.com/security/compliance/hipaa
 - BigQuery DDL reference — https://cloud.google.com/bigquery/docs/reference/standard-sql/data-definition-language
 - BigQuery partition and cluster requirements — https://cloud.google.com/bigquery/docs/partitioned-tables
-- Reading JSON with a schema in Spark — https://spark.apache.org/docs/3.5.3/sql-ref-datatypes.html
-- Spark SQL built-in functions (Spark 3.5) — https://spark.apache.org/docs/3.5.3/sql-ref-functions-builtin.html
-- Spark window functions — https://spark.apache.org/docs/3.5.3/api/python/reference/pyspark.sql/window.html
-- Cloud KMS for Cloud Storage — https://cloud.google.com/kms/docs/encrypt-storage
-- BigQuery audit logging — https://cloud.google.com/bigquery/docs/audit-logs
+- Reading JSON with a schema in Spark — https://archive.apache.org/dist/spark/docs/3.5.3/sql-ref-datatypes.html
+- Spark SQL built-in functions (Spark 3.5) — https://archive.apache.org/dist/spark/docs/3.5.3/sql-ref-functions-builtin.html
+- Spark window functions — https://archive.apache.org/dist/spark/docs/3.5.3/api/python/reference/pyspark.sql/window.html
+- Cloud KMS for Cloud Storage — https://cloud.google.com/kms/docs/cmek
+- BigQuery audit logging — https://cloud.google.com/bigquery/docs/reference/auditlogs
 - Dataproc job submission (`pyspark`) — https://cloud.google.com/sdk/gcloud/reference/dataproc/jobs/submit/pyspark
-- Dataproc image versions — https://cloud.google.com/dataproc/docs/concepts/versioning/dataproc-image-versions
+- Dataproc image versions — https://cloud.google.com/dataproc/docs/concepts/versioning
 - Dataproc serverless (optional, for bursty workloads) — https://cloud.google.com/dataproc-serverless/docs/concepts/overview
