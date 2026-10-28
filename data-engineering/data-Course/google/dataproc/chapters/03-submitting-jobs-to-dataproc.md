@@ -297,14 +297,16 @@ people who learned the console labels first and then wrote a script.
 gcloud dataproc jobs describe JOB_ID --region=us-central1 \
   --format="value(status.state)"      # → DONE / ERROR / CANCELLED
 
-# Exit code reflects success
+# Check the exit code after waiting
 gcloud dataproc jobs wait JOB_ID --region=us-central1
-echo "exit code: $?"                   # 0 on success, non-zero on failure
+echo "exit code: $?"
 ```
 
 💡 **Use `gcloud dataproc jobs wait` in scripts, not a polling loop.** It blocks until the
-job reaches a terminal state and returns a proper exit code, so it composes correctly with
-`set -e` in a shell script.
+job reaches a terminal state and prints the driver output as it goes. For a fully
+deterministic pass/fail check, read `status.state` explicitly and compare it to `DONE` —
+that way the script's logic does not depend on gcloud's exit-code convention, which is not
+documented as part of the command's contract.
 
 ### Job concurrency
 
@@ -1002,8 +1004,8 @@ gcloud dataproc clusters delete course-dev --region=us-central1
 - The API job states are `PENDING`, `SETUP_DONE`, `RUNNING`, `CANCEL_PENDING`,
   `CANCEL_STARTED`, `CANCELLED`, **`DONE`** (success), **`ERROR`** (failure),
   `ATTEMPT_FAILURE`. The console's "Succeeded"/"Failed" map to `DONE`/`ERROR`.
-- Use `gcloud dataproc jobs wait` in scripts — it blocks and returns a meaningful exit
-  code. Avoid polling loops.
+- Use `gcloud dataproc jobs wait` in scripts rather than a polling loop. For a
+  deterministic pass/fail check, read `status.state` and compare it to `DONE`.
 - Every job has a `driverOutputUri` in the staging bucket. `gcloud dataproc jobs
   describe` returns it; `gcloud logging read` gives you structured driver and executor logs.
 - The **metadata server** exposes `dataproc-cluster-name`, `dataproc-bucket`,
@@ -1035,13 +1037,16 @@ gcloud dataproc clusters delete course-dev --region=us-central1
    that data should live instead.
 
 3. **Job state automation.** Write a bash script that submits a job with `--async`,
-   polls `gcloud dataproc jobs describe` for its state, and exits non-zero if the final
-   state is not `DONE`. Then find the bug in this version and explain why it fails:
+   waits for it, and exits non-zero if the final state is not `DONE`. Then find the bug
+   in this version and explain why it fails:
    ```bash
    while [[ "$(gcloud dataproc jobs describe "$JOB" --format='value(status.state)')" == "SUCCEEDED" ]]; do
      sleep 5
    done
    ```
+   Three separate bugs: the state name `SUCCEEDED` does not exist (it is `DONE`), the loop
+   tests for *equality* when it should test for *inequality* (it exits immediately, before
+   the job finishes), and the state check belongs in a `!=` comparison against `DONE`.
    Explain the difference between the console's "Succeeded" label and the API's `DONE`
    state, and where else in GCP you might see this same naming mismatch.
 
