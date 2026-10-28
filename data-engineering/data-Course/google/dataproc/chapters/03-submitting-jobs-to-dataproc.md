@@ -360,13 +360,25 @@ gcloud dataproc jobs describe JOB_ID --region=us-central1 \
 # List recent jobs
 gcloud dataproc jobs list --region=us-central1 --limit=20
 
-# Only failed jobs
-gcloud dataproc jobs list --region=us-central1 \
-  --filter="status.state=ERROR"
+# Restrict to one cluster
+gcloud dataproc jobs list --region=us-central1 --cluster=course-dev
+
+# Only jobs still running or pending (ACTIVE)
+gcloud dataproc jobs list --region=us-central1 --state-filter=active
+
+# Finished jobs (DONE / ERROR / CANCELLED) — INACTIVE
+gcloud dataproc jobs list --region=us-central1 --state-filter=inactive
 
 # Kill a running job
-gcloud dataproc jobs cancel JOB_ID --region=us-central1
+gcloud dataproc jobs kill JOB_ID --region=us-central1
 ```
+
+⚠️ **`gcloud dataproc jobs list --filter` only accepts `status.state` values of `ACTIVE`
+or `INACTIVE`** — you cannot filter by `ERROR` or `DONE` directly. `ACTIVE` groups
+`PENDING`, `SETUP_DONE`, and `RUNNING`; `INACTIVE` groups `CANCELLED`, `DONE`, and
+`ERROR`. To find failed jobs specifically, filter on `INACTIVE` and then inspect each
+job's `status.state` with `jobs describe`, or filter on labels — which is exactly why
+labelling your jobs (`--labels=run_date=2026-10-28`) is worth doing.
 
 ### Via Cloud Logging
 
@@ -435,7 +447,6 @@ The available attributes:
 | `dataproc-worker-count` | Number of worker nodes |
 | `dataproc-master` | Hostname of the first master |
 | `dataproc-master-additional` | Comma-separated extra master hostnames (HA) |
-| `dataproc-has-metadata-server` | Whether the metadata server is present |
 | `SPARK_BQ_CONNECTOR_VERSION` | Version of the pre-installed BigQuery connector |
 
 From PySpark:
@@ -847,18 +858,36 @@ gcloud dataproc jobs submit pyspark main.py \
 ### Step 5 — Submit Spark SQL and Spark (Scala/Java)
 
 ```bash
-# Spark SQL
+# Spark SQL — from a file
 cat > analysis.sql <<'SQL'
+CREATE EXTERNAL TABLE sales (name STRING, amount DOUBLE)
+  USING parquet
+  LOCATION 'gs://my-bucket/sales/';
+
 SELECT name, SUM(amount) AS total
 FROM sales
 GROUP BY name
 ORDER BY total DESC;
 SQL
 
-gcloud dataproc jobs submit spark-sql analysis.sql \
+gcloud dataproc jobs submit spark-sql \
   --cluster=course-dev \
   --region=us-central1 \
-  --jars=gs://my-bucket/libs/sales.jar
+  --file=analysis.sql
+
+# Spark SQL — inline, with variables
+gcloud dataproc jobs submit spark-sql \
+  --cluster=course-dev \
+  --region=us-central1 \
+  --execute="SELECT count(*) FROM sales" \
+  --params=cutoff=100
+
+# Spark SQL — with a UDF jar on the classpath
+gcloud dataproc jobs submit spark-sql \
+  --cluster=course-dev \
+  --region=us-central1 \
+  --file=analysis.sql \
+  --jars=gs://my-bucket/libs/udfs.jar
 
 # Spark Java/Scala — needs a main class and a JAR
 gcloud dataproc jobs submit spark \
@@ -868,6 +897,11 @@ gcloud dataproc jobs submit spark \
   --jars=gs://my-bucket/libs/sales.jar \
   -- 1000
 ```
+
+⚠️ **`spark-sql` requires `--file` or `--execute` — one of them is mandatory.** The file
+must be an HCFS URI, so a local path is uploaded to the staging bucket automatically. It
+also has a `--params` flag for setting variables in the queries, and `--jars` for
+registering UDFs.
 
 ### Step 6 — Observe the job
 
