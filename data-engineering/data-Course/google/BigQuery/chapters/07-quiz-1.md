@@ -137,4 +137,4 @@ and one you would use to serve a BI dashboard on top of BigQuery.
 
 ## 📚 Next
 
-[08 · What is BigQuery](./08-what-is-bigquery.md)
+[08 · Conventional Data Warehouse Problems](./08-conventional-warehouse-problems.md)
