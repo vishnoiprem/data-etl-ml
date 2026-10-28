@@ -81,22 +81,27 @@ ORDER BY ordinal_position;
 
 ```sql
 CREATE OR REPLACE EXTERNAL TABLE `YOUR_PROJECT_ID.raw.events_parquet_strict`
+(
+  event_id   STRING,
+  user_id    STRING,
+  event_type STRING,
+  event_ts   TIMESTAMP,
+  amount     NUMERIC(10,2),
+  properties JSON
+)
 OPTIONS (
   format = 'PARQUET',
-  uris = ['gs://YOUR_PROJECT_ID-bq-course/raw/events_*.parquet'],
-  schema = (
-    event_id   STRING,
-    user_id    STRING,
-    event_type STRING,
-    event_ts   TIMESTAMP,
-    amount     NUMERIC(10,2),
-    properties JSON
-  )
+  uris = ['gs://YOUR_PROJECT_ID-bq-course/raw/events_*.parquet']
 );
 ```
 
 ⚠️ **An explicit schema on an external table avoids a schema-detection scan on every query.** With
 auto-detection, BigQuery may re-read the file metadata each time.
+
+💡 **Schema placement:** the column list goes in parentheses *after* the table name —
+exactly like `CREATE TABLE`. It does **not** go inside `OPTIONS()` as a `schema = (...)`
+option. `OPTIONS()` carries only source and format settings (`format`, `uris`,
+`skip_leading_rows`, `field_delimiter`, `hive_partitioning_mode`, …).
 
 ### 3. Hive-partitioned external table
 
@@ -127,6 +132,13 @@ GROUP BY dt;
 
 ```sql
 CREATE OR REPLACE EXTERNAL TABLE `YOUR_PROJECT_ID.raw.orders_csv`
+(
+  order_id     STRING,
+  customer_id  STRING,
+  order_date   DATE,
+  total_amount NUMERIC(12,2),
+  status       STRING
+)
 OPTIONS (
   format = 'CSV',
   uris = ['gs://YOUR_PROJECT_ID-bq-course/staging/orders_*.csv'],
@@ -134,14 +146,7 @@ OPTIONS (
   field_delimiter = ',',
   quote = '"',
   null_markers = [''],
-  max_bad_records = 10,
-  schema = (
-    order_id     STRING,
-    customer_id  STRING,
-    order_date   DATE,
-    total_amount NUMERIC(12,2),
-    status       STRING
-  )
+  max_bad_records = 10
 );
 ```
 
@@ -149,18 +154,18 @@ OPTIONS (
 
 ```sql
 CREATE OR REPLACE EXTERNAL TABLE `YOUR_PROJECT_ID.raw.events_json`
+(
+  event_id   STRING,
+  user_id    STRING,
+  event_type STRING,
+  event_ts   TIMESTAMP,
+  amount     NUMERIC(10,2),
+  properties JSON
+)
 OPTIONS (
   format = 'NEWLINE_DELIMITED_JSON',
   uris = ['gs://YOUR_PROJECT_ID-bq-course/raw/events_*.json'],
-  json_extension = 'json',
-  schema = (
-    event_id   STRING,
-    user_id    STRING,
-    event_type STRING,
-    event_ts   TIMESTAMP,
-    amount     NUMERIC(10,2),
-    properties JSON
-  )
+  json_extension = 'json'
 );
 ```
 

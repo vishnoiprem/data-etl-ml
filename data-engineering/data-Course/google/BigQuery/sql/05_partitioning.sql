@@ -168,11 +168,11 @@ ALTER TABLE `YOUR_PROJECT_ID.curated.orders`
 
 -- Add a partition (required before inserting into a specific partition)
 ALTER TABLE `YOUR_PROJECT_ID.curated.orders`
-  ADD PARTITION DATE '20260115';
+  ADD PARTITION order_date = DATE '20260115';
 
 -- Drop a partition (deletes the data)
 ALTER TABLE `YOUR_PROJECT_ID.curated.orders`
-  DROP PARTITION DATE '20260115';
+  DROP PARTITION order_date = DATE '20260115';
 
 -- Require partition filters (a cost safety net)
 ALTER TABLE `YOUR_PROJECT_ID.curated.orders`

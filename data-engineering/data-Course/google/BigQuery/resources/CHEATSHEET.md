@@ -98,8 +98,8 @@ ALTER TABLE `p.ds.t` ADD COLUMN c STRING DEFAULT 'x';
 ALTER TABLE `p.ds.t` DROP COLUMN c;
 ALTER TABLE `p.ds.t` SET OPTIONS(description='...', partition_expiration_days=90);
 ALTER TABLE `p.ds.t` SET OPTIONS(clustering_fields=['a','b']);
-ALTER TABLE `p.ds.t` ADD PARTITION DATE '20260115';
-ALTER TABLE `p.ds.t` DROP PARTITION DATE '20260115';
+ALTER TABLE `p.ds.t` ADD PARTITION order_date = DATE '20260115';
+ALTER TABLE `p.ds.t` DROP PARTITION order_date = DATE '20260115';
 ```
 
 ---
