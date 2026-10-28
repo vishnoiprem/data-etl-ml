@@ -1,4 +1,0 @@
-malformed_csv	not-an-order,missing-fields,garbage
-malformed_csv	o99999999,c000001,not-a-timestamp,EMEA,web,EUR,complete,not-a-number,p0001
-unknown_currency	o99999997,c000003,2026-01-01T00:00:00+00:00,EMEA,web,XYZ,complete,100.00,p0003
-malformed_csv	,,,,

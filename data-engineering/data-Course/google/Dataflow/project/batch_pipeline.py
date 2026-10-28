@@ -105,13 +105,24 @@ def build_pipeline(
     orders = lines | "ParseOrders" >> beam.ParDo(ParseOrderFn())
 
     if reference_path:
+        # `AsDict` builds a `{product_id: row}` lookup on each worker, so
+        # the enrichment below is an O(1) dictionary hit per order.
+        #
+        # `AsIter` would also work, but it hands the function a *list*,
+        # and a lookup against that list is a linear scan — O(orders ×
+        # products) comparisons across the whole job. With 1,206 products
+        # and ~20,000 orders that is roughly 24 million string comparisons
+        # for a lookup table that fits in memory in milliseconds.
         reference = (
             pipeline
             | "ReadReference" >> ReadFromText(reference_path)
             | "ParseReference" >> beam.Map(_parse_reference_line)
+            | "KeyByProductId" >> beam.Map(
+                lambda row: (row["product_id"], row)
+            )
         )
         orders = orders | "EnrichWithCategory" >> beam.Map(
-            _enrich_with_category, reference=beam.pvalue.AsIter(reference)
+            _enrich_with_category, reference=beam.pvalue.AsDict(reference)
         )
 
     completed = orders | "KeepCompletedOrders" >> beam.Filter(
@@ -134,9 +145,15 @@ def build_pipeline(
     )
 
     if bigquery_table:
+        # `WRITE_TRUNCATE`, not `WRITE_APPEND`. This sink writes a
+        # **full-refresh aggregate** — one row per region summarising the
+        # whole input. Appending would leave the previous run's rows in the
+        # table and double-count every order on the next run. Truncating
+        # makes the write idempotent: re-running the job overwrites the
+        # table with the same content rather than adding to it.
         rows | "WriteSummaryBigQuery" >> beam.io.WriteToBigQuery(
             bigquery_table,
-            write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
+            write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
         )
 
@@ -165,22 +182,27 @@ def _parse_reference_line(line: str) -> dict[str, str]:
         return {}
 
 
-def _enrich_with_category(order: dict, reference: list[dict]) -> dict:
+def _enrich_with_category(order: dict, reference: dict[str, dict]) -> dict:
     """Attach a product category to an order using a side input.
+
+    The side input is a `{product_id: row}` mapping, so the lookup is an
+    O(1) dictionary hit rather than a linear scan over the table.
+
+    A lookup miss is **not** an error. The order still counts; it just
+    gets the "unknown" category. Silently dropping unmatched orders
+    would change the revenue totals, which is worse than a visible
+    "unknown" bucket.
 
     Args:
         order: The order dict.
-        reference: Every row of the reference table.
+        reference: The product reference table, keyed by product id.
 
     Returns:
-        The order dict, with a "category" key added when it was found.
+        The order dict, with a "category" key added.
     """
     product_id = order.get("product_id")
-    for row in reference:
-        if row.get("product_id") == product_id:
-            order["category"] = row.get("category", "unknown")
-            return order
-    order["category"] = "unknown"
+    row = reference.get(product_id)
+    order["category"] = row.get("category", "unknown") if row else "unknown"
     return order
 
 

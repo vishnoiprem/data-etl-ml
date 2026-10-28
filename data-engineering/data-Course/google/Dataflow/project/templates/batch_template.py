@@ -117,9 +117,11 @@ def build_pipeline(
     )
 
     if bigquery_table:
+        # `WRITE_TRUNCATE` because this is a full-refresh aggregate — one
+        # row per region. Appending would double-count on every re-run.
         summary | "WriteBigQuery" >> beam.io.WriteToBigQuery(
             bigquery_table,
-            write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
+            write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
         )
 

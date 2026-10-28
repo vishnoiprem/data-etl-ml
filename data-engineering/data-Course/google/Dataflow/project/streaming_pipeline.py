@@ -40,7 +40,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import apache_beam as beam  # noqa: E402
 from apache_beam.io.gcp.pubsub import ReadFromPubSub  # noqa: E402
 from apache_beam.io.textio import ReadFromText, WriteToText  # noqa: E402
-from apache_beam.transforms.window import FixedWindows  # noqa: E402
+from apache_beam.transforms.window import FixedWindows, TimestampedValue  # noqa: E402
 from apache_beam.transforms.trigger import (  # noqa: E402
     AfterCount,
     AccumulationMode,
@@ -54,7 +54,11 @@ from beam_options import (  # noqa: E402
     pipeline_options_summary,
     resolve_runner,
 )
-from transforms import format_summary_csv, parse_event_payload  # noqa: E402
+from transforms import (  # noqa: E402
+    format_summary_csv,
+    parse_event_payload,
+    parse_timestamp,
+)
 
 log = logging.getLogger(__name__)
 
@@ -111,9 +115,29 @@ def event_timestamp(event: dict):
     """
     from apache_beam.utils.timestamp import Timestamp
 
-    from transforms import parse_timestamp
-
     return Timestamp(float(parse_timestamp(str(event["event_ts"])).timestamp()))
+
+
+def stamp_event_time(event: dict):
+    """Wrap an event so Beam knows when it happened.
+
+    Without this, every element carries the *arrival* timestamp assigned by
+    the runner, and a fixed window groups by when the runner processed the
+    event rather than when it occurred. On a bounded file that means every
+    event lands in one window; on a real stream it means late data is
+    counted in the wrong hour.
+
+    `TimestampedValue` sets the element's event-time timestamp. The
+    `WindowInto` downstream then assigns the element to the window that
+    contains that timestamp.
+
+    Args:
+        event: The parsed event dict.
+
+    Returns:
+        A `TimestampedValue` carrying the event at its event-time timestamp.
+    """
+    return TimestampedValue(event, event_timestamp(event))
 
 
 def to_window_row(item) -> str:
@@ -200,6 +224,16 @@ def build_streaming_pipeline(
             `allow_unsafe_triggers`.
     """
     parsed = events | "ParseEvents" >> beam.Map(parse_event)
+
+    # Drop the malformed payloads before they reach the timestamp step —
+    # `parse_event` returns None for those, and `stamp_event_time` would
+    # fail on a None.
+    parsed = parsed | "DropMalformed" >> beam.Filter(lambda event: event is not None)
+
+    # Stamp each event with its own event-time timestamp. Without this the
+    # runner's arrival timestamp is used, and every event lands in whichever
+    # window the runner happened to process it in.
+    parsed = parsed | "StampEventTime" >> beam.Map(stamp_event_time)
 
     # The trigger decides when a window's result is emitted.
     #

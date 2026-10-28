@@ -13,6 +13,7 @@ Usage:
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -332,6 +333,170 @@ class TestBatchPipeline:
         contents = "\n".join(f.read_text(encoding="utf-8") for f in output_files)
         # The cancelled order (999.00) is now included in AMER.
         assert "AMER,2,1049.0" in contents
+
+    def test_side_input_enrichment_does_not_change_the_totals(self, tmp_path):
+        """Enriching with a product reference leaves the revenue unchanged.
+
+        The reference table is a side input, so it is broadcast to every
+        worker rather than shuffled. The regression this guards against is
+        a side input that is *silently* not applied — Beam runs the
+        pipeline to completion and writes plausible-looking output either
+        way.
+        """
+        from batch_pipeline import build_pipeline
+
+        input_file = tmp_path / "orders.csv"
+        input_file.write_text("\n".join(ORDER_LINES) + "\n", encoding="utf-8")
+
+        reference_file = tmp_path / "reference.ndjson"
+        reference_file.write_text(
+            "\n".join(
+                [
+                    json.dumps({"product_id": "p1", "category": "widgets"}),
+                    json.dumps({"product_id": "p2", "category": "gadgets"}),
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        output_prefix = tmp_path / "summary_enriched"
+        with TestPipeline(options=beam_test_options()) as pipeline:
+            build_pipeline(
+                pipeline,
+                input_path=str(input_file),
+                output_path=str(output_prefix),
+                reference_path=str(reference_file),
+            )
+
+        output_files = sorted(tmp_path.glob("summary_enriched*"))
+        contents = "\n".join(f.read_text(encoding="utf-8") for f in output_files)
+        # The revenue is identical to the unenriched run.
+        assert "EMEA,3,401.0" in contents
+        assert "AMER,1,50.0" in contents
+
+    def test_side_input_lookup_miss_is_not_fatal(self):
+        """An order with no matching product still counts.
+
+        A missing dimension row must not drop the order — that would
+        silently change the revenue totals. The order is counted and
+        labelled "unknown".
+        """
+        from batch_pipeline import _enrich_with_category
+
+        reference = {"p1": {"product_id": "p1", "category": "widgets"}}
+
+        hit = _enrich_with_category({"product_id": "p1"}, reference)
+        assert hit["category"] == "widgets"
+
+        miss = _enrich_with_category({"product_id": "missing"}, reference)
+        assert miss["category"] == "unknown"
+
+
+# --------------------------------------------------------------------------
+# Streaming pipeline tests
+# --------------------------------------------------------------------------
+
+#: Two events in different hours, one region, deliberately **out of
+#: chronological order** in the file — the second line's `event_ts` is
+#: earlier than the first line's. If the pipeline windows on arrival time
+#: rather than event time, both events land in one window; if it windows on
+#: event time, they land in two windows.
+EVENT_LINES = [
+    json.dumps(
+        {
+            "event_id": "e1",
+            "user_id": "u1",
+            "event_ts": "2026-01-15T10:30:00+00:00",
+            "event_type": "click",
+            "product_id": "p1",
+            "region": "EMEA",
+            "value": 10.0,
+        }
+    ),
+    json.dumps(
+        {
+            "event_id": "e2",
+            "user_id": "u2",
+            "event_ts": "2026-01-15T12:30:00+00:00",
+            "event_type": "click",
+            "product_id": "p2",
+            "region": "EMEA",
+            "value": 20.0,
+        }
+    ),
+]
+
+
+class TestStreamingPipeline:
+    """The windowed aggregation built by `streaming_pipeline`."""
+
+    def test_events_land_in_separate_event_time_windows(self, tmp_path):
+        """Events are windowed by event time, not by arrival time.
+
+        This is the regression test for the most subtle bug the course
+        project can have: forgetting to stamp elements with their event-time
+        timestamps. The pipeline still produces the right *totals*, so the
+        bug is invisible until you look at the per-window output — where
+        every event collapses into a single window.
+        """
+        from streaming_pipeline import build_streaming_pipeline
+
+        input_file = tmp_path / "events.ndjson"
+        input_file.write_text("\n".join(EVENT_LINES) + "\n", encoding="utf-8")
+        output_prefix = tmp_path / "streaming"
+
+        with TestPipeline(options=beam_test_options()) as pipeline:
+            events = pipeline | "Read" >> ReadFromText(str(input_file))
+            build_streaming_pipeline(
+                pipeline,
+                events=events,
+                output_path=str(output_prefix),
+                window_seconds=3600,
+            )
+
+        output_files = sorted(tmp_path.glob("streaming*"))
+        assert output_files, "the pipeline produced no output file"
+
+        contents = "\n".join(f.read_text(encoding="utf-8") for f in output_files)
+        rows = [
+            line
+            for line in contents.splitlines()
+            if line and not line.startswith("region,")
+        ]
+
+        # Two events, two hours apart, two windows — one row per window.
+        assert len(rows) == 2, (
+            f"expected one row per event-time window, got {len(rows)}: {rows}"
+        )
+        # Each window holds exactly one event, with that event's own value.
+        assert sorted(rows) == ["EMEA,1,10.0", "EMEA,1,20.0"], rows
+
+    def test_malformed_events_are_dropped_not_fatal(self, tmp_path):
+        """A malformed payload is dropped instead of failing the pipeline."""
+        from streaming_pipeline import build_streaming_pipeline
+
+        input_file = tmp_path / "events.ndjson"
+        input_file.write_text(
+            "\n".join(["not json at all"] + EVENT_LINES) + "\n", encoding="utf-8"
+        )
+        output_prefix = tmp_path / "streaming_malformed"
+
+        with TestPipeline(options=beam_test_options()) as pipeline:
+            events = pipeline | "Read" >> ReadFromText(str(input_file))
+            build_streaming_pipeline(
+                pipeline,
+                events=events,
+                output_path=str(output_prefix),
+                window_seconds=3600,
+            )
+
+        output_files = sorted(tmp_path.glob("streaming_malformed*"))
+        contents = "\n".join(f.read_text(encoding="utf-8") for f in output_files)
+        # The two good events are counted; the bad one is gone.
+        assert "EMEA,1,10.0" in contents
+        assert "EMEA,1,20.0" in contents
+        assert "not json" not in contents
 
 
 def _to_epoch(timestamp: str) -> float:

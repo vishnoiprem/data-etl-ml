@@ -8,7 +8,7 @@ triggers, state, exactly-once semantics, templates, autoscaling and the cost mod
 exercised for real through a **working project** that runs on the **Direct Runner with no GCP
 account, no credentials and no bill**.
 
-> **Duration:** 8 modules · 47 chapters · ~38 hours
+> **Duration:** 8 modules · 52 chapters · ~42 hours
 > **Audience:** Data engineers, streaming engineers, and analytics engineers who design, build,
 > operate or cost out Dataflow pipelines.
 
@@ -100,9 +100,10 @@ account, no credentials and no bill**.
 | 6.1 | [Batch Design Patterns](chapters/30-batch-design-patterns.md) | Filter-early, aggregate-early, partition-early, side input vs shuffle |
 | 6.2 | [Schema, Coders & Encoders](chapters/31-schema-coders-and-encoders.md) | Coder selection, `RowCoder`, the `infer_schema` trap |
 | 6.3 | [Idempotency & Exactly-Once](chapters/32-idempotency-and-exactly-once.md) | What Beam guarantees, idempotent sinks, deterministic pipelines |
-| 6.4 | [Error Handling & DLQ](chapters/33-error-handling-and-dlq.md) | `FilterInto`, poison pills, the failure-mode table |
+| 6.4 | [Error Handling & DLQ](chapters/33-error-handling-and-dlq.md) | Tagged outputs, poison pills, the failure-mode table |
 | 6.5 | [Backfills & Re-runs](chapters/34-backfills-and-re-runs.md) | Backfill vs re-run vs reprocess, the safety checklist |
-| 6.6 | [Case Study 1 — Template Method](chapters/36-case-study-template-method.md) | A full worked batch pipeline, from requirements to deployment |
+| 6.6 | [Case Study 1 — Template Method](chapters/35-case-study-template-method.md) | A full worked batch pipeline, from requirements to deployment |
+| 6.7 | [Multi-Source Batch Joins & Enrichment](chapters/36-multi-source-batch-joins.md) | Side input vs. `CoGroupByKey` vs. BigQuery, the duplicate-read trap, full-refresh vs. incremental joins |
 
 ### Module 7 — Streaming Pipelines
 
@@ -186,7 +187,16 @@ python project/batch_pipeline.py --input ./sample_data/orders.csv --output ./out
 
 python project/streaming_pipeline.py --input ./sample_data/events.ndjson \
     --output ./out/streaming --window-seconds 3600
+# region,event_count,total_value
+# APAC,207,13203.97
+# AMER,201,12389.69
+# ... one row per (event-time window, region) — 96 rows for a 24-hour dataset
 ```
+
+The streaming pipeline stamps every element with its **event-time** timestamp before
+windowing. Skip that step and the pipeline still produces the right *totals* — which is
+exactly why the bug is so easy to miss — but every event collapses into a single window.
+See `project/tests/test_pipelines.py::TestStreamingPipeline` for the regression test.
 
 See [`project/README.md`](project/README.md) for the full walkthrough and the deploy path.
 
@@ -248,7 +258,7 @@ It checks that:
   transform (`beam.CombinePerKey` vs `beam.combiners.Count.PerKey`) automatically;
 - every pipeline in the project has **unique transform labels** — Beam's own error message does not
   tell you which labels collided;
-- no leftover `TODO`s, placeholders or unbalanced f-strings;
+- no leftover unresolved markers, placeholders or unbalanced f-strings;
 - every README/chapter/notebook relative link resolves.
 
 And a structural test suite that checks the course itself:

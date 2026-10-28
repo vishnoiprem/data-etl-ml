@@ -1354,6 +1354,35 @@ schema.
 Same family of constraint. `schema_update_options` needs file loads, not
 streaming inserts.
 
+### `ValueError: Write disposition WRITE_TRUNCATE is not supported for streaming inserts to BigQuery`
+
+A third member of the same family, and the one most likely to surprise
+you, because `WRITE_TRUNCATE` is the *correct* disposition for a
+full-refresh batch load.
+
+Beam enforces this in `_StreamingBigQuerySource` — the code path that
+writes rows through BigQuery's streaming-insert API rather than by
+loading a file. A streaming insert cannot delete the existing contents
+of a table: the API has no such operation. So Beam raises before the
+job is submitted.
+
+The rule that follows:
+
+| Write path | `WRITE_TRUNCATE` | Why |
+|---|---|---|
+| `FILE_LOADS` (the default for batch) | ✅ allowed | BigQuery loads a file and can replace the table's contents atomically |
+| Streaming inserts | ❌ raises `ValueError` | the streaming-insert API has no "replace" operation |
+
+This is a constraint of the **BigQuery API**, not of Beam's design. If
+you genuinely need to replace a table's contents, you have to load it
+as a file — which is another reason a batch aggregate belongs on the
+`FILE_LOADS` path.
+
+Note that this only bites when the streaming path is selected
+explicitly. `WriteToBigQuery` uses file loads by default, so a batch
+pipeline with `write_disposition=WRITE_TRUNCATE` runs fine — which is
+what the course's own `batch_pipeline.py` does.
+
 ### `ValueError: max_retries cannot be more than 10000`
 
 `max_retries` is bounded by BigQuery's streaming-insert quota limit. Beam

@@ -1147,8 +1147,22 @@ that reads `orders*` from a bucket where you have been writing with
 evolving schemas, you have a problem the first time you add a
 non-default field.
 
-The mitigation is a schema registry or a schema directory, and it is
-worth knowing that Beam supports one natively:
+There is a second, better enforcement point that Avro gives you for
+free: **the writer validates too.** If you add a field without a
+default and then write a record that does not have it, `fastavro`
+refuses to encode the record and the job fails:
+
+```text
+ValueError: no value and no default for channel [while running 'WriteAvro/Write/WriteImpl/WriteBundles']
+```
+
+That is a failure at write time, in the job that caused it, with the
+field name in the message. It is the difference between a schema
+enforced format and a convention, and it is worth remembering when
+someone asks why they should use Avro instead of JSON.
+
+The mitigation for the read side is a schema registry or a schema
+directory, and it is worth knowing that Beam supports one natively:
 
 ```python
 import apache_beam as beam
@@ -1541,6 +1555,64 @@ Expected:
 element_type: <class 'str'>
 ```
 
+### Step 5b — the write side, same story
+
+The `WriteToCsv` and `WriteToJson` failures are the mirror image. Create
+`work/json_writer.py`:
+
+```python
+"""Write schema'd rows with WriteToCsv and WriteToJson."""
+
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+from apache_beam.pvalue import Row
+
+options = PipelineOptions(flags=["--runner=BundleBasedDirectRunner"])
+
+with beam.Pipeline(options=options) as p:
+    rows = p | "Create" >> beam.Create([
+        Row(region="EMEA", n=1),
+        Row(region="AMER", n=2),
+    ])
+    rows | "WriteCsv" >> beam.io.WriteToCsv("./out/probe_csv")
+
+print("OK")
+```
+
+Run it:
+
+```bash
+python work/json_writer.py
+```
+
+Expected:
+
+```text
+ERROR:apache_beam.runners.common:NotImplementedError [while running 'WriteCsv/BatchElements(pcoll)']
+    raise NotImplementedError
+RuntimeError: NotImplementedError [while running 'WriteCsv/BatchElements(pcoll)']
+```
+
+Change the runner to `PrismRunner` and re-run:
+
+```bash
+# edit flags=["--runner=PrismRunner"] in work/json_writer.py
+python work/json_writer.py
+cat out/probe_csv*
+```
+
+Expected:
+
+```text
+OK
+region,n
+EMEA,1
+AMER,2
+```
+
+Note that the input is a `beam.Row`, not a dict. `WriteToCsv` needs to
+know the column names and types, and a `beam.Row` is how you tell it.
+
 
 ### Step 6 — write Parquet and read it back
 
@@ -1684,11 +1756,14 @@ Expected:
 element_type: Any
 {'order_id': 'o1', 'region': 'EMEA', 'amount': 10.5}
 {'order_id': 'o2', 'region': 'AMER', 'amount': 3.25}
-embedded schema: {'type': 'record', 'name': 'Order', 'namespace': 'com.example.orders', 'fields': [...]}
+embedded schema: {'type': 'record', 'name': 'com.example.orders.Order', 'fields': [...]}
 ```
 
 The schema really is in the file — you can read it back with any Avro
-library, with no external registry.
+library, with no external registry. (`fastavro` folds the `namespace`
+into the fully-qualified `name`, which is why it comes back as
+`com.example.orders.Order` rather than as two separate keys.)
+
 
 ### Step 8 — the Avro schema-evolution check
 
@@ -1761,29 +1836,69 @@ Run it:
 
 ```bash
 python work/avro_evolution.py
-cat out/evo_with_default_text
-cat out/evo_without_default_text
 ```
 
-Expected — both read back, because the reader takes the schema from the
-file header:
+Expected:
 
 ```text
 with_default: written and read back
-without_default: written and read back
-{'order_id': 'o1', 'amount': 10.5, 'channel': 'unknown'}
-{'order_id': 'o1', 'amount': 10.5}
 ```
 
-The point is in the output. The `with_default` file materialises
-`channel: 'unknown'` for a record that never had one; the
-`without_default` file has no `channel` key at all, because there was
-no default to supply.
+…and then the second case fails, with:
 
-A reader that requires `channel` will succeed on the first file and
-fail on the second — with a `KeyError` or a missing-field decode error,
-depending on how it is written. That is the backward-compatibility
-failure, reproduced locally.
+```text
+ValueError: no value and no default for channel [while running 'WriteAvro/Write/WriteImpl/WriteBundles']
+RuntimeError: Pipeline job-003 failed in state FAILED: bundle inst004 stage-005 failed
+```
+
+This is a *better* demonstration than a read-time failure, and it is
+worth pausing on. Avro caught the incompatibility **at write time**,
+not at read time. The record `{"order_id": "o1", "amount": 10.5}` has
+no `channel` value, the schema has no default for it, and `fastavro`
+refuses to encode it.
+
+That is the enforcement you get for free with a schema-enforced format,
+and it is exactly what you do *not* get with CSV or JSON — where the
+same schema change would have written a file with no `channel` column,
+and the failure would have surfaced hours later in a consumer.
+
+Now read back the file that *did* get written:
+
+```bash
+cat out/evo_with_default_text
+```
+
+Expected:
+
+```text
+{'order_id': 'o1', 'amount': 10.5, 'channel': 'unknown'}
+```
+
+The `channel` key is materialised with the default value, even though
+the source record never had one. That is what "backward compatible"
+means in practice: a reader that does not know about `channel` at all
+can still read this file, and a reader that does know about it gets
+`'unknown'` rather than a missing key.
+
+To see the read-time failure, write the file with a *record* that
+supplies the field but a *schema* that a downstream reader without the
+field expects — that is, write `channel` explicitly and then read with
+`BASE`:
+
+```python
+import apache_beam as beam
+from apache_beam.io import avroio
+
+with beam.Pipeline() as p:
+    rows = p | "ReadAvro" >> avroio.ReadFromAvro("./out/evo_with_default-*.avro")
+    print(rows.element_type)
+```
+
+The reader takes the schema from the file header, so it succeeds — which
+is the point. The compatibility rules are what you rely on when the
+reader has a *pinned* schema of its own, which is what a schema
+registry gives you and what `ReadFromAvro(schema=...)` is for.
+
 
 ### Step 9 — column projection, the Parquet payoff
 
@@ -1803,10 +1918,10 @@ with beam.Pipeline() as p:
         "out/formats/parquet-*.parquet",
         columns=["region", "amount"],
     )
-    everything | "CountAll" >> beam.combiners.Count.PerKey() | "WriteAll" >> beam.io.WriteToText(
+    everything | "KeyAll" >> beam.Map(lambda row: (1, 1)) | "CountAll" >> beam.combiners.Count.PerKey() | "WriteAll" >> beam.io.WriteToText(
         "./out/proj_all", num_shards=1, shard_name_template=""
     )
-    projected | "CountProjected" >> beam.combiners.Count.PerKey() | "WriteProjected" >> beam.io.WriteToText(
+    projected | "KeyProjected" >> beam.Map(lambda row: (1, 1)) | "CountProjected" >> beam.combiners.Count.PerKey() | "WriteProjected" >> beam.io.WriteToText(
         "./out/proj_subset", num_shards=1, shard_name_template=""
     )
 ```
@@ -1829,6 +1944,19 @@ Expected:
 Both return 5,000 rows — projection changes *what each row contains*,
 not how many rows there are. On a wide table with a hundred columns,
 this is the difference between moving 4 MB and moving 400 MB.
+
+Note the `Key` stage before the count. `beam.combiners.Count.PerKey()`
+is a *per-key* combiner and it requires `(key, value)` pairs. Feeding it
+the raw dicts from the Parquet reader gives you:
+
+```text
+ValueError: too many values to unpack (expected 2) [while running 'ReadAll/ParDo(_ArrowTableToRowDictionaries)']
+```
+
+which is another one of those errors that points at the wrong place.
+The `ReadAll` label in the message is a red herring — the real problem is
+in the `CountAll` stage, three transforms downstream.
+
 
 ---
 
@@ -1860,7 +1988,25 @@ hands the SDF expansion a tuple where it expects a `PCollection`.
 3. If you must use the pandas path, do the parsing in pandas *outside*
    the pipeline and feed the results in with `beam.Create`.
 
-### `RuntimeError: NotImplementedError [while running 'W/BatchElements(pcoll)']`
+**And if you are trying to reproduce the failure**, note that
+`beam.Pipeline()` with no `options=` ignores your `--runner` command
+line flag entirely, because it constructs `PipelineOptions([])` from an
+empty argument list. You must pass the runner explicitly:
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions(flags=["--runner=BundleBasedDirectRunner"])
+
+with beam.Pipeline(options=options) as p:
+    rows = p | "ReadCsv" >> beam.io.ReadFromCsv("./sample_data/orders.csv")
+```
+
+Without this, you will "test" the classic runner, watch the pipeline
+succeed, and conclude that the runner does not matter. It does.
+
+### `RuntimeError: NotImplementedError [while running 'Write/BatchElements(pcoll)']`
 
 The classic DirectRunner cannot execute the `GroupIntoBatches` step that
 `WriteToCsv` and `WriteToJson` expand into.
@@ -1890,6 +2036,13 @@ The course's `format_summary_csv` in `project/transforms.py` is the
 production version of exactly this, and it uses `csv.writer` rather
 than an f-string so that a value containing a comma cannot corrupt the
 output.
+
+Note the label in the error message: `'Write/BatchElements(pcoll)'`.
+The `Write` is your transform label, and `BatchElements` is the internal
+step that failed. If your label is something else, the message will say
+something else — which is a useful way to find the offending transform
+in a large pipeline.
+
 
 ### `ImportError: Please install apache_beam[dataframe]`
 
@@ -1953,6 +2106,33 @@ with beam.Pipeline() as p:
 Setting `validate=False` defers the check to run time — useful when
 the files are produced by an upstream job in the same DAG, but it turns
 a clear early error into a late one. Prefer fixing the pattern.
+
+### `ValueError: no value and no default for channel`
+
+You added a field to your Avro schema without a default, and the records
+you are writing do not have a value for it.
+
+```text
+ValueError: no value and no default for channel [while running 'WriteAvro/Write/WriteImpl/WriteBundles']
+```
+
+This is Avro's schema enforcement working, at write time. It is a good
+error: it names the field and it arrives immediately.
+
+**Fix:** give the field a default, so that records which predate it
+still encode:
+
+```python
+{"name": "channel", "type": "string", "default": "unknown"}
+```
+
+Or make it explicitly nullable:
+
+```python
+{"name": "channel", "type": ["null", "string"], "default": None}
+```
+
+Or supply the value in every record you write.
 
 ### `KeyError: 'channel'` after an Avro schema change
 

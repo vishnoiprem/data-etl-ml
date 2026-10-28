@@ -18,6 +18,13 @@ _run/
 _smoke*/
 _run*/
 
+# Scratch directories used while authoring the course
+_gen/
+_out/
+_out2/
+_scratch/
+work/
+
 # Notebooks
 .ipynb_checkpoints/
 

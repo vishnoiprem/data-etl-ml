@@ -51,10 +51,10 @@ populated with the standard types at import time:
 | `str` | `StrUtf8Coder` | yes |
 | `bytes` | `BytesCoder` | yes |
 | `bool` | `BooleanCoder` | yes |
-| `dict` | `MapCoder` | yes |
-| `tuple` | `TupleCoder` | yes |
-| `list` | `ListCoder` | yes |
-| `NoneType` | `NullableCoder` | yes |
+| `dict` | `FastPrimitivesCoder` | **no** |
+| `tuple` | `FastPrimitivesCoder` | **no** |
+| `list` | `FastPrimitivesCoder` | **no** |
+| `NoneType` | `FastPrimitivesCoder` | **no** |
 
 You can inspect it at runtime:
 
@@ -66,9 +66,31 @@ print(registry.get_coder(str))    # StrUtf8Coder
 print(registry.get_coder(dict))   # FastPrimitivesCoder
 ```
 
-Note the third line: a bare `dict` does **not** get a `MapCoder` by
-default. It gets `FastPrimitivesCoder`. That distinction matters in a
-moment.
+Read that table carefully, because it is the single most useful fact in
+this chapter. **The five scalar types get dedicated, deterministic
+coders. The four container types all fall back to
+`FastPrimitivesCoder`, which is not deterministic.**
+
+This is the part that surprises people. `MapCoder`, `TupleCoder`, and
+`ListCoder` all exist in `apache_beam.coders` — they are real, and they
+are deterministic. But the registry does not hand them out for the bare
+Python types. `MapCoder` is only reachable through
+`MapCoder.from_type_hint`, that is, from a `Dict[str, int]`-style type
+hint. `TupleCoder` is reachable the same way, from a
+`Tuple[int, str]`-style hint. `ListCoder`, likewise, from
+`List[str]`.
+
+So the rule is not "containers are pickled". The rule is: **a type
+hint gets you a precise, deterministic coder; a bare Python type gets
+you the pickled fallback.** Annotate and you get structure. Do not
+annotate and you get bytes.
+
+For `NoneType` the answer looks strange — `FastPrimitivesCoder` for
+`None`? — but it is the same rule: there is no `NoneTypeCoder`, and
+`FastPrimitivesCoder` handles `None` by encoding it as a pickled
+`None`. To get a real nullable coder, use a type hint of
+`Optional[X]`, which produces a `NullableCoder` wrapping the coder for
+`X`.
 
 #### 2. The type hint
 
@@ -348,13 +370,35 @@ belongs to the **Java** SDK's schema extensions, not the Python one.
 
 #### `RowCoder` and `force_deterministic`
 
-`RowCoder` has a `force_deterministic` flag:
+`RowCoder` has a `force_deterministic` flag. The constructor is
+`RowCoder(schema, force_deterministic=False)`, and the `schema` it
+wants is the **inner schema proto** — not the `FieldType` wrapper that
+`typing_to_runner_api` returns:
 
 ```python
 from apache_beam.coders import RowCoder
+from apache_beam.typehints.schemas import typing_to_runner_api
 
-coder = RowCoder(schema, force_deterministic=True)
+row_type = typing_to_runner_api(Order)
+schema = row_type.row_type.schema      # <- the .row_type.schema part matters
+
+coder = RowCoder(schema)
+print(coder)                            # RowCoder
+print(coder.is_deterministic())         # True
+
+forced = RowCoder(schema, force_deterministic=True)
+print(forced.is_deterministic())        # True
 ```
+
+Pass `typing_to_runner_api(Order)` directly and you get:
+
+```text
+AttributeError: id
+```
+
+Because `FieldType` has no `id` — the `id` lives one level down, on
+`row_type.schema`. This is the single most common way to get this
+wrong.
 
 With the flag set, Beam raises rather than silently producing a
 non-deterministic encoding when a field type cannot be encoded
@@ -363,17 +407,62 @@ fields, whose ordering is not stable.
 
 ### `AvroGenericCoder` and schema inference
 
-`AvroGenericCoder` encodes Avro records — dicts whose keys match an Avro
-schema:
+`AvroGenericCoder` encodes Avro records. Two details about its API trip
+people up, and both are silent until you encode something:
 
 ```python
-from apache_beam.coders import AvroGenericCoder
+import json
 
-coder = AvroGenericCoder(avro_schema)
+from apache_beam.coders import AvroGenericCoder
+from apache_beam.coders.avro_record import AvroRecord
+
+AVRO_SCHEMA = {
+    "type": "record",
+    "name": "Order",
+    "fields": [
+        {"name": "order_id", "type": "string"},
+        {"name": "region", "type": "string"},
+        {"name": "amount", "type": "double"},
+    ],
+}
+
+# 1. The schema is a JSON *string*, not a dict.
+coder = AvroGenericCoder(json.dumps(AVRO_SCHEMA))
+
+# 2. The value is an AvroRecord, not a plain dict.
+record = AvroRecord({"order_id": "o1", "region": "EMEA", "amount": 10.5})
+encoded = coder.encode(record)
+print(encoded)
+print(coder.decode(encoded).record)
 ```
 
-Its signature is `AvroGenericCoder(schema)`, and it is what the Avro IO
-transforms use.
+Output:
+
+```text
+b'\x04o1\x08EMEA\x00\x00\x00\x00\x00\x00%@'
+{'order_id': 'o1', 'region': 'EMEA', 'amount': 10.5}
+```
+
+Pass a dict as the schema and you get:
+
+```text
+TypeError: the JSON object must be str, bytes or bytearray, not dict
+```
+
+Pass a plain dict as the value and you get:
+
+```text
+AssertionError
+```
+
+— because `AvroCoderImpl.encode` asserts that the value is an
+`AvroRecord`. An assertion, not a validation, so it disappears entirely
+under `python -O`.
+
+One more wrinkle: `AvroGenericCoder` reports
+`is_deterministic() == False`. The Avro *binary* encoding is
+deterministic, but the coder in 2.77 does not claim to be. If Avro
+records are your shuffle key, be aware of that.
 
 The "schema inference" that people associate with Avro is really the
 behaviour of the *schema-bearing IO transforms*. `beam.io.WriteToAvro`
@@ -394,6 +483,10 @@ rows | "WriteAvro" >> beam.io.WriteToAvro(
     "gs://bucket/orders", schema=AVRO_SCHEMA, num_shards=1
 )
 ```
+
+Note the contrast with the coder: `WriteToAvro` accepts the schema as a
+**dict**, because it converts it itself before handing it to the
+coder.
 
 Avro's schema-in-file is the reason Avro is the right choice for a
 long-lived, cross-team data contract: the reader does not need to know
@@ -606,7 +699,7 @@ wraps the resulting DataFrame rows in a **generated schema'd named tuple**
 whose type name embeds a UUID:
 
 ```text
-BeamSchema_5e46372a_2790_46d4_b177_84b8a107bd79(order_id='o1', region='EMEA', amount=10.5)
+BeamSchema_9f0dc081_09f7_4369_a0e6_ea4ed11d6b72(order_id='o1', region='EMEA', amount=10.5)
 ```
 
 The UUID changes when the schema changes. Read a file with three columns
@@ -614,11 +707,14 @@ and one with four, and you get two *different* types:
 
 ```text
 # three columns
-BeamSchema_5e46372a_2790_46d4_b177_84b8a107bd79(order_id='o1', region='EMEA', amount=10.5)
+BeamSchema_9f0dc081_09f7_4369_a0e6_ea4ed11d6b72(order_id='o1', region='EMEA', amount=10.5)
 
 # four columns
-BeamSchema_44a463a4_2434_4d59_a430_468ab1ae6785(order_id='o1', region='EMEA', amount=10.5, channel='web')
+BeamSchema_26b77c0a_187e_42b4_8b3a_edf5133e3194(order_id='o1', region='EMEA', amount=10.5, channel='web')
 ```
+
+The UUID is a hash of the inferred schema, so it is regenerated on
+every run. Do not paste one into a test assertion.
 
 This is where the operational trap bites. **The inferred schema is baked
 into the pipeline at construction time.** If the file changes between the
@@ -627,25 +723,31 @@ is exactly what happens when a producer writes a new version of the file
 while a backfill is running — the reader has already committed to the old
 schema.
 
-And worse: if you pin the schema with `dtype=`, the drift is **silent**:
+And worse: if you select columns explicitly with `usecols=`, the drift
+is **silent**:
 
 ```python
 # The pipeline declares three columns. The file has four.
 rows = pipeline | "Read" >> beam.io.ReadFromCsv(
     "gs://bucket/orders_2026_01_15.csv",
-    dtype={"order_id": str, "region": str, "amount": float},
+    usecols=["order_id", "region", "amount"],
 )
 ```
 
 The `channel` column is **dropped without an error**. The job succeeds.
 The output is wrong.
 
+> **`dtype` is not `usecols`.** `ReadFromCsv` forwards its keyword
+> arguments straight to `pandas.read_csv`. `dtype` *casts* the columns
+> you name and leaves the rest in place. `usecols` *selects*, and
+> therefore discards. It is `usecols` that loses data silently.
+
 Three defences:
 
-1. **Pin the schema explicitly** with `dtype=` (or `names=` plus `dtype=`),
-   and treat a schema change as a code change. Pinning turns a silent
-   wrong answer into a loud failure — provided you also validate the
-   header.
+1. **Pin the schema explicitly** with `usecols=` (the column set) and
+   `dtype=` (the column types), and treat a schema change as a code
+   change. Pinning turns a silent wrong answer into a loud failure —
+   provided you also validate the header.
 2. **Validate the header yourself.** Read the file as text, check the
    first line against an expected set of column names, and route
    mismatches to a DLQ. This is what the course project does, by parsing
@@ -718,18 +820,32 @@ Expected:
 element_type: Any
 
 registry lookups:
-      int -> VarIntCoder
-    float -> FloatCoder
-      str -> StrUtf8Coder
-    bytes -> BytesCoder
-     bool -> BooleanCoder
-     dict -> FastPrimitivesCoder
-    tuple -> TupleCoder
+     int -> VarIntCoder
+   float -> FloatCoder
+     str -> StrUtf8Coder
+   bytes -> BytesCoder
+    bool -> BooleanCoder
+    dict -> FastPrimitivesCoder
+   tuple -> FastPrimitivesCoder
 ```
 
-Two things to notice. `element_type` is `Any` — the `ParseOrderFn` has no
-type annotations, so Beam has nothing to infer from. And a bare `dict`
-maps to `FastPrimitivesCoder`, not to `MapCoder`.
+Three things to notice. `element_type` is `Any` — the `ParseOrderFn` has
+no type annotations, so Beam has nothing to infer from. A bare `dict`
+maps to `FastPrimitivesCoder`, not to `MapCoder`. And a bare `tuple`
+maps to `FastPrimitivesCoder` too, even though `TupleCoder` exists in
+`apache_beam.coders`.
+
+`TupleCoder` is not something the registry hands out for a plain Python
+type. It is a `FastCoder` with a *list of component coders*, and it is
+only reachable through `TupleCoder.from_type_hint` — that is, when Beam
+resolves a `TupleConstraint` from a **type hint** such as
+`Tuple[int, str]`. Ask the registry for the unparameterised `tuple` and
+you get the pickled fallback. Ask it for `Tuple[int, str]` and you get
+the same answer, because `registry.get_coder` looks up the *Python
+class* `typing.Tuple`, not the constraint.
+
+The practical consequence: an untyped tuple of mixed values gets
+pickled. If a tuple is your shuffle key, annotate it.
 
 ### Step 2 — check the determinism of the coders
 
@@ -848,7 +964,7 @@ Create `hands_on_parquet.py`:
 ```python
 """Write schema'd orders to Parquet and read them back."""
 import shutil
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Optional
 
 import apache_beam as beam
@@ -908,6 +1024,9 @@ def main():
             | "ReadOrders" >> beam.io.ReadFromText(INPUT)
             | "ParseOrders" >> beam.Map(parse_line)
             | "KeepValid" >> beam.Filter(lambda order: order is not None)
+            # `WriteToParquet` indexes rows by column name (`row[n]`),
+            # so the element must be a dict, not the dataclass.
+            | "ToDict" >> beam.Map(asdict)
             | "WriteParquet" >> beam.io.WriteToParquet(
                 OUTPUT,
                 schema=ARROW_SCHEMA,
@@ -949,8 +1068,15 @@ order_id: string
 region: string
 amount: double
 5000 rows
-['AMER', 'AMER', 'EMEA', 'EMEA', 'EMEA']
+['AMER', 'EMEA', 'LATAM', 'APAC', 'EMEA']
 ```
+
+Note the row order. `WriteToParquet` writes the elements in the order
+they arrive, and the order they arrive in is whatever the runner
+happened to produce. It is *not* sorted, and it is *not* guaranteed to
+be stable across runs once a shuffle is involved. Parquet has no
+ordering guarantee — if you need a deterministic order, sort it
+explicitly before the write.
 
 ### Step 5 — read the Parquet back into Beam
 
@@ -1020,11 +1146,12 @@ def main():
     read(V1, "v1: three columns, schema inferred")
     read(V2, "v2: four columns, schema inferred")
 
-    # Now pin the schema to the *v1* shape and read the *v2* file.
+    # Now read the *v2* file but select only the three v1 columns.
+    # The fourth column is dropped — silently, with no error.
     read(
         V2,
-        "v2 read with the v1 schema pinned — the new column is dropped silently",
-        dtype={"order_id": str, "region": str, "amount": float},
+        "v2 read with usecols pinned to the v1 shape — the new column is dropped silently",
+        usecols=["order_id", "region", "amount"],
     )
 
 
@@ -1042,17 +1169,21 @@ Expected:
 
 ```text
 --- v1: three columns, schema inferred ---
-BeamSchema_5e46372a_2790_46d4_b177_84b8a107bd79(order_id='o1', region='EMEA', amount=10.5)
-BeamSchema_5e46372a_2790_46d4_b177_84b8a107bd79(order_id='o2', region='AMER', amount=20.0)
+BeamSchema_9f0dc081_09f7_4369_a0e6_ea4ed11d6b72(order_id='o1', region='EMEA', amount=10.5)
+BeamSchema_9f0dc081_09f7_4369_a0e6_ea4ed11d6b72(order_id='o2', region='AMER', amount=20.0)
 
 --- v2: four columns, schema inferred ---
-BeamSchema_44a463a4_2434_4d59_a430_468ab1ae6785(order_id='o1', region='EMEA', amount=10.5, channel='web')
-BeamSchema_44a463a4_2434_46d4_b177_84b8a107bd79(order_id='o2', region='AMER', amount=20.0, channel='mobile')
+BeamSchema_26b77c0a_187e_42b4_8b3a_edf5133e3194(order_id='o1', region='EMEA', amount=10.5, channel='web')
+BeamSchema_26b77c0a_187e_42b4_8b3a_edf5133e3194(order_id='o2', region='AMER', amount=20.0, channel='mobile')
 
---- v2 read with the v1 schema pinned — the new column is dropped silently ---
-BeamSchema_82bb585e_e055_472b_9b55_ae5dc5f81e7e(order_id='o1', region='EMEA', amount=10.5)
-BeamSchema_82bb585e_e055_472b_9b55_ae5dc5f81e7e(order_id='o2', region='AMER', amount=20.0)
+--- v2 read with usecols pinned to the v1 shape — the new column is dropped silently ---
+BeamSchema_d5bbfd24_f5e2_4fa9_88dd_2aa2a2d9a693(order_id='o1', region='EMEA', amount=10.5)
+BeamSchema_d5bbfd24_f5e2_4fa9_88dd_2aa2a2d9a693(order_id='o2', region='AMER', amount=20.0)
 ```
+
+The UUIDs in those type names are regenerated on every run — they are a
+hash of the inferred schema, not a stable identifier. Do not write
+them into a test assertion.
 
 Three things to take away:
 
@@ -1060,9 +1191,24 @@ Three things to take away:
    schema.** The two files produce two different Python types.
 2. **The inferred schema is baked in at pipeline-construction time.** The
    worker does not re-read the header and renegotiate.
-3. **A pinned `dtype` drops unknown columns without an error.** The third
-   run read a four-column file and produced three-column rows. The job
-   succeeded. The data was wrong.
+3. **`usecols` drops columns without an error.** The third run read a
+   four-column file and produced three-column rows. The job succeeded.
+   The data was wrong.
+
+One clarification, because it is a common misunderstanding: **`dtype`
+is not `usecols`.** `ReadFromCsv` forwards its keyword arguments to
+`pandas.read_csv`, and pandas' `dtype` only *casts* the columns you
+name — it does not drop the ones you leave out. Passing
+`dtype={"order_id": str, "region": str, "amount": float}` to the
+four-column file still yields four-column rows, with `channel` intact.
+It is `usecols` that selects, and therefore that discards.
+
+Both arguments have a place. `dtype` pins the *type* of a column you
+are keeping, which is what you want when pandas might otherwise
+infer `object` for a column of numbers with a stray blank. `usecols`
+pins the *set* of columns, which is how you accidentally lose data.
+If you use `usecols`, treat it as a schema declaration and keep it
+next to the contract it mirrors.
 
 ### Step 7 — the safe alternative
 
@@ -1205,10 +1351,15 @@ dataclass with `registry.register_row`.
 
 ### The CSV read silently dropped a column
 
-This is the `ReadFromCsv` inference trap, not a bug in your code. The
-reader honours the `dtype` you gave it and ignores columns you did not
-declare. Pin the *complete* column set, and validate the header
-separately.
+This is the `ReadFromCsv` inference trap, not a bug in your code. If you
+passed `usecols=`, the reader kept exactly the columns you named and
+discarded the rest — with no error and no warning. Pin the *complete*
+column set, and validate the header separately.
+
+If you did **not** pass `usecols`, look at `dtype` instead: a `dtype`
+value that does not match the data (a column of numbers pinned to `str`,
+say) will make pandas raise, and a column pandas cannot parse at all will
+come through as `object`. Neither case drops a column on its own.
 
 ### `ValueError: Cannot provide coder for <class 'X'>`
 
@@ -1303,10 +1454,12 @@ output size, and partition by date if the output is large.
   automatically.
 - **`beam.io.ReadFromCsv` is the pandas reader in 2.77** and infers a
   schema whose type name embeds a UUID that changes with the schema. A
-  pinned `dtype` **silently drops unknown columns** — the operational
-  trap. Validate the contract yourself, at the boundary.
+  pinned `usecols` **silently drops the columns it does not name** — the
+  operational trap. (`dtype` only casts; it does not drop.) Validate the
+  contract yourself, at the boundary.
 - `beam.io.WriteToParquet` takes a **`pyarrow.Schema`**, not a dict and
-  not a Beam Row schema.
+  not a Beam Row schema — and the element it receives must be
+  dict-like, because the writer indexes rows by column name.
 
 ---
 

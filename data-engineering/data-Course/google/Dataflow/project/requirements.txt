@@ -1,11 +1,20 @@
 # Core — Apache Beam with the GCP extras
-apache-beam[gcp]>=2.53.0
+#
+# The `[gcp]` extra pulls in google-cloud-storage, google-cloud-bigquery,
+# google-cloud-pubsub and google-cloud-dataflow-**client** — which is the
+# modern Dataflow API client.
+#
+# Do NOT install the standalone `google-cloud-dataflow` package. It is a
+# legacy wrapper that pins `apache-beam==2.2.0` and `protobuf<=3.3.0`,
+# neither of which builds on Python 3.11+. `apache-beam[gcp]` already
+# installs everything the course needs.
+apache-beam[gcp]>=2.77.0
 
 # Google Cloud clients used by the sinks and the setup helpers
 google-cloud-bigquery>=3.11.0
 google-cloud-storage>=2.14.0
 google-cloud-pubsub>=2.21.0
-google-cloud-dataflow>=0.13.0
+google-cloud-dataflow-client>=0.13.0
 
 # Testing
 pytest>=8.0.0
@@ -15,3 +24,26 @@ jupyterlab>=4.0.0
 ipykernel>=6.29.0
 nbformat>=5.9.0
 nbclient>=0.8.0
+
+# Required to build a pipeline *inside* a Jupyter/IPython kernel.
+#
+# This is not optional and not a "dataframe API" choice. When Beam detects
+# that it is running inside IPython — which is every notebook in this
+# course — it imports its interactive runner to label transforms with
+# their cell number. That module does `import pandas` at the top level,
+# so a missing pandas breaks `beam.Pipeline()` with:
+#
+#   ModuleNotFoundError: No module named 'pandas'
+#
+# raised from apache_beam/runners/interactive/utils.py
+#
+# The upper bound matters. Beam 2.77 builds its DataFrame wrappers by
+# reflecting over `pandas.DataFrame`, and pandas 3.0 removed
+# `DataFrame.first`. With pandas 3.x, constructing a pipeline inside a
+# notebook fails with:
+#
+#   AttributeError: type object 'DataFrame' has no attribute 'first'
+#
+# raised from apache_beam/dataframe/frame_base.py. Pin below 3.0 until
+# Beam ships support for it.
+pandas>=2.0.0,<3.0.0
