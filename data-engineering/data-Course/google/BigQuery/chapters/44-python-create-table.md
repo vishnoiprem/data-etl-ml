@@ -182,11 +182,16 @@ client.query(
 
 ```python
 table = bigquery.Table("YOUR_PROJECT_ID.raw.events_external")
-table.external_source_configuration = bigquery.ExternalSourceConfiguration(
-    source_format="PARQUET",
-    source_uris=["gs://YOUR_PROJECT_ID-bq-course/raw/events_*.parquet"],
-    autodetect=True,
+# `ExternalConfig` is the SDK equivalent of `WITH PARTITION OPTIONS`.
+# Format-specific knobs live on `config.options` (see external_config.CSVOptions
+# / AvroOptions / ParquetOptions / HivePartitioningOptions).
+table.external_data_configuration = bigquery.ExternalConfig(
+    bigquery.ExternalSourceFormat.PARQUET
 )
+table.external_data_configuration.source_uris = [
+    "gs://YOUR_PROJECT_ID-bq-course/raw/events_*.parquet"
+]
+table.external_data_configuration.autodetect = True
 table.schema = [
     bigquery.SchemaField("event_id", "STRING"),
     bigquery.SchemaField("user_id", "STRING"),

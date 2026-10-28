@@ -193,6 +193,10 @@ def split_sql_statements(text: str) -> list[str]:
 def extract_sql_from_python(source: str) -> list[tuple[int, str]]:
     """Find SQL-looking string literals in a Python source blob.
 
+    f-strings are resolved against the notebook's known placeholder names so the
+    extracted SQL is complete and parseable. Prose strings and Python code
+    fragments are rejected.
+
     Returns (line_number, sql_text) pairs."""
     found: list[tuple[int, str]] = []
     try:
@@ -200,21 +204,61 @@ def extract_sql_from_python(source: str) -> list[tuple[int, str]]:
     except SyntaxError:
         return found
 
+    # Names bound to SQL-ish values in the snippet. f-strings referencing these
+    # get substituted with a syntactically valid literal.
+    bound: dict[str, str] = {}
     for node in ast.walk(tree):
-        if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            tgt = node.targets[0]
+            if isinstance(tgt, ast.Name) and isinstance(node.value, ast.Constant):
+                if isinstance(node.value.value, str) and node.value.value.startswith(("gs://", "http", "/")):
+                    bound[tgt.id] = node.value.value
+
+    # Well-known placeholders used throughout the course. Resolving these makes
+    # the extracted SQL a complete, parseable statement.
+    bound.setdefault("PROJECT_ID", "your_project")
+    bound.setdefault("PROJECT", "your_project")
+    bound.setdefault("BUCKET", "your-bucket")
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            value = node.value
+        elif isinstance(node, ast.JoinedStr):
+            # f-string: reconstruct with placeholders substituted
+            parts = []
+            for v in node.values:
+                if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                    parts.append(v.value)
+                elif isinstance(v, ast.FormattedValue):
+                    parts.append("{" + ast.unparse(v.value) + "}")
+            value = "".join(parts)
+        else:
             continue
-        value = node.value
+
         stripped = value.strip()
         if not stripped:
             continue
         if not SQL_START.match(stripped):
             continue
-        # heuristics: must contain a SQL-ish clause and no Python syntax markers
-        if any(marker in value for marker in ("\n    ", "f\"", "{PROJECT")):
-            pass  # allowed
-        if "=" in stripped.split("\n")[0] and " " not in stripped.split("\n")[0]:
-            continue  # probably a python assignment string
-        found.append((getattr(node, "lineno", 0), value))
+
+        # Reject prose that merely starts with a SQL keyword
+        if "\n" not in stripped and " " not in stripped:
+            continue
+        if re.match(r"(?i)^(MERGE|INSERT|UPDATE|DELETE|SELECT|ALTER|CREATE|DROP)\s*$", stripped):
+            continue
+
+        # Resolve f-string placeholders that survived as literal '{...}'
+        resolved = value
+        for name, repl in bound.items():
+            resolved = resolved.replace("{" + name + "}", repl)
+        resolved = re.sub(r"\{[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?\}", "placeholder", resolved)
+
+        # If the SQL still contains an unresolved brace it is a truncated
+        # fragment, not a complete statement.
+        if "{" in resolved or "}" in resolved:
+            continue
+
+        found.append((getattr(node, "lineno", 0), resolved))
     return found
 
 

@@ -58,7 +58,7 @@ Dataflow, Flink, Spark, and the local Direct Runner.
 
 ### Map and FlatMap
 
-```python
+```text
 import apache_beam as beam
 
 (p
@@ -75,7 +75,7 @@ SELECT value, value + 1 FROM input
 
 ### Filter
 
-```python
+```text
 | "Filter" >> beam.Filter(lambda row: row["total_amount"] > 100)
 ```
 
@@ -85,7 +85,7 @@ WHERE total_amount > 100
 
 ### CombinePerKey — the workhorse
 
-```python
+```text
 from apache_beam import combiners
 
 (p
@@ -103,7 +103,7 @@ FROM orders GROUP BY region
 associative and commutative, so Beam can parallelize it and merge partial results — which
 means it scales, unlike a Python function that accumulates a list.
 
-```python
+```text
 class AverageRevenueFn(beam.CombineFn):
     def create_accumulator(self):
         return (0.0, 0)          # (sum, count)
@@ -129,7 +129,7 @@ class AverageRevenueFn(beam.CombineFn):
 
 ### GroupBy
 
-```python
+```text
 (p
  | "Key" >> beam.Map(lambda r: (r["region"], r))
  | "GroupBy" >> beam.GroupBy(lambda r: r["region"])
@@ -148,7 +148,7 @@ incrementally. Use `GroupBy` for small groups; use `CombinePerKey` for large one
 
 ### Joins
 
-```python
+```text
 from apache_beam import Join
 
 orders = p | "Orders" >> beam.io.ReadFromParquet(orders_path)
@@ -157,7 +157,7 @@ regions = p | "Regions" >> beam.io.ReadFromParquet(regions_path)
 joined = orders | "Join" >> Join.RegionsJoin(orders, regions)
 ```
 
-```python
+```text
 # Manual join — more control
 orders_kv = orders | "Key" >> beam.Map(lambda r: (r["region"], r))
 regions_kv = regions | "Key" >> beam.Map(lambda r: (r["region"], r))
@@ -176,7 +176,7 @@ faster, simpler, and cheaper than a shuffle join in the pipeline.
 
 ### Side inputs
 
-```python
+```text
 regions = p | "Read regions" >> beam.io.ReadFromParquet(regions_path)
 lookup = beam.pvalue.AsSingleton(
     regions | "To dict" >> beam.Map(lambda r: (r["region"], r["name"]))
@@ -192,7 +192,7 @@ lookup = beam.pvalue.AsSingleton(
 
 ### Reshuffle
 
-```python
+```text
 (p
  | "Read" >> beam.io.ReadFromPubSub(topic=TOPIC)
  | "Parse" >> beam.Map(parse)
@@ -231,7 +231,7 @@ rebalances skewed data so one hot key does not land on one worker.
 | Kafka | `beam.io.WriteToKafka` |
 | GCS | `beam.io.WriteToText` with a GCS path |
 
-```python
+```text
 # Write partitioned Parquet by date
 (p
  | "Read" >> beam.io.ReadFromPubSub(topic=TOPIC)
@@ -249,7 +249,7 @@ rebalances skewed data so one hot key does not land on one worker.
 
 ## 🧠 Beam SQL
 
-```python
+```text
 from apache_beam.sql import register_table
 
 with beam.Pipeline(options=options) as p:
@@ -281,7 +281,7 @@ transformation layer. Use BigQuery SQL for that.
 
 ## 🧠 The DataFrames API
 
-```python
+```text
 import apache_beam as beam
 from apache_beam.dataframe.io import read_csv, to_parquet
 
@@ -295,7 +295,7 @@ from apache_beam.dataframe.io import read_csv, to_parquet
 )
 ```
 
-```python
+```text
 # With a schema
 schema = {
     "fields": [
@@ -317,7 +317,7 @@ is not the recommended approach for new production code — but it is excellent 
 
 ## 🛠️ Hands-On: a complete word-count pipeline
 
-```python
+```text
 """
 wordcount.py — the canonical Beam example, in three dialects.
 """
@@ -344,7 +344,7 @@ if __name__ == "__main__":
     run()
 ```
 
-```python
+```text
 # The same thing with the CombinePerKey API
 with beam.Pipeline(options=options) as p:
     (
@@ -356,7 +356,7 @@ with beam.Pipeline(options=options) as p:
     )
 ```
 
-```python
+```text
 # The same thing with Beam SQL
 from apache_beam.sql import register_table
 

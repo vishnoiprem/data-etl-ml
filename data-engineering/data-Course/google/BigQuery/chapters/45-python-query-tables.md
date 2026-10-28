@@ -245,7 +245,7 @@ job.result()
 ### 12. Export results to Parquet in GCS
 
 ```python
-job_config = bigquery.ExportJobConfig(
+job_config = bigquery.ExtractJobConfig(
     destination="gs://YOUR_PROJECT_ID-bq-course/exports/orders_*.parquet",
     destination_format="PARQUET",
     use_avro_logical_types=True,

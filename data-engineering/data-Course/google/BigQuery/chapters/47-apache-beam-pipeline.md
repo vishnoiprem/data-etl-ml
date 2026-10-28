@@ -39,7 +39,7 @@ Beam SDK  →  runner  →  execution
 
 ## 🧠 The anatomy of a Beam pipeline
 
-```python
+```text
 import apache_beam as beam
 from apache_beam.io.gcp.bigquery_io import BigQueryDisposition
 from apache_beam.io.gcp import bigquery_io
@@ -100,7 +100,7 @@ pip install apache-beam[gcp,dataframe,db,filesystem] \
 
 ### 3. A complete batch ingestion pipeline
 
-```python
+```text
 """
 beam_pos_ingest.py — ingest daily POS CSV extracts into BigQuery.
 """
@@ -242,7 +242,7 @@ non-serializable state. Without it, workers fail with a confusing import error.
 
 ### 6. Writing to a partition
 
-```python
+```text
 | "Write BQ" >> bigquery_io.WriteToBigQuery(
     TABLE,
     schema=ORDER_SCHEMA,
@@ -262,7 +262,7 @@ write over roughly 50,000 rows per job can hit BigQuery's load-job limits.
 
 ### 7. Filtering, deduplicating, and grouping
 
-```python
+```text
 from apache_beam import combiners
 from apache_beam import filters
 
@@ -290,7 +290,7 @@ with beam.Pipeline(options=options) as p:
 
 ### 8. Reading from BigQuery
 
-```python
+```text
 from apache_beam.io.gcp.bigquery_io import ReadFromBigQuery
 
 (
@@ -312,7 +312,7 @@ into the engine instead of pulling the whole table into the pipeline.
 
 ### 9. Grouping into dictionaries
 
-```python
+```text
 | "Group by customer" >> beam.GroupBy(lambda r: r["customer_id"])
 | "Aggregate" >> beam.Map(
     lambda g: {
@@ -325,7 +325,7 @@ into the engine instead of pulling the whole table into the pipeline.
 
 ### 10. Handling errors
 
-```python
+```text
 from apache_beam import pvalue
 from apache_beam.io.gcp.bigquery_io import BigQueryDisposition
 from apache_beam.io import WriteToText

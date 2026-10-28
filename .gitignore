@@ -146,3 +146,11 @@ realtime-stock-pipeline/trade-finder/reports/email_*.txt
 # apex-rag-omni frontend manifests (otherwise hidden by *.json above)
 !agentic-ai/apex-rag-omni/frontend/package.json
 !agentic-ai/apex-rag-omni/frontend/tsconfig.json
+
+.idaa
+
+
+
+
+
+.puku-cli

@@ -106,29 +106,48 @@ ALTER TABLE `YOUR_PROJECT_ID.analytics.customers`
   ALTER COLUMN email SET OPTIONS (policy_tags = ('YOUR_PROJECT_ID.security.pii_email'));
 ```
 
+```sql
+-- Conditional policy tags are created with DDL, not with client-library
+-- constructors. The taxonomy must already exist in Policy Tags.
+CREATE POLICY TAG `YOUR_PROJECT_ID.security.pii_email`
+DESCRIPTION = 'Email address'
+;
+
+-- Attach it to a column
+ALTER TABLE `YOUR_PROJECT_ID.analytics.customers`
+  ALTER COLUMN email SET OPTIONS (policy_tags = ('YOUR_PROJECT_ID.security.pii_email'));
+```
+
 ```python
-# Apply dynamic masking via a conditional policy tag
+# From Python, the same DDL runs as an ordinary query job.
 from google.cloud import bigquery
 
 client = bigquery.Client()
-dataset = client.dataset("security")
 
-# Create a conditional policy tag with a masking rule
-tag = bigquery.ConditionalPolicyTag(
-    bigquery.PolicyTagCategory.CONDITIONAL,
-    [
-        bigquery.ConditionalPolicyTagRule(
-            bigquery.PolicyTagRuleCondition(
-                ["projects/YOUR_PROJECT_ID/locations/US/taxonomies/1/policyTags/2"]
-            ),
-            bigquery.PolicyTagRuleResult(
-                bigquery.PolicyTagResult.ALLOW,
-                bigquery.MaskingResult("email", "SHA256"),
-            ),
-        )
-    ],
-)
+ddl = """
+CREATE POLICY TAG `YOUR_PROJECT_ID.security.pii_email`
+DESCRIPTION = 'Email address'
+"""
+
+job = client.query(ddl)
+job.result()
+print(f"✓ policy tag created")
+
+# And attach it to a column
+attach = """
+ALTER TABLE `YOUR_PROJECT_ID.analytics.customers`
+  ALTER COLUMN email SET OPTIONS (policy_tags = ('YOUR_PROJECT_ID.security.pii_email'))
+"""
+
+job = client.query(attach)
+job.result()
+print(f"✓ policy tag attached to analytics.customers.email")
 ```
+
+> **Note:** policy tags live in the **Policy Tags** API (`policytags.googleapis.com`),
+> not the BigQuery API. Create the taxonomy and tag there first, then reference
+> the tag by name from BigQuery DDL. The `bigquery.ConditionalPolicyTag` and
+> related classes do not exist in `google-cloud-bigquery`.
 
 ### 4. Row-level security via a view
 

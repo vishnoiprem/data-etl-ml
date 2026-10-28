@@ -46,7 +46,7 @@ and now the revenue is different."
 
 ### 1. A complete streaming pipeline
 
-```python
+```text
 """
 beam_stream_ingest.py — Pub/Sub → BigQuery, continuously.
 """
@@ -174,7 +174,7 @@ drastically shortens deployments of a streaming job.
 
 ### 3. Windowing — the core streaming concept
 
-```python
+```text
 from apache_beam.transforms.window import FixedWindows, SlidingWindows, SessionWindows, IntervalWindow
 from apache_beam.transforms.trigger import (
     AfterCount,
@@ -195,7 +195,7 @@ from apache_beam.transforms.trigger import (
 | "Session 30 min gap" >> beam.WindowInto(SessionWindows(gap_size=1800))
 ```
 
-```python
+```text
 # Trigger: emit after 1000 elements OR after 30 seconds of processing time
 | "Trigger" >> beam.WindowInto(
     FixedWindows(60),
@@ -215,7 +215,7 @@ from apache_beam.transforms.trigger import (
 based on observed event timestamps. Late data (beyond the watermark) is dropped unless you
 set an allowed lateness.
 
-```python
+```text
 | "Allow lateness" >> beam.WindowInto(
     FixedWindows(60),
     allowed_lateness=3600,      # 1 hour
@@ -224,7 +224,7 @@ set an allowed lateness.
 
 ### 4. Aggregating per window
 
-```python
+```text
 from apache_beam import combiners, window
 
 with beam.Pipeline(options=options) as p:
@@ -251,7 +251,7 @@ with beam.Pipeline(options=options) as p:
 
 ### 5. Session windows — grouping a user journey
 
-```python
+```text
 from apache_beam.transforms.window import SessionWindows
 
 (
@@ -283,7 +283,7 @@ re-firing the window.
 
 ### 6. State and timers — memory across the stream
 
-```python
+```text
 class DeduplicateEvents(beam.DoFn):
     """Deduplicate by event_id using a bounded cache."""
 
@@ -341,7 +341,7 @@ across bundles or workers.
 
 ### 7. Hybrid mode — streaming with periodic batch reconciliation
 
-```python
+```text
 from apache_beam import window as beam_window
 from apache_beam.transforms.window import FixedWindows
 
