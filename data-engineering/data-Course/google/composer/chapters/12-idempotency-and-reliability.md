@@ -119,6 +119,7 @@ gs://source-bucket/2026-01-15/orders.csv
 **The code that looks right:**
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 load = BigQueryInsertJobOperator(
     task_id="load_to_bigquery",
     configuration={
@@ -159,6 +160,7 @@ load = BigQueryInsertJobOperator(
 **And this is the version that is even worse:**
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 "writeDisposition": "WRITE_APPEND",
 ```
 
@@ -189,6 +191,7 @@ BigQuery's `writeDisposition` determines what happens to the destination when a 
 **Without a partition decorator** — truncating the entire table:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 "destinationTable": {
     "projectId": "{{ var.value.gcp_project_id }}",
     "datasetId": "{{ params.target_dataset }}",
@@ -202,6 +205,7 @@ A retry truncates and rewrites the whole table. Idempotent — but it also means
 **With a partition decorator** — the correct pattern for a daily DAG:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 "destinationTable": {
     "projectId": "{{ var.value.gcp_project_id }}",
     "datasetId": "{{ params.target_dataset }}",
@@ -216,6 +220,7 @@ Now `WRITE_TRUNCATE` clears only the `20260115` partition and rewrites it. A ret
 This is exactly what the course's `03_etl_bigquery.py` does, and the comment says why:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 # 3. Load the staged data into the target table. The write disposition
 #    is WRITE_TRUNCATE against a partition decorator, which makes the
 #    load idempotent — a retry replaces the partition instead of
@@ -679,6 +684,7 @@ The second load added nothing, because every row's key was already present. That
 ### Step 4 — the deployable DAG, with the fix
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 # project/dags/07_idempotent_load.py
 """
 07_idempotent_load.py — a DAG that is safe to retry, re-run, and backfill.

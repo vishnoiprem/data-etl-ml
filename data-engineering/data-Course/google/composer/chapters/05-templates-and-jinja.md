@@ -156,6 +156,7 @@ the dependency has been satisfied). This is exactly how
 `03_etl_bigquery.py` gets the staging table name:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 "query": (
     "SELECT order_id, customer_id, order_ts, region, channel, "
     "currency, status, amount, product_id, "
@@ -201,6 +202,7 @@ reason, and its `render_template` wraps failures in
 `TemplateRenderError`:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 from templating import render_template, TemplateRenderError
 
 try:
@@ -673,6 +675,7 @@ That is the course's wrapper, not Airflow's. The real cause is on
 `.cause`:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 except TemplateRenderError as exc:
     print(type(exc.cause).__name__, exc.cause)
 ```

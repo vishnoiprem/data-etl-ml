@@ -368,6 +368,7 @@ There are three variants, and they map to the three mechanisms.
 **Variant A — the data arrives on a known schedule.** Don't wait. Schedule the consumer after the producer's known completion time, and use `ExternalTaskSensor` with an `execution_delta` only if you need to *confirm* the producer ran.
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 consumer = DAG(
     dag_id="consumer",
     schedule="30 3 * * *",       # 03:30, after the producer's 02:00 run
@@ -519,6 +520,7 @@ run_window = DataflowCreateJobOperator(
 **Solution C — a Dataset.** The bounded Dataflow job updates a Dataset when it finishes; the Airflow DAG is scheduled on that Dataset. This is the cleanest, and it removes the coordination problem entirely.
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 ORDERS_WINDOW = Dataset("gs://YOUR_BUCKET/windows/orders")
 
 publish = DataflowCreateJobOperator(
@@ -537,6 +539,7 @@ publish = DataflowCreateJobOperator(
 **2. `SubDagOperator`.** Removed in Airflow 2.0. It existed to nest a DAG inside a DAG, and it was confusing enough that Airflow deleted it. Use `TaskGroup` instead:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 from airflow.utils.task_group import TaskGroup
 
 with TaskGroup(group_id="load") as load_group:
@@ -671,6 +674,7 @@ Four regions → four mapped task instances, determined by the data at run time.
 ### Step 3 — the deployable DAG with dynamic mapping
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 # project/dags/09_fanout_patterns.py
 """
 09_fanout_patterns.py — the pattern catalogue, in one DAG.

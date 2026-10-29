@@ -68,6 +68,10 @@ ALLOWED_PLACEHOLDERS = {
     "PROJECT_ID",
 }
 
+#: A Python block containing this marker is an intentional fragment and is
+#: exempt from the parse check.
+FRAGMENT_MARKER = "snippet: fragment"
+
 
 class Report:
     """Collects audit findings."""
@@ -201,6 +205,10 @@ def check_placeholders(path: Path, report: Report) -> None:
 def check_python_snippets(path: Path, report: Report) -> None:
     """Check that every Python snippet in a markdown file parses.
 
+    A snippet explicitly marked as a fragment is skipped: a block that
+    shows one dict key, or an abbreviated call with ``...``, is teaching
+    a shape, not a runnable program. Unmarked snippets must parse.
+
     Args:
         path: The markdown file.
         report: The report to collect findings in.
@@ -208,10 +216,14 @@ def check_python_snippets(path: Path, report: Report) -> None:
     text = path.read_text(encoding="utf-8")
     for index, block in enumerate(iter_code_blocks(text)):
         report.check()
-        # Skip shell-style placeholders and fragment snippets that are
-        # explicitly partial (they start with "..." or use indentation).
         stripped = block.strip()
-        if not stripped or stripped.startswith("..."):
+        if not stripped:
+            continue
+        if FRAGMENT_MARKER in block:
+            continue
+        # An abbreviated snippet using `...` as a placeholder argument is
+        # a deliberate elision.
+        if re.search(r",\s*\.\.\.\s*[,)]", stripped) or stripped.endswith("..."):
             continue
         try:
             ast.parse(block)

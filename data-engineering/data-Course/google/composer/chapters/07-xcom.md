@@ -160,6 +160,7 @@ XCom can be pulled from a **template**, not just from Python. This is
 the mechanism `03_etl_bigquery.py` uses:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 "query": (
     "SELECT order_id, customer_id, order_ts, region, channel, "
     "currency, status, amount, product_id, "

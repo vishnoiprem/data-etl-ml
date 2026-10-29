@@ -215,6 +215,7 @@ This is worth spelling out in full, because it is the single most common
 branching defect and it is *silent*.
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
 with DAG(dag_id="branching_bug") as dag:
     check = PythonOperator(task_id="check", python_callable=check)
 
@@ -245,6 +246,7 @@ someone looks.
 The fix:
 
 ```python
+# --- snippet: fragment (part of a larger structure) ---
     notify = PythonOperator(
         task_id="notify",
         python_callable=notify,
