@@ -139,7 +139,7 @@ model without the strategy contaminating the eval.
 - **Not a fundamental model.** The features are technical
   (price, volume, momentum, range). No fundamentals, no
   sentiment, no news. If you want those, see
-  [`../../ai-engineering/12-llm-application-track/04-rag-langchain/`](../../ai-engineering/12-llm-application-track/04-rag-langchain/)
+  [`../../ai-engineering/12-llm-application-track/04-rag-langchain/`](../../../learning/ai-engineering/12-llm-application-track/04-rag-langchain/)
   for a RAG pattern that overlays news on top of the tape.
 - **Not high-frequency.** 60s cadence is the floor for
   Yahoo-Finance-grade data. Sub-second signals need a

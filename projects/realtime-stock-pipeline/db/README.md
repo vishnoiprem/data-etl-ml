@@ -122,7 +122,7 @@ you tune `retention` on the raw hypertable.
 - **Not a market-data archival store.** 7 days of raw ticks
   is enough for the live system. For multi-year archives,
   use S3 + Parquet + Iceberg (the pattern in
-  [`../../data-engineering/keystone-iceberg-ops/`](../../data-engineering/keystone-iceberg-ops/)).
+  [`../../data-engineering/keystone-iceberg-ops/`](../../../learning/data-engineering/keystone-iceberg-ops/)).
 
 ---
 

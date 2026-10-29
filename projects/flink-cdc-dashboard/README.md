@@ -128,7 +128,7 @@ Five things, in order of importance:
   Kafka + Flink + Postgres + Grafana, with the real configs.
 - **Not multi-tenant.** One Postgres, one Kafka cluster, one
   Flink job. If you need isolation, look at
-  [`../data-engineering/multi-tenant-isolation/`](../data-engineering/multi-tenant-isolation/).
+  [`../data-engineering/multi-tenant-isolation/`](../../learning/data-engineering/multi-tenant-isolation/).
 - **Not a CDC-from-Oracle / MySQL demo.** Just Postgres. The
   Debezium pattern is the same for MySQL; for Oracle and SQL
   Server, the connector config changes but the topology doesn't.
@@ -154,8 +154,8 @@ and the affected `*.sh` script.
   The production-grade sibling: Kafka + Flink + Postgres +
   Grafana with the same topology, but with HA + monitoring
   + persistence.
-- [`../data-engineering/keystone-iceberg-ops/`](../data-engineering/keystone-iceberg-ops/) —
+- [`../data-engineering/keystone-iceberg-ops/`](../../learning/data-engineering/keystone-iceberg-ops/) —
   The Iceberg-table-ops angle on the same data. CDC into
   Iceberg instead of into a Postgres sink.
-- [`../data-engineering/activity-volume-olap/`](../data-engineering/activity-volume-olap/) —
+- [`../data-engineering/activity-volume-olap/`](../../learning/data-engineering/activity-volume-olap/) —
   The OLAP-on-top-of-CDC view: ClickHouse + Kafka + dbt.

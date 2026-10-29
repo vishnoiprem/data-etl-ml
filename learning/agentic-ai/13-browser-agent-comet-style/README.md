@@ -75,7 +75,7 @@ cd extension
 
 ## See also
 
-- [`06-regulated-industry/`](../06-regulated-industry/) — the same shape for server-side, with audit log.
+- [`06-regulated-industry/`](../../ai-engineering/06-regulated-industry/) — the same shape for server-side, with audit log.
 
 ---
 
@@ -92,7 +92,7 @@ cd extension
   except the user-clicked "send" action. The
   server-side equivalent (with full audit log) lives
   in
-  [`../06-regulated-industry/`](../06-regulated-industry/).
+  [`../06-regulated-industry/`](../../ai-engineering/06-regulated-industry/).
 - **Not a privacy-by-policy system.** The URL
   allowlist is *enforced in the extension code*,
   not promised in a privacy policy. The "0
@@ -110,7 +110,7 @@ cd extension
 
 ## Related directories
 
-- [`../06-regulated-industry/`](../06-regulated-industry/) —
+- [`../06-regulated-industry/`](../../ai-engineering/06-regulated-industry/) —
   the server-side equivalent with full audit
   log + per-tenant retention. The shape is the
   same; the privacy boundary moves from the

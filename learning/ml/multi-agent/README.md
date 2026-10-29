@@ -210,7 +210,7 @@ between tool calls.
 
 ## Related directories
 
-- [`../ai-engineering/03-multi-agent-platform/`](../ai-engineering/03-multi-agent-platform/) —
+- [`../ai-engineering/03-multi-agent-platform/`](../../ai-engineering/03-multi-agent-platform/) —
   the production-shaped multi-agent platform (LangGraph
   orchestrator, Bedrock, shared memory store).
 - [`../../agentic-ai/ai-agent/`](../../agentic-ai/ai-agent/) —

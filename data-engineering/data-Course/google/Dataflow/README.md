@@ -309,7 +309,7 @@ See [`interview/README.md`](interview/README.md) for the study plan.
 
 ## Related Courses
 
-- **[BigQuery for Big Data Engineers](../BigQuery/README.md)** — the warehouse course. Read it
+- **[BigQuery for Big Data Engineers](../../../../learning/data-engineering/data-Course/google/BigQuery/README.md)** — the warehouse course. Read it
   first if BigQuery is new to you; this course assumes you know what a partition is.
 - **[Apache Airflow](https://airflow.apache.org/)** — for orchestrating *when* your Dataflow jobs
   run, which is a different problem from *how* the pipeline computes.

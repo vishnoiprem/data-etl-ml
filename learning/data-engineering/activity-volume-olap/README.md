@@ -62,7 +62,7 @@ make demo
 
 ## Related directories
 
-- [`../realtime-stock-pipeline/`](../realtime-stock-pipeline/) —
+- [`../realtime-stock-pipeline/`](../../../projects/realtime-stock-pipeline/) —
   the streaming cousin (Flink + TimescaleDB
   continuous aggregates instead of pre-built cubes).
   The same shape, the real-time variant.

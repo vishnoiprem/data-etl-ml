@@ -137,6 +137,6 @@ each one has a clear focus; in production, you'd compose them.
 - [`../data-engineering/`](../data-engineering/) — The 18 data-platform
   projects. Agents need data platforms; the data platforms here are what
   the agents reason over.
-- [`../leads-pipeline/`](../leads-pipeline/) — The hiring-agent and
+- [`../leads-pipeline/`](../../projects/leads-pipeline/) — The hiring-agent and
   customer-service-agent patterns are the same patterns I use to ship
   real outreach. Concrete, not aspirational.

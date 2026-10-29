@@ -14,7 +14,7 @@ agent patterns (tool integration, perception →
 reasoning → action loop, multi-model routing) are
 written down in code, even if the implementations are
 intentionally small. The production-shaped builds live
-in [`../ai-engineering/03-multi-agent-platform/`](../ai-engineering/03-multi-agent-platform/)
+in [`../ai-engineering/03-multi-agent-platform/`](../../ai-engineering/03-multi-agent-platform/)
 and the `agentic-ai/` projects.
 
 ---
@@ -199,7 +199,7 @@ per-agent code shape.
 
 ## Related directories
 
-- [`../ai-engineering/03-multi-agent-platform/`](../ai-engineering/03-multi-agent-platform/) —
+- [`../ai-engineering/03-multi-agent-platform/`](../../ai-engineering/03-multi-agent-platform/) —
   the production-shaped multi-agent platform (LangGraph,
   Bedrock, shared memory).
 - [`../../agentic-ai/`](../../agentic-ai/) — 18

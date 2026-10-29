@@ -178,18 +178,18 @@ the auth.
 - **Not the PII-detection solution.** Comprehend's PII
   detection is one option; for regulated industries the
   real solution is
-  [`../../../ai-engineering/06-regulated-industry/`](../../../ai-engineering/06-regulated-industry/),
+  [`../../../ai-engineering/06-regulated-industry/`](../../ai-engineering/06-regulated-industry/),
   which adds a per-call redaction policy + audit log.
 
 ---
 
 ## Related directories
 
-- [`../../../ai-engineering/06-regulated-industry/`](../../../ai-engineering/06-regulated-industry/) —
+- [`../../../ai-engineering/06-regulated-industry/`](../../ai-engineering/06-regulated-industry/) —
   the regulated-industry pattern: PII redaction, audit
   log, per-tenant retention. The right home for
   production-grade audio pipelines.
-- [`../../../ai-engineering/22-whisper-streaming-stt/`](../../../ai-engineering/22-whisper-streaming-stt/) —
+- [`../../../ai-engineering/22-whisper-streaming-stt/`](../../ai-engineering/22-whisper-streaming-stt/) —
   the open-source Whisper alternative to Transcribe. Same
   shape, no AWS lock-in.
 - [`../../../agentic-ai/`](../../../agentic-ai/) — the

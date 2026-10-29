@@ -349,7 +349,7 @@ serving) on canned but realistic data. ~17s.
   the table-ops layer that keeps the lake alive;
   Marketplace 100 produces the data this would
   compact.
-- [`../realtime-stock-pipeline/`](../realtime-stock-pipeline/) —
+- [`../realtime-stock-pipeline/`](../../../projects/realtime-stock-pipeline/) —
   the streaming reference; Marketplace 100 is the
   batch counterpart.
 

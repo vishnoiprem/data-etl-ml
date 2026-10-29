@@ -146,7 +146,7 @@ It is **not** the right call when:
 
 - **Not a production LLM platform.** No auth, no rate limit, no
   retry budget, no per-tenant routing. The reference is what
-  [`../ai-engineering/01-enterprise-rag-platform/`](../ai-engineering/01-enterprise-rag-platform/)
+  [`../ai-engineering/01-enterprise-rag-platform/`](../../learning/ai-engineering/01-enterprise-rag-platform/)
   builds on top of.
 - **Not a replacement for an LLM gateway like LiteLLM or Portkey.**
   Those are designed for multi-provider routing, fallback, and
@@ -211,13 +211,13 @@ CMD ["uvicorn", "server_api:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## Related directories
 
-- [`../ai-engineering/01-enterprise-rag-platform/`](../ai-engineering/01-enterprise-rag-platform/) —
+- [`../ai-engineering/01-enterprise-rag-platform/`](../../learning/ai-engineering/01-enterprise-rag-platform/) —
   The RAG cousin: this gateway is the front door, the RAG platform
   is what you put behind it.
-- [`../ai-engineering/07-prompt-engineering/`](../ai-engineering/07-prompt-engineering/) —
+- [`../ai-engineering/07-prompt-engineering/`](../../learning/ai-engineering/07-prompt-engineering/) —
   The versioning + A/B-test layer that belongs on top of this
   gateway.
-- [`../ai-engineering/08-llmops-platform/`](../ai-engineering/08-llmops-platform/) —
+- [`../ai-engineering/08-llmops-platform/`](../../learning/ai-engineering/08-llmops-platform/) —
   The observability / cost / drift layer that the gateway's
   LangSmith trace feeds into.
 - [`./`](../medium/) — the rest of the `medium/` directory: long-form

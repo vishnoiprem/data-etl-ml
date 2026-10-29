@@ -157,7 +157,7 @@ standard
   template.
 - **Not the only serverless build in the repo.** The
   AWS Transcribe + Polly pipeline
-  ([`../agentic-ai/5-amazon-transcribe/`](../agentic-ai/5-amazon-transcribe/))
+  ([`../agentic-ai/5-amazon-transcribe/`](../../learning/agentic-ai/5-amazon-transcribe/))
   is a more complete serverless build (Transcribe +
   Comprehend PII + Polly + S3). It includes a
   **security warning** about hardcoded AWS keys in
@@ -168,7 +168,7 @@ standard
 
 ## Related directories
 
-- [`../agentic-ai/5-amazon-transcribe/`](../agentic-ai/5-amazon-transcribe/) —
+- [`../agentic-ai/5-amazon-transcribe/`](../../learning/agentic-ai/5-amazon-transcribe/) —
   a more complete serverless audio pipeline (S3 →
   Transcribe → Comprehend → Polly). Builds on this
   pattern.

@@ -48,7 +48,7 @@ By the end of Module 4 you can:
    Same embeddings, very different operational stories.
 ```
 
-(Full comparison in [`resources/vector-db-comparison.md`](../../resources/vector-db-comparison.md).)
+(Full comparison in [`resources/vector-db-comparison.md`](../resources/vector-db-comparison.md).)
 ---
 
 **Last updated:** 2026-10-12  

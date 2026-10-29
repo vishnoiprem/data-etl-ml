@@ -81,8 +81,8 @@ Three reasons I prefer slide-decks + notebooks over a textbook:
 It is **not** a research-level CV program. The latest architecture
 covered is EfficientNet (2019). If you want ViT, Swin, ConvNeXt,
 MAE, DINO, the post-2020 stuff — see
-[`../ml/diffusion/`](../ml/diffusion/) for diffusion models and
-[`../ai-engineering/`](../ai-engineering/) for the production
+[`../ml/diffusion/`](../../learning/ml/diffusion/) for diffusion models and
+[`../ai-engineering/`](../../learning/ai-engineering/) for the production
 LLM/CV systems that build on this foundation.
 
 ---
@@ -113,7 +113,7 @@ your own code alongside the slides.
 
 - [`../ml/`](../ml/) — The classical-ML and deep-learning half
   of the portfolio. The math, the implementations, the eval.
-- [`../ai-engineering/`](../ai-engineering/) — Production LLM +
+- [`../ai-engineering/`](../../learning/ai-engineering/) — Production LLM +
   CV systems. The "ship it" half that builds on these foundations.
-- [`../ai-course-public/`](../ai-course-public/) — 197 lines,
+- [`../ai-course-public/`](../../learning/ai-course-public/) — 197 lines,
   the broader AI engineering curriculum (not CV-specific).

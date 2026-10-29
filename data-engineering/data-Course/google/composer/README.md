@@ -282,7 +282,7 @@ See [`interview/README.md`](interview/README.md) for the study plan.
 
 - **[Google Dataflow](../Dataflow/README.md)** — the *processing* course. Read it if
   you want to know what runs *inside* the tasks this course orchestrates.
-- **[BigQuery for Big Data Engineers](../BigQuery/README.md)** — the warehouse
+- **[BigQuery for Big Data Engineers](../../../../learning/data-engineering/data-Course/google/BigQuery/README.md)** — the warehouse
   course. This course assumes you know what a partition is.
 
 ---

@@ -128,9 +128,9 @@ If you want to talk about any of these, the door is open:
 
 - [`../ai-engineering/`](../ai-engineering/) — the LLM / agent / eval half
   of the portfolio (40 projects, AWS best practices).
-- [`../leads-pipeline/`](../leads-pipeline/) — the side hustle that funded
+- [`../leads-pipeline/`](../../projects/leads-pipeline/) — the side hustle that funded
   a chunk of this work (cold-email + AI tailoring).
-- [`../realtime-stock-pipeline/`](../realtime-stock-pipeline/) — the
+- [`../realtime-stock-pipeline/`](../../projects/realtime-stock-pipeline/) — the
   Kafka/Flink/Postgres/Grafana reference build that ties streaming to
   the OLAP store.
 - [`../medium/`](../medium/) — long-form articles on every section here,

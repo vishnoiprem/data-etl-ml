@@ -150,14 +150,14 @@ entry point is `ts/src/services/text/text_bedrock.ts`.
 - **Not a Bedrock Agents tutorial.** Agents (action groups,
   knowledge bases, orchestration) are a separate API
   surface that this course doesn't cover. For agents, see
-  [`../../8-swe-agent-devin-style/`](../../8-swe-agent-devin-style/).
+  [`../../8-swe-agent-devin-style/`](../8-swe-agent-devin-style/).
 - **Not a fine-tuning course.** Bedrock fine-tuning
   (continued pre-training, custom models) is out of scope.
 - **Not a production deployment guide.** This is the
   *API surface* reference. For production-grade
   invocation (retries, cost controls, batch inference,
   provisioned throughput), see
-  [`../../../ai-engineering/20-cog-style-inference-api/`](../../../ai-engineering/20-cog-style-inference-api/).
+  [`../../../ai-engineering/20-cog-style-inference-api/`](../../ai-engineering/20-cog-style-inference-api/).
 - **Not a substitute for the AWS docs.** The course is
   the *first 60 minutes*. The
   [Bedrock docs](https://docs.aws.amazon.com/bedrock/)
@@ -174,9 +174,9 @@ entry point is `ts/src/services/text/text_bedrock.ts`.
 - [`../8-swe-agent-devin-style/`](../8-swe-agent-devin-style/) —
   the Bedrock-Agents-style SWE agent build (action groups,
   tool use, planning).
-- [`../../../ai-engineering/20-cog-style-inference-api/`](../../../ai-engineering/20-cog-style-inference-api/) —
+- [`../../../ai-engineering/20-cog-style-inference-api/`](../../ai-engineering/20-cog-style-inference-api/) —
   the production inference API patterns (rate limiting,
   batching, streaming).
-- [`../../../ai-engineering/01-enterprise-rag-platform/`](../../../ai-engineering/01-enterprise-rag-platform/) —
+- [`../../../ai-engineering/01-enterprise-rag-platform/`](../../ai-engineering/01-enterprise-rag-platform/) —
   the RAG layer that the `pdf_rag.py` example is a
   stripped-down version of.

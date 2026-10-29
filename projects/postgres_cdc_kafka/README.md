@@ -99,7 +99,7 @@ The stream runs until you `Ctrl-C` it.
   minimum-viable CDC pattern.
 - **Not a multi-table pipeline.** One Kafka topic, one Delta
   table. Multi-table CDC needs a routing layer; the pattern
-  lives in [`../data-engineering/keystone-iceberg-ops/`](../data-engineering/keystone-iceberg-ops/).
+  lives in [`../data-engineering/keystone-iceberg-ops/`](../../learning/data-engineering/keystone-iceberg-ops/).
 
 ---
 
@@ -112,9 +112,9 @@ After you understand this file:
 2. **Production reference:** [`../realtime-stock-pipeline/`](../realtime-stock-pipeline/)
    for the full Kafka + Flink + Postgres + Grafana build, with
    auth, monitoring, and persistence.
-3. **Schema evolution:** [`../data-engineering/keystone-iceberg-ops/`](../data-engineering/keystone-iceberg-ops/)
+3. **Schema evolution:** [`../data-engineering/keystone-iceberg-ops/`](../../learning/data-engineering/keystone-iceberg-ops/)
    for the table-ops layer that comes after the pipeline: snapshot
    expiry, compaction, schema-evolution tests.
-4. **dbt on top of the Delta table:** [`../data-engineering/financial-reporting-platform/`](../data-engineering/financial-reporting-platform/)
+4. **dbt on top of the Delta table:** [`../data-engineering/financial-reporting-platform/`](../../learning/data-engineering/financial-reporting-platform/)
    for the dbt-pattern that turns the raw Delta table into a
    reporting layer.

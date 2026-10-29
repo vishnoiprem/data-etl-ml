@@ -153,7 +153,7 @@ worker code is identical; only the deploy target changes.
 
 ## Related directories
 
-- [`../realtime-stock-pipeline/producer/`](../realtime-stock-pipeline/producer/) —
+- [`../realtime-stock-pipeline/producer/`](../../../projects/realtime-stock-pipeline/producer/) —
   the producer half of the streaming pipeline, which
   also publishes to Kafka the way this edge worker
   forwards to the central collector.

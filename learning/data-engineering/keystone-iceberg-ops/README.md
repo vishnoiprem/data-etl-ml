@@ -143,7 +143,7 @@ schema change, not a follow-up.
   doesn't touch query planning or execution.
 - **Not a streaming layer.** If you want continuous
   ingestion into Iceberg, see
-  [`../realtime-stock-pipeline/flink/`](../realtime-stock-pipeline/flink/).
+  [`../realtime-stock-pipeline/flink/`](../../../projects/realtime-stock-pipeline/flink/).
 - **Not a multi-cluster ops tool.** The `ops/` scripts
   run on a single scheduler. For multi-cluster / multi-
   region lake ops, you want something like
@@ -160,6 +160,6 @@ schema change, not a follow-up.
 - [`../data-engineering/`](../data-engineering/) — the
   parent directory. 18 projects; this one is the
   "keep the lake alive at year three" half.
-- [`../realtime-stock-pipeline/flink/`](../realtime-stock-pipeline/flink/) —
+- [`../realtime-stock-pipeline/flink/`](../../../projects/realtime-stock-pipeline/flink/) —
   the streaming ingestion path that produces the small
   files this project's compactor rewrites.
