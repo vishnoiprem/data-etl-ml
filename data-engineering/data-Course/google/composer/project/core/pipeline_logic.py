@@ -175,6 +175,27 @@ def format_timestamp(value: datetime) -> str:
     return value.astimezone(timezone.utc).isoformat()
 
 
+def _field_count(text: str) -> int:
+    """Count the CSV fields in a line, honouring quoted fields.
+
+    ``text.split(",")`` is wrong for a quoted field containing a comma —
+    ``"Acme, Inc.",US`` is two fields, not three. This matters for the
+    reject reason code: a row rejected as ``wrong_field_count`` when it
+    actually had the right number of fields sends you looking at the
+    wrong thing entirely.
+
+    Args:
+        text: The CSV line.
+
+    Returns:
+        The number of fields, or -1 if the line cannot be parsed.
+    """
+    try:
+        return len(next(csv.reader(io.StringIO(text))))
+    except (csv.Error, StopIteration):
+        return -1
+
+
 def try_parse_order_line(line: str) -> dict[str, Any] | None:
     """Parse one CSV line into an order dict, returning None when malformed.
 
@@ -314,9 +335,15 @@ def transform_orders(
 
         row = try_parse_order_line(text)
         if row is None:
+            # `try_parse_order_line` returns None for two different
+            # reasons: the wrong number of fields, or an amount that is
+            # not a number. Recover which one it was so the reject
+            # reason code is accurate — a reason code becomes a metric
+            # label, and "wrong_field_count" on a row that had the right
+            # number of fields sends you looking in the wrong place.
             reason = (
                 REJECT_WRONG_FIELD_COUNT
-                if len(text.split(",")) != len(ORDER_FIELDS)
+                if _field_count(text) != len(ORDER_FIELDS)
                 else REJECT_BAD_AMOUNT
             )
             if reject:

@@ -38,7 +38,7 @@ KERNELSPEC: dict[str, Any] = {
 
 LANGUAGE_INFO: dict[str, Any] = {
     "name": "python",
-    "version": "3.11.0",
+    "version": "3.13.0",
     "mimetype": "text/x-python",
     "codemirror_mode": {"name": "ipython", "version": 3},
     "pygments_lexer": "ipython3",
