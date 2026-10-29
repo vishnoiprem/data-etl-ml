@@ -156,15 +156,15 @@ jobs:
           if accepted:
               print(f'::notice::{len(accepted)} advisories accepted as known risk (not blocking)')
               for name, ver, vid in accepted:
-                  print(f'::notice file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — accepted risk')
+                  print(f'::notice file=$${{ matrix.manifest }}::{name} {ver} {vid} — accepted risk')
           if warnings:
               print(f'::warning::{len(warnings)} advisories with a fix available (not blocking)')
               for name, ver, vid, fix in warnings[:20]:
-                  print(f'::warning file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — fix: {",".join(fix)}')
+                  print(f'::warning file=$${{ matrix.manifest }}::{name} {ver} {vid} — fix: {",".join(fix)}')
           if blockers:
               print('::error::Blocking security findings (unfixable HIGH/CRITICAL):', file=sys.stderr)
               for name, ver, vid, score in blockers:
-                  print(f'::error file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — CVSS {score} (no fix version available)', file=sys.stderr)
+                  print(f'::error file=$${{ matrix.manifest }}::{name} {ver} {vid} — CVSS {score} (no fix version available)', file=sys.stderr)
               sys.exit(1)
           PYEOF
           rm -f audit.json "$tmp"
