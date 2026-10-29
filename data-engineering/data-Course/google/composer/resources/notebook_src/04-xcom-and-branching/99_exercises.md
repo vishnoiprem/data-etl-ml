@@ -1,5 +1,0 @@
-## Exercises
-
-1. **XCom budget.** Write a function `xcom_budget(payload)` that returns the JSON byte size of a payload, and use it to compute how many of *your* course's order rows would fit in 48 KB. Then state, in one sentence, what you would push through XCom instead.
-2. **Harder — the unskipped branch.** Build a DAG where `full_load` and `incremental_load` both depend on `choose_strategy`, and a `finalise` task depends on both with `trigger_rule="all_done"`. Run it with a low threshold so `full_load` is chosen. Report the state of every task and explain why `finalise` ran even though `incremental_load` was skipped.
-3. **Harder — a branch that depends on a branch.** Build a DAG: `choose_a` branches to `path_x` or `path_y`; `choose_b` depends on **both** `path_x` and `path_y` and branches to `final_1` or `final_2`. Run it with the threshold set so `path_x` is chosen. Explain what happens to `choose_b` under each of the trigger rules `all_success`, `none_failed` and `all_done`, and which one you would use.

@@ -113,25 +113,49 @@ def generate_orders(
     return rows
 
 
-def generate_malformed_rows(count: int = 5) -> list[str]:
+def generate_malformed_rows(count: int = 9) -> list[str]:
     """Generate rows that deliberately fail validation.
 
     These are what the dead-letter path needs: a pipeline that rejects bad
-    input must have bad input to reject. The rows exercise every reject
-    reason code the project defines.
+    input must have bad input to reject.
+
+    The base list contains **one row per reject reason code** the project
+    defines, plus one row that is valid but not revenue-bearing (its
+    status is ``cancelled``). That last row is deliberate: it proves the
+    validator *accepts* rows it does not count as revenue, which is the
+    distinction between "invalid" and "not revenue-bearing".
+
+    With every reason code appearing exactly once, the reject counts are
+    all 1 — which is what makes the dead-letter path assertable.
+
+    Args:
+        count: How many rows to return. Counts above the base length
+            repeat the base rows; counts below it take a prefix, which
+            may not cover every reason code.
 
     Returns:
         Malformed CSV lines.
     """
     base = [
+        # wrong_field_count
         "not-an-order,missing-fields,garbage",
+        # bad_amount
         "o99999999,c000001,not-a-timestamp,EMEA,web,EUR,complete,not-a-number,p0001",
+        # unknown_region
         "o99999998,c000002,2026-01-01T00:00:00+00:00,UNKNOWN_REGION,web,EUR,complete,100.00,p0002",
+        # unknown_currency
         "o99999997,c000003,2026-01-01T00:00:00+00:00,EMEA,web,XYZ,complete,100.00,p0003",
-        ",,,,",
-        "o99999996,,,,,,,,",
+        # missing_order_id
+        ",c000004,2026-01-01T00:00:00+00:00,EMEA,web,EUR,complete,100.00,p0004",
+        # missing_customer_id
+        "o99999996,,2026-01-01T00:00:00+00:00,EMEA,web,EUR,complete,100.00,p0006",
+        # negative_amount
         "o99999995,c000005,2026-01-01T00:00:00+00:00,EMEA,web,EUR,complete,-50.00,p0005",
+        # unknown_status
         "o99999994,c000006,2026-01-01T00:00:00+00:00,EMEA,web,EUR,unknown_status,100.00,p0006",
+        # VALID, but `cancelled` — accepted by the validator, then
+        # excluded from the revenue because it does not bear revenue.
+        "o99999993,c000007,2026-01-01T00:00:00+00:00,EMEA,web,EUR,cancelled,100.00,p0007",
     ]
     if count <= len(base):
         return base[:count]
@@ -265,7 +289,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Fraction of orders sent to one hot customer key (0.0-1.0)",
     )
     parser.add_argument(
-        "--malformed", type=int, default=5, help="Number of malformed rows to include"
+        "--malformed", type=int, default=9, help="Number of malformed rows to include"
     )
     parser.add_argument("--upload", default=None, help="Optional gs:// destination")
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging")
