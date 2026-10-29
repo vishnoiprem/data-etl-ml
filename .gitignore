@@ -151,6 +151,7 @@ realtime-stock-pipeline/trade-finder/reports/email_*.txt
 
 
 
+.vscode
 
 
 .puku-cli
