@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Course outputs
+out/
+sample_data/
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+
+# Secrets — never commit these
+.env
+*.pem
+service-account*.json
+
+# Notebooks
+.ipynb_checkpoints/
