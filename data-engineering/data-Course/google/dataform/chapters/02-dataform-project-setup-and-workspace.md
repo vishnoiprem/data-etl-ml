@@ -209,7 +209,7 @@ action name**, with the extension stripped:
 
 ```
 definitions/stg_orders.sqlx   →  action name: stg_orders
-definitions/sources.sqlx      →  action name: sources
+definitions/sources/raw_orders.sqlx      →  action name: raw_orders
 ```
 
 Subdirectories are conventional — `stg/`, `int/`, `marts/` are the community-standard layering
@@ -223,7 +223,7 @@ create. There is no special `sources/` folder — a declaration is just another 
 `definitions/`.
 
 ```sqlx
-// definitions/sources.sqlx
+// definitions/sources/raw_orders.sqlx
 
 config {
   type: "declaration",
@@ -399,7 +399,17 @@ dataform core                              # foreground server
 dataform compile --project-dir definitions # in another terminal
 ```
 
-For running SQL **without touching real BigQuery**, use the **BigQuery emulator**:
+For **validating SQL for free**, use a BigQuery **dry run**. A dry run checks syntax and
+authorizes the query without consuming any bytes, so you can validate an expensive model
+before it ever runs:
+
+```bash
+bq query --use_legacy_sql=false --dry_run \
+  'SELECT COUNT(*) FROM `my-project.analytics.stg_orders`'
+```
+
+The **BigQuery emulator** also exists as a Docker image for running SQL without touching
+BigQuery at all:
 
 ```bash
 docker run -p 9050:9050 -e BIGQUERY_EMULATOR_HOST=localhost:9050 \
@@ -407,9 +417,9 @@ docker run -p 9050:9050 -e BIGQUERY_EMULATOR_HOST=localhost:9050 \
 export BIGQUERY_EMULATOR_HOST=localhost:9050
 ```
 
-⚠️ **The emulator is not BigQuery.** It implements enough of the API for Dataform's tests, but
-not every function, DDL statement, or BigQuery-specific feature. Treat emulator passes as a fast
-first gate, never as proof.
+⚠️ **The emulator is not BigQuery.** It implements only a subset of the API, and not every
+function, DDL statement, or BigQuery-specific feature. Treat emulator passes as a fast first
+gate, never as proof — and use dry runs against real BigQuery for the final check.
 
 💡 **Compilation is hermetic.** Dataform compiles your code in a sandbox with no internet
 access — no external API calls, no network. That is a guarantee, not a limitation: the same code
@@ -502,7 +512,7 @@ vars:
 
 ### Step 5 — Declare the source
 
-`definitions/sources.sqlx`:
+`definitions/sources/raw_orders.sqlx`:
 
 ```sqlx
 config {
@@ -642,4 +652,4 @@ repo, and the same pattern works in Cloud Build.
 - Declare data sources — https://cloud.google.com/dataform/docs/declare-source
 - Declare dependencies — https://cloud.google.com/dataform/docs/dependencies
 - Dataform open source (dataform-co/dataform) — https://github.com/dataform-co/dataform
-- BigQuery emulator — https://cloud.google.com/bigquery/docs/emulator
+- BigQuery dry-run queries (validate SQL for free) — https://cloud.google.com/bigquery/docs/dry-run-queries

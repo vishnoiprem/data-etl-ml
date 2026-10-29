@@ -356,7 +356,9 @@ config { type: "incremental", uniqueKey: ["store_id", "transaction_id"] }
 ```sqlx
 config {
   type: "table",
-  labels: { team: "analytics", domain: "sales", tier: "gold", cost_center: "CC-4417" }
+  bigquery: {
+    labels: { team: "analytics", domain: "sales", tier: "gold", cost_center: "CC-4417" }
+  }
 }
 ```
 
@@ -466,9 +468,11 @@ All three models below read the same cleaned source and produce the same daily a
 // definitions/staging/stg_orders.sqlx
 config {
   type: "table",
-  partitionBy: "DATE(order_date)",
-  clusterBy: ["customer_id"],
-  labels: { team: "analytics", layer: "staging" }
+  bigquery: {
+    partitionBy: "DATE(order_date)",
+    clusterBy: ["customer_id"],
+    labels: { team: "analytics", layer: "staging" }
+  }
 }
 
 SELECT
@@ -495,7 +499,7 @@ GROUP BY order_date
 
 ```sqlx
 // definitions/marts/tbl_daily_sales.sqlx    ← type: "table"
-config { type: "table", partitionBy: "DATE(sale_date)" }
+config { type: "table", bigquery: { partitionBy: "DATE(sale_date)" } }
 
 SELECT order_date AS sale_date,
        COUNT(DISTINCT order_id) AS order_count,
@@ -510,7 +514,7 @@ GROUP BY order_date
 config {
   type: "incremental",
   uniqueKey: ["sale_date"],
-  partitionBy: "DATE(sale_date)"
+  bigquery: { partitionBy: "DATE(sale_date)" }
 }
 
 SELECT order_date AS sale_date,

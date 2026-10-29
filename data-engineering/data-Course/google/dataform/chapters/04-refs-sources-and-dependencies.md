@@ -121,7 +121,7 @@ A **declaration** tells Dataform about a table that already exists and that Data
 create.
 
 ```sqlx
-// definitions/sources.sqlx
+// definitions/sources/raw_orders.sqlx
 
 config {
   type: "declaration",
@@ -132,18 +132,18 @@ config {
 ```
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│  FILE: definitions/sources.sqlx                               │
-│                                                                │
-│  config { type: "declaration", ... }                          │
-│         │             │             │                         │
-│         │             │             └── "orders" = the NAME   │
-│         │             └── "raw" = the SCHEMA (dataset)         │
-│         └── "source-project" = the DATABASE (project)         │
-│                                                                │
-│  Models reference it as: ${ref("orders")}                     │
-│     → source-project.raw.orders                               │
-└────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  FILE: definitions/sources/raw_orders.sqlx                       │
+│                                                                  │
+│  config { type: "declaration", ... }                             │
+│         │             │             │                           │
+│         │             │             └── "orders" = the NAME     │
+│         │             └── "raw" = the SCHEMA (dataset)           │
+│         └── "source-project" = the DATABASE (project)           │
+│                                                                  │
+│  Models reference it as: ${ref("orders")}                       │
+│     → source-project.raw.orders                                 │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 💡 **The declaration's `name` is the action name.** It is what other actions reference. The
@@ -488,7 +488,7 @@ compile and run one thing instead of the whole warehouse.
 
 ### Step 1 — Build a three-action chain
 
-`definitions/sources.sqlx`:
+`definitions/sources/raw_orders.sqlx`:
 
 ```sqlx
 config {
@@ -661,7 +661,7 @@ The action no longer appears as an action to execute, but it still resolves in t
 
 2. **Broken graph, then fix.** Create four actions that form a cycle (`a → b → c → d → a`). Record the compiler's error message verbatim. Then refactor: extract the shared logic into a fifth action so the cycle becomes a diamond. Re-derive the graph and confirm the compile succeeds. Explain why a cycle in a BigQuery pipeline is a modelling smell rather than a scheduling problem.
 
-3. **Declaration naming trap.** Create `definitions/sources.sqlx` with `config { type: "declaration", database: "source-project", schema: "raw", name: "orders" }` and then create `definitions/sources.sqlx` a second time with a different `name` — compile and record what happens. Then move the second declaration into a JavaScript file using `declare({...})` and confirm it compiles. Explain why multiple declarations belong in a `.js` file rather than a `.sqlx` file.
+3. **Declaration naming trap.** Create `definitions/sources/raw_orders.sqlx` with `config { type: "declaration", database: "source-project", schema: "raw", name: "orders" }`. Now try to add a *second* declaration to the same file by appending another `config { ... }` block — compile and record what happens. Then move the second declaration into a JavaScript file (`definitions/declarations.js`) using `declare({...})` and confirm it compiles. Explain why multiple declarations belong in a `.js` file rather than a `.sqlx` file.
 
 4. **Freshness is not free — design the equivalent.** Dataform Cloud does not ship a built-in `freshness` block on declarations. Design the equivalent yourself: write a custom SQL operation that reads the source's load timestamp and raises a failure when it is too old. Show how you would wire it into the graph as a dependency of every action that reads that source, and explain how you would surface the failure.
 

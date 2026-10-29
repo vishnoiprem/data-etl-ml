@@ -22,28 +22,18 @@ Dataform gives you two ways to check quality, and they run at different times ag
 things.
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  ASSERTIONS                          Separate queries, run as a          │
-│                                      dependency of the model.            │
-│                                      Run against the BUILT table.       │
-│                                                                         │
-│  SELECT * FROM fct_orders WHERE amount < 0;                            │
-│  → if it returns ANY rows, the assertion FAILS                         │
-│                                                                         │
-│  → "Does the table I just built contain bad rows?"                     │
-└─────────────────────────────────────────────────────────────────────────┘
+ASSERTIONS    → separate queries, run as a dependency of the model;
+                run against the BUILT table.
+                SELECT * FROM fct_orders WHERE amount < 0;
+                → if it returns ANY rows, the assertion FAILS
+                → "Does the table I just built contain bad rows?"
 
-┌─────────────────────────────────────────────────────────────────────────┐
-│  TESTS                              Separate queries, run independently.  │
-│                                      Compare a model's output to a      │
-│                                      known expected result.             │
-│                                                                         │
-│  config { type: "test" }                                               │
-│  input "foo" { SELECT 1 AS bar }                                       │
-│  SELECT 1 AS bar                                                       │
-│                                                                         │
-│  → "Does my transformation logic do what I think it does?"             │
-└─────────────────────────────────────────────────────────────────────────┘
+TESTS         → separate queries, run independently; compare a model's
+                output to a known expected result.
+                config { type: "test" }
+                input "foo" { SELECT 1 AS bar }
+                SELECT 1 AS bar
+                → "Does my transformation logic do what I think it does?"
 ```
 
 **The governing philosophy:**
@@ -213,14 +203,14 @@ future.
 here — a per-row predicate like that is true for zero rows and therefore always passes. Aggregate
 checks need a different mechanism.
 
-### What there is **no** built-in `rowCount` assertion
+### What is **not** built in: `rowCount` and `relationships`
 
-⚠️ **There is no built-in `rowCount` assertion.** If you need "the table is not empty" or "the
-row count grew", you write it yourself.
+⚠️ **Dataform has no built-in `rowCount` assertion and no built-in `relationships` assertion.**
+(dbt has both — one of the most common sources of confusion when moving between the tools.) If
+you write either name in the `assertions` config, the compiler rejects it.
 
-**"The table is not empty"** — write it as a `rowConditions`? No: an empty table trivially
-satisfies every per-row predicate, so `rowConditions` cannot express it. Use a **custom assertion
-action** instead:
+**"The table is not empty"** — you need a custom assertion action, because an empty table
+trivially satisfies every per-row predicate:
 
 ```sqlx
 // definitions/assertions/fct_orders_not_empty.sqlx
@@ -234,10 +224,10 @@ FROM `my-project.analytics.fct_orders`
 LIMIT 1
 ```
 
-An assertion query that **returns rows** fails. `LIMIT 1` on an empty table returns nothing, so
-the assertion passes; on a non-empty table it returns a row, so the assertion fails.
+`LIMIT 1` on an empty table returns nothing, so the assertion passes; on a non-empty table it
+returns a row, so the assertion fails.
 
-**"The row count grew since the last run"** — a custom assertion with a subquery:
+**"The row count grew since the last run"** — a custom assertion with a scalar subquery:
 
 ```sqlx
 // definitions/assertions/fct_orders_row_count.sqlx
@@ -253,17 +243,13 @@ FROM (
 WHERE n = 0
 ```
 
-💡 **This is the standard workaround people reach for when they expect a `rowCount` assertion.**
-Note the important difference in shape: the built-in `rowConditions` assertion tests *rows*;
-your custom assertion tests a *scalar query result*.
+⚠️ **Note the shape difference.** The built-in `rowConditions` assertion tests *rows*; your
+custom assertion tests a *scalar query result*. A per-row predicate can't express an aggregate
+check — `COUNT(*) > 0` is true for zero rows and therefore always passes.
 
-### There is no built-in `relationships` assertion
+**"Every order has a valid customer"** — the relationship check. Two ways to write it:
 
-⚠️ **Dataform has no built-in `relationships` assertion.** (dbt does — one of the most common
-sources of confusion when moving between the two tools.) Relationship and foreign-key checks must
-be written explicitly, either as a `rowConditions` assertion or as a custom assertion action.
-
-**As a `rowConditions` assertion** — express the orphan check as a per-row predicate:
+*As a `rowConditions` predicate:*
 
 ```sqlx
 config {
@@ -280,7 +266,7 @@ config {
 and it references `dim_customers` inside a per-row predicate — a correlated subquery over the
 whole table. On a large fact table this is a serious scan.
 
-**As a custom assertion action** — the recommended form, because the query runs once:
+*As a custom assertion action — the recommended form:*
 
 ```sqlx
 // definitions/assertions/fct_orders_relationship_customers.sqlx
@@ -329,8 +315,8 @@ WHERE amount < 0
 inverted from most people's first instinct, so write it down:
 
 ```
-  SELECT * FROM t WHERE bad        →  returns rows  →  assertion FAILS
-  SELECT * FROM t WHERE good       →  returns rows  →  assertion FAILS  ← counterintuitive!
+  SELECT * FROM t WHERE bad         →  returns rows  →  assertion FAILS
+  SELECT * FROM t WHERE good        →  returns rows  →  assertion FAILS  ← counterintuitive!
   SELECT 1 FROM t WHERE bad LIMIT 1 →  returns 0 rows →  assertion PASSES
 ```
 
@@ -492,10 +478,10 @@ real line item. Prefer the custom assertion action — it joins once instead of 
 | `uniqueKey` | Built-in assertion | Duplicate keys that break `MERGE` and double-count | Cross-column uniqueness |
 | `uniqueKeys` | Built-in assertion | Multiple composite keys not unique | — |
 | `nonNull` | Built-in assertion | Missing keys, incomplete joins, null dimensions | Wrong values |
-| `rowConditions` | Built-in assertion | Business-rule violations (negative amounts, bad enum values) | Aggregate checks; empty tables |
+| `rowConditions` | Built-in assertion | Business-rule violations (negative amounts, bad enums) | Aggregate checks; empty tables |
 | Relationship / FK | Custom assertion action | Orphan rows | Cycles, cardinality violations |
 | Row count | Custom assertion action | Empty tables; "the run added nothing" | Wrong-but-nonempty counts |
-| Unit test | `type: "test"` | Wrong filter logic, wrong join condition, wrong aggregation | Anything requiring real data volume |
+| Unit test | `type: "test"` | Wrong filter / join / aggregation logic | Anything needing real data volume |
 
 ### Data quality dimensions
 
@@ -518,11 +504,13 @@ review. Don't assume a green assertion suite means the data is correct.
 // definitions/staging/stg_orders.sqlx
 config {
   type: "table",
-  partitionBy: { order_date: "DATE(order_date)" },
   assertions: {
     uniqueKey: ["order_id"],
     nonNull: ["order_id", "customer_id", "order_date"],
     rowConditions: ["order_amount >= 0"]
+  },
+  bigquery: {
+    partitionBy: "DATE(order_date)"
   }
 }
 
@@ -539,11 +527,13 @@ WHERE order_status != 'cancelled'
 config {
   type: "incremental",
   uniqueKey: ["order_id"],
-  partitionBy: { order_date: "DATE(order_date)" },
   assertions: {
     uniqueKey: ["order_id"],
     nonNull: ["order_id", "order_date"],
     rowConditions: ["order_amount >= 0"]
+  },
+  bigquery: {
+    partitionBy: "DATE(order_date)"
   }
 }
 
@@ -606,17 +596,18 @@ source of confusion for people coming from dbt, where both exist.
 (For the source declaration, see Lecture 2.2 — Dataform declares sources with
 `type: "declaration"` and references them with `ref()`.)
 
-
 ```sqlx
 // definitions/marts/fct_orders.sqlx
 config {
   type: "incremental",
   uniqueKey: ["order_id"],
-  partitionBy: { order_date: "DATE(order_date)" },
   assertions: {
     uniqueKey: ["order_id"],
     nonNull: ["order_id", "order_date"],
     rowConditions: ["order_amount >= 0"]
+  },
+  bigquery: {
+    partitionBy: "DATE(order_date)"
   }
 }
 
@@ -638,7 +629,6 @@ dataform compile
 The compiled graph contains **separate assertion actions**, not inline `ASSERT` statements:
 
 ```bash
-# List the assertion nodes in the DAG
 python3 -c "
 import json
 g = json.load(open('.dataform/run.json'))
@@ -685,8 +675,8 @@ FROM `my-project.analytics.fct_orders`
 WHERE NOT (order_amount >= 0)
 ```
 
-Note that `nonNull` was folded into the `rowConditions` assertion, exactly as the implementation
-does — there's no separate `nonNull` assertion node.
+Note that `nonNull` was folded into the `rowConditions` assertion — there is no separate
+`nonNull` assertion node.
 
 ### Step 4 — Write a custom assertion
 
@@ -732,11 +722,11 @@ bq query --use_legacy_sql=false \
 ```
 
 ```
-+----------+-------------+------------+
-| order_id | index_row_count | ...    |
-+----------+-------------+------------+
-| 99999    |             2 | ...    |
-+----------+-------------+------------+
++----------+---------------+
+| order_id | index_row_count |
++----------+---------------+
+| 99999    |             2 |
++----------+---------------+
 ```
 
 The exact duplicate row is now queryable. That's the payoff of the assertions dataset.

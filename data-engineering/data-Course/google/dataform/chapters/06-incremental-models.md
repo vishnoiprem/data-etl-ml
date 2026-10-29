@@ -36,18 +36,38 @@ INCREMENTAL (type: "incremental")
 
 ### The two strategies
 
-Dataform generates **one of two statements** for an incremental model, decided entirely by whether
-you set `uniqueKey`.
+Dataform generates **one of two statements** for an incremental model, decided by whether you set
+`uniqueKey` — or stated explicitly with `incrementalStrategy`.
 
 | | `merge` strategy | `insert` strategy |
 |---|---|---|
-| Triggered by | `config { uniqueKey: ["id"] }` | **No** `uniqueKey` in config |
+| Triggered by | `uniqueKey` set, or `incrementalStrategy: "MERGE"` | No `uniqueKey`, and no `incrementalStrategy` |
 | Generated SQL | `MERGE target AS D USING source AS S ON ...` | `INSERT INTO target (cols) SELECT ...` |
 | Existing key | `WHEN MATCHED THEN UPDATE` | Row appended (duplicate) |
 | New key | `WHEN NOT MATCHED THEN INSERT` | Row appended |
 | Idempotent? | **Yes** | **No** — reruns duplicate rows |
 | Correct for updates | Yes (late data, corrections) | No |
 | Key must be unique | Yes | No |
+
+💡 **Dataform exposes the strategy explicitly.** The `incrementalStrategy` config key takes
+`"MERGE"` or `"INSERT_OVERWRITE"`:
+
+| `incrementalStrategy` | Behavior |
+|---|---|
+| `"MERGE"` | Matches rows on `uniqueKey` — update existing, insert new. **Requires `uniqueKey`.** |
+| `"INSERT_OVERWRITE"` | Replaces whole partitions present in the new data. **Requires `partitionBy`.** |
+| *(unset)* | Defaults to `MERGE` if `uniqueKey` is configured, append otherwise |
+
+```sqlx
+config {
+  type: "incremental",
+  uniqueKey: ["id"]
+  // incrementalStrategy is inferred as MERGE from uniqueKey
+}
+```
+
+⚠️ **The compiler enforces both requirements.** `MERGE` without a `uniqueKey`, or
+`INSERT_OVERWRITE` without a `partitionBy`, is a compile error — not a runtime surprise.
 
 ```
 MERGE (with uniqueKey)
@@ -328,19 +348,22 @@ partition rewrite, and it doesn't destroy history on failure. `DELETE` + `INSERT
 only on a small, non-partitioned table.
 
 💡 **Better still: use the built-in `INSERT_OVERWRITE` incremental strategy.** Dataform exposes
-an explicit strategy enum, so you never have to hand-write the `DELETE`:
+an explicit strategy, so you never have to hand-write the `DELETE`:
 
 ```sqlx
 config {
   type: "incremental",
-  incremental_strategy: "INSERT_OVERWRITE",
-  update_partition_filter: "order_date = @order_date"
+  incrementalStrategy: "INSERT_OVERWRITE",
+  bigquery: {
+    partitionBy: "DATE(order_date)",
+    updatePartitionFilter: "order_date = @order_date"
+  }
 }
 ```
 
-`INCREMENTAL_STRATEGY_MERGE` matches rows on `uniqueKey`; `INCREMENTAL_STRATEGY_INSERT_OVERWRITE`
-replaces whole partitions present in the new data. The strategy defaults to `MERGE` when
-`uniqueKey` is configured and `APPEND` otherwise.
+⚠️ **`INSERT_OVERWRITE` requires `partitionBy`** — the compiler errors without it. It replaces
+whole partitions present in the new data, so it gives you partition-replace semantics without
+the hand-written `DELETE` and its metadata-rewrite cost.
 
 ### `partitionBy` and expiration on incremental models
 
@@ -348,9 +371,11 @@ replaces whole partitions present in the new data. The strategy defaults to `MER
 config {
   type: "incremental",
   uniqueKey: ["id"],
-  partitionBy: "DATE(order_date)",
   partition_expiration_days: 90,
-  require_partition_filter: true
+  require_partition_filter: true,
+  bigquery: {
+    partitionBy: "DATE(order_date)"
+  }
 }
 ```
 
@@ -458,8 +483,10 @@ schedule), you can delete the affected partitions first with a **pre-hook**:
 ```sqlx
 config {
   type: "incremental",
-  partitionBy: "DATE(order_date)",
-  pre_operations: [
+  bigquery: {
+    partitionBy: "DATE(order_date)",
+    },
+pre_operations: [
     {
       "SELECT": "DELETE FROM ${self()} WHERE order_date = @partition_date"
     }
@@ -519,8 +546,10 @@ WHERE order_status != 'cancelled'
 config {
   type: "incremental",
   uniqueKey: ["order_id"],
-  partitionBy: "DATE(order_date)",
-  partition_expiration_days: 90,
+  bigquery: {
+    partitionBy: "DATE(order_date)",
+    },
+partition_expiration_days: 90,
   assertions: {
     rowCount: { when: "incremental()", else: true },
     nonNull: ["order_id", "order_date"],
@@ -687,7 +716,7 @@ assertion doing its job.
 - `partition_expiration_days` and `require_partition_filter` are **model-level** configs; workspace defaults like `defaultAssertionDataset` and `defaultLocation` live in **`workflow_settings.yaml`**. There is no `bigquery` section in `dataform.json` and no `table_expiration_days` model config.
 - Incremental models need **different assertions**: `rowCount: { when: "incremental()", else: true }`, plus `nonNull` on the partition and key columns and `uniqueKey` for uniqueness.
 - `defaultAssertionDataset` (default `dataform_assertions`) records assertion failures as rows in BigQuery so you can inspect what actually broke.
-- A pre-hook `DELETE` before an insert-based incremental is possible, but the metadata cost remains — prefer `MERGE` or the built-in `INSERT_OVERWRITE` strategy.
+- A pre-hook `DELETE` before an append-based incremental is possible, but the metadata cost remains — prefer `MERGE`, or the built-in `incrementalStrategy: "INSERT_OVERWRITE"` (which requires `partitionBy`).
 
 ---
 

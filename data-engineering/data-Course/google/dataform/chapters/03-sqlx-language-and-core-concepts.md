@@ -76,7 +76,7 @@ The core config interface, `ITableConfig`, extends `IActionConfig`, `IDependenci
 | `description` | string | Human description, surfaced in the catalog and lineage. |
 | `columns` | object | Per-column descriptions, display names, tags, BigQuery policy tags. |
 | `uniqueKey` | string[] | Column(s) that uniquely identify a row. Used for merge criteria. |
-| `partitionBy` | string \| object | Partition column and expiration. |
+| `partitionBy` | string | Partition expression, e.g. `"DATE(order_date)"`. Also settable as `bigquery.partitionBy`. |
 | `clusterBy` | string[] | Clustering column(s). |
 | `labels` | object | BigQuery table labels (key → value). |
 | `tags` | string[] | Dataform tags for action selection. |
@@ -375,7 +375,7 @@ take everything.*
 A declaration tells Dataform about an existing table it does not create.
 
 ```sqlx
-// definitions/sources.sqlx
+// definitions/sources/raw_orders.sqlx
 
 config {
   type: "declaration",
@@ -483,7 +483,7 @@ For code shared across **multiple repositories**, create or import a package.
 |-----------|------|--------------|--------------|
 | Templating style | JSX-style `${expression}` | None | Jinja `{{ expression }}` / `{% statement %}` |
 | Materialization | Built into `config` | You write the DDL yourself | Macros (`materialization` blocks) |
-| Dependency declaration | `ref()` | None — external orchestration | `ref()` / `source()` |
+| Dependency declaration | `ref()` | None — external orchestration | `ref()` |
 | Test framework | `type: "assertion"` files + `config.assertions` | You write and run them | `schema.yml` or `dbt tests` |
 | Config | `workflow_settings.yaml` + per-file `config` | N/A | `dbt_project.yml` + model `config` |
 | Incremental | `incremental()` context method | Manual `MERGE` | `is_incremental()` macro |
@@ -507,7 +507,7 @@ Create these files under `definitions/`, then run `dataform compile` after each.
 
 ### Step 1 — Declare the source
 
-`definitions/sources.sqlx`:
+`definitions/sources/raw_orders.sqlx`:
 
 ```sqlx
 config {
@@ -549,7 +549,7 @@ config {
   type: "table",
   description: "Staged orders, deduplicated",
   tags: ["daily"],
-  partitionBy: { field: "order_date", dataType: "date" },
+  partitionBy: "DATE(order_date)",
   clusterBy: ["customer_id"]
 }
 
@@ -567,7 +567,7 @@ config {
   type: "incremental",
   description: "Order fact table, incrementally maintained",
   uniqueKey: ["order_id"],
-  partitionBy: { field: "order_date", dataType: "date" },
+  partitionBy: "DATE(order_date)",
   clusterBy: ["customer_id"],
   protected: true
 }
@@ -698,4 +698,5 @@ grep -o "raw_staging\.stg_orders\|analytics\.stg_orders" .dataform/run.sql | sor
 - JavaScript in Dataform — https://cloud.google.com/dataform/docs/javascript-in-dataform
 - Dataform assertions — https://cloud.google.com/dataform/docs/assertions
 - Configure additional actions — https://cloud.google.com/dataform/docs/configure-additional-actions
-- Dataform vs dbt — https://cloud.google.com/dataform/docs/comparison/dataform-and-dbt
+- Dataform overview — https://cloud.google.com/dataform/docs/overview
+- SQL workflows in Dataform — https://cloud.google.com/dataform/docs/sql-workflows
