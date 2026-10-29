@@ -58,7 +58,7 @@ jobs:
           # The scope groups must be non-empty when present: `feat(): x` is
           # rejected, `feat: x` and `feat(ui): x` are accepted.
           headerPattern: '^(\w+)(?:\(([^()]+)\))?(?:\(([^()]+)\))?: (.*)$'
-          headerPatternCorrespondence: type, scope, scope, subject
+          headerPatternCorrespondence: type, scope, scope2, subject
           # Subject must be at least 3 chars; nothing past 100 chars.
           #
           # The previous limit was 72, which is a soft industry convention for
