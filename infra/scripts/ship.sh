@@ -11,22 +11,22 @@
 #   5. fast-forward push to origin/master (never force-pushes)
 #
 # Default usage (interactive, asks for message):
-#   bash scripts/ship.sh
+#   bash infra/scripts/ship.sh
 #
 # Non-interactive, with a message inline:
-#   bash scripts/ship.sh -m "fix(course): repair trades_gemini SyntaxError"
+#   bash infra/scripts/ship.sh -m "fix(course): repair trades_gemini SyntaxError"
 #
 # Refuse the soft-reset (treat any local wip as sacred, just commit
 # on top as normal — useful when you've reviewed the snapshots):
-#   bash scripts/ship.sh --no-squash -m "..."
+#   bash infra/scripts/ship.sh --no-squash -m "..."
 #
 # Dry run (everything except the actual commit + push):
-#   bash scripts/ship.sh --dry-run
+#   bash infra/scripts/ship.sh --dry-run
 
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 # ---- arg parsing -----------------------------------------------------------
@@ -118,7 +118,7 @@ if [ "$STAGED" -eq 0 ]; then
   echo ""
   echo "Nothing staged. Stage your edits first, e.g.:"
   echo "  git add path/to/file"
-  echo "Then re-run: bash scripts/ship.sh"
+  echo "Then re-run: bash infra/scripts/ship.sh"
   exit 1
 fi
 

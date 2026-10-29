@@ -3,12 +3,12 @@
 # Run pip-audit + npm audit on every project, organized by top-level area.
 # Produces a single summary table.
 #
-# Usage: bash scripts/audit_by_project.sh
+# Usage: bash infra/scripts/audit_by_project.sh
 
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PIP_AUDIT="${PIP_AUDIT:-$REPO_ROOT/.env/bin/pip-audit}"

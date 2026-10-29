@@ -3,15 +3,15 @@
 # Audit every pinned requirements manifest in the repo and report counts.
 #
 # Usage:
-#   bash scripts/run_pip_audit.sh           # human-readable summary
-#   bash scripts/run_pip_audit.sh --json    # machine-readable (per-manifest)
+#   bash infra/scripts/run_pip_audit.sh           # human-readable summary
+#   bash infra/scripts/run_pip_audit.sh --json    # machine-readable (per-manifest)
 #
 # See docs/SECURITY_AUDIT.md for context and the fix plan.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PIP_AUDIT="${PIP_AUDIT:-$REPO_ROOT/.env/bin/pip-audit}"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # scripts/repo_stats.sh
 # Prints repo stats that the README "By the numbers" table references.
-# Usage:  bash scripts/repo_stats.sh
-#         bash scripts/repo_stats.sh --json   # machine-readable
+# Usage:  bash infra/scripts/repo_stats.sh
+#         bash infra/scripts/repo_stats.sh --json   # machine-readable
 #
 # Excludes .git, .idea, .pytest_cache, .env, .puku-cli, virtualenvs, and caches.
 
@@ -10,7 +10,7 @@ set -euo pipefail
 
 # Resolve repo root from the script's location (works no matter where you run it).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
 
 EXCLUDES=(

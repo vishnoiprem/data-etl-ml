@@ -1,6 +1,6 @@
 name: leads-ci
 
-# CI for leads-pipeline/draft-cron
+# CI for projects/leads-pipeline/draft-cron
 # - Runs the 6 in-repo test modules against a Postgres service
 #   container on a fresh Ubuntu runner
 # - Lints the modified source files
@@ -49,12 +49,12 @@ jobs:
         with:
           python-version: "3.10"
           cache: pip
-          cache-dependency-path: leads-pipeline/draft-cron/requirements.txt
+          cache-dependency-path: projects/leads-pipeline/draft-cron/requirements.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r leads-pipeline/draft-cron/requirements.txt
+          pip install -r projects/leads-pipeline/draft-cron/requirements.txt
           pip install flake8 pytest
 
       - name: Init test schema
@@ -66,7 +66,7 @@ jobs:
           AVILX_DB_PASSWORD: avilx
           PGPASSWORD: avilx
         run: |
-          psql -h localhost -p 5433 -U avilx -d avilx_test -f leads-pipeline/draft-cron/db/schema.sql
+          psql -h localhost -p 5433 -U avilx -d avilx_test -f projects/leads-pipeline/draft-cron/db/schema.sql
 
       - name: Run tests
         env:
@@ -76,7 +76,7 @@ jobs:
           AVILX_DB_USER: avilx
           AVILX_DB_PASSWORD: avilx
         run: |
-          cd leads-pipeline/draft-cron
+          cd projects/leads-pipeline/draft-cron
           set -e
           for t in test_dedup_key test_dedup test_parser test_resume_tailor test_better_email test_bounce_deny_persistence test_hnhiring_parse; do
             echo "===> $t"
@@ -86,7 +86,7 @@ jobs:
       - name: Lint (advisory)
         continue-on-error: true
         run: |
-          cd leads-pipeline/draft-cron
+          cd projects/leads-pipeline/draft-cron
           # Advisory only — flake8 reports style issues but does not
           # fail the build. Promote to a hard failure once the
           # existing F401/E741/W292 warnings are fixed in a follow-up
@@ -110,8 +110,8 @@ jobs:
       - name: Read version
         id: version
         run: |
-          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
-            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          if [[ -f projects/leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < projects/leads-pipeline/draft-cron/VERSION)
           else
             V="0.0.0+${GITHUB_SHA::7}"
           fi
@@ -153,8 +153,8 @@ jobs:
           docker build \
             --tag "$TAG" \
             --build-arg "VERSION=${VERSION}" \
-            --file leads-pipeline/draft-cron/Dockerfile \
-            leads-pipeline/draft-cron
+            --file projects/leads-pipeline/draft-cron/Dockerfile \
+            projects/leads-pipeline/draft-cron
           # Verify the image is visible to the daemon before
           # we try to run it — fail fast with a clear error
           # if it isn't, so the next failure mode is obvious
@@ -192,7 +192,7 @@ jobs:
           if [ "${SIZE_MB}" -gt "${MAX_MB}" ]; then
             echo "::error::image is ${SIZE_MB} MB which exceeds the ${MAX_MB} MB budget."
             echo "::error::Likely cause: a large file was added to the build context."
-            echo "::error::Check leads-pipeline/draft-cron/.dockerignore first."
+            echo "::error::Check projects/leads-pipeline/draft-cron/.dockerignore first."
             exit 1
           fi
           echo "✅ size budget OK"
@@ -230,8 +230,8 @@ jobs:
       - name: Read version
         id: version
         run: |
-          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
-            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          if [[ -f projects/leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < projects/leads-pipeline/draft-cron/VERSION)
           else
             V="0.0.0+${GITHUB_SHA::7}"
           fi
@@ -244,8 +244,8 @@ jobs:
           docker build \
             --tag "leads-pipeline:scan-${GITHUB_SHA}" \
             --build-arg "VERSION=${VERSION}" \
-            --file leads-pipeline/draft-cron/Dockerfile \
-            leads-pipeline/draft-cron
+            --file projects/leads-pipeline/draft-cron/Dockerfile \
+            projects/leads-pipeline/draft-cron
         env:
           VERSION: ${{ steps.version.outputs.version }}
 
