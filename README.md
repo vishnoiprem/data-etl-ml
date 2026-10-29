@@ -257,7 +257,7 @@ Open it: [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) — `do
 | 17 | **Capital One-style FinCrime data mesh** | Regulated data needs a contract, not just a schema. Domain-owned data products, contract tests on every change, lineage, and access control. It's heavier than a raw lake, but the audit team stops paging you at 11pm. | DataHub · Great Expectations · dbt · Lake Formation | [`data-engineering/scb_aml_platform/`](learning/data-engineering/scb_aml_platform/) (reference impl) |
 | 18 | **Lyft-style streaming + batch hybrid** | I want one codebase, not two. Backfill and streaming share the same job definition, with time-travel for reconciliation when they disagree. The Kappa-leaning version, with a Batch escape hatch for the things streaming can't do cleanly. | Flink · Spark · Iceberg · Airflow | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
 | 19 | **Cloudflare-style edge analytics** | Regional aggregation close to the user, late-merge reconciliation, tiered storage (hot → warm → cold). Useful when the volume is global and the budget isn't. The shape is closer to a CDN log pipeline than a typical warehouse job. | Kafka · Flink · R2 · ClickHouse | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) (reference impl) |
-| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/`](data-engineering/) (reference impl) |
+| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/`](learning/data-engineering/) (reference impl) |
 | 21 | **Snowflake-style elastic warehouse** | Compute and storage decoupled, virtual warehouses that scale in seconds, and per-query credits. I rewrote our nightly batch as a virtual-warehouse-style fleet on Spark + Iceberg, with auto-suspend on idle and auto-resume on queue depth. The result: the same job ran in 12 minutes instead of 90, and the bill tracked the work. | Spark · Iceberg · S3 · Airflow | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
 | 22 | **BigQuery-style serverless analytics** | No cluster to size, no warm-up cost, per-byte scanned billing. I built a Parquet-on-S3 + DuckDB + caching layer that approximates that ergonomics for sub-petabyte scale, with column-pruned reads and result caching keyed by query hash. Not BigQuery — but the same operating model. | DuckDB · Parquet · S3 · dbt | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
 | 23 | **Bloomberg-style market-data plant** | Tick capture, normalized symbology, a real-time reference data service, and a fan-out engine that serves the same tick to dozens of subscribers without re-parsing. The hard part is the symbology map — `ticker → FIGI → CUSIP` — and the fact that a single ticker can map to 4 underlying instruments. | Kafka · Flink · gRPC · Redis · Postgres | [`data-engineering/bloomberg-symbology/`](learning/data-engineering/bloomberg-symbology/) |
@@ -568,7 +568,7 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](learning/ai-engineering/03-m
 
 | Directory | What's inside | Read |
 |-----------|---------------|------|
-| `data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](learning/data-engineering/README.md) |
+| `learning/data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](learning/data-engineering/README.md) |
 | `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](learning/ai-engineering/README.md) |
 | `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](learning/agentic-ai/README.md) |
 | `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](learning/ml/README.md) |
@@ -589,11 +589,9 @@ The repo is grouped by purpose, so a reviewer can read it top-down.
 |---|---|---|
 | [`projects/`](projects/) | Production-style buildables: streaming and ETL pipelines | [`leads-pipeline`](projects/leads-pipeline/), [`realtime-stock-pipeline`](projects/realtime-stock-pipeline/), [`flink-cdc-dashboard`](projects/flink-cdc-dashboard/) |
 | [`learning/`](learning/) | Course work and reference builds: AI engineering, agentic AI, ML, Spark, Python, Go, data engineering | [`ai-engineering/40-ai-side-hustle`](learning/ai-engineering/40-ai-side-hustle/) |
-| [`data-engineering/`](data-engineering/) | Data-engineering course material | |
 | [`portfolio/`](portfolio/) | Resume, Head-of-AI portfolio, Medium articles and interview guides | [`Resume/`](portfolio/Resume/) |
 | [`experiments/`](experiments/) | Scratch work, SAM template, program notes | |
 | [`infra/`](infra/) | Docker, docs, assets and maintenance scripts (`infra/scripts/`) | [`docker-compose.yml`](infra/docker-compose.yml) |
-| [`config/`](config/) | Copies of repo-level config (licence, contributing, requirements) | |
 | [`audit-results/`](audit-results/) | pip-audit and npm-audit output | |
 
 Repo-level files that tools expect at the root (`.github/`, `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `requirements.txt`, `docker-compose.yml`) stay at the top level.
@@ -706,7 +704,7 @@ The `medium/` folder holds long-form articles and interview playbooks.
 ## Conventions Used Across Projects
 
 - **Python** 3.10+; **Spark** 3.x; **Java** 11 for Spark
-- Project layout: `config/`, `ingestion/`, `processing/`, `serving/`, `tests/`
+- Project layout: `ingestion/`, `processing/`, `serving/`, `tests/`
 - **Tests:** `pytest`, fixtures under `tests/`, sample data under `data/dummy/`
 - **Config:** env-driven via `.env`; never hard-code secrets
 - **Logging:** structured JSON via `logging` + `python-json-logger`

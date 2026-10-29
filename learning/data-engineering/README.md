@@ -36,7 +36,7 @@ the AML platform at a global bank," the answers live here.
 | 14 | [**Ontology data fabric**](./ontology-data-fabric/) | One semantic layer across the lakehouse; queryable, governable | Neo4j, Iceberg, OpenLineage |
 | 15 | [**Data-engineering course**](./data-engineering-course/) | 14-week curriculum + dbt project, the way I would teach it | dbt, Snowflake, Airflow |
 | 16 | [**Cloudvala**](./data-enginnering-cloudvala/) | Streaming ETL on Cloudvala reference architecture | Spark, Kafka, S3 |
-| 17 | [**data-engineering**](./data-engineering/) | The "kitchen sink" reference build: ingestion → lake → warehouse → serving | Spark, Iceberg, dbt |
+| 17 | [**data-engineering**](./) | The "kitchen sink" reference build: ingestion → lake → warehouse → serving | Spark, Iceberg, dbt |
 | 18 | [**activity-volume-olap**](./activity-volume-olap/) | Distinct from #7: focus on wide-table column-store design | ClickHouse, Kafka |
 
 > 18 projects. ~2,600 source files. 1 design philosophy: **ship the boring bits**.

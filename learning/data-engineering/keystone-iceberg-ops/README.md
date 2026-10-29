@@ -157,7 +157,7 @@ schema change, not a follow-up.
 - [`../activity-volume-olap/`](../activity-volume-olap/) —
   the OLAP layer that sits on top of the Iceberg tables
   this project maintains.
-- [`../data-engineering/`](../data-engineering/) — the
+- [`../data-engineering/`](../) — the
   parent directory. 18 projects; this one is the
   "keep the lake alive at year three" half.
 - [`../realtime-stock-pipeline/flink/`](../../../projects/realtime-stock-pipeline/flink/) —

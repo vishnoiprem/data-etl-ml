@@ -36,18 +36,18 @@ and **production-style PySpark jobs** running on Dataproc.
 ### Module 1 — Foundations & Dataproc
 | # | Chapter | Covers |
 |---|---------|--------|
-| 1.1 | [Big Data Challenges: Hadoop → Spark → Dataproc](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/01-bigdata-challenges-and-landscape.md) | Four Vs, MapReduce limits, Spark's in-memory model, Dataproc's value |
-| 1.2 | [Dataproc Cluster Creation & Management](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/02-dataproc-cluster-creation-and-management.md) | `gcloud dataproc clusters create`, machine types, autoscaling, IAM, VPC, cost control |
-| 1.3 | [Submitting Jobs to Dataproc](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/03-submitting-jobs-to-dataproc.md) | `gcloud dataproc jobs submit pyspark`, Jupyter, SSH, job states, logging, metadata server |
+| 1.1 | [Big Data Challenges: Hadoop → Spark → Dataproc](chapters/01-bigdata-challenges-and-landscape.md) | Four Vs, MapReduce limits, Spark's in-memory model, Dataproc's value |
+| 1.2 | [Dataproc Cluster Creation & Management](chapters/02-dataproc-cluster-creation-and-management.md) | `gcloud dataproc clusters create`, machine types, autoscaling, IAM, VPC, cost control |
+| 1.3 | [Submitting Jobs to Dataproc](chapters/03-submitting-jobs-to-dataproc.md) | `gcloud dataproc jobs submit pyspark`, Jupyter, SSH, job states, logging, metadata server |
 
 ### Module 2 — PySpark Core
 | # | Chapter | Covers |
 |---|---------|--------|
-| 2.1 | [PySpark Fundamentals & Spark Architecture](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/04-pyspark-fundamentals-and-spark-architecture.md) | Driver/executor model, DAG scheduling, lazy evaluation, read/write, caching |
-| 2.2 | [RDDs vs DataFrames: Choosing the Right Abstraction](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/05-rdds-vs-dataframes-and-when-to-use-each.md) | Lineage, checkpointing, Catalyst, `explain(True)`, `pandas_udf`, when RDDs still win |
-| 2.3 | [Extracting Data from Multiple Sources](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/06-extracting-data-from-multiple-sources.md) | GCS, BigQuery, JDBC, Pub/Sub, Kafka; error modes; `_corrupt_record` quarantine |
+| 2.1 | [PySpark Fundamentals & Spark Architecture](chapters/04-pyspark-fundamentals-and-spark-architecture.md) | Driver/executor model, DAG scheduling, lazy evaluation, read/write, caching |
+| 2.2 | [RDDs vs DataFrames: Choosing the Right Abstraction](chapters/05-rdds-vs-dataframes-and-when-to-use-each.md) | Lineage, checkpointing, Catalyst, `explain(True)`, `pandas_udf`, when RDDs still win |
+| 2.3 | [Extracting Data from Multiple Sources](chapters/06-extracting-data-from-multiple-sources.md) | GCS, BigQuery, JDBC, Pub/Sub, Kafka; error modes; `_corrupt_record` quarantine |
 | 2.4 | [Writing DataFrames to Multiple Sinks](chapters/07-writing-dataframe-to-multiple-sinks.md) | BigQuery (direct vs indirect), partitioned Parquet, JDBC batching, fan-out |
-| 2.5 | [PySpark Transformations — Part 1](../../../../learning/data-engineering/data-Course/google/dataproc/chapters/08-pyspark-transformations-part-1.md) | Column API, casting, nulls, strings, all 7 join types, `groupBy`, window functions |
+| 2.5 | [PySpark Transformations — Part 1](chapters/08-pyspark-transformations-part-1.md) | Column API, casting, nulls, strings, all 7 join types, `groupBy`, window functions |
 | 2.6 | [PySpark Transformations — Part 2](chapters/09-pyspark-transformations-part-2.md) | Advanced windows, skew, `repartition` vs `coalesce`, nested data, quality patterns |
 
 ### Module 3 — Case Studies

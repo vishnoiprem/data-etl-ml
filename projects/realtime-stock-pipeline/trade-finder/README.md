@@ -188,7 +188,7 @@ the suppliers that stay in the top quartile under noise.
 - [`../`](../) — the parent `realtime-stock-pipeline/`. Kafka +
   Flink + TimescaleDB + Grafana. Different problem (real-time
   market data), same machine.
-- [`../../data-engineering/`](../../data-engineering/) — the
+- [`../../data-engineering/`](../../../learning/data-engineering/) — the
   18 data-platform projects. The trade-finder is closer in
   spirit to `e-commerce-end-2end/` and `bloomberg-symbology/`
   than to the streaming stack.
