@@ -18,7 +18,7 @@ ai-side-hustle, ai-tools, revenue, data-engineering, apache-spark, kafka, flink,
 **Include in search engine results:** ✅ checked (already default).
 
 **Pinned repository (in your GitHub profile):**
-Pin [`ai-engineering/40-ai-side-hustle/`](../../ai-engineering/40-ai-side-hustle/) as the
+Pin [`learning/ai-engineering/40-ai-side-hustle/`](../../ai-engineering/40-ai-side-hustle/) as the
 top item. The repo's headline is "Make money with AI on day one. No audience
 required." — a 4-stream AI revenue factory (SEO content, micro-SaaS scaffold,
 digital products, print-on-demand merch) that runs in offline-stub mode so a

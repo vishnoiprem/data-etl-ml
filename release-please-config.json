@@ -3,7 +3,7 @@
   "release-type": "python",
   "package-name": "data-etl-ml",
   "include-component-in-tag": false,
-  "version-file": "leads-pipeline/draft-cron/VERSION",
+  "version-file": "projects/leads-pipeline/draft-cron/VERSION",
   "bump-minor-pre-major": false,
   "bump-patch-for-minor-pre-major": false,
   "pull-request-title-pattern": "chore(release): release ${version}",
@@ -25,7 +25,7 @@
       "release-type": "python",
       "package-name": "data-etl-ml",
       "changelog-path": "CHANGELOG.md",
-      "version-file": "leads-pipeline/draft-cron/VERSION",
+      "version-file": "projects/leads-pipeline/draft-cron/VERSION",
       "bump-minor-pre-major": false,
       "bump-patch-for-minor-pre-major": false
     }

@@ -41,10 +41,10 @@
     // leads-pipeline runtime deps: minor + patch automerge if
     // tests pass, but never a major bump unattended.
     {
-      "matchPaths": ["leads-pipeline/draft-cron/requirements.txt"],
+      "matchPaths": ["projects/leads-pipeline/draft-cron/requirements.txt"],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,
-      "labels": ["dependencies", "renovate", "leads-pipeline"]
+      "labels": ["dependencies", "renovate", "projects/leads-pipeline"]
     },
     // GitHub Actions: patch-only automerge, majors always PR.
     {

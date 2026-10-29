@@ -51,7 +51,7 @@ updates:
         patterns: ["*"]
 
   - package-ecosystem: "pip"
-    directory: "/ai-engineering"
+    directory: "/learning/ai-engineering"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -62,7 +62,7 @@ updates:
       - "dependencies"
       - "security"
       - "python"
-      - "ai-engineering"
+      - "learning/ai-engineering"
     commit-message:
       prefix: "chore(ai-eng)"
       include: "scope"
@@ -93,7 +93,7 @@ updates:
 
   # data-engineering (NEW: previously unscanned)
   - package-ecosystem: "pip"
-    directory: "/data-engineering"
+    directory: "/learning/data-engineering"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -104,7 +104,7 @@ updates:
       - "dependencies"
       - "security"
       - "python"
-      - "data-engineering"
+      - "learning/data-engineering"
     commit-message:
       prefix: "chore(de)"
       include: "scope"
@@ -119,7 +119,7 @@ updates:
 
   # agentic-ai (NEW: LangChain / Bedrock samples)
   - package-ecosystem: "pip"
-    directory: "/agentic-ai"
+    directory: "/learning/agentic-ai"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -130,7 +130,7 @@ updates:
       - "dependencies"
       - "security"
       - "python"
-      - "agentic-ai"
+      - "learning/agentic-ai"
     commit-message:
       prefix: "chore(agentic)"
       include: "scope"
@@ -146,7 +146,7 @@ updates:
 
   # Spark reference (NEW)
   - package-ecosystem: "pip"
-    directory: "/Spark"
+    directory: "/learning/Spark"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -168,7 +168,7 @@ updates:
 
   # realtime-stock-pipeline (NEW)
   - package-ecosystem: "pip"
-    directory: "/realtime-stock-pipeline"
+    directory: "/projects/realtime-stock-pipeline"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -185,7 +185,7 @@ updates:
 
   # flink-cdc-dashboard (NEW)
   - package-ecosystem: "pip"
-    directory: "/flink-cdc-dashboard"
+    directory: "/projects/flink-cdc-dashboard"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -202,7 +202,7 @@ updates:
 
   # ml reference (NEW)
   - package-ecosystem: "pip"
-    directory: "/ml"
+    directory: "/learning/ml"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -219,7 +219,7 @@ updates:
 
   # ai-course-public (NEW)
   - package-ecosystem: "pip"
-    directory: "/ai-course-public"
+    directory: "/learning/ai-course-public"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -248,7 +248,7 @@ updates:
 
   # npm ecosystem (TypeScript starters)
   - package-ecosystem: "npm"
-    directory: "/agentic-ai/7_Bedrock_course/recap/ts-strarter"
+    directory: "/learning/agentic-ai/7_Bedrock_course/recap/ts-strarter"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -264,7 +264,7 @@ updates:
       include: "scope"
 
   - package-ecosystem: "npm"
-    directory: "/agentic-ai/7_Bedrock_course/ts"
+    directory: "/learning/agentic-ai/7_Bedrock_course/ts"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -280,7 +280,7 @@ updates:
       include: "scope"
 
   - package-ecosystem: "npm"
-    directory: "/aws/ecs-data-ingestion"
+    directory: "/infra/aws/ecs-data-ingestion"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -316,9 +316,9 @@ updates:
         applies-to: security-updates
         patterns: ["*"]
 
-  # leads-pipeline/draft-cron (CD runtime manifest)
+  # projects/leads-pipeline/draft-cron (CD runtime manifest)
   - package-ecosystem: "pip"
-    directory: "/leads-pipeline/draft-cron"
+    directory: "/projects/leads-pipeline/draft-cron"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -329,7 +329,7 @@ updates:
       - "dependencies"
       - "security"
       - "python"
-      - "leads-pipeline"
+      - "projects/leads-pipeline"
     commit-message:
       prefix: "chore(leads)"
       include: "scope"
@@ -346,9 +346,9 @@ updates:
         update-types: ["minor", "patch"]
         patterns: ["*"]
 
-  # Docker base image (Dockerfile in leads-pipeline/draft-cron)
+  # Docker base image (Dockerfile in projects/leads-pipeline/draft-cron)
   - package-ecosystem: "docker"
-    directory: "/leads-pipeline/draft-cron"
+    directory: "/projects/leads-pipeline/draft-cron"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -359,7 +359,7 @@ updates:
       - "dependencies"
       - "security"
       - "docker"
-      - "leads-pipeline"
+      - "projects/leads-pipeline"
     commit-message:
       prefix: "chore(leads)"
       include: "scope"

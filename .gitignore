@@ -159,10 +159,11 @@ realtime-stock-pipeline/trade-finder/reports/email_*.txt
 medium/micro1/
 
 # Reorg: vendor installers, local envs, runtime artifacts
-infra/aws/
+infra/aws/dist/
+infra/aws/install
+infra/aws/THIRD_PARTY_LICENSES
 infra/sam-installation/
 **/node_modules/
-*.db
 experiments/path/
 .DS_Store
-**/*.zip
+learning/ai-engineering/realtime-crypto-sentiment/*.db
