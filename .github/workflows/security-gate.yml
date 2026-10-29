@@ -39,24 +39,24 @@ jobs:
           # only pin the top-of-repo + recently-touched manifests so PRs
           # get fast feedback on the most common change sites.
           - requirements.txt
-          - ai-engineering/01-enterprise-rag-platform/requirements.txt
-          - ai-engineering/05-distributed-inference/requirements.txt
-          - ai-engineering/10-hello-world-mlops-main/requirements.txt
-          - ai-engineering/16-graph-rag/requirements.txt
-          - ai-engineering/realtime-crypto-sentiment/requirements.txt
-          - data-engineering/scb_aml_platform/requirements-airflow.txt
-          - data-engineering/financial-reporting-platform/requirements.txt
-          - data-engineering/e-commerce-end-2end/requirements.txt
-          - data-engineering/lazada-superset/requirements.txt
-          - data-engineering/data-engineering-course/aws_lambda_course/requirements.txt
-          - data-engineering/data-engineering-course/aws_ec2_course/requirements.txt
-          - data-engineering/data-engineering-course/aws_eventbridge_course/requirements.txt
-          - data-engineering/data-engineering-course/aws_snowflake_course/requirements.txt
-          - flink-cdc-dashboard/requirements.txt
-          - Spark/document-processing/requirements.txt
-          - agentic-ai/7_Bedrock_course/recap/py-starter/requirements.txt
-          - agentic-ai/7_Bedrock_course/recap/py-starter/requirements-dev.txt
-          - agentic-ai/7_Bedrock_course/textApi/py/requirements-dev.txt
+          - learning/ai-engineering/01-enterprise-rag-platform/requirements.txt
+          - learning/ai-engineering/05-distributed-inference/requirements.txt
+          - learning/ai-engineering/10-hello-world-mlops-main/requirements.txt
+          - learning/ai-engineering/16-graph-rag/requirements.txt
+          - learning/ai-engineering/realtime-crypto-sentiment/requirements.txt
+          - learning/data-engineering/scb_aml_platform/requirements-airflow.txt
+          - learning/data-engineering/financial-reporting-platform/requirements.txt
+          - learning/data-engineering/e-commerce-end-2end/requirements.txt
+          - learning/data-engineering/lazada-superset/requirements.txt
+          - learning/data-engineering/data-engineering-course/aws_lambda_course/requirements.txt
+          - learning/data-engineering/data-engineering-course/aws_ec2_course/requirements.txt
+          - learning/data-engineering/data-engineering-course/aws_eventbridge_course/requirements.txt
+          - learning/data-engineering/data-engineering-course/aws_snowflake_course/requirements.txt
+          - projects/flink-cdc-dashboard/requirements.txt
+          - learning/Spark/document-processing/requirements.txt
+          - learning/agentic-ai/7_Bedrock_course/recap/py-starter/requirements.txt
+          - learning/agentic-ai/7_Bedrock_course/recap/py-starter/requirements-dev.txt
+          - learning/agentic-ai/7_Bedrock_course/textApi/py/requirements-dev.txt
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -177,11 +177,11 @@ jobs:
       matrix:
         project:
           - aws/ecs-data-ingestion
-          - agentic-ai/7_Bedrock_course/ts
-          - agentic-ai/7_Bedrock_course/recap/ts-strarter
-          - agentic-ai/7_Bedrock_course/imageApi/ts
-          - agentic-ai/7_Bedrock_course/textApi/ts
-          - ai-engineering/16-graph-rag/web
+          - learning/agentic-ai/7_Bedrock_course/ts
+          - learning/agentic-ai/7_Bedrock_course/recap/ts-strarter
+          - learning/agentic-ai/7_Bedrock_course/imageApi/ts
+          - learning/agentic-ai/7_Bedrock_course/textApi/ts
+          - learning/ai-engineering/16-graph-rag/web
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v6

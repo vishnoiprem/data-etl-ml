@@ -19,9 +19,9 @@
 
 # Container image — Dockerfile + .dockerignore changes ship a new
 # image on the next push to main
-/leads-pipeline/draft-cron/Dockerfile      @vishnoiprem
-/leads-pipeline/draft-cron/.dockerignore   @vishnoiprem
+/projects/leads-pipeline/draft-cron/Dockerfile      @vishnoiprem
+/projects/leads-pipeline/draft-cron/.dockerignore   @vishnoiprem
 
 # Runtime deps — touched by dependabot but a human should review
 # major-version bumps (psycopg2 v3, requests v3, python-docx v2)
-/leads-pipeline/draft-cron/requirements.txt @vishnoiprem
+/projects/leads-pipeline/draft-cron/requirements.txt @vishnoiprem

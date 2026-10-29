@@ -25,7 +25,7 @@ A clear, short description.
 
 - OS: (e.g. macOS 14)
 - Python: (e.g. 3.11.5)
-- Project / folder: (e.g. data-engineering/scb_aml_platform)
+- Project / folder: (e.g. learning/data-engineering/scb_aml_platform)
 - Branch / commit: (e.g. main @ abc1234)
 
 ### Logs / screenshots

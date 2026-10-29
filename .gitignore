@@ -157,3 +157,13 @@ realtime-stock-pipeline/trade-finder/reports/email_*.txt
 .puku-cli
 # personal interview notes (repo is public)
 medium/micro1/
+
+# Reorg: vendor installers, local envs, runtime artifacts
+infra/aws/dist/
+infra/aws/install
+infra/aws/THIRD_PARTY_LICENSES
+infra/sam-installation/
+**/node_modules/
+experiments/path/
+.DS_Store
+learning/ai-engineering/realtime-crypto-sentiment/*.db

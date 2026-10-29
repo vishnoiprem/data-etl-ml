@@ -56,14 +56,14 @@ jobs:
       fail-fast: false
       matrix:
         manifest:
-          - data-engineering/scb_aml_platform/requirements.txt
-          - data-engineering/scb_aml_platform/requirements-airflow.txt
-          - ai-engineering/01-enterprise-rag-platform/requirements.txt
-          - ai-engineering/03-multi-agent-platform/requirements.txt
-          - ai-engineering/05-distributed-inference/requirements.txt
-          - ai-engineering/16-graph-rag/requirements.txt
-          - ai-engineering/16-graph-rag/requirements-dev.txt
-          - leads-pipeline/draft-cron/requirements.txt
+          - learning/data-engineering/scb_aml_platform/requirements.txt
+          - learning/data-engineering/scb_aml_platform/requirements-airflow.txt
+          - learning/ai-engineering/01-enterprise-rag-platform/requirements.txt
+          - learning/ai-engineering/03-multi-agent-platform/requirements.txt
+          - learning/ai-engineering/05-distributed-inference/requirements.txt
+          - learning/ai-engineering/16-graph-rag/requirements.txt
+          - learning/ai-engineering/16-graph-rag/requirements-dev.txt
+          - projects/leads-pipeline/draft-cron/requirements.txt
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

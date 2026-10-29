@@ -12,7 +12,7 @@
 > 74 world-top reference patterns in the tables below. If you've used the system at Netflix, Stripe, Anthropic, Databricks, Bloomberg, or OpenAI, I can defend how I'd build it, run it, and cost it.
 
 > 💸 **Looking for a working AI revenue system, not just code?** Start with
-> [`ai-engineering/40-ai-side-hustle/`](ai-engineering/40-ai-side-hustle/) —
+> [`ai-engineering/40-ai-side-hustle/`](learning/ai-engineering/40-ai-side-hustle/) —
 > a self-contained 4-stream AI revenue factory (SEO content, micro-SaaS
 > scaffold, digital products, print-on-demand merch) that runs in
 > offline-stub mode so you can see the whole pipeline in 5 minutes.
@@ -139,7 +139,7 @@ External           ──►                   ──►   Job1: Entity Resoluti
                                            ──►   Job4: Sanctions Screen       CRS · TRS · NRS
 ```
 
-Open it: [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) — every Spark job, every rule, every feature has its own module.
+Open it: [`data-engineering/scb_aml_platform/`](learning/data-engineering/scb_aml_platform/) — every Spark job, every rule, every feature has its own module.
 
 ### 🤖 2. Enterprise RAG Platform — production RAG, not a vibe-coded demo
 
@@ -165,19 +165,19 @@ User Query ──► Hybrid Retriever (hybrid.py) ──► Reranker (reranker.p
                                                    LangSmith / Reports
 ```
 
-Open it: [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/) — `Makefile` to `make up && make eval`. Eval is built in, not bolted on.
+Open it: [`ai-engineering/01-enterprise-rag-platform/`](learning/ai-engineering/01-enterprise-rag-platform/) — `Makefile` to `make up && make eval`. Eval is built in, not bolted on.
 
 ### 🧩 3. Multi-Agent Platform — LangGraph + Bedrock, planner/executor split
 
 Orchestrated agents with shared memory, tool-use, and bounded loops. Modeled on real LangGraph patterns.
 
-Open it: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agent-platform/) — `make demo` brings it up.
+Open it: [`ai-engineering/03-multi-agent-platform/`](learning/ai-engineering/03-multi-agent-platform/) — `make demo` brings it up.
 
 ### 🌊 4. Realtime Stock Pipeline — Kafka + Flink + CDC, one-command bring-up
 
 Streaming market data: producers → Kafka → Flink (joins, windows, CDC) → Postgres → Grafana.
 
-Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker compose up -d` and you're live.
+Open it: [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) — `docker compose up -d` and you're live.
 
 ---
 
@@ -201,7 +201,7 @@ Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker comp
 | **Hire me (full-time)** | You're hiring Senior / Staff data or AI | **[Email →](mailto:vishnoiprem@gmail.com?subject=Full-time%20role)** |
 | **Give me a project** | You have a scoped pipeline / RAG / agent / eval project | **[Email →](mailto:vishnoiprem@gmail.com?subject=Project%20inquiry)** |
 | **Just talk** | Sounding board, code review, "should we hire for this?" | **[Book a 30-min call →](https://calendly.com/prem-vishnoi/30min)** |
-| **Read first** | You're a tech lead, want to skim before reaching out | [Featured Deep Dives](#-featured-deep-dives) below · [Interview Q&A](#-interview-qa) · [`Resume/`](Resume/) |
+| **Read first** | You're a tech lead, want to skim before reaching out | [Featured Deep Dives](#-featured-deep-dives) below · [Interview Q&A](#-interview-qa) · [`Resume/`](portfolio/Resume/) |
 
 > **Reply time: < 24 hours.** I read every message. If you don't hear back, ping me on [LinkedIn](https://www.linkedin.com/in/vishnoiprem/) or [X (@vishnoiprem)](https://x.com/vishnoiprem).
 >
@@ -238,90 +238,90 @@ Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker comp
 
 | # | Project | What it actually does | Stack | Folder |
 |---|---|---|---|---|
-| 1 | **SCB AML Platform** | 15-country AML pipeline at Standard Chartered. 750+ Hive ODS tables, 4 Spark jobs (entity resolution, aggregations, 200+ features, sanctions screening), 6-rule engine, CRS/TRS/NRS risk scoring, STR/SAR/CTR alerts, Lucid Search over Elasticsearch. | Sqoop · Kafka · Hive · Spark · Elasticsearch · FastAPI · Airflow | [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) |
-| 2 | **Realtime Stock Pipeline** | Streaming market data: producers → Kafka → Flink jobs (windows, joins, CDC) → Postgres → Grafana. One-command bring-up with `docker compose`. | Kafka · Flink · Postgres · Grafana · Docker | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) |
-| 3 | **Flink CDC Dashboard** | End-to-end CDC: Postgres → Flink SQL → live dashboard. Self-contained with `0_setup_project.sh` → `5_run_dashboard.sh`. | Flink SQL · Postgres · Docker | [`flink-cdc-dashboard/`](flink-cdc-dashboard/) |
+| 1 | **SCB AML Platform** | 15-country AML pipeline at Standard Chartered. 750+ Hive ODS tables, 4 Spark jobs (entity resolution, aggregations, 200+ features, sanctions screening), 6-rule engine, CRS/TRS/NRS risk scoring, STR/SAR/CTR alerts, Lucid Search over Elasticsearch. | Sqoop · Kafka · Hive · Spark · Elasticsearch · FastAPI · Airflow | [`data-engineering/scb_aml_platform/`](learning/data-engineering/scb_aml_platform/) |
+| 2 | **Realtime Stock Pipeline** | Streaming market data: producers → Kafka → Flink jobs (windows, joins, CDC) → Postgres → Grafana. One-command bring-up with `docker compose`. | Kafka · Flink · Postgres · Grafana · Docker | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) |
+| 3 | **Flink CDC Dashboard** | End-to-end CDC: Postgres → Flink SQL → live dashboard. Self-contained with `0_setup_project.sh` → `5_run_dashboard.sh`. | Flink SQL · Postgres · Docker | [`flink-cdc-dashboard/`](projects/flink-cdc-dashboard/) |
 | 4 | **Banking AML Data** | AML data modeling + feature engineering on PySpark. | PySpark · Feature Store | [`data-engineering/Banking-AML-Data/`](data-engineering/Banking-AML-Data/) |
-| 5 | **Financial Reporting Platform** | Reporting layer on a lakehouse with dbt + Airflow. | dbt · Snowflake/BQ · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) |
-| 6 | **E-commerce End-to-End** | Full e-comm data platform: ingest → marts → serving. | Spark · Airflow · dbt | [`data-engineering/e-commerce-end-2end/`](data-engineering/e-commerce-end-2end/) |
-| 7 | **Lazada + Superset** | BI platform with Superset on a warehouse. | Superset · Druid/Starburst | [`data-engineering/lazada-superset/`](data-engineering/lazada-superset/) |
-| 8 | **Order ETL (Go)** | Order ETL pipeline written in Go against Postgres. | Go · Postgres | [`golang/order-etl-pipeline/`](golang/order-etl-pipeline/) |
-| 9 | **AWS ECS Data Ingestion** | Containerized data ingestion on AWS ECS. | ECS · Docker · AWS | [`aws/ecs-data-ingestion/`](aws/ecs-data-ingestion/) |
-| 10 | **Netflix-style Keystone pipeline** | I wanted a real multi-region event backbone, not a single-region demo. So this one is Kafka → Flink → Iceberg with exactly-once, a schema registry, and a backfill path I can re-run without poisoning the lake. Same skeleton Netflix's Keystone team writes about — the boring parts (checkpointing, late events, partition rebalance) are the parts that matter. | Kafka · Flink · Iceberg · Schema Registry · S3 | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
+| 5 | **Financial Reporting Platform** | Reporting layer on a lakehouse with dbt + Airflow. | dbt · Snowflake/BQ · Airflow | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) |
+| 6 | **E-commerce End-to-End** | Full e-comm data platform: ingest → marts → serving. | Spark · Airflow · dbt | [`data-engineering/e-commerce-end-2end/`](learning/data-engineering/e-commerce-end-2end/) |
+| 7 | **Lazada + Superset** | BI platform with Superset on a warehouse. | Superset · Druid/Starburst | [`data-engineering/lazada-superset/`](learning/data-engineering/lazada-superset/) |
+| 8 | **Order ETL (Go)** | Order ETL pipeline written in Go against Postgres. | Go · Postgres | [`golang/order-etl-pipeline/`](learning/golang/order-etl-pipeline/) |
+| 9 | **AWS ECS Data Ingestion** | Containerized data ingestion on AWS ECS. | ECS · Docker · AWS | [`aws/ecs-data-ingestion/`](infra/aws/ecs-data-ingestion/) |
+| 10 | **Netflix-style Keystone pipeline** | I wanted a real multi-region event backbone, not a single-region demo. So this one is Kafka → Flink → Iceberg with exactly-once, a schema registry, and a backfill path I can re-run without poisoning the lake. Same skeleton Netflix's Keystone team writes about — the boring parts (checkpointing, late events, partition rebalance) are the parts that matter. | Kafka · Flink · Iceberg · Schema Registry · S3 | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) (reference impl) |
 | 11 | **Uber-style real-time feature store** | I hit the train/serve skew problem enough times to want a clean answer. This store does online + offline, point-in-time joins, and a hard fresh-feature SLA — so the same feature definitions serve both training and the live model. That's the part most homegrown stores skip, and the part that bites you six months in. | Spark · Feast · Redis · Kafka · gRPC | [`data-engineering/Banking-AML-Data/`](data-engineering/Banking-AML-Data/) (reference impl) |
-| 12 | **Stripe-style idempotent event bus** | Money events cannot be applied twice. Full stop. So the bus uses idempotency keys, a dead-letter queue with replay, and a daily reconciliation against the source of truth. It's the unglamorous half of payments — the half where you sleep at night. | Kafka · Flink · Postgres · Redis · DLQ | [`flink-cdc-dashboard/`](flink-cdc-dashboard/) (reference impl) |
-| 13 | **Airbnb-style lakehouse (Delta / Iceberg)** | I got tired of "where did this column come from" and "what was the value last Tuesday." This is the answer: open table formats, time-travel, schema evolution, Z-order clustering. The query patterns stay the same; the lake just stops lying. | Delta Lake · Iceberg · dbt · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
-| 14 | **Meta-style stream processing (Flink + RocksDB)** | High-throughput stateful jobs with a real state backend, not in-memory. RocksDB underneath, exactly-once, savepoints, rescaling without a full restart. This is the pattern behind ranking and ads pipelines at places that actually run ranking and ads pipelines. | Flink · RocksDB · Kafka · S3 | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
-| 15 | **Netflix-style CDC → search → recs** | Postgres WAL → Kafka → Flink → Elasticsearch + FAISS. The interesting part is the lag budget: sub-second from write to searchable, and from searchable to recommendable. Anything slower and the recommendation feels wrong. | Flink CDC · Elasticsearch · FAISS | [`flink-cdc-dashboard/`](flink-cdc-dashboard/) (reference impl) |
-| 16 | **Shopify-style partitioned clickstream lake** | Petabyte-scale click ingestion that doesn't bankrupt the finance team. Heavily partitioned Parquet, column-pruned reads, cost-aware query routing so the analyst's `SELECT *` doesn't scan the whole lake. I learned this one the expensive way. | S3 · Parquet · Athena · dbt | [`data-engineering/e-commerce-end-2end/`](data-engineering/e-commerce-end-2end/) (reference impl) |
-| 17 | **Capital One-style FinCrime data mesh** | Regulated data needs a contract, not just a schema. Domain-owned data products, contract tests on every change, lineage, and access control. It's heavier than a raw lake, but the audit team stops paging you at 11pm. | DataHub · Great Expectations · dbt · Lake Formation | [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) (reference impl) |
-| 18 | **Lyft-style streaming + batch hybrid** | I want one codebase, not two. Backfill and streaming share the same job definition, with time-travel for reconciliation when they disagree. The Kappa-leaning version, with a Batch escape hatch for the things streaming can't do cleanly. | Flink · Spark · Iceberg · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
-| 19 | **Cloudflare-style edge analytics** | Regional aggregation close to the user, late-merge reconciliation, tiered storage (hot → warm → cold). Useful when the volume is global and the budget isn't. The shape is closer to a CDN log pipeline than a typical warehouse job. | Kafka · Flink · R2 · ClickHouse | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
-| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/`](data-engineering/) (reference impl) |
-| 21 | **Snowflake-style elastic warehouse** | Compute and storage decoupled, virtual warehouses that scale in seconds, and per-query credits. I rewrote our nightly batch as a virtual-warehouse-style fleet on Spark + Iceberg, with auto-suspend on idle and auto-resume on queue depth. The result: the same job ran in 12 minutes instead of 90, and the bill tracked the work. | Spark · Iceberg · S3 · Airflow | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
-| 22 | **BigQuery-style serverless analytics** | No cluster to size, no warm-up cost, per-byte scanned billing. I built a Parquet-on-S3 + DuckDB + caching layer that approximates that ergonomics for sub-petabyte scale, with column-pruned reads and result caching keyed by query hash. Not BigQuery — but the same operating model. | DuckDB · Parquet · S3 · dbt | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
-| 23 | **Bloomberg-style market-data plant** | Tick capture, normalized symbology, a real-time reference data service, and a fan-out engine that serves the same tick to dozens of subscribers without re-parsing. The hard part is the symbology map — `ticker → FIGI → CUSIP` — and the fact that a single ticker can map to 4 underlying instruments. | Kafka · Flink · gRPC · Redis · Postgres | [`data-engineering/bloomberg-symbology/`](data-engineering/bloomberg-symbology/) |
-| 24 | **Stripe-style double-entry ledger** | Money movement as a sequence of immutable postings that always sum to zero, with reconciliation jobs that prove the books close. Append-only, never UPDATE, never DELETE. This is the boring 80% of a payments system that nobody talks about and everyone regrets skipping. | Postgres · CRDT · idempotency keys | [`data-engineering/cqrs-ledger/`](data-engineering/cqrs-ledger/) |
-| 25 | **LinkedIn-style activity-volume OLAP** | The "follow feed" / "who viewed your profile" workload: billions of events per day, dimensional rollups, sub-second interactive queries. Cube-style pre-aggregation + late-arriving handling + per-tenant freshness. Same shape behind the LinkedIn dashboards, sized for a single team. | Pinot · StarRocks · Kafka · HDFS | [`data-engineering/activity-volume-olap/`](data-engineering/activity-volume-olap/) |
-| 26 | **Cloudflare Workers-style data plane** | Latency-sensitive data transformations at the edge, before the bytes ever hit the central lake. A V8-isolate-style worker runtime for ETL, with KV for state and Durable Objects for per-entity coordination. Useful for "I want my analytics to fire on the request, not 4 hours later." | Workers · KV · R2 · D1 (SQLite) | [`data-engineering/edge-analytics-workers/`](data-engineering/edge-analytics-workers/) |
-| 27 | **Databricks-style Photon execution engine** | Vectorized, code-generated query execution that turns Spark SQL into something competitive with C++. I rewrote a hot path to use Arrow + codegen + a small custom kernel set; the same query dropped from 18 minutes to 4 without changing the API. The lesson: data-format choice and execution-engine choice are the same decision. | Apache Arrow · Photon-style codegen · Spark | [`data-engineering/financial-reporting-platform/`](data-engineering/financial-reporting-platform/) (reference impl) |
-| 28 | **Apple-style privacy-preserving analytics** | Differential privacy on telemetry, on-device aggregation, k-anonymity for cohort reports. The hard part isn't the math; it's making the dashboards still useful. I built a small DP library + a view layer that quantifies the privacy budget consumed per dashboard. | DP-SGD · on-device agg · Postgres | [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/) (reference impl) |
-| 29 | **Netflix-style Keystone + Iceberg table management** | The boring operations layer that nobody writes blog posts about: automated snapshot expiry, compaction, orphan-file cleanup, schema-evolution tests. Iceberg makes it possible; the operational harness is what makes it reliable. | Iceberg · Nessie · Airflow · S3 | [`data-engineering/keystone-iceberg-ops/`](data-engineering/keystone-iceberg-ops/) |
-| 30 | **Coinbase-style crypto exchange data plane** | Order book + trade + settlement + cold-wallet audit, in one pipeline, with replayable events and signed payloads. Reconciliation across hot and cold wallets is its own daily batch. I learned more from building this than from any textbook on the topic. | Kafka · Postgres · gRPC · RocksDB | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
-| 31 | **Palantir-style ontology + data fabric** | A unified object model on top of every source: people, companies, transactions, events, with links, versions, and access control. Building a small ontology with a graph layer + lineage + per-object ACLs changed how I think about regulated-data problems. The "object" is the unit; tables are an implementation detail. | Neo4j · DataHub · dbt · Lake Formation | [`data-engineering/ontology-data-fabric/`](data-engineering/ontology-data-fabric/) |
-| 32 | **Tesla-style factory data lake** | Machine telemetry at 10ms cadence from thousands of devices, time-series compression, edge-pre-aggregation, and a quality loop that feeds back into the next firmware release. The same telemetry drives alerting, dashboards, and training data for the next model. | TimescaleDB · Kafka · MQTT · Parquet | [`realtime-stock-pipeline/`](realtime-stock-pipeline/) (reference impl) |
-| 33 | **Salesforce-style multi-tenant data isolation** | One schema, many tenants, every query plan must include the tenant filter or it's a security incident. Row-level security, per-tenant encryption keys, audit log of every cross-tenant attempt. The boring stuff that lets you sign enterprise contracts. | Postgres RLS · per-tenant KMS · DataHub | [`data-engineering/multi-tenant-isolation/`](data-engineering/multi-tenant-isolation/) |
-| 34 | **GitHub-style event-sourced audit log** | Every state change in the system is an event with a hash chain — append-only, cryptographically linked, replayable to reconstruct any prior state. It's how you answer "who saw this row, when, and why" without a separate audit table that drifts. | Kafka · event sourcing · hash chain · S3 | [`data-engineering/event-sourced-audit/`](data-engineering/event-sourced-audit/) |
+| 12 | **Stripe-style idempotent event bus** | Money events cannot be applied twice. Full stop. So the bus uses idempotency keys, a dead-letter queue with replay, and a daily reconciliation against the source of truth. It's the unglamorous half of payments — the half where you sleep at night. | Kafka · Flink · Postgres · Redis · DLQ | [`flink-cdc-dashboard/`](projects/flink-cdc-dashboard/) (reference impl) |
+| 13 | **Airbnb-style lakehouse (Delta / Iceberg)** | I got tired of "where did this column come from" and "what was the value last Tuesday." This is the answer: open table formats, time-travel, schema evolution, Z-order clustering. The query patterns stay the same; the lake just stops lying. | Delta Lake · Iceberg · dbt · Airflow | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
+| 14 | **Meta-style stream processing (Flink + RocksDB)** | High-throughput stateful jobs with a real state backend, not in-memory. RocksDB underneath, exactly-once, savepoints, rescaling without a full restart. This is the pattern behind ranking and ads pipelines at places that actually run ranking and ads pipelines. | Flink · RocksDB · Kafka · S3 | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) (reference impl) |
+| 15 | **Netflix-style CDC → search → recs** | Postgres WAL → Kafka → Flink → Elasticsearch + FAISS. The interesting part is the lag budget: sub-second from write to searchable, and from searchable to recommendable. Anything slower and the recommendation feels wrong. | Flink CDC · Elasticsearch · FAISS | [`flink-cdc-dashboard/`](projects/flink-cdc-dashboard/) (reference impl) |
+| 16 | **Shopify-style partitioned clickstream lake** | Petabyte-scale click ingestion that doesn't bankrupt the finance team. Heavily partitioned Parquet, column-pruned reads, cost-aware query routing so the analyst's `SELECT *` doesn't scan the whole lake. I learned this one the expensive way. | S3 · Parquet · Athena · dbt | [`data-engineering/e-commerce-end-2end/`](learning/data-engineering/e-commerce-end-2end/) (reference impl) |
+| 17 | **Capital One-style FinCrime data mesh** | Regulated data needs a contract, not just a schema. Domain-owned data products, contract tests on every change, lineage, and access control. It's heavier than a raw lake, but the audit team stops paging you at 11pm. | DataHub · Great Expectations · dbt · Lake Formation | [`data-engineering/scb_aml_platform/`](learning/data-engineering/scb_aml_platform/) (reference impl) |
+| 18 | **Lyft-style streaming + batch hybrid** | I want one codebase, not two. Backfill and streaming share the same job definition, with time-travel for reconciliation when they disagree. The Kappa-leaning version, with a Batch escape hatch for the things streaming can't do cleanly. | Flink · Spark · Iceberg · Airflow | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
+| 19 | **Cloudflare-style edge analytics** | Regional aggregation close to the user, late-merge reconciliation, tiered storage (hot → warm → cold). Useful when the volume is global and the budget isn't. The shape is closer to a CDN log pipeline than a typical warehouse job. | Kafka · Flink · R2 · ClickHouse | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) (reference impl) |
+| 20 | **Google Spanner-style globally-distributed OLTP** | The CAP-theorem tax is real, but you can get close to a single global database if you accept TrueTime-style clock skew and use Paxos for replication. I built a small Postgres + logical-replication shim that does regional writes with conflict-free merges, which is the same shape Spanner exposes — just without the atomic clocks. | Postgres · logical replication · Citus | [`data-engineering/`](learning/data-engineering/) (reference impl) |
+| 21 | **Snowflake-style elastic warehouse** | Compute and storage decoupled, virtual warehouses that scale in seconds, and per-query credits. I rewrote our nightly batch as a virtual-warehouse-style fleet on Spark + Iceberg, with auto-suspend on idle and auto-resume on queue depth. The result: the same job ran in 12 minutes instead of 90, and the bill tracked the work. | Spark · Iceberg · S3 · Airflow | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
+| 22 | **BigQuery-style serverless analytics** | No cluster to size, no warm-up cost, per-byte scanned billing. I built a Parquet-on-S3 + DuckDB + caching layer that approximates that ergonomics for sub-petabyte scale, with column-pruned reads and result caching keyed by query hash. Not BigQuery — but the same operating model. | DuckDB · Parquet · S3 · dbt | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
+| 23 | **Bloomberg-style market-data plant** | Tick capture, normalized symbology, a real-time reference data service, and a fan-out engine that serves the same tick to dozens of subscribers without re-parsing. The hard part is the symbology map — `ticker → FIGI → CUSIP` — and the fact that a single ticker can map to 4 underlying instruments. | Kafka · Flink · gRPC · Redis · Postgres | [`data-engineering/bloomberg-symbology/`](learning/data-engineering/bloomberg-symbology/) |
+| 24 | **Stripe-style double-entry ledger** | Money movement as a sequence of immutable postings that always sum to zero, with reconciliation jobs that prove the books close. Append-only, never UPDATE, never DELETE. This is the boring 80% of a payments system that nobody talks about and everyone regrets skipping. | Postgres · CRDT · idempotency keys | [`data-engineering/cqrs-ledger/`](learning/data-engineering/cqrs-ledger/) |
+| 25 | **LinkedIn-style activity-volume OLAP** | The "follow feed" / "who viewed your profile" workload: billions of events per day, dimensional rollups, sub-second interactive queries. Cube-style pre-aggregation + late-arriving handling + per-tenant freshness. Same shape behind the LinkedIn dashboards, sized for a single team. | Pinot · StarRocks · Kafka · HDFS | [`data-engineering/activity-volume-olap/`](learning/data-engineering/activity-volume-olap/) |
+| 26 | **Cloudflare Workers-style data plane** | Latency-sensitive data transformations at the edge, before the bytes ever hit the central lake. A V8-isolate-style worker runtime for ETL, with KV for state and Durable Objects for per-entity coordination. Useful for "I want my analytics to fire on the request, not 4 hours later." | Workers · KV · R2 · D1 (SQLite) | [`data-engineering/edge-analytics-workers/`](learning/data-engineering/edge-analytics-workers/) |
+| 27 | **Databricks-style Photon execution engine** | Vectorized, code-generated query execution that turns Spark SQL into something competitive with C++. I rewrote a hot path to use Arrow + codegen + a small custom kernel set; the same query dropped from 18 minutes to 4 without changing the API. The lesson: data-format choice and execution-engine choice are the same decision. | Apache Arrow · Photon-style codegen · Spark | [`data-engineering/financial-reporting-platform/`](learning/data-engineering/financial-reporting-platform/) (reference impl) |
+| 28 | **Apple-style privacy-preserving analytics** | Differential privacy on telemetry, on-device aggregation, k-anonymity for cohort reports. The hard part isn't the math; it's making the dashboards still useful. I built a small DP library + a view layer that quantifies the privacy budget consumed per dashboard. | DP-SGD · on-device agg · Postgres | [`data-engineering/scb_aml_platform/`](learning/data-engineering/scb_aml_platform/) (reference impl) |
+| 29 | **Netflix-style Keystone + Iceberg table management** | The boring operations layer that nobody writes blog posts about: automated snapshot expiry, compaction, orphan-file cleanup, schema-evolution tests. Iceberg makes it possible; the operational harness is what makes it reliable. | Iceberg · Nessie · Airflow · S3 | [`data-engineering/keystone-iceberg-ops/`](learning/data-engineering/keystone-iceberg-ops/) |
+| 30 | **Coinbase-style crypto exchange data plane** | Order book + trade + settlement + cold-wallet audit, in one pipeline, with replayable events and signed payloads. Reconciliation across hot and cold wallets is its own daily batch. I learned more from building this than from any textbook on the topic. | Kafka · Postgres · gRPC · RocksDB | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) (reference impl) |
+| 31 | **Palantir-style ontology + data fabric** | A unified object model on top of every source: people, companies, transactions, events, with links, versions, and access control. Building a small ontology with a graph layer + lineage + per-object ACLs changed how I think about regulated-data problems. The "object" is the unit; tables are an implementation detail. | Neo4j · DataHub · dbt · Lake Formation | [`data-engineering/ontology-data-fabric/`](learning/data-engineering/ontology-data-fabric/) |
+| 32 | **Tesla-style factory data lake** | Machine telemetry at 10ms cadence from thousands of devices, time-series compression, edge-pre-aggregation, and a quality loop that feeds back into the next firmware release. The same telemetry drives alerting, dashboards, and training data for the next model. | TimescaleDB · Kafka · MQTT · Parquet | [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/) (reference impl) |
+| 33 | **Salesforce-style multi-tenant data isolation** | One schema, many tenants, every query plan must include the tenant filter or it's a security incident. Row-level security, per-tenant encryption keys, audit log of every cross-tenant attempt. The boring stuff that lets you sign enterprise contracts. | Postgres RLS · per-tenant KMS · DataHub | [`data-engineering/multi-tenant-isolation/`](learning/data-engineering/multi-tenant-isolation/) |
+| 34 | **GitHub-style event-sourced audit log** | Every state change in the system is an event with a hash chain — append-only, cryptographically linked, replayable to reconstruct any prior state. It's how you answer "who saw this row, when, and why" without a separate audit table that drifts. | Kafka · event sourcing · hash chain · S3 | [`data-engineering/event-sourced-audit/`](learning/data-engineering/event-sourced-audit/) |
 
 ### 🤖 AI Engineering (LLM, RAG, Agents)
 
 | # | Project | What it actually does | Stack | Folder |
 |---|---|---|---|---|
-| 20 | **Enterprise RAG Platform** | Production RAG with 5 sub-systems: `ingestion/loader.py + chunker.py`, `embedding/`, `retrieval/{vector, bm25, hybrid, reranker}.py`, `generation/`, `eval/ragas_eval.py`. Hybrid retrieval + rerank + RAGAS eval. | LangChain · Weaviate · Bedrock · FastAPI | [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/) |
-| 21 | **Multi-Agent Platform** | Orchestrated agents with shared memory and tool use. Makefile-driven dev workflow. | LangGraph · Bedrock · OpenAI | [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agent-platform/) |
-| 22 | **Distributed Inference** | Low-latency LLM serving at scale. | vLLM · Triton · Ray | [`ai-engineering/05-distributed-inference/`](ai-engineering/05-distributed-inference/) |
-| 23 | **Regulated Industry AI** | Governed AI for banking / financial-crime compliance. | Bedrock · Guardrails · PII | [`ai-engineering/06-regulated-industry/`](ai-engineering/06-regulated-industry/) |
-| 24 | **LLMOps Platform** | Eval, monitoring, cost, drift for LLM workloads. | LangSmith · Prometheus | [`ai-engineering/08-llmops-platform/`](ai-engineering/08-llmops-platform/) |
-| 25 | **Code-Fix Agent** | Agent that reads broken code, plans a fix, and opens a patch. | LangGraph · Tools | [`ai-engineering/15-code-fix-agent/`](ai-engineering/15-code-fix-agent/) |
-| 26 | **Enterprise Search Agent** | Agentic enterprise search over docs + DBs + APIs via MCP. | MCP · Bedrock · LangGraph | [`agentic-ai/2-enterprise-search-agent-full/`](agentic-ai/2-enterprise-search-agent-full/) |
-| 27 | **Bedrock + Aurora + S3** | Reference agent stack on AWS Bedrock + Aurora + S3. | Bedrock · Aurora · S3 | [`agentic-ai/3-aws-bedrock-aurora-s3/`](agentic-ai/3-aws-bedrock-aurora-s3/) |
-| 28 | **Wiki RAG ReAct** | Wikipedia-grounded ReAct agent. | ReAct · RAG | [`agentic-ai/6_wiki_rag_react_project/`](agentic-ai/6_wiki_rag_react_project/) |
-| 29 | **Logistics Route Optimisation** | ML-driven route optimization with OR-Tools. | OR-Tools · ML | [`ai-engineering/9-Logistics-Route-Optimisation/`](ai-engineering/9-Logistics-Route-Optimisation/) |
-| 30 | **FM Evaluation Harness** | Reproducible evaluation harness for foundation models. | RAGAS · LangSmith | [`ai-engineering/04-fm-evaluation/`](ai-engineering/04-fm-evaluation/) |
-| 31 | **LLM Fine-Tuning** | Fine-tuning experiments, eval, and recipes. | PEFT · LoRA · HF | [`ai-engineering/02-llm-fine-tuning/`](ai-engineering/02-llm-fine-tuning/) |
-| 32 | **Prompt Engineering** | Prompt patterns, regression tests, scoring. | LangChain · pytest | [`ai-engineering/07-prompt-engineering/`](ai-engineering/07-prompt-engineering/) |
-| 33 | **Graph RAG** | Pure vector RAG falls apart the moment the question is "what does X own and who reports to them?" So I bolted on a knowledge graph: entity linking, multi-hop reasoning, and a retriever that walks the graph when the cosine distance isn't enough. It's slower, but the questions it answers are the ones users actually ask. | Neo4j · NetworkX · LangChain | [`ai-engineering/16-graph-rag/`](ai-engineering/16-graph-rag/) |
-| 34 | **OpenAI / Anthropic-style inference platform** | If you're serving more than one team, cost attribution isn't optional. This one runs multi-tenant with autoscaling, a prompt cache so we don't pay to re-encode the system prompt, and per-tenant rate limits so one team can't starve the others. Same ideas the public APIs run on, just with a few eyes on the dashboard. | vLLM · Triton · Kong · Prometheus | [`ai-engineering/38-multi-tenant-inference/`](ai-engineering/38-multi-tenant-inference/) |
-| 35 | **Anthropic-style safety + eval harness** | A LLM app without a red-team suite is a house without a smoke alarm. This one has a judge model, principle-driven scoring rubrics, and a regression gate so a bad prompt doesn't slip into prod on a Friday afternoon. The vibe is less "lab" and more "compliance team that codes." | RAGAS · DeepEval · Claude · Guardrails | [`ai-engineering/06-regulated-industry/`](ai-engineering/06-regulated-industry/) (reference impl) |
-| 36 | **Perplexity-style web RAG + citation** | Live web retrieval wired into a RAG pipeline, with citation enforcement (the model has to point at a URL or it doesn't answer) and a freshness score that punishes stale sources. Without citation enforcement, the model will confidently cite things that don't exist. | LangChain · Tavily · Cohere Rerank · RAGAS | [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/) (reference impl) |
-| 37 | **Harvey-style legal RAG (citation + audit)** | Legal answers without citations are useless and dangerous. This one does case-law-aware chunking, hard-citation enforcement, PII redaction, and writes every answer to an audit log. The same shape Harvey and the regulated-doc vendors run, just sized for a single in-house team. | LangChain · pgvector · Claude · Bedrock Guardrails | [`ai-engineering/06-regulated-industry/`](ai-engineering/06-regulated-industry/) (reference impl) |
-| 38 | **Notion-style embedding + semantic search** | Text-only search misses half the corpus in a workspace tool. So this indexes text + image + layout with a multi-modal embedder, and surfaces results that match on meaning rather than exact words. The "find the page with the orange chart" use case finally works. | CLIP · OpenCLIP · Weaviate · FastAPI | [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/) (reference impl) |
-| 39 | **OpenAI Operator-style computer-use agent** | An agent that actually clicks things on a screen, not just calls an API. VLM + tool-use, but with the non-negotiables: safety guardrails on every action, replay so I can see what it did, and a step budget so it doesn't get stuck refreshing a page forever. | LangGraph · Claude · VLM · Playwright | [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agent-platform/) (reference impl) |
-| 40 | **Anthropic-style tool-use + function-calling** | The model gets to call tools — but only the tools I defined, with schemas it has to follow. Parallel calls, retries with backoff, idempotency on anything that has side effects, and a typed result back into the agent loop. The point is to make tool use feel boring instead of magical. | LangGraph · Pydantic · OpenAI · Anthropic | [`ai-engineering/15-code-fix-agent/`](ai-engineering/15-code-fix-agent/) (reference impl) |
-| 41 | **Databricks-style Mosaic AI gateway** | One gateway, many models. Per-tenant routing, cost attribution that lands in the same dashboard as p95 latency, prompt versioning so I can roll back a bad prompt without a redeploy, and traffic shaping so a launch doesn't DDoS the upstream provider. | LiteLLM · MLflow · Redis · FastAPI | [`ai-engineering/08-llmops-platform/`](ai-engineering/08-llmops-platform/) (reference impl) |
-| 42 | **GitHub Copilot-style inline suggestion engine** | Streaming token-by-token completion with a debounce so it doesn't generate while I'm still typing, context-aware retrieval so the suggestion sees my other files, a prefix cache so the second keystroke isn't a fresh prompt, and a ghost-text UX. The latency budget is the product. | vLLM · Triton · Tree-sitter · WebSocket | [`ai-engineering/34-copilot-inline-suggest/`](ai-engineering/34-copilot-inline-suggest/) |
-| 43 | **Salesforce / Slack-style Agentforce** | Enterprise agents need the boring bits: per-tenant tools (no leakage), RAG over customer data with row-level access, an audit log of every action, and a human-in-the-loop step before anything irreversible. Without those, you'll be doing a "trust us" talk to the security team every quarter. | LangGraph · MCP · Bedrock · Postgres | [`agentic-ai/2-enterprise-search-agent-full/`](agentic-ai/2-enterprise-search-agent-full/) (reference impl) |
-| 44 | **DeepMind-style frontier research pipeline** | Reproducible ML research: dataset versioning, training infra (FSDP/ZeRO) that actually scales, an eval harness I can re-run on last week's commit, and ablation sweeps in config, not in a notebook. The pipeline is the artifact; the model weights are downstream. | PyTorch FSDP · W&B · Hydra · RAGAS | [`ai-engineering/37-frontier-research-pipeline/`](ai-engineering/37-frontier-research-pipeline/) |
-| 45 | **Hugging Face-style open-source model hub** | A registry with versioning, an eval table per model, download stats, and a license gate so a model with a non-commercial license can't be served commercially. Same bones as the public Hub — just private and bolted to your own stack. | HF Hub · LitServe · DVC · Postgres | [`ai-engineering/27-hf-model-hub/`](ai-engineering/27-hf-model-hub/) |
-| 46 | **OpenAI-style RLHF / DPO training loop** | The full alignment path: SFT, reward model, PPO or DPO with a KL constraint so the policy doesn't wander off, eval gating so a regression can't ship, and ablations on every knob that matters. Not magic — mostly bookkeeping, but the bookkeeping is what makes alignment reproducible. | PyTorch · TRL · DeepSpeed · W&B | [`ai-engineering/28-rlhf-dpo-train/`](ai-engineering/28-rlhf-dpo-train/) |
-| 47 | **Nvidia-style distributed training (FSDP + FlashAttention)** | Training across nodes without OOMs that ruin your weekend. FSDP/ZeRO for sharding, FlashAttention-2 for memory, mixed precision, gradient checkpointing when I need it, and NCCL tuning that I did once, wrote down, and stopped re-deriving. | PyTorch FSDP · FlashAttention · NCCL · Slurm | [`ai-engineering/29-fsdp-flash-train/`](ai-engineering/29-fsdp-flash-train/) |
-| 48 | **OpenAI-style Triton kernel optimization** | When PyTorch is too slow and CUDA is too verbose, Triton hits the middle. Custom fused attention, RMSNorm, rotary embeddings, with autotune so the compiler picks the block size on the actual GPU. The boring version of "I wrote a kernel" — production-ready, not a benchmark. | Triton · CUDA · PyTorch · `triton.testing` | [`ai-engineering/30-triton-kernels/`](ai-engineering/30-triton-kernels/) |
-| 49 | **Anthropic-style Constitutional AI loop** | Self-critique + revision, the Anthropic way. A principle set, a judge model that scores against it, a revision loop that doesn't run forever, and a red-team suite that hits the resulting model with the awkward prompts. The output is better; the cost is more eval runs. | Claude · RAGAS · DeepEval · vLLM | [`ai-engineering/31-constitutional-ai/`](ai-engineering/31-constitutional-ai/) |
-| 50 | **AWS SageMaker-style MLOps platform** | The full lifecycle: data labeling, training, registry, deployment, monitoring, retraining trigger. I built the control plane as a set of small services with one workflow spec and an explicit `PromoteRequest` (not a `PUT /production` footgun) — every promotion is logged with a reason. | FastAPI · MLflow · Postgres · K8s | [`ai-engineering/17-mlops-control-plane/`](ai-engineering/17-mlops-control-plane/) |
-| 51 | **Google Vertex-style unified AI platform** | One pane of glass: model garden, training, tuning, deployment, monitoring, feature store, vector search. The value isn't any one of these — it's that they're integrated, versioned, and the same auth flows through all of them. | Vertex-style platform · Ray · KFP · BigQuery | [`ai-engineering/24-vertex-style-platform/`](ai-engineering/24-vertex-style-platform/) |
-| 52 | **DeepSeek-style MoE training** | Mixture-of-experts at the trillion-parameter scale, with expert parallelism, top-k routing, and load-balancing losses that don't blow up. I built a toy MoE trainer in PyTorch + DeepSpeed that handles 8 experts × 4B params on 8 GPUs, which is enough to feel the routing pain and learn the load-balance tricks. | DeepSpeed MoE · Megatron · NCCL | [`ai-engineering/25-deepseek-moe-train/`](ai-engineering/25-deepseek-moe-train/) |
-| 53 | **Mistral-style open-weights serving** | Apache-2.0-licensed models that you can self-host, fine-tune, and ship without a vendor relationship. The serving stack I built for this assumes the model is on your own infra: vLLM, prefix cache, prompt cache, and a token-budget guard so a 200K-context request doesn't melt the cluster. | vLLM · Mistral · prefix cache · Triton | [`ai-engineering/26-mistral-self-host/`](ai-engineering/26-mistral-self-host/) |
-| 54 | **Cohere-style rerank + embeddings service** | Rerank is the cheapest accuracy boost in RAG. Real numbers on a 5K legal-Q&A eval: retriever alone = 78% recall@10; after rerank = 91% recall@10, +35ms p95, +$0.0003/query. The threshold-picker (`service/threshold.py`) finds the score cutoff that gives you 90% recall at your target precision. | BGE-reranker · FastAPI · calibration | [`ai-engineering/19-rerank-service/`](ai-engineering/19-rerank-service/) |
-| 55 | **vLLM-style PagedAttention engine** | The single biggest open-source LLM-serving improvement of the last 2 years. PagedAttention treats KV cache like virtual memory, so you can serve 2-4x more concurrent requests on the same GPU. Toy in `paged_kv.py` captures the indirection; real numbers: 8 → 18 concurrent requests at same memory, 18% lower p99. | vLLM · PagedAttention · CUDA · Triton | [`ai-engineering/18-paged-attention-serving/`](ai-engineering/18-paged-attention-serving/) |
-| 56 | **LlamaIndex-style ingestion framework** | 200+ loaders, 50+ vector stores, 30+ LLMs, all behind one interface. The lesson: the abstraction is right at the boundary, wrong at the core. I use LlamaIndex for connectors and write the retrieval + eval myself. The repo shows both halves. | LlamaIndex · 200+ loaders · vector stores | [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/) |
-| 57 | **Pinecone-style serverless vector DB** | IVF (Inverted File) index on S3, query path on Lambda. The toy index in `store/index.py` builds 1M vectors in 90s and serves top-10 queries in 4-12ms depending on cold/warm. The trade-off table (nprobe vs recall vs latency) is in the README. | S3 · Faiss · Lambda · IVF | [`ai-engineering/23-serverless-vector-store/`](ai-engineering/23-serverless-vector-store/) |
-| 58 | **Replicate-style inference API** | One API, many models, GPU pooling, cold-start mitigation, and a billing layer that doesn't lie. The toy in `api/predict.py` shows the predict handler; `api/billing.py` does per-tenant GPU-time accumulation. The hard part was the cold-start path, not the inference. | FastAPI · Triton · S3 · Modal | [`ai-engineering/20-cog-style-inference-api/`](ai-engineering/20-cog-style-inference-api/) |
-| 59 | **Together-style GPU cloud + inference** | Bare-metal GPU access plus a serverless inference layer on top, with per-token billing. The interesting engineering is the autoscaler that fills H100s to 80%+ utilization while keeping tail latency under 200ms. I built a toy version that does this for one model on one GPU fleet. | H100 · vLLM · SGLang · SkyPilot | [`ai-engineering/36-together-gpu-cloud/`](ai-engineering/36-together-gpu-cloud/) |
-| 60 | **Weights & Biases-style experiment tracking** | Every run, every hyperparameter, every metric, every artifact — queryable. The "I forgot what hyperparameters I used 3 weeks ago" problem goes away. I built a small experiment tracker in Postgres + Streamlit that I use on every project, and which integrates with the eval harness so a run's metrics are reproducible from the run ID alone. | W&B · MLflow · Postgres · Streamlit | [`ai-engineering/33-mlflow-tracker/`](ai-engineering/33-mlflow-tracker/) |
-| 61 | **OpenAI Whisper-style speech-to-text** | Streaming with VAD + carry-over context + partial-emit smoothing. Real numbers on faster-whisper-large-v3, A10G: streaming = 280ms p50 / 3.4% WER vs batch = 850ms p50 / 2.8% WER. Streaming pays 0.6 WER points for 3x lower latency. The flicker fix in `service/streaming.py` is the part nobody writes blog posts about. | Whisper · Silero VAD · faster-whisper | [`ai-engineering/22-whisper-streaming-stt/`](ai-engineering/22-whisper-streaming-stt/) |
-| 62 | **ElevenLabs-style voice synthesis + cloning** | Sub-200ms TTFB streaming, voice cloning from a 30-second sample, emotion control. I built a small inference server on top of an open-weights TTS model and learned that the latency budget is dominated by the first-frame synthesis, not the streaming. | XTTS · Bark · VITS · Triton | [`ai-engineering/35-elevenlabs-tts-stream/`](ai-engineering/35-elevenlabs-tts-stream/) |
-| 63 | **Midjourney / Stable Diffusion-style image generation** | SDXL pipeline + 4x upscaler + safety filter. Real numbers on A10G: SDXL alone 1.8s p50; + safety 2.1s; + 4x upscale 4.6s (VRAM 12GB peak). The two things that broke: NSFW classifier over-triggered on medical terms (per-tenant threshold fix), and upscaler + SDXL can't both fit in 24GB (explicit memory release between stages). | SDXL · Real-ESRGAN · CLIP safety | [`ai-engineering/21-sdxl-image-service/`](ai-engineering/21-sdxl-image-service/) |
-| 64 | **Suno / Udio-style music generation** | Text-to-music at the bar-quality level: a latent-audio transformer, classifier-free guidance, and a streaming decoder. I built a small music-gen toy that runs locally, which taught me that audio transformers have a different memory profile than text transformers and a very different evaluator. | AudioLDM · MusicGen · Bark · diffusers | [`ai-engineering/13-ai-engineering-course/`](ai-engineering/13-ai-engineering-course/) |
+| 20 | **Enterprise RAG Platform** | Production RAG with 5 sub-systems: `ingestion/loader.py + chunker.py`, `embedding/`, `retrieval/{vector, bm25, hybrid, reranker}.py`, `generation/`, `eval/ragas_eval.py`. Hybrid retrieval + rerank + RAGAS eval. | LangChain · Weaviate · Bedrock · FastAPI | [`ai-engineering/01-enterprise-rag-platform/`](learning/ai-engineering/01-enterprise-rag-platform/) |
+| 21 | **Multi-Agent Platform** | Orchestrated agents with shared memory and tool use. Makefile-driven dev workflow. | LangGraph · Bedrock · OpenAI | [`ai-engineering/03-multi-agent-platform/`](learning/ai-engineering/03-multi-agent-platform/) |
+| 22 | **Distributed Inference** | Low-latency LLM serving at scale. | vLLM · Triton · Ray | [`ai-engineering/05-distributed-inference/`](learning/ai-engineering/05-distributed-inference/) |
+| 23 | **Regulated Industry AI** | Governed AI for banking / financial-crime compliance. | Bedrock · Guardrails · PII | [`ai-engineering/06-regulated-industry/`](learning/ai-engineering/06-regulated-industry/) |
+| 24 | **LLMOps Platform** | Eval, monitoring, cost, drift for LLM workloads. | LangSmith · Prometheus | [`ai-engineering/08-llmops-platform/`](learning/ai-engineering/08-llmops-platform/) |
+| 25 | **Code-Fix Agent** | Agent that reads broken code, plans a fix, and opens a patch. | LangGraph · Tools | [`ai-engineering/15-code-fix-agent/`](learning/ai-engineering/15-code-fix-agent/) |
+| 26 | **Enterprise Search Agent** | Agentic enterprise search over docs + DBs + APIs via MCP. | MCP · Bedrock · LangGraph | [`agentic-ai/2-enterprise-search-agent-full/`](learning/agentic-ai/2-enterprise-search-agent-full/) |
+| 27 | **Bedrock + Aurora + S3** | Reference agent stack on AWS Bedrock + Aurora + S3. | Bedrock · Aurora · S3 | [`agentic-ai/3-aws-bedrock-aurora-s3/`](learning/agentic-ai/3-aws-bedrock-aurora-s3/) |
+| 28 | **Wiki RAG ReAct** | Wikipedia-grounded ReAct agent. | ReAct · RAG | [`agentic-ai/6_wiki_rag_react_project/`](learning/agentic-ai/6_wiki_rag_react_project/) |
+| 29 | **Logistics Route Optimisation** | ML-driven route optimization with OR-Tools. | OR-Tools · ML | [`ai-engineering/9-Logistics-Route-Optimisation/`](learning/ai-engineering/9-Logistics-Route-Optimisation/) |
+| 30 | **FM Evaluation Harness** | Reproducible evaluation harness for foundation models. | RAGAS · LangSmith | [`ai-engineering/04-fm-evaluation/`](learning/ai-engineering/04-fm-evaluation/) |
+| 31 | **LLM Fine-Tuning** | Fine-tuning experiments, eval, and recipes. | PEFT · LoRA · HF | [`ai-engineering/02-llm-fine-tuning/`](learning/ai-engineering/02-llm-fine-tuning/) |
+| 32 | **Prompt Engineering** | Prompt patterns, regression tests, scoring. | LangChain · pytest | [`ai-engineering/07-prompt-engineering/`](learning/ai-engineering/07-prompt-engineering/) |
+| 33 | **Graph RAG** | Pure vector RAG falls apart the moment the question is "what does X own and who reports to them?" So I bolted on a knowledge graph: entity linking, multi-hop reasoning, and a retriever that walks the graph when the cosine distance isn't enough. It's slower, but the questions it answers are the ones users actually ask. | Neo4j · NetworkX · LangChain | [`ai-engineering/16-graph-rag/`](learning/ai-engineering/16-graph-rag/) |
+| 34 | **OpenAI / Anthropic-style inference platform** | If you're serving more than one team, cost attribution isn't optional. This one runs multi-tenant with autoscaling, a prompt cache so we don't pay to re-encode the system prompt, and per-tenant rate limits so one team can't starve the others. Same ideas the public APIs run on, just with a few eyes on the dashboard. | vLLM · Triton · Kong · Prometheus | [`ai-engineering/38-multi-tenant-inference/`](learning/ai-engineering/38-multi-tenant-inference/) |
+| 35 | **Anthropic-style safety + eval harness** | A LLM app without a red-team suite is a house without a smoke alarm. This one has a judge model, principle-driven scoring rubrics, and a regression gate so a bad prompt doesn't slip into prod on a Friday afternoon. The vibe is less "lab" and more "compliance team that codes." | RAGAS · DeepEval · Claude · Guardrails | [`ai-engineering/06-regulated-industry/`](learning/ai-engineering/06-regulated-industry/) (reference impl) |
+| 36 | **Perplexity-style web RAG + citation** | Live web retrieval wired into a RAG pipeline, with citation enforcement (the model has to point at a URL or it doesn't answer) and a freshness score that punishes stale sources. Without citation enforcement, the model will confidently cite things that don't exist. | LangChain · Tavily · Cohere Rerank · RAGAS | [`ai-engineering/01-enterprise-rag-platform/`](learning/ai-engineering/01-enterprise-rag-platform/) (reference impl) |
+| 37 | **Harvey-style legal RAG (citation + audit)** | Legal answers without citations are useless and dangerous. This one does case-law-aware chunking, hard-citation enforcement, PII redaction, and writes every answer to an audit log. The same shape Harvey and the regulated-doc vendors run, just sized for a single in-house team. | LangChain · pgvector · Claude · Bedrock Guardrails | [`ai-engineering/06-regulated-industry/`](learning/ai-engineering/06-regulated-industry/) (reference impl) |
+| 38 | **Notion-style embedding + semantic search** | Text-only search misses half the corpus in a workspace tool. So this indexes text + image + layout with a multi-modal embedder, and surfaces results that match on meaning rather than exact words. The "find the page with the orange chart" use case finally works. | CLIP · OpenCLIP · Weaviate · FastAPI | [`ai-engineering/01-enterprise-rag-platform/`](learning/ai-engineering/01-enterprise-rag-platform/) (reference impl) |
+| 39 | **OpenAI Operator-style computer-use agent** | An agent that actually clicks things on a screen, not just calls an API. VLM + tool-use, but with the non-negotiables: safety guardrails on every action, replay so I can see what it did, and a step budget so it doesn't get stuck refreshing a page forever. | LangGraph · Claude · VLM · Playwright | [`ai-engineering/03-multi-agent-platform/`](learning/ai-engineering/03-multi-agent-platform/) (reference impl) |
+| 40 | **Anthropic-style tool-use + function-calling** | The model gets to call tools — but only the tools I defined, with schemas it has to follow. Parallel calls, retries with backoff, idempotency on anything that has side effects, and a typed result back into the agent loop. The point is to make tool use feel boring instead of magical. | LangGraph · Pydantic · OpenAI · Anthropic | [`ai-engineering/15-code-fix-agent/`](learning/ai-engineering/15-code-fix-agent/) (reference impl) |
+| 41 | **Databricks-style Mosaic AI gateway** | One gateway, many models. Per-tenant routing, cost attribution that lands in the same dashboard as p95 latency, prompt versioning so I can roll back a bad prompt without a redeploy, and traffic shaping so a launch doesn't DDoS the upstream provider. | LiteLLM · MLflow · Redis · FastAPI | [`ai-engineering/08-llmops-platform/`](learning/ai-engineering/08-llmops-platform/) (reference impl) |
+| 42 | **GitHub Copilot-style inline suggestion engine** | Streaming token-by-token completion with a debounce so it doesn't generate while I'm still typing, context-aware retrieval so the suggestion sees my other files, a prefix cache so the second keystroke isn't a fresh prompt, and a ghost-text UX. The latency budget is the product. | vLLM · Triton · Tree-sitter · WebSocket | [`ai-engineering/34-copilot-inline-suggest/`](learning/ai-engineering/34-copilot-inline-suggest/) |
+| 43 | **Salesforce / Slack-style Agentforce** | Enterprise agents need the boring bits: per-tenant tools (no leakage), RAG over customer data with row-level access, an audit log of every action, and a human-in-the-loop step before anything irreversible. Without those, you'll be doing a "trust us" talk to the security team every quarter. | LangGraph · MCP · Bedrock · Postgres | [`agentic-ai/2-enterprise-search-agent-full/`](learning/agentic-ai/2-enterprise-search-agent-full/) (reference impl) |
+| 44 | **DeepMind-style frontier research pipeline** | Reproducible ML research: dataset versioning, training infra (FSDP/ZeRO) that actually scales, an eval harness I can re-run on last week's commit, and ablation sweeps in config, not in a notebook. The pipeline is the artifact; the model weights are downstream. | PyTorch FSDP · W&B · Hydra · RAGAS | [`ai-engineering/37-frontier-research-pipeline/`](learning/ai-engineering/37-frontier-research-pipeline/) |
+| 45 | **Hugging Face-style open-source model hub** | A registry with versioning, an eval table per model, download stats, and a license gate so a model with a non-commercial license can't be served commercially. Same bones as the public Hub — just private and bolted to your own stack. | HF Hub · LitServe · DVC · Postgres | [`ai-engineering/27-hf-model-hub/`](learning/ai-engineering/27-hf-model-hub/) |
+| 46 | **OpenAI-style RLHF / DPO training loop** | The full alignment path: SFT, reward model, PPO or DPO with a KL constraint so the policy doesn't wander off, eval gating so a regression can't ship, and ablations on every knob that matters. Not magic — mostly bookkeeping, but the bookkeeping is what makes alignment reproducible. | PyTorch · TRL · DeepSpeed · W&B | [`ai-engineering/28-rlhf-dpo-train/`](learning/ai-engineering/28-rlhf-dpo-train/) |
+| 47 | **Nvidia-style distributed training (FSDP + FlashAttention)** | Training across nodes without OOMs that ruin your weekend. FSDP/ZeRO for sharding, FlashAttention-2 for memory, mixed precision, gradient checkpointing when I need it, and NCCL tuning that I did once, wrote down, and stopped re-deriving. | PyTorch FSDP · FlashAttention · NCCL · Slurm | [`ai-engineering/29-fsdp-flash-train/`](learning/ai-engineering/29-fsdp-flash-train/) |
+| 48 | **OpenAI-style Triton kernel optimization** | When PyTorch is too slow and CUDA is too verbose, Triton hits the middle. Custom fused attention, RMSNorm, rotary embeddings, with autotune so the compiler picks the block size on the actual GPU. The boring version of "I wrote a kernel" — production-ready, not a benchmark. | Triton · CUDA · PyTorch · `triton.testing` | [`ai-engineering/30-triton-kernels/`](learning/ai-engineering/30-triton-kernels/) |
+| 49 | **Anthropic-style Constitutional AI loop** | Self-critique + revision, the Anthropic way. A principle set, a judge model that scores against it, a revision loop that doesn't run forever, and a red-team suite that hits the resulting model with the awkward prompts. The output is better; the cost is more eval runs. | Claude · RAGAS · DeepEval · vLLM | [`ai-engineering/31-constitutional-ai/`](learning/ai-engineering/31-constitutional-ai/) |
+| 50 | **AWS SageMaker-style MLOps platform** | The full lifecycle: data labeling, training, registry, deployment, monitoring, retraining trigger. I built the control plane as a set of small services with one workflow spec and an explicit `PromoteRequest` (not a `PUT /production` footgun) — every promotion is logged with a reason. | FastAPI · MLflow · Postgres · K8s | [`ai-engineering/17-mlops-control-plane/`](learning/ai-engineering/17-mlops-control-plane/) |
+| 51 | **Google Vertex-style unified AI platform** | One pane of glass: model garden, training, tuning, deployment, monitoring, feature store, vector search. The value isn't any one of these — it's that they're integrated, versioned, and the same auth flows through all of them. | Vertex-style platform · Ray · KFP · BigQuery | [`ai-engineering/24-vertex-style-platform/`](learning/ai-engineering/24-vertex-style-platform/) |
+| 52 | **DeepSeek-style MoE training** | Mixture-of-experts at the trillion-parameter scale, with expert parallelism, top-k routing, and load-balancing losses that don't blow up. I built a toy MoE trainer in PyTorch + DeepSpeed that handles 8 experts × 4B params on 8 GPUs, which is enough to feel the routing pain and learn the load-balance tricks. | DeepSpeed MoE · Megatron · NCCL | [`ai-engineering/25-deepseek-moe-train/`](learning/ai-engineering/25-deepseek-moe-train/) |
+| 53 | **Mistral-style open-weights serving** | Apache-2.0-licensed models that you can self-host, fine-tune, and ship without a vendor relationship. The serving stack I built for this assumes the model is on your own infra: vLLM, prefix cache, prompt cache, and a token-budget guard so a 200K-context request doesn't melt the cluster. | vLLM · Mistral · prefix cache · Triton | [`ai-engineering/26-mistral-self-host/`](learning/ai-engineering/26-mistral-self-host/) |
+| 54 | **Cohere-style rerank + embeddings service** | Rerank is the cheapest accuracy boost in RAG. Real numbers on a 5K legal-Q&A eval: retriever alone = 78% recall@10; after rerank = 91% recall@10, +35ms p95, +$0.0003/query. The threshold-picker (`service/threshold.py`) finds the score cutoff that gives you 90% recall at your target precision. | BGE-reranker · FastAPI · calibration | [`ai-engineering/19-rerank-service/`](learning/ai-engineering/19-rerank-service/) |
+| 55 | **vLLM-style PagedAttention engine** | The single biggest open-source LLM-serving improvement of the last 2 years. PagedAttention treats KV cache like virtual memory, so you can serve 2-4x more concurrent requests on the same GPU. Toy in `paged_kv.py` captures the indirection; real numbers: 8 → 18 concurrent requests at same memory, 18% lower p99. | vLLM · PagedAttention · CUDA · Triton | [`ai-engineering/18-paged-attention-serving/`](learning/ai-engineering/18-paged-attention-serving/) |
+| 56 | **LlamaIndex-style ingestion framework** | 200+ loaders, 50+ vector stores, 30+ LLMs, all behind one interface. The lesson: the abstraction is right at the boundary, wrong at the core. I use LlamaIndex for connectors and write the retrieval + eval myself. The repo shows both halves. | LlamaIndex · 200+ loaders · vector stores | [`ai-engineering/01-enterprise-rag-platform/`](learning/ai-engineering/01-enterprise-rag-platform/) |
+| 57 | **Pinecone-style serverless vector DB** | IVF (Inverted File) index on S3, query path on Lambda. The toy index in `store/index.py` builds 1M vectors in 90s and serves top-10 queries in 4-12ms depending on cold/warm. The trade-off table (nprobe vs recall vs latency) is in the README. | S3 · Faiss · Lambda · IVF | [`ai-engineering/23-serverless-vector-store/`](learning/ai-engineering/23-serverless-vector-store/) |
+| 58 | **Replicate-style inference API** | One API, many models, GPU pooling, cold-start mitigation, and a billing layer that doesn't lie. The toy in `api/predict.py` shows the predict handler; `api/billing.py` does per-tenant GPU-time accumulation. The hard part was the cold-start path, not the inference. | FastAPI · Triton · S3 · Modal | [`ai-engineering/20-cog-style-inference-api/`](learning/ai-engineering/20-cog-style-inference-api/) |
+| 59 | **Together-style GPU cloud + inference** | Bare-metal GPU access plus a serverless inference layer on top, with per-token billing. The interesting engineering is the autoscaler that fills H100s to 80%+ utilization while keeping tail latency under 200ms. I built a toy version that does this for one model on one GPU fleet. | H100 · vLLM · SGLang · SkyPilot | [`ai-engineering/36-together-gpu-cloud/`](learning/ai-engineering/36-together-gpu-cloud/) |
+| 60 | **Weights & Biases-style experiment tracking** | Every run, every hyperparameter, every metric, every artifact — queryable. The "I forgot what hyperparameters I used 3 weeks ago" problem goes away. I built a small experiment tracker in Postgres + Streamlit that I use on every project, and which integrates with the eval harness so a run's metrics are reproducible from the run ID alone. | W&B · MLflow · Postgres · Streamlit | [`ai-engineering/33-mlflow-tracker/`](learning/ai-engineering/33-mlflow-tracker/) |
+| 61 | **OpenAI Whisper-style speech-to-text** | Streaming with VAD + carry-over context + partial-emit smoothing. Real numbers on faster-whisper-large-v3, A10G: streaming = 280ms p50 / 3.4% WER vs batch = 850ms p50 / 2.8% WER. Streaming pays 0.6 WER points for 3x lower latency. The flicker fix in `service/streaming.py` is the part nobody writes blog posts about. | Whisper · Silero VAD · faster-whisper | [`ai-engineering/22-whisper-streaming-stt/`](learning/ai-engineering/22-whisper-streaming-stt/) |
+| 62 | **ElevenLabs-style voice synthesis + cloning** | Sub-200ms TTFB streaming, voice cloning from a 30-second sample, emotion control. I built a small inference server on top of an open-weights TTS model and learned that the latency budget is dominated by the first-frame synthesis, not the streaming. | XTTS · Bark · VITS · Triton | [`ai-engineering/35-elevenlabs-tts-stream/`](learning/ai-engineering/35-elevenlabs-tts-stream/) |
+| 63 | **Midjourney / Stable Diffusion-style image generation** | SDXL pipeline + 4x upscaler + safety filter. Real numbers on A10G: SDXL alone 1.8s p50; + safety 2.1s; + 4x upscale 4.6s (VRAM 12GB peak). The two things that broke: NSFW classifier over-triggered on medical terms (per-tenant threshold fix), and upscaler + SDXL can't both fit in 24GB (explicit memory release between stages). | SDXL · Real-ESRGAN · CLIP safety | [`ai-engineering/21-sdxl-image-service/`](learning/ai-engineering/21-sdxl-image-service/) |
+| 64 | **Suno / Udio-style music generation** | Text-to-music at the bar-quality level: a latent-audio transformer, classifier-free guidance, and a streaming decoder. I built a small music-gen toy that runs locally, which taught me that audio transformers have a different memory profile than text transformers and a very different evaluator. | AudioLDM · MusicGen · Bark · diffusers | [`ai-engineering/13-ai-engineering-course/`](learning/ai-engineering/13-ai-engineering-course/) |
 
 ### 🕹️ AI Agents (the things that actually do work)
 
@@ -329,16 +329,16 @@ Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker comp
 
 | # | Project | What it actually does | Stack | Folder |
 |---|---|---|---|---|
-| 65 | **Devin-style autonomous SWE agent** | Take a GitHub issue, clone the repo, understand the codebase, write a fix, run the tests, push a PR. Real numbers on SWE-bench-lite (5 tasks): 3/5 resolved; the 2 failures are long-context retrieval across many files. The fix I'm working on: Tree-sitter symbol-level retrieval, not whole-file retrieval. | LangGraph · Docker · pytest · Claude | [`agentic-ai/8-swe-agent-devin-style/`](agentic-ai/8-swe-agent-devin-style/) |
-| 66 | **Claude Code-style terminal agent** | A REPL that lives in your shell. The agent streams diffs, asks before destructive actions, and detects "stuck" (same tool, same args, 3x in a row) and stops. Real numbers in my own shell: 80% of refactoring chores done without intervention, 15% need an approval, 5% get stuck and I kill it. | LangGraph · ripgrep · PTY · approval gate | [`agentic-ai/9-terminal-agent-claude-code/`](agentic-ai/9-terminal-agent-claude-code/) |
-| 67 | **Cursor-style IDE agent** | Inline edits, multi-file refactors, codebase-aware chat. The trick is the index: a Tree-sitter symbol-level retrieval layer (not whole-file) that finds the right symbol in 4-5x fewer hops on a 50K-symbol eval. The example shows a query "where is the user resolver?" returning the exact symbol, not the file. | Tree-sitter · symbol index · inline UX | [`agentic-ai/10-ide-agent-cursor-style/`](agentic-ai/10-ide-agent-cursor-style/) |
-| 68 | **Manus-style general-purpose agent** | "Plan a 5-day trip to Japan under $2K" — 18 steps, $0.42, 11 minutes. The guardrails (step budget, cost ceiling, tool allowlist) are the difference between a useful agent and a runaway one. The "book a flight" task correctly stops at the payment step: that tool isn't in the allowlist. | LangGraph · Playwright · Claude · guardrails | [`agentic-ai/11-general-agent-manus-style/`](agentic-ai/11-general-agent-manus-style/) |
-| 69 | **Sierra-style customer-service agent** | Resolves 60% of tier-1 tickets without a human at a payments SaaS. The action graph (reversible / needs-consent / needs-human / dollar cap) is the part that makes it safe to give real auth. Real metrics: 0.04% false-action rate, 4.6/5 CSAT. The idempotency-key fix on refunds is in the README. | Twilio · Stripe · Salesforce · audit log | [`agentic-ai/12-customer-service-agent/`](agentic-ai/12-customer-service-agent/) |
-| 70 | **Perplexity Comet-style browser agent** | Read-only summarization in a Chrome MV3 extension. The privacy gate is the product: bank/health/email/auth URLs are blocked by default; the user can extend the allowlist. Real numbers in a 40-user beta: 0 exfiltrations, 4.4/5 trust score. | MV3 · WebLLM · URL allowlist | [`agentic-ai/13-browser-agent-comet-style/`](agentic-ai/13-browser-agent-comet-style/) |
-| 71 | **LinkedIn-style hiring agent** | JD -> shortlist in one go. Real numbers in-house (6 months): 240 JDs processed, 4.2 hours saved per recruiter per JD, 1:8 screen-to-offer (industry avg 1:14). The fairness audit (disparate impact p > 0.05) is the non-negotiable. Rule gates override the LLM judge — must-haves are absolute. | LinkedIn API · rule gates · fairness audit | [`agentic-ai/14-hiring-agent/`](agentic-ai/14-hiring-agent/) |
-| 72 | **Multi-agent debate + verifier** | Two agents argue, a third judges on groundedness, evidence, and logical soundness. Real numbers on a 200-Q legal-Q&A set: single LLM 0.74 accuracy / 0.18 hallucination; + verifier 0.84 accuracy / 0.07 hallucination. The verifier is doing the work — without it, debaters converge on shared-but-wrong answers. | Claude · judge LLM · verifier rubric | [`agentic-ai/15-multi-agent-debate/`](agentic-ai/15-multi-agent-debate/) |
-| 73 | **AutoGPT-style autonomous loop with guardrails** | The original "give the agent a goal and a computer" pattern with the guardrails that make it safe: step budget, cost ceiling, per-tool rate limit, output-schema validation, and a kill switch I can hit from my phone. Real numbers (30 research tasks): 0 manual kills, max cost capped at $1.80, no surprise network calls. | sandbox · kill switch · schema validator | [`agentic-ai/16-autonomous-loop/`](agentic-ai/16-autonomous-loop/) |
-| 74 | **Anthropic-style Computer Use agent** | VLM sees the screen, plans an action, Playwright executes. Real numbers on a legacy CRM (1.2K actions, 4 weeks): 70% task completion, 4.1 hours/week saved. The failure breakdown is in the README: 12% hallucinated buttons, 8% slow loads, 6% unexpected modals, 4% VLM errors. The replay log is what makes it debuggable. | Claude · VLM · Playwright · replay log | [`agentic-ai/17-computer-use-agent/`](agentic-ai/17-computer-use-agent/) |
+| 65 | **Devin-style autonomous SWE agent** | Take a GitHub issue, clone the repo, understand the codebase, write a fix, run the tests, push a PR. Real numbers on SWE-bench-lite (5 tasks): 3/5 resolved; the 2 failures are long-context retrieval across many files. The fix I'm working on: Tree-sitter symbol-level retrieval, not whole-file retrieval. | LangGraph · Docker · pytest · Claude | [`agentic-ai/8-swe-agent-devin-style/`](learning/agentic-ai/8-swe-agent-devin-style/) |
+| 66 | **Claude Code-style terminal agent** | A REPL that lives in your shell. The agent streams diffs, asks before destructive actions, and detects "stuck" (same tool, same args, 3x in a row) and stops. Real numbers in my own shell: 80% of refactoring chores done without intervention, 15% need an approval, 5% get stuck and I kill it. | LangGraph · ripgrep · PTY · approval gate | [`agentic-ai/9-terminal-agent-claude-code/`](learning/agentic-ai/9-terminal-agent-claude-code/) |
+| 67 | **Cursor-style IDE agent** | Inline edits, multi-file refactors, codebase-aware chat. The trick is the index: a Tree-sitter symbol-level retrieval layer (not whole-file) that finds the right symbol in 4-5x fewer hops on a 50K-symbol eval. The example shows a query "where is the user resolver?" returning the exact symbol, not the file. | Tree-sitter · symbol index · inline UX | [`agentic-ai/10-ide-agent-cursor-style/`](learning/agentic-ai/10-ide-agent-cursor-style/) |
+| 68 | **Manus-style general-purpose agent** | "Plan a 5-day trip to Japan under $2K" — 18 steps, $0.42, 11 minutes. The guardrails (step budget, cost ceiling, tool allowlist) are the difference between a useful agent and a runaway one. The "book a flight" task correctly stops at the payment step: that tool isn't in the allowlist. | LangGraph · Playwright · Claude · guardrails | [`agentic-ai/11-general-agent-manus-style/`](learning/agentic-ai/11-general-agent-manus-style/) |
+| 69 | **Sierra-style customer-service agent** | Resolves 60% of tier-1 tickets without a human at a payments SaaS. The action graph (reversible / needs-consent / needs-human / dollar cap) is the part that makes it safe to give real auth. Real metrics: 0.04% false-action rate, 4.6/5 CSAT. The idempotency-key fix on refunds is in the README. | Twilio · Stripe · Salesforce · audit log | [`agentic-ai/12-customer-service-agent/`](learning/agentic-ai/12-customer-service-agent/) |
+| 70 | **Perplexity Comet-style browser agent** | Read-only summarization in a Chrome MV3 extension. The privacy gate is the product: bank/health/email/auth URLs are blocked by default; the user can extend the allowlist. Real numbers in a 40-user beta: 0 exfiltrations, 4.4/5 trust score. | MV3 · WebLLM · URL allowlist | [`agentic-ai/13-browser-agent-comet-style/`](learning/agentic-ai/13-browser-agent-comet-style/) |
+| 71 | **LinkedIn-style hiring agent** | JD -> shortlist in one go. Real numbers in-house (6 months): 240 JDs processed, 4.2 hours saved per recruiter per JD, 1:8 screen-to-offer (industry avg 1:14). The fairness audit (disparate impact p > 0.05) is the non-negotiable. Rule gates override the LLM judge — must-haves are absolute. | LinkedIn API · rule gates · fairness audit | [`agentic-ai/14-hiring-agent/`](learning/agentic-ai/14-hiring-agent/) |
+| 72 | **Multi-agent debate + verifier** | Two agents argue, a third judges on groundedness, evidence, and logical soundness. Real numbers on a 200-Q legal-Q&A set: single LLM 0.74 accuracy / 0.18 hallucination; + verifier 0.84 accuracy / 0.07 hallucination. The verifier is doing the work — without it, debaters converge on shared-but-wrong answers. | Claude · judge LLM · verifier rubric | [`agentic-ai/15-multi-agent-debate/`](learning/agentic-ai/15-multi-agent-debate/) |
+| 73 | **AutoGPT-style autonomous loop with guardrails** | The original "give the agent a goal and a computer" pattern with the guardrails that make it safe: step budget, cost ceiling, per-tool rate limit, output-schema validation, and a kill switch I can hit from my phone. Real numbers (30 research tasks): 0 manual kills, max cost capped at $1.80, no surprise network calls. | sandbox · kill switch · schema validator | [`agentic-ai/16-autonomous-loop/`](learning/agentic-ai/16-autonomous-loop/) |
+| 74 | **Anthropic-style Computer Use agent** | VLM sees the screen, plans an action, Playwright executes. Real numbers on a legacy CRM (1.2K actions, 4 weeks): 70% task completion, 4.1 hours/week saved. The failure breakdown is in the README: 12% hallucinated buttons, 8% slow loads, 6% unexpected modals, 4% VLM errors. The replay log is what makes it debuggable. | Claude · VLM · Playwright · replay log | [`agentic-ai/17-computer-use-agent/`](learning/agentic-ai/17-computer-use-agent/) |
 
 ### 🧪 Labs & Learning Tracks
 
@@ -346,12 +346,12 @@ Open it: [`realtime-stock-pipeline/`](realtime-stock-pipeline/) — `docker comp
 
 | # | Track | What's inside | Folder |
 |---|---|---|---|
-| 80 | AI Engineering Course (DeepLearning.AI-style) | 18 modules: ML foundations → transformers → LLMs → RAG → agents → evals → safety → infra → infra/deployment → frontier ideas. 18 sub-READMEs. | [`ai-engineering/13-ai-engineering-course/`](ai-engineering/13-ai-engineering-course/) |
-| 81 | LLM Application Track | 6 sub-courses: LLM fundamentals · evaluation · prompt engineering · RAG · tool-use · agentic systems. | [`ai-engineering/12-llm-application-track/`](ai-engineering/12-llm-application-track/) |
-| 82 | Deep Learning Specialization | DL modules with notebooks. | [`ai-engineering/14-deep-learning-specialization/`](ai-engineering/14-deep-learning-specialization/) |
-| 83 | Spark Labs | `basic/`, `agg/`, `document-processing/`, `tunning/`, `realtime/`, `windwow/`, `salting/`, `scripts/`. | [`Spark/`](Spark/) |
-| 84 | Python (interview + utilities) | Concurrency, Dask, NVIDIA helpers, contracts cycle, linked lists, etc. | [`Python/`](Python/) |
-| 85 | Classic ML | GenAI Pinnacle, diffusion, neural networks, vector embeddings, system design. | [`ml/`](ml/) |
+| 80 | AI Engineering Course (DeepLearning.AI-style) | 18 modules: ML foundations → transformers → LLMs → RAG → agents → evals → safety → infra → infra/deployment → frontier ideas. 18 sub-READMEs. | [`ai-engineering/13-ai-engineering-course/`](learning/ai-engineering/13-ai-engineering-course/) |
+| 81 | LLM Application Track | 6 sub-courses: LLM fundamentals · evaluation · prompt engineering · RAG · tool-use · agentic systems. | [`ai-engineering/12-llm-application-track/`](learning/ai-engineering/12-llm-application-track/) |
+| 82 | Deep Learning Specialization | DL modules with notebooks. | [`ai-engineering/14-deep-learning-specialization/`](learning/ai-engineering/14-deep-learning-specialization/) |
+| 83 | Spark Labs | `basic/`, `agg/`, `document-processing/`, `tunning/`, `realtime/`, `windwow/`, `salting/`, `scripts/`. | [`Spark/`](learning/Spark/) |
+| 84 | Python (interview + utilities) | Concurrency, Dask, NVIDIA helpers, contracts cycle, linked lists, etc. | [`Python/`](learning/Python/) |
+| 85 | Classic ML | GenAI Pinnacle, diffusion, neural networks, vector embeddings, system design. | [`ml/`](learning/ml/) |
 
 ---
 
@@ -441,7 +441,7 @@ External           ──►                   ──►   Job1: Entity Resoluti
 and 7-year retention, on a stack that maps 1:1 to modern lakehouse + streaming
 architectures. Real data engineers, real compliance, real trade-offs.
 
-Folder: [`data-engineering/scb_aml_platform/`](data-engineering/scb_aml_platform/)
+Folder: [`data-engineering/scb_aml_platform/`](learning/data-engineering/scb_aml_platform/)
 
 ---
 
@@ -454,7 +454,7 @@ end-to-end latency for visualization.
 **Stack highlight:** Flink is configurable via `flink/flink-conf.yaml`, jobs live
 in `flink/jobs/`, the whole thing is wired with `docker-compose.yml`.
 
-Folder: [`realtime-stock-pipeline/`](realtime-stock-pipeline/)
+Folder: [`realtime-stock-pipeline/`](projects/realtime-stock-pipeline/)
 
 ---
 
@@ -503,7 +503,7 @@ retrieval-only sub-system here has **4** techniques: vector, BM25, hybrid,
 reranker. Adding a new retrieval method is a one-file change. Eval is built
 in, not bolted on.
 
-Folder: [`ai-engineering/01-enterprise-rag-platform/`](ai-engineering/01-enterprise-rag-platform/)
+Folder: [`ai-engineering/01-enterprise-rag-platform/`](learning/ai-engineering/01-enterprise-rag-platform/)
 
 ---
 
@@ -513,7 +513,7 @@ Orchestrated agents with shared memory, tool-use, and a planner/executor split.
 Has its own `Makefile`, `src/`, `tests/`, and `sample_data/`. Modeled on real
 LangGraph + Bedrock patterns.
 
-Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agent-platform/)
+Folder: [`ai-engineering/03-multi-agent-platform/`](learning/ai-engineering/03-multi-agent-platform/)
 
 ---
 
@@ -568,100 +568,33 @@ Folder: [`ai-engineering/03-multi-agent-platform/`](ai-engineering/03-multi-agen
 
 | Directory | What's inside | Read |
 |-----------|---------------|------|
-| `data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](data-engineering/README.md) |
-| `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](ai-engineering/README.md) |
-| `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](agentic-ai/README.md) |
-| `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](ml/README.md) |
-| `realtime-stock-pipeline/` | Kafka + Flink + Postgres + Grafana reference build | [realtime-stock-pipeline/README.md](realtime-stock-pipeline/README.md) |
-| `leads-pipeline/` | Cold-email + AI resume tailoring pipeline (the side hustle) | [leads-pipeline/README.md](leads-pipeline/README.md) |
-| `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](ai-course-public/README.md) |
-| `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](flink-cdc-dashboard/README.md) |
-| `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](pincel-ai-program/README.md) |
-| `postgres_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgres_cdc_kafka/README.md](postgres_cdc_kafka/README.md) |
+| `learning/data-engineering/` | 18 production data-platform projects: SCB AML, CQRS ledger, Iceberg ops, multi-tenant, OLAP | [data-engineering/README.md](learning/data-engineering/README.md) |
+| `ai-engineering/` | 40 LLM / RAG / agent / eval projects on AWS best practices | [ai-engineering/README.md](learning/ai-engineering/README.md) |
+| `agentic-ai/` | 18 production agents: MCP, browser-use, IDE, multi-agent debate, computer-use | [agentic-ai/README.md](learning/agentic-ai/README.md) |
+| `ml/` | Classical ML + deep learning + LLM foundations, from linear regression to GPT-2 | [ml/README.md](learning/ml/README.md) |
+| `realtime-stock-pipeline/` | Kafka + Flink + Postgres + Grafana reference build | [realtime-stock-pipeline/README.md](projects/realtime-stock-pipeline/README.md) |
+| `leads-pipeline/` | Cold-email + AI resume tailoring pipeline (the side hustle) | [leads-pipeline/README.md](projects/leads-pipeline/README.md) |
+| `ai-course-public/` | 197 lines, the public AI engineering curriculum | [ai-course-public/README.md](learning/ai-course-public/README.md) |
+| `flink-cdc-dashboard/` | 6-script CDC bring-up, the smallest end-to-end Flink CDC reference | [flink-cdc-dashboard/README.md](projects/flink-cdc-dashboard/README.md) |
+| `pincel-ai-program/` | Computer Vision using PyTorch — 16 lessons, 2 modules | [pincel-ai-program/README.md](experiments/pincel-ai-program/README.md) |
+| `postgres_cdc_kafka/` | One-file Postgres → Kafka → Delta CDC reference | [postgres_cdc_kafka/README.md](projects/postgres_cdc_kafka/README.md) |
 
 ---
 
-## Repository Layout (Recommended)
+## Repository Layout
 
-The repo is currently organized chronologically / by source. Below is the
-**proposed target layout** that groups work by purpose so it reads cleanly
-top-down for a reviewer. No files have been moved — this is a recommendation
-(see migration steps below).
+The repo is grouped by purpose, so a reviewer can read it top-down.
 
-```
-data-etl-ml/
-├── 01-projects/                 # Production-style buildables (recruiter first stop)
-│   ├── data-engineering/
-│   │   ├── scb_aml_platform/         # AML pipeline, 15 countries, 50M txns/day
-│   │   ├── Banking-AML-Data/
-│   │   ├── financial-reporting-platform/
-│   │   ├── e-commerce-end-2end/
-│   │   ├── lazada-superset/
-│   │   ├── clp_projects/
-│   │   └── data-enginnering-cloudvala/
-│   ├── streaming/
-│   │   ├── realtime-stock-pipeline/   # Kafka + Flink + CDC + Grafana
-│   │   └── flink-cdc-dashboard/
-│   ├── ai-engineering/
-│   │   ├── 01-enterprise-rag-platform/
-│   │   ├── 03-multi-agent-platform/
-│   │   ├── 04-fm-evaluation/
-│   │   ├── 05-distributed-inference/
-│   │   ├── 06-regulated-industry/
-│   │   ├── 07-prompt-engineering/
-│   │   ├── 08-llmops-platform/
-│   │   ├── 9-Logistics-Route-Optimisation/
-│   │   └── 15-code-fix-agent/
-│   ├── agentic-ai/
-│   │   ├── 2-enterprise-search-agent-full/
-│   │   ├── 3-aws-bedrock-aurora-s3/
-│   │   ├── 6_wiki_rag_react_project/
-│   │   └── 7_Bedrock_course/
-│   └── aws/
-│       └── ecs-data-ingestion/
-├── 02-labs/                    # Hands-on exercises, course work
-│   ├── Spark/
-│   ├── Python/
-│   ├── ml/   (deep_Learning, GenAI-Pinnacle, LLM, ai-agent, vector-ebedding, …)
-│   ├── ai-engineering/   (course sub-folders)
-│   ├── golang/order-etl-pipeline/
-│   └── postgres_cdc_kafka/
-├── 03-content/                 # Writing & teaching
-│   └── medium/                 # Medium articles + interview guides
-├── 04-career/                  # Resume assets
-│   └── Resume/
-├── 05-reference/               # Reference / scratch / templates
-│   ├── app/                    # SAM hello-world template
-│   ├── doc/
-│   ├── path/
-│   ├── pincel-ai-program/
-│   ├── sam-installation/
-│   └── Senior Delivery Consultant - Data Engineering/
-├── docs/                       # Screenshots, demo GIFs, social preview HTML
-│   └── assets/
-├── scripts/                    # repo_stats.sh, docker_start.sh, maintenance/
-├── infra/                      # Top-level Docker, env, requirements
-│   ├── docker-compose.yml
-│   ├── requirements.txt
-│   └── (clean_repo.sh now lives in scripts/maintenance/)
-├── .github/                    # REPO_ABOUT, SOCIAL_PREVIEW, issue/PR templates
-├── LICENSE                     # MIT
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── DEMOS.md
-└── README.md                   # ← you are here
-```
+| Folder | What lives here | Start with |
+|---|---|---|
+| [`projects/`](projects/) | Production-style buildables: streaming and ETL pipelines | [`leads-pipeline`](projects/leads-pipeline/), [`realtime-stock-pipeline`](projects/realtime-stock-pipeline/), [`flink-cdc-dashboard`](projects/flink-cdc-dashboard/) |
+| [`learning/`](learning/) | Course work and reference builds: AI engineering, agentic AI, ML, Spark, Python, Go, data engineering | [`ai-engineering/40-ai-side-hustle`](learning/ai-engineering/40-ai-side-hustle/) |
+| [`portfolio/`](portfolio/) | Resume, Head-of-AI portfolio, Medium articles and interview guides | [`Resume/`](portfolio/Resume/) |
+| [`experiments/`](experiments/) | Scratch work, SAM template, program notes | |
+| [`infra/`](infra/) | Docker, docs, assets and maintenance scripts (`infra/scripts/`) | [`docker-compose.yml`](infra/docker-compose.yml) |
+| [`audit-results/`](audit-results/) | pip-audit and npm-audit output | |
 
-### Migration steps
-
-1. Create `01-projects/`, `02-labs/`, `03-content/`, `04-career/`, `05-reference/`, `docs/`, `scripts/`.
-2. Move buildable projects into `01-projects/<domain>/…`.
-3. Move course / tutorial folders into `02-labs/`.
-4. Move `medium/` into `03-content/medium/`.
-5. Move `Resume/` into `04-career/Resume/`.
-6. Move scratch / template folders into `05-reference/`.
-7. Move `docker-compose.yml`, `scripts/maintenance/clean_repo.sh`, `requirements.txt` to `infra/`.
-8. Add a short `README.md` to each top-level `0X-…` folder.
+Repo-level files that tools expect at the root (`.github/`, `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `requirements.txt`, `docker-compose.yml`) stay at the top level.
 
 ---
 
@@ -711,30 +644,30 @@ The `medium/` folder holds long-form articles and interview playbooks.
 
 **Featured interview guides:**
 
-- [Standard Chartered — Director, Data Science](medium/Standard_Chartered_Director_Data_Science_Interview_Guide.md)
-- [JPMC — Head, Data & AI Compliance](medium/JPMC_Head_Data_AI_Compliance_Interview_Guide.md)
-- [Visa — Director, Data Engineering](medium/Visa_Director_Data_Engineering_Interview_Guide.md)
-- [ST Logistics](medium/ST_Logistics_Interview_Guide.md)
-- [APAC Solution Architect Playbook](medium/APAC_Solution_Architect_Interview_Playbook.pptx)
+- [Standard Chartered — Director, Data Science](portfolio/medium/Standard_Chartered_Director_Data_Science_Interview_Guide.md)
+- [JPMC — Head, Data & AI Compliance](portfolio/medium/JPMC_Head_Data_AI_Compliance_Interview_Guide.md)
+- [Visa — Director, Data Engineering](portfolio/medium/Visa_Director_Data_Engineering_Interview_Guide.md)
+- [ST Logistics](portfolio/medium/ST_Logistics_Interview_Guide.md)
+- [APAC Solution Architect Playbook](portfolio/medium/APAC_Solution_Architect_Interview_Playbook.pptx)
 
 **Featured deep-dives:**
 
-- [RAG Production on Databricks](medium/RAG_Production_Databricks.ipynb)
-- [RAG Reference Guide](medium/RAG_Reference_Guide.docx)
-- [Weaviate for Banking AI](medium/Weaviate_Banking_AI_Complete_Guide.md)
-- [DistilBERT](medium/DistilBERT_Medium_Article.md)
-- [CLP Data Engineer Interview Prep](medium/CLP_Data_Engineer_Interview_Preparation.md)
-- [Metadata Management & Lineage](medium/Metadata-Management-Lineage-Guide.docx)
-- [Building Data-Driven Apps in Go](medium/building-data-driven-apps-golang.md)
+- [RAG Production on Databricks](portfolio/medium/RAG_Production_Databricks.ipynb)
+- [RAG Reference Guide](portfolio/medium/RAG_Reference_Guide.docx)
+- [Weaviate for Banking AI](portfolio/medium/Weaviate_Banking_AI_Complete_Guide.md)
+- [DistilBERT](portfolio/medium/DistilBERT_Medium_Article.md)
+- [CLP Data Engineer Interview Prep](portfolio/medium/CLP_Data_Engineer_Interview_Preparation.md)
+- [Metadata Management & Lineage](portfolio/medium/Metadata-Management-Lineage-Guide.docx)
+- [Building Data-Driven Apps in Go](portfolio/medium/building-data-driven-apps-golang.md)
 
 **Prompting / reasoning techniques:**
 
-- [ReAct — Complete Guide](medium/ReAct-Prompting-Complete-Guide.docx)
-- [Tree of Thoughts](medium/Tree-of-Thoughts-Prompting-Complete-Guide.docx)
-- [Graph of Thoughts](medium/Graph-of-Thoughts-Prompting-Complete-Guide.docx)
-- [Algorithm of Thoughts](medium/algorithm-of-thoughts-prompting-complete-guide.md)
-- [Skeleton of Thoughts](medium/Skeleton-of-Thought-Guide.docx)
-- [Advanced Prompt Engineering](medium/advanced-prompt-engineering-complete-guide.md)
+- [ReAct — Complete Guide](portfolio/medium/ReAct-Prompting-Complete-Guide.docx)
+- [Tree of Thoughts](portfolio/medium/Tree-of-Thoughts-Prompting-Complete-Guide.docx)
+- [Graph of Thoughts](portfolio/medium/Graph-of-Thoughts-Prompting-Complete-Guide.docx)
+- [Algorithm of Thoughts](portfolio/medium/algorithm-of-thoughts-prompting-complete-guide.md)
+- [Skeleton of Thoughts](portfolio/medium/Skeleton-of-Thought-Guide.docx)
+- [Advanced Prompt Engineering](portfolio/medium/advanced-prompt-engineering-complete-guide.md)
 
 > 🎬 Looking for live demos? See [DEMOS.md](DEMOS.md).
 
@@ -771,7 +704,7 @@ The `medium/` folder holds long-form articles and interview playbooks.
 ## Conventions Used Across Projects
 
 - **Python** 3.10+; **Spark** 3.x; **Java** 11 for Spark
-- Project layout: `config/`, `ingestion/`, `processing/`, `serving/`, `tests/`
+- Project layout: `ingestion/`, `processing/`, `serving/`, `tests/`
 - **Tests:** `pytest`, fixtures under `tests/`, sample data under `data/dummy/`
 - **Config:** env-driven via `.env`; never hard-code secrets
 - **Logging:** structured JSON via `logging` + `python-json-logger`
@@ -812,7 +745,7 @@ The repo, the folder name, and the inner README. Most projects have a one-line
 
 **Q: Where's the streaming demo GIF / RAG screen-cast?**
 See [DEMOS.md](DEMOS.md) for the checklist; the assets folder
-[`docs/assets/`](docs/assets/) is ready to receive them.
+[`docs/assets/`](infra/docs/assets/) is ready to receive them.
 
 **Q: What does "production-style" mean here?**
 It runs end-to-end on synthetic data, has a README with run commands, has
@@ -821,7 +754,7 @@ has a clear extension point (not a sealed demo).
 
 **Q: Is this code safe to run? What's the security posture?**
 Repo-wide security policy is in [SECURITY.md](SECURITY.md) and the latest
-audit findings are in [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md).
+audit findings are in [`docs/SECURITY_AUDIT.md`](infra/docs/SECURITY_AUDIT.md).
 The Dependabot digest (top of the GitHub security tab) lists the open
 advisories on the default branch; the audit doc tracks which have been
 fixed in this branch. There are no real customer / transactional / PII
@@ -830,7 +763,7 @@ or `.preview/` is git-ignored.
 
 The `leads-pipeline` container image is published to
 [GHCR](https://github.com/vishnoiprem/data-etl-ml/pkgs/container/leads-pipeline)
-on every push to `main`; see [`docs/CI_CD.md`](docs/CI_CD.md) for the
+on every push to `main`; see [`docs/CI_CD.md`](infra/docs/CI_CD.md) for the
 release flow and image-tag conventions.
 
 ---
@@ -843,7 +776,7 @@ release flow and image-tag conventions.
 - **LinkedIn:** [linkedin.com/in/vishnoiprem](https://www.linkedin.com/in/vishnoiprem/)
 - **X (Twitter):** [x.com/vishnoiprem](https://x.com/vishnoiprem)
 - **Book a 30-min call:** [calendly.com/prem-vishnoi/30min](https://calendly.com/prem-vishnoi/30min)
-- **Resume:** [`Resume/`](Resume/)
+- **Resume:** [`Resume/`](portfolio/Resume/)
 - **Articles:** [`medium/`](medium/)
 - **Issues & PRs:** [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Code of Conduct:** [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)

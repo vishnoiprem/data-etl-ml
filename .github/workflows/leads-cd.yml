@@ -61,7 +61,7 @@ jobs:
       - name: Show build context size
         run: |
           echo "Context size:"
-          du -sh leads-pipeline/draft-cron | head
+          du -sh projects/leads-pipeline/draft-cron | head
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -99,8 +99,8 @@ jobs:
       - name: Read version
         id: version
         run: |
-          if [[ -f leads-pipeline/draft-cron/VERSION ]]; then
-            V=$(tr -d '[:space:]' < leads-pipeline/draft-cron/VERSION)
+          if [[ -f projects/leads-pipeline/draft-cron/VERSION ]]; then
+            V=$(tr -d '[:space:]' < projects/leads-pipeline/draft-cron/VERSION)
           else
             V=""
           fi
@@ -113,8 +113,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          context: leads-pipeline/draft-cron
-          file: leads-pipeline/draft-cron/Dockerfile
+          context: projects/leads-pipeline/draft-cron
+          file: projects/leads-pipeline/draft-cron/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

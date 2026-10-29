@@ -1,6 +1,6 @@
 name: ai-side-hustle-ci
 
-# CI for the ai-engineering/40-ai-side-hustle project.
+# CI for the learning/ai-engineering/40-ai-side-hustle project.
 # - Pure-Python, no external services. Just runs pytest on every push.
 # - The 4 streams + projections + simulator + dashboard + merch
 #   total 65 tests; all should pass in <2s.
@@ -9,12 +9,12 @@ on:
   push:
     branches: [main]
     paths:
-      - "ai-engineering/40-ai-side-hustle/**"
+      - "learning/ai-engineering/40-ai-side-hustle/**"
       - ".github/workflows/ai-side-hustle-ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - "ai-engineering/40-ai-side-hustle/**"
+      - "learning/ai-engineering/40-ai-side-hustle/**"
 
 # Cancel superseded runs on the same ref to save runner minutes.
 concurrency:
@@ -36,23 +36,23 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: ai-engineering/40-ai-side-hustle/requirements.txt
+          cache-dependency-path: learning/ai-engineering/40-ai-side-hustle/requirements.txt
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r ai-engineering/40-ai-side-hustle/requirements.txt
+          pip install -r learning/ai-engineering/40-ai-side-hustle/requirements.txt
 
       - name: Run tests
         run: |
-          cd ai-engineering/40-ai-side-hustle
+          cd learning/ai-engineering/40-ai-side-hustle
           python -m pytest tests/ -v
 
       - name: Smoke test (make demo in --no-record mode)
         # Confirms the orchestrator at least imports + runs end-to-end
         # without writing to the ledger. Catches import/typo regressions.
         run: |
-          cd ai-engineering/40-ai-side-hustle
+          cd learning/ai-engineering/40-ai-side-hustle
           python scripts/run_factory.py --no-record --output /tmp/side-hustle-smoke
           test -f /tmp/side-hustle-smoke/INDEX.md && echo "INDEX.md OK"
           # Clean up the smoke-test output so the runner stays tidy.

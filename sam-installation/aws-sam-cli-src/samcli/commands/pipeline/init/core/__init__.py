@@ -1,1 +1,0 @@
-"""Pipeline init core command"""
