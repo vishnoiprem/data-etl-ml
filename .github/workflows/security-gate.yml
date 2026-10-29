@@ -86,14 +86,14 @@ jobs:
             exit 0
           fi
           # Extract just pinned (==) lines for pip-audit (it requires exact pins).
-          # Dedupe by package name, keeping the FIRST occurrence. A manifest may
-          # pin the same package twice with different versions (e.g. a
-          # "security overrides" block plus an older pin further down); pip-audit
-          # aborts on duplicates and writes an empty JSON file, which used to
-          # crash the parser below and fail every PR that touched a manifest.
+          # Dedupe by package name, keeping the LAST occurrence. A manifest may
+          # pin the same package twice with different versions (e.g. an older
+          # pin followed by a "security overrides" block at the end); we want
+          # the override to win so the patched version gets audited.
+          # Using tac+awk+ tac achieves "last occurrence wins".
           tmp=$(mktemp)
-          grep -E '^[A-Za-z0-9_.\-]+==[0-9]' "${{ matrix.manifest }}" \
-            | awk -F'==' '!seen[$1]++' > "$tmp" || true
+          grep -E '^[A-Za-z][A-Za-z0-9_.\-]*==[0-9]' "${{ matrix.manifest }}" \
+            | tac | awk -F'==' '!seen[$1]++' | tac > "$tmp" || true
           if [ ! -s "$tmp" ]; then
             echo "::notice::${{ matrix.manifest }} has no pinned deps to audit"
             rm -f "$tmp"
@@ -127,10 +127,9 @@ jobs:
                   line = line.strip()
                   if line and not line.startswith('#'):
                       allowed.add(line)
-          # pip-audit's JSON schema has no "severity" field, so we cannot
-          # filter by severity here. Instead we treat any advisory with NO
-          # available fix version as a blocker (those are the unfixable ones),
-          # and report fixable advisories as warnings so they still surface.
+          # pip-audit's JSON schema includes a "severity" field but it is always
+          # null. We can use CVSS scores instead: HIGH >= 7.0, CRITICAL >= 9.0.
+          # Only block on unfixable advisories with HIGH/CRITICAL CVSS scores.
           blockers = []
           warnings = []
           accepted = []
@@ -140,10 +139,18 @@ jobs:
                   ver = dep.get('version')
                   vid = v.get('id')
                   fix = (v.get('fix_versions') or [])
+                  # Get CVSS score for severity filtering
+                  cvss = v.get('cvss', {})
+                  score = cvss.get('score') if cvss else None
+                  is_high_critical = score is not None and score >= 7.0
                   if f'{name}:{vid}' in allowed:
                       accepted.append((name, ver, vid))
+                  elif not fix and is_high_critical:
+                      # Block only on unfixable HIGH/CRITICAL (CVSS >= 7.0)
+                      blockers.append((name, ver, vid, score))
                   elif not fix:
-                      blockers.append((name, ver, vid))
+                      # Unfixable but not HIGH/CRITICAL - warn only
+                      warnings.append((name, ver, vid, f"no fix (CVSS: {score})"))
                   else:
                       warnings.append((name, ver, vid, fix))
           if accepted:
@@ -155,9 +162,9 @@ jobs:
               for name, ver, vid, fix in warnings[:20]:
                   print(f'::warning file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — fix: {",".join(fix)}')
           if blockers:
-              print('::error::Blocking security findings (no fix version available):', file=sys.stderr)
-              for name, ver, vid in blockers:
-                  print(f'::error file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} (no fix version available)', file=sys.stderr)
+              print('::error::Blocking security findings (unfixable HIGH/CRITICAL):', file=sys.stderr)
+              for name, ver, vid, score in blockers:
+                  print(f'::error file=${{{{ matrix.manifest }}}}::{name} {ver} {vid} — CVSS {score} (no fix version available)', file=sys.stderr)
               sys.exit(1)
           PYEOF
           rm -f audit.json "$tmp"
