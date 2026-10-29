@@ -4,11 +4,11 @@
 
 ## 🎯 What you will learn
 
-- The four `config { type: ... }` values — `table`, `view`, `incremental`, `ephemeral` — and the exact SQL each compiles to
+- The three `config { type: ... }` values — `table`, `view`, `incremental` — and the exact SQL each compiles to
 - What each strategy costs in bytes scanned, storage, and query latency
 - How `CREATE OR REPLACE TABLE` gives you atomic swaps in BigQuery
 - Why views can silently become a performance trap when partition filters don't push down
-- How `partitionBy`, `clusterBy`, `uniqueKey`, `labels`, and `transitive` shape the physical table
+- How `partitionBy`, `clusterBy`, `uniqueKey`, and `labels` shape the physical table, and why "ephemeral" is a dbt concept Dataform doesn't have
 - The staging → intermediate → mart layering convention and why the boundaries exist
 
 ---
@@ -21,15 +21,16 @@ Every Dataform model starts with a question: **should this be a stored thing, or
 thing?** That answer determines whether BigQuery stores bytes, whether downstream models
 re-compute the logic, how a failure behaves, and what the model costs every single day.
 
-In Dataform you answer it with `config { type: "..." }`. There are exactly four values, and each
-compiles to a different shape of SQL:
+In Dataform you answer it with `config { type: "..." }`. There are exactly three values:
 
 ```
    table       → CREATE OR REPLACE TABLE         stored, full rewrite every run
    view        → CREATE OR REPLACE VIEW          definition only; re-computed per query
    incremental → CREATE OR REPLACE TABLE + MERGE  stored; only new rows processed
-   ephemeral   → (nothing!)                      inlined as a CTE in every downstream model
 ```
+
+⚠️ **Dataform has only three materialization types.** There is **no `ephemeral` type** — that's a
+dbt concept, and a Dataform config with `type: "ephemeral"` fails to compile.
 
 ### `type: "table"` → `CREATE OR REPLACE TABLE`
 
@@ -119,65 +120,67 @@ partition pruning.** Verify with `EXPLAIN`, or check `totalBytesProcessed` in a 
 💡 **Treat a view as a *query*, not a *table*.** The moment a view is on a hot dashboard path or
 sits over a partitioned table with a non-pushable filter, materialize it.
 
-### `type: "ephemeral"` → not materialized at all
+### "Ephemeral" — a dbt concept Dataform doesn't have
 
-The one people misunderstand most. An `ephemeral` model is **never compiled into a table or
-view**. Its SQL is **inlined as a CTE** into every downstream model that references it.
+⚠️ **Dataform has no `ephemeral` type.** In dbt, `materialized: "ephemeral"` means "don't create
+a table — inline this SQL as a CTE into every downstream model." That is a genuinely useful tool,
+and it's a common question to bring from dbt. But Dataform's `config { type: ... }` accepts only
+three values:
+
+```
+   type: "table"        → CREATE OR REPLACE TABLE
+   type: "view"         → CREATE OR REPLACE VIEW
+   type: "incremental"  → CREATE OR REPLACE TABLE + MERGE / INSERT
+```
+
+A file with `config { type: "ephemeral" }` fails to compile. **And `ref()` never inlines SQL** —
+it always resolves to the concrete name of a table or view:
 
 ```sqlx
-// definitions/marts/int__customer_labels.sqlx
-config { type: "ephemeral" }
+// definitions/marts/fct_orders.sqlx
+config { type: "table" }
 
-SELECT customer_id,
-       CASE WHEN lifetime_value > 10000 THEN 'platinum'
-            WHEN lifetime_value > 1000  THEN 'gold'
-            ELSE 'standard' END AS segment
-FROM ${ref("stg_customers")}
+SELECT o.id, c.segment
+FROM ${ref("stg_orders")} AS o
+JOIN ${ref("int__customer_labels")} AS c USING (customer_id)
 ```
 
-A downstream model references it with `JOIN ${ref("int__customer_labels")}`. Dataform compiles
-both models into a single statement:
+compiles to:
 
 ```sql
-CREATE OR REPLACE TABLE `my-project.analytics.fct_orders` AS
-WITH
-  int__customer_labels AS (
-    -- ⚠️ the ephemeral model's SQL was INLINED here
-    SELECT customer_id,
-           CASE WHEN lifetime_value > 10000 THEN 'platinum'
-                WHEN lifetime_value > 1000  THEN 'gold'
-                ELSE 'standard' END AS segment
-    FROM `my-project.analytics.stg_customers`
-  )
 SELECT o.id, c.segment
 FROM `my-project.analytics.stg_orders` AS o
-JOIN int__customer_labels AS c USING (customer_id);
+JOIN `my-project.analytics.int__customer_labels` AS c USING (customer_id);
 ```
 
-**Cost profile:** zero storage, zero table-creation cost — but note carefully:
+`int__customer_labels` is a **real view**. Its definition is stored, and BigQuery re-executes it
+on every read — but there is no CTE inlining.
 
-| Scenario | Ephemeral | Table |
+**So what do you do in Dataform when you'd reach for `ephemeral`?**
+
+| You want (dbt thinking) | Dataform equivalent | Cost difference |
 |---|---|---|
-| Storage | None | Active logical storage billed |
-| `stg_customers` scanned | Once per downstream query that inlines it | Once per rebuild |
-| 5 downstream models | scanned 5× | scanned 1×, then 5 cheap reads |
-| 50 downstream models | scanned 50× | scanned 1× |
-| Compiled SQL size | Grows with every dependent | Constant |
+| A CTE inlined into one downstream model | Just write the `SELECT` inline in that model, or use a `vars` block | None — inline SQL costs nothing extra |
+| A CTE inlined into several downstream models | A `view` | A view re-computes on **read**, not per dependent |
+| Shared logic with no storage cost at all | Put it in a `vars` block or a JS helper function in `definitions/` | No BigQuery cost at all |
 
-⚠️ **The trap:** because the ephemeral model is inlined into *each* downstream model separately,
-the compiled SQL grows linearly with the number of dependents. A wide ephemeral CTE referenced by
-20 models is re-computed 20 times and bloats `run.sql`.
+💡 **The Dataform-native answer to "small logic reused a few times" is usually a `vars` block or a
+shared JS function** — not a model. Models in Dataform always become something BigQuery reads.
 
-**When to use it:** small dimension lookups (a static mapping table, a currency-code list, a
-status decoder); logic reused a *handful* of times where the source is cheap to scan; a "macro"
-you want to version-control but not materialize.
+```js
+// definitions/utils.js
+const customerSegment = (lifetimeValue) =>
+  lifetimeValue > 10000 ? "platinum" : lifetimeValue > 1000 ? "gold" : "standard";
+```
 
-**When it hurts:** a wide, expensive CTE referenced by many models; a model whose source is large
-(ephemeral forces a re-scan of the base table, not a read of a small pre-aggregated table);
-anything you need to query independently.
+💡 **The dbt "ephemeral" idea is worth understanding even though Dataform lacks it**, because it
+teaches a real cost principle: **logic reused many times should be computed once and read many
+times.** In Dataform you get that with a `table` (or a `view` if the source is tiny). You can also
+get it with a `vars` block for pure expression logic — no BigQuery object is created at all.
 
-💡 **The decision rule:** if a source table is scanned more than ~3 times across the DAG because
-of an ephemeral model, materialize it. Ephemeral is for *cheap* and *narrow*, not for *shared*.
+⚠️ **Don't reach for a `view` as a substitute for `ephemeral` without checking the read
+pattern.** A view is free to *create* but re-bills its whole source scan on every read. A wide CTE
+referenced by 20 models becomes 20 re-scans of the base table.
 
 ### `type: "incremental"` → `CREATE OR REPLACE TABLE` + `MERGE`
 
@@ -219,16 +222,14 @@ produces **~4,000 rows / ~300 KB**, the view runs **60 times/day**, and 30 days 
 ├─────────────┼──────────────────┼──────────────────┼────────────┼──────────────┤
 │ incremental │ 180 GB           │ 180 GB           │ ~9 MB      │ updated on   │
 │             │ (+4.7 GB MERGE)  │                  │            │ run          │
-├─────────────┼──────────────────┼──────────────────┼────────────┼──────────────┤
-│ ephemeral   │ 1.2 TB inlined   │ depends on       │ 0          │ always live  │
-│ (nonsensical│ into every       │ downstream       │            │              │
-│  here)      │ dependent)       │ query            │            │              │
 └─────────────┴──────────────────┴──────────────────┴────────────┴──────────────┘
+
+(Dataform has no `ephemeral` type — see the "ephemeral is a dbt concept" section above.)
 ```
 
 ⚠️ **The view's 72 TB/day figure is the number to remember.** A view is not "free storage" — it is
-"you re-pay for the computation on every single read." Materializing that view into a `table`
-turns 72 TB/day of scanning into 1.2 TB/day plus a trivial 9 MB read. That is the whole argument.
+"you re-pay for the computation on every single read." Materializing it turns 72 TB/day of
+scanning into 1.2 TB/day plus a trivial 9 MB read. That is the whole argument.
 
 💡 **A view is only cheaper than a table when reads are rare AND the source is small.** If
 `reads-per-day × source-size > rebuild-cost`, materialize.
@@ -268,10 +269,19 @@ Beyond `type`, the `config` block shapes the physical table.
 #### `partitionBy`
 
 ```sqlx
-config { type: "table", partitionBy: { ts: "DATE(ts)" } }
+config { type: "table", partitionBy: "DATE(ts)" }
 ```
 
-`partitionBy` accepts a map of `column -> partition expression`:
+`partitionBy` takes a **partition expression string** — the expression BigQuery uses to derive
+the partition from a column:
+
+```sqlx
+config { type: "table", partitionBy: "DATE(order_date)" }
+```
+
+⚠️ **It is a single string, not a map.** A BigQuery table can only be partitioned by one
+expression, so `partitionBy: { ts: "DATE(ts)" }` is not valid — write `partitionBy: "DATE(ts)"`.
+The expression may reference any column in the table.
 
 | Expression | Partitioning | Typical use |
 |---|---|---|
@@ -285,8 +295,8 @@ config { type: "table", partitionBy: { ts: "DATE(ts)" } }
 // Month-partitioned fact table
 config {
   type: "incremental",
-  partitionBy: { order_date: "DATE(order_date)" },
-  uniqueKey: "id"
+  partitionBy: "DATE(order_date)",
+  uniqueKey: ["id"]
 }
 ```
 
@@ -301,10 +311,13 @@ A partitioned 1 TB table still costs 1 TB of storage.
 ```sqlx
 config {
   type: "table",
-  partitionBy: { sale_date: "DATE(sale_date)" },
+  partitionBy: "DATE(sale_date)",
   clusterBy: ["customer_id", "region"]
 }
 ```
+
+`clusterBy` takes an **array of column names** (up to 4), and combines with `partitionBy` in the
+same config block.
 
 Clustering sorts data within each partition by the given columns. BigQuery's clustering is "loose"
 — it doesn't guarantee full ordering, but it co-locates matching values, letting BigQuery apply
@@ -323,15 +336,15 @@ pruning, cluster by the dimension you'll join and filter on.
 #### `uniqueKey`
 
 ```sqlx
-config { type: "incremental", uniqueKey: "id" }
+config { type: "incremental", uniqueKey: ["id"] }
 ```
 
-`uniqueKey` names the column (or comma-separated columns) that uniquely identifies a row. For
-incremental models it **switches the generated statement from `INSERT` to `MERGE`**, and it is what
-makes the merge idempotent. Composite keys use a comma-separated string:
+`uniqueKey` names the column (or columns) that uniquely identifies a row. For incremental models
+it **switches the generated statement from `INSERT` to `MERGE`**, and it is what makes the merge
+idempotent. Composite keys use an **array**:
 
 ```sqlx
-config { type: "incremental", uniqueKey: "store_id,transaction_id" }
+config { type: "incremental", uniqueKey: ["store_id", "transaction_id"] }
 ```
 
 ⚠️ **`uniqueKey` must actually be unique in the source.** If it isn't, the `MERGE` may error
@@ -351,24 +364,35 @@ Labels propagate to BigQuery as table labels, driving **billing attribution** (p
 pricing) and **dataset-level governance**. 💡 Label every table at creation — retroactive
 labelling is painful.
 
-#### `transitive`
+#### `dependOnDependencyAssertions`
 
 ```sqlx
-config { type: "table", transitive: true }
+config { type: "table", dependOnDependencyAssertions: true }
 ```
 
-By default `transitive: false` means only **direct** dependencies matter for invalidation. Setting
-`transitive: true` makes Dataform rebuild the model when **any** transitive dependency changes:
+⚠️ **There is no `transitive` config key in Dataform** — that's a dbt concept. Dataform's
+equivalent is `dependOnDependencyAssertions`, which controls whether a model also waits on the
+*assertions* attached to its dependencies.
 
 ```
   stg_orders ──▶ int__enriched ──▶ fct_sales
-
-  transitive: false → stg_orders changes?  NO
-  transitive: true  → stg_orders changes?  YES
+      │                                │
+      └── has a nonNull assertion       │  dependOnDependencyAssertions: true
+                                         └── waits for stg_orders' assertion too
 ```
 
-💡 **Use `transitive: true` sparingly.** It maximizes freshness but multiplies rebuild cost across
-the DAG. Right for small, high-value aggregates; wasteful for large ones.
+| Setting | Behavior |
+|---|---|
+| `false` (default) | The model runs when its direct dependencies' *data* is ready |
+| `true` | The model also waits for the assertions of its dependencies to pass |
+
+💡 **Turn it on for downstream marts.** If `stg_orders` has a `nonNull` assertion and `fct_orders`
+reads from it, you want `fct_orders` to be blocked until that assertion passes — otherwise a
+null-key row propagates before anyone notices.
+
+⚠️ **It's not about rebuild triggers.** Dataform's invalidation is graph-based: a model rebuilds
+when the data it reads changes, and the DAG already handles transitive rebuilds correctly. This
+config is specifically about *assertion* dependencies.
 
 ### The staging → intermediate → mart convention
 
@@ -378,7 +402,7 @@ the layer boundary is where that job ends.
 ```
    RAW / SOURCE          External systems. No logic. No renames. Read-only.
    raw.orders            Owned by the source team.
-        │ source()
+        │ ref() to a declaration
         ▼
    STAGING (stg_*)       ONE JOB: clean and conform.
                          • canonical renaming • correct casts
@@ -418,17 +442,31 @@ the source, or you cannot rebuild the mart from raw without silently inheriting 
 `amount` is a non-null float64, timestamps are UTC", downstream models can rely on those guarantees
 without re-checking. Write them down as assertions (Lecture 2.3).
 
-## 🛠️ Hands-On: Compare the Four Types
+## 🛠️ Hands-On: Compare the Three Types
 
-### Step 1 — Four models, four types
+### Step 1 — Declare the source, then build three models
 
-All four read the same cleaned source and produce the same daily aggregate.
+⚠️ **Dataform has no `source()` function** — that's dbt. A source is declared as its own file
+with `type: "declaration"`, and referenced downstream with `ref()` like any other action:
+
+```sqlx
+// definitions/sources/raw_orders.sqlx
+config {
+  type: "declaration",
+  database: "my-project",
+  schema: "raw",
+  name: "orders",
+  description: "Raw orders table owned by the source system"
+}
+```
+
+All three models below read the same cleaned source and produce the same daily aggregate.
 
 ```sqlx
 // definitions/staging/stg_orders.sqlx
 config {
   type: "table",
-  partitionBy: { order_date: "DATE(order_date)" },
+  partitionBy: "DATE(order_date)",
   clusterBy: ["customer_id"],
   labels: { team: "analytics", layer: "staging" }
 }
@@ -440,7 +478,7 @@ SELECT
   'complete'           AS order_status,
   TIMESTAMP(order_ts)  AS updated_at,
   DATE(order_ts)       AS order_date
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE order_status != 'cancelled'
 ```
 
@@ -457,7 +495,7 @@ GROUP BY order_date
 
 ```sqlx
 // definitions/marts/tbl_daily_sales.sqlx    ← type: "table"
-config { type: "table", partitionBy: { sale_date: "DATE(sale_date)" } }
+config { type: "table", partitionBy: "DATE(sale_date)" }
 
 SELECT order_date AS sale_date,
        COUNT(DISTINCT order_id) AS order_count,
@@ -471,8 +509,8 @@ GROUP BY order_date
 // same SELECT body as tbl_daily_sales, different config
 config {
   type: "incremental",
-  uniqueKey: "sale_date",
-  partitionBy: { sale_date: "DATE(sale_date)" }
+  uniqueKey: ["sale_date"],
+  partitionBy: "DATE(sale_date)"
 }
 
 SELECT order_date AS sale_date,
@@ -517,11 +555,11 @@ table read → bytes: 311296          (~304 KB — it reads one partition)
 
 That ~16,000× difference is the entire materialization argument, in one number.
 
-### Step 4 — Verify the ephemeral inlining
+### Step 4 — See how `ref()` resolves
 
 ```sqlx
 // definitions/marts/int__customer_labels.sqlx
-config { type: "ephemeral" }
+config { type: "view" }
 
 SELECT customer_id,
        CASE WHEN total_spend > 5000 THEN 'platinum'
@@ -531,29 +569,32 @@ FROM ${ref("stg_orders")}
 GROUP BY customer_id, total_spend
 ```
 
-A second model (`fct_customer_orders`) joins it with
-`LEFT JOIN ${ref("int__customer_labels")} AS l USING (customer_id)`.
+A second model joins it:
+
+```sqlx
+// definitions/marts/fct_customer_orders.sqlx
+config { type: "table" }
+
+SELECT o.order_id, l.segment
+FROM ${ref("stg_orders")} AS o
+LEFT JOIN ${ref("int__customer_labels")} AS l USING (customer_id)
+```
 
 ```bash
 dataform compile
-grep -B2 -A 14 "int__customer_labels AS" .dataform/run.sql
+grep -A 6 "fct_customer_orders" .dataform/run.sql
 ```
 
 ```
-WITH
-  int__customer_labels AS (
-    SELECT customer_id,
-           CASE WHEN total_spend > 5000 THEN 'platinum'
-                WHEN total_spend > 500  THEN 'gold'
-                ELSE 'standard' END AS segment
-    FROM `my-project.analytics.stg_orders`
-    GROUP BY customer_id, total_spend
-  )
-SELECT ...
+CREATE OR REPLACE TABLE `my-project.analytics.fct_customer_orders` AS
+SELECT o.order_id, l.segment
+FROM `my-project.analytics.stg_orders` AS o
+LEFT JOIN `my-project.analytics.int__customer_labels` AS l USING (customer_id);
 ```
 
-No `CREATE TABLE` anywhere for that model. Add a third downstream model that also refs it,
-recompile, and watch the CTE appear a second time in a different statement.
+⚠️ **Note what did *not* happen.** `int__customer_labels` was resolved to a table name — it was
+**not** inlined as a CTE. There is no `ephemeral` type in Dataform, so `ref()` always produces a
+concrete BigQuery object. The definition lives in a view; BigQuery re-executes it on every read.
 
 ### Step 5 — Confirm atomicity
 
@@ -583,33 +624,35 @@ bq query --use_legacy_sql=false \
 
 ## 🔑 Key Takeaways
 
-- The four types are `table`, `view`, `incremental`, `ephemeral` — the choice drives cost, freshness, and failure behavior.
+- Dataform has **three** materialization types: `table`, `view`, `incremental`. There is **no `ephemeral`** — that's a dbt concept, and `ref()` always resolves to a real table or view.
 - `table` → `CREATE OR REPLACE TABLE`: stored, full rebuild every run, cheapest to read.
 - `view` → `CREATE OR REPLACE VIEW`: stores nothing, but **re-runs the whole query and re-bills the bytes on every read**. A view read 60×/day over a 1.2 TB source costs 72 TB/day of scanning.
-- `ephemeral` → **not materialized at all**; inlined as a CTE into every downstream model. Zero storage, but the computation is duplicated per dependent and the compiled SQL grows.
+- The dbt "ephemeral" idea (inline a CTE, no storage) has no Dataform equivalent — use a `vars` block or a shared JS function for pure expression logic that you'd otherwise share.
 - `incremental` → `CREATE OR REPLACE TABLE` + `MERGE` (with `uniqueKey`) or `INSERT` (without). Covered fully in Lecture 2.2.
 - `CREATE OR REPLACE TABLE` is **atomic** in BigQuery: readers see the old table or the new one, never a partial write. But atomic ≠ cheap — the full rebuild still happens.
 - Partitioning reduces **bytes scanned**, not storage. `partitionBy` takes BigQuery partition expressions: `DATE(ts)`, `DATE_TRUNC(ts, MONTH)`, `TIMESTAMP_TRUNC(ts, DAY)`.
 - `clusterBy` (up to 4 columns) sorts within a partition for block-level pruning — use it for the high-cardinality dimension you join on.
 - `uniqueKey` both enables the `MERGE` path and declares row identity. It must actually be unique.
-- `labels` drive billing attribution and governance; `transitive: true` rebuilds on any transitive change — powerful, but it multiplies rebuild cost.
+- `labels` drive billing attribution and governance. There is **no** `transitive` config key in Dataform — the dbt equivalent is `dependOnDependencyAssertions`, which makes a model wait for its dependencies' assertions.
 - **Layer boundaries exist so each layer has one job**: staging cleans, intermediate reshapes, marts present. Debuggability, reuse, and cost control all follow from that.
-- Default to `table`. Use `view` only when reads are rare and the source is small; use `ephemeral` only for small, cheap lookups reused a handful of times.
+- Default to `table`. Use `view` only when reads are rare and the source is small.
 
 ---
 
 ## 📚 Practice Exercises
 
 1. **Materialization audit.** Take a real project (or a public BigQuery dataset) and classify
-   every model as table / view / incremental / ephemeral. For each `view`, compute
+   every model as table / view / incremental. For each `view`, compute
    `reads_per_day × source_bytes_scanned` versus the cost of materializing. Produce a one-page
    recommendation with the top three changes ranked by dollars saved.
 
-2. **The ephemeral decision.** Write two versions of the same 12-column customer enrichment CTE
-   — one `ephemeral`, one `table` — plus **three** downstream models that reference it. Compile
-   both, and report: (a) how many times does the CTE appear in each `run.sql`? (b) how many bytes
-   are scanned at run time in each design? (c) at what number of downstream models does ephemeral
-   become more expensive than the table version?
+2. **The ephemeral question.** You've read that dbt's `ephemeral` materialization avoids
+   materializing a shared CTE. Dataform has no equivalent. Write three Dataform designs for
+   "a 12-column customer enrichment rule reused by three downstream models" — (a) a `table`,
+   (b) a `view`, (c) a `vars` block holding the segmentation logic. Compile all three and report:
+   how many BigQuery objects does each create, how many bytes are scanned at run time, and what
+   each costs when one of the downstream models is queried 50 times a day? Then state which
+   design you'd pick, and why.
 
 3. **Partition pruning detective.** Create a partitioned `stg_orders` table, then write two views
    over it: one that filters on the partition column directly, one that wraps it in

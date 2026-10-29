@@ -5,11 +5,10 @@
 ## 🎯 What you will learn
 
 - What SQLX actually is: SQL + JSX-style expressions + a config block
-- The three-part file structure — `config` block, then SQL, then optional `post` block
+- The file structure — `config` block first, then the SQL
 - Every field in the `config` block, and what each one changes about the compiled output
-- `ref()` and `source()` in depth — how names resolve and how the DAG is built
-- The helper functions: `resolve()`, `is_incremental()`, `when()`, `self()`, `publish()`, `operate()`
-- Unit tests (`unitTest` blocks) and the `expect` operators
+- `ref()`, `resolve()`, `self()`, `when()`, and `incremental()` — the context methods
+- Data source declarations, custom SQL operations, and assertions
 - How SQLX compares to plain SQL and to dbt's Jinja
 
 ---
@@ -18,38 +17,35 @@
 
 ### What SQLX is
 
-SQLX is a **superset of SQL**. It is SQL, plus three additions:
+SQLX is a **superset of SQL**. It is SQL, plus two additions:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │  1. A CONFIG BLOCK      config { type: "table", ... }                   │
-│     → declarative metadata: materialization, partitioning, tests        │
+│     → declarative metadata: materialization, partitioning, assertions   │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  2. SQLX EXPRESSIONS   ${ref("stg_orders")}                            │
 │     → JSX-style interpolation of compiler-resolved values               │
-├──────────────────────────────────────────────────────────────────────────┤
-│  3. A POST BLOCK        post { operations { ... } }                     │
-│     → optional post-execution operations (delete, update, assert, grant)│
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Everything in a `.sqlx` file is one of those three things: the SQL is ordinary SQL BigQuery
-executes, the config block is metadata the compiler reads, and the expressions are placeholders
-the compiler substitutes.
+Everything in a `.sqlx` file is one of those two things. The SQL part is ordinary SQL that
+BigQuery executes. The config block is metadata the compiler reads. The expressions are
+placeholders the compiler substitutes.
+
+SQLX files can also contain JavaScript blocks (`js { ... }`) for local constants and functions.
 
 ### The file structure
 
-The order is fixed and the compiler enforces it:
+The `config` block comes first, and the compiler enforces it:
 
 ```
-definitions/stg/stg_orders.sqlx
+definitions/stg_orders.sqlx
 
 ┌─────────────────────────────────────────────────────────────┐
 │ ① config { ... }        ← FIRST. Declarative metadata.      │
 ├─────────────────────────────────────────────────────────────┤
 │ ② SELECT ...            ← the SQL body                     │
-├─────────────────────────────────────────────────────────────┤
-│ ③ post { ... }          ← OPTIONAL. Post-execution ops.     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -60,123 +56,122 @@ config {
 }
 
 SELECT *
-FROM ${source("raw_orders", "orders")}
-
-post {
-  operations {
-    grant {
-      roles: ["roles/bigquery.dataViewer"],
-      grantees: ["group:analytics@company.com"]
-    }
-  }
-}
+FROM ${ref("orders")}
 ```
 
-⚠️ **The `config` block must come first.** Putting SQL before `config` is a compile error. And
+⚠️ **The `config` block must come first.** Putting SQL before `config` is a compile error, and
 there can be only one `config` block per file.
 
 ### The `config` block — full reference
 
+The core config interface, `ITableConfig`, extends `IActionConfig`, `IDependenciesConfig`,
+`IDocumentableConfig`, `INamedConfig`, and `ITargetableConfig`:
+
 | Field | Type | Purpose |
 |-------|------|---------|
-| `type` | string | **Required.** `table`, `view`, `incremental`, or `ephemeral`. |
-| `schema` | string | Override the target dataset for this model only. |
-| `database` | string | Override the target project for this model only. |
-| `description` | string | Human description, surfaced in the catalog and lineage UI. |
-| `uniqueKey` | string \| string[] | Column(s) that uniquely identify a row. Used by incremental merge. |
-| `partitionBy` | string \| object | Partition column(s) and expiration. |
-| `clusterBy` | string \| string[] | Clustering column(s). |
+| `type` | string | **Required.** `table`, `view`, or `incremental`. |
+| `name` | string | Action name. Defaults to the filename without the extension. |
+| `schema` | string | Override the target BigQuery dataset for this action. |
+| `database` | string | Override the target GCP project for this action. |
+| `description` | string | Human description, surfaced in the catalog and lineage. |
+| `columns` | object | Per-column descriptions, display names, tags, BigQuery policy tags. |
+| `uniqueKey` | string[] | Column(s) that uniquely identify a row. Used for merge criteria. |
+| `partitionBy` | string \| object | Partition column and expiration. |
+| `clusterBy` | string[] | Clustering column(s). |
 | `labels` | object | BigQuery table labels (key → value). |
-| `tags` | string \| string[] | Dataform tags for workflow/action selection. |
-| `disabled` | boolean | Compile the model but do not execute it. |
-| `protected` | boolean | Block destructive operations (DROP, overwrite). |
-| `dependencies` | string[] | Extra DAG edges to models not referenced in SQL. |
-| `hermetic` | boolean | When true, the model may only read data it declares via `ref()`/`source()`. |
-| `assertions` | object | Automatic assertions generated for this model. |
-| `include` / `exclude` | string[] | Files to include or exclude from the model's compilation. |
-| `bigquery` | object | BigQuery-specific options (see below). |
+| `tags` | string[] | Dataform tags for action selection. |
+| `disabled` | boolean | If true, the action is not run — but can still be depended upon. |
+| `protected` | boolean | **Incremental only.** Running the action ignores `full-refresh`. |
+| `dependencies` | string[] | Extra DAG edges to actions not referenced in the SQL. |
+| `hermetic` | boolean | Whether all dependencies are explicitly declared. |
+| `dependOnDependencyAssertions` | boolean | Whether this action also depends on its dependencies' assertions. |
+| `assertions` | object | Automatic assertions generated for this action. |
+| `materialized` | boolean | **View only.** Create a BigQuery materialized view. |
+| `onSchemaChange` | string | **Incremental only.** `IGNORE`, `FAIL`, `EXTEND`, or `SYNCHRONIZE`. |
+| `bigquery` | object | BigQuery-specific warehouse options. |
+| `preserveGovernanceControls` | boolean | Re-apply BigQuery policies and governance tags on recreation. |
 
-`schema` and `database` are the per-model overrides — they take precedence over
-`defaultDataset` and `defaultProject` in `dataform.json`. Chapter 1.4 covers the resolution
-rules in full.
+#### `type` — the three materializations
 
-#### `type` — the four materializations
-
-There are exactly **four** types, and choosing the wrong one is the most common early mistake.
+There are exactly **three** types:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ type: "view"         → CREATE OR REPLACE VIEW. No data stored.         │
-│   Use for: thin transformations, dimension lookups, dashboards.         │
-├──────────────────────────────────────────────────────────────────────────┤
 │ type: "table"        → CREATE OR REPLACE TABLE. Full rebuild every run.│
 │   Use for: staging layers, aggregates that must be exactly right.      │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ type: "incremental"  → MERGE into an existing table. Only changed rows  │
-│   are written. Requires uniqueKey. Large, append-mostly fact tables.   │
+│ type: "view"         → CREATE OR REPLACE VIEW. No data stored.         │
+│   Use for: thin transformations, dimension lookups, dashboards.         │
+│   + `materialized: true` creates a BigQuery materialized view.          │
 ├──────────────────────────────────────────────────────────────────────────┤
-│ type: "ephemeral"    → NOT materialized. Inlined as a CTE into its     │
-│   dependents. Reusable CTEs, light cleansing between two real models.  │
+│ type: "incremental"  → MERGE into an existing table. Only changed rows  │
+│   are written. Requires uniqueKey and a WHERE clause.                  │
+│   Use for: large, append-mostly fact tables.                           │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ⚠️ **`table` rebuilds the whole thing every run.** On a 2-billion-row table that is a full scan
-and a full rewrite — every time. `incremental` exists to avoid exactly that. If you have a
-`table` model that takes minutes and scans billions of bytes, it should probably be
-`incremental`.
+and a full rewrite — every time. `incremental` exists to avoid exactly that.
 
-⚠️ **`ephemeral` models disappear from your catalog.** They become CTEs. You cannot query them
-directly, and they do not appear as tables in BigQuery. They are still real nodes in the DAG.
+⚠️ **An `incremental` table must include a WHERE clause.** This is a hard requirement, not a
+style guideline — it is what makes the incremental run bounded.
 
-#### `partitionBy` and `clusterBy`
+#### `uniqueKey` — the merge criterion
+
+```sqlx
+config {
+  type: "incremental",
+  uniqueKey: ["order_id"]
+}
+```
+
+Records with matching unique key(s) are **updated** instead of new rows being inserted. It is a
+list, even when there is only one column.
+
+#### `hermetic`
 
 ```sqlx
 config {
   type: "table",
-  partitionBy: { field: "order_date", dataType: "date", expirationDays: 90 },
-  clusterBy: ["customer_id", "status"]
+  hermetic: true
 }
 ```
 
-`partitionBy` with `expirationDays` is a **cost control**: BigQuery drops partitions older than
-the window. `clusterBy` improves filter pruning and join performance.
+Declares whether the action is hermetic — that is, whether **all of its dependencies are
+explicitly declared**. If the action depends on data from a source that is not declared as a
+dependency, set `hermetic` to `false`. Otherwise, set it to `true`.
 
-#### `hermetic`, `dependencies`, `protected`
+💡 **Set `hermetic: true` and the compiler enforces it.** An undeclared table reference in a
+hermetic action is a compile error, not a silent bug. This is the cheapest guard against
+introducing a dependency the graph does not know about.
+
+#### `protected`
 
 ```sqlx
 config {
-  type: "table",
-  hermetic: true,          // may only read data declared via ref()/source()
-  dependencies: ["stg_orders"],  // extra DAG edge to a model not referenced in SQL
-  protected: true          // block destructive operations against the relation
+  type: "incremental",
+  protected: true
 }
 ```
 
-`hermetic: true` makes the compiler fail if the model reads any table it did not declare via
-`ref()` or `source()`. `dependencies` is for *ordering* dependencies, not data dependencies.
-`protected` stops Dataform overwriting or dropping the relation without an explicit override.
+⚠️ **`protected` is only allowed for the `incremental` type.** When set to true, running the
+action ignores the `full-refresh` option. This is useful for tables built from transient data,
+to verify that historical data is never lost.
 
-💡 **Turn `hermetic: true` on for your marts layer.** It is the cheapest possible guard against
-accidentally introducing a hidden dependency the DAG does not know about — this is how Dataform's
-"no undeclared dependencies" guarantee is actually enforced.
+#### `onSchemaChange` — what happens when the schema drifts
 
-#### `bigquery` specific options
+Only valid for `incremental` tables. Dataform checks the `SELECT` query to determine if columns
+were added or removed, then performs the action you specify:
 
-```sqlx
-config {
-  type: "table",
-  bigquery: {
-    updatePartitionFilter: "TRUE",
-    insertMode: "INSERT",
-    partitionExpirationDays: 90,
-    requirePartitionFilter: true,
-    clustering: { fields: ["customer_id"] }
-  }
-}
-```
+| Value | Behavior |
+|-------|----------|
+| `IGNORE` (default) | Ignores added columns; errors on missing columns. |
+| `FAIL` | Stops the action if any schema change is detected. |
+| `EXTEND` | Adds new columns with `NULL` for previous records; errors on removed columns. |
+| `SYNCHRONIZE` | Adds new columns and removes columns no longer in the query. **Cannot be undone.** |
 
-`requirePartitionFilter: true` makes BigQuery **reject queries** that scan the table without a
-partition filter — a cost guardrail at the database level, not just a convention.
+⚠️ **`SYNCHRONIZE` can lose data.** Removing a column from the query drops it from the table
+and all its historical values. Use `EXTEND` unless you are certain.
 
 #### `assertions` in config
 
@@ -184,13 +179,46 @@ partition filter — a cost guardrail at the database level, not just a conventi
 config {
   type: "table",
   assertions: {
-    rowCount: { min: 1 },
-    nonNull: ["order_id", "customer_id"]
+    nonNull: ["order_id", "customer_id"],
+    uniqueKey: ["order_id"],
+    uniqueKeys: [["order_id"], ["order_id", "line_number"]],
+    rowConditions: ["total_amount >= 0"]
   }
 }
 ```
 
-Auto-generates assertions for every model with this config.
+| Assertion | Meaning |
+|-----------|---------|
+| `nonNull` | Column(s) which can never be `NULL`. |
+| `uniqueKey` | Column(s) constituting the unique key index. |
+| `uniqueKeys` | Combinations of columns, each of which is a unique key. |
+| `rowConditions` | General conditions that must hold true for all rows. |
+
+When configured, the relevant assertions are **automatically created and run as a dependency**
+of the table.
+
+#### `bigquery` specific options
+
+```sqlx
+config {
+  type: "table",
+  bigquery: {
+    partitionBy: "order_date",
+    partitionExpirationDays: 90,
+    clusterBy: ["customer_id"],
+    updatePartitionFilter: "TRUE",
+    requirePartitionFilter: true,
+    labels: { team: "analytics", tier: "gold" },
+    additionalOptions: { "option-name": '"value"' }
+  }
+}
+```
+
+`requirePartitionFilter: true` makes BigQuery **reject queries** that scan the table without a
+partition filter — a cost guardrail at the database level, not just a convention.
+
+`additionalOptions` passes options straight through to the BigQuery API. String values must be
+double-quoted inside the string: `'"string-value"'`.
 
 ### `ref()` — the core of the language
 
@@ -212,123 +240,63 @@ stg_orders"                                           when stg_orders
                                                       changes
 ```
 
-(`resolve()` returns a relation *name*, not a CTE — the compiled SQL contains a straight
-`FROM \`my-project.analytics.stg_orders\``.)
-
-```sqlx
-config { type: "view" }
-
-SELECT *
-FROM ${ref("stg_orders")}
-```
-
 The `${...}` wrapper is JSX-style interpolation: the expression is evaluated at compile time and
 the result is substituted into the SQL text as a literal.
 
+⚠️ **`ref()` resolves to a fully-qualified relation, not a CTE.** `FROM ${ref("stg_orders")}`
+compiles to `FROM \`my-project.analytics.stg_orders\``. There is no join, no subquery, no
+materialization — it is a straight reference to the upstream table.
 
-
-### `source()` — declaring external tables
-
-`source()` declares data that Dataform does **not** create: a table that already exists in
-BigQuery, written by another system.
-
-```
-definitions/sources/raw_orders.sqlx
-
-config {
-  type: "declarative",
-  database: "source-project",
-  schema: "raw",
-  description: "Raw orders landing table"
-}
-
-source("raw_orders", "orders")
-```
-
-The **file name** is the source name (`raw_orders`); the **argument** is the table name (`orders`).
-Models then use `SELECT * FROM ${source("raw_orders", "orders")}`.
-
-| Field | Meaning |
-|-------|---------|
-| `type` | Must be `"declarative"`. |
-| `database` | Project the source table lives in. |
-| `schema` | Dataset the source table lives in. |
-| `description` | Human description. |
-| `loaded_at_field` | Column holding the load timestamp. Used by freshness checks. |
-| `freshness` | `{ errorAfter: "48h", warnAfter: "24h" }` — how stale is too stale. |
+#### The `ref()` call forms
 
 ```sqlx
-config {
-  type: "declarative",
-  database: "source-project",
-  schema: "raw",
-  loaded_at_field: "_loaded_at",
-  freshness: {
-    errorAfter: "48h",
-    warnAfter: "24h"
-  }
-}
-
-source("raw_orders", "orders")
+${ref("name")}                                       // name only
+${ref("schema", "name")}                             // schema + name
+${ref("database", "schema", "name")}                 // full path
+${ref({ name: "name", schema: "schema", database: "database" })}  // object form
 ```
 
-💡 **`loaded_at_field` + `freshness` is how you get pipeline monitoring for free.** Dataform
-checks the source's load timestamp and raises a warning or an error if the data has not arrived
-on schedule. This catches "the upstream job silently stopped three days ago" — the failure mode
-that is otherwise invisible until someone notices a stale dashboard.
+- With **one** value, the default database and schema are used, and the value is the `name`.
+- With **two** values, the default database is used and the values are `schema` and `name`.
+- With **three** values, they are `database`, `schema`, and `name`.
+- The **object form** `{ name, schema, database }` is the most readable, and it is the form to
+  reach for when you need to override the schema.
 
-### `resolve()` and `is_incremental()`
+```sqlx
+// Read from a different dataset
+FROM ${ref({ name: "stg_orders", schema: "raw_staging" })}
+```
 
-`resolve("name")` looks up `vars` in `dataform.json` at compile time. Nested access works too:
-`resolve("featureFlags.enableNewPricing")`.
+⚠️ **The override order matters when you mix forms.** `ref("schema", "name")` is positional;
+`ref({ name: ..., schema: ... })` is named. Passing `ref("name", { schema: "other" })` — a name
+followed by an options object — is **not** a documented call form. Use the object form
+`ref({ name: "name", schema: "other" })` or the positional form `ref("schema", "name")`.
+
+### `resolve()` — resolving without a dependency
+
+`resolve()` works like `ref()`, but **instead of adding a dependency**, it resolves the provided
+reference so it can be used in SQL.
 
 ```sqlx
 config { type: "view" }
 
 SELECT *
-FROM ${source("raw_orders", "orders")}
-WHERE order_date >= '${resolve("startDate")}'
-  AND region IN (${resolve("regions")})
+FROM ${resolve("stg_orders")}
 ```
 
-`is_incremental()` returns `true` **only** on an incremental run of an `incremental` model. On
-the first run (or a full refresh), it is `false`.
-
-### `incremental()` and the `when()` idiom
-
-`incremental()` is a helper that produces the WHERE clause for an incremental model. The
-standard Dataform pattern builds the clause with `when()`:
-
-```sqlx
-config {
-  type: "incremental",
-  uniqueKey: "order_id"
-}
-
-SELECT
-    order_id,
-    customer_id,
-    order_date,
-    total_amount
-FROM ${source("raw_orders", "orders")}
-WHERE ${when(incremental(), "order_date > @last_run", "TRUE")}
-```
-
-This reads as: *on an incremental run, filter to rows after the last run; on a full rebuild,
-take everything.* The `when()` function takes a condition and returns the true or false branch.
-
-`when(condition, trueValue, falseValue)` — the two-argument form returns `trueValue` when the
-condition holds and `""` otherwise; the three-argument form returns the false branch.
+💡 **Use `resolve()` when you need the table name but not the ordering.** For example, in a
+`UNION ALL` branch you want to read the current state of a table without forcing a rebuild, or
+when you need the qualified name as a string literal rather than in a FROM clause.
 
 ### `self()` — referencing your own table
 
-`self()` returns the model's own fully-qualified relation name. You need it to read the
-previous state of the table you are writing:
+`self()` is equivalent to `resolve(name())`. It returns a valid SQL string referencing the table
+produced by this action.
 
 ```sqlx
 config {
   type: "incremental",
-  uniqueKey: "order_id"
+  uniqueKey: ["order_id"]
 }
 
 SELECT
@@ -336,7 +304,7 @@ SELECT
     o.customer_id,
     o.total_amount,
     COALESCE(c.segment, 'unknown') AS segment
-FROM ${source("raw_orders", "orders")} o
+FROM ${ref("orders")} o
 LEFT JOIN ${self()} c
     ON o.order_id = c.order_id
 ```
@@ -344,186 +312,170 @@ LEFT JOIN ${self()} c
 💡 **`self()` in a join is how you enrich with your own historical state** — cumulative
 measures, slowly-changing dimensions, last-known values.
 
-### `publish()` — operational metadata
-
-`publish()` attaches metadata to the relation Dataform creates. It does not change the SQL.
+It also works in `post_operations` to grant access on the table you just built:
 
 ```sqlx
-config {
-  type: "table",
-  description: "Order fact table"
-}
+config { type: "table" }
 
-SELECT * FROM ${ref("stg_orders")}
+SELECT * FROM ${ref("orders")}
 
-post {
-  publish({
-    schema: "analytics",
-    database: "my-project",
-    description: "Order fact table, one row per order",
-    columns: {
-      order_id: { description: "Surrogate key of the order" },
-      customer_id: { description: "Surrogate key of the customer" }
-    },
-    rowCount: 1234567,
-    updatedAt: "2025-01-15T10:30:00Z"
-  })
+post_operations {
+  GRANT `roles/bigquery.dataViewer`
+  ON TABLE ${self()}
+  TO "group:analytics@company.com"
 }
 ```
 
-💡 **`publish()` does not change the SQL.** It is how a model tells the catalog what it contains,
-which is what makes the lineage graph readable six months later. `publishWithSelector()` is the
-variant that publishes metadata for a **subset** of rows — used with `operate()` operations to
-publish metadata about a specific partition or slice.
-
-### `operate()` — declarative operations
-
-`operate()` declares things to do to the relation *after* it is built.
+### `when()` — conditional SQL
 
 ```sqlx
-config {
-  type: "table"
-}
-
-SELECT * FROM ${ref("stg_orders")}
-
-post {
-  operations {
-    delete  { where: "order_date < DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)" }
-    update  { where: "status = 'pending'", columns: { status: "'cancelled'" } }
-    assert  { where: "order_id IS NULL", error: "Found null order_id" }
-    grant   { roles: ["roles/bigquery.dataViewer"],
-              grantees: ["group:analytics@company.com"] }
-    revoke  { roles: ["roles/bigquery.dataOwner"],
-              grantees: ["user:contractor@vendor.com"] }
-  }
-}
+when(cond: boolean, trueCase: string, falseCase: string) => string
 ```
 
-| Action | What it does |
-|--------|--------------|
-| `delete` | DELETE matching rows. |
-| `update` | UPDATE matching rows, setting columns. |
-| `assert` | Fail the run if any row matches. |
-| `grant` | GRANT a role to a grantee. |
-| `revoke` | REVOKE a role from a grantee. |
-
-💡 **`delete` is the idiomatic way to implement retention.** Partition expiration is cheaper, but
-`operate({action: "delete"})` works on any table and can be conditional.
-
-### `unitTest` blocks — the test framework
-
-Dataform has first-class unit tests. A `unitTest` block defines test cases for a model.
-
-```sqlx
-config {
-  type: "table"
-}
-
-SELECT * FROM ${source("raw_orders", "orders")}
-
-unitTest("stg_orders", {
-  "a valid order passes": {
-    ref: { stg_orders: { order_id: 1, customer_id: 10, total_amount: 25.0 } },
-    rows: [
-      { order_id: 1, customer_id: 10, total_amount: 25.0 }
-    ],
-    columns: {
-      order_id: { not_null: true },
-      total_amount: { not_null: true, equals: 25.0 }
-    }
-  }
-})
-```
-
-Anatomy:
-
-- **Test name** — the first string argument. It must be unique within the file.
-- **`ref`** — the mocked inputs. `ref: { stg_orders: { ... } }` supplies rows for the `stg_orders`
-  relation, so the test runs against **fake data**, not real BigQuery.
-- **`rows`** — the expected output rows.
-- **`columns`** — per-column expectations using `expect` operators.
-
-| Operator | Asserts |
-|----------|---------|
-| `equals` / `not_equals` | The value equals (or does not equal) the expected value. |
-| `not_null` | The value is not null. |
-| `in_set` / `not_in_set` | The value is (or is not) one of a set of values. |
-| `between` | The value falls in a range (inclusive). |
-| `matches` | The value matches a regex pattern. |
-| `contains` | The value contains a substring. |
-| `length_equals` | The array/string length equals a number. |
-| `row_count` | The number of rows equals a number. |
-| `aggregate_equals` | An aggregate over the rows equals a value. |
-
-```sqlx
-unitTest("stg_orders", {
-  "rejects negative amounts": {
-    ref: { stg_orders: { order_id: 2, total_amount: -5.0 } },
-    rows: [{ order_id: 2, total_amount: -5.0 }],
-    columns: {
-      total_amount: { not_in_set: [-5.0] },
-      order_id: { not_null: true, in_set: [1, 2, 3] }
-    }
-  },
-  "produces exactly one row": {
-    ref: { stg_orders: { order_id: 3 } },
-    rows: [{ order_id: 3 }],
-    columns: { order_id: { row_count: 1 } }
-  }
-})
-```
-
-⚠️ **`unitTest` runs against mocked `ref` data, not real tables.** That is what makes it fast —
-the test does not query BigQuery at all (against the emulator, or in Dataform Cloud's test
-environment). The trade-off: you must mock *every* upstream input your model reads, or the test
-fails with a missing-input error.
-
-### `assert` blocks — standalone assertions
-
-A `unitTest` validates a model in isolation. An `assert` validates a **data quality rule** about
-a relation, and can be declared on its own or attached to a model via `config { assertions: ... }`.
-
-```sqlx
-assert {
-  name: "fct_orders_has_no_orphans",
-  description: "Every order must reference a known customer",
-  rows: [{ order_id: "1", customer_id: "999" }],
-  columns: { order_id: { not_null: true } }
-}
-```
-
-💡 **Assertions are how you turn a silent data-quality problem into a failed build.** A model
-that produces null keys or loses 90% of its rows should fail loudly, not quietly write bad data
-into a dashboard.
-
-
-### `include` / `exclude`, and reading project config
-
-Inside a `config` block, `include` and `exclude` control which files contribute to the model:
-
-```sqlx
-config {
-  type: "table",
-  include: ["definitions/stg/*.sqlx"],
-  exclude: ["definitions/stg/stg_orders.sqlx"]
-}
-```
-
-And you can read project-level and model-level config from SQLX:
+Shorthand for an `if` condition — equivalent to `cond ? trueCase : falseCase`. **`falseCase` is
+optional and defaults to an empty string.**
 
 ```sqlx
 config { type: "view" }
 
-SELECT *
-FROM ${source("raw_orders", "orders")}
-WHERE dataset = '${dataform.projectConfig.defaultDataset}'
-  AND ${dataform.projectConfig.vars.filterFlag} = true
+SELECT ${when(
+  dataform.projectConfig.vars.myVariableName === "myVariableValue",
+  "myVariableName is set to myVariableValue!",
+  "myVariableName is not set to myVariableValue!"
+)}
 ```
 
-- `dataform.projectConfig.vars.foo` — access a var
-- `dataform.projectConfig.defaultDataset` — the project config values
-- `dataform.config.someConfig` — access a value from the model's own `config` block
+### `incremental()` — is this an incremental run?
+
+```sqlx
+incremental() => boolean
+```
+
+Returns `true` when the current context indicates that the table will be built incrementally. On
+the first run, or a full refresh, it returns `false`.
+
+The standard Dataform incremental idiom combines it with `when()`:
+
+```sqlx
+config {
+  type: "incremental",
+  uniqueKey: ["order_id"]
+}
+
+SELECT order_id, customer_id, order_date, total_amount
+FROM ${ref("orders")}
+WHERE ${when(incremental(), "order_date > @last_run", "TRUE")}
+```
+
+This reads as: *on an incremental run, filter to rows after the last run; on a full rebuild,
+take everything.*
+
+### Data source declarations
+
+A declaration tells Dataform about an existing table it does not create.
+
+```sqlx
+// definitions/sources.sqlx
+
+config {
+  type: "declaration",
+  database: "source-project",
+  schema: "raw",
+  name: "orders"
+}
+```
+
+You declare one source per SQLX file. Reference it with `ref("orders")` — it behaves like any
+other action for dependency purposes.
+
+For multiple declarations, use a JavaScript file:
+
+```javascript
+// definitions/declarations.js
+
+declare({ database: "source-project", schema: "raw", name: "orders" });
+declare({ database: "source-project", schema: "raw", name: "customers" });
+```
+
+### Custom SQL operations
+
+`type: "operations"` lets you run arbitrary BigQuery SQL that Dataform passes through
+unmodified.
+
+```sqlx
+// definitions/cleanup.sqlx
+
+config { type: "operations" }
+
+DELETE FROM dataset.table WHERE country = 'GB';
+DELETE FROM dataset.table WHERE country = 'FR';
+```
+
+BigQuery runs all the operations in a file in the same context, and creates the run SQL by
+joining them with a semicolon.
+
+To create a table that other actions can reference, set `hasOutput: true` and use `self()` in
+the `CREATE`:
+
+```sqlx
+config {
+  type: "operations",
+  hasOutput: true
+}
+
+CREATE OR REPLACE TABLE ${self()} AS (SELECT 1 AS test)
+```
+
+⚠️ **When `hasOutput` is true, the operation's name must match the output table's name.** That
+is how Dataform knows what relation the operation produced.
+
+### Assertions
+
+Assertions are data quality test queries. Dataform runs them every time it updates your
+workflow, and alerts you if any fail.
+
+```sqlx
+// definitions/assertions.sqlx
+
+config { type: "assertion" }
+
+SELECT *
+FROM ${ref("fct_orders")}
+WHERE order_id IS NULL OR customer_id IS NULL
+```
+
+A `type: "assertion"` file can be set as a dependency and as a dependent by declaring
+`dependencies` in the `config` block.
+
+💡 **Assertions are how you turn a silent data-quality problem into a failed build.** A model
+that produces null keys should fail loudly, not quietly write bad data into a dashboard.
+
+### JavaScript blocks and `includes/`
+
+You can add JavaScript to a SQLX file inline or in a `js` block:
+
+```sqlx
+config { type: "view" }
+
+js {
+  const columnName = "foo";
+}
+
+SELECT
+  1 AS ${columnName},
+  ${bar(1)} AS two
+```
+
+For code shared across a **single file**, use a `js` block. For code shared across the whole
+repository, use `includes/`:
+
+```javascript
+// includes/constants.js
+const launch_date = "11.11.2011";
+module.exports = { launch_date };
+```
+
+For code shared across **multiple repositories**, create or import a package.
 
 ### SQLX vs plain SQL vs dbt Jinja
 
@@ -531,10 +483,10 @@ WHERE dataset = '${dataform.projectConfig.defaultDataset}'
 |-----------|------|--------------|--------------|
 | Templating style | JSX-style `${expression}` | None | Jinja `{{ expression }}` / `{% statement %}` |
 | Materialization | Built into `config` | You write the DDL yourself | Macros (`materialization` blocks) |
-| Dependency declaration | `ref()` / `source()` | None — external orchestration | `ref()` / `source()` |
-| Test framework | `unitTest` blocks + `assert` | You write and run them | `schema.yml` or `dbt tests` |
-| Config | `dataform.json` + per-file `config` block | N/A | `dbt_project.yml` + model `config` |
-| Incremental | `is_incremental()` + `incremental()` | Manual `MERGE` | `is_incremental()` macro |
+| Dependency declaration | `ref()` | None — external orchestration | `ref()` / `source()` |
+| Test framework | `type: "assertion"` files + `config.assertions` | You write and run them | `schema.yml` or `dbt tests` |
+| Config | `workflow_settings.yaml` + per-file `config` | N/A | `dbt_project.yml` + model `config` |
+| Incremental | `incremental()` context method | Manual `MERGE` | `is_incremental()` macro |
 | Errors on bad ref | Compile-time, always | Runtime | Compile-time, usually |
 | Verbosity | Moderate | None | High — Jinja blocks are dense |
 | Portability | Dataform only | Universal | dbt only |
@@ -545,17 +497,30 @@ Chapter 1.1 — a folder of scripts with encoded-by-filename ordering.
 
 💡 **SQLX is roughly halfway between plain SQL and dbt Jinja in terms of ceremony.** The `config`
 block is a formal declaration; the `${}` interpolation is familiar to anyone who has written
-React; and there is no separate YAML file for tests — tests live next to the code they test.
+React; and tests live next to the code they test.
 
 ---
 
-## 🛠️ Hands-On: One File Per Model Type
+## 🛠️ Hands-On: One File Per Action Type
 
 Create these files under `definitions/`, then run `dataform compile` after each.
 
-### Step 1 — A `view` model
+### Step 1 — Declare the source
 
-`definitions/marts/dim_customers.sqlx`:
+`definitions/sources.sqlx`:
+
+```sqlx
+config {
+  type: "declaration",
+  database: "source-project",
+  schema: "raw",
+  name: "orders"
+}
+```
+
+### Step 2 — A `view` action
+
+`definitions/dim_customers.sqlx`:
 
 ```sqlx
 config {
@@ -575,32 +540,33 @@ SELECT
 FROM ${ref("stg_customers")}
 ```
 
-### Step 2 — A `table` model
+### Step 3 — A `table` action
 
-`definitions/stg/stg_orders.sqlx`:
+`definitions/stg_orders.sqlx`:
 
 ```sqlx
 config {
   type: "table",
   description: "Staged orders, deduplicated",
+  tags: ["daily"],
   partitionBy: { field: "order_date", dataType: "date" },
   clusterBy: ["customer_id"]
 }
 
 SELECT order_id, customer_id, order_date, total_amount
-FROM ${source("raw_orders", "orders")}
+FROM ${ref("orders")}
 QUALIFY ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY _loaded_at DESC) = 1
 ```
 
-### Step 3 — An `incremental` model
+### Step 4 — An `incremental` action
 
-`definitions/marts/fct_orders.sqlx`:
+`definitions/fct_orders.sqlx`:
 
 ```sqlx
 config {
   type: "incremental",
   description: "Order fact table, incrementally maintained",
-  uniqueKey: "order_id",
+  uniqueKey: ["order_id"],
   partitionBy: { field: "order_date", dataType: "date" },
   clusterBy: ["customer_id"],
   protected: true
@@ -612,116 +578,63 @@ SELECT
     o.order_date,
     o.total_amount,
     COALESCE(c.segment, 'unknown') AS segment
-FROM ${source("raw_orders", "orders")} o
+FROM ${ref("orders")} o
 LEFT JOIN ${self()} c
     ON o.order_id = c.order_id
 WHERE ${when(incremental(), "o.order_date > @last_run", "TRUE")}
 ```
 
-### Step 4 — An `ephemeral` model
+### Step 5 — A custom operation
 
-`definitions/int/int_order_items_enriched.sqlx`:
-
-```sqlx
-config {
-  type: "ephemeral",
-  description: "Order items joined to order context; inlined as a CTE"
-}
-
-SELECT
-    i.order_id,
-    i.product_id,
-    i.quantity * i.unit_price AS line_total,
-    o.order_date,
-    o.customer_id
-FROM ${ref("stg_order_items")} i
-JOIN ${ref("stg_orders")} o
-    ON i.order_id = o.order_id
-```
-
-⚠️ **An `ephemeral` model cannot be referenced by anything except a `view`, `table`, or
-`incremental` model that will actually materialize it.** If two materialized models reference the
-same ephemeral model, it is inlined into both — which defeats the purpose and doubles the cost.
-
-### Step 5 — A model with post-operations
-
-`definitions/marts/fct_order_items.sqlx`:
+`definitions/cleanup.sqlx`:
 
 ```sqlx
-config {
-  type: "table",
-  description: "Order line items"
-}
+config { type: "operations" }
 
-SELECT order_id, product_id, quantity, unit_price
-FROM ${ref("int_order_items_enriched")}
-
-post {
-  operations {
-    delete { where: "order_id IN (SELECT order_id FROM ${source("raw_orders", "cancelled_orders")})" }
-    grant  { roles: ["roles/bigquery.dataViewer"],
-             grantees: ["group:analytics@company.com"] }
-  }
-  publish({
-    description: "Order line items, published to the analytics dataset",
-    rowCount: 4819203,
-    updatedAt: "2025-01-15T10:30:00Z"
-  })
-}
+DELETE FROM `my-project.analytics.stg_orders`
+WHERE order_date < DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY);
 ```
 
-### Step 6 — A unit test
+### Step 6 — An assertion
 
-`definitions/stg/stg_orders.sqlx` — append the test:
+`definitions/assertions.sqlx`:
 
 ```sqlx
-unitTest("stg_orders", {
-  "keeps only the latest version of each order": {
-    ref: {
-      stg_orders: {
-        order_id: 1,
-        customer_id: 10,
-        total_amount: 25.0,
-        _loaded_at: "2025-01-01"
-      }
-    },
-    rows: [{ order_id: 1, customer_id: 10, total_amount: 25.0 }],
-    columns: {
-      order_id: { not_null: true },
-      total_amount: { equals: 25.0 }
-    }
-  }
-})
+config { type: "assertion" }
+
+SELECT *
+FROM ${ref("fct_orders")}
+WHERE order_id IS NULL
 ```
 
-### Step 7 — Compile and run the tests
+### Step 7 — Compile and run
 
 ```bash
 # Compile — catches config errors, missing refs, bad types
 dataform compile
 
-# Run the unit tests
+# Run the assertions
 dataform test
 
-# Compile just one model and its dependencies
+# Compile just one action and its dependencies
 dataform compile --nodes fct_orders
 
-# Inspect the compiled SQL for the incremental model — note the MERGE
+# Inspect the compiled SQL for the incremental action — note the MERGE
 grep -A 20 "fct_orders" .dataform/run.sql | head -40
 ```
 
 ### Step 8 — Exercise `resolve()` and `when()`
 
-Add a var to `dataform.json` — `{ "vars": { "region": "us-east1", "minAmount": 10.0 } }` —
-then use it:
+Add a var to `workflow_settings.yaml` — `vars: { region: 'us-east1', minAmount: '10.0' }` —
+then use them:
 
 ```sqlx
 config { type: "view" }
 
 SELECT *
 FROM ${ref("stg_orders")}
-WHERE region = '${resolve("region")}'
-  AND total_amount >= ${resolve("minAmount")}
+WHERE region = '${dataform.projectConfig.vars.region}'
+  AND total_amount >= ${dataform.projectConfig.vars.minAmount}
 ```
 
 ```bash
@@ -729,45 +642,60 @@ dataform compile --vars '{"region": "eu-west1"}'
 grep "eu-west1" .dataform/run.sql    # confirms the override reached the SQL
 ```
 
+### Step 9 — Try the object form of `ref()`
+
+```sqlx
+FROM ${ref({ name: "stg_orders", schema: "raw_staging" })}
+```
+
+```bash
+dataform compile
+grep -o "raw_staging\.stg_orders\|analytics\.stg_orders" .dataform/run.sql | sort -u
+```
+
 ---
 
 ## 🔑 Key Takeaways
 
-- SQLX = SQL + `${}` expressions + a `config` block (+ optional `post` block). The `config` block must come first.
-- There are exactly four types: `table`, `view`, `incremental`, `ephemeral`. `table` rebuilds fully; `incremental` merges; `ephemeral` becomes a CTE and never materializes.
-- `ref()` is four things at once: name resolution, a DAG edge, schema awareness, and an invalidation trigger. It resolves to a fully-qualified relation.
-- `source()` declares external tables. The **file name** is the source name; the **argument** is the table name. Source `config` needs `type: "declarative"`.
-- `resolve()` reads compile-time `vars`. `when()` picks between branches. `is_incremental()` is true only on incremental runs.
-- The standard incremental idiom is `WHERE ${when(incremental(), "order_date > @last_run", "TRUE")}` — a filter on incremental runs, everything on a full rebuild.
-- `self()` returns your own model's relation — use it to join against the previous state of the table.
-- `operate()` declares `delete`, `update`, `assert`, `grant`, `revoke` as post-execution operations.
-- `publish()` attaches operational metadata to the relation; it does not change the SQL.
-- `unitTest` blocks validate models against **mocked** `ref` inputs. The `expect` operators are: `equals`, `not_equals`, `not_null`, `in_set`, `not_in_set`, `between`, `matches`, `contains`, `length_equals`, `row_count`, `aggregate_equals`.
-- `hermetic: true` is the cheapest guard against undeclared dependencies — turn it on for your marts layer.
-- `loaded_at_field` + `freshness` on sources gives you upstream-staleness monitoring for free.
+- SQLX = SQL + `${}` expressions + a `config` block. The `config` block must come first.
+- There are exactly three types: `table`, `view`, `incremental`. `table` rebuilds fully, `incremental` merges, `view` stores nothing.
+- An `incremental` table **must** have a WHERE clause, and `uniqueKey` is a list — `["order_id"]`, not `"order_id"`.
+- `ref()` is four things at once: name resolution, a DAG edge, schema awareness, and an invalidation trigger.
+- `ref()` call forms: `ref("name")`, `ref("schema", "name")`, `ref("database", "schema", "name")`, or `ref({ name, schema, database })`. A name followed by an options object is **not** a documented form.
+- `resolve()` resolves a reference **without** adding a dependency; `self()` is equivalent to `resolve(name())`.
+- `when(cond, trueCase, falseCase)` — `falseCase` is optional and defaults to `""`.
+- `incremental()` returns a boolean: true only when the table is being built incrementally. The standard idiom is `WHERE ${when(incremental(), "order_date > @last_run", "TRUE")}`.
+- `hermetic: true` means all dependencies are explicitly declared — the compiler enforces it.
+- `protected` is **incremental only**; it makes the action ignore `full-refresh`.
+- `onSchemaChange` accepts `IGNORE`, `FAIL`, `EXTEND`, `SYNCHRONIZE`. `SYNCHRONIZE` can lose data.
+- `config.assertions` supports `nonNull`, `uniqueKey`, `uniqueKeys`, and `rowConditions` — **not** `rowCount`.
+- Data source declarations are `type: "declaration"` files in `definitions/`. There is no special `sources/` folder.
+- Custom SQL uses `type: "operations"`, with `hasOutput: true` when other actions must reference the output.
+- Assertions are `type: "assertion"` files, and Dataform runs them on every workflow update.
 
 ---
 
 ## 📚 Practice Exercises
 
-1. **Type selection audit.** You have five models: a customer dimension joined into 40 dashboards, a 3-billion-row click stream, a small currency lookup, a reusable cleansed-orders CTE used by two marts, and a daily aggregate. Assign a `type` to each and justify it. Then find the one that would be most expensive if you got it wrong, and estimate the cost difference.
+1. **Type selection audit.** You have five actions: a customer dimension joined into 40 dashboards, a 3-billion-row click stream, a small currency lookup, a reusable cleansed-orders CTE used by two marts, and a daily aggregate. Assign a `type` to each and justify it. Then find the one that would be most expensive if you got it wrong, and estimate the cost difference.
 
-2. **Config block archaeology.** Take a plain SQL file that creates a partitioned, clustered table with a `CREATE OR REPLACE` and a `DELETE` afterwards. Rewrite it as SQLX. Identify every piece of SQL you moved into `config` and every piece you moved into `post { operations { ... } }`. Explain what the compiler now knows that it did not before.
+2. **Config block archaeology.** Take a plain SQL file that creates a partitioned, clustered table with a `CREATE OR REPLACE` and a `DELETE` afterwards. Rewrite it as SQLX. Identify every piece of SQL you moved into `config`, every piece you moved into a `type: "operations"` file, and explain what the compiler now knows that it did not before.
 
-3. **Build a model type zoo.** Create one model of each of the four types. Compile, then inspect `.dataform/run.sql` and write down the exact DDL Dataform generated for each — `CREATE OR REPLACE VIEW`, `CREATE OR REPLACE TABLE`, `MERGE`, and the CTE inlining. Then explain why `ephemeral` produces no statement of its own.
+3. **Build an action zoo.** Create one action of each of the three types, plus a declaration, an operation, and an assertion. Compile, then inspect `.dataform/run.sql` and write down the exact SQL Dataform generated for each. Then explain why a declaration produces no statement of its own.
 
-4. **Unit test gauntlet.** Write a `unitTest` for `stg_orders` with at least six cases, using `equals`, `not_null`, `in_set`, `not_in_set`, `between`, `matches`, `contains`, and `row_count`. Then deliberately break the model (change a filter, change a column name) and confirm each test fails for the right reason.
+4. **`ref()` form drill.** Write the same cross-schema reference four ways: `ref("name")`, `ref("schema", "name")`, `ref("database", "schema", "name")`, and `ref({ name, schema, database })`. Compile each and verify the compiled SQL resolves to the relation you expect. Then try `ref("name", { schema: "other" })` and record the error — explain why the object form is the one to reach for.
 
-5. **Hermeticity experiment.** Take a model and set `hermetic: true`. Add an undocumented table reference to a table that is not declared via `ref()` or `source()`. Compile and record the error. Then find a real dependency edge you had forgotten and add it to `config { dependencies: [...] }` instead. Explain why `dependencies` is the right fix for an ordering dependency but not for a data dependency.
+5. **Hermeticity experiment.** Set `hermetic: true` on an action, then add an undocumented table reference. Compile and record the error. Then find a real dependency edge you had forgotten and add it as a declaration plus a `ref()`. Explain why `dependencies` is the right tool for an ordering dependency but not for a data dependency.
 
 ---
 
 ## 📖 Further Reading
 
-- Dataform SQLX reference — https://cloud.google.com/dataform/docs/reference/sqlx
-- Dataform configuration reference — https://cloud.google.com/dataform/docs/reference/config
-- Dataform `ref()` and `source()` — https://cloud.google.com/dataform/docs/reference/sqlx-ref-and-source
-- Dataform unit tests — https://cloud.google.com/dataform/docs/tests/unit-tests
-- Dataform assertions — https://cloud.google.com/dataform/docs/tests/assertions
-- Dataform operations — https://cloud.google.com/dataform/docs/reference/operations
+- Dataform core reference — https://cloud.google.com/dataform/docs/reference/dataform-core-reference
+- Declare data sources — https://cloud.google.com/dataform/docs/declare-source
+- Declare dependencies — https://cloud.google.com/dataform/docs/dependencies
+- Add custom SQL operations — https://cloud.google.com/dataform/docs/custom-sql
+- JavaScript in Dataform — https://cloud.google.com/dataform/docs/javascript-in-dataform
+- Dataform assertions — https://cloud.google.com/dataform/docs/assertions
+- Configure additional actions — https://cloud.google.com/dataform/docs/configure-additional-actions
 - Dataform vs dbt — https://cloud.google.com/dataform/docs/comparison/dataform-and-dbt

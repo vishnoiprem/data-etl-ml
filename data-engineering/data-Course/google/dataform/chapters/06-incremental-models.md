@@ -41,7 +41,7 @@ you set `uniqueKey`.
 
 | | `merge` strategy | `insert` strategy |
 |---|---|---|
-| Triggered by | `config { uniqueKey: "id" }` | **No** `uniqueKey` in config |
+| Triggered by | `config { uniqueKey: ["id"] }` | **No** `uniqueKey` in config |
 | Generated SQL | `MERGE target AS D USING source AS S ON ...` | `INSERT INTO target (cols) SELECT ...` |
 | Existing key | `WHEN MATCHED THEN UPDATE` | Row appended (duplicate) |
 | New key | `WHEN NOT MATCHED THEN INSERT` | Row appended |
@@ -70,25 +70,27 @@ decoration: it is what makes the model safely re-runnable.
 where no row is ever updated) and you control the run schedule tightly enough to guarantee no
 double-runs.
 
-### `is_incremental()` and the `when()` idiom
+### `incremental()` and the `when()` idiom
 
 The subtlety with an incremental model is that its SQL must work **twice**: once for the initial
 load, and once for every subsequent run. The filter that restricts to "new data" must be
 **inactive** on the first run — otherwise the table would only ever contain the last slice.
 
-Dataform exposes this with two helpers:
+Dataform exposes this with the `incremental()` helper, combined with `when(cond, trueCase, falseCase?)`:
 
 | Helper | Returns |
 |---|---|
 | `incremental()` | `true` when the model already exists (not the first run) |
-| `is_incremental()` | Same meaning, dbt-style alias |
+
+⚠️ **There is no `is_incremental()` in Dataform** — that's the dbt spelling. Dataform's helper is
+`incremental()`, used as `${when(incremental(), "...")}`.
 
 The canonical idiom combines them with `when()`:
 
 ```sqlx
 config {
   type: "incremental",
-  uniqueKey: "id"
+  uniqueKey: ["id"]
 }
 
 SELECT
@@ -96,7 +98,7 @@ SELECT
   customer_id,
   amount,
   updated_at
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE
   ${when(incremental(), "updated_at > (SELECT MAX(updated_at) FROM ${self()})")}
 ```
@@ -159,11 +161,11 @@ The `MAX(updated_at)` approach derives the watermark from the data itself. The a
 // definitions/marts/fct_orders.sqlx
 config {
   type: "incremental",
-  uniqueKey: "id"
+  uniqueKey: ["id"]
 }
 
 SELECT id, customer_id, amount, updated_at
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE updated_at > ${vars("last_run_ts")}
 ```
 
@@ -178,10 +180,10 @@ vars {
 
 ```sqlx
 // definitions/marts/fct_orders.sqlx
-config { type: "incremental", uniqueKey: "id" }
+config { type: "incremental", uniqueKey: ["id"] }
 
 SELECT id, customer_id, amount, updated_at
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE updated_at > (SELECT last_watermark FROM ${ref("ops_last_run")})
 ```
 
@@ -230,10 +232,10 @@ The fix is to **re-read a window of already-processed data** and let the `MERGE`
 duplicates:
 
 ```sqlx
-config { type: "incremental", uniqueKey: "id" }
+config { type: "incremental", uniqueKey: ["id"] }
 
 SELECT id, customer_id, amount, updated_at
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE
   ${when(
     incremental(),
@@ -345,8 +347,8 @@ replaces whole partitions present in the new data. The strategy defaults to `MER
 ```sqlx
 config {
   type: "incremental",
-  uniqueKey: "id",
-  partitionBy: { order_date: "DATE(order_date)" },
+  uniqueKey: ["id"],
+  partitionBy: "DATE(order_date)",
   partition_expiration_days: 90,
   require_partition_filter: true
 }
@@ -396,7 +398,7 @@ count should be 5000" is meaningless for a table that accumulates.
 ```sqlx
 config {
   type: "incremental",
-  uniqueKey: "id",
+  uniqueKey: ["id"],
   assertions: {
     rowCount: { when: "incremental()", else: true },
     nonNull: ["id", "order_date"],
@@ -431,7 +433,7 @@ FULL REBUILD (type: "table")
   Scanned/run: 1.2 TB     Written/run: 109 GB   Billed/day: 1.31 TB
   Time to first row: ~11 min (full build before any data lands)   Idempotent: Yes
 
-INCREMENTAL (uniqueKey: "id")
+INCREMENTAL (uniqueKey: ["id"])
   Scanned/run: 180 GB     Written/run: 18 GB     Billed/day: 198 GB
   Time to first row: ~45 sec                      Idempotent: Yes (MERGE)
 
@@ -456,7 +458,7 @@ schedule), you can delete the affected partitions first with a **pre-hook**:
 ```sqlx
 config {
   type: "incremental",
-  partitionBy: { order_date: "DATE(order_date)" },
+  partitionBy: "DATE(order_date)",
   pre_operations: [
     {
       "SELECT": "DELETE FROM ${self()} WHERE order_date = @partition_date"
@@ -476,13 +478,27 @@ touches the whole table's metadata. Use it only where that cost is acceptable, a
 
 ## 🛠️ Hands-On: Build an Incremental Orders Model
 
-### Step 1 — The staging model
+### Step 1 — Declare the source and build the staging model
+
+⚠️ **Dataform has no `source()` function** — a source is a `type: "declaration"` file, referenced
+downstream with `ref()`:
+
+```sqlx
+// definitions/sources/raw_orders.sqlx
+config {
+  type: "declaration",
+  database: "my-project",
+  schema: "raw",
+  name: "orders",
+  description: "Raw orders table owned by the source system"
+}
+```
 
 ```sqlx
 // definitions/staging/stg_orders.sqlx
 config {
   type: "table",
-  partitionBy: { order_date: "DATE(order_date)" }
+  partitionBy: "DATE(order_date)"
 }
 
 SELECT
@@ -492,7 +508,7 @@ SELECT
   'complete'           AS order_status,
   TIMESTAMP(order_ts)  AS updated_at,
   DATE(order_ts)       AS order_date
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE order_status != 'cancelled'
 ```
 
@@ -502,8 +518,8 @@ WHERE order_status != 'cancelled'
 // definitions/marts/fct_orders.sqlx
 config {
   type: "incremental",
-  uniqueKey: "order_id",
-  partitionBy: { order_date: "DATE(order_date)" },
+  uniqueKey: ["order_id"],
+  partitionBy: "DATE(order_date)",
   partition_expiration_days: 90,
   assertions: {
     rowCount: { when: "incremental()", else: true },

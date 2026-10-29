@@ -5,13 +5,12 @@
 ## 🎯 What you will learn
 
 - How `ref()` resolves a name to a fully-qualified relation, step by step
-- The precedence rules between `dataform.json` defaults, per-model `config`, and `ref()` overrides
-- How the `sources/` folder is discovered, and what the file name vs the argument means
-- Freshness configuration: `loaded_at_field` + `freshness` on a source
-- How the DAG is built, and how to read `.dataform/run.json` to inspect it
+- The precedence rules between project settings, per-action `config`, and `ref()` overrides
+- How Dataform discovers declarations, and what the `type: "declaration"` config means
+- How the dependency graph is built, and how to read `.dataform/run.json` to inspect it
 - Topological ordering, cycles, and how the compiler reports a missing `ref()`
-- `include`/`exclude`, `disabled` models, `protected` models, and cross-project refs
-- `action_selector`, `actions: ["run"]` vs `["build"]` vs `["test"]`, and ephemeral models in the graph
+- `dependencies` for non-SQL dependencies; `disabled` and `protected` actions
+- Cross-schema and cross-project refs; `action_selector` and the `actions` types
 
 ---
 
@@ -19,35 +18,39 @@
 
 ### How a `ref()` resolves
 
-`ref("stg_orders")` looks up a model **by name** — the filename without the `.sqlx` extension —
-and returns its fully-qualified relation. The resolution is a strict sequence:
+`ref()` looks up an action **by name** — the filename without the extension — and returns its
+fully-qualified relation. The resolution is a strict sequence:
 
 ```
   ref("stg_orders")
         │
         ▼
- ① FIND THE MODEL — look for stg_orders.sqlx anywhere under definitions/
-        │    (excluding definitions/sources/, which holds sources)
-        ▼
- ② APPLY THE TARGET SCHEMA — first match wins:
-      a. the schema in the ref() call:  ref("x", { schema: "other" })
-      b. the model's own config { schema: "..." }
-      c. dataform.json → warehouse.schema
-      d. dataform.json → defaultDataset
+ ① FIND THE ACTION
+   Look for stg_orders.sqlx (or stg_orders.js) under definitions/
+   The name is the filename without its extension.
         │
         ▼
- ③ APPLY THE TARGET DATABASE — same precedence:
-      a. ref("x", { database: "other-project" })
-      b. the model's own config { database: "..." }
-      c. dataform.json → warehouse.database
-      d. dataform.json → defaultProject
+ ② APPLY THE TARGET SCHEMA
+   Which dataset? Resolution order (first match wins):
+      a. the schema in the ref() call itself
+         ref({ name: "stg_orders", schema: "other_schema" })
+      b. the action's own config { schema: "..." }
+      c. workflow_settings.yaml → defaultDataset
         │
         ▼
- ④ RETURN THE QUALIFIED NAME → `my-project.analytics.stg_orders`
+ ③ APPLY THE TARGET DATABASE
+   Same precedence:
+      a. ref({ name: "stg_orders", database: "other-project" })
+      b. the action's own config { database: "..." }
+      c. workflow_settings.yaml → defaultProject
+        │
+        ▼
+ ④ RETURN THE QUALIFIED NAME
+   `my-project.analytics.stg_orders`
 ```
 
 The result is substituted into your SQL as a literal, and **a DAG edge is created** from
-`stg_orders` to the model that called `ref()`.
+`stg_orders` to the action that called `ref()`.
 
 ### The precedence table
 
@@ -55,43 +58,35 @@ This is the single most useful thing to internalize:
 
 | Priority | Source | Example |
 |----------|--------|---------|
-| 1 (highest) | The `ref()` call itself | `ref("stg_orders", { schema: "other_schema" })` |
-| 2 | The model's own `config` block | `config { schema: "staging" }` |
-| 3 | `dataform.json` → `warehouse` | `warehouse.schema`, `warehouse.database` |
-| 4 (lowest) | `dataform.json` → `default*` | `defaultDataset`, `defaultProject` |
+| 1 (highest) | The `ref()` call itself | `ref({ name: "stg_orders", schema: "other_schema" })` |
+| 2 | The action's own `config` block | `config { schema: "staging" }` |
+| 3 (lowest) | `workflow_settings.yaml` | `defaultDataset`, `defaultProject` |
 
-💡 **A per-model `config { schema: ... }` affects where that model is *written*.** A
-`ref("x", { schema: "..." })` affects where `x` is *read from*. They are different things, and
-mixing them up is the classic "why is my table in the wrong dataset" bug.
+💡 **A per-action `config { schema: ... }` affects where that action is *written*.** A
+`ref({ schema: ... })` affects where the referenced action is *read from*. They are different
+things, and mixing them up is the classic "why is my table in the wrong dataset" bug.
 
-### `ref()` with a custom schema
-
-```sqlx
-config { type: "view" }
-
-SELECT *
-FROM ${ref("stg_orders", { schema: "raw_staging" })}
-```
-
-This reads `my-project.raw_staging.stg_orders` while still declaring a dependency on the
-`stg_orders` **model**. Use it when the same logical model exists materialized in several
-datasets — e.g. a `stg_orders` model built into both `analytics` and `sandbox`, and one
-particular consumer needs the sandbox copy.
+### The `ref()` call forms
 
 ```sqlx
-// Cross-project reference
-FROM ${ref("stg_orders", { database: "other-project", schema: "staging" })}
+${ref("name")}                                       // name only
+${ref("schema", "name")}                             // schema + name
+${ref("database", "schema", "name")}                 // full path
+${ref({ name: "name", schema: "schema", database: "database" })}  // object form
 ```
 
-⚠️ **A `ref()` override does not create a new model.** It still points at the same node in the
-DAG. If `stg_orders` lives in `analytics` but you reference it with `{ schema: "raw_staging" }`,
-Dataform will still build `analytics.stg_orders` and then your query will read
-`raw_staging.stg_orders` — which may not exist. The override is for *reading* an already-
-materialized variant, not for redirecting the build.
+- With **one** value, the default database and schema are used; the value is the `name`.
+- With **two** values, the default database is used; the values are `schema` and `name`.
+- With **three** values, they are `database`, `schema`, and `name`.
+- The **object form** is the most readable and is the one to reach for when you need to override
+  the schema.
+
+⚠️ **`ref("name", { schema: "other" })` is not a documented call form.** The documented forms are
+the positional ones and the object form. Use `ref({ name: "name", schema: "other" })`.
 
 ### Cross-schema and cross-project refs
 
-The normal case: models in a different dataset within the same project.
+The normal case: actions in a different dataset within the same project.
 
 ```sqlx
 config {
@@ -109,7 +104,9 @@ The `config { schema: "marts" }` says *write me to* `marts`. The `ref()` says *r
 For a genuinely different project:
 
 ```sqlx
-FROM ${ref("shared_dim_customer", { database: "shared-analytics-prod", schema: "dims" })}
+FROM ${ref({ name: "shared_dim_customer",
+             database: "shared-analytics-prod",
+             schema: "dims" })}
 ```
 
 ⚠️ **Cross-project refs require IAM.** The identity running the pipeline needs
@@ -118,109 +115,66 @@ the workspace's service account must have it too. This is the most common cause 
 "permission denied" that only appears in production, because local development runs under your
 own user account.
 
-### The `sources/` folder and how Dataform discovers sources
+### Data source declarations
 
-Sources live in `definitions/sources/`. Dataform scans that folder and treats each file as a
-**source definition**.
-
-```
-definitions/sources/
-├── raw_orders.sqlx        ← source name: "raw_orders"
-├── raw_customers.sqlx     ← source name: "raw_customers"
-└── crm_contacts.sqlx      ← source name: "crm_contacts"
-```
-
-Each file declares one or more tables:
+A **declaration** tells Dataform about a table that already exists and that Dataform does not
+create.
 
 ```sqlx
-// definitions/sources/raw_orders.sqlx
+// definitions/sources.sqlx
 
 config {
-  type: "declarative",
+  type: "declaration",
   database: "source-project",
   schema: "raw",
-  description: "Raw orders landing table"
+  name: "orders"
 }
-
-source("raw_orders", "orders")
 ```
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  FILE: definitions/sources/raw_orders.sqlx                    │
+│  FILE: definitions/sources.sqlx                               │
 │                                                                │
-│  source("raw_orders", "orders")                               │
-│         │             │                                       │
-│         │             └── "orders"  = the TABLE name           │
-│         └── "raw_orders"  = the SOURCE name (= file name)     │
+│  config { type: "declaration", ... }                          │
+│         │             │             │                         │
+│         │             │             └── "orders" = the NAME   │
+│         │             └── "raw" = the SCHEMA (dataset)         │
+│         └── "source-project" = the DATABASE (project)         │
 │                                                                │
-│  Models reference it as: ${source("raw_orders", "orders")}    │
+│  Models reference it as: ${ref("orders")}                     │
 │     → source-project.raw.orders                               │
 └────────────────────────────────────────────────────────────────┘
 ```
 
-> **The file name is the source name. The argument in `source()` is the table name.**
+💡 **The declaration's `name` is the action name.** It is what other actions reference. The
+`database` and `schema` tell Dataform where the physical table lives — and they can differ from
+your project's defaults, which is exactly how you point at an upstream or shared dataset.
 
-So `definitions/sources/raw_orders.sqlx` containing `source("raw_orders", "orders")` creates a
-source named `raw_orders` with a table named `orders`.
+⚠️ **A declaration produces no build step.** There is nothing to compile and nothing to create.
+But it *is* a real node in the graph: `ref("orders")` creates a normal DAG edge, and Dataform
+will not try to build `source-project.raw.orders`.
 
-⚠️ **A `source()` file that declares no table, or a `source()` call whose first argument does
-not match the file name, is a compile error.** The compiler will not guess.
+For multiple declarations, use a JavaScript file:
 
-⚠️ **Sources do not create tables and do not appear in the DAG as buildable nodes.** They are
-leaves — the entry points where external data enters your graph. There is nothing to build, so
-there is nothing to order.
+```javascript
+// definitions/declarations.js
 
-### Source config — `type`, `loaded_at_field`, and `freshness`
-
-```sqlx
-// definitions/sources/raw_orders.sqlx
-
-config {
-  type: "declarative",
-  database: "source-project",
-  schema: "raw",
-  description: "Raw orders landing table, written by the operational system",
-  loaded_at_field: "_loaded_at",
-  freshness: {
-    errorAfter: "48h",
-    warnAfter: "24h"
-  }
-}
-
-source("raw_orders", "orders")
+declare({ database: "source-project", schema: "raw", name: "orders" });
+declare({ database: "source-project", schema: "raw", name: "customers" });
 ```
 
-| Field | Effect |
-|-------|--------|
-| `type: "declarative"` | Marks this as a source (not a model). |
-| `database` / `schema` | Where the external table lives. |
-| `description` | Surfaced in the catalog and lineage. |
-| `loaded_at_field` | Column holding the load timestamp. |
-| `freshness.errorAfter` | Age at which the source is considered **failed**. |
-| `freshness.warnAfter` | Age at which the source is considered **stale**. |
-
-💡 **Freshness is the closest thing Dataform has to an SLA on an external feed.** With
-`loaded_at_field: "_loaded_at"` and `freshness: { errorAfter: "48h", warnAfter: "24h" }`,
-Dataform checks the source's load timestamp on every run: older than 24 hours is a warning,
-older than 48 hours is an error that fails the build.
-
-This catches the failure mode nothing else catches: **the upstream job silently stopped.** Your
-pipeline keeps running green against three-day-old data, and nobody notices until someone asks
-why the numbers look stale.
-
-### How the DAG is built
+### How the dependency graph is built
 
 The compiler does this, in order:
 
 ```
-   ① PARSE every .sqlx file under definitions/
+   ① PARSE every .sqlx and .js file under definitions/
         ▼
-   ② EXTRACT the config block → a target per model
+   ② EXTRACT the config block → an action per file
         ▼
-   ③ SCAN the SQL body for ref() and source() calls
-        ├─► ref("x")         → edge: x  ──►  this model
-        └─► source("s","t")  → no edge (sources are leaves)
+   ③ SCAN the SQL body for ref() calls
+        │
+        └─► ref("x")  → edge: x  ──►  this action
         ▼
    ④ ADD explicit config { dependencies: [...] } edges
         ▼
@@ -228,8 +182,11 @@ The compiler does this, in order:
         ▼
    ⑥ RESOLVE each ref() to a fully-qualified relation name
         ▼
-   ⑦ GENERATE the compiled SQL + the DAG (.dataform/run.json)
+   ⑦ GENERATE the compiled SQL + the graph (.dataform/run.json)
 ```
+
+💡 **`resolve()` deliberately does not create an edge.** That is its whole difference from
+`ref()`. Use `ref()` when you need ordering; use `resolve()` when you only need the name.
 
 ### Reading `.dataform/run.json`
 
@@ -239,11 +196,11 @@ The compiler does this, in order:
     { "name": "stg_orders",
       "relation": "my-project.analytics.stg_orders",
       "type": "table",
-      "fileName": "definitions/stg/stg_orders.sqlx" },
+      "fileName": "definitions/stg_orders.sqlx" },
     { "name": "fct_orders",
       "relation": "my-project.analytics.fct_orders",
       "type": "incremental",
-      "fileName": "definitions/marts/fct_orders.sqlx" }
+      "fileName": "definitions/fct_orders.sqlx" }
   ],
   "dag": {
     "stg_orders": {
@@ -262,23 +219,32 @@ The compiler does this, in order:
 }
 ```
 
-`dag.<model>.dependencies` is the list you care about — it is the model's upstream nodes,
-derived from the SQL.
-
-Key fields:
-
 | Field | What it tells you |
 |-------|-------------------|
-| `targets` | Every model, with its resolved relation, type, and source file. |
-| `dag.<model>.relations` | The relations a model produces. |
-| `dag.<model>.dependencies` | The upstream nodes it depends on. **This is your dependency list.** |
+| `targets` | Every action, with its resolved relation, type, and source file. |
+| `dag.<action>.relations` | The relations an action produces. |
+| `dag.<action>.dependencies` | The upstream nodes it depends on. **This is your dependency list.** |
 | `operations` | The ordered list of actions to execute. |
-| `tests` | Unit tests and assertions attached to the graph. |
+| `tests` | Assertions attached to the graph. |
 
 ```bash
-# Pretty-print the DAG
+# Pretty-print the graph
 python3 -m json.tool .dataform/run.json | head -60
+
+# List every action and its dependencies
+python3 -c "
+import json
+d = json.load(open('.dataform/run.json'))
+for name, node in d['dag'].items():
+    deps = [x['target']['name'] for x in node.get('dependencies', [])]
+    print(f'{name} <- {deps}')
+"
 ```
+
+💡 **In Dataform Cloud, the same information is visual.** The **Compiled graph** tab shows your
+workflow as an interactive DAG, filterable by name, tag, and type (assertion, declaration,
+incremental table, operation, table, view). Clicking an action shows its full name, type,
+dependencies, and dependents. The `run.json` file is the local equivalent of that view.
 
 ### Topological ordering
 
@@ -296,11 +262,11 @@ all of its dependencies. There may be several valid orderings — the compiler p
 ```
 
 Because `stg_orders` and `stg_customers` are independent, they may run in parallel. Dataform
-exploits this — `dataform run` executes independent nodes concurrently, which is where the
-BigQuery slot-time savings come from.
+exploits this — independent nodes execute concurrently, which is where the BigQuery slot-time
+savings come from.
 
-⚠️ **The compiler cannot invent a dependency from shared tables.** If two models read the same
-`source()` and you assume one must run first, you are wrong — they are independent by
+⚠️ **The compiler cannot invent a dependency from shared tables.** If two actions read the same
+declaration and you assume one must run first, you are wrong — they are independent by
 definition.
 
 ### Cycles — and how the compiler reports them
@@ -314,8 +280,8 @@ compile time.
       └────────────────────────────┘
 ```
 
-The error names the models involved in the cycle. The fix is to break the loop — usually by
-extracting the shared logic into a third model that both depend on:
+The error names the actions involved in the cycle. The fix is to break the loop — usually by
+extracting the shared logic into a third action that both depend on:
 
 ```
     stg_a ──▶ stg_b ──┐
@@ -323,16 +289,16 @@ extracting the shared logic into a third model that both depend on:
     stg_d ──▶ stg_e ──┘
 ```
 
-⚠️ **A cycle is almost always a design smell, not a typo.** It usually means two models are
+⚠️ **A cycle is almost always a design smell, not a typo.** It usually means two actions are
 doing each other's jobs — and in BigQuery, a self-referencing table is usually better expressed
 with `self()` than with a cycle.
 
 ### A worked compile error — a missing ref
 
-Create a model that references something that does not exist:
+Create an action that references something that does not exist:
 
 ```sqlx
-// definitions/marts/fct_orders.sqlx
+// definitions/fct_orders.sqlx
 
 config { type: "table" }
 
@@ -351,24 +317,21 @@ Error: Compilation failed
   Target 'fct_orders' is invalid:
     1:6: Unable to resolve reference to 'stg_orderz'.
     Compiled SQL cannot be determined until the reference is resolved.
-    Check that the model 'stg_orderz' exists in the project and that
-    the file name matches the model name.
+    Check that the action 'stg_orderz' exists in the project and that
+    the file name matches the action name.
 ```
 
 Three things to notice:
 
-1. **The error names the model and the missing reference.** You do not have to hunt for it.
+1. **The error names the action and the missing reference.** You do not have to hunt for it.
 2. **Nothing was written to BigQuery.** The compiler stopped before any query ran.
 3. **The error is a compile error, not a runtime error.** The "table does not exist" failure mode
    from Chapter 1.1 cannot happen here.
 
-Fix it — create `definitions/stg/stg_orderz.sqlx`, or correct the typo to `ref("stg_orders")`.
-Then `dataform compile; echo $?` returns `0`.
+Fix it — create `definitions/stg_orderz.sqlx`, or correct the typo to `ref("stg_orders")`. Then
+`dataform compile; echo $?` returns `0`.
 
-⚠️ **The same error appears for an undefined `source()`.** `source("raw_oders", "orders")` with
-no matching file in `definitions/sources/` fails identically.
-
-### The DAG before and after a dependency
+### The graph before and after a dependency
 
 **Before** — `fct_orders` reads only `stg_orders`:
 
@@ -424,28 +387,20 @@ config {
 
 Use it for ordering dependencies, not data dependencies:
 
-- A model must run *after* a cleanup/audit model finishes
-- A model must not run concurrently with another model (e.g. both write the same partition)
-- A model must run after a `DELETE` operation on another model
+- An action must run *after* a cleanup/audit action finishes
+- An action must not run concurrently with another action (e.g. both write the same partition)
+- An action must run after a custom operation on another action
 
-⚠️ **`dependencies` does not make data available.** If model A reads model B's table, you must
+💡 **There are two ways to declare a dependency.** Either reference it as an argument of `ref()`
+in a `SELECT` statement, or declare a list of `dependencies` in the `config` block. The `config`
+block form is for dependencies that are not referenced in the SQL statement but still need to run
+before the action.
+
+⚠️ **`dependencies` does not make data available.** If action A reads action B's table, you must
 use `ref("B")`. Adding `dependencies: ["B"]` without a `ref()` gives you ordering but no
 readability — and the compiler will still complain about an unresolved table name.
 
-### `include` / `exclude`
-
-```sqlx
-config {
-  type: "table",
-  include: ["definitions/stg/*.sqlx"],
-  exclude: ["definitions/stg/stg_temp.sqlx"]
-}
-```
-
-These control which files contribute to the model's compilation — used when you build a model
-from a shared template or want to exclude a file from a specific compiled target.
-
-### `disabled` models
+### `disabled` actions
 
 ```sqlx
 config {
@@ -454,70 +409,35 @@ config {
 }
 ```
 
-The model is **compiled but not executed**. It stays in the DAG so that anything referencing it
-still resolves, but `dataform run` will not build it.
+If set to true, the action is **not run**. The action can still be depended upon — useful for
+temporarily turning off broken actions without breaking everything downstream.
 
-⚠️ **A `disabled` model is not deleted.** If it already produced a table, the table stays in
-BigQuery with stale data. Downstream models that read it will keep working — with stale data.
-`disabled` is for pausing a model, not for removing one.
+⚠️ **A `disabled` action is not deleted.** If it already produced a table, the table stays in
+BigQuery with stale data. Downstream actions that read it will keep working — with stale data.
+`disabled` is for pausing an action, not for removing one.
 
-### `protected` models
+### `protected` actions
 
 ```sqlx
 config {
-  type: "table",
+  type: "incremental",
   protected: true
 }
 ```
 
-Dataform refuses to run destructive operations against the relation — no overwrite, no drop —
-without an explicit override. It is the "do not accidentally destroy my mart" switch.
-
-### Ephemeral models and the graph
-
-An `ephemeral` model is a node in the DAG that produces **no relation**. It is inlined into its
-dependents as a CTE.
-
-```
-    WITH a materialized model:
-    ┌──────────────┐
-    │ stg_orders   │
-    └──────┬───────┘
-    ┌──────▼───────┐
-    │ fct_orders   │        ← one physical table
-    └──────────────┘
-
-    WITH an ephemeral model in between:
-    ┌──────────────┐
-    │ stg_orders   │
-    └──────┬───────┘
-    ┌──────▼───────┐     ┌────────────────┐
-    │ int_enriched │────▶│ → CTE inside   │
-    │ (ephemeral)  │     │   fct_orders   │
-    └──────────────┘     └────────────────┘
-```
-
-⚠️ **An ephemeral model shared by two materialized models is inlined into both** — the CTE is
-duplicated, and the upstream work is done twice. If you want the work done once, make it a
-`view` or a `table`.
+⚠️ **`protected` is only allowed for the `incremental` type.** When set to true, running the
+action ignores the `full-refresh` option. This is useful for tables built from transient data,
+to verify that historical data is never lost.
 
 ### `action_selector` and `actions`
 
-In `workflows/*.json`, `actionSelector` picks *which* actions a workflow covers, and `actions`
-gives the per-action detail.
+Actions are grouped and selected by **tag**. A `tag` is a list of strings in an action's `config`
+block, and it is how you select a subset of the graph to build, run, or test.
 
-```json
-{
-  "workflows": [
-    {
-      "name": "orders",
-      "tags": ["daily"],
-      "actionSelector": ["orders"],
-      "actions": [
-        { "name": "fct_orders", "tags": ["daily"], "disabled": false }
-      ]
-    }
-  ]
+```sqlx
+config {
+  type: "table",
+  tags: ["daily", "marts"]
 }
 ```
 
@@ -526,17 +446,17 @@ The three action types:
 | Action | What it does |
 |--------|--------------|
 | `build` | Creates or replaces the target relation. The DDL. |
-| `run` | Executes the model's query. |
-| `test` | Runs the unit tests and assertions attached to the model. |
+| `run` | Executes the action's query. |
+| `test` | Runs the assertions attached to the action. |
 
 ```bash
-# Build only — create the table, don't populate it
+# Build only — create the relation, don't populate it
 dataform run --actions build
 
 # Run only — populate, don't create/replace
 dataform run --actions run
 
-# Test only — assertions and unit tests, no data written
+# Test only — assertions, no data written
 dataform run --actions test
 
 # All three
@@ -549,50 +469,46 @@ touching the production tables — ideal as a pull-request check.
 ### Compiling a subgraph
 
 ```bash
-# Compile one model and its upstream dependencies
+# Compile one action and its upstream dependencies
 dataform compile --nodes fct_orders
 
 # Compile several
 dataform compile --nodes stg_orders,fct_orders
 
-# Include downstream models too
+# Include downstream actions too
 dataform run --nodes fct_orders --include-dependents
 ```
 
-💡 **This is your inner-loop command.** While iterating on one model, `--nodes` means you
+💡 **This is your inner-loop command.** While iterating on one action, `--nodes` means you
 compile and run one thing instead of the whole warehouse.
 
 ---
 
 ## 🛠️ Hands-On: Trace a Dependency Graph
 
-### Step 1 — Build a three-model chain
+### Step 1 — Build a three-action chain
 
-`definitions/sources/raw_orders.sqlx`:
+`definitions/sources.sqlx`:
 
 ```sqlx
 config {
-  type: "declarative",
+  type: "declaration",
   database: "source-project",
   schema: "raw",
-  description: "Raw orders landing table",
-  loaded_at_field: "_loaded_at",
-  freshness: { errorAfter: "48h", warnAfter: "24h" }
+  name: "orders"
 }
-
-source("raw_orders", "orders")
 ```
 
-`definitions/stg/stg_orders.sqlx`:
+`definitions/stg_orders.sqlx`:
 
 ```sqlx
 config { type: "table", description: "Staged orders" }
 
 SELECT order_id, customer_id, order_date, total_amount
-FROM ${source("raw_orders", "orders")}
+FROM ${ref("orders")}
 ```
 
-`definitions/marts/fct_orders.sqlx` — same shape, but reading the model:
+`definitions/fct_orders.sqlx`:
 
 ```sqlx
 config { type: "table", description: "Order fact table" }
@@ -601,7 +517,7 @@ SELECT o.order_id, o.customer_id, o.order_date, o.total_amount
 FROM ${ref("stg_orders")} o
 ```
 
-### Step 2 — Compile and read the DAG
+### Step 2 — Compile and read the graph
 
 ```bash
 dataform compile
@@ -648,7 +564,7 @@ JOIN ${ref("dim_customers")} c ON o.customer_id = c.customer_id
 dataform compile
 ```
 
-Re-run the DAG dump from Step 2. Now `fct_orders <- ['stg_orders', 'dim_customers']`.
+Re-run the graph dump from Step 2. Now `fct_orders <- ['stg_orders', 'dim_customers']`.
 
 ### Step 5 — Use a cross-schema reference
 
@@ -660,7 +576,7 @@ config {
 
 SELECT o.order_id, o.total_amount
 FROM ${ref("stg_orders")} o
-JOIN ${ref("dim_customers", { schema: "dims" })} c
+JOIN ${ref({ name: "dim_customers", schema: "dims" })} c
     ON o.customer_id = c.customer_id
 ```
 
@@ -669,7 +585,22 @@ dataform compile
 grep -o "dims\.dim_customers\|analytics\.dim_customers" .dataform/run.sql | sort -u
 ```
 
-### Step 6 — Compile a subgraph
+### Step 6 — Declare an ordering dependency
+
+```sqlx
+config {
+  type: "table",
+  dependencies: ["stg_orders"]
+}
+```
+
+```bash
+dataform compile
+```
+
+Note the edge appears in `dag` even though the SQL does not reference `stg_orders`.
+
+### Step 7 — Compile a subgraph
 
 ```bash
 dataform compile --nodes fct_orders
@@ -679,7 +610,7 @@ dataform run --nodes fct_orders --dry-run
 Compare the action list against `dataform run --dry-run` for the whole project. The subgraph
 should contain only `fct_orders` and its upstream dependencies.
 
-### Step 7 — Test the action types
+### Step 8 — Test the action types
 
 ```bash
 dataform run --actions test --dry-run
@@ -687,7 +618,7 @@ dataform run --actions build --dry-run
 dataform run --actions run --dry-run
 ```
 
-### Step 8 — Disable a model and observe
+### Step 9 — Disable an action and observe
 
 ```sqlx
 config {
@@ -700,51 +631,51 @@ config {
 dataform run --dry-run
 ```
 
-The model no longer appears as an action to execute, but it still resolves in the DAG.
+The action no longer appears as an action to execute, but it still resolves in the graph.
 
 ---
 
 ## 🔑 Key Takeaways
 
-- `ref()` resolves in four steps: find the model by filename → apply the schema → apply the database → return the qualified name.
-- Precedence, highest first: the `ref()` call's own override → the model's `config` → `dataform.json` `warehouse` → `dataform.json` `default*`.
-- `config { schema: "x" }` controls where a model is **written**; `ref("y", { schema: "x" })` controls where `y` is **read from**. Different things.
-- The `sources/` folder rule: **file name = source name, `source()` argument = table name.** A mismatch is a compile error.
-- Source config needs `type: "declarative"`. `loaded_at_field` + `freshness` (`warnAfter` / `errorAfter`) gives you staleness monitoring on external feeds.
-- Sources are leaves — they have no buildable node and produce no DAG edges.
-- The DAG is built by: parse → extract config → scan for `ref()`/`source()` → add `dependencies` edges → topological sort → resolve names → emit `run.sql` and `run.json`.
-- Read `run.json`'s `dag.<model>.dependencies` to see a model's upstream nodes. `targets` is the full model inventory.
-- Independent models run in parallel — that is where BigQuery slot-time savings come from.
+- `ref()` resolves in four steps: find the action by filename → apply the schema → apply the database → return the qualified name.
+- Precedence, highest first: the `ref()` call's own override → the action's `config` → `workflow_settings.yaml` defaults.
+- `config { schema: "x" }` controls where an action is **written**; `ref({ schema: "x" })` controls where the referenced action is **read from**. Different things.
+- The documented `ref()` forms are positional (`ref("name")`, `ref("schema","name")`, `ref("database","schema","name")`) and the object form `ref({ name, schema, database })`. A name followed by an options object is **not** documented.
+- Declarations live in `definitions/` like any other file — `type: "declaration"`, with `name`, `schema`, and `database`. There is no special `sources/` folder.
+- A declaration produces no build step, but it is a real graph node: `ref()` on one creates a normal DAG edge.
+- `resolve()` resolves a reference **without** adding a dependency. That is the whole difference from `ref()`.
+- The graph is built by: parse → extract config → scan for `ref()` → add `dependencies` edges → topological sort → resolve names → emit `run.sql` and `run.json`.
+- Read `run.json`'s `dag.<action>.dependencies` to see upstream nodes. In Dataform Cloud, the **Compiled graph** tab is the visual equivalent.
+- Independent actions run in parallel — that is where BigQuery slot-time savings come from.
 - A **cycle is a compile error**, and it almost always means a design problem, not a typo.
-- A **missing `ref()` is a compile error** naming the model and the missing reference. Nothing is written to BigQuery.
-- `dependencies` is for *ordering* edges the SQL does not imply. It does not make data readable — that needs `ref()`.
-- `disabled` compiles but does not execute, and does **not** delete an existing table. `protected` blocks destructive operations.
-- An ephemeral model produces no relation; if two materialized models share it, the CTE is duplicated and the work is done twice.
-- `actions` are `build` (DDL), `run` (execute the query), and `test` (unit tests and assertions). `--actions test` is a cheap CI gate.
+- A **missing `ref()` is a compile error** naming the action and the missing reference. Nothing is written to BigQuery.
+- There are two ways to declare a dependency: `ref()` in a `SELECT`, or `dependencies` in the `config` block for ordering-only edges.
+- `disabled` means the action is not run but **can still be depended upon** — and does **not** delete an existing table. `protected` is **incremental only** and makes the action ignore `full-refresh`.
+- Actions are `build` (DDL), `run` (execute the query), and `test` (assertions). `--actions test` is a cheap CI gate.
 
 ---
 
 ## 📚 Practice Exercises
 
-1. **Resolution truth table.** For a model `fct_orders` with `config { schema: "marts" }` calling `ref("stg_orders")`, where `stg_orders` has `config { schema: "staging" }` and `dataform.json` has `defaultDataset: "analytics"` and `warehouse.schema: "analytics"` — work out the fully-qualified relation for each of the four resolution steps. Then repeat with `ref("stg_orders", { schema: "raw_staging" })` and explain exactly which table gets written and which gets read.
+1. **Resolution truth table.** For an action `fct_orders` with `config { schema: "marts" }` calling `ref("stg_orders")`, where `stg_orders` has `config { schema: "staging" }` and `workflow_settings.yaml` has `defaultDataset: "analytics"` — work out the fully-qualified relation for each of the four resolution steps. Then repeat with `ref({ name: "stg_orders", schema: "raw_staging" })` and explain exactly which table gets written and which gets read.
 
-2. **Broken graph, then fix.** Create four models that form a cycle (`a → b → c → d → a`). Record the compiler's error message verbatim. Then refactor: extract the shared logic into a fifth model so the cycle becomes a diamond. Re-derive the DAG and confirm the compile succeeds. Explain why a cycle in a BigQuery pipeline is a modelling smell rather than a scheduling problem.
+2. **Broken graph, then fix.** Create four actions that form a cycle (`a → b → c → d → a`). Record the compiler's error message verbatim. Then refactor: extract the shared logic into a fifth action so the cycle becomes a diamond. Re-derive the graph and confirm the compile succeeds. Explain why a cycle in a BigQuery pipeline is a modelling smell rather than a scheduling problem.
 
-3. **Source naming trap.** Write a source file `definitions/sources/orders.sqlx` containing `source("raw_orders", "orders")`. Compile and record the error. Then fix it two different ways — rename the file, and rename the argument — and explain the difference in what each fix means for downstream models.
+3. **Declaration naming trap.** Create `definitions/sources.sqlx` with `config { type: "declaration", database: "source-project", schema: "raw", name: "orders" }` and then create `definitions/sources.sqlx` a second time with a different `name` — compile and record what happens. Then move the second declaration into a JavaScript file using `declare({...})` and confirm it compiles. Explain why multiple declarations belong in a `.js` file rather than a `.sqlx` file.
 
-4. **Freshness monitor.** Add `loaded_at_field` and `freshness` to two sources: one that loads hourly and one that loads daily. Set `warnAfter`/`errorAfter` appropriately for each. Write the exact queries you would run to check whether the source has actually been updated, and explain how Dataform's freshness check would have caught a silent upstream failure that your query would have missed.
+4. **Freshness is not free — design the equivalent.** Dataform Cloud does not ship a built-in `freshness` block on declarations. Design the equivalent yourself: write a custom SQL operation that reads the source's load timestamp and raises a failure when it is too old. Show how you would wire it into the graph as a dependency of every action that reads that source, and explain how you would surface the failure.
 
-5. **Subgraph surgery.** Build a project with 12 models. Use `dataform compile --nodes` and `--include-dependents` to compile three different subgraphs, and record the action count each time. Then use `--actions build`, `--actions run`, and `--actions test` separately and explain what each produces. Finally, design a `workflows/` file with two workflows (an hourly `stg` one and a nightly `marts` one) and show how the compiled action lists differ.
+5. **Subgraph surgery.** Build a project with 12 actions. Use `dataform compile --nodes` and `--include-dependents` to compile three different subgraphs, and record the action count each time. Then use `--actions build`, `--actions run`, and `--actions test` separately and explain what each produces. Finally, tag your actions (`daily`, `hourly`, `marts`) and show how tagging lets you select a subset.
 
 ---
 
 ## 📖 Further Reading
 
-- Dataform `ref()` and `source()` — https://cloud.google.com/dataform/docs/reference/sqlx-ref-and-source
-- Dataform dependency graph — https://cloud.google.com/dataform/docs/concepts/dependency-graph
-- Dataform configuration reference — https://cloud.google.com/dataform/docs/reference/config
-- Dataform `dataform.json` reference — https://cloud.google.com/dataform/docs/reference/dataform-json
-- Dataform assertions — https://cloud.google.com/dataform/docs/tests/assertions
-- Dataform unit tests — https://cloud.google.com/dataform/docs/tests/unit-tests
-- Dataform CLI reference — https://cloud.google.com/dataform/docs/reference/cli
-- BigQuery IAM roles — https://cloud.google.com/bigquery/docs/access-control
+- Dataform core reference — https://cloud.google.com/dataform/docs/reference/dataform-core-reference
+- Declare dependencies — https://cloud.google.com/dataform/docs/dependencies
+- Declare data sources — https://cloud.google.com/dataform/docs/declare-source
+- Create a development workspace — https://cloud.google.com/dataform/docs/create-workspace
+- Configure compilation — https://cloud.google.com/dataform/docs/configure-compilation
+- Add custom SQL operations — https://cloud.google.com/dataform/docs/custom-sql
+- Dataform assertions — https://cloud.google.com/dataform/docs/assertions
+- Using the Dataform CLI — https://cloud.google.com/dataform/docs/use-dataform-cli

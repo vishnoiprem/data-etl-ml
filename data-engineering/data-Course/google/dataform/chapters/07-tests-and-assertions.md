@@ -68,7 +68,7 @@ The built-in assertions are configured inside the model's `config` block:
 ```sqlx
 config {
   type: "incremental",
-  uniqueKey: "id",
+  uniqueKey: ["id"],
   assertions: {
     uniqueKey: ["id"],
     nonNull: ["id", "event_date"],
@@ -106,7 +106,7 @@ rejects it. Relationship checks and row-count checks must be written by hand.
 ```sqlx
 config {
   type: "incremental",
-  uniqueKey: "id",
+  uniqueKey: ["id"],
   assertions: {
     uniqueKey: ["id"]
   }
@@ -530,7 +530,7 @@ SELECT
   id AS order_id, customer_id, amount AS order_amount,
   'complete' AS order_status,
   TIMESTAMP(order_ts) AS updated_at, DATE(order_ts) AS order_date
-FROM ${source("raw", "orders")}
+FROM ${ref("raw_orders")}
 WHERE order_status != 'cancelled'
 ```
 
@@ -538,7 +538,7 @@ WHERE order_status != 'cancelled'
 // definitions/marts/fct_orders.sqlx
 config {
   type: "incremental",
-  uniqueKey: "order_id",
+  uniqueKey: ["order_id"],
   partitionBy: { order_date: "DATE(order_date)" },
   assertions: {
     uniqueKey: ["order_id"],
@@ -603,11 +603,15 @@ source of confusion for people coming from dbt, where both exist.
 
 ### Step 1 — A model with built-in assertions
 
+(For the source declaration, see Lecture 2.2 — Dataform declares sources with
+`type: "declaration"` and references them with `ref()`.)
+
+
 ```sqlx
 // definitions/marts/fct_orders.sqlx
 config {
   type: "incremental",
-  uniqueKey: "order_id",
+  uniqueKey: ["order_id"],
   partitionBy: { order_date: "DATE(order_date)" },
   assertions: {
     uniqueKey: ["order_id"],
