@@ -38,7 +38,7 @@ cryptography==50.0.2
 # OpenSSL, either upgrade system OpenSSL or pin to 46.0.5 as a temporary
 # fallback (re-introduces 11 advisories).
 protobuf==6.33.5
-pymongo==4.18.2
+pymongo==4.18.3
 httplib2==0.32.0
 azure-core==1.38.0
 azure-identity==1.16.1
