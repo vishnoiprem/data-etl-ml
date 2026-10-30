@@ -105,10 +105,24 @@ jobs:
           mkdir -p .audit
           grep -E '^[A-Za-z][A-Za-z0-9_.\-]*==[0-9]' requirements.txt \
             | tac | awk -F'==' '!seen[$1]++' | tac > .audit/sarif-pinned.txt || true
-          # Only generate SARIF if we have pinned deps and pip-audit succeeds
+          # Only generate SARIF if we have pinned deps and pip-audit succeeds.
+          #
+          # NOTE: pip-audit 2.10.1 does NOT support `--format sarif`. Its
+          # supported formats are columns, json, cyclonedx-json, cyclonedx-xml
+          # and markdown. Passing `sarif` made pip-audit exit 2 with
+          # "invalid OutputFormatChoice value: 'sarif'", which under
+          # `shell: bash -e` aborted the job before anything was uploaded.
+          # We ask pip-audit for JSON and convert it to SARIF 2.1.0 ourselves.
           if [ -s .audit/sarif-pinned.txt ]; then
             python -m pip_audit -r .audit/sarif-pinned.txt --no-deps --disable-pip \
-                --format sarif --output .audit/pip-audit.sarif
+                --format json --output .audit/pip-audit.json || true
+            if [ -s .audit/pip-audit.json ]; then
+              python3 infra/scripts/pip_audit_json_to_sarif.py \
+                  .audit/pip-audit.json .audit/pip-audit.sarif requirements.txt
+            else
+              echo "::notice::pip-audit produced no JSON — skipping SARIF upload"
+              rm -f .audit/pip-audit.json
+            fi
           else
             echo "::notice::No pinned deps to audit for SARIF"
             rm -f .audit/sarif-pinned.txt
