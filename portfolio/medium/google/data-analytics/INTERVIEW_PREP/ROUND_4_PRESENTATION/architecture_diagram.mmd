@@ -1,0 +1,452 @@
+# GCP Data Platform Architecture - Mermaid Diagrams
+## Whiteboard-Ready Diagrams for Round 4 Presentation
+
+---
+
+## 1. Target State Architecture (Main Diagram - Draw in 5 min)
+
+```mermaid
+flowchart TB
+    subgraph SOURCES["📦 SOURCE SYSTEMS"]
+        TD[("Teradata\n80TB")]
+        HD[("Hadoop/Hive\n50TB")]
+        OR[("Oracle\n10TB")]
+        KF[("Kafka\nStreaming")]
+    end
+
+    subgraph INGEST["🔄 INGESTION LAYER"]
+        DS[("Datastream\nCDC")]
+        DP[("Dataproc\nSpark Batch")]
+        DF[("Dataflow\nStreaming")]
+    end
+
+    subgraph STORAGE["☁️ STORAGE LAYER"]
+        GCS_L[("GCS Landing\nAvro/Raw")]
+        GCS_C[("GCS Curated\nParquet")]
+    end
+
+    subgraph DW["🏗️ BIGQUERY ENTERPRISE DW"]
+        BQ_R[("Raw Layer\nPartition by date")]
+        BQ_S[("Staging Layer\ndbt models + tests")]
+        BQ_V[("Serving Layer\nPartition + Cluster")]
+    end
+
+    subgraph GOVERNANCE["🛡️ GOVERNANCE & SECURITY"]
+        DL[("Dataplex\nLake/Zone/Asset")]
+        PT[("Policy Tags\nColumn-level")]
+        VPC[("VPC-SC\nPerimeter")]
+        CMEK[("CMEK + Cloud HSM\nKey Sovereignty")]
+    end
+
+    subgraph ANALYTICS["📊 ANALYTICS & AI"]
+        LK[("Looker\nSelf-serve BI")]
+        BQML[("BigQuery ML\nIn-database ML")]
+        VA[("Vertex AI\nML Platform")]
+        FS[("Feature Store\nPoint-in-time")]
+    end
+
+    %% Connections
+    TD -->|CDC| DS
+    OR -->|CDC| DS
+    HD -->|DistCp| DP
+    KF -->|Stream| DF
+
+    DS -->|Avro| GCS_L
+    DP -->|Parquet| GCS_L
+    DF -->|Parquet| GCS_L
+
+    GCS_L -->|Transform| GCS_C
+    GCS_C -->|Load| BQ_R
+    BQ_R -->|dbt| BQ_S
+    BQ_S -->|Optimize| BQ_V
+
+    BQ_V -->|Govern| DL
+    DL -->|Tags| PT
+    VPC -.->|Enclose| BQ_V
+    CMEK -.->|Encrypt| BQ_V
+
+    BQ_V -->|Query| LK
+    BQ_V -->|Train| BQML
+    BQML -->|Promote| VA
+    VA -->|Features| FS
+    FS -->|Serve| VA
+
+    %% Styling
+    classDef source fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef ingest fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef storage fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    classDef dw fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef gov fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef analytics fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
+
+    class TD,HD,OR,KF source
+    class DS,DP,DF ingest
+    class GCS_L,GCS_C storage
+    class BQ_R,BQ_S,BQ_V dw
+    class DL,PT,VPC,CMEK gov
+    class LK,BQML,VA,FS analytics
+```
+
+---
+
+## 2. Migration Flow Diagram (Phased Approach)
+
+```mermaid
+flowchart LR
+    subgraph PHASE1["PHASE 1: ASSESS (Weeks 1-2)"]
+        A1[Inventory\n1,247 tables]
+        A2[Query Log\nAnalysis]
+        A3[TCO Model\nApproved]
+        A4[Risk Register\n12 risks]
+    end
+
+    subgraph PHASE2["PHASE 2: PILOT (Weeks 3-6)"]
+        P1[5 Workloads\nSelected]
+        P2[Data Parity\n100% match]
+        P3[Performance\n2min vs 45min]
+        P4[Sign-off\nBusiness UAT]
+    end
+
+    subgraph PHASE3["PHASE 3: MIGRATE (Weeks 7-22)"]
+        M1[Historical Load\nDataproc Parallel]
+        M2[CDC Sync\nDatastream→Dataflow]
+        M3[Dual-Write\n14-day validation]
+        M4[Cutover\nDNS flip 15min]
+    end
+
+    subgraph PHASE4["PHASE 4: OPTIMIZE (Ongoing)"]
+        O1[Partition/Cluster\nMonthly Review]
+        O2[Materialized\nViews Top 20]
+        O3[BI Engine\nExec Dashboards]
+        O4[Slot Reservations\n3yr = 35% off]
+    end
+
+    A1 --> A2 --> A3 --> A4 --> P1
+    P1 --> P2 --> P3 --> P4 --> M1
+    M1 --> M2 --> M3 --> M4 --> O1
+    O1 --> O2 --> O3 --> O4
+
+    classDef phase1 fill:#e3f2fd,stroke:#1976d2
+    classDef phase2 fill:#fff3e0,stroke:#f57c00
+    classDef phase3 fill:#fce4ec,stroke:#c2185b
+    classDef phase4 fill:#e8f5e9,stroke:#388e3c
+
+    class A1,A2,A3,A4 phase1
+    class P1,P2,P3,P4 phase2
+    class M1,M2,M3,M4 phase3
+    class O1,O2,O3,O4 phase4
+```
+
+---
+
+## 3. Data Flow - Streaming Pipeline Detail
+
+```mermaid
+flowchart TB
+    subgraph PRODUCER["📤 PRODUCERS"]
+        KFK[Kafka Topics\nuser.events, txn.events]
+        DB[Debezium CDC\nMySQL/Postgres]
+    end
+
+    subgraph INGEST_LAYER["🔄 DATASTREAM / PUBSUB"]
+        DS[Datastream\nCDC → Pub/Sub]
+        PS[Pub/Sub Topics\nPartitioned by key]
+        DLQ[Dead Letter Topic\nFailed messages]
+    end
+
+    subgraph PROCESSING["⚙️ DATAFLOW STREAMING"]
+        W1[Window: Fixed 5min\nAllowed Lateness 10min]
+        W2[Watermark\nEvent-time based]
+        TRANS[Transform DoFn\nValidate, Enrich, Dedup]
+        SIDE[Side Input\nReference Data\nRefreshed hourly]
+        AGG[Aggregation\nSession Windows]
+    end
+
+    subgraph SINK["🎯 BIGQUERY SINK"]
+        BQ_STREAM[BigQuery Storage\nWrite API\nStreaming inserts]
+        BQ_TABLE[Partitioned by\nevent_date\nClustered by user_id]
+        MV[Materialized View\nPre-aggregated\nHourly rollups]
+    end
+
+    subgraph MONITORING["📈 OBSERVABILITY"]
+        M1[Dataflow Metrics\nLag, throughput, errors]
+        M2[BigQuery Metrics\nBytes, slots, latency]
+        M3[Alerting\nPub/Sub → Cloud Monitoring\nPagerDuty/Slack]
+    end
+
+    KFK --> DS
+    DB --> DS
+    DS --> PS
+    PS -->|Main| W1
+    PS -.->|Failed| DLQ
+
+    W1 --> W2 --> TRANS
+    TRANS --> SIDE
+    TRANS --> AGG
+    AGG --> BQ_STREAM
+    BQ_STREAM --> BQ_TABLE
+    BQ_TABLE --> MV
+
+    W1 -.-> M1
+    TRANS -.-> M1
+    BQ_STREAM -.-> M2
+    M1 --> M3
+    M2 --> M3
+
+    classDef prod fill:#e3f2fd,stroke:#1976d2
+    classDef ingest fill:#fff3e0,stroke:#f57c00
+    classDef proc fill:#fce4ec,stroke:#c2185b
+    classDef sink fill:#e8f5e9,stroke:#388e3c
+    classDef mon fill:#f3e5f5,stroke:#7b1fa2
+
+    class KFK,DB prod
+    class DS,PS,DLQ ingest
+    class W1,W2,TRANS,SIDE,AGG proc
+    class BQ_STREAM,BQ_TABLE,MV sink
+    class M1,M2,M3 mon
+```
+
+---
+
+## 4. Security Architecture (VPC-SC + CMEK)
+
+```mermaid
+flowchart TB
+    subgraph INTERNET["🌐 INTERNET"]
+        USER[Users/Analysts]
+        API[External APIs]
+    end
+
+    subgraph VPC_SC["🔒 VPC SERVICE CONTROLS PERIMETER"]
+        subgraph PROD_PROJECT["📦 PROD PROJECT"]
+            BQ[BigQuery]
+            DF[Dataflow]
+            VP[Vertex AI]
+            CS[Composer]
+        end
+
+        subgraph DATA_PROJECT["📦 DATA PROJECT"]
+            GCS[Cloud Storage]
+            BQ_DW[BigQuery DW]
+            DL[Dataplex]
+        end
+
+        subgraph SHARED_VPC["🌐 SHARED VPC"]
+            PSC[Private Service Connect\nBigQuery, Dataflow, Vertex AI]
+            NAT[Cloud NAT\nEgress only]
+            FW[Firewall Rules\nDeny all ingress]
+        end
+    end
+
+    subgraph KEY_MGMT["🔐 KEY MANAGEMENT (Separate Project)"]
+        KR1[Key Ring: BQ\nKeys: bq-data-key]
+        KR2[Key Ring: GCS\nKeys: gcs-data-key]
+        KR3[Key Ring: Vertex AI\nKeys: ml-model-key]
+        HSM[Cloud HSM\nFIPS 140-2 L3]
+    end
+
+    subgraph IDENTITY["👤 IDENTITY & ACCESS"]
+        IAM[IAM Conditions\nTime/Location/Resource]
+        DENY[Deny Policies\nPrevent risky actions]
+        SA[Service Accounts\nWorkload Identity]
+        WIF[Workload Identity\nFederation]
+    end
+
+    USER -->|HTTPS| PSC
+    API -.->|Blocked| FW
+    PSC --> BQ
+    PSC --> DF
+    PSC --> VP
+
+    BQ -->|CMEK| KR1
+    GCS -->|CMEK| KR2
+    VP -->|CMEK| KR3
+    KR1 --> HSM
+    KR2 --> HSM
+    KR3 --> HSM
+
+    IAM -->|Attach| SA
+    DENY -->|Protect| BQ
+    DENY -->|Protect| GCS
+    WIF -->|Federate| SA
+
+    classDef perimeter fill:#ffebee,stroke:#c62828,stroke-width:3px
+    classDef keys fill:#fff8e1,stroke:#fbc02d,stroke-width:2px
+    classDef identity fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+
+    class VPC_SC perimeter
+    class KR1,KR2,KR3,HSM keys
+    class IAM,DENY,SA,WIF identity
+```
+
+---
+
+## 5. Data Governance (Dataplex + Policy Tags)
+
+```mermaid
+flowchart TB
+    subgraph DATAPLEX["🏗️ DATAPLEX LAKE"]
+        LAKE[Lake: enterprise-data-lake\nRegion: asia-southeast1]
+
+        subgraph RAW_ZONE["📂 RAW ZONE"]
+            RA1[Asset: teradata-raw\nGCS: gs://bucket/raw/teradata/]
+            RA2[Asset: hadoop-raw\nGCS: gs://bucket/raw/hadoop/]
+            RA3[Asset: oracle-raw\nGCS: gs://bucket/raw/oracle/]
+        end
+
+        subgraph CURATED_ZONE["📂 CURATED ZONE"]
+            CA1[Asset: customer-360\nBQ: project.dataset.customer_360]
+            CA2[Asset: transactions\nBQ: project.dataset.transactions]
+            CA3[Asset: events\nBQ: project.dataset.events]
+        end
+    end
+
+    subgraph GOVERNANCE["🛡️ GOVERNANCE LAYER"]
+        TAX[Policy Tag Taxonomy\nprojects/123/locations/asia-southeast1/taxonomies/456]
+
+        subgraph TAGS["Policy Tags"]
+            PT1[PII: SSN, Email, Phone]
+            PT2[Financial: CC, Account, Salary]
+            PT3[Health: PatientID, Diagnosis]
+            PT4[Restricted: PII + Financial]
+        end
+
+        DQ[Data Quality Scans\nGreat Expectations\nDaily 02:00 UTC]
+        DLP[DLP Integration\nAuto-classify → Tag]
+        LIN[Column Lineage\nSource → BQ → Looker → Vertex]
+    end
+
+    subgraph ENFORCEMENT["⚡ ENFORCEMENT"]
+        RLS[Row-Level Security\ntenant_id = SESSION_USER()]
+        CM[Column Masking\nSSN → ***-**-1234]
+        AQ[Access Control\nIAM + Policy Tags]
+        AUD[Audit Logs\nCloud Audit → Chronicle]
+    end
+
+    LAKE --> RAW_ZONE
+    LAKE --> CURATED_ZONE
+
+    RAW_ZONE -->|Scan| DQ
+    CURATED_ZONE -->|Scan| DQ
+    DQ -->|Classify| DLP
+    DLP -->|Apply Tags| TAGS
+    TAGS -->|Taxonomy| TAX
+
+    TAGS -->|Enforce| RLS
+    TAGS -->|Enforce| CM
+    TAGS -->|Enforce| AQ
+    TAGS -->|Track| LIN
+    LIN -->|Audit| AUD
+
+    classDef lake fill:#e3f2fd,stroke:#1976d2
+    classDef zone fill:#fff3e0,stroke:#f57c00
+    classDef gov fill:#fce4ec,stroke:#c2185b
+    classDef enforce fill:#e8f5e9,stroke:#388e3c
+
+    class LAKE lake
+    class RAW_ZONE,CURATED_ZONE,RA1,RA2,RA3,CA1,CA2,CA3 zone
+    class TAX,TAGS,PT1,PT2,PT3,PT4,DQ,DLP,LIN gov
+    class RLS,CM,AQ,AUD enforce
+```
+
+---
+
+## 6. Cost Optimization Architecture
+
+```mermaid
+flowchart TB
+    subgraph COMPUTE["⚡ COMPUTE OPTIMIZATION"]
+        SLOT[Slot Reservations\n3yr CUD = 35% off\nBaseline: 2000 slots]
+        AUTOSCALE[Autoscaling\nMin: 500, Max: 5000]
+        SPOT[Spot VMs\nDataproc Workers\n60-90% savings]
+        FLEX[Flex Slots\nOn-demand burst\nPer-second billing]
+    end
+
+    subgraph STORAGE["💾 STORAGE OPTIMIZATION"]
+        PART[Partition by Date\nPrune 90%+ data]
+        CLUSTER[Cluster by High-Card\ncustomer_id, session_id]
+        COMPRESS[ZSTD Compression\n30-50% size reduction]
+        LIFECYCLE[Lifecycle Rules\n90d → Nearline, 365d → Coldline]
+    end
+
+    subgraph QUERY["🔍 QUERY OPTIMIZATION"]
+        MV[Materialized Views\nTop 20 Aggregations\nAuto-refresh]
+        BI[BI Engine\n100GB reserved\nSub-second dashboards]
+        CACHE[Query Result Cache\n24hr TTL, free reuse]
+        PRUNE[Partition Pruning\nWHERE event_date >= ...]
+    end
+
+    subgraph MONITORING["📊 COST MONITORING"]
+        BUDGET[Budget Alerts\n50%/80%/100% thresholds]
+        LABEL[Labels: env, team, project\nCost allocation]
+        RECOMMEND[Recommender API\nSlot, storage, query insights]
+        REPORT[Monthly Chargeback\nPer team/project]
+    end
+
+    SLOT --> AUTOSCALE
+    AUTOSCALE --> FLEX
+    SPOT -.-> DATAPROC[Dataproc Clusters]
+
+    PART --> CLUSTER
+    CLUSTER --> COMPRESS
+    COMPRESS --> LIFECYCLE
+
+    MV --> BI
+    BI --> CACHE
+    CACHE --> PRUNE
+
+    BUDGET --> LABEL
+    LABEL --> RECOMMEND
+    RECOMMEND --> REPORT
+
+    classDef compute fill:#e3f2fd,stroke:#1976d2
+    classDef storage fill:#e8f5e9,stroke:#388e3c
+    classDef query fill:#fff3e0,stroke:#f57c00
+    classDef monitor fill:#f3e5f5,stroke:#7b1fa2
+
+    class SLOT,AUTOSCALE,SPOT,FLEX compute
+    class PART,CLUSTER,COMPRESS,LIFECYCLE storage
+    class MV,BI,CACHE,PRUNE query
+    class BUDGET,LABEL,RECOMMEND,REPORT monitor
+```
+
+---
+
+## 7. Whiteboard Drawing Sequence (Practice Script)
+
+```mermaid
+flowchart TB
+    START([Start\n5:00 Timer])
+
+    S1[1. Draw 3 Columns\nSOURCE | INGEST | TARGET\n(30 sec)]
+    S2[2. Source Boxes\nTeradata, Hadoop, Oracle, Kafka\n(1 min)]
+    S3[3. Ingestion Arrows\nDatastream, Dataproc, Dataflow\n(1 min)]
+    S4[4. GCS → BigQuery\nLanding → Curated → Raw/Staging/Serving\n(1 min)]
+    S5[5. Right Side Services\nDataplex, Looker, Vertex AI\n(1 min)]
+    S6[6. Security Callouts\nVPC-SC box, CMEK locks, Policy Tags\n(30 sec)]
+    S7[7. Key Labels\nPartition/Cluster, Editions, Commitments\n(30 sec)]
+    END([Done\n~4:30 elapsed])
+
+    START --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> END
+
+    classDef step fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    class S1,S2,S3,S4,S5,S6,S7 step
+```
+
+---
+
+## Usage Instructions
+
+### For Presentation:
+1. **Main Architecture** (Diagram 1) - Draw live on whiteboard (5 min)
+2. **Migration Flow** (Diagram 2) - Show as slide, reference during Q&A
+3. **Streaming Detail** (Diagram 3) - Deep-dive if asked about real-time
+4. **Security** (Diagram 4) - Mandatory for Singapore (MAS-TRM/PDPA)
+5. **Governance** (Diagram 5) - Differentiator for Data & Analytics Lead
+6. **Cost** (Diagram 6) - CFO-facing, shows business acumen
+
+### Practice:
+- Draw Diagram 1 from memory 5x until <4 min
+- Annotate with metrics: "100TB", "24x faster", "62% cost reduction"
+- Use colors: Blue=Source, Orange=Ingest, Green=Storage, Pink=DW, Purple=Gov, Yellow=AI
+- Label every arrow with technology (not just "data flows")

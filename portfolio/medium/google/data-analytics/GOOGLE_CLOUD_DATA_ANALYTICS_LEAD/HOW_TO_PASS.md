@@ -1,4 +1,4 @@
-# How to Pass: Google Cloud Data & Analytics Lead
+/# How to Pass: Google Cloud Data & Analytics Lead
 ## Cloud Consulting Professional Services
 
 ---
@@ -11,9 +11,13 @@ PASS = (Technical Credibility × Consulting Delivery) + (People Leadership × St
 
 You must **excel in all dimensions** — this role sits at the intersection of engineering, consulting, sales, and management.
 
+> **Note:** every quoted example below ("hired 15 engineers", "$5M P&L", "12 accounts", etc.) is a **placeholder**. Replace each with your own real, verifiable numbers before the interview. Follow-up questions will probe them.
+
 ---
 
 ### 📊 Round-by-Round Pass Strategy
+
+> Round order varies by loop. Leadership and Googleyness are sometimes merged or swapped, so prepare all six regardless of sequence.
 
 #### **Round 1: Recruiter Screen — "Credible & Communicative"**
 | Must Demonstrate | How to Prove It |
@@ -31,7 +35,7 @@ You must **excel in all dimensions** — this role sits at the intersection of e
 #### **Round 2: Technical Architecture — "Architect Who Delivers"**
 | Must Demonstrate | How to Prove It |
 |------------------|-----------------|
-| **End-to-end architecture** | Whiteboard: on-prem → GCP migration (assessment → design → pilot → scale) |
+| **End-to-end architecture** | Whiteboard: on-prem → GCP migration (Assess → Plan → Migrate → Validate → Optimize) |
 | **Technology judgment** | "Chose Dataflow over Dataproc because [streaming/latency/cost]" |
 | **Migration patterns** | Lift-and-shift vs. refactor vs. rebuild — when each, risks, timeline |
 | **Scale & cost** | "Designed for 100TB/day, optimized to $X/month via partitioning/clustering" |
@@ -56,7 +60,7 @@ You must **excel in all dimensions** — this role sits at the intersection of e
 **Pass Signal:** "I'd want you on my client engagement tomorrow"  
 **Fail Signal:** Jumps to tech solution, ignores budget/timeline/people, no risk mitigation
 
-**Your Secret Weapon:** **Migration Framework** (Assess → Plan → Migrate → Validate → Optimize) — apply to any scenario.
+**Your Secret Weapon:** **Migration Framework** (Assess → Plan → Migrate → Validate → Optimize) — apply to any scenario. It nests inside the Client Engagement Model; see `FRAMEWORKS/README.md` for which to use when.
 
 ---
 
@@ -76,7 +80,7 @@ You must **excel in all dimensions** — this role sits at the intersection of e
 
 ---
 
-#### **Round 5: Googliness — "Navigator of Ambiguity"**
+#### **Round 5: Googleyness — "Navigator of Ambiguity"**
 | Must Demonstrate | How to Prove It |
 |------------------|-----------------|
 | **User focus** | "Pushed back on stakeholder request because it hurt end-user experience" |
@@ -125,11 +129,11 @@ You must **excel in all dimensions** — this role sits at the intersection of e
 | Days | Focus | Deliverable |
 |------|-------|-------------|
 | 1-3 | **Technical Refresh** | GCP data services cheat sheet, migration patterns, ADR template |
-| 4-7 | **Story Bank** | 8 STAR stories (2 per leadership competency), written + rehearsed |
+| 4-7 | **Story Bank** | 8 STAR stories (one per Round 4 story-bank category), written + rehearsed |
 | 8-10 | **Case Studies** | 3 full case study write-ups using Client Engagement Model |
 | 11-13 | **Architecture Whiteboarding** | 5 scenarios on whiteboard, timed, recorded, self-critiqued |
 | 14-16 | **Mock Round 2 & 3** | Peer/mentor mock, feedback, iterate |
-| 17-19 | **Mock Round 4 & 5** | Leadership/Googliness mock, STAR refinement |
+| 17-19 | **Mock Round 4 & 5** | Leadership/Googleyness mock, STAR refinement |
 | 20-22 | **Executive Narrative** | 1-pager vision, practice with senior leader |
 | 23-25 | **Full Loop Mock** | End-to-end simulation, score against rubric |
 | 26-30 | **Polish & Confidence** | Review gaps, rest, mental prep, logistics |
@@ -174,4 +178,4 @@ Every answer should signal: *I deliver client outcomes, I grow people, I build s
 
 **You have the experience. Now package it with structure, evidence, and Google's language.**
 
-*See ROUNDS/, FRAMEWORKS/, SOLUTIONS/ for detailed content.*
+*See ROUNDS/ (rounds 1–6), FRAMEWORKS/README.md and SOLUTIONS/ for detailed content.*
