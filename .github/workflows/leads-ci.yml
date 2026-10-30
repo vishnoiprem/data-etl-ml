@@ -250,7 +250,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
 
       - name: Run grype
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         with:
           image: leads-pipeline:scan-${{ github.sha }}
           # Advisory only. The leads-pipeline is a portfolio
