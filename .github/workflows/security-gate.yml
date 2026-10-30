@@ -207,8 +207,21 @@ jobs:
           fi
           cd "${{ matrix.project }}"
           npm install --no-audit --no-fund --legacy-peer-deps
-          # npm audit returns nonzero on vulns — parse JSON and fail only on HIGH/CRITICAL.
+          # `npm audit` exits 1 whenever it finds ANY vulnerability — even
+          # low-severity ones. Under `shell: bash -e` that aborted the step
+          # before the severity check below could run, so a project with
+          # zero HIGH/CRITICAL findings still failed the gate. We capture
+          # the exit code and let our own HIGH/CRITICAL check decide.
+          set +e
           npm audit --json > audit.json
+          audit_rc=$?
+          set -e
+          if [ ! -s audit.json ]; then
+            echo "::error::npm audit failed to produce JSON for ${{ matrix.project }} (exit $audit_rc)"
+            npm audit 2>&1 || true
+            exit 1
+          fi
+          # Parse JSON and fail only on HIGH/CRITICAL.
           node -e "
             const d = require('./audit.json');
             const m = d.metadata.vulnerabilities;
