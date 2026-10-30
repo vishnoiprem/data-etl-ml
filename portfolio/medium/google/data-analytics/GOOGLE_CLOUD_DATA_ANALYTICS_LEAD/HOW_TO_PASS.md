@@ -1,4 +1,4 @@
-# How to Pass: Google Cloud Data & Analytics Lead
+/# How to Pass: Google Cloud Data & Analytics Lead
 ## Cloud Consulting Professional Services
 
 ---
