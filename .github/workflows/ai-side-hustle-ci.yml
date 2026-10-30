@@ -7,12 +7,14 @@ name: ai-side-hustle-ci
 
 on:
   push:
-    branches: [main]
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale.
+    branches: [master, main]
     paths:
       - "learning/ai-engineering/40-ai-side-hustle/**"
       - ".github/workflows/ai-side-hustle-ci.yml"
   pull_request:
-    branches: [main]
+    branches: [master, main]
     paths:
       - "learning/ai-engineering/40-ai-side-hustle/**"
 

@@ -2,7 +2,8 @@ name: release-please
 
 # Automated release PRs from conventional commits.
 #
-# On every push to main, release-please scans the commit log since
+# On every push to the default branch (master), release-please scans
+# the commit log since
 # the last release, infers the next semver from the conventional
 # commit types (feat → minor, fix → patch, feat! / BREAKING CHANGE
 # → major), and opens a PR like:
@@ -20,7 +21,11 @@ name: release-please
 
 on:
   push:
-    branches: [main]
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale. Triggering on `main` alone meant
+    # no release PR was ever opened for the branch that actually
+    # receives the work.
+    branches: [master, main]
 
 permissions:
   contents: write        # create release commits + tags
@@ -29,7 +34,7 @@ permissions:
 
 concurrency:
   # Don't kill an in-flight release commit because a new push to
-  # main arrived mid-release; let it finish.
+  # the default branch arrived mid-release; let it finish.
   group: release-please-${{ github.ref }}
   cancel-in-progress: false
 
@@ -70,6 +75,9 @@ jobs:
               owner,
               repo,
               workflow_id: 'leads-cd.yml',
-              ref: 'main',
+              // Dispatch against the default branch. `main` is
+              // stale in this repo, so a dispatch on `main` would
+              // rebuild the image from 77 commits of old code.
+              ref: 'master',
               inputs: { tag_suffix: `v${tag}` }
             });

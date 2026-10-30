@@ -1,7 +1,8 @@
 name: leads-cd
 
 # Continuous Deployment: build the leads-pipeline container image
-# and publish it to ghcr.io on every push to main. The image is just
+# and publish it to ghcr.io on every push to the default branch
+# (master). The image is just
 # published — there is no remote deploy step. Pull + run is one
 # line on the target host:
 #
@@ -9,8 +10,8 @@ name: leads-cd
 #   docker run --rm -e AVILX_DB_HOST=... ghcr.io/.../leads-pipeline
 #
 # Tags (managed by docker/metadata-action):
-#   latest                  — only on push to main
-#   main-<short_sha>        — for reproducible deploys
+#   latest                  — only on push to the default branch
+#   <branch>-<short_sha>    — for reproducible deploys
 #   <short_sha>             — for pinning
 #
 # After pushing, the `verify` job re-pulls and smoke-tests the
@@ -29,7 +30,11 @@ name: leads-cd
 
 on:
   push:
-    branches: [main]
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale. Publishing only on `main` meant
+    # the container was never rebuilt for the branch that actually
+    # receives the work.
+    branches: [master, main]
   workflow_dispatch:
     inputs:
       tag_suffix:
@@ -78,9 +83,9 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/vishnoiprem/data-etl-ml/leads-pipeline
-          # Flavor so the same workflow can publish 'latest' on main
-          # and a sha-tagged image for any other push (workflow_dispatch
-          # included).
+          # Flavor so the same workflow can publish 'latest' on the
+          # default branch and a sha-tagged image for any other push
+          # (workflow_dispatch included).
           flavor: |
             latest=auto
           tags: |
@@ -159,8 +164,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Tag #1 is `latest` on main (or `<ref>` elsewhere) — that's
-      # what consumers will pull. Verify that one specifically.
+      # Tag #1 is `latest` on the default branch (or `<ref>`
+      # elsewhere) — that's what consumers will pull. Verify that
+      # one specifically.
       - name: Pull + smoke test
         env:
           TAGS: ${{ needs.build-and-push.outputs.image }}
@@ -174,8 +180,8 @@ jobs:
 
           # Mirror leads-ci's size budget so a bloated image can't
           # silently land in GHCR just because it slipped past CI
-          # (e.g. a freshly-added dep that lands directly on main
-          # via a fast-forward merge).
+          # (e.g. a freshly-added dep that lands directly on the
+          # default branch via a fast-forward merge).
           SIZE_BYTES=$(docker image inspect "$IMAGE" --format='{{.Size}}')
           SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
           echo "image size: ${SIZE_MB} MB (budget: ${MAX_MB} MB)"
@@ -218,7 +224,7 @@ jobs:
   # doesn't gate the image push itself.
   #
   # The artifact name is tag-suffixed so a single workflow run that
-  # pushed multiple tags (e.g. main + sha) doesn't collide.
+  # pushed multiple tags (e.g. master + sha) doesn't collide.
   sbom:
     name: Generate SBOM
     runs-on: ubuntu-latest

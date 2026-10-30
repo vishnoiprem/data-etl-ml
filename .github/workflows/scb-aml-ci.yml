@@ -9,12 +9,15 @@ name: scb-aml-ci
 
 on:
   push:
-    branches: [main]
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale. Triggering on `main` alone meant this
+    # project's CI never ran against the branch that receives the work.
+    branches: [master, main]
     paths:
       - "learning/data-engineering/scb_aml_platform/**"
       - ".github/workflows/scb-aml-ci.yml"
   pull_request:
-    branches: [main]
+    branches: [master, main]
     paths:
       - "learning/data-engineering/scb_aml_platform/**"
       - ".github/workflows/scb-aml-ci.yml"

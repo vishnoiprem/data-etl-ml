@@ -13,12 +13,16 @@ name: codeql
 
 on:
   push:
-    branches: [main]
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale. Triggering on `main` alone meant
+    # CodeQL never scanned PRs or pushes to the branch that actually
+    # receives the work.
+    branches: [master, main]
     paths:
       - "projects/leads-pipeline/**"
       - ".github/workflows/codeql.yml"
   pull_request:
-    branches: [main]
+    branches: [master, main]
     paths:
       - "projects/leads-pipeline/**"
   schedule:

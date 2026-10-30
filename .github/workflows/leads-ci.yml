@@ -4,14 +4,14 @@ name: leads-ci
 # - Runs the 6 in-repo test modules against a Postgres service
 #   container on a fresh Ubuntu runner
 # - Lints the modified source files
-# - Triggers on push to main + active feature branches, and on PR
-#   to main
+# - Triggers on push to master + active feature branches, and on PR
+#   to master. `main` is kept for compatibility but is stale.
 
 on:
   push:
-    branches: [main, feature/agent-coding-11oct, feature/auto-pilot-ai-leads-loop]
+    branches: [master, main, feature/agent-coding-11oct, feature/auto-pilot-ai-leads-loop]
   pull_request:
-    branches: [main]
+    branches: [master, main]
 
 # Cancel superseded runs on the same ref to save runner minutes on
 # force-pushes. For pushes we cancel; for PRs we also cancel so a
