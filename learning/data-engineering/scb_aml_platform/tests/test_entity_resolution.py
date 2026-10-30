@@ -27,10 +27,30 @@ class TestJaroWinklerScore:
         assert jaro_winkler_score("Mohammed", "Mohammad") > 0.85
 
     def test_completely_different_names_score_low(self):
+        """Different names must fall below the production match threshold.
+
+        The old assertion was `score < 0.5`, which is not a property of
+        the Jaro-Winkler algorithm: "John Smith" and "Zhang Wei" share
+        five characters (h, n, i, and the space) inside the matching
+        window, giving a Jaro score of ~0.615 — with a zero-length
+        common prefix, so no Winkler bonus applies. The implementation
+        was correct all along; the threshold in the assertion was
+        arbitrary.
+
+        What actually matters is that the pair does NOT match, i.e.
+        the score stays below JARO_WINKLER_THRESHOLD (0.85) — the
+        value the entity-resolution pipeline actually uses to decide
+        whether two names are the same customer.
+        """
+        from scb_aml_platform.config.settings import JARO_WINKLER_THRESHOLD
         from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import (
             jaro_winkler_score,
         )
-        assert jaro_winkler_score("John Smith", "Zhang Wei") < 0.5
+
+        score = jaro_winkler_score("John Smith", "Zhang Wei")
+        assert score < JARO_WINKLER_THRESHOLD, (
+            f"{score} would be treated as a match at threshold {JARO_WINKLER_THRESHOLD}"
+        )
 
     def test_empty_or_none_returns_zero(self):
         from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import (

@@ -274,24 +274,28 @@ jobs:
       # `image: registry:...` tells it to scan from the local
       # registry cache rather than re-pulling or going through
       # a registry client.
+      #
+      # `anchore/sbom-action` uploads the SBOM as a workflow artifact
+      # ITSELF (`upload-artifact: true` is its default) and then
+      # removes the file from the workspace. A separate
+      # actions/upload-artifact step to do the same thing therefore
+      # failed with "No files were found with the provided path" —
+      # the file was already uploaded and gone. The action's own
+      # upload is the one we want; `upload-artifact-retention` sets
+      # its lifetime in days.
       - name: Generate SBOM (SPDX JSON)
         uses: anchore/sbom-action@v0
         with:
           image: registry:${{ env.IMAGE }}
           format: spdx-json
           artifact-name: leads-pipeline-sbom.spdx.json
+          upload-artifact: true
+          # 30-day retention for the SBOM artifact.
+          upload-artifact-retention: 30
           # Default syft version used by the action is the one
           # pinned in the action's Dockerfile; override only if
           # reproducibility becomes a concern.
           # syft-version: v1.27.0
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: leads-pipeline-sbom
-          path: leads-pipeline-sbom.spdx.json
-          if-no-files-found: error
-          retention-days: 30
 
   # Sign every tag produced by build-and-push using cosign's keyless
   # mode (no keypair to manage; the signature is bound to the OIDC
@@ -310,7 +314,11 @@ jobs:
     needs: build-and-push
     if: needs.build-and-push.result == 'success'
     permissions:
-      packages: read
+      # packages: WRITE is required — cosign pushes the signature to
+      # GHCR as an OCI artifact next to the image. With only `read`
+      # the upload failed with "DENIED: installation not allowed to
+      # Write organization package".
+      packages: write
       # id-token: write is required for cosign's OIDC flow.
       id-token: write
       contents: read
