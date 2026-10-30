@@ -7,10 +7,8 @@ prints, and the CLI argument parses.
 """
 from __future__ import annotations
 
-import argparse
 import io
 from contextlib import redirect_stdout
-from datetime import datetime, timezone
 
 
 class TestStepHelper:
@@ -30,13 +28,14 @@ class TestCLI:
     """Tests for the CLI argument parser."""
 
     def test_default_date_is_today(self):
-        from scb_aml_platform.orchestration.pipeline_orchestrator import (
-            run_pipeline,
-        )
         # Just verify the function signature accepts a date string.
         # Don't actually call run_pipeline() — it would need full
         # dummy data + Spark to work.
         import inspect
+
+        from scb_aml_platform.orchestration.pipeline_orchestrator import (
+            run_pipeline,
+        )
         sig = inspect.signature(run_pipeline)
         assert "run_date" in sig.parameters
         assert sig.parameters["run_date"].default is None

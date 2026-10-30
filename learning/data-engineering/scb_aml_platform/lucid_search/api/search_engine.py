@@ -15,15 +15,25 @@ When not available              → Pandas in-memory search (same interface)
 """
 
 import sys
-import json
-import re
 from pathlib import Path
-from typing import Optional
 
+import jellyfish
 import numpy as np
 import pandas as pd
-import jellyfish
 from loguru import logger
+
+# Make the project importable as `scb_aml_platform.*` when this module
+# is run directly (not via `pip install -e .`). This has to happen
+# BEFORE the `scb_aml_platform` import below.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
+
+from scb_aml_platform.config.settings import (
+    BASE_DIR,
+    ES_HOST,
+    ES_INDEX_ENTITY,
+    ES_PORT,
+    ES_SCHEME,
+)
 
 
 def _serialize(v):
@@ -49,13 +59,6 @@ def _serialize(v):
     if isinstance(v, pd.Timestamp):
         return v.isoformat()
     return v
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
-from scb_aml_platform.config.settings import (
-    BASE_DIR, JARO_WINKLER_THRESHOLD,
-    ES_HOST, ES_PORT, ES_SCHEME,
-    ES_INDEX_ENTITY, ES_INDEX_TXN, ES_INDEX_SCREENING, ES_INDEX_GRAPH
-)
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
@@ -134,8 +137,8 @@ class LucidSearchEngine:
     def search(
         self,
         query: str,
-        countries: Optional[list] = None,
-        risk_band: Optional[str] = None,
+        countries: list | None = None,
+        risk_band: str | None = None,
         pep_only: bool = False,
         max_results: int = 20,
         search_mode: str = "all",    # fuzzy | phonetic | exact | all

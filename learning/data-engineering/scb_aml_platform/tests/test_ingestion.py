@@ -7,7 +7,7 @@ filtering logic.
 """
 from __future__ import annotations
 
-import pandas as pd
+import contextlib
 
 
 class TestPartitionPath:
@@ -50,8 +50,5 @@ class TestCountryFiltering:
 
         # Should not raise even if data files are missing
         # (the implementation logs warnings and continues)
-        try:
+        with contextlib.suppress(FileNotFoundError):
             sqoop_ingest.run_all("20260115")
-        except FileNotFoundError:
-            # Acceptable — the function may bail on missing files
-            pass

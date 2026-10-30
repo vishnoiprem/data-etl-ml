@@ -1,5 +1,7 @@
+import json
+import time
+
 import pysolr
-import json, time
 
 solr = pysolr.Solr("http://localhost:8983/solr/products", always_commit=False)
 

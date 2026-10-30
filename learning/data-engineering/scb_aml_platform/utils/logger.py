@@ -2,9 +2,9 @@
 
 import sys
 from pathlib import Path
-from loguru import logger
 
-from scb_aml_platform.config.settings import LOG_LEVEL, LOG_DIR
+from loguru import logger
+from scb_aml_platform.config.settings import LOG_DIR, LOG_LEVEL
 
 
 def setup_logger(name: str = "aml_platform"):

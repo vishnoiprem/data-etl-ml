@@ -17,18 +17,16 @@ Output: entity_master DataFrame with golden_entity_id column
 Run: python job1_entity_resolution.py
 """
 
-import sys
 import hashlib
+import sys
 from pathlib import Path
 
-import pandas as pd
 import jellyfish
+import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
-from scb_aml_platform.config.settings import (
-    DUMMY_DIR, JARO_WINKLER_THRESHOLD, BASE_DIR
-)
+from scb_aml_platform.config.settings import BASE_DIR, DUMMY_DIR, JARO_WINKLER_THRESHOLD
 
 DUMMY_DIR = Path(DUMMY_DIR)
 PROCESSED_DIR = BASE_DIR / "data" / "processed"
@@ -139,7 +137,7 @@ def pass2_fuzzy_name(df: pd.DataFrame) -> pd.DataFrame:
     merge_map = {}  # golden_id → canonical_golden_id
     match_count = 0
 
-    for (nat, dob), group in buckets:
+    for (_nat, _dob), group in buckets:
         if len(group) < 2:
             continue
         rows = group.to_dict("records")
@@ -181,7 +179,7 @@ def pass3_phonetic(df: pd.DataFrame) -> pd.DataFrame:
 
     # Group by nationality only (DOB may differ due to data quality)
     buckets = df.groupby("nationality")
-    for nat, group in buckets:
+    for _nat, group in buckets:
         if len(group) < 2:
             continue
         rows = group.to_dict("records")
@@ -279,7 +277,7 @@ def run():
 
     # Stats
     exact_hits = df[df["golden_entity_id"].duplicated(keep=False)]["golden_entity_id"].nunique()
-    logger.info(f"\nEntity Resolution Summary:")
+    logger.info("\nEntity Resolution Summary:")
     logger.info(f"  Input records   : {len(df):,}")
     logger.info(f"  Unique entities : {master['golden_entity_id'].nunique():,}")
     logger.info(f"  Cross-country links: {exact_hits:,} entities with 2+ records")

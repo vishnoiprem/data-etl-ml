@@ -18,8 +18,8 @@ Output: output/alerts/aml_alert_master.parquet
         output/reports/regulatory_filing_queue.csv
 """
 
-import sys
 import hashlib
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -27,9 +27,7 @@ import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
-from scb_aml_platform.config.settings import (
-    BASE_DIR, REGULATORS, RISK_HIGH_MIN
-)
+from scb_aml_platform.config.settings import BASE_DIR, REGULATORS, RISK_HIGH_MIN
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
 OUTPUT_ALERTS = Path(BASE_DIR) / "output" / "alerts"
@@ -177,7 +175,7 @@ def run() -> pd.DataFrame:
     merged = merge_alerts_with_risk(rules_alerts, risk_profiles)
     final_alerts = classify_and_file(merged)
 
-    logger.info(f"\nAlert Summary:")
+    logger.info("\nAlert Summary:")
     if not final_alerts.empty:
         logger.info(f"  Total alerts    : {len(final_alerts):,}")
         logger.info(f"  STR             : {(final_alerts['alert_type']=='STR').sum()}")

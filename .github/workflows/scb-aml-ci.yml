@@ -47,8 +47,13 @@ jobs:
           pip install -r requirements.in
           pip install pytest pytest-cov pytest-asyncio ruff
       - name: Lint
+        # The project directory IS the package root — the importable
+        # packages (aml_engine, config, ingestion, …) sit directly
+        # under it. There is no nested `scb_aml_platform/` directory,
+        # so pointing ruff at one made it fail with E902 "No such
+        # file or directory" before it ever linted a line.
         run: |
-          ruff check scb_aml_platform/ tests/
+          ruff check .
       - name: Test
         run: |
           python -m pytest tests/ -v --tb=short
@@ -66,7 +71,49 @@ jobs:
         with:
           python-version: "3.11"
       - name: pip-audit
+        # Audit this project's own manifest directly. The repo-root
+        # `infra/scripts/run_pip_audit.sh` cannot be used here: it
+        # resolves REPO_ROOT from its own location (so it must run
+        # from the repo root, not the project dir) and it shells out
+        # to a local `.env/bin/python` venv that does not exist on a
+        # CI runner. Both assumptions made this step exit 127.
         run: |
           python -m pip install --upgrade pip
           python -m pip install pip-audit==2.10.1
-          bash infra/scripts/run_pip_audit.sh
+          mkdir -p .audit
+          # pip-audit needs every line pinned with `==`. The pins live
+          # in requirements.in — requirements.txt is only a
+          # `-r ./requirements.in` pointer with no pins of its own, so
+          # auditing it alone found nothing. The three `>=` ranges in
+          # requirements.in (pandas, numpy, pyarrow) are dropped here:
+          # pip-audit rejects unpinned lines, and those three are
+          # covered by the repo-root pip-audit workflow.
+          grep -E '^[A-Za-z][A-Za-z0-9_.\-]*==[0-9]' requirements.in \
+            | tac | awk -F'==' '!seen[$1]++' | tac > .audit/pinned.txt || true
+          if [ ! -s .audit/pinned.txt ]; then
+            echo "::notice::no pinned deps in requirements.in — nothing to audit"
+            exit 0
+          fi
+          echo "Auditing $(wc -l < .audit/pinned.txt) pinned dependencies"
+          python -m pip_audit -r .audit/pinned.txt --no-deps --disable-pip --format json \
+              --output .audit/pip-audit.json || true
+          python -m pip_audit -r .audit/pinned.txt --no-deps --disable-pip --format columns || true
+          # Fail the job only on findings that have a fix available,
+          # matching the policy used by the repo-root pip-audit
+          # workflow. A finding with no fix is reported but not
+          # blocking — there is nothing to upgrade to.
+          python3 - <<'PY'
+          import json, sys
+          with open(".audit/pip-audit.json") as fh:
+              data = json.load(fh)
+          blockers = []
+          for dep in data.get("dependencies", []):
+              for vuln in dep.get("vulns", []):
+                  if vuln.get("fix_versions"):
+                      blockers.append((dep.get("name"), vuln.get("id")))
+          if blockers:
+              for name, vid in blockers:
+                  print(f"::error::{name}: {vid} has a fix available")
+              sys.exit(1)
+          print("OK: no audit-blocking vulnerabilities")
+          PY

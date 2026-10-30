@@ -15,18 +15,21 @@ Run: uvicorn scb_aml_platform.lucid_search.api.app:app --host 0.0.0.0 --port 800
 """
 
 import sys
-import json
 from pathlib import Path
-from typing import Optional
 
-from fastapi import FastAPI, Query, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    API_HOST, API_PORT, API_TITLE, API_VERSION, COUNTRIES, CORS_ALLOWED_ORIGINS
+    API_HOST,
+    API_PORT,
+    API_TITLE,
+    API_VERSION,
+    CORS_ALLOWED_ORIGINS,
+    COUNTRIES,
 )
 from scb_aml_platform.lucid_search.api.search_engine import LucidSearchEngine
 
@@ -56,7 +59,7 @@ app.add_middleware(
 )
 
 # Singleton search engine
-_engine: Optional[LucidSearchEngine] = None
+_engine: LucidSearchEngine | None = None
 
 
 def get_engine() -> LucidSearchEngine:
@@ -105,8 +108,8 @@ def stats():
 @app.get("/search")
 def search(
     q: str = Query(..., description="Entity name to search", min_length=2),
-    countries: Optional[str] = Query(None, description="Comma-separated ISO country codes, e.g. SG,HK"),
-    risk_band: Optional[str] = Query(None, description="LOW | MEDIUM | HIGH | CRITICAL"),
+    countries: str | None = Query(None, description="Comma-separated ISO country codes, e.g. SG,HK"),
+    risk_band: str | None = Query(None, description="LOW | MEDIUM | HIGH | CRITICAL"),
     pep_only: bool = Query(False, description="Return PEP entities only"),
     max_results: int = Query(20, ge=1, le=100),
     mode: str = Query("all", description="fuzzy | phonetic | exact | all"),

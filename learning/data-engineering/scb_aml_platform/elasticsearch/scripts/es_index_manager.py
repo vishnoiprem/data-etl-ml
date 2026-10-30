@@ -12,19 +12,24 @@ Requires: Elasticsearch 8.x running on localhost:9200
 If ES is not available, data is saved to JSON files for inspection.
 """
 
-import sys
 import json
-from pathlib import Path
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    ES_HOST, ES_PORT, ES_SCHEME,
-    ES_INDEX_ENTITY, ES_INDEX_TXN, ES_INDEX_SCREENING, ES_INDEX_GRAPH,
-    BASE_DIR
+    BASE_DIR,
+    ES_HOST,
+    ES_INDEX_ENTITY,
+    ES_INDEX_GRAPH,
+    ES_INDEX_SCREENING,
+    ES_INDEX_TXN,
+    ES_PORT,
+    ES_SCHEME,
 )
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
@@ -42,12 +47,10 @@ def get_es_client():
 
         # The local scb_aml_platform/elasticsearch/ folder shadows the pip package.
         # Load the pip-installed elasticsearch directly from site-packages.
-        original_modules = {k: v for k, v in sys.modules.items()
-                            if k == "elasticsearch" or k.startswith("elasticsearch.")}
         original_path = sys.path[:]
 
         # Build a path that only includes site-packages (no local project dirs)
-        site_paths = site.getsitepackages() + [site.getusersitepackages()]
+        site_paths = [*site.getsitepackages(), site.getusersitepackages()]
         sys.path = site_paths
 
         for key in list(sys.modules.keys()):
@@ -56,13 +59,13 @@ def get_es_client():
 
         try:
             es_mod = importlib.import_module("elasticsearch")
-            Elasticsearch = es_mod.Elasticsearch
+            es_client_cls = es_mod.Elasticsearch
         finally:
             sys.path = original_path
             # Restore original modules (keep the pip one we just loaded)
             pass
 
-        client = Elasticsearch(
+        client = es_client_cls(
             hosts=[{"host": ES_HOST, "port": ES_PORT, "scheme": ES_SCHEME}],
             request_timeout=30,
         )
@@ -127,9 +130,7 @@ def _df_to_docs(df: pd.DataFrame) -> list[dict]:
                 clean[k] = [str(x) for x in v]
             elif isinstance(v, np.ndarray):
                 clean[k] = v.tolist()
-            elif v is None:
-                clean[k] = None
-            elif isinstance(v, float) and np.isnan(v):
+            elif v is None or (isinstance(v, float) and np.isnan(v)):
                 clean[k] = None
             else:
                 try:

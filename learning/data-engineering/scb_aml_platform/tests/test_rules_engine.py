@@ -7,17 +7,15 @@ sample_screening, sample_features).
 """
 from __future__ import annotations
 
-import pytest
-
 from scb_aml_platform.aml_engine.rules.rules_engine import (
     RuleAlert,
+    aggregate_alerts,
     rule_ctr,
     rule_high_risk_xborder,
     rule_pep_transaction,
     rule_sanctions_hit,
     rule_structuring,
     rule_velocity_spike,
-    aggregate_alerts,
 )
 
 
@@ -190,6 +188,6 @@ class TestAggregateAlerts:
             ),
         ]
         df = aggregate_alerts(alerts)
-        rule_to_type = dict(zip(df["rule_id"], df["report_type"]))
+        rule_to_type = dict(zip(df["rule_id"], df["report_type"], strict=True))
         assert rule_to_type["R01"] == "CTR"
         assert rule_to_type["R02"] == "STR"

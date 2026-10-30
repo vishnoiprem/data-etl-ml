@@ -6,14 +6,15 @@ Since we run locally without a Hadoop cluster, this module:
   - Provides a query interface used by Spark jobs in local mode
 """
 
-import sys
 import sqlite3
-import pandas as pd
+import sys
 from pathlib import Path
+
+import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
-from scb_aml_platform.config.settings import DUMMY_DIR, HIVE_METASTORE_DB, COUNTRIES
+from scb_aml_platform.config.settings import DUMMY_DIR, HIVE_METASTORE_DB
 
 DUMMY_DIR = Path(DUMMY_DIR)
 DB_PATH = Path(HIVE_METASTORE_DB)

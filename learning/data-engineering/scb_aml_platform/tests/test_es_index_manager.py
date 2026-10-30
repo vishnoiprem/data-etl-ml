@@ -5,8 +5,8 @@ Tests only the pure-Python helpers (no ES client required).
 """
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 class TestDfToDocs:

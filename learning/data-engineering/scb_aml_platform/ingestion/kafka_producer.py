@@ -11,10 +11,9 @@ In production: Kafka Connect source connectors with Debezium CDC
 Here: publishes messages to local Kafka (or prints if no broker available)
 """
 
-import sys
 import json
+import sys
 import time
-import random
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -23,8 +22,11 @@ from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    DUMMY_DIR, KAFKA_BOOTSTRAP, KAFKA_TOPIC_TXN, KAFKA_TOPIC_WIRE,
-    CTR_THRESHOLD_USD
+    CTR_THRESHOLD_USD,
+    DUMMY_DIR,
+    KAFKA_BOOTSTRAP,
+    KAFKA_TOPIC_TXN,
+    KAFKA_TOPIC_WIRE,
 )
 
 DUMMY_DIR = Path(DUMMY_DIR)

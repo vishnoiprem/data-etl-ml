@@ -1,7 +1,9 @@
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
 import json
 import time
+
+from elasticsearch.helpers import bulk
+
+from elasticsearch import Elasticsearch
 
 INDEX = "products"
 
@@ -48,7 +50,7 @@ except Exception as e:
     print("Index setup error:", repr(e))
     raise
 
-with open("products.json", "r") as f:
+with open("products.json") as f:
     products = json.load(f)
 
 def gen_actions(items):

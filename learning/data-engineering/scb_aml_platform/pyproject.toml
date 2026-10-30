@@ -115,7 +115,6 @@ target-version = ["py310", "py311", "py312"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-src = ["scb_aml_platform", "tests"]
 
 [tool.ruff.lint]
 select = [
@@ -133,6 +132,21 @@ ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # function call in default argument (FastAPI patterns)
     "RUF012", # mutable class attributes (used in dataclasses)
+    # N999: ruff derives the module name from the DIRECTORY a file
+    # lives in. This project sits under `learning/data-engineering/`,
+    # whose hyphen is not a valid Python identifier, so every
+    # `__init__.py` was flagged "Invalid module name: 'data-engineering'".
+    # The importable name is `scb_aml_platform` (set by the parent
+    # dir on sys.path via tests/conftest.py) — the directory layout
+    # is a repo-structure constraint, not a code defect.
+    "N999",
+    # RUF001/RUF002/RUF003: ambiguous-unicode warnings. The codebase
+    # deliberately uses typographic characters (en dash, ×, curly
+    # quotes) in docstrings and comments. They render correctly and
+    # carry meaning; replacing them with ASCII would be noise.
+    "RUF001",
+    "RUF002",
+    "RUF003",
 ]
 
 [tool.ruff.lint.per-file-ignores]

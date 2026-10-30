@@ -20,14 +20,12 @@ Output: data/processed/customer_risk_profiles.parquet
 import sys
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
-from scb_aml_platform.config.settings import (
-    BASE_DIR, RISK_LOW_MAX, RISK_MEDIUM_MAX, RISK_HIGH_MIN
-)
+from scb_aml_platform.config.settings import BASE_DIR, RISK_LOW_MAX, RISK_MEDIUM_MAX
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
@@ -184,7 +182,7 @@ def compute_nrs(features: pd.DataFrame, screening: pd.DataFrame) -> pd.DataFrame
 # COMPOSITE SCORE & RISK BAND
 # ─────────────────────────────────────────────
 def composite_score(crs: int, trs: int, nrs: int) -> int:
-    return int(round(0.35 * crs + 0.40 * trs + 0.25 * nrs))
+    return round(0.35 * crs + 0.40 * trs + 0.25 * nrs)
 
 
 def risk_band(score: int) -> str:

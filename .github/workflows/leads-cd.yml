@@ -139,9 +139,17 @@ jobs:
           sbom: false              # keep the image lean
 
       - name: Print image references
+        # `steps.meta.outputs.tags` is a NEWLINE-separated list. Expanding
+        # it directly into a `for` word-list spliced a raw newline into
+        # the script, and bash aborted with "syntax error near unexpected
+        # token" before printing anything. Pass it through an env var
+        # and split on whitespace instead — same approach the verify
+        # and sbom jobs already use.
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           echo "✅ Pushed:"
-          for t in ${{ steps.meta.outputs.tags }}; do
+          for t in $TAGS; do
             echo "  $t"
           done
 

@@ -9,8 +9,8 @@ import sys
 from pathlib import Path
 
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -70,7 +70,7 @@ def run_demo():
         engine = LucidSearchEngine()
 
         result = engine.search("Mohammed Al-Rahman", max_results=5)
-        console.print(f"Query: 'Mohammed Al-Rahman'")
+        console.print("Query: 'Mohammed Al-Rahman'")
         console.print(f"Results: {result['total']} | Time: {result['search_time_ms']}ms | Backend: {result['backend']}")
 
         if result["results"]:

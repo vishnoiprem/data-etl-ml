@@ -1,8 +1,9 @@
 
 
-from faker import Faker
-import random
 import json
+import random
+
+from faker import Faker
 
 fake = Faker()
 

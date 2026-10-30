@@ -3,8 +3,6 @@ Tests for alert generation: SLA mapping, dedup, status assignment.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
 import pandas as pd
 import pytest
 
@@ -92,7 +90,8 @@ class TestClassifyAndFile:
         self, sample_rules_alerts, sample_risk_profiles
     ):
         from scb_aml_platform.aml_engine.alert_generation.alert_generator import (
-            classify_and_file, merge_alerts_with_risk,
+            classify_and_file,
+            merge_alerts_with_risk,
         )
         merged = merge_alerts_with_risk(sample_rules_alerts, sample_risk_profiles)
         out = classify_and_file(merged)
@@ -104,7 +103,8 @@ class TestClassifyAndFile:
         self, sample_rules_alerts, sample_risk_profiles
     ):
         from scb_aml_platform.aml_engine.alert_generation.alert_generator import (
-            classify_and_file, merge_alerts_with_risk,
+            classify_and_file,
+            merge_alerts_with_risk,
         )
         merged = merge_alerts_with_risk(sample_rules_alerts, sample_risk_profiles)
         out = classify_and_file(merged)
@@ -115,7 +115,8 @@ class TestClassifyAndFile:
         self, sample_rules_alerts, sample_risk_profiles
     ):
         from scb_aml_platform.aml_engine.alert_generation.alert_generator import (
-            classify_and_file, merge_alerts_with_risk,
+            classify_and_file,
+            merge_alerts_with_risk,
         )
         merged = merge_alerts_with_risk(sample_rules_alerts, sample_risk_profiles)
         out = classify_and_file(merged)
@@ -137,7 +138,8 @@ class TestClassifyAndFile:
         self, sample_rules_alerts, sample_risk_profiles
     ):
         from scb_aml_platform.aml_engine.alert_generation.alert_generator import (
-            classify_and_file, merge_alerts_with_risk,
+            classify_and_file,
+            merge_alerts_with_risk,
         )
         # Duplicate C001 alerts to verify dedup
         doubled = pd.concat([sample_rules_alerts, sample_rules_alerts.iloc[[0]]], ignore_index=True)
@@ -162,7 +164,9 @@ class TestRegulatoryQueue:
         self, sample_rules_alerts, sample_risk_profiles
     ):
         from scb_aml_platform.aml_engine.alert_generation.alert_generator import (
-            classify_and_file, generate_regulatory_queue, merge_alerts_with_risk,
+            classify_and_file,
+            generate_regulatory_queue,
+            merge_alerts_with_risk,
         )
         merged = merge_alerts_with_risk(sample_rules_alerts, sample_risk_profiles)
         out = classify_and_file(merged)
@@ -174,7 +178,9 @@ class TestRegulatoryQueue:
         self, sample_rules_alerts, sample_risk_profiles
     ):
         from scb_aml_platform.aml_engine.alert_generation.alert_generator import (
-            classify_and_file, generate_regulatory_queue, merge_alerts_with_risk,
+            classify_and_file,
+            generate_regulatory_queue,
+            merge_alerts_with_risk,
         )
         merged = merge_alerts_with_risk(sample_rules_alerts, sample_risk_profiles)
         out = classify_and_file(merged)

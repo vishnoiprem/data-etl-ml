@@ -19,17 +19,19 @@ Output: data/processed/aml_feature_store.parquet
 """
 
 import sys
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    BASE_DIR, CTR_THRESHOLD_USD, STRUCTURING_WINDOW_DAYS,
-    STRUCTURING_COUNT_THRESHOLD
+    BASE_DIR,
+    CTR_THRESHOLD_USD,
+    STRUCTURING_COUNT_THRESHOLD,
+    STRUCTURING_WINDOW_DAYS,
 )
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"

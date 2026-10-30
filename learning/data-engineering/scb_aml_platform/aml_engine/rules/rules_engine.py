@@ -18,18 +18,19 @@ Each rule returns a list of RuleAlert records.
 
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    BASE_DIR, CTR_THRESHOLD_USD, STRUCTURING_WINDOW_DAYS,
-    STRUCTURING_COUNT_THRESHOLD
+    BASE_DIR,
+    CTR_THRESHOLD_USD,
+    STRUCTURING_COUNT_THRESHOLD,
+    STRUCTURING_WINDOW_DAYS,
 )
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
@@ -169,14 +170,14 @@ def rule_sanctions_hit(screening: pd.DataFrame) -> list[RuleAlert]:
 def rule_pep_transaction(wires: pd.DataFrame, customers: pd.DataFrame) -> list[RuleAlert]:
     """PEP customer wire transfer ≥ USD 50,000."""
     alerts = []
-    PEP_WIRE_THRESHOLD = 50_000
+    pep_wire_threshold = 50_000
 
     pep_ids = set(customers[customers["pep_flag"] == "Y"]["customer_id"])
     cust_map = customers.set_index("customer_id")[["customer_name", "country_code"]].to_dict("index")
 
     hits = wires[
         (wires["sender_customer_id"].isin(pep_ids)) &
-        (wires["amount_usd"] >= PEP_WIRE_THRESHOLD)
+        (wires["amount_usd"] >= pep_wire_threshold)
     ]
     for _, row in hits.iterrows():
         cust_id = row["sender_customer_id"]

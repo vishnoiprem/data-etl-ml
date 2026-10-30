@@ -9,7 +9,6 @@ Here: reads dummy Parquet files and writes partitioned ORC-like Parquet
 """
 
 import sys
-import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -18,7 +17,10 @@ from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    DUMMY_DIR, HDFS_ROOT, COUNTRIES, HDFS_PARTITION_TEMPLATE
+    COUNTRIES,
+    DUMMY_DIR,
+    HDFS_PARTITION_TEMPLATE,
+    HDFS_ROOT,
 )
 
 DUMMY_DIR = Path(DUMMY_DIR)
@@ -110,7 +112,7 @@ def ingest_sanctions_list(run_date: str):
     _write_partition(df, path, "sanctions_list/global")
 
 
-def run_all(run_date: str = None):
+def run_all(run_date: str | None = None):
     """Run full Sqoop ingestion cycle."""
     if run_date is None:
         run_date = datetime.now(timezone.utc).strftime("%Y%m%d")

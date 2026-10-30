@@ -15,8 +15,8 @@ Each step runs sequentially and passes state via files.
 Run: python pipeline_orchestrator.py [--date YYYYMMDD]
 """
 
-import sys
 import argparse
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,7 +35,7 @@ def step(name: str, simulated_time: str):
     logger.info(f"{'='*60}")
 
 
-def run_pipeline(run_date: str = None):
+def run_pipeline(run_date: str | None = None):
     start = datetime.now(timezone.utc)
     if run_date is None:
         run_date = start.strftime("%Y%m%d")
@@ -66,7 +66,7 @@ def run_pipeline(run_date: str = None):
 
     # ── STEP 2: Hive Simulator Load (02:00 → 03:00)
     step("STEP 2: Load ODS into Hive Simulator", "02:00 → 03:00")
-    from scb_aml_platform.hive.scripts.hive_simulator import load_ods_tables, get_table_info
+    from scb_aml_platform.hive.scripts.hive_simulator import get_table_info, load_ods_tables
     load_ods_tables()
     info = get_table_info()
     logger.success(f"Hive tables loaded: {list(info.keys())}")
