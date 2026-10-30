@@ -41,4 +41,4 @@ pyyaml==6.0.1
 click==8.1.7
 rich==13.5.3
 loguru==0.7.2
-tqdm==4.66.1
+tqdm==4.66.3
