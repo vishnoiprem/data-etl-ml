@@ -1,0 +1,24 @@
+# The course's core is pure standard library — `project/core/` imports
+# nothing outside the stdlib, and `project/local_bi.py` runs on a bare
+# Python install.
+#
+# These are the extras: the test runner, and the SDKs for the optional
+# cloud sections.
+
+# Testing
+pytest>=8.0
+
+# The BigQuery chapters read the destination table
+google-cloud-bigquery>=3.0.0
+
+# The Secret Manager chapter and the Cloud Run deploy path
+google-cloud-secretmanager>=2.20.0
+
+# The Looker / Cloud SQL path
+psycopg2-binary>=2.9.9
+
+# The notebook runner
+jupyter>=1.0.0
+nbclient>=0.10.0
+nbformat>=5.10.0
+ipykernel>=6.29.0
