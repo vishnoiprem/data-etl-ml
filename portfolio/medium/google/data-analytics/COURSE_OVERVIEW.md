@@ -62,40 +62,66 @@ Prepare comprehensively for Google Data Analyst interviews (including Google Dat
 ```
 data-analytics/
 ├── COURSE_OVERVIEW.md          # This file
+├── GCP_DATA_ENGINEERING_COURSE/  # ⭐ The 34-chapter hands-on GCP course
+├── GOOGLE_CLOUD_DATA_ANALYTICS_LEAD/
+├── INTERVIEW_PREP/
 ├── WEEK_1_TECHNICAL/
-│   ├── DAY_1_SQL_BASICS.md
-│   ├── DAY_2_SQL_ADVANCED.md
-│   ├── DAY_3_SPREADSHEETS.md
-│   ├── DAY_4_TABLEAU.md
-│   ├── DAY_5_PYTHON.md
-│   ├── DAY_6_STATISTICS.md
-│   ├── DAY_7_REVIEW.md
-│   ├── practice_queries/
-│   └── solutions/
 ├── WEEK_2_INTERVIEW/
-│   ├── DAY_8_CASE_STUDIES.md
-│   ├── DAY_9_PRODUCT_SENSE.md
-│   ├── DAY_10_BEHAVIORAL.md
-│   ├── DAY_11_DATA_MODELING.md
-│   ├── DAY_12_COMMUNICATION.md
-│   ├── DAY_13_MOCK_INTERVIEW.md
-│   ├── DAY_14_FINAL_REVIEW.md
-│   ├── frameworks/
-│   └── star_stories/
 ├── CHEAT_SHEETS/
-│   ├── sql_cheatsheet.md
-│   ├── tableau_cheatsheet.md
-│   ├── python_pandas_cheatsheet.md
-│   ├── statistics_cheatsheet.md
-│   └── google_interview_tips.md
 ├── RESOURCES/
-│   ├── recommended_reading.md
-│   ├── practice_platforms.md
-│   └── google_specific_resources.md
 └── TRACKER/
-    ├── daily_progress.md
-    └── mock_scores.md
 ```
+
+---
+
+### ⭐ GCP Data Engineering Course (the main build)
+
+[`GCP_DATA_ENGINEERING_COURSE/`](GCP_DATA_ENGINEERING_COURSE/) is the
+primary deliverable in this folder: **8 modules · 34 chapters · ~33,000
+lines**, covering the Google Cloud platform from the mechanism up — IAM,
+storage and databases, BigQuery, streaming, processing, orchestration,
+governance and ML on GCP.
+
+It ships with a **working project** that runs locally with no GCP
+account, no credentials and no bill:
+
+```bash
+cd GCP_DATA_ENGINEERING_COURSE
+
+python3 -m venv .venv && source .venv/bin/activate
+
+# Generate the deterministic dataset
+python resources/sample_data.py --output-dir ./sample_data
+
+# Run the pipeline
+python project/local_runner.py --run
+
+# Run the tests and the course linter
+python3 -m pytest project/tests/ -q
+python resources/audit_course.py
+```
+
+The core modules import nothing from Google Cloud, so the whole platform
+— the 34-service catalogue, the 23-role IAM policy engine, the cost
+model and the pipeline — is modelled in pure Python and runs in under
+half a second.
+
+It also carries a bank of **128 interview questions** written the way a
+senior engineer answers them: a direct answer, the mechanism, the
+trade-off, and a production detail with numbers.
+
+| Path | What it holds |
+|------|---------------|
+| [`GCP_DATA_ENGINEERING_COURSE/README.md`](GCP_DATA_ENGINEERING_COURSE/README.md) | Course front door, module map, how to run it |
+| [`GCP_DATA_ENGINEERING_COURSE/chapters/`](GCP_DATA_ENGINEERING_COURSE/chapters/) | The 34 chapters |
+| [`GCP_DATA_ENGINEERING_COURSE/project/`](GCP_DATA_ENGINEERING_COURSE/project/) | The runnable local simulation |
+| [`GCP_DATA_ENGINEERING_COURSE/interview/`](GCP_DATA_ENGINEERING_COURSE/interview/) | 128 interview questions + a 14-day study plan |
+| [`GCP_DATA_ENGINEERING_COURSE/resources/`](GCP_DATA_ENGINEERING_COURSE/resources/) | Setup, cheatsheet, glossary, FAQ, the linter |
+
+The interview-prep directories above are the *analyst-side* package: SQL,
+Python, statistics, case studies and behavioural rounds. The GCP Data
+Engineering course is the *engineer-side* package. Together they cover
+the whole interview loop.
 
 ---
 
