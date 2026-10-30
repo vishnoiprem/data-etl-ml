@@ -24,7 +24,7 @@ oauthlib==4.0.0
 virtualenv==21.14.10
 tqdm==4.67.3
 marshmallow==3.26.2
-msgpack==1.2.1
+msgpack==1.2.3
 sqlparse==0.6.0
 pyasn1==0.6.4
 gunicorn==23.0.0
