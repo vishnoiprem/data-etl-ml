@@ -181,8 +181,15 @@ jobs:
           MAX_MB: 300
         run: |
           set -e
-          # Pick first tag (typically `latest` or branch ref).
-          IMAGE=$(echo "$TAGS" | awk '{print $1}')
+          # Pick the FIRST tag (typically `latest` or the branch ref).
+          #
+          # `awk '{print $1}'` does NOT do that: `$1` is "first field
+          # of each line", and awk prints one output line per input
+          # line. On a multi-tag list it therefore returned ALL the
+          # tags joined by newlines, and the next command failed with
+          # "invalid reference format". `head -1` takes only the first
+          # line; `awk` then splits that single line into its fields.
+          IMAGE=$(echo "$TAGS" | head -1 | awk '{print $1}')
           echo "Verifying image: $IMAGE"
           docker pull "$IMAGE"
 
@@ -255,7 +262,10 @@ jobs:
           TAGS: ${{ needs.build-and-push.outputs.image }}
         run: |
           set -e
-          IMAGE=$(echo "$TAGS" | awk '{print $1}')
+          # Same `head -1` fix as the verify job — `awk '{print $1}'`
+          # returns every line of a multi-line tag list, which makes
+          # the image reference invalid.
+          IMAGE=$(echo "$TAGS" | head -1 | awk '{print $1}')
           echo "Pulling $IMAGE for SBOM scan"
           docker pull "$IMAGE"
           echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
@@ -322,7 +332,12 @@ jobs:
           TAGS: ${{ needs.build-and-push.outputs.image }}
         run: |
           set -e
-          for IMAGE in $TAGS; do
+          # Iterate one tag per line. `for IMAGE in $TAGS` does NOT
+          # split on the newlines in the tag list — the whole list
+          # arrives as a single word, so cosign was handed one
+          # invalid multi-line reference instead of three tags.
+          echo "$TAGS" | while IFS= read -r IMAGE; do
+            [ -z "$IMAGE" ] && continue
             echo "signing $IMAGE"
             # Keyless: GitHub Actions provides the OIDC token via
             # the ACTIONS_ID_TOKEN_REQUEST_TOKEN env var; cosign

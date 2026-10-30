@@ -21,7 +21,8 @@ elasticsearch==8.9.0
 elasticsearch-dsl==8.9.0
 
 # Kafka (ingestion simulation)
-kafka-python==2.0.2
+# 2.3.2 clears PYSEC-2026-2190 / PYSEC-2026-2191.
+kafka-python==2.3.2
 
 # Database / HDFS simulation (SQLite-based local Hive)
 sqlalchemy==1.4.52
@@ -31,14 +32,17 @@ PyHive==0.7.0
 faker==19.6.2
 
 # API (Lucid Search — FastAPI)
-fastapi==0.103.1
+# 0.109.1 clears PYSEC-2024-38.
+fastapi==0.109.1
 uvicorn==0.23.2
 httpx==0.25.0
 
 # Utilities
-python-dotenv==1.0.0
+# 1.2.2 clears PYSEC-2026-2270.
+python-dotenv==1.2.2
 pyyaml==6.0.1
 click==8.1.7
 rich==13.5.3
 loguru==0.7.2
-tqdm==4.66.1
+# 4.66.3 clears PYSEC-2026-1976.
+tqdm==4.66.3

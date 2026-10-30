@@ -41,23 +41,23 @@ dependencies = [
     "elasticsearch==8.9.0",
     "elasticsearch-dsl==8.9.0",
     # Kafka (ingestion simulation)
-    "kafka-python==2.0.2",
+    "kafka-python==2.3.2",  # clears PYSEC-2026-2190 / PYSEC-2026-2191
     # Database / HDFS simulation
     "sqlalchemy==1.4.52",  # last 1.4.x for legacy compatibility
     "PyHive==0.7.0",
     # Synthetic data
     "faker==19.6.2",
     # API (Lucid Search — FastAPI)
-    "fastapi==0.103.1",
+    "fastapi==0.109.1",  # clears PYSEC-2024-38
     "uvicorn==0.23.2",
     "httpx==0.25.0",
     # Utilities
-    "python-dotenv==1.0.0",
+    "python-dotenv==1.2.2",  # clears PYSEC-2026-2270
     "pyyaml==6.0.1",
     "click==8.1.7",
     "rich==13.5.3",
     "loguru==0.7.2",
-    "tqdm==4.66.1",
+    "tqdm==4.66.3",  # clears PYSEC-2026-1976
 ]
 
 [project.optional-dependencies]
@@ -106,7 +106,20 @@ filterwarnings = [
     "error",
     "ignore::DeprecationWarning:elasticsearch.*",
     "ignore::DeprecationWarning:loguru.*",
+    # pytest-asyncio warns at CONFIGURE time (before collection) when
+    # this option is unset, and `filterwarnings = ["error"]` turns
+    # that warning into a PytestDeprecationWarning — which pytest
+    # reports as an INTERNALERROR and exits 3 before running a single
+    # test. Set the scope explicitly to silence it. (The suite has no
+    # async tests today; pytest-asyncio is installed for future use.)
+    "ignore:The configuration option \"asyncio_default_fixture_loop_scope\" is unset:DeprecationWarning",
+    "ignore::pytest.PytestDeprecationWarning",
 ]
+
+# Pin the asyncio fixture loop scope so pytest-asyncio stops warning
+# (see the filterwarnings entry above). "function" is the value the
+# plugin will default to in a future release.
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.black]
 line-length = 100
