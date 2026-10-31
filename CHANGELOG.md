@@ -1,0 +1,58 @@
+# Changelog
+
+## [0.2.0](https://github.com/vishnoiprem/data-etl-ml/compare/v0.1.0...v0.2.0) (2026-10-31)
+
+
+### Features
+
+* **agentic-ai:** add apex-rag-omni — sovereign RAG platform for 100M docs ([377b3ec](https://github.com/vishnoiprem/data-etl-ml/commit/377b3ecc8eb20410dc19ae47e350f267309e2db6))
+* **agentic-ai:** add ChatGPT-style query UI and trace reviewer route ([5652a45](https://github.com/vishnoiprem/data-etl-ml/commit/5652a452a51fab28e2f02e819d02f9182384a2bd))
+* **agentic-ai:** production hardening v0.2.0 — auth, async audit, real eval, healthz/readyz ([4d15d84](https://github.com/vishnoiprem/data-etl-ml/commit/4d15d84adca16826d4fd98a1ccfc4a878b5b8b13))
+* **ai-course-public:** add AI Builder in n8n course scaffold ([eca8809](https://github.com/vishnoiprem/data-etl-ml/commit/eca880914b07867a01a60e297dcd7caa28a9ffa6))
+* **ai-course-public:** add CDO/Head-of-Data masterclass course ([b1f5d7b](https://github.com/vishnoiprem/data-etl-ml/commit/b1f5d7b005426cfa9035b32918eb1e63599a8287))
+* **ai-fde:** bring data_llm_engineer/ onto master with a fix ([ce2c77e](https://github.com/vishnoiprem/data-etl-ml/commit/ce2c77ef22053a3e41a755d18479b304e9ca60d4))
+* **apex-rag-omni:** ChatGPT-style streaming chat, real retrieval, hallucination + sanitization ([f1dae05](https://github.com/vishnoiprem/data-etl-ml/commit/f1dae051a0ebfe9e7bf0bcd140cab7bc40ae20ca))
+* **apex-rag-omni:** document upload + Docker/Caddy production deploy + README guides ([444f771](https://github.com/vishnoiprem/data-etl-ml/commit/444f7711df10833d839c2c661f775c13dcf7ed56))
+* **apex-rag-omni:** English/Thai/Vietnamese/Chinese/Hindi support end to end ([e67afbc](https://github.com/vishnoiprem/data-etl-ml/commit/e67afbc51839d1d15a1e2a22881eb64939b43b39))
+* **apex-rag-omni:** plain-words explanation via free OpenAI-compatible model (Ollama/Groq/OpenRouter/Gemini) ([c42457d](https://github.com/vishnoiprem/data-etl-ml/commit/c42457dace4ca13d2d12b1dc7f1c79c0622c5fc4))
+* **data-analysis:** add Semantic Layer & BI course module ([ca60720](https://github.com/vishnoiprem/data-etl-ml/commit/ca607201c75de00809dee01a3a343ec9c8d018ca))
+* **datastream:** add Datastream & CDC course module ([ccdb2e6](https://github.com/vishnoiprem/data-etl-ml/commit/ccdb2e693d686fc19f00ae1b8d1cdb75e1dbf03b))
+* expand trading-bot main and add Google Cloud data analytics lead overview ([8830390](https://github.com/vishnoiprem/data-etl-ml/commit/88303908729983fa8cddaaf722a6c04819e294c8))
+* **puku-cli:** add executive interview, lead finder and trade agents ([78c06bc](https://github.com/vishnoiprem/data-etl-ml/commit/78c06bcd2cdc82d66dd6be084ecf8be4f6742fb0))
+* **scb-aml:** merge realtime, ML and test suites from audit branch ([47b5f0b](https://github.com/vishnoiprem/data-etl-ml/commit/47b5f0bf137a796ce1b727ca83fd7c5d6a9bbc84))
+* **scb-aml:** restore SCB AML Platform project to main ([e6d4973](https://github.com/vishnoiprem/data-etl-ml/commit/e6d49736f307975a0af2e53ad5fe106864e1ff08))
+* **scripts:** ship.sh -- curate + push helper for master ([370959a](https://github.com/vishnoiprem/data-etl-ml/commit/370959ac5dea3c1f11259b550b6583bd5ad4c938))
+* update trading-bot signal watcher and add round 3 case study prep ([0e50e87](https://github.com/vishnoiprem/data-etl-ml/commit/0e50e8726216c2886a3593b802d42f2a4a61d4c4))
+
+
+### Bug Fixes
+
+* **agentic-ai:** align legacy Domain enum + prompts to hr_policies/tech_docs/product_docs ([697c3fc](https://github.com/vishnoiprem/data-etl-ml/commit/697c3fcc58010a097af2694c93b0f3ee2d9ba4eb))
+* **agentic-ai:** bump ts-strarter to latest deps — 0 npm vulnerabilities ([3e8a292](https://github.com/vishnoiprem/data-etl-ml/commit/3e8a292d49144e092f9b8e43759fa0acbf0a1f60))
+* **ai-engineering:** bump graph-rag/web to Vite 8 — 0 npm vulnerabilities ([d6bffbf](https://github.com/vishnoiprem/data-etl-ml/commit/d6bffbf83139ad8917bd4a63d1d64bf280d711a6))
+* **ai-fde:** phase-7 index listed 15 of 100 companies ([a72a00c](https://github.com/vishnoiprem/data-etl-ml/commit/a72a00c596e84b6bf6f76c3d19f5501ebaf3412d))
+* **ai-fde:** remove triplicated footers across 31 READMEs ([a7a8ed0](https://github.com/vishnoiprem/data-etl-ml/commit/a7a8ed057df430b1d706496f5819d2e44d180e98))
+* **algorithms:** DAY_30 clone_graph keyed on object identity, not value ([9aa35ea](https://github.com/vishnoiprem/data-etl-ml/commit/9aa35eac3567f8dbd85a9972e482b11b2d0f2ad5))
+* **apex-rag-omni/ui:** UX pass from browser review (layout, mobile, refusals, icons) ([9f7a36f](https://github.com/vishnoiprem/data-etl-ml/commit/9f7a36fc62841ecee23bb5badfe4a0bb46be380f))
+* **aws:** migrate ecs-data-ingestion to Vite 8 — 0 npm vulnerabilities ([66a8bba](https://github.com/vishnoiprem/data-etl-ml/commit/66a8bba80a34077de1958c9614ec64a343ad6871))
+* **ci:** clear scb-aml-platform CVEs and fix leads-cd tag extraction ([2e52bbc](https://github.com/vishnoiprem/data-etl-ml/commit/2e52bbcf422c8f961691f100cc5aa765442185d9))
+* **ci:** fix leads-cd sign/sbom permissions and correct a Jaro-Winkler test ([ac324bd](https://github.com/vishnoiprem/data-etl-ml/commit/ac324bdfc0998e3cec7ce4547f2a1da10de7b605))
+* **ci:** repair pip-audit SARIF upload and npm-audit gate ([9ed8cf2](https://github.com/vishnoiprem/data-etl-ml/commit/9ed8cf2580958882cb62a28e7f7383753ae84dd4))
+* **ci:** repair scb-aml-ci and leads-cd jobs that failed on master ([7c5cedc](https://github.com/vishnoiprem/data-etl-ml/commit/7c5cedc38bee4fe73f849d8e535d5639366af1a9))
+* **ci:** stop npm audit exit code from bypassing the severity gate ([c054236](https://github.com/vishnoiprem/data-etl-ml/commit/c0542365a65c1d39ef0d849c85b3c6ea6953e332))
+* **ci:** trigger workflows on master instead of stale main ([58a3f50](https://github.com/vishnoiprem/data-etl-ml/commit/58a3f506e83685ea670700f8f60e0b66c30ee6d2))
+* **ci:** unblock Dependabot PRs broken by security-gate and title lint ([bcba3ce](https://github.com/vishnoiprem/data-etl-ml/commit/bcba3ce3323d5bcfd4a62f3392a0cbb91be06ba2))
+* **ci:** unblock Dependabot PRs broken by security-gate and title lint ([#183](https://github.com/vishnoiprem/data-etl-ml/issues/183)) ([8d2b807](https://github.com/vishnoiprem/data-etl-ml/commit/8d2b80737a96c1672855b36f77315ea1c4239dd2))
+* **composer:** teach the audit linter to recognise intentional code fragments ([423908d](https://github.com/vishnoiprem/data-etl-ml/commit/423908d223174ca80369941ca0053bdecd707e8b))
+* **data_llm_engineer:** unbreak 5 nested same-quote f-string cells ([403cb85](https://github.com/vishnoiprem/data-etl-ml/commit/403cb851b106b4fb9f07def6a9d01e4005bd5fb7))
+* **deps:** bump 5 vulnerable Python pins in root requirements.txt ([ba4844a](https://github.com/vishnoiprem/data-etl-ml/commit/ba4844a2e17109d0187b9afe3c4aeecb7adf4ea2))
+* **deps:** upgrade vulnerable pins to clear 8 CVEs ([7c1a810](https://github.com/vishnoiprem/data-etl-ml/commit/7c1a810bcd5cdf51b7cb8f30658ed5712e367648))
+* **git:** remove broken gitlink and ignore nested .claude worktrees ([741c3dd](https://github.com/vishnoiprem/data-etl-ml/commit/741c3dd3db2c9996ec80a168e61bfe05d8676f10))
+* **portfolio:** track 3 files dropped by gitignore after the rename ([72dbc5c](https://github.com/vishnoiprem/data-etl-ml/commit/72dbc5cefbac4262c5245eb4b4dc1ed6a6624004))
+* re-track generated sample outputs that master tracked ([489d637](https://github.com/vishnoiprem/data-etl-ml/commit/489d6370654d4797774a5075b5f89d2279128006))
+* repoint CI, dependabot, CODEOWNERS and tooling paths; keep ecs-data-ingestion and sample DBs tracked ([7f84e21](https://github.com/vishnoiprem/data-etl-ml/commit/7f84e21856009a8de1f161db670d67a420b64bf5))
+* repoint workflows and scripts to reorganised paths ([ba689b7](https://github.com/vishnoiprem/data-etl-ml/commit/ba689b7d0f05ebca797fceedbbe03765c8026575))
+* **scb-aml:** P2 security — restrict CORS, drop deprecated utcnow, trim deps ([8dd7a68](https://github.com/vishnoiprem/data-etl-ml/commit/8dd7a68d3433d3444a135717fe6985731047e34e))
+* **scb-aml:** P2 security — restrict CORS, drop deprecated utcnow, trim deps ([47e9c93](https://github.com/vishnoiprem/data-etl-ml/commit/47e9c93f8cacad9a70e22bb882f6c471a570542e))
+* **security:** add node_modules to .gitignore and remove tracked copy ([76adde0](https://github.com/vishnoiprem/data-etl-ml/commit/76adde0440adee5bba45fe8e29e964282a1d2b59))
+* **security:** bump torch 2.9.1→2.14.1 and pyarrow 18.1.0→23.0.1 ([5142795](https://github.com/vishnoiprem/data-etl-ml/commit/51427952b33893df608dc75e9674fdc0b550a09f))
