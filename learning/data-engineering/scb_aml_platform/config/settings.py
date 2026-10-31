@@ -14,6 +14,7 @@ DATA_DIR = BASE_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 DUMMY_DIR = DATA_DIR / "dummy"
 OUTPUT_DIR = BASE_DIR / "output"
+ML_MODEL_DIR = DATA_DIR / "ml_models"
 
 # ─────────────────────────────────────────────
 # 15 COUNTRY CODES
@@ -92,6 +93,18 @@ RISK_HIGH_MIN = 61
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "localhost:9092")
 KAFKA_TOPIC_TXN = "scb.transactions.raw"
 KAFKA_TOPIC_WIRE = "scb.wire_transfers.raw"
+KAFKA_TOPIC_REALTIME_ALERTS = "scb.realtime.alerts"
+KAFKA_CONSUMER_GROUP = "scb_aml_realtime_consumer"
+
+# Realtime detection
+REALTIME_WINDOW_SECONDS = 300        # 5 min rolling window
+REALTIME_VELOCITY_THRESHOLD = 5      # ≥5 wires/5min triggers velocity rule
+REALTIME_CTR_THRESHOLD_USD = 10_000  # mirrors CTR
+REALTIME_HIGH_RISK_DEST = {"IR", "KP", "MM", "SY", "YE", "AF"}
+
+# ML model
+ML_MODEL_DIR = DATA_DIR / "ml_models"
+ML_RISK_LABEL_THRESHOLD = 70         # composite_aml_score >= this → "high_risk"
 
 # ─────────────────────────────────────────────
 # REGULATORY

@@ -19,19 +19,17 @@ Output: data/processed/aml_feature_store.parquet
 """
 
 import sys
-from datetime import datetime, timedelta
 from pathlib import Path
+from datetime import datetime, timedelta
 
-import numpy as np
 import pandas as pd
+import numpy as np
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    BASE_DIR,
-    CTR_THRESHOLD_USD,
-    STRUCTURING_COUNT_THRESHOLD,
-    STRUCTURING_WINDOW_DAYS,
+    BASE_DIR, CTR_THRESHOLD_USD, STRUCTURING_WINDOW_DAYS,
+    STRUCTURING_COUNT_THRESHOLD
 )
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
@@ -49,6 +47,9 @@ HIGH_RISK_COUNTRIES = {"IR", "KP", "MM", "SY", "YE", "AF", "LY", "SO"}
 # ─────────────────────────────────────────────
 def compute_velocity_features(txns: pd.DataFrame) -> pd.DataFrame:
     """Transaction count and volume over multiple time windows."""
+    # Defensive: callers may pass raw parquet (date as string).
+    txns = txns.copy()
+    txns["txn_date"] = pd.to_datetime(txns["txn_date"], errors="coerce")
     windows = [1, 7, 30, 90]
     result = txns[["customer_id"]].drop_duplicates()
 
@@ -89,6 +90,8 @@ def compute_structuring_features(txns: pd.DataFrame) -> pd.DataFrame:
     Structuring: multiple transactions just below CTR threshold (85–100%)
     within STRUCTURING_WINDOW_DAYS days.
     """
+    txns = txns.copy()
+    txns["txn_date"] = pd.to_datetime(txns["txn_date"], errors="coerce")
     threshold_low = CTR_THRESHOLD_USD * 0.85
     threshold_high = CTR_THRESHOLD_USD
 
@@ -122,8 +125,18 @@ def compute_structuring_features(txns: pd.DataFrame) -> pd.DataFrame:
 # ─────────────────────────────────────────────
 def compute_cross_border_features(wires: pd.DataFrame) -> pd.DataFrame:
     """Cross-border wire transfer exposure."""
+    wires = wires.copy()
+    # Defensive: accept either `value_date` (SWIFT) or `wire_date`
+    # (synthetic generator).
+    if "value_date" in wires.columns:
+        date_col = "value_date"
+    elif "wire_date" in wires.columns:
+        date_col = "wire_date"
+    else:
+        raise KeyError("wires must have `value_date` or `wire_date`")
+    wires[date_col] = pd.to_datetime(wires[date_col], errors="coerce")
     cutoff = REFERENCE_DATE - timedelta(days=30)
-    recent = wires[wires["value_date"] >= cutoff].copy()
+    recent = wires[wires[date_col] >= cutoff].copy()
 
     recent["is_high_risk_dest"] = recent["receiver_country"].isin(HIGH_RISK_COUNTRIES)
 
@@ -182,6 +195,8 @@ def compute_network_features(txns: pd.DataFrame, rels: pd.DataFrame) -> pd.DataF
 # ─────────────────────────────────────────────
 def compute_behavioural_features(txns: pd.DataFrame) -> pd.DataFrame:
     """Dormancy, channel diversity, average transaction size trend."""
+    txns = txns.copy()
+    txns["txn_date"] = pd.to_datetime(txns["txn_date"], errors="coerce")
     cutoff_30 = REFERENCE_DATE - timedelta(days=30)
     cutoff_60 = REFERENCE_DATE - timedelta(days=60)
 
@@ -229,12 +244,17 @@ def compute_behavioural_features(txns: pd.DataFrame) -> pd.DataFrame:
 # FEATURE CATEGORY 6: KYC
 # ─────────────────────────────────────────────
 def compute_kyc_features(kyc: pd.DataFrame) -> pd.DataFrame:
-    """KYC staleness and risk rating history."""
+    """KYC staleness and risk rating history.
+
+    Returns customer_id, kyc_age_days, kyc_status. Note: we deliberately
+    DO NOT return pep_flag from the KYC table — the customer-master
+    `pep_flag` is the authoritative one and is already merged upstream.
+    """
     kyc = kyc.copy()
     kyc["kyc_date_dt"] = pd.to_datetime(kyc["kyc_date"], errors="coerce")
     kyc["kyc_age_days"] = (REFERENCE_DATE - kyc["kyc_date_dt"]).dt.days.fillna(9999).astype(int)
 
-    return kyc[["customer_id", "kyc_age_days", "kyc_status", "pep_flag"]].copy()
+    return kyc[["customer_id", "kyc_age_days", "kyc_status"]].copy()
 
 
 # ─────────────────────────────────────────────
@@ -251,6 +271,12 @@ def run() -> pd.DataFrame:
     rels = pd.read_parquet(DUMMY_DIR / "relationships.parquet")
 
     txns["txn_date"] = pd.to_datetime(txns["txn_date"], errors="coerce")
+    # Synthetic generator writes `wire_date`; real SWIFT feeds use `value_date`.
+    # Normalize to `wire_date` so all downstream code uses one name.
+    if "wire_date" in wires.columns and "value_date" not in wires.columns:
+        wires = wires.rename(columns={"wire_date": "value_date"})
+    elif "value_date" in wires.columns and "wire_date" not in wires.columns:
+        wires = wires.rename(columns={"value_date": "wire_date"})
     wires["value_date"] = pd.to_datetime(wires["value_date"], errors="coerce")
 
     customers = pd.read_parquet(DUMMY_DIR / "customers.parquet")

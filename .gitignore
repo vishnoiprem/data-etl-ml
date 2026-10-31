@@ -63,6 +63,15 @@ data/
 # (git uses last-match-wins for ignore rules).
 !*.json.example
 !*.jsonl.example
+# The scb_aml_platform `data/` tree holds the dummy-data generator
+# source package. The generated `data/processed/` output stays ignored
+# by the project-level .gitignore, but the source must be trackable.
+!learning/data-engineering/scb_aml_platform/data/
+!learning/data-engineering/scb_aml_platform/data/dummy/
+!learning/data-engineering/scb_aml_platform/data/dummy/__init__.py
+!learning/data-engineering/scb_aml_platform/data/dummy/generate_dummy_data.py
+!learning/data-engineering/scb_aml_platform/data/dummy/tests/
+!learning/data-engineering/scb_aml_platform/data/dummy/tests/**
 # release-please state files (root of repo)
 !release-please-config.json
 # Grafana provisioned dashboards (ships with the MLOps fine-tune project so

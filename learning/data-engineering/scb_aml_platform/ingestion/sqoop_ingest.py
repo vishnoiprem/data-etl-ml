@@ -63,7 +63,14 @@ def ingest_customers(run_date: str):
 def ingest_accounts(run_date: str):
     """Sqoop import: source_system=core_banking, table=account_master"""
     logger.info("=== Sqoop: Ingesting account_master ===")
-    df = pd.read_parquet(DUMMY_DIR / "accounts.parquet")
+    accounts_path = DUMMY_DIR / "accounts.parquet"
+    if not accounts_path.exists():
+        logger.warning(
+            "account_master source missing "
+            f"({accounts_path}) — skipping this table."
+        )
+        return
+    df = pd.read_parquet(accounts_path)
 
     for country in COUNTRIES:
         subset = df[df["country_code"] == country].copy()
@@ -89,9 +96,31 @@ def ingest_transactions(run_date: str):
 
 
 def ingest_wire_transfers(run_date: str):
-    """Flat-file ingest: CIB SWIFT MT103/MT202 messages"""
+    """Flat-file ingest: CIB SWIFT MT103/MT202 messages.
+
+    The wire feed carries `sender_customer_id`, not a sender country —
+    the originating country comes from the customer master. Partition
+    on the sender's country, which is the bank's home market.
+    """
     logger.info("=== Flat-file: Ingesting wire transfers (SWIFT) ===")
     df = pd.read_parquet(DUMMY_DIR / "wire_transfers.parquet")
+
+    if "sender_country" not in df.columns:
+        customers = pd.read_parquet(DUMMY_DIR / "customers.parquet")
+        df = df.merge(
+            customers[["customer_id", "country_code"]].rename(
+                columns={"country_code": "sender_country"}
+            ),
+            left_on="sender_customer_id",
+            right_on="customer_id",
+            how="left",
+        ).drop(columns=["customer_id"])
+        # A wire whose sender is not in the customer master has no
+        # country to partition on — drop it rather than mis-file it.
+        dropped = int(df["sender_country"].isna().sum())
+        if dropped:
+            logger.warning(f"{dropped} wire(s) with no matching customer — dropped.")
+        df = df[df["sender_country"].notna()]
 
     for country in COUNTRIES:
         subset = df[df["sender_country"] == country].copy()
