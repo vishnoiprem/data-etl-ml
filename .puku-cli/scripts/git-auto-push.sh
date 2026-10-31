@@ -2,8 +2,9 @@
 # git-auto-push.sh — background agent that pushes un-pushed commits.
 #
 # Triggers:
-#   * When /Users/pvishnoi/PycharmProjects/data-etl-ml/.puku-cli/state/git-push-now
-#     exists (set by .git/hooks/post-commit).
+#   * When a git-push-now flag file exists. The .git/hooks/post-commit hook
+#     touches the GLOBAL one (~/.puku-cli/state/git-push-now); we also watch
+#     the project-local one for backwards compatibility.
 #   * Every 600 seconds (10 min) as a safety net.
 #
 # Usage:  bash /Users/pvishnoi/PycharmProjects/data-etl-ml/.puku-cli/scripts/git-auto-push.sh
@@ -14,12 +15,15 @@ set -u
 
 PROJECT="/Users/pvishnoi/PycharmProjects/data-etl-ml"
 STATE_DIR="$PROJECT/.puku-cli/state"
+GLOBAL_STATE_DIR="$HOME/.puku-cli/state"
 FLAG="$STATE_DIR/git-push-now"
+GLOBAL_FLAG="$GLOBAL_STATE_DIR/git-push-now"
 LOG="$STATE_DIR/git-auto-push.log"
 PIDFILE="$STATE_DIR/git-auto-push.pid"
 REPO="$PROJECT"
+INTERVAL="${PUSH_INTERVAL:-600}"
 
-mkdir -p "$STATE_DIR"
+mkdir -p "$STATE_DIR" "$GLOBAL_STATE_DIR"
 echo $$ > "$PIDFILE"
 
 ts() { date '+%Y-%m-%d %H:%M:%S'; }
@@ -46,14 +50,20 @@ push_repo() {
     )
 }
 
-log "=== git-auto-push started (pid $$) ==="
+log "=== git-auto-push started (pid $$), interval ${INTERVAL}s ==="
 
 while true; do
-    if [ -f "$FLAG" ]; then
-        rm -f "$FLAG"
+    triggered=0
+    for f in "$GLOBAL_FLAG" "$FLAG"; do
+        if [ -f "$f" ]; then
+            rm -f "$f"
+            triggered=1
+        fi
+    done
+    if [ "$triggered" -eq 1 ]; then
         push_repo "post-commit"
     else
         push_repo "timer"
     fi
-    sleep 600
+    sleep "$INTERVAL"
 done

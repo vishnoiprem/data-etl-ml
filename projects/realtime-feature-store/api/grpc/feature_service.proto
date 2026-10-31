@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package feature_store.v1;
+
+option python_generic_services = true;
+option go_package = "github.com/feature-store/gen/go";
+
+// Feature Store gRPC Service Definition
+
+service FeatureService {
+  // Get online features for multiple entities (primary inference path)
+  rpc GetOnlineFeatures(GetOnlineFeaturesRequest) returns (GetOnlineFeaturesResponse);
+  
+  // Get online feature vector for single entity
+  rpc GetOnlineFeatureVector(GetOnlineFeatureVectorRequest) returns (GetOnlineFeatureVectorResponse);
+  
+  // Get historical features for training (point-in-time correct)
+  rpc GetHistoricalFeatures(GetHistoricalFeaturesRequest) returns (GetHistoricalFeaturesResponse);
+  
+  // List feature views
+  rpc ListFeatureViews(ListFeatureViewsRequest) returns (ListFeatureViewsResponse);
+  
+  // Get feature view definition
+  rpc GetFeatureView(GetFeatureViewRequest) returns (FeatureView);
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // Stream features for real-time updates (WebSocket-like)
+  rpc StreamFeatures(StreamFeaturesRequest) returns (stream FeatureUpdate);
+}
+
+// Request/Response Messages
+
+message EntityKey {
+  string entity = 1;
+  string key = 2;
+}
+
+message GetOnlineFeaturesRequest {
+  string feature_view = 1;
+  repeated string entity_keys = 2;
+  repeated string features = 3;  // optional: if empty, return all
+}
+
+message FeatureVector {
+  string entity = 1;
+  string key = 2;
+  map<string, FeatureValue> features = 3;
+  string event_timestamp = 4;
+  string created_timestamp = 5;
+}
+
+message FeatureValue {
+  oneof value {
+    int64 int_value = 1;
+    double double_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+    bytes bytes_value = 5;
+    repeated int64 int_array = 6;
+    repeated double double_array = 7;
+    repeated string string_array = 8;
+  }
+}
+
+message GetOnlineFeaturesResponse {
+  repeated FeatureVector vectors = 1;
+  int64 latency_ms = 2;
+  double cache_hit_rate = 3;
+}
+
+message GetOnlineFeatureVectorRequest {
+  repeated EntityKey entities = 1;
+  repeated string features = 2;
+}
+
+message GetOnlineFeatureVectorResponse {
+  map<string, map<string, FeatureValue>> results = 1;  // "entity:key" -> feature map
+  int64 latency_ms = 2;
+}
+
+message GetHistoricalFeaturesRequest {
+  repeated EntityTimestamp entity_timestamps = 1;
+  repeated string feature_views = 2;
+  repeated string features = 3;
+}
+
+message EntityTimestamp {
+  string entity_key = 1;
+  string event_timestamp = 2;
+}
+
+message GetHistoricalFeaturesResponse {
+  string data = 1;  // Serialized Arrow/Parquet
+  int32 row_count = 2;
+  repeated string columns = 3;
+}
+
+message ListFeatureViewsRequest {}
+
+message FeatureView {
+  string name = 1;
+  string entity = 2;
+  repeated FeatureDef features = 3;
+  bool online = 4;
+  bool offline = 5;
+  string description = 6;
+}
+
+message FeatureDef {
+  string name = 1;
+  string type = 2;  // "numeric", "categorical", "embedding", "array", "struct"
+  string dtype = 3; // "int32", "int64", "float32", "float64", "string", "bool"
+  int32 dimension = 4;
+  string description = 5;
+}
+
+message ListFeatureViewsResponse {
+  repeated FeatureView feature_views = 1;
+}
+
+message GetFeatureViewRequest {
+  string name = 1;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string online_store = 2;
+  string offline_store = 3;
+  string version = 4;
+}
+
+message StreamFeaturesRequest {
+  string feature_view = 1;
+  repeated string entity_keys = 2;
+  repeated string features = 3;
+}
+
+message FeatureUpdate {
+  string entity_key = 1;
+  map<string, FeatureValue> features = 2;
+  string event_timestamp = 3;
+  string update_type = 4;  // "insert", "update", "delete"
+}

@@ -1,0 +1,360 @@
+version: '3.8'
+
+services:
+  # Message Queue
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: fs-kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/etc/confluent/docker/healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - feature-store
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: fs-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - feature-store
+
+  # Online Feature Store - Redis Cluster
+  redis-node-0:
+    image: redis:7.2-alpine
+    container_name: fs-redis-0
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "7000:7000"
+      - "17000:17000"
+    volumes:
+      - ./redis/redis-node-0.conf:/usr/local/etc/redis/redis.conf
+      - redis-0-data:/data
+    networks:
+      - feature-store
+
+  redis-node-1:
+    image: redis:7.2-alpine
+    container_name: fs-redis-1
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "7001:7001"
+      - "17001:17001"
+    volumes:
+      - ./redis/redis-node-1.conf:/usr/local/etc/redis/redis.conf
+      - redis-1-data:/data
+    networks:
+      - feature-store
+
+  redis-node-2:
+    image: redis:7.2-alpine
+    container_name: fs-redis-2
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "7002:7002"
+      - "17002:17002"
+    volumes:
+      - ./redis/redis-node-2.conf:/usr/local/etc/redis/redis.conf
+      - redis-2-data:/data
+    networks:
+      - feature-store
+
+  # Online Feature Store - Cassandra
+  cassandra:
+    image: cassandra:4.1
+    container_name: fs-cassandra
+    environment:
+      CASSANDRA_CLUSTER_NAME: feature-store
+      CASSANDRA_DC: dc1
+      CASSANDRA_RACK: rack1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      CASSANDRA_NUM_TOKENS: 256
+      MAX_HEAP_SIZE: 2G
+      HEAP_NEWSIZE: 400M
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe cluster"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    networks:
+      - feature-store
+
+  # Offline Feature Store - MinIO (S3-compatible)
+  minio:
+    image: minio/minio:RELEASE.2024-01-16T16-07-38Z
+    container_name: fs-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - feature-store
+
+  # Offline Feature Store - Trino for Iceberg
+  trino:
+    image: trinodb/trino:443
+    container_name: fs-trino
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./trino/config.properties:/etc/trino/config.properties
+      - ./trino/catalog:/etc/trino/catalog
+    networks:
+      - feature-store
+    depends_on:
+      - minio
+
+  # Metadata Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: fs-postgres
+    environment:
+      POSTGRES_DB: feature_store
+      POSTGRES_USER: fs_user
+      POSTGRES_PASSWORD: fs_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - feature-store
+
+  # Feature Registry Database
+  registry-db:
+    image: postgres:16-alpine
+    container_name: fs-registry-db
+    environment:
+      POSTGRES_DB: feature_registry
+      POSTGRES_USER: registry_user
+      POSTGRES_PASSWORD: registry_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - registry-db-data:/var/lib/postgresql/data
+      - ./postgres/registry_init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - feature-store
+
+  # Stream Processing - Flink
+  flink-jobmanager:
+    image: flink:1.18-scala_2.12-java11
+    container_name: fs-flink-jm
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - FLINK_PROPERTIES=jobmanager.memory.process.size: 2g, taskmanager.memory.process.size: 4g, parallelism.default: 4
+    volumes:
+      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+      - ./flink/jobs:/opt/flink/usrlib
+    networks:
+      - feature-store
+
+  flink-taskmanager:
+    image: flink:1.18-scala_2.12-java11
+    container_name: fs-flink-tm
+    command: taskmanager
+    environment:
+      - FLINK_PROPERTIES=jobmanager.memory.process.size: 2g, taskmanager.memory.process.size: 4g, parallelism.default: 4
+      - JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
+    volumes:
+      - ./flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml
+      - ./flink/jobs:/opt/flink/usrlib
+    networks:
+      - feature-store
+    depends_on:
+      - flink-jobmanager
+
+  # Feature API Server
+  feature-api:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.api
+    container_name: fs-api
+    environment:
+      - REDIS_CLUSTER_NODES=redis-node-0:7000,redis-node-1:7001,redis-node-2:7002
+      - CASSANDRA_HOSTS=cassandra
+      - POSTGRES_HOST=postgres
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REGISTRY_DB_HOST=registry-db
+    ports:
+      - "8082:8082"
+      - "8083:8083"  # gRPC
+    networks:
+      - feature-store
+    depends_on:
+      - redis-node-0
+      - redis-node-1
+      - redis-node-2
+      - cassandra
+      - postgres
+      - kafka
+      - registry-db
+
+  # Model Serving
+  model-server:
+    build:
+      context: ..
+      dockerfile: deploy/docker/Dockerfile.serving
+    container_name: fs-model-server
+    environment:
+      - FEATURE_API_URL=http://feature-api:8082
+      - MODEL_REGISTRY_URL=http://model-registry:8084
+      - PROMETHEUS_URL=http://prometheus:9090
+    ports:
+      - "8085:8085"
+      - "8086:8086"  # gRPC
+    networks:
+      - feature-store
+    depends_on:
+      - feature-api
+
+  # Model Registry
+  model-registry:
+    image: mlflow/mlflow:2.11.0
+    container_name: fs-mlflow
+    command: mlflow server --host 0.0.0.0 --port 8084 --backend-store-uri postgresql://mlflow:mlflow@mlflow-db:5432/mlflow --default-artifact-root s3://mlflow/
+    environment:
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+    ports:
+      - "8084:8084"
+    networks:
+      - feature-store
+    depends_on:
+      - minio
+      - mlflow-db
+
+  mlflow-db:
+    image: postgres:16-alpine
+    container_name: fs-mlflow-db
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+    volumes:
+      - mlflow-db-data:/var/lib/postgresql/data
+    networks:
+      - feature-store
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: fs-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - feature-store
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: fs-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    networks:
+      - feature-store
+    depends_on:
+      - prometheus
+
+  # Monitoring - Jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: fs-jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=badger
+    ports:
+      - "16686:16686"
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    volumes:
+      - jaeger-data:/var/lib/jaeger
+    networks:
+      - feature-store
+
+  # Schema Registry
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.0
+    container_name: fs-schema-registry
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    ports:
+      - "8081:8081"
+    networks:
+      - feature-store
+    depends_on:
+      - kafka
+
+volumes:
+  kafka-data:
+  zookeeper-data:
+  zookeeper-logs:
+  redis-0-data:
+  redis-1-data:
+  redis-2-data:
+  cassandra-data:
+  minio-data:
+  postgres-data:
+  registry-db-data:
+  mlflow-db-data:
+  prometheus-data:
+  grafana-data:
+  jaeger-data:
+
+networks:
+  feature-store:
+    driver: bridge
