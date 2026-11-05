@@ -20,7 +20,7 @@ setuptools==84.1.0
 pygments==2.20.0
 filelock==4.2.1
 wheel==0.46.2
-oauthlib==4.0.0
+oauthlib==4.0.1
 virtualenv==21.14.10
 tqdm==4.67.3
 marshmallow==3.26.2
