@@ -13,7 +13,7 @@
 | `ROUND_4_LEADERSHIP.md` | Story bank is 8 empty rows; no model answers or "likely question" answers | §2 gives worked structures and 6 full answers |
 | `ROUND_5_GOOGLEYNESS.md` | Same: prompts only; "failure" story is the known weak spot | §3 gives answers incl. a failure template that scores |
 | `ROUND_6_EXECUTIVE.md` | One-pager is a skeleton; no answers for 40% growth, decline-an-engagement, GenAI | §4 gives full answers and a filled one-pager |
-| `ROUND_3_CASE_STUDY.md` | Good frameworks, but its numbers ("$500K phase", "40–60%") are illustrative | §1 keeps the logic, states assumptions, replaces fixed claims with ranges |
+| `ROUND_3_CASE_STUDY.md` | Good frameworks, but its figures are illustrative — the scenario prompts ("200 TB", "9 months", "$150K vs $50K/month", "40% reduction in 60 days") read as if fixed | §1 keeps the logic, states assumptions, replaces fixed claims with ranges |
 | `HOW_TO_PASS.md` | Placeholder metrics ("hired 15", "$5M practice") look like facts | Replace with your own verified numbers or drop |
 
 **Universal answer shapes used below**

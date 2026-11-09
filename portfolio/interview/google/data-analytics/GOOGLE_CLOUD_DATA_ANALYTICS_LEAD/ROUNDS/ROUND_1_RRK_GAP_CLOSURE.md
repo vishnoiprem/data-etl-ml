@@ -257,11 +257,23 @@ Rehearsed humility reads worse than silence. **It must cost you something to adm
 
 ### If you cannot recall a specific story in time
 
-**Do not fabricate.** Instead:
+**Do not fabricate one, and do not borrow a pattern story with invented numbers.**
 
-> "My clearest example isn't a single decision, it's a pattern I stopped: for the first two years I would give my team the *answer* — a decision, an architecture, a plan — because I was the most senior person in the room and I was usually right most of the time. **What I learned from the cases where I wasn't was that my team had stopped disagreeing with me.** I changed it by making the decision process explicit: I'd put a recommendation in writing, ask the team to argue with it before I decided, and hold myself to the rule that I'd say what I didn't know. **The measurable change: the number of technical decisions where a junior engineer's input changed the outcome went from roughly zero to most of them, and the team's incident rate fell.**"
+A fabricated "measurable change" is the single most dangerous thing you can say in this round. The interviewer asks *"how do you know that?"*, you cannot produce the figure, and from that point every number in your resume is suspect. **A setback story with no number is survivable. A setback story with a made-up number is not.**
 
-That is honest, specific, and mechanistic — and it is a real leadership failure mode, so it will survive scrutiny.
+**Instead, say the true thing, which is also the strong thing:**
+
+> "I'm going to give you an honest answer rather than a polished one. I don't have a single decision I'm proud of being wrong about in the way you're asking for. The decision I'm most comfortable putting in front of you is one where I *was* right — and I'll take you through it, including what the counter-argument was and what it would have cost me if I'd been wrong. And then I'll tell you the pattern I did have to change, which is this: **I learned that being right repeatedly is itself a risk, because it changes how your team behaves.** Earlier in my career I would arrive with the answer already formed, and I was often right, and I don't think I appreciated for a while that the people around me could tell I wasn't going to change my mind. The people who'd given me the most useful input stopped giving it, and I found that out later rather than sooner.
+>
+> "The change I made was procedural: I'd write my recommendation down, ask the team to argue with it *before* I decided, and hold myself to saying out loud what I didn't know. What I can tell you honestly is that people started raising problems earlier, and they started bringing me things I'd otherwise have missed. I don't have a clean number for that, and I'd rather say that than invent one."
+
+**Why this beats a manufactured anecdote:**
+- It is **true without knowing your history** — it is a genuine, common leadership failure mode, and it is *your* pattern only if you recognise it.
+- It **answers the brief's intent** ("times you learned something new from a setback") with a real insight about yourself.
+- It **refuses the number**, which is the credibility move: *"I'd rather say that than invent one"* is exactly what a lead who has been in the room says.
+- It invites the follow-up rather than closing it down — the interviewer will want to pull on the "stopped giving it" thread, and that thread is true.
+
+**The one thing to avoid:** ending on a fabricated metric. If you want a number here, it must come from your own record — and it does not need to be in this answer. **Q8's incident baseline and Q4's retention figures are real numbers you can bring to a different question, where you can stand behind them.**
 
 ---
 

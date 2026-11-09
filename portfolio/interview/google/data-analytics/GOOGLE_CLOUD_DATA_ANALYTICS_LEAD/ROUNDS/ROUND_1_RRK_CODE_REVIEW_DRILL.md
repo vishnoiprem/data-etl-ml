@@ -139,11 +139,22 @@ Say the ordering out loud with a reason: *"The type bug first, because until tha
 **Run 3 is the one that matters.** Reading code you wrote yourself is a different skill from reading code you have never seen. Use one of:
 
 - `GCP_DATA_ENGINEERING_COURSE/project/core/pipeline_logic.py` (909 lines — `deduplicate`, `watermark_lag`, `partition_for_event` are rich)
-- `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/composer_dag.py`
+- `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/composer_dag.py` (584 lines)
 - `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/bigquery_optimization.sql`
-- `INTERVIEW_PREP/assets/code/custom_dataflow_transform.py`
+- `INTERVIEW_PREP/assets/code/custom_dataflow_transform.py` (643 lines)
 
 **Get one genuinely unfamiliar snippet.** Where the interviewer gets it is unknown; the *format* is not. Build the habit, not the memorisation.
+
+### Second verified target: `composer_dag.py`
+
+Already checked by reading — so you are not starting from zero on Run 3. Four findings, and they are a **different flavour** from the Dataflow file (orchestration and governance, rather than correctness and idempotency):
+
+1. **Raw `email` flows into the dimension table.** The `MERGE` into `dim_customer` selects `email` from `stg_customers` and writes it straight through — no masking, no policy tag, no classification. On a customer dimension that is PII landing in a table with no column-level protection. *This is the finding that shows you read the *data*, not just the code.*
+2. **`QUALIFY ROW_NUMBER() ... ORDER BY _processed_ts DESC = 1` with no tie-breaker.** If two rows for the same `customer_id` share a `_processed_ts` — which a batch `_processed_ts` makes likely — the row chosen is **non-deterministic**. The same input can produce different output on a re-run. **That breaks idempotency in a way that is invisible until you diff two runs.**
+3. **`catchup=False` on the daily schedule (line 185).** Defensible, but it is a *choice* — so be ready to say what you would do if the pipeline was down for two days: the catchup window, and whether backfilling by event date is safe given the `WHERE DATE(_processed_ts) = ...` filter, which reads *processing* date, not event date.
+4. **`concurrency=10` with `retries=3` and a broad `except Exception` (line 128).** Ten concurrent tasks each retrying three times, with the error type flattened — a failure storm is possible and triage will be by string match.
+
+**The pairing is the point.** The Dataflow file is a *correctness and idempotency* review; this one is a *governance and orchestration* review. Being able to switch between those registers on demand is what makes the answer sound like judgement rather than a rehearsed list.
 
 **Do not** answer "this looks good, just add type hints." A review with no findings is a failed review — you must find something, and it must be a semantic finding, not a style nit.
 
