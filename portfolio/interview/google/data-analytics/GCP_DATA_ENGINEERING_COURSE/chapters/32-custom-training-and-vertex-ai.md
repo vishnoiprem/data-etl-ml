@@ -1573,12 +1573,39 @@ And assert it after training:
 
 ```python
 import os
+import tempfile
+
+with tempfile.TemporaryDirectory() as output_dir:
+    # Stand in for the artefact the training job writes.
+    with open(os.path.join(output_dir, "model.joblib"), "wb") as f:
+        f.write(b"placeholder")
+
+    assert os.path.exists(os.path.join(output_dir, "model.joblib")), (
+        f"model artefact not written to AIP_MODEL_DIR={output_dir}"
+    )
+    print(f"artefact present in {output_dir}")
+```
+
+In the training job itself, the directory comes from the environment
+and the artefact is the one the previous step wrote:
+
+```python
+import os
 
 output_dir = os.environ.get("AIP_MODEL_DIR", "/tmp/model")
 assert os.path.exists(os.path.join(output_dir, "model.joblib")), (
     f"model artefact not written to AIP_MODEL_DIR={output_dir}"
 )
 ```
+
+This assertion is the cheapest insurance in the whole training job. A
+Vertex training job that writes its artefact to the wrong directory
+still exits zero — `job.run()` returns successfully and
+`model.resource_name` points at a version with nothing in it. The
+assertion converts a silent success into a failed job, which is the
+outcome you want, because a red build is cheaper than a model that
+does not exist.
+
 
 ### 4. `403 Permission denied on resource projects/.../locations/.../endpoints/...`
 

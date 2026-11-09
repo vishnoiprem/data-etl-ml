@@ -68,7 +68,7 @@
 
 5. OPTIMIZATION (Post-Migration)
    ├── BigQuery: Partition/cluster, materialized views, slots
-   ├── Dataproc: Autoscaling, preemptible VMs, shuffle optimization
+   ├── Dataproc: Autoscaling, Spot VMs, shuffle optimization
    └── Cost: Labels, budgets, recommendations API
 ```
 
@@ -98,7 +98,7 @@ Pub/Sub (ingest, ordering keys)
 - **Dataflow:** Side inputs for reference data, stateful processing, custom windowing
 - **Vertex AI:** Endpoint autoscaling, model monitoring, drift detection
 - **BigQuery Streaming:** Buffer, partition decorators, _PARTITIONTIME
-- **Exactly-once:** Pub/Sub exactly-once + Dataflow + BigQuery streaming = end-to-end
+- **Exactly-once:** Pub/Sub exactly-once delivery is per-subscription, pull-only and regional, and does not remove duplicates the publisher itself sent. Dataflow is exactly-once *inside* the pipeline. End-to-end needs an idempotent sink: BigQuery Storage Write API with offsets for streaming, or `MERGE` on a deterministic event key for batch/micro-batch. See `ROUND_1_RRK_TOPIC_DEEP_DIVE.md` §3.
 
 ---
 
@@ -210,7 +210,7 @@ GCP: BigQuery Omni (query on-prem), Dataproc on Bare Metal, Vertex AI
 - [ ] **Draw architecture** — clear layers, data flow, GCP services labeled
 - [ ] **Explain trade-offs** — every choice has a reason + alternative considered
 - [ ] **Quantify** — TB, events/sec, latency, $ cost, timeline, team size
-- [ ] **Migrateatterns** — name 6 R's, apply to scenario
+- [ ] **Migration patterns** — name 6 R's, apply to scenario
 - [ ] **Governance** — lineage, quality, security, cost — not afterthought
 - [ ] **Partner lens** — "Here's what SI team owns vs. what we own"
 - [ ] **Ask clarifying questions** — "What's their downtime tolerance?" "Team skills?"

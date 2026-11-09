@@ -292,6 +292,12 @@ CLUSTER_ONLY_MARKERS = (
     "datastore.Client",
     "firestore.Client",
     "bigtable.Client",
+    # Vertex AI runs on a managed cluster. A snippet that reads
+    # AIP_MODEL_DIR only means anything inside a training job, where
+    # the directory holds the artefact the job itself wrote.
+    "AIP_MODEL_DIR",
+    "aiplatform",
+    "vertexai",
 )
 
 #: Snippets that need a local file the reader supplies. The course

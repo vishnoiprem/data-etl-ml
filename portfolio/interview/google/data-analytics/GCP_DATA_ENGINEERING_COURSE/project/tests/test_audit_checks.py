@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import os
 import sys
 from pathlib import Path
 
@@ -270,8 +271,17 @@ def test_earlier_import_does_not_rescue_a_later_block(tmp_path):
 def test_every_chapter_has_snippets_that_run():
     """No chapter may contain a snippet that fails to run."""
     report = audit.Report()
-    for chapter in sorted((COURSE_ROOT / "chapters").glob("*.md")):
-        audit.check_snippet_execution(chapter, report)
+    # The chapter snippets use paths relative to the course root
+    # (``sys.path.insert(0, "project/core")`` and
+    # ``open("sample_data/events.csv")``). Run them from there, which
+    # is the contract ``audit.main`` itself uses.
+    previous_cwd = Path.cwd()
+    os.chdir(COURSE_ROOT)
+    try:
+        for chapter in sorted((COURSE_ROOT / "chapters").glob("*.md")):
+            audit.check_snippet_execution(chapter, report)
+    finally:
+        os.chdir(previous_cwd)
     assert not report.errors, report.errors
 
 
