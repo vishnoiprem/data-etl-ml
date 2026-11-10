@@ -41,6 +41,13 @@
 
 **Why it passes:** evidence first, contain, fix, make it stick, no invented saving.
 
+**Follow-up A:** "One query scans 50 TB every hour. The business owner says it's critical and refuses to stop it."
+> "I don't ask them to stop it; 'critical' and 'must scan 50 TB hourly' are different claims. First, **put a number on it**: 50 TB an hour is about 36,000 TB a month, which at an on-demand rate of roughly $6 per TB (verify current pricing) is on the order of $200K a month. Then understand the need: what decision, how fresh, full history or only new data? Then offer ways to keep it running for a fraction of the cost: **incremental processing** (only new or changed partitions), a **materialised view or pre-aggregation**, partition and cluster so filters prune, a schedule that matches the real need, and **isolation** in its own project or capped reservation so its cost is predictable. I'd avoid a hard `maximum_bytes_billed` on this job without agreement, because it would make the critical query fail. If they still refuse, I escalate as a **decision, not a veto**: show the sponsor and finance the numbers, ask the owner to accept the cost formally, and set a budget and alert meanwhile. **I protect the outcome, not the query.**"
+
+**Follow-up B (practise in your own words):** "You cut it from 50 TB to 2 TB an hour. Now the owner says the dashboard is 20 minutes staler than before and wants the old version back. What do you do?" Hint: restate the freshness requirement as a number, compare the cost of closing the gap against its business value, offer options (a faster incremental cadence, a hot-path for the latest hour, a documented freshness SLO), and never revert silently.
+
+**Note on illustrative tables:** if you show a before and after cost table, make the totals match the scenario ($5K to $50K here). A table that doesn't reconcile costs credibility.
+
 ---
 
 ## 2. Data mesh versus a central platform
