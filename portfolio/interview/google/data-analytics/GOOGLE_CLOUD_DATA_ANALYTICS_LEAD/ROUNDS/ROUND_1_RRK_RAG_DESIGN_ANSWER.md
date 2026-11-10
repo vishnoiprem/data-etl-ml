@@ -50,7 +50,11 @@ Good skeleton. Fixes needed:
 | Rerank top 30 to 50 down to about 8 | about 50 to 150 ms | Vertex AI ranking or similar |
 | LLM first token | about 150 to 300 ms | Stream the answer |
 
-If the full answer must be under 500 ms, the design changes: smaller model, shorter context, or precomputed answers for frequent questions. Say so.
+**Do the sum out loud — the interviewer will.** The ranges total roughly **280–680 ms**, so the 500 ms p95 target is **not met at the pessimistic end**. That is the point of the exercise, and you should be the one to say it:
+
+> "Summed, that's about 280 to 680 milliseconds. The p95 target of 500 is achievable in the happy path but **not at the tail**, and p95 is exactly the tail. So the design levers are: drop the rerank stage for most queries and rerank only when retrieval confidence is low; cache embeddings; use a smaller model for the common case and escalate to a larger one; and keep context short. If the target is a hard contractual SLO, I'd say that now and propose the smaller-model path as the committed design, rather than discover the miss in production."
+
+If the **full** answer must be under 500 ms rather than first token, the design changes more fundamentally: smaller model, shorter context, or precomputed answers for frequent questions. **Say which definition you are using before you commit to a number.**
 
 ### Step 4. Generation that stays grounded
 - Pass the model a structured **`evidence_json`**: chunk ID, text, source, version, date, for each retrieved chunk.
