@@ -86,7 +86,7 @@ $ python3 project/local_runner.py --run
 
 ### The honest answer, ready to say
 
-> "My production depth is **Spark, Kafka, Flink and Databricks** — that's where I've run platforms at 10B+ daily rows and 500+ daily jobs. **My Google Cloud hands-on is architect-level**: I've designed and costed BigQuery and Dataflow solutions, and I've built this end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite, which I just rebuilt this month because two of its tests were failing.
+> "My production depth is **Spark, Kafka, Flink and Databricks** — that's where I've run platforms at 10B+ daily rows and 500+ daily jobs. **My Google Cloud hands-on is architect-level**: I've designed and costed BigQuery and Dataflow solutions, and I've built this end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite, which I repaired this month — it was failing its own audit checks because the sample data was never generated.
 >
 > **My production depth on those specific services is lighter than I'd want it to be.** Here's the 60-day plan..."
 

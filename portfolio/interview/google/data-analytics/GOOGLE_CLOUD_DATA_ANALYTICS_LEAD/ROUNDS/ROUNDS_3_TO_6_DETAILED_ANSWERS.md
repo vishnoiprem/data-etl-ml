@@ -14,7 +14,7 @@
 | `ROUND_5_GOOGLEYNESS.md` | Same: prompts only; "failure" story is the known weak spot | §3 gives answers incl. a failure template that scores |
 | `ROUND_6_EXECUTIVE.md` | One-pager is a skeleton; no answers for 40% growth, decline-an-engagement, GenAI | §4 gives full answers and a filled one-pager |
 | `ROUND_3_CASE_STUDY.md` | Good frameworks, but its figures are illustrative — the scenario prompts ("200 TB", "9 months", "$150K vs $50K/month", "40% reduction in 60 days") read as if fixed | §1 keeps the logic, states assumptions, replaces fixed claims with ranges |
-| `HOW_TO_PASS.md` | Placeholder metrics ("hired 15", "$5M practice") look like facts | Replace with your own verified numbers or drop |
+| `HOW_TO_PASS.md` | Already disciplined: it explicitly labels the illustrative corpus figures ("$2.1M -> $12.3M ARR at 34% margin", "Practice of the Year") as **not your history** | Keep that warning; do not reintroduce fixed practice numbers |
 
 **Universal answer shapes used below**
 - Hypothetical: **Understand → Prepare → Options → Recommend → Support**.
@@ -151,7 +151,7 @@ Structure that scores (genuine, specific, owned, changed):
 **Avoid:** a strength disguised as a weakness; blaming a team; a failure with no consequence; a rehearsed-sounding humility.
 
 ### G4. "How did you get a team you don't manage to follow your direction?"
-> "Influence without authority is **shared goal + evidence + making their job easier**. I find what each party is measured on, tie the change to their goals, use data to show the problem, run a small pilot to reduce their risk, give credit publicly, and agree decision rights. [Example: moved three teams to a common data contract by showing incident cost and doing the first integration for them.]"
+> "Influence without authority is **shared goal + evidence + making their job easier**. I find what each party is measured on, tie the change to their goals, use data to show the problem, run a small pilot to reduce their risk, give credit publicly, and agree decision rights. [YOUR example: a real cross-team change you drove — e.g. aligning N teams on one data contract by showing the incident cost and doing the first integration yourself. Use only a real example, and state the real number of teams.]"
 
 ### G5. "Changed your mind because of someone else's input."
 > "[Situation where a junior engineer/peer challenged my design.] I tested their point against the evidence, found they were right about [the failure mode], said so openly, changed the design, and credited them in the decision record. It also changed how I run reviews: I now ask for the strongest objection before approving."

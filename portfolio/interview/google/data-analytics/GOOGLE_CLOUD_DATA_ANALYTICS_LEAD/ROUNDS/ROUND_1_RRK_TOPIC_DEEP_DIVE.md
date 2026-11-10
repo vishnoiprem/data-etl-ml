@@ -378,11 +378,11 @@ Sourced from cross-reading `ROUND_2_TECHNICAL_ARCHITECTURE.md` and the HOW_TO_PA
 
 1. **"Pub/Sub exactly-once + Dataflow + BigQuery streaming = end-to-end"** (Round 2, Scenario 2) is too simple. End-to-end exactly-once depends on an **idempotent sink**; use the Storage Write API with offsets, or `MERGE` on a deterministic key. Say that (see §3).
 2. **"BigQuery streaming inserts, `_PARTITIONTIME`"** is legacy phrasing. Prefer the Storage Write API and partition on **event time** (a real column), not ingestion pseudo-columns.
-3. **"Slot reservations, 40–60% savings"** is a rule of thumb, not a fact. Say "typically meaningful for steady workloads; I'd model it from the customer's actual slot-usage history before promising a number."
+3. **"Slot reservations, 40–60% savings"** in `ROUND_2_TECHNICAL_ARCHITECTURE.md` is a rule of thumb, not a fact. Say "typically meaningful for steady workloads; I'd model it from the customer's actual slot-usage history before promising a number."
 4. **"Preemptible VMs"** are now **Spot VMs**; say Spot.
 5. **"Dataplex Lake/Zone/Asset"** is the older model; Dataplex now emphasises Universal Catalog, data products, quality scans and lineage. Know both vocabularies.
-6. **Placeholder metrics** in `HOW_TO_PASS.md` ("hired 15 engineers", "$5M practice") are **not yours**. Replace each with your own verified figure or drop it. Overclaiming under challenge is the one hard fail.
-7. **Typo:** `ROUND_2_TECHNICAL_ARCHITECTURE.md` checklist reads "Migrateatterns" → "Migration patterns".
+6. **Aspirational corpus figures** ("$2.1M → $12.3M ARR practice", "$2.5M / 120TB migration", "500TB FSI programme", "$5.4M revenue / 35% margin") are **not yours**. `ROUND_1_RRK.md` and `HOW_TO_PASS.md` already warn about these — keep that warning, and never borrow them as history. Overclaiming under challenge is the one hard fail.
+7. **Fixed:** the "Migrateatterns" typo in `ROUND_2_TECHNICAL_ARCHITECTURE.md` is corrected — the checklist now reads "Migration patterns".
 
 ---
 
