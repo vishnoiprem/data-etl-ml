@@ -1,7 +1,7 @@
 # GCP Data Engineering — Interview Question Bank
 
 A certification-style and interview-style question bank for the Google Cloud
-Data Engineer course. **157 questions** across eight files, every one written
+Data Engineer course. **172 questions** across nine files, every one written
 the way a senior engineer answers in an interview: a direct answer in the first
 sentence, then the mechanism, then the trade-off, then a concrete production
 detail or number — and, where it earns its place, a failure story.
@@ -51,8 +51,9 @@ topic files as reference.
 | [`05-processing-and-orchestration.md`](05-processing-and-orchestration.md) | 16 | Hadoop, Spark/Dataproc, Beam/Dataflow, Airflow/Composer/Workflows, Dataform, Data Fusion, Dataprep | 5, 6 |
 | [`06-governance-security-and-ml.md`](06-governance-security-and-ml.md) | 14 | DLP, residency, compliance, encryption, CMEK, Looker Studio and BI, ML fundamentals, Vertex AI, BigQuery ML | 7, 8 |
 | [`07-query-optimization.md`](07-query-optimization.md) | 20 | Execution graphs, metrics, join strategy, skew, salting, row multiplication, incremental loads, cost measurement | 3 |
-| [`top-40.md`](top-40.md) | 46 | The highest-yield questions, consolidated, for a final cramming pass | all |
-| **Total** | **157** | | |
+| [`08-dataflow-and-beam.md`](08-dataflow-and-beam.md) | 10 | Beam model vs runner, PCollections, windowing and triggers, exactly-once semantics, streaming modes, autoscaling, job states, side inputs vs state, testing | 5.3 |
+| [`top-40.md`](top-40.md) | 51 | The highest-yield questions, consolidated, for a final cramming pass | all |
+| **Total** | **172** | | |
 
 Every question has the same anatomy:
 
@@ -120,17 +121,19 @@ and what your sink must do about it.*
 | Day | Learn | Drill | Lab |
 |---|---|---|---|
 | **12** | `chapters/20`–`chapters/24` | `05` Q1–Q16 | `platform_sim.build_demo_project()` and `run_pipeline` end to end |
+| **12b** | `chapters/22` (re-read) | `08` Q1–Q10 | The Dataflow cost comparison — `estimate("dataflow", ...)` against `estimate("bigquery", ...)` |
 | **13** | `chapters/25`–`chapters/34` | `06` Q1–Q14 | `redact_pii` and `looks_like_email` — see why regex is not DLP |
 
 *Checkpoint: you can explain the shared responsibility boundary, and say what
-CMEK buys you and what it costs.*
+CMEK buys you and what it costs. You can also state — in one sentence each —
+what Beam guarantees that the runner does not, and what it does not.*
 
 ### Day 14 — Final cramming pass
 
 | Block | Activity |
 |---|---|
-| **Morning (60 min)** | Work through `top-40.md` Q1–Q23 out loud, no notes. Mark every question you hesitated on. |
-| **Midday (45 min)** | Work through `top-40.md` Q24–Q46 the same way. |
+| **Morning (60 min)** | Work through `top-40.md` Q1–Q25 out loud, no notes. Mark every question you hesitated on. |
+| **Midday (45 min)** | Work through `top-40.md` Q26–Q51 the same way. |
 | **Afternoon (45 min)** | Re-answer only the marked ones. Then do one full mock: pick five questions at random from any file and answer them in four minutes each, standing up. |
 | **Evening (15 min)** | Read the failure stories you did not remember. They are the part interviewers probe, because they are the part you can only have if you have actually operated the platform. |
 
@@ -154,7 +157,7 @@ only helps if the marks are accurate.
 
 | Band | Every question | What it means |
 |---|---|---|
-| **Interview-ready** | 90%+ R, no N in the top 40 | You can defend your answers under follow-up. Expect to be asked "why not the alternative?" on every design question — the trade-off section is what answers that. |
+| **Interview-ready** | 90%+ R, no N in the top 51 | You can defend your answers under follow-up. Expect to be asked "why not the alternative?" on every design question — the trade-off section is what answers that. |
 | **Nearly there** | 75–89% R, remaining are mostly P | You know the material. Your weak spots are the production details and the numbers. Drill those specifically — they are the easiest to fix. |
 | **Needs work** | 50–74% R | You have read but not absorbed. Repeat the 14-day schedule at half speed, one file per two days. |
 | **Start the chapters** | Below 50% R | Read `../chapters/` in order first. This bank works as a mirror; it does not work as a substitute for the source material. |
@@ -210,7 +213,7 @@ python interview/_verify_bank.py
 
 It confirms the question counts match the table above, that every question
 has the required anatomy, that every cross-reference and link resolves, that
-no placeholder markers survive, and that all **111** `Check yourself` blocks
+no placeholder markers survive, and that all **121** `Check yourself` blocks
 execute — diffing the ones that quote an `Expected output:` against what the
 code actually prints. Expected result: `failures: 0`.
 

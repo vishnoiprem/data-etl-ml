@@ -32,6 +32,7 @@ TOPICS = [
     "05-processing-and-orchestration.md",
     "06-governance-security-and-ml.md",
     "07-query-optimization.md",
+    "08-dataflow-and-beam.md",
 ]
 
 # The numbers quoted in README.md's file table.
@@ -43,7 +44,8 @@ EXPECTED_COUNTS = {
     "05-processing-and-orchestration.md": 16,
     "06-governance-security-and-ml.md": 14,
     "07-query-optimization.md": 20,
-    "top-40.md": 46,
+    "08-dataflow-and-beam.md": 10,
+    "top-40.md": 51,
 }
 
 
@@ -112,7 +114,7 @@ def main() -> int:
     print("\n== cross-references (topic file + question number) ==")
     for name in TOPICS:
         text = (HERE / name).read_text()
-        for label, target in re.findall(
+        for target, number in re.findall(
             r"\[(\d\d-[a-z-]+\.md) Q(\d+)\]\(\1\)", text
         ):
             target_path = HERE / target
@@ -121,8 +123,8 @@ def main() -> int:
                 failures += 1
                 continue
             n = count_questions(target_path.read_text())
-            if int(target) > n:
-                print(f"  {name}: {target} Q{target} does not exist (file has {n})")
+            if int(number) > n:
+                print(f"  {name}: {target} Q{number} does not exist (file has {n})")
                 failures += 1
     print("  checked")
 

@@ -1,8 +1,8 @@
-# Top 46 — Final Cramming Pass
+# Top 51 — Final Cramming Pass
 
 ## 🎯 How to use this file
 
-Forty-six questions selected for yield: the ones that come up repeatedly in GCP data engineering interviews and certification exams, and the ones where a wrong answer reveals a gap. Read the bold first line of each answer — if you can produce it from memory, you are ready. If not, read the mechanism, then say the answer out loud in your own words. Use this on the last two days of a study plan, not as your first pass.
+Fifty-one questions selected for yield: the ones that come up repeatedly in GCP data engineering interviews and certification exams, and the ones where a wrong answer reveals a gap. Read the bold first line of each answer — if you can produce it from memory, you are ready. If not, read the mechanism, then say the answer out loud in your own words. Use this on the last two days of a study plan, not as your first pass.
 
 Each question cross-references the full treatment in the topic files. The numbering here is independent — Q1 here is not Q1 there.
 
@@ -649,6 +649,76 @@ Each question cross-references the full treatment in the topic files. The number
 **In practice.** Idempotency key from data (`dedup_key` = `"<partition>:<event_id>"`), ack after write, `maximumBytesBilled` on every job, partitioned-and-clustered tables from the template, and a data-quality gate that compares output to expected invariants and fails the job when they do not match.
 
 *Full answer: [05-processing-and-orchestration.md Q16](05-processing-and-orchestration.md)*
+
+---
+
+### Q47. What is the difference between Apache Beam and Cloud Dataflow?
+
+**Answer.** Beam is the open-source **programming model**; Dataflow is one **managed runner** that executes Beam pipelines. The same Beam code also runs on Flink and Spark runners.
+
+**Mechanism.** The model defines *what* is computed — `PCollection`s, `DoFn`s, `ParDo`, `GroupByKey`, `WindowInto`, triggers — while the runner owns *how* it is executed: workers, state backend, checkpointing, autoscaling. Dataflow is the runner that makes unbounded input the default case, so streaming, windowing and exactly-once are first-class rather than bolted on.
+
+**Trade-off.** Portability is real but not free: the capability matrix means a pipeline relying on a runner-specific feature (a BigQuery streaming write, a GCS sink) is no longer portable, and the abstraction costs performance — you inherit the runner's scheduling rather than controlling it.
+
+**In practice.** I pick the runner by the workload: Dataflow for streaming and for any pipeline that must run in both batch and streaming mode from one codebase; Flink when you need its own state backend; Spark when the team already lives in the Spark ecosystem.
+
+*Full answer: [08-dataflow-and-beam.md Q1](08-dataflow-and-beam.md)*
+
+---
+
+### Q48. What does "exactly-once" actually guarantee in Dataflow?
+
+**Answer.** Exactly-once guarantees that **committed pipeline results** are not duplicated — not that your user code runs once, and not that your external side effects happen once.
+
+**Mechanism.** The runner assigns unique IDs to each element, receivers retain the IDs they have processed, and that record is checkpointed to stable storage; on restart the duplicate is recognised and dropped. The retained-ID set is garbage-collected as the watermark passes, which bounds the bookkeeping. Exactly-once does not cover your `DoFn` body, side effects outside Dataflow (an API call, a database write), or logs — a retried attempt is an *attempt*, not a *commit*.
+
+**Trade-off.** The guarantee is on the output, so the gap is exactly where side effects live. A pipeline that writes to BigQuery and also posts to an API has exactly-once BigQuery writes and at-least-once API posts, unless you make the API call idempotent with your own key.
+
+**In practice.** When I need external side effects, I make them idempotent — same key, same result — rather than trying to extend the runner's guarantee. And I treat the guarantee as covering *commits*, not *completeness*: a record arriving past the watermark can still be dropped.
+
+*Full answer: [08-dataflow-and-beam.md Q4](08-dataflow-and-beam.md)*
+
+---
+
+### Q49. What is the difference between a window and a trigger in Beam?
+
+**Answer.** The **window** is the finite group of elements a timestamp belongs to; the **trigger** decides *when* that window's results are emitted.
+
+**Mechanism.** A window bounds the data — `WindowInto(FixedWindows(1))` puts every event into a one-hour bucket. A trigger controls emission: bounded data emits when the window closes, while unbounded data emits when the watermark passes the window end, optionally early, late, or repeatedly (`AccumulatingMode` versus `DiscardingMode`). The watermark is the system's estimate of how far behind real time the data is.
+
+**Trade-off.** Firing early gives low latency and you must handle the corrections that follow — in `DiscardingMode` a late element is dropped, in `AccumulatingMode` it is folded into a new output. Triggering only at window end is exact but delays every result until the window closes, which for a one-hour window is a one-hour latency.
+
+**In practice.** The default that gets used in production is: fixed one-hour windows, an end-of-window trigger, and a late-data grace period. Anything fancier is a latency-versus-correctness decision I make deliberately, not by default.
+
+*Full answer: [08-dataflow-and-beam.md Q3](08-dataflow-and-beam.md)*
+
+---
+
+### Q50. What is the difference between exactly-once and at-least-once streaming mode in Dataflow?
+
+**Answer.** Exactly-once is the **default** and deduplicates pipeline results across retries; at-least-once **skips the deduplication bookkeeping** to reduce latency and cost, at the price of possible duplicates in the output.
+
+**Mechanism.** The modes are selected with a job option — `--dataflowServiceOptions=streaming_mode_at_least_once` (Java) or `--dataflow_service_options=...` (Python and Go); templates use `--additional-experiments=streaming_mode_at_least_once`, and the two experiments are mutually exclusive. The at-least-once path is faster because it does not maintain and checkpoint the processed-ID set, which is the expensive part of exactly-once.
+
+**Trade-off.** At-least-once trades correctness for throughput, so the sink must be idempotent. It also constrains the pipeline: it needs Streaming Engine with resource-based billing, it is incompatible with `BigQueryIO` in `FILE_LOADS` mode, and it wants `STORAGE_API_AT_LEAST_ONCE` writes. Switching modes means replacing the job, not editing it.
+
+**In practice.** I stay on exactly-once unless the duplicate rate is genuinely painful — baseline duplicates are typically under 1% — and I only switch when I have made the sink idempotent and measured the latency win.
+
+*Full answer: [08-dataflow-and-beam.md Q5](08-dataflow-and-beam.md)*
+
+---
+
+### Q51. How do you test a Beam pipeline, and what does "the pipeline passed" mean?
+
+**Answer.** Test the **pure logic** as plain functions, then test the **semantics** against the runner you will deploy to. "The pipeline passed" is meaningless until you know which layer you tested.
+
+**Mechanism.** The model-versus-runner split is what makes this possible: windowing and aggregation can be ordinary functions over a list of dicts, unit-tested with no cluster. The **Direct Runner** then checks that the *model* is wired correctly — windows, triggers, serialisation, I/O — but it is not distributed, so it will not surface skew or ordering assumptions.
+
+**Trade-off.** The Direct Runner is free and fast and it is not a performance test; a small Dataflow job in batch mode catches what the Direct Runner misses but costs real money and real time. The trade-off is not price, it is **which layer of the stack you covered**.
+
+**In practice.** Three layers: pure functions against known totals (4800 events, 12 malformed rows, 24 hourly windows producing 96 window-region rows), the Direct Runner on every commit, and a small Dataflow job before release. And always assert **input volume against output volume** — a pipeline that completes with wrong numbers is exactly what unit tests miss.
+
+*Full answer: [08-dataflow-and-beam.md Q10](08-dataflow-and-beam.md)*
 
 ---
 

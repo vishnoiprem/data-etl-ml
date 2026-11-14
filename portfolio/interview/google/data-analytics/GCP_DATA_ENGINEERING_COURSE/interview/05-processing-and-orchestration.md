@@ -103,6 +103,8 @@ print("pricing:", service.pricing_model)
 print("resources:", service.key_resources)
 ```
 
+*See also: [08-dataflow-and-beam.md Q1](08-dataflow-and-beam.md) for the model-versus-runner split, and [08-dataflow-and-beam.md Q2](08-dataflow-and-beam.md) for the core abstractions.*
+
 ---
 
 ### Q5. What is a watermark in Beam, and what happens to late data?
@@ -129,6 +131,8 @@ print("watermark lag:", lag)
 print("lag in seconds:", lag.total_seconds())
 ```
 
+*See also: [08-dataflow-and-beam.md Q3](08-dataflow-and-beam.md) for the difference between a window and a trigger.*
+
 ---
 
 ### Q6. What is a side input, and when would you use one?
@@ -150,6 +154,8 @@ from pipeline_logic import CURRENCY_TO_EUR, normalise_currency
 print("rate table (the side input):", CURRENCY_TO_EUR)
 print("100 GBP ->", normalise_currency(100.0, "GBP"), "EUR")
 ```
+
+*See also: [08-dataflow-and-beam.md Q9](08-dataflow-and-beam.md) for the difference between a side input and state.*
 
 ---
 
