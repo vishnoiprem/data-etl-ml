@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="scb_aml_platform",
-    version="1.0.0",
+    version="0.2.0",
     description="SCB AML Platform — End-to-End Anti-Money Laundering Data Platform",
     author="Prem Vishnoi",
     author_email="prem.vishnoi@example.com",
