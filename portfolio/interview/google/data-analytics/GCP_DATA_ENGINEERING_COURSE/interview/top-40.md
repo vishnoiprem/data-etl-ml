@@ -1,8 +1,8 @@
-# Top 40 — Final Cramming Pass
+# Top 41 — Final Cramming Pass
 
 ## 🎯 How to use this file
 
-Forty questions selected for yield: the ones that come up repeatedly in GCP data engineering interviews and certification exams, and the ones where a wrong answer reveals a gap. Read the bold first line of each answer — if you can produce it from memory, you are ready. If not, read the mechanism, then say the answer out loud in your own words. Use this on the last two days of a study plan, not as your first pass.
+Forty-one questions selected for yield: the ones that come up repeatedly in GCP data engineering interviews and certification exams, and the ones where a wrong answer reveals a gap. Read the bold first line of each answer — if you can produce it from memory, you are ready. If not, read the mechanism, then say the answer out loud in your own words. Use this on the last two days of a study plan, not as your first pass.
 
 Each question cross-references the full treatment in the topic files. The numbering here is independent — Q1 here is not Q1 there.
 
@@ -134,7 +134,21 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q10. What does Pub/Sub guarantee, and what does that force you to build?
+### Q10. Explain BigQuery's storage and compute architecture.
+
+**Answer.** Serverless → Colossus → Capacitor → Dremel → Slots. Colossus is the distributed storage layer, Capacitor the compressed columnar format it stores data in, Dremel the distributed query execution engine, slots the virtual compute units it runs on. Storage and compute are physically separated.
+
+**Mechanism.** Colossus holds tables split into blocks across the fleet; Capacitor's columnar layout gives column pruning and compression; Dremel plans a query as scan → shuffle → aggregate → write; Dremel leases slots to run those stages.
+
+**Trade-off.** You gain elasticity and cost proportionality, and lose control of physical placement. Because the meters are separate, a query can be cheap in bytes and expensive in slots — and the shuffle, not the scan, drives your slot count.
+
+**In practice.** Three separate meters: $6.25/TB scanned, $0.06/slot-hour, storage per GB-month. A 10 TB table scanned whole is **$62.50**; pruned to one partition, **$0.62** — a 100× win decided at table-creation time.
+
+*Full answer: [03-analytics-and-cost.md Q17](03-analytics-and-cost.md)*
+
+---
+
+### Q11. What does Pub/Sub guarantee, and what does that force you to build?
 
 **Answer.** **At-least-once delivery.** A message can be delivered more than once, and a subscriber that dies mid-processing gets redelivery. You must make the sink idempotent.
 
@@ -148,7 +162,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q11. What is a Pub/Sub dead-letter topic, and what should you alert on?
+### Q12. What is a Pub/Sub dead-letter topic, and what should you alert on?
 
 **Answer.** Where messages go when a subscriber rejects them or they exceed the maximum delivery attempts.
 
@@ -162,7 +176,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q12. When do you choose Kafka over Pub/Sub?
+### Q13. When do you choose Kafka over Pub/Sub?
 
 **Answer.** Kafka when you need high throughput with per-partition ordering you control, long retention with replay, or an existing Kafka ecosystem. Pub/Sub when you want fully managed, zero-idle-cost operation.
 
@@ -176,7 +190,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q13. Explain Kafka consumer groups and why a rebalance is scary.
+### Q14. Explain Kafka consumer groups and why a rebalance is scary.
 
 **Answer.** A consumer group shares the partitions of a topic — each partition goes to exactly one consumer in the group — and each consumer tracks its **offset**.
 
@@ -190,7 +204,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q14. What is Datastream, and when is CDC the wrong choice?
+### Q15. What is Datastream, and when is CDC the wrong choice?
 
 **Answer.** Datastream is managed change data capture — it reads a source's binlog or replication stream and publishes row changes to a destination.
 
@@ -204,7 +218,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q15. What are the storage classes, and what is the catch?
+### Q16. What are the storage classes, and what is the catch?
 
 **Answer.** Standard ($0.020/GB-month, free retrieval), Nearline ($0.010, $0.010/GB to read), Coldline ($0.004, $0.020/GB), Archive ($0.0012, $0.050/GB — more than Standard storage costs).
 
@@ -218,7 +232,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q16. What is the difference between block storage and Filestore?
+### Q17. What is the difference between block storage and Filestore?
 
 **Answer.** Persistent Disk and Hyperdisk are **block** storage — a volume attached to instances, seen as `/dev/sdb`, zone-bound. Filestore is **managed NFS** — a network filesystem many instances mount at once.
 
@@ -232,7 +246,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q17. When is Cloud SQL the wrong answer?
+### Q18. When is Cloud SQL the wrong answer?
 
 **Answer.** When you need horizontal write scaling, strong consistency across regions, or analytical scans over history. Use Spanner for global relational scale, BigQuery for analytics.
 
@@ -246,7 +260,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q18. What does Spanner buy you over Cloud SQL, and what does it cost?
+### Q19. What does Spanner buy you over Cloud SQL, and what does it cost?
 
 **Answer.** Horizontal sharding, global replication and **strong consistency across regions** — a transaction can span regions and still be serialisable.
 
@@ -260,7 +274,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q19. How do you choose a database?
+### Q20. How do you choose a database?
 
 **Answer.** Access pattern first, then consistency, then scale. Analytical scans → BigQuery; key lookups → Firestore/Datastore; time-series ranges → Bigtable; range scans with joins → Cloud SQL; global strong consistency → Spanner.
 
@@ -274,7 +288,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q20. When do you choose Memorystore, and when is a cache the wrong answer?
+### Q21. When do you choose Memorystore, and when is a cache the wrong answer?
 
 **Answer.** For read-heavy, latency-sensitive lookups of data you already have elsewhere. Wrong when you use it as a second source of truth.
 
@@ -288,7 +302,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q21. What is the difference between Data Fusion and Dataprep?
+### Q22. What is the difference between Data Fusion and Dataprep?
 
 **Answer.** Data Fusion is a general-purpose visual **ETL and integration** tool for connecting systems. Dataprep is a specialised **data preparation and profiling** tool for wrangling data files for analysis.
 
@@ -302,7 +316,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q22. When do you choose Composer over Workflows?
+### Q23. When do you choose Composer over Workflows?
 
 **Answer.** Composer when the orchestration is a DAG with dependencies, backfills and data-aware logic. Workflows when it is a chain of API calls with no branching data logic.
 
@@ -316,7 +330,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q23. What is a logical date, and why is it the most important concept in Airflow?
+### Q24. What is a logical date, and why is it the most important concept in Airflow?
 
 **Answer.** The label of a DAG run, representing the **data interval** it processes — not the moment it ran.
 
@@ -330,7 +344,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q24. Why use Dataform instead of plain SQL?
+### Q25. Why use Dataform instead of plain SQL?
 
 **Answer.** Version-controlled, tested, dependency-aware SQL — `ref()` and `source()` instead of hand-maintained table names, with generated lineage and reviewable pull requests.
 
@@ -344,7 +358,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q25. What is the MapReduce shuffle and why is it the expensive part?
+### Q26. What is the MapReduce shuffle and why is it the expensive part?
 
 **Answer.** The phase where each mapper's intermediate key-value pairs are partitioned by key and shipped across the network to the reducers, where they are sorted and merged.
 
@@ -358,7 +372,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q26. When would you use Spark on Dataproc versus Dataflow batch?
+### Q27. When would you use Spark on Dataproc versus Dataflow batch?
 
 **Answer.** Dataproc when the codebase is already Spark or you need Spark-specific features (MLlib, GraphX, Spark SQL). Dataflow batch when you want one pipeline to run as batch today and streaming tomorrow, with managed autoscaling and no cluster admin.
 
@@ -372,7 +386,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q27. What is a watermark in Beam, and what happens to late data?
+### Q28. What is a watermark in Beam, and what happens to late data?
 
 **Answer.** The pipeline's declaration that no more events will arrive with a timestamp at or before it. Events arriving after that are **late data**.
 
@@ -386,7 +400,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q28. What is event time versus processing time, and why does it matter?
+### Q29. What is event time versus processing time, and why does it matter?
 
 **Answer.** Processing time is when your system handles the event; event time is when it happened. Windowing on the wrong one produces answers that look right and are wrong.
 
@@ -396,11 +410,11 @@ Each question cross-references the full treatment in the topic files. The number
 
 **In practice.** Use event time with a watermark that declares how late is late enough. Events past the watermark go to a side output for reprocessing.
 
-*Full answer: [05-processing-and-ingestion.md Q12](04-streaming-and-ingestion.md)*
+*Full answer: [04-streaming-and-ingestion.md Q12](04-streaming-and-ingestion.md)*
 
 ---
 
-### Q29. What does Sensitive Data Protection do, and where does it belong in a pipeline?
+### Q30. What does Sensitive Data Protection do, and where does it belong in a pipeline?
 
 **Answer.** It discovers sensitive data and either inspects it (classifies and reports) or de-identifies it (redacts, masks, tokenises, formats).
 
@@ -414,7 +428,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q30. What are the de-identification techniques, and which one keeps joins working?
+### Q31. What are the de-identification techniques, and which one keeps joins working?
 
 **Answer.** Redaction, masking, tokenisation and format-preserving encryption. **Tokenisation** is the one that keeps joins working.
 
@@ -428,7 +442,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q31. How do you enforce data residency on GCP?
+### Q32. How do you enforce data residency on GCP?
 
 **Answer.** Three layers: location choice, org policy on permitted locations, and IAM scoped so nobody reads across the boundary.
 
@@ -442,7 +456,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q32. What is CMEK, and what breaks when you adopt it?
+### Q33. What is CMEK, and what breaks when you adopt it?
 
 **Answer.** Customer-Managed Encryption Keys: you create the key in Cloud KMS and point a service at it, so the key's lifecycle, rotation and revocation are yours. What breaks is that you now own availability.
 
@@ -456,7 +470,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q33. What is the shared responsibility model, and where do audits actually bite?
+### Q34. What is the shared responsibility model, and where do audits actually bite?
 
 **Answer.** Google secures the physical infrastructure, hypervisor, networking and facilities. You secure the OS, middleware, application, data — and the IAM configuration that gives access to it.
 
@@ -470,7 +484,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q34. What is a BI semantic layer, and why does it matter?
+### Q35. What is a BI semantic layer, and why does it matter?
 
 **Answer.** A governed definition of your business metrics, sitting between raw data and dashboards, so "monthly active customers" means exactly one thing everywhere.
 
@@ -484,7 +498,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q35. Explain supervised versus unsupervised learning.
+### Q36. Explain supervised versus unsupervised learning.
 
 **Answer.** Supervised learns a mapping from labelled examples; unsupervised finds structure in unlabelled data without being told what to look for.
 
@@ -498,7 +512,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q36. When do you use a prebuilt or AutoML model instead of training your own?
+### Q37. When do you use a prebuilt or AutoML model instead of training your own?
 
 **Answer.** Prebuilt when the task is one Google already solved well (vision, speech, translation, moderation). AutoML when you have labelled data but do not want to tune hyperparameters yourself.
 
@@ -512,7 +526,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q37. What does custom training on Vertex AI involve, and how do you operationalise a model?
+### Q38. What does custom training on Vertex AI involve, and how do you operationalise a model?
 
 **Answer.** Running your own training code on managed infrastructure, plus everything needed to run it in production.
 
@@ -526,7 +540,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q38. What is BigQuery ML, and when is it right?
+### Q39. What is BigQuery ML, and when is it right?
 
 **Answer.** Train and serve models with SQL inside the warehouse — `CREATE MODEL`, `SELECT * FROM ML.PREDICT(...)` — with no data movement.
 
@@ -540,7 +554,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q39. A team says "BigQuery is too expensive." What do you ask?
+### Q40. A team says "BigQuery is too expensive." What do you ask?
 
 **Answer.** How many bytes did the query scan, how many times was the same data scanned, who ran it, and what is the storage-versus-scan split. The answer is usually redundant scanning.
 
@@ -554,7 +568,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q40. How do you make a data pipeline production-ready?
+### Q41. How do you make a data pipeline production-ready?
 
 **Answer.** Deterministic idempotency, a bounded retry, a dead-letter path, cost controls in the deployment template, and tests at every layer.
 

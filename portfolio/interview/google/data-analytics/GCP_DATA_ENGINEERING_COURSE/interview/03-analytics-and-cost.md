@@ -2,7 +2,7 @@
 
 ## 🎯 How to use this file
 
-Sixteen questions covering Module 3: BigQuery's execution model, partitioning, clustering, schemas, query optimisation, BigLake, Dataplex and Data Catalog, plus the cost model that turns all of it into money. The cost questions are the ones that separate a candidate who has run a real bill from one who has only read about it — BigQuery bills on bytes scanned, and every optimisation on this list is a way to scan fewer bytes.
+Seventeen questions covering Module 3: BigQuery's internal architecture and execution model, partitioning, clustering, schemas, query optimisation, BigLake, Dataplex and Data Catalog, plus the cost model that turns all of it into money. The cost questions are the ones that separate a candidate who has run a real bill from one who has only read about it — BigQuery bills on bytes scanned, and every optimisation on this list is a way to scan fewer bytes.
 
 ## Questions
 
@@ -394,6 +394,67 @@ print("warehouse-role services:", warehouse)
 for service_id in warehouse:
     print(f"  {SERVICES[service_id].name}: {SERVICES[service_id].summary}")
 ```
+
+---
+
+### Q17. Explain BigQuery's storage and compute architecture. What are Colossus, Capacitor, Dremel and slots?
+
+**Answer.** BigQuery is serverless, and under it sit five layers in this order: **Serverless → Colossus → Capacitor → Dremel → Slots**. Colossus is the distributed storage layer holding your tables, Capacitor is the compressed columnar format it stores them in, Dremel is the distributed query execution engine, and slots are the virtual compute units Dremel runs on. The architecturally decisive fact is that **storage and compute are physically separated** and connected over a petabit-scale network.
+
+**Mechanism.** *Colossus* holds every table split into blocks spread across many machines, replicated for durability — which is the storage half of "serverless": your data is not attached to a server, so it outlives any particular machine and scales without you rebalancing shards. *Capacitor* decides how those bytes are laid out, and being **columnar** is what gives BigQuery column pruning (a `SELECT store_id` reads only the `store_id` blocks) and far better compression than the same values interleaved into rows. *Dremel* takes one logical SQL statement and plans it as a distributed tree of stages — scan → shuffle → aggregate → write — where the shuffle is the expensive step, redistributing data across workers by join key or group key. *Slots* are the units Dremel leases to run those stages, and a **slot-hour** is the billable unit.
+
+**Trade-off.** The separation buys elasticity, cost proportionality and scale without rebalancing — but it also means you no longer control the physical placement, and it changes how you optimise. Because storage and compute are metered separately, a query can be cheap in bytes and expensive in slots. And because Dremel's shuffle determines your slot count, the shuffle is what you actually optimise, not the scan. Compared with PostgreSQL — a row-oriented OLTP engine with shared buffers and point-lookup indexes — BigQuery trades transactional flexibility for columnar scans and unbounded parallelism. That is the right trade for analytics and the wrong one for a high-write transactional workload.
+
+**In practice.** The three meters are separate: on-demand bytes scanned at $6.25/TB, slot-hours at $0.06, and storage per GB-month. A 10 TB table scanned whole costs **$62.50**; pruned to one partition it costs **$0.62** — a 100× reduction from a decision made at table-creation time, not a query-time tweak. The break-even between on-demand and flat-rate is also a number I quote: $60 buys 1,000 slot-hours, which equals scanning 9.6 TB on demand. Below that volume on-demand wins; above it flat-rate wins *provided the slots are actually busy* — reserve for the average and you queue at the peaks. The practical cost levers, in the order I reach for them: partition pruning, column pruning, clustering for **selective filters only**, and pre-aggregating before storage.
+
+**Failure story.** The failure I have seen most often is a table created without partitioning, which looks harmless at 10 GB and costs $62.50 per full scan at 10 TB. The second is clustering on a key that queries only ever `GROUP BY` rather than filter on — clustering sorts rows within a partition, so it prunes blocks for a selective `WHERE store_id = 'S1'` and does **nothing** for `GROUP BY store_id`, which reads every block in the partition either way.
+
+**Check yourself.** Try it:
+```python
+import sys
+sys.path.insert(0, "project/core")
+from cost_model import estimate
+from pipeline_logic import estimated_scan_bytes
+
+# Three separate meters: compute, storage, and bytes scanned.
+print(f"Slots    1000 slot-hours: ${estimate('bigquery', slot_hours=1000).total:.2f}")
+print(f"Colossus 1 TB at rest:    ${estimate('bigquery', storage_gb=1024).total:.2f}")
+
+# The 100x win: same table, whole vs pruned to one partition.
+whole = estimate("bigquery", scanned_tb=10.0, apply_free_tier=False).total
+pruned = estimate("bigquery", scanned_tb=0.1, apply_free_tier=False).total
+print(f"whole:  ${whole:.2f}")
+print(f"pruned: ${pruned:.2f}")
+print(f"ratio:  {whole / pruned:.0f}x")
+
+# Why the byte count moves but the ratio does not: it is the serialised
+# width of your rows times the number of rows.
+rows = [
+    {"event_id": f"e{i}", "user_id": f"u{i}", "event_dt": "2026-01-15",
+     "region": "AMER" if i % 2 else "EMEA", "amount_eur": 10.0}
+    for i in range(4800)
+]
+full = estimated_scan_bytes(rows, partitioned=False)
+cut = estimated_scan_bytes(rows, partitioned=True, partition_prune_ratio=0.01)
+print(f"unpartitioned: {full:,} bytes")
+print(f"pruned to 1%:  {cut:,} bytes")
+print(f"reduction:     {full / cut:.0f}x")
+```
+
+Expected output:
+
+```text
+Slots    1000 slot-hours: $60.00
+Colossus 1 TB at rest:    $20.48
+whole:  $62.50
+pruned: $0.62
+ratio:  100x
+unpartitioned: 501,780 bytes
+pruned to 1%:  5,017 bytes
+reduction:     100x
+```
+
+For the full walkthrough — storage/compute separation, the PostgreSQL comparison, and the cost levers — see [`practice/01-storage-model.md`](../GCP_DATA_ENGINEERING_COURSE/practice/01-storage-model.md).
 
 ---
 
