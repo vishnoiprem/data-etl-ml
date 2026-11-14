@@ -1,0 +1,21 @@
+modules to be imported before : 
+	shell : sudo pip install apache_beam[gcp]
+
+	shell :
+		pip install google-cloud-pubsub
+
+
+for submitting code :
+python3 -m pubsub_stream_pipeline \
+--input_topic projects/rich-tine-405803/topics/topic-stream \
+--output_path gs://source_bucket_11222023/output \
+--project rich-tine-405803 \
+--region us-west1 \
+--temp_location gs://source_bucket_11222023/temp \
+--runner DataflowRunner
+
+
+python -m venv beam_env
+.\beam_env\Scripts\activate
+
+python3 -m  df.py --job_name=test --project=morning-bootcamp-630 --region=us-west1 --temp_location=gs://landing-zone-bucket-bq/temp --runner=DataflowRunner

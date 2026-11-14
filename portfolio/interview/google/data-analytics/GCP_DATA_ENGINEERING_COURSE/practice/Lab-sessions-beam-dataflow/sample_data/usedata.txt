@@ -1,0 +1,15 @@
+UserID,Page,TimeSpent
+1,Homepage,30
+1,About Us,15
+2,Homepage,45
+2,Product Page,60
+1,Product Page,20
+3,Homepage,60
+3,About Us,20
+2,About Us,10
+3,About Us,20
+3,About Us,20
+3,About Us,20
+1,Product Page,20
+1,Product Page,20
+1,Product Page,20

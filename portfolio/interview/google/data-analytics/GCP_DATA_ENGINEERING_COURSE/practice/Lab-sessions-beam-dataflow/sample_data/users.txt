@@ -1,0 +1,8 @@
+user_id,name,country
+1,John,USA
+2,Alice,Canada
+3,Bob,UK
+4,Eve,Australia
+5,Charlie,India
+6,Remo
+7,Mintu,India,1520

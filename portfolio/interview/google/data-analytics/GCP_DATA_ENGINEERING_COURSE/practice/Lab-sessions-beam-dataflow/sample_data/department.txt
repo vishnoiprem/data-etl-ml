@@ -1,0 +1,6 @@
+department_id,department_name
+101, Engineering
+102, HR
+103, IT
+104, Marketing
+105, Sales

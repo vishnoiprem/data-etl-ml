@@ -1,0 +1,4 @@
+product_id,product_name,unit_price
+101,Product A,10
+102,Product B,15
+103,Product C,20
