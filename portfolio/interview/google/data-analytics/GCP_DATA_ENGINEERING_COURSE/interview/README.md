@@ -1,7 +1,7 @@
 # GCP Data Engineering — Interview Question Bank
 
 A certification-style and interview-style question bank for the Google Cloud
-Data Engineer course. **130 questions** across seven files, every one written
+Data Engineer course. **157 questions** across eight files, every one written
 the way a senior engineer answers in an interview: a direct answer in the first
 sentence, then the mechanism, then the trade-off, then a concrete production
 detail or number — and, where it earns its place, a failure story.
@@ -46,12 +46,13 @@ topic files as reference.
 |---|---:|---|---|
 | [`01-platform-fundamentals.md`](01-platform-fundamentals.md) | 14 | Cloud concepts, regions and zones, resource hierarchy, IAM, service accounts, org policies, networking, compute | 1 |
 | [`02-storage-and-databases.md`](02-storage-and-databases.md) | 14 | Cloud Storage, block and file storage, Cloud SQL, Spanner, Bigtable, Datastore/Firestore, Memorystore, database selection | 2 |
-| [`03-analytics-and-cost.md`](03-analytics-and-cost.md) | 17 | BigQuery architecture and execution model, partitioning, clustering, schemas, optimisation, BigLake, Dataplex, Data Catalog, cost modelling | 3 |
+| [`03-analytics-and-cost.md`](03-analytics-and-cost.md) | 19 | BigQuery architecture and execution model, partitioning, clustering, schemas, optimisation, BigLake, Dataplex, Data Catalog, cost modelling | 3 |
 | [`04-streaming-and-ingestion.md`](04-streaming-and-ingestion.md) | 14 | Kafka, Pub/Sub, Datastream and CDC, transfer services, delivery semantics | 4 |
 | [`05-processing-and-orchestration.md`](05-processing-and-orchestration.md) | 16 | Hadoop, Spark/Dataproc, Beam/Dataflow, Airflow/Composer/Workflows, Dataform, Data Fusion, Dataprep | 5, 6 |
 | [`06-governance-security-and-ml.md`](06-governance-security-and-ml.md) | 14 | DLP, residency, compliance, encryption, CMEK, Looker Studio and BI, ML fundamentals, Vertex AI, BigQuery ML | 7, 8 |
-| [`top-40.md`](top-40.md) | 41 | The highest-yield questions, consolidated, for a final cramming pass | all |
-| **Total** | **130** | | |
+| [`07-query-optimization.md`](07-query-optimization.md) | 20 | Execution graphs, metrics, join strategy, skew, salting, row multiplication, incremental loads, cost measurement | 3 |
+| [`top-40.md`](top-40.md) | 46 | The highest-yield questions, consolidated, for a final cramming pass | all |
+| **Total** | **157** | | |
 
 Every question has the same anatomy:
 
@@ -98,8 +99,8 @@ minutes, and justify it on access pattern, consistency and scale.*
 | Day | Learn | Drill | Lab |
 |---|---|---|---|
 | **7** | `chapters/12`, `chapters/13` | `03` Q1–Q8 | `python project/local_runner.py --cost` |
-| **8** | `chapters/14` | `03` Q9–Q17 | `python project/local_runner.py --compare` |
-| **9** | `chapters/15` | All 17 of `03` again | Compute the cost of a 10 TB unpartitioned `COUNT(*)` — then the partitioned version |
+| **8** | `chapters/14` | `03` Q9–Q19, then `07` Q1–Q8 | `python project/local_runner.py --compare` |
+| **9** | `chapters/15` | All 19 of `03` again, then `07` Q9–Q20 | Compute the cost of a 10 TB unpartitioned `COUNT(*)` — then the partitioned version |
 
 *Checkpoint: you can look at a slow or expensive query and name the four things
 you would check, in order.*
@@ -128,8 +129,8 @@ CMEK buys you and what it costs.*
 
 | Block | Activity |
 |---|---|
-| **Morning (60 min)** | Work through `top-40.md` Q1–Q20 out loud, no notes. Mark every question you hesitated on. |
-| **Midday (45 min)** | Work through `top-40.md` Q21–Q41 the same way. |
+| **Morning (60 min)** | Work through `top-40.md` Q1–Q23 out loud, no notes. Mark every question you hesitated on. |
+| **Midday (45 min)** | Work through `top-40.md` Q24–Q46 the same way. |
 | **Afternoon (45 min)** | Re-answer only the marked ones. Then do one full mock: pick five questions at random from any file and answer them in four minutes each, standing up. |
 | **Evening (15 min)** | Read the failure stories you did not remember. They are the part interviewers probe, because they are the part you can only have if you have actually operated the platform. |
 
@@ -197,6 +198,21 @@ python project/local_runner.py --run
 python project/local_runner.py --cost
 python project/local_runner.py --compare
 ```
+
+### Checking the bank itself
+
+Every number quoted in this bank is produced by code, not asserted. The
+validator checks that, and the rest of the structure:
+
+```bash
+python interview/_verify_bank.py
+```
+
+It confirms the question counts match the table above, that every question
+has the required anatomy, that every cross-reference and link resolves, that
+no placeholder markers survive, and that all **111** `Check yourself` blocks
+execute — diffing the ones that quote an `Expected output:` against what the
+code actually prints. Expected result: `failures: 0`.
 
 The **verified outputs** you should be able to reproduce and explain — if your
 numbers differ, one of them is wrong, and that is worth finding:

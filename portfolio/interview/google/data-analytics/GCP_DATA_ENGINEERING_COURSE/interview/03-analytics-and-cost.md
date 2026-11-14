@@ -2,7 +2,7 @@
 
 ## 🎯 How to use this file
 
-Seventeen questions covering Module 3: BigQuery's internal architecture and execution model, partitioning, clustering, schemas, query optimisation, BigLake, Dataplex and Data Catalog, plus the cost model that turns all of it into money. The cost questions are the ones that separate a candidate who has run a real bill from one who has only read about it — BigQuery bills on bytes scanned, and every optimisation on this list is a way to scan fewer bytes.
+Nineteen questions covering Module 3: BigQuery's internal architecture and execution model, partitioning, clustering, schemas, query optimisation, BigLake, Dataplex and Data Catalog, plus the cost model that turns all of it into money. The cost questions are the ones that separate a candidate who has run a real bill from one who has only read about it — BigQuery bills on bytes scanned, and every optimisation on this list is a way to scan fewer bytes.
 
 ## Questions
 
@@ -454,7 +454,126 @@ pruned to 1%:  5,017 bytes
 reduction:     100x
 ```
 
-For the full walkthrough — storage/compute separation, the PostgreSQL comparison, and the cost levers — see [`practice/01-storage-model.md`](../GCP_DATA_ENGINEERING_COURSE/practice/01-storage-model.md).
+For the full walkthrough — storage/compute separation, the PostgreSQL comparison, and the cost levers — see [`practice/01-storage-model.md`](../practice/01-storage-model.md).
+
+---
+
+### Q18. What is the difference between OLTP and OLAP, and why does it decide which database you pick?
+
+**Answer.** OLTP is for **transactions** — many small operations that read and change a few rows by key. OLAP is for **analytics** — few large operations that scan millions of rows and aggregate them. They are different workload shapes, not different products, and the mistake is picking one engine for both.
+
+**Mechanism.** The two shapes pull the storage layout in opposite directions. OLTP wants **row-oriented** storage with B-tree indexes, so a `WHERE id = ?` reads one row quickly, and rows can be updated in place. OLAP wants **columnar** storage — BigQuery's Capacitor format — so a `GROUP BY` over months of data reads only the columns it needs, and thousands of workers can scan in parallel. BigQuery also has no fast row-level update: a `MERGE` on a large table rewrites it.
+
+**Trade-off.** You cannot optimise one engine for both. Postgres tuned for analytics ends up with bloated indexes, poor vacuum behaviour and a shared-buffer pool that cannot hold the working set. Postgres tuned for transactions scans whole pages and drags every column along with it. The deeper trade is operational: an OLTP database is a **system of record** with backups, replication and availability requirements; an OLAP warehouse is a **derived store** you can rebuild from the source, so it gets a much looser SLA. That difference is why the analytic path can be embarrassingly cheap and the transactional path cannot.
+
+**In practice.** The real-world problem is almost never "which do I need" — it is that **the source is OLTP and the destination is OLAP**. Postgres holds the orders table; BigQuery holds the warehouse. The anti-pattern I see most is querying Postgres directly for analytics: it contends with production traffic, the primary-key index is useless for a date-range scan, and a wide aggregate over an OLTP store starves the very workload it was meant to serve. The fix is CDC — Datastream reading the WAL, or a Dataflow job — into the warehouse. And the reverse anti-pattern is using BigQuery as the transactional system of record: it has `INSERT`/`UPDATE`/`MERGE`, but a `MERGE` over a large table is a full rewrite, so it is fine for late-arriving facts and corrections and wrong for a checkout system.
+
+**Failure story.** A team put the order-history table in Cloud SQL and ran a monthly revenue report directly against it. The report took 40 minutes, timed out against a read replica, and during peak hours it caused lock contention that slowed down order capture — the analytics load degraded the transactional system. Moving the same table to BigQuery via Datastream made the report a 12-second scan of a partition, and the contention disappeared.
+
+**Check yourself.** Try it:
+```python
+import sys
+sys.path.insert(0, "project/core")
+from pipeline_logic import bucket_by_window, aggregate_by_window
+from service_catalog import data_role_index
+
+# The same rows, two access patterns.
+rows = [
+    {"event_id": f"e{i}", "user_id": f"u{i % 3}", "event_dt": f"2026-01-15T{i % 2:02d}:00:00+00:00",
+     "event_type": "order", "region": "AMER", "amount_eur": 10.0}
+    for i in range(6)
+]
+
+# OLTP shape: pull one specific event by key.
+buckets = bucket_by_window(rows)
+print("point lookups -> windows:", {k: len(v) for k, v in buckets.items()})
+
+# OLAP shape: scan and aggregate across all of them.
+print("aggregate ->", len(aggregate_by_window(rows)), "group rows")
+
+# Which service does which job?
+roles = data_role_index()
+print("warehouse role:", roles["warehouse"])
+```
+
+Expected output:
+
+```text
+point lookups -> windows: {'2026-01-15T00:00:00+00:00': 3, '2026-01-15T01:00:00+00:00': 3}
+aggregate -> 2 group rows
+warehouse role: ['biglake', 'bigquery', 'bigtable', 'cloud-spanner', 'cloud-sql', 'database-migration', 'datastore', 'firestore', 'memorystore']
+```
+
+Note that the `warehouse` role contains **both** `cloud-sql` and `bigquery` — the role is "where data is queried", and both can be. The split is not "cloud-sql is OLTP, BigQuery is OLAP"; it is **per table, per workload**. A single Postgres instance routinely holds both an `orders` table (OLTP) and a `order_history` reporting table (OLAP), and the second one is a query waiting to hurt somebody.
+
+---
+
+### Q19. How does BigQuery handle nested and repeated data, and what does `UNNEST` do?
+
+**Answer.** BigQuery has two non-relational types: **`STRUCT`** for nested fields and **`ARRAY`** for repeated fields. `UNNEST` is the bridge that turns an array into rows, so you can join and aggregate over it relationally.
+
+**Mechanism.** A `STRUCT` is a single value with sub-fields, accessed by dot notation — `shipping_address.city`. An `ARRAY` is a repeated value, accessed with a subscript — `line_items[OFFSET(0)].sku`, where `OFFSET` is 0-based and `ORDINAL` is 1-based. The constraint that catches people: **arrays cannot be directly nested** — `ARRAY<ARRAY<INT64>>` is invalid, and `ARRAY<STRUCT<...>>` is valid because the struct is the nesting mechanism. To get array elements out as rows you use `CROSS JOIN UNNEST(arr) AS alias`.
+
+**Trade-off.** Nesting keeps the schema honest — an address and its line items *are* parts of an order, and modelling them as nested avoids a join and a surrogate key. But repeated fields have real costs. Unnesting **multiplies rows**: every order becomes one row per line item, so `COUNT(*)` over the result counts line items, not orders, and a second unnested array in the same query multiplies again. That fan-out is the single most common bug in nested BigQuery SQL. There is also a performance caveat — repeated fields can inhibit block pruning, so for a large flat table queried with narrow filters, a fully flattened schema often scans *faster* despite being bigger.
+
+**In practice.** The rule I apply: **unnest with a correlated subquery when you need to keep the parent grain.** If you want one row per order and the line items as an aggregated array, this is correct:
+
+```sql
+SELECT
+    order_id,
+    (SELECT ARRAY_AGG(li.sku) FROM UNNEST(line_items) AS li) AS skus
+FROM orders
+WHERE ARRAY_LENGTH(line_items) > 1
+```
+
+Whereas the flat `CROSS JOIN UNNEST` form is only correct when you *want* the fan-out:
+
+```sql
+SELECT o.order_id, li.sku, li.quantity
+FROM orders AS o
+CROSS JOIN UNNEST(o.line_items) AS li
+```
+
+And note `WHERE ARRAY_LENGTH(o.line_items) > 1` filters the *parent* — the flat form does not, because the array is exploded before the filter is meaningful. The other arithmetic that catches people: `line_items[SAFE_ORDINAL(1)]` returns `NULL` instead of erroring on a short array, which is what you want for ragged data.
+
+**Failure story.** A revenue report unnested `line_items` and `discounts` in the same query. Because each order has multiple line items *and* multiple discounts, the result was multiplied — a single order with 3 line items and 2 discounts produced 6 rows, so revenue was counted twice and the dashboard overstated it by ~3×. The report had been running for two months. The fix was to aggregate each array separately in a subquery before joining, so each array contributes exactly one row per order.
+
+**Check yourself.** Try it:
+```python
+import sys
+sys.path.insert(0, "project/core")
+from pipeline_logic import bucket_by_window, aggregate_by_window
+
+# A parent with a repeated child — the same shape as an order with line items.
+rows = [
+    {"event_id": f"e{i}", "user_id": f"u{i % 3}", "event_dt": f"2026-01-15T{i % 2:02d}:00:00+00:00",
+     "event_type": "order", "region": "AMER", "amount_eur": 10.0}
+    for i in range(6)
+]
+
+# CROSS JOIN UNNEST equivalent: explode the repeated child into rows.
+exploded = [r for bucket in bucket_by_window(rows).values() for r in bucket]
+print("rows in:", len(rows), " rows exploded:", len(exploded))
+
+# The parent grain, preserved — one row per parent.
+grouped = aggregate_by_window(rows)
+print("group rows:", len(grouped))
+print("counts sum to:", sum(g["event_count"] for g in grouped))
+
+# The fan-out rule: exploded rows >= parents, and the ratio is the multiplicity.
+print("multiplicity:", len(exploded) // len(grouped) if grouped else 0)
+```
+
+Expected output:
+
+```text
+rows in: 6  rows exploded: 6
+group rows: 2
+counts sum to: 6
+multiplicity: 3
+```
+
+The multiplicity of **3** is the point: three parents map to one group, and the aggregate preserves the count. A query that explodes two arrays from the same parent would multiply by both, and the `event_count` from the grouped form is what you compare against to catch it.
 
 ---
 

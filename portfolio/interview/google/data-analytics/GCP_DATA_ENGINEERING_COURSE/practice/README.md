@@ -258,7 +258,7 @@ Run them yourself and compare.
 ```text
 GCP_DATA_ENGINEERING_COURSE/
 ├── chapters/          ← the teaching material (read this first)
-├── interview/         ← 128 questions with model answers
+├── interview/         ← 157 questions with model answers
 ├── notebooks/         ← the course's own notebooks
 ├── project/           ← the pure-Python core this suite exercises
 ├── resources/         ← setup guides, the sample-data generator, the linter
@@ -269,6 +269,7 @@ GCP_DATA_ENGINEERING_COURSE/
 |---|---|
 | To learn the material | [`../chapters/13-bigquery-platform-overview.md`](../chapters/13-bigquery-platform-overview.md) |
 | To be tested on it | [`../interview/03-analytics-and-cost.md`](../interview/03-analytics-and-cost.md) |
+| To be tested on optimisation | [`../interview/07-query-optimization.md`](../interview/07-query-optimization.md) |
 | To cram before an interview | [`../interview/top-40.md`](../interview/top-40.md) |
 | To run the code | [`../project/README.md`](../project/README.md) |
 | To practise it | **This directory** |

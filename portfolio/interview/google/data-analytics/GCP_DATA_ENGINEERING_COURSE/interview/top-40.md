@@ -1,8 +1,8 @@
-# Top 41 — Final Cramming Pass
+# Top 46 — Final Cramming Pass
 
 ## 🎯 How to use this file
 
-Forty-one questions selected for yield: the ones that come up repeatedly in GCP data engineering interviews and certification exams, and the ones where a wrong answer reveals a gap. Read the bold first line of each answer — if you can produce it from memory, you are ready. If not, read the mechanism, then say the answer out loud in your own words. Use this on the last two days of a study plan, not as your first pass.
+Forty-six questions selected for yield: the ones that come up repeatedly in GCP data engineering interviews and certification exams, and the ones where a wrong answer reveals a gap. Read the bold first line of each answer — if you can produce it from memory, you are ready. If not, read the mechanism, then say the answer out loud in your own words. Use this on the last two days of a study plan, not as your first pass.
 
 Each question cross-references the full treatment in the topic files. The numbering here is independent — Q1 here is not Q1 there.
 
@@ -148,7 +148,77 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q11. What does Pub/Sub guarantee, and what does that force you to build?
+### Q11. A query is slow. What is your process for diagnosing it?
+
+**Answer.** Four levers, in a fixed order: **bytes scanned → shuffle → skew → join strategy.** Measure first; do not start by rewriting SQL.
+
+**Mechanism.** The four map onto the four query stages. Bytes scanned is the scan stage and the direct cost driver on on-demand pricing. A shuffle is where rows are redistributed by key — the slot-hours go there. Skew is a shuffle with a bad distribution, so one worker becomes the straggler. Join strategy decides whether a shuffle happened at all.
+
+**Trade-off.** A fix at a later step can be undone by an earlier one: re-clustering does nothing if the query scans the whole table anyway, and broadcasting does nothing if the scan is the bottleneck.
+
+**In practice.** `bq query --dry_run` for bytes (ten seconds), then the execution graph for a shuffle stage, then the key distribution for skew, then why the small side was not broadcast. The three numbers every time: `total_bytes_processed`, `total_slot_ms`, elapsed time.
+
+*Full answer: [07-query-optimization.md Q1](07-query-optimization.md)*
+
+---
+
+### Q12. What is data skew, and how does it slow a query down?
+
+**Answer.** Skew is when the rows are not evenly distributed across keys — one key holds a disproportionate share. The query slows down because the whole query waits for the slowest worker.
+
+**Mechanism.** In a shuffle each worker takes a partition. With uniform distribution they finish together. With skew, one key dominates: that worker gets 4.1M rows while its peers get 400K, and the others **sit idle holding their slots** for the whole duration. The cost is not the extra data — it is wall-clock time multiplied by slots that had nothing to do.
+
+**Trade-off.** Skew is usually a data property, not a query bug, so "rewrite the query" rarely fixes it. The causes are structural: a hot customer, a `NULL` or sentinel key that collects everything, or a slowly-changing dimension never split into versions.
+
+**In practice.** Two ratios: max-to-median and max-to-average. A healthy distribution is 1.0× on both; above 10× is skew, above 100× is serious. One key holding 60% of the rows gives a **24.6×** max-to-average ratio.
+
+*Full answer: [07-query-optimization.md Q6](07-query-optimization.md)*
+
+---
+
+### Q13. What is the difference between a broadcast join and a shuffle join, and how does BigQuery choose?
+
+**Answer.** A **broadcast hash join** copies the small side to every worker and probes it locally — no shuffle. A **shuffle join** redistributes both sides by join key. BigQuery picks automatically from the build side's size after filtering, the key's cardinality, and whether either side is sorted or clustered.
+
+**Mechanism.** Broadcast: the small side is replicated, the large side streams past a local copy — so there is no shuffle stage *and* no skew, because every worker does identical work. Shuffle: both sides are partitioned by key, so rows sharing a key land together, at the cost of moving both sides across the network.
+
+**Trade-off.** Broadcast wins on latency and slots when the small side genuinely fits; it loses when the "small" side is not small, because replicating it to a thousand workers multiplies memory pressure. Shuffle wins on a large build side or an unavoidable cross-location join.
+
+**In practice.** Keep dimension tables small and in their own table — typically under 10 MB compressed. When BigQuery does not broadcast a join it should, the build side was larger than expected, usually because of a `NULL` join key that defeated the filter.
+
+*Full answer: [07-query-optimization.md Q4](07-query-optimization.md)*
+
+---
+
+### Q14. How do you prevent row multiplication during joins?
+
+**Answer.** Three techniques, in order of preference: **pre-aggregate the many side to one row per key**, **filter `NULL` join keys**, and **deduplicate the build side on the join key**. Then assert on the output row count.
+
+**Mechanism.** Multiplication happens when the build side has more than one row per join key — a dimension with historical versions where you assumed one current row, or `NULL` keys, which match each other under a `LEFT JOIN`. It is a data problem, not a query problem: the SQL is doing exactly what you asked.
+
+**Trade-off.** Pre-aggregating is correct but changes the grain, irreversibly. Arbitrary deduplication silently discards data, and *which* row survives is arbitrary unless you pick deliberately. `NULL` filtering changes semantics — a `LEFT JOIN` that drops `NULL` rows is no longer a `LEFT JOIN`.
+
+**In practice.** Assert on the output row count in every pipeline: rows out greater than rows in on a join is a bug, and the assertion should fail the job rather than publish. On the build side, `HAVING COUNT(*) > 1` on the key returns anything, it is not a dimension.
+
+*Full answer: [07-query-optimization.md Q10](07-query-optimization.md)*
+
+---
+
+### Q15. How do you implement incremental loads, and how do you handle duplicates and late arrivals?
+
+**Answer.** Track a **high-water mark** per source, load only what is newer, use the **logical date of the run** rather than `now()`, and make it idempotent. Duplicates go with a data-derived idempotency key; late arrivals go with a lookback window.
+
+**Mechanism.** Three moving parts: the **watermark** (the cursor), the **filter** (rows above it), and the **commit** (advancing it) — and the commit is where the bugs live. Advance the watermark before the data is durably written and you have a permanent gap.
+
+**Trade-off.** A pure `> watermark` filter misses out-of-order records. The alternatives are a **lookback window** (re-read the last N minutes and let idempotency absorb the duplicates) or **CDC** with a source sequence number, which captures every change but costs more to operate.
+
+**In practice.** Four rules: derive the partition from the logical date, never `CURRENT_TIMESTAMP()`; always add a lookback window; make the key data-derived (`dedup_key(event_id, partition)` → `20260115:evt-0001`); advance the watermark only after the write succeeds. A late arrival at `23:00` the previous day is exactly what a pure watermark filter drops.
+
+*Full answer: [07-query-optimization.md Q17](07-query-optimization.md)*
+
+---
+
+### Q16. What does Pub/Sub guarantee, and what does that force you to build?
 
 **Answer.** **At-least-once delivery.** A message can be delivered more than once, and a subscriber that dies mid-processing gets redelivery. You must make the sink idempotent.
 
@@ -162,7 +232,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q12. What is a Pub/Sub dead-letter topic, and what should you alert on?
+### Q17. What is a Pub/Sub dead-letter topic, and what should you alert on?
 
 **Answer.** Where messages go when a subscriber rejects them or they exceed the maximum delivery attempts.
 
@@ -176,7 +246,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q13. When do you choose Kafka over Pub/Sub?
+### Q18. When do you choose Kafka over Pub/Sub?
 
 **Answer.** Kafka when you need high throughput with per-partition ordering you control, long retention with replay, or an existing Kafka ecosystem. Pub/Sub when you want fully managed, zero-idle-cost operation.
 
@@ -190,7 +260,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q14. Explain Kafka consumer groups and why a rebalance is scary.
+### Q19. Explain Kafka consumer groups and why a rebalance is scary.
 
 **Answer.** A consumer group shares the partitions of a topic — each partition goes to exactly one consumer in the group — and each consumer tracks its **offset**.
 
@@ -204,7 +274,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q15. What is Datastream, and when is CDC the wrong choice?
+### Q20. What is Datastream, and when is CDC the wrong choice?
 
 **Answer.** Datastream is managed change data capture — it reads a source's binlog or replication stream and publishes row changes to a destination.
 
@@ -218,7 +288,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q16. What are the storage classes, and what is the catch?
+### Q21. What are the storage classes, and what is the catch?
 
 **Answer.** Standard ($0.020/GB-month, free retrieval), Nearline ($0.010, $0.010/GB to read), Coldline ($0.004, $0.020/GB), Archive ($0.0012, $0.050/GB — more than Standard storage costs).
 
@@ -232,7 +302,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q17. What is the difference between block storage and Filestore?
+### Q22. What is the difference between block storage and Filestore?
 
 **Answer.** Persistent Disk and Hyperdisk are **block** storage — a volume attached to instances, seen as `/dev/sdb`, zone-bound. Filestore is **managed NFS** — a network filesystem many instances mount at once.
 
@@ -246,7 +316,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q18. When is Cloud SQL the wrong answer?
+### Q23. When is Cloud SQL the wrong answer?
 
 **Answer.** When you need horizontal write scaling, strong consistency across regions, or analytical scans over history. Use Spanner for global relational scale, BigQuery for analytics.
 
@@ -260,7 +330,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q19. What does Spanner buy you over Cloud SQL, and what does it cost?
+### Q24. What does Spanner buy you over Cloud SQL, and what does it cost?
 
 **Answer.** Horizontal sharding, global replication and **strong consistency across regions** — a transaction can span regions and still be serialisable.
 
@@ -274,7 +344,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q20. How do you choose a database?
+### Q25. How do you choose a database?
 
 **Answer.** Access pattern first, then consistency, then scale. Analytical scans → BigQuery; key lookups → Firestore/Datastore; time-series ranges → Bigtable; range scans with joins → Cloud SQL; global strong consistency → Spanner.
 
@@ -288,7 +358,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q21. When do you choose Memorystore, and when is a cache the wrong answer?
+### Q26. When do you choose Memorystore, and when is a cache the wrong answer?
 
 **Answer.** For read-heavy, latency-sensitive lookups of data you already have elsewhere. Wrong when you use it as a second source of truth.
 
@@ -302,7 +372,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q22. What is the difference between Data Fusion and Dataprep?
+### Q27. What is the difference between Data Fusion and Dataprep?
 
 **Answer.** Data Fusion is a general-purpose visual **ETL and integration** tool for connecting systems. Dataprep is a specialised **data preparation and profiling** tool for wrangling data files for analysis.
 
@@ -316,7 +386,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q23. When do you choose Composer over Workflows?
+### Q28. When do you choose Composer over Workflows?
 
 **Answer.** Composer when the orchestration is a DAG with dependencies, backfills and data-aware logic. Workflows when it is a chain of API calls with no branching data logic.
 
@@ -330,7 +400,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q24. What is a logical date, and why is it the most important concept in Airflow?
+### Q29. What is a logical date, and why is it the most important concept in Airflow?
 
 **Answer.** The label of a DAG run, representing the **data interval** it processes — not the moment it ran.
 
@@ -344,7 +414,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q25. Why use Dataform instead of plain SQL?
+### Q30. Why use Dataform instead of plain SQL?
 
 **Answer.** Version-controlled, tested, dependency-aware SQL — `ref()` and `source()` instead of hand-maintained table names, with generated lineage and reviewable pull requests.
 
@@ -358,7 +428,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q26. What is the MapReduce shuffle and why is it the expensive part?
+### Q31. What is the MapReduce shuffle and why is it the expensive part?
 
 **Answer.** The phase where each mapper's intermediate key-value pairs are partitioned by key and shipped across the network to the reducers, where they are sorted and merged.
 
@@ -372,7 +442,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q27. When would you use Spark on Dataproc versus Dataflow batch?
+### Q32. When would you use Spark on Dataproc versus Dataflow batch?
 
 **Answer.** Dataproc when the codebase is already Spark or you need Spark-specific features (MLlib, GraphX, Spark SQL). Dataflow batch when you want one pipeline to run as batch today and streaming tomorrow, with managed autoscaling and no cluster admin.
 
@@ -386,7 +456,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q28. What is a watermark in Beam, and what happens to late data?
+### Q33. What is a watermark in Beam, and what happens to late data?
 
 **Answer.** The pipeline's declaration that no more events will arrive with a timestamp at or before it. Events arriving after that are **late data**.
 
@@ -400,7 +470,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q29. What is event time versus processing time, and why does it matter?
+### Q34. What is event time versus processing time, and why does it matter?
 
 **Answer.** Processing time is when your system handles the event; event time is when it happened. Windowing on the wrong one produces answers that look right and are wrong.
 
@@ -414,7 +484,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q30. What does Sensitive Data Protection do, and where does it belong in a pipeline?
+### Q35. What does Sensitive Data Protection do, and where does it belong in a pipeline?
 
 **Answer.** It discovers sensitive data and either inspects it (classifies and reports) or de-identifies it (redacts, masks, tokenises, formats).
 
@@ -428,7 +498,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q31. What are the de-identification techniques, and which one keeps joins working?
+### Q36. What are the de-identification techniques, and which one keeps joins working?
 
 **Answer.** Redaction, masking, tokenisation and format-preserving encryption. **Tokenisation** is the one that keeps joins working.
 
@@ -442,7 +512,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q32. How do you enforce data residency on GCP?
+### Q37. How do you enforce data residency on GCP?
 
 **Answer.** Three layers: location choice, org policy on permitted locations, and IAM scoped so nobody reads across the boundary.
 
@@ -456,7 +526,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q33. What is CMEK, and what breaks when you adopt it?
+### Q38. What is CMEK, and what breaks when you adopt it?
 
 **Answer.** Customer-Managed Encryption Keys: you create the key in Cloud KMS and point a service at it, so the key's lifecycle, rotation and revocation are yours. What breaks is that you now own availability.
 
@@ -470,7 +540,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q34. What is the shared responsibility model, and where do audits actually bite?
+### Q39. What is the shared responsibility model, and where do audits actually bite?
 
 **Answer.** Google secures the physical infrastructure, hypervisor, networking and facilities. You secure the OS, middleware, application, data — and the IAM configuration that gives access to it.
 
@@ -484,7 +554,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q35. What is a BI semantic layer, and why does it matter?
+### Q40. What is a BI semantic layer, and why does it matter?
 
 **Answer.** A governed definition of your business metrics, sitting between raw data and dashboards, so "monthly active customers" means exactly one thing everywhere.
 
@@ -498,7 +568,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q36. Explain supervised versus unsupervised learning.
+### Q41. Explain supervised versus unsupervised learning.
 
 **Answer.** Supervised learns a mapping from labelled examples; unsupervised finds structure in unlabelled data without being told what to look for.
 
@@ -512,7 +582,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q37. When do you use a prebuilt or AutoML model instead of training your own?
+### Q42. When do you use a prebuilt or AutoML model instead of training your own?
 
 **Answer.** Prebuilt when the task is one Google already solved well (vision, speech, translation, moderation). AutoML when you have labelled data but do not want to tune hyperparameters yourself.
 
@@ -526,7 +596,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q38. What does custom training on Vertex AI involve, and how do you operationalise a model?
+### Q43. What does custom training on Vertex AI involve, and how do you operationalise a model?
 
 **Answer.** Running your own training code on managed infrastructure, plus everything needed to run it in production.
 
@@ -540,7 +610,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q39. What is BigQuery ML, and when is it right?
+### Q44. What is BigQuery ML, and when is it right?
 
 **Answer.** Train and serve models with SQL inside the warehouse — `CREATE MODEL`, `SELECT * FROM ML.PREDICT(...)` — with no data movement.
 
@@ -554,7 +624,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q40. A team says "BigQuery is too expensive." What do you ask?
+### Q45. A team says "BigQuery is too expensive." What do you ask?
 
 **Answer.** How many bytes did the query scan, how many times was the same data scanned, who ran it, and what is the storage-versus-scan split. The answer is usually redundant scanning.
 
@@ -568,7 +638,7 @@ Each question cross-references the full treatment in the topic files. The number
 
 ---
 
-### Q41. How do you make a data pipeline production-ready?
+### Q46. How do you make a data pipeline production-ready?
 
 **Answer.** Deterministic idempotency, a bounded retry, a dead-letter path, cost controls in the deployment template, and tests at every layer.
 
