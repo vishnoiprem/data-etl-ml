@@ -39,6 +39,17 @@ BLOCK = re.compile(
     re.S,
 )
 
+# The same, but the output is compared as a *multiset of lines* rather than an
+# exact string.  Beam makes no ordering promise, so a block that deliberately
+# demonstrates unordered output is marked with this heading and checked by
+# sorting both sides.  The multiset comparison still catches a missing or an
+# extra element — only the order is forgiven.
+BLOCK_UNORDERED = re.compile(
+    r"```python\n((?:(?!```).)*?)```\n\nExpected output \(unordered\):\n\n"
+    r"```text\n((?:(?!```).)*?)```",
+    re.S,
+)
+
 # Only these files are scanned; the assignments are graded exercises and are
 # checked by their own solution scripts.
 SCAN_GLOBS = ["*.md", "labs/*.md", "assignments/*.md"]
@@ -86,6 +97,30 @@ def scan_files() -> list[pathlib.Path]:
         files.extend(sorted(HERE.glob(pattern)))
     # The README is an index, not module prose.
     return [f for f in files if f.name not in {"README.md"}]
+
+
+def blocks_in(text: str) -> list[tuple[str, str, bool]]:
+    """Return ``(code, expected, unordered)`` for every block in a file.
+
+    A file may mix the two heading styles, so both patterns are searched and
+    the results are merged in the order they appear in the text.
+    """
+    found: list[tuple[int, str, str, bool]] = []
+    for match in BLOCK.finditer(text):
+        found.append((match.start(), match.group(1), match.group(2), False))
+    for match in BLOCK_UNORDERED.finditer(text):
+        found.append((match.start(), match.group(1), match.group(2), True))
+    found.sort(key=lambda item: item[0])
+    return [(code, expected, unordered) for _, code, expected, unordered in found]
+
+
+def same_output(actual: str, expected: str, unordered: bool) -> bool:
+    """Compare two transcripts, optionally forgiving line order."""
+    if not unordered:
+        return actual.rstrip("\n") == expected.rstrip("\n")
+    return sorted(actual.rstrip("\n").splitlines()) == sorted(
+        expected.rstrip("\n").splitlines()
+    )
 
 
 def run_block(
@@ -145,8 +180,9 @@ def main() -> int:
 
     for path in scan_files():
         text = path.read_text(encoding="utf-8")
-        for index, match in enumerate(BLOCK.finditer(text), start=1):
-            code, expected = match.group(1), match.group(2)
+        for index, (code, expected, unordered) in enumerate(
+            blocks_in(text), start=1
+        ):
             checked += 1
 
             result = run_block(interpreter, code, workdir)
@@ -159,7 +195,7 @@ def main() -> int:
                 print(result.stderr.strip()[-1500:])
                 continue
 
-            if actual != want:
+            if not same_output(actual, want, unordered):
                 mismatches += 1
                 print(f"MISMATCH {path.name} block {index}")
                 print("--- expected ---")
@@ -175,7 +211,7 @@ def main() -> int:
                 first = actual
                 for _ in range(args.repeats - 1):
                     again = run_block(interpreter, code, workdir)
-                    if again.stdout.rstrip("\n") != first:
+                    if not same_output(again.stdout.rstrip("\n"), first, unordered):
                         unstable += 1
                         print(f"UNSTABLE {path.name} block {index}")
                         print(f"  run 1: {first[:200]!r}")

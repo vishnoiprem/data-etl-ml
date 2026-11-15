@@ -60,7 +60,7 @@ pc3 = pc2   | "Filter" >> beam.Filter(pred)
 The distinction is not academic. `GroupByKey` on an unbounded PCollection cannot
 finish — there is always more data. So a streaming pipeline needs **windowing** to
 turn the unbounded stream into a set of bounded groups. That is the whole reason
-module 07 exists.
+module 06 exists.
 
 ### 4 — Element type
 
@@ -69,6 +69,10 @@ the PCollection it produces (that is allowed), but within one PCollection the ty
 is uniform. Beam uses this for type checking: a `CombinePerKey` applied to a
 PCollection of ints, rather than tuples, fails at graph-construction time with a
 `TypeCheckError` — before any data moves.
+
+`TypeCheckError` derives from `Exception`, **not** from `TypeError`. Catching it
+with `except TypeError` does not work; import it explicitly from
+`apache_beam.typehints.decorators`.
 
 ### 5 — Operation type
 
@@ -118,7 +122,7 @@ with beam.Pipeline(options=options) as p:
     _ = pc2 | "Show doubled" >> beam.Map(lambda x: print(f"doubled:  {x}"))
 ```
 
-Expected output:
+Expected output (unordered):
 
 ```text
 original: 1
@@ -129,18 +133,19 @@ original: 3
 doubled:  6
 ```
 
-Note what this output is *not* telling you. The two branches are independent,
+Note what this transcript is *not* promising. The two branches are independent,
 and the runner is free to interleave them differently on every run — the
-transcript above is one valid ordering, not a promise. This is property 5 in
-action: **there is no guaranteed order**.
+ordering above is one valid arrangement, not a contract. Run it again and you
+may well see `doubled` first. This is property 5 in action: **there is no
+guaranteed order**.
 
 To get a transcript you can actually diff, collect the results and sort them.
-That is the block below.
+That is the next block.
 
 ### 💻 Runs locally — the same pipeline, with a stable transcript
 
-Collect both branches into one PCollection, sort the elements, and only then
-print. The ordering problem disappears, and `pc1` is still visibly unmodified.
+Collect both branches under one key, then sort the collected list. The
+ordering problem disappears, and `pc1` is still visibly unmodified.
 
 ```python
 import apache_beam as beam
@@ -155,29 +160,33 @@ with beam.Pipeline(options=options) as p:
     pc1 = p | "Create" >> beam.Create([1, 2, 3])
     pc2 = pc1 | "Double" >> beam.Map(lambda x: x * 2)
 
-    originals = pc1 | "Label original" >> beam.Map(lambda x: f"original: {x}")
-    doubled = pc2 | "Label doubled" >> beam.Map(lambda x: f"doubled:  {x}")
+    originals = pc1 | "Label original" >> beam.Map(lambda x: ("all", f"original: {x}"))
+    doubled = pc2 | "Label doubled" >> beam.Map(lambda x: ("all", f"doubled:  {x}"))
 
     merged = (originals, doubled) | "Merge" >> beam.Flatten()
-    ordered = merged | "Sort" >> beam.Map(lambda x: x)
-
-    _ = ordered | "Show" >> beam.Map(lambda x: print(x))
+    grouped = merged | "Group" >> beam.GroupByKey()
+    _ = (
+        grouped
+        | "Sort" >> beam.Map(lambda kv: sorted(kv[1]))
+        | "Print" >> beam.Map(print)
+    )
 ```
 
 Expected output:
 
 ```text
-doubled:  2
-doubled:  4
-doubled:  6
-original: 1
-original: 2
-original: 3
+['doubled:  2', 'doubled:  4', 'doubled:  6', 'original: 1', 'original: 2', 'original: 3']
 ```
 
-Two lessons in one block. The values are sorted, so the transcript is
+Two lessons in one block. The elements are sorted, so the transcript is
 reproducible — and the labels prove which PCollection each element came from.
 `pc1` yielded `1, 2, 3`; the doubling lives entirely in `pc2`.
+
+Note the pattern, because it is the general one: **Beam cannot sort
+PCollections directly.** You group everything under a key, `GroupByKey`
+reassembles it as one list, and you sort that list in Python. This is also why
+`beam.Map(lambda x: x)` after a `Flatten` is *not* a sort — it is a no-op that
+looks like one.
 
 ### 💻 Runs locally — bounded PCollections all share one timestamp
 
@@ -203,26 +212,77 @@ with beam.Pipeline(options=options) as p:
         p
         | "Create" >> beam.Create(["a", "b", "c"])
         | "Stamp" >> beam.ParDo(ShowTs())
+        | "Print" >> beam.Map(print)
     )
 ```
 
 Expected output:
 
 ```text
-a @ 1970-01-01 00:00:00+00:00
-b @ 1970-01-01 00:00:00+00:00
-c @ 1970-01-01 00:00:00+00:00
+a @ Timestamp(-9223372036854.775000)
+b @ Timestamp(-9223372036854.775000)
+c @ Timestamp(-9223372036854.775000)
 ```
 
-Every element of a bounded PCollection carries the same timestamp — the epoch,
-because `Create` has no other timestamp to offer. In a streaming source, each
-element would carry its own event time instead.
+Three facts in one block.
+
+**Every element carries the same timestamp.** The three values are identical,
+because a bounded source stamps the whole PCollection with one time — the
+minimum timestamp of the input. In a streaming source, each element carries its
+own event time instead.
+
+**The value is Beam's minimum timestamp, not the epoch.** `Create` has no
+timestamp of its own to offer, so it uses `Timestamp.MIN_TIMESTAMP`, which is
+`-9223372036854.775000` seconds. That is the floor of the representable range,
+not "no timestamp" and not zero.
+
+**`to_utc_datetime()` overflows on it.** This is a real trap, and it catches
+people who try to format the timestamp as a date:
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions([
+    "--runner=DirectRunner",
+    "--environment_type=LOOPBACK",
+])
+
+class ShowTs(beam.DoFn):
+    def process(self, element, ts=beam.DoFn.TimestampParam):
+        try:
+            print(f"{element} @ {ts.to_utc_datetime()}")
+        except OverflowError as e:
+            print(f"{element} @ {ts}  (not a representable datetime: {e})")
+
+with beam.Pipeline(options=options) as p:
+    (
+        p
+        | "Create" >> beam.Create(["a", "b", "c"])
+        | "Stamp" >> beam.ParDo(ShowTs())
+    )
+```
+
+Expected output:
+
+```text
+a @ Timestamp(-9223372036854.775000)  (not a representable datetime: date value out of range)
+b @ Timestamp(-9223372036854.775000)  (not a representable datetime: date value out of range)
+c @ Timestamp(-9223372036854.775000)  (not a representable datetime: date value out of range)
+```
+
+Left unhandled, the same code raises `OverflowError: date value out of range
+[while running 'Stamp']` and the job fails. `MIN_TIMESTAMP` is roughly a
+billion years before the epoch, which no `datetime` can represent. When you
+need a readable timestamp, convert it yourself, or read the window's own
+`start`/`end`, which the runner has already clamped to something printable.
 
 ### 💻 Runs locally — element type is enforced at graph-construction time
 
 ```python
 import apache_beam as beam
 from apache_beam.options.pipeline_options import PipelineOptions
+from apache_beam.typehints.decorators import TypeCheckError
 
 options = PipelineOptions([
     "--runner=DirectRunner",
@@ -237,7 +297,7 @@ try:
             | "Create" >> beam.Create([1, 2, 3])
             | "CombinePerKey" >> beam.CombinePerKey(sum)
         )
-except TypeError as e:
+except TypeCheckError as e:
     print(f"rejected at graph time: {type(e).__name__}")
     print("CombinePerKey needs (key, value) tuples, not bare ints")
 ```
@@ -249,50 +309,41 @@ rejected at graph time: TypeCheckError
 CombinePerKey needs (key, value) tuples, not bare ints
 ```
 
-`TypeCheckError` is a subclass of `TypeError`. Beam checks the element type when
-the graph is built, so this failure costs nothing — no job was submitted, no data
-was read.
+Beam checks the element type when the graph is built, so this failure costs
+nothing — no job was submitted, no data was read. Note that `TypeCheckError`
+derives straight from `Exception`, *not* from `TypeError`, so `except
+TypeError` will not catch it. Import it explicitly:
 
-### 💻 Runs locally — no grained operations, and no guaranteed order
+```python
+from apache_beam.typehints.decorators import TypeCheckError
+```
+
+### 💻 Runs locally — no grained operations
+
+A PCollection exposes none of the sequence protocol. You cannot index it, take
+its length, or iterate over it.
 
 ```python
 import apache_beam as beam
-from apache_beam.options.pipeline_options import PipelineOptions
 
-options = PipelineOptions([
-    "--runner=DirectRunner",
-    "--environment_type=LOOPBACK",
-])
+dunder = ("__getitem__", "__len__", "__iter__")
+exposed = [name for name in dunder if hasattr(beam.PCollection, name)]
 
-with beam.Pipeline(options=options) as p:
-    (
-        p
-        | "Create" >> beam.Create(list(range(10)))
-        | "Map" >> beam.Map(lambda x: x * 10)
-        | "Sort" >> beam.Map(lambda x: x)
-    )
-
-# You cannot index into a PCollection. But you can sort the *results* of
-# running it, which is the supported way to get deterministic output.
-from apache_beam.io.textio import WriteToText
-
-with beam.Pipeline(options=options) as p:
-    (
-        p
-        | "Create" >> beam.Create(list(range(10)))
-        | "Map" >> beam.Map(lambda x: x * 10)
-    )
-
-print("A PCollection has no __getitem__:")
-print("  beam.PCollection exposes:", [m for m in dir(beam.PCollection) if m.startswith('_') and m in ('__getitem__', '__len__', '__iter__')] or "none of __getitem__, __len__, __iter__")
+print("A PCollection has no grained operations.")
+print(f"  exposed of {dunder}: {exposed or 'none'}")
 ```
 
 Expected output:
 
 ```text
-A PCollection has no __getitem__:
-  beam.PCollection exposes: none of __getitem__, __len__, __iter__
+A PCollection has no grained operations.
+  exposed of ('__getitem__', '__len__', '__iter__'): none
 ```
+
+And `beam.Map(lambda x: x)` is not a sort — it is a no-op that looks like one.
+Beam cannot sort a PCollection. If you need ordered output, group the elements
+under one key, `GroupByKey` them back into a list, and sort that list in
+Python.
 
 ---
 
@@ -319,6 +370,29 @@ symbols are `beam.DoFn.TimestampParam`, `beam.DoFn.WindowParam` and
 `beam.DoFn.StateParam`. `StateParam` additionally needs a `StateSpec` object, not
 a string.
 
+### `OverflowError: date value out of range`
+
+You called `to_utc_datetime()` on Beam's `MIN_TIMESTAMP` — the value a bounded
+source stamps on its elements. It is about a billion years before the epoch, so
+no `datetime` can hold it. Print the `Timestamp` directly, or read the window's
+own `start`/`end`.
+
+### `except TypeError` did not catch the `TypeCheckError`
+
+`TypeCheckError` inherits from `Exception`, not from `TypeError`. Import it
+explicitly:
+
+```python
+from apache_beam.typehints.decorators import TypeCheckError
+```
+
+### The output order changed between two runs
+
+That is expected. Beam does not guarantee element order. Sort the results before
+comparing them, or compare them as sets. Note that this suite's verifier knows
+the difference: a block headed `Expected output (unordered):` is compared as a
+multiset of lines, and one headed `Expected output:` must match exactly.
+
 ---
 
 ## 💡 Production Notes
@@ -341,10 +415,13 @@ a string.
 - **Immutable**: transforms return new PCollections. The old one is unchanged.
 - **Bounded** = finite, all elements share one timestamp. **Unbounded** = a stream,
   each element carries its own.
+- A bounded source stamps its elements with Beam's `MIN_TIMESTAMP`
+  (`Timestamp(-9223372036854.775000)`), which no `datetime` can represent.
 - **Element type** is uniform within a PCollection, and Beam enforces it at graph
-  construction time.
+  construction time with a `TypeCheckError` — which is an `Exception`, not a
+  `TypeError`.
 - **No grained operations**: no indexing, no `len()`, no iteration. Order is not
-  guaranteed.
+  guaranteed, and Beam cannot sort a PCollection for you.
 - Every element carries a **timestamp**; that is what windows are built from.
 - A PCollection is **owned** by the Pipeline that made it.
 
