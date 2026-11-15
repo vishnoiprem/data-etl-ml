@@ -1,0 +1,20 @@
+NOTEBOOK Usecase2.ipynb
+======================================================================
+
+--- cell 1 --- exit 1
+
+STDERR:
+rce_class(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/Users/prem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/practice/.beam-venv/lib/python3.12/site-packages/apache_beam/io/textio.py", line 143, in __init__
+    super().__init__(
+  File "/Users/prem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/practice/.beam-venv/lib/python3.12/site-packages/apache_beam/io/filebasedsource.py", line 126, in __init__
+    self._validate()
+  File "/Users/prem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/practice/.beam-venv/lib/python3.12/site-packages/apache_beam/options/value_provider.py", line 192, in _f
+    return fnc(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/prem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/practice/.beam-venv/lib/python3.12/site-packages/apache_beam/io/filebasedsource.py", line 191, in _validate
+    raise IOError('No files found based on the file pattern %s' % pattern)
+OSError: No files found based on the file pattern ./sales_data.csv
+
+--- cell 2 --- exit 0

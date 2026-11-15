@@ -1,0 +1,6 @@
+NOTEBOOK usecase1.ipynb
+======================================================================
+
+--- cell 1 --- SKIPPED (needs WriteToBigQuery)
+
+--- cell 2 --- exit 0

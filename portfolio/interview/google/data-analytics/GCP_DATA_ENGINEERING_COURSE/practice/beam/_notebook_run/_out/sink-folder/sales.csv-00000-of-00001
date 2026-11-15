@@ -1,0 +1,9 @@
+0
+"2023-01-01,New York,Widget,100"
+"2023-01-02,New York,Widget,150"
+"2023-01-01,Los Angeles,Gadget,200"
+"2023-01-02,Los Angeles,Gadget,250"
+"2023-01-01,San Francisco,Widget,120"
+"2023-01-02,San Francisco,Widget,130"
+"test1, Los Angeles,Gadget,200"
+"2023-01-02,San Francisco,Widget,test2"
