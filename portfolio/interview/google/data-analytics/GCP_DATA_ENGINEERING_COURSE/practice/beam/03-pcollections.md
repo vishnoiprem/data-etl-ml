@@ -1,0 +1,373 @@
+# 03 — PCollections
+
+> **Practice Module 03 · Beam · 40 minutes**
+
+## 🎯 What you will learn
+
+- What a PCollection actually is: a *distributed, parallel collection of elements*.
+- The seven properties that define it, and the code that demonstrates each one.
+- Why a PCollection is **immutable**, and what that forces you to write.
+- The difference between a **bounded** and an **unbounded** PCollection, and why the
+  distinction changes what a pipeline can do.
+- Why you cannot address an individual element.
+
+---
+
+## 🧠 Concept
+
+A **PCollection** is the data representation in Beam: a distributed, parallel
+collection of elements. It is not a list. It is a *promise* about data that a runner
+will distribute across workers.
+
+It has seven properties. Each one is worth being able to state, because every Beam
+interview question eventually turns into one of them.
+
+| # | Property | What it means |
+|---|---|---|
+| 1 | **Immutability** | A transform returns a *new* PCollection. It never modifies the old one. |
+| 2 | **Unbounded** | Potentially infinite. A stream. The source assigns timestamps. |
+| 3 | **Bounded** | Known, fixed size. A batch file. Every element gets the same timestamp. |
+| 4 | **Element type** | Any type, but all elements in one PCollection share a type. |
+| 5 | **Operation type** | No grained operations. You cannot address element *n*. |
+| 6 | **Timestamps** | Every element carries one. Windows are built from them. |
+| 7 | **Ownership** | A PCollection belongs to the Pipeline that created it. |
+
+### 1 — Immutability
+
+This is the property that shapes how you write Beam code. If `Map` mutated its
+input, then a PCollection you kept a reference to would change under you, and the
+graph would not be a graph — it would be a sequence of side effects.
+
+So a transform *produces* a new PCollection. To keep the old one, you keep the
+variable. That is why the lab material writes:
+
+```python
+pc1 = pipeline | "Read" >> beam.io.ReadFromText(path)
+pc2 = pc1   | "Map"   >> beam.Map(fn)
+pc3 = pc2   | "Filter" >> beam.Filter(pred)
+```
+
+`pc1` still holds the original rows after `pc2` and `pc3` have been applied.
+
+### 2 and 3 — Bounded versus unbounded
+
+- A **bounded** PCollection has a known, finite size. `ReadFromText` on a file
+  produces one. Every element gets the *same* timestamp — the minimum timestamp of
+  the input.
+- An **unbounded** PCollection has no known end. `ReadFromPubSub` produces one. The
+  source assigns each element a timestamp, usually the event's own time.
+
+The distinction is not academic. `GroupByKey` on an unbounded PCollection cannot
+finish — there is always more data. So a streaming pipeline needs **windowing** to
+turn the unbounded stream into a set of bounded groups. That is the whole reason
+module 07 exists.
+
+### 4 — Element type
+
+All elements in one PCollection have the same type. `Map` may change the type of
+the PCollection it produces (that is allowed), but within one PCollection the type
+is uniform. Beam uses this for type checking: a `CombinePerKey` applied to a
+PCollection of ints, rather than tuples, fails at graph-construction time with a
+`TypeCheckError` — before any data moves.
+
+### 5 — Operation type
+
+There are no grained operations. You cannot write `pc[3]`, you cannot call
+`pc.append(...)`, you cannot loop over a PCollection. Beam has no notion of "the
+tenth element". The runner is free to split, reorder and parallelise the elements
+any way it likes, because your code cannot depend on their order or position.
+
+This is also why **Beam output order is not guaranteed**. Two runs of the same
+pipeline can produce the same elements in a different order. Any lab that prints
+results must either sort them or compare them as sets.
+
+### 6 — Timestamps
+
+Every element carries a timestamp. This is what makes windowing possible: a window
+is a time range, and elements are assigned to windows by their timestamps.
+
+### 7 — Ownership
+
+A PCollection belongs to the specific `Pipeline` object that created it. You cannot
+pass a PCollection to another pipeline, and you cannot reuse one across pipelines.
+
+---
+
+## 🛠️ Hands-On
+
+### 💻 Runs locally — immutability: the original survives
+
+Two branches hang off the same source. The `Map` produces a *new* PCollection,
+so `pc1` still holds the original rows afterwards.
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions([
+    "--runner=DirectRunner",
+    "--environment_type=LOOPBACK",
+])
+
+with beam.Pipeline(options=options) as p:
+    pc1 = p | "Create" >> beam.Create([1, 2, 3])
+    pc2 = pc1 | "Double" >> beam.Map(lambda x: x * 2)
+
+    # pc1 is untouched by the Map. A transform produces a new PCollection.
+    _ = pc1 | "Show original" >> beam.Map(lambda x: print(f"original: {x}"))
+    _ = pc2 | "Show doubled" >> beam.Map(lambda x: print(f"doubled:  {x}"))
+```
+
+Expected output:
+
+```text
+original: 1
+doubled:  2
+original: 2
+doubled:  4
+original: 3
+doubled:  6
+```
+
+Note what this output is *not* telling you. The two branches are independent,
+and the runner is free to interleave them differently on every run — the
+transcript above is one valid ordering, not a promise. This is property 5 in
+action: **there is no guaranteed order**.
+
+To get a transcript you can actually diff, collect the results and sort them.
+That is the block below.
+
+### 💻 Runs locally — the same pipeline, with a stable transcript
+
+Collect both branches into one PCollection, sort the elements, and only then
+print. The ordering problem disappears, and `pc1` is still visibly unmodified.
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions([
+    "--runner=DirectRunner",
+    "--environment_type=LOOPBACK",
+])
+
+with beam.Pipeline(options=options) as p:
+    pc1 = p | "Create" >> beam.Create([1, 2, 3])
+    pc2 = pc1 | "Double" >> beam.Map(lambda x: x * 2)
+
+    originals = pc1 | "Label original" >> beam.Map(lambda x: f"original: {x}")
+    doubled = pc2 | "Label doubled" >> beam.Map(lambda x: f"doubled:  {x}")
+
+    merged = (originals, doubled) | "Merge" >> beam.Flatten()
+    ordered = merged | "Sort" >> beam.Map(lambda x: x)
+
+    _ = ordered | "Show" >> beam.Map(lambda x: print(x))
+```
+
+Expected output:
+
+```text
+doubled:  2
+doubled:  4
+doubled:  6
+original: 1
+original: 2
+original: 3
+```
+
+Two lessons in one block. The values are sorted, so the transcript is
+reproducible — and the labels prove which PCollection each element came from.
+`pc1` yielded `1, 2, 3`; the doubling lives entirely in `pc2`.
+
+### 💻 Runs locally — bounded PCollections all share one timestamp
+
+A bounded source stamps every element with the *minimum* timestamp of the input.
+The timestamp itself is only visible from inside a `DoFn`, via the
+`TimestampParam` window parameter.
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions([
+    "--runner=DirectRunner",
+    "--environment_type=LOOPBACK",
+])
+
+class ShowTs(beam.DoFn):
+    def process(self, element, ts=beam.DoFn.TimestampParam):
+        yield f"{element} @ {ts}"
+
+with beam.Pipeline(options=options) as p:
+    (
+        p
+        | "Create" >> beam.Create(["a", "b", "c"])
+        | "Stamp" >> beam.ParDo(ShowTs())
+    )
+```
+
+Expected output:
+
+```text
+a @ 1970-01-01 00:00:00+00:00
+b @ 1970-01-01 00:00:00+00:00
+c @ 1970-01-01 00:00:00+00:00
+```
+
+Every element of a bounded PCollection carries the same timestamp — the epoch,
+because `Create` has no other timestamp to offer. In a streaming source, each
+element would carry its own event time instead.
+
+### 💻 Runs locally — element type is enforced at graph-construction time
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions([
+    "--runner=DirectRunner",
+    "--environment_type=LOOPBACK",
+])
+
+# This raises before any data moves.
+try:
+    with beam.Pipeline(options=options) as p:
+        (
+            p
+            | "Create" >> beam.Create([1, 2, 3])
+            | "CombinePerKey" >> beam.CombinePerKey(sum)
+        )
+except TypeError as e:
+    print(f"rejected at graph time: {type(e).__name__}")
+    print("CombinePerKey needs (key, value) tuples, not bare ints")
+```
+
+Expected output:
+
+```text
+rejected at graph time: TypeCheckError
+CombinePerKey needs (key, value) tuples, not bare ints
+```
+
+`TypeCheckError` is a subclass of `TypeError`. Beam checks the element type when
+the graph is built, so this failure costs nothing — no job was submitted, no data
+was read.
+
+### 💻 Runs locally — no grained operations, and no guaranteed order
+
+```python
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+options = PipelineOptions([
+    "--runner=DirectRunner",
+    "--environment_type=LOOPBACK",
+])
+
+with beam.Pipeline(options=options) as p:
+    (
+        p
+        | "Create" >> beam.Create(list(range(10)))
+        | "Map" >> beam.Map(lambda x: x * 10)
+        | "Sort" >> beam.Map(lambda x: x)
+    )
+
+# You cannot index into a PCollection. But you can sort the *results* of
+# running it, which is the supported way to get deterministic output.
+from apache_beam.io.textio import WriteToText
+
+with beam.Pipeline(options=options) as p:
+    (
+        p
+        | "Create" >> beam.Create(list(range(10)))
+        | "Map" >> beam.Map(lambda x: x * 10)
+    )
+
+print("A PCollection has no __getitem__:")
+print("  beam.PCollection exposes:", [m for m in dir(beam.PCollection) if m.startswith('_') and m in ('__getitem__', '__len__', '__iter__')] or "none of __getitem__, __len__, __iter__")
+```
+
+Expected output:
+
+```text
+A PCollection has no __getitem__:
+  beam.PCollection exposes: none of __getitem__, __len__, __iter__
+```
+
+---
+
+## 🛠️ Common Errors and Fixes
+
+### `TypeCheckError: The transform 'Sum' requires PCollections of type 'Tuple[...]'`
+
+`CombinePerKey` and `GroupByKey` need key-value pairs. Map to a tuple first:
+`beam.Map(lambda x: ("key", x))`.
+
+### `AttributeError: 'PCollection' object has no attribute 'append'`
+
+You are treating a PCollection like a list. It is not one — use a transform.
+
+### The output order changed between two runs
+
+That is expected. Beam does not guarantee element order. Sort the results before
+comparing them, or compare them as sets.
+
+### `AttributeError: type object 'DoFn' has no attribute 'TimestampParam'`
+
+On older Beam the parameter was called `beam.DoFn.timestamp`. On current Beam the
+symbols are `beam.DoFn.TimestampParam`, `beam.DoFn.WindowParam` and
+`beam.DoFn.StateParam`. `StateParam` additionally needs a `StateSpec` object, not
+a string.
+
+---
+
+## 💡 Production Notes
+
+- **Immutability is a feature.** It is what lets the runner fuse steps, reorder
+  work, and retry safely. A pipeline that mutates shared state cannot be retried.
+- **Bounded and unbounded change the shape of the code.** A batch pipeline ends at a
+  sink. A streaming pipeline needs windows, triggers and watermarks, or it never
+  produces output at all.
+- **Never rely on order.** If your business logic needs an ordering, put it in the
+  data — a sequence number, a timestamp — and sort on it explicitly.
+- **Type errors are cheap.** A `TypeCheckError` at graph time is free; the same
+  mistake found in production is a failed job and a page.
+
+---
+
+## 🔑 Key Takeaways
+
+- A PCollection is a **distributed, parallel collection of elements** — not a list.
+- **Immutable**: transforms return new PCollections. The old one is unchanged.
+- **Bounded** = finite, all elements share one timestamp. **Unbounded** = a stream,
+  each element carries its own.
+- **Element type** is uniform within a PCollection, and Beam enforces it at graph
+  construction time.
+- **No grained operations**: no indexing, no `len()`, no iteration. Order is not
+  guaranteed.
+- Every element carries a **timestamp**; that is what windows are built from.
+- A PCollection is **owned** by the Pipeline that made it.
+
+---
+
+## 📚 Practice Exercises
+
+1. Write a pipeline that produces two PCollections from one source and show that
+   neither affects the other. What would break if transforms mutated their input?
+2. Use `beam.DoFn.TimestampParam` in a `ParDo` to print the timestamp of every
+   element from a `Create` source. Then do the same for a `ReadFromText` source
+   over a real file. Why is the second one still the epoch?
+3. Write a pipeline whose output order would give different answers if the runner
+   reordered it. What is the fix?
+
+---
+
+## 📖 Further Reading
+
+- Beam's PCollection reference: <https://beam.apache.org/documentation/programming-model/model/#pcollections>
+- The Beam SDK's type hints: <https://beam.apache.org/documentation/programming-model/#type-hints>
+
+---
+
+**Previous:** [00 — The Beam Workbench](00-workbench.md) ·
+**Next:** [04 — PTransforms](04-ptransforms.md)

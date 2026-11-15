@@ -26,19 +26,29 @@ import pathlib
 import re
 import subprocess
 import sys
-import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 
 # A python block followed by its expected output.
+#
+# The code body must not contain a fence, so that an illustrative snippet in the
+# prose (which has no "Expected output" of its own) cannot swallow the real
+# block that follows it.
 BLOCK = re.compile(
-    r"```python\n(.*?)```\n\nExpected output:\n\n```text\n(.*?)```",
+    r"```python\n((?:(?!```).)*?)```\n\nExpected output:\n\n```text\n((?:(?!```).)*?)```",
     re.S,
 )
 
 # Only these files are scanned; the assignments are graded exercises and are
 # checked by their own solution scripts.
 SCAN_GLOBS = ["*.md", "labs/*.md", "assignments/*.md"]
+
+# The preamble every block gets: the module's own path on sys.path, plus the
+# Beam import, so a block can use either.
+PREAMBLE = """import sys, pathlib
+sys.path.insert(0, {beam_lib!r})
+sys.path.insert(0, {here!r})
+"""
 
 
 def candidate_interpreters() -> list[str]:
@@ -74,20 +84,24 @@ def scan_files() -> list[pathlib.Path]:
     files: list[pathlib.Path] = []
     for pattern in SCAN_GLOBS:
         files.extend(sorted(HERE.glob(pattern)))
-    # The top-level README and the workbench reference are not module prose.
+    # The README is an index, not module prose.
     return [f for f in files if f.name not in {"README.md"}]
 
 
-def run_block(interpreter: str, code: str, cwd: pathlib.Path) -> subprocess.CompletedProcess:
+def run_block(
+    interpreter: str, code: str, cwd: pathlib.Path
+) -> subprocess.CompletedProcess:
     """Execute one code block and return the completed process."""
+    preamble = PREAMBLE.format(beam_lib=str(HERE), here=str(HERE))
     script = cwd / "_beam_block.py"
-    script.write_text(code)
+    script.write_text(preamble + code)
     try:
         return subprocess.run(
             [interpreter, str(script)],
             capture_output=True,
             text=True,
             cwd=str(cwd),
+            timeout=300,
         )
     finally:
         script.unlink(missing_ok=True)
@@ -127,7 +141,6 @@ def main() -> int:
     checked = 0
     unstable = 0
 
-    # Labs write their output under the beam/ directory, so run them there.
     workdir = HERE
 
     for path in scan_files():
