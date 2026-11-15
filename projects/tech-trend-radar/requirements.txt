@@ -1,0 +1,22 @@
+# Tech Trend Radar — dependencies
+#
+# House style: lower bounds only, with a comment on why each one is here.
+# Everything runs on the CPU with no API key and no Docker.
+
+# HTTP client for the source adapters. One client, reused across sources,
+# so connection pooling and timeouts are configured in exactly one place.
+httpx>=0.27
+
+# The API layer. FastAPI gives the structured response the project is
+# built around — a request in, a ranked trend list out.
+fastapi>=0.110
+
+# Request validation and the response models the API returns.
+pydantic>=2.6
+
+# ASGI server for `make api`.
+uvicorn>=0.27
+
+# RSS parsing is done with the standard library (xml.etree), so no feed
+# parser dependency is needed. Adding one would be the only reason to
+# touch the network for data the stdlib already handles.

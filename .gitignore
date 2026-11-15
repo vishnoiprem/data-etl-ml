@@ -77,6 +77,12 @@ data/
 # Grafana provisioned dashboards (ships with the MLOps fine-tune project so
 # Grafana auto-loads them on first boot).
 !agentic-ai/19-mlops-finetune-genai/infra/grafana/**/*.json
+# Trade-sourcing-ai: the quote fixture is a required input for the demo and
+# the test suite, so it must be tracked. The generated reports (eval output,
+# value reports, audit ledger) stay ignored.
+!projects/trade-sourcing-ai/data/
+!projects/trade-sourcing-ai/data/quotes.json
+projects/trade-sourcing-ai/reports/
 !.release-please-manifest.json
 .devcontainer/
 !.devcontainer/devcontainer.json
