@@ -153,26 +153,273 @@ Your resume does not list a role for January to July 2024. The interviewer will 
 
 ### Q6. "A customer's analytics pipeline processes 10B+ rows/day with late and out-of-order events, and duplicate writes are corrupting downstream aggregates. How do you diagnose and fix it?"
 
-**Framework:** Understand → Prepare → Options → Recommend → Support
+**Framework:** Contain → Understand → Trace → Options (A, B, C) → Recommend in sequence → Support on GCP → Measure
 
-> "**Understand first.** A few questions, because 'late events' and 'duplicate writes' have very different root causes. Is the corruption a **count** problem (double-counted events) or a **state** problem (last-write-wins overwriting a newer state with an older one)? Are duplicates **exact** — same event ID — or **near** duplicates — same business key, different payload, from two source systems? And what's the intended semantics: at-least-once ingestion, exactly-once processing, or idempotent state?
->
-> **Prepare.** I'd want: the event ID and business-key definitions, the source contract, the current watermark and lateness assumptions, and the actual delta between expected and observed aggregates — sampled, not averaged. I'd also want the arrival-time distribution, not just mean lateness.
->
-> **Options.** Three, and the trade-offs matter. *Option A: fix at the sink* — dedupe at the final write using a merge on a deterministic key. Cheap, and it's the right first move, but it doesn't stop the source of truth being wrong, and it costs you a full reprocess to remediate history. *Option B: fix at the source* — make the producer idempotent with an event ID and an upsert key, so retries are safe. This is the correct long-term answer, but it means negotiating with upstream teams you may not control. *Option C: windowing and state management* — use event-time windows with a permitted-lateness policy and a state store that handles out-of-order updates. This is what you need for correctness in general, and it's the most work.
->
-> **Recommend.** B and C together, with A as the immediate containment. Sequence: first quarantine and dedupe at the sink so aggregates stop being wrong this week — that's Option A as a patch, not an architecture. Then fix semantics upstream, which is Option B, because without it every downstream fix is paying tax on a problem you don't own. Then adopt event-time processing with explicit lateness policy and state handling, which is Option C, because that's what makes the pipeline correct for the next source you onboard, not just this one.
->
-> **Support.** The specific mechanisms, on Google Cloud: **BigQuery** with `MERGE` on a deterministic key for idempotent materialisation and `PARTITION BY` event date for targeted reprocessing; **Pub/Sub** with ordering keys where order matters (and exactly-once delivery on the subscription, which stops redelivery after an ack but does *not* remove duplicates the producer itself published), feeding **Dataflow**, which is exactly-once for pipeline state and de-duplicates on message ID or a producer-assigned ID attribute; the sink is made idempotent because end-to-end exactly-once is only as strong as the write; **Dataflow** windowing with allowed lateness for out-of-order handling; and a **dead-letter path** for records that exceed the lateness window so they are auditable rather than silently dropped.
->
-> What could go wrong: if producers can't be changed, Option B is blocked and the sink-side idempotency becomes permanent architecture, not a patch — you should plan for that. If event-time semantics change retroactively because a business definition changed, historical aggregates need recomputation, which is why I'd insist on a versioned data contract.
->
-> **How I'd measure it:** duplicate rate in the sink at zero, a reconciliation between source and sink counts within an agreed tolerance, and a defined freshness SLA that reflects measured lateness — not an aspiration."
+**The frame to say first:** "I treat this as a **correctness incident first and a scale problem second.** More Dataflow workers or BigQuery slots improve throughput. They do not repair event-time handling or non-idempotent writes."
 
-**Key elements:** Clarifying questions up front; the **count vs state** distinction; **exact vs near** duplicates; idempotency as a property of the write path; **event-time vs processing-time**; a recommendation with a sequence and an honest blocker; specific GCP mechanisms; reconciliation as the measure.
+**Flow 1. The whole answer on one page**
 
-**Pass signal:** You say **"at-least-once ingestion with idempotent writes"** unprompted, and you treat idempotency as a *key property* rather than a feature.
-**Fail signal:** "Use BigQuery partitioning and clustering" as the answer. Partitioning does not fix duplicate writes.
+```mermaid
+flowchart LR
+    C["1 Contain<br/>stop publishing bad aggregates<br/>keep raw flowing to Cloud Storage<br/>snapshot, mark tables provisional"]
+    U["2 Understand<br/>count problem or state problem?<br/>exact or near duplicates?<br/>intended semantics"]
+    T["3 Trace<br/>follow sample bad records<br/>producer, Pub/Sub, Dataflow,<br/>BigQuery, aggregate"]
+    subgraph O["4 Options, applied in this order"]
+        direction TB
+        OA["A Sink: staging + partition-scoped MERGE<br/>patch this week"]
+        OB["B Source: stable event_id, business key, version<br/>structural fix"]
+        OC["C Event time: watermarks, allowed lateness,<br/>bounded state, late path<br/>general correctness"]
+        OA --> OB --> OC
+    end
+    R["5 Repair<br/>replay raw from Cloud Storage<br/>recompute affected partitions<br/>dual run, reconcile, cut over"]
+    M["6 Measure<br/>duplicate keys = 0<br/>old never replaces new<br/>control totals, freshness SLA"]
+    C --> U --> T --> O --> R --> M
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class C red
+    class U,T blue
+    class OA,OB,OC yellow
+    class R,M green
+```
+
+> **Contain.** "Before I change the pipeline I protect the business. I stop publishing the corrupted aggregates to Looker, APIs and finance reports, but I do **not** stop ingestion: raw events keep landing in immutable Cloud Storage. I record the first bad event date and the affected partitions, take table snapshots, mark the affected tables provisional, and keep the corrupted tables for audit.
+>
+> **Understand.** Two questions decide the whole fix. Is it a **count** problem, the same event counted twice, or a **state** problem, an older event overwriting a newer one? And are the duplicates **exact**, same event ID, or **near**, the same business transaction under different IDs or payloads? Then the intended semantics: at-least-once ingestion, with idempotent writes.
+>
+> **Trace.** I take a sample of bad records and follow each one through producer, Pub/Sub, Dataflow, staging and canonical table, using event ID, business key, version, event time, ingestion time, Pub/Sub message ID and the Dataflow job. I look at the **whole lateness distribution**, p50, p95, p99, p99.9, not the mean. That tells me whether the duplicates come from producer retries, Pub/Sub redelivery, Dataflow replay, an overlapping backfill, or a non-idempotent write."
+
+**Flow 2. Where the duplicate enters: what to inspect at each layer**
+
+```mermaid
+flowchart LR
+    P["Producer<br/>event_id, business_key,<br/>version, event_time"] --> PS["Pub/Sub<br/>message_id, publish_time,<br/>delivery_attempt"]
+    PS --> DF["Dataflow<br/>watermark, window, pane,<br/>restarts, backlog"]
+    DF --> ST["BigQuery staging<br/>duplicate and version checks"]
+    ST --> CA["Canonical table"]
+    CA --> AG["Aggregates"]
+    AG --> BI["Looker, APIs, ML"]
+    P -.->|"retry without idempotency"| X1["Repeated event_id"]
+    PS -.->|"redelivery after ack deadline"| X2["Same message, many deliveries"]
+    DF -.->|"replay, worker restart"| X3["Reprocessed window"]
+    ST -.->|"backfill overlaps streaming"| X4["Same key, two writers"]
+    AG -.->|"incremental sum per delivery"| X5["Event counted twice"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    class P,PS,DF,ST,CA blue
+    class AG,BI green
+    class X1,X2,X3,X4,X5 red
+```
+
+| Layer | What I inspect | Likely cause |
+|---|---|---|
+| Producer | Repeated `event_id`, retry logs | Retry that mints a new ID, or reuses one with a changed payload |
+| Pub/Sub | Message IDs, delivery attempts, ack latency | Redelivery after the ack deadline |
+| Dataflow | Worker restarts, watermark, backlog | Replay or duplicate processing |
+| Backfill | Date range and job overlap | Streaming and backfill writing the same keys |
+| BigQuery | Duplicate keys per partition | Append-only, non-idempotent write |
+| Aggregate | Same event counted more than once | Incremental sum on each delivery |
+
+First two queries, on a bounded date range. The second separates identical retries from conflicting duplicates.
+
+```sql
+SELECT event_date, event_id, COUNT(*) AS occurrences
+FROM `project.analytics.events_raw`
+WHERE event_date BETWEEN '2026-11-01' AND '2026-11-07'
+GROUP BY event_date, event_id
+HAVING COUNT(*) > 1
+ORDER BY occurrences DESC;
+
+SELECT event_id,
+       COUNT(*) AS rows_received,
+       COUNT(DISTINCT payload_hash) AS payload_versions,
+       MIN(ingestion_time) AS first_seen,
+       MAX(ingestion_time) AS last_seen
+FROM `project.analytics.events_raw`
+WHERE event_date BETWEEN '2026-11-01' AND '2026-11-07'
+GROUP BY event_id
+HAVING COUNT(*) > 1;
+```
+
+`payload_versions = 1` points at redelivery or replay. `payload_versions > 1` means the source reused an ID or sent updates without version semantics.
+
+**Flow 3. Count versus state: the distinction that picks the fix**
+
+```mermaid
+flowchart TD
+    Q{"What is corrupted?"}
+    Q -->|"Same event counted twice"| CT["COUNT problem<br/>payment P123 arrives 3 times<br/>must contribute 1,000, not 3,000"]
+    Q -->|"Older state replaces newer"| ST["STATE problem<br/>order O456 v7 PACKED arrives<br/>after v8 SHIPPED"]
+    CT --> CF["Fix: uniqueness by event_id"]
+    ST --> SF["Fix: update only when<br/>incoming_version > stored_version"]
+    CF --> E{"Exact or near duplicate?"}
+    E -->|"Exact: same event_id"| EX["Dedupe on event_id"]
+    E -->|"Near: different IDs,<br/>same business transaction"| NE["Needs a business key<br/>otherwise dedupe is probabilistic<br/>and can delete valid events"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    class Q,E yellow
+    class CT,ST red
+    class CF,SF,EX green
+    class NE blue
+```
+
+**Event ID prevents double counting. Version or sequence prevents old state replacing new.** A Pub/Sub message ID is not a business key: if a producer publishes the same event twice, Pub/Sub assigns two message IDs. A safe key is `source_system + source_business_id + event_type + version`. If the source has no ID, hash **stable** fields only, never ingestion time, or a replay mints a new key.
+
+> **Options.** "Three, and I'd apply all three, in sequence.
+>
+> **A, fix at the sink.** Land in BigQuery staging, then a **partition-scoped MERGE** on `event_id` and version into the canonical table. Fast, makes reruns and backfills safe, but it does not stop upstream duplication, history still needs repair, and an unbounded MERGE is expensive at this volume.
+>
+> **B, fix at the source.** The producer reuses the **same** `event_id` on every retry and sends a business key and a monotonic version. This is the real long-term fix and it needs the upstream team.
+>
+> **C, event-time semantics.** Deduplication alone does not fix out-of-order data. Dataflow decides on event time and version, not arrival order: event-time timestamps, windows, watermarks, allowed lateness, triggers, keyed state and timers, and a path for very-late events."
+
+**Option A in SQL.** Deduplicate the staging rows *inside* the source first. Without that, BigQuery fails the MERGE with "UPDATE/MERGE must match at most one source row for each target row" whenever staging holds two rows for one key. Filter both sides on the partition column so BigQuery prunes.
+
+```sql
+MERGE `project.analytics.events_canonical` AS target
+USING (
+  SELECT * EXCEPT (rn)
+  FROM (
+    SELECT *, ROW_NUMBER() OVER (
+             PARTITION BY event_id
+             ORDER BY event_version DESC, ingestion_time DESC) AS rn
+    FROM `project.analytics.events_staging`
+    WHERE event_date = @event_date
+  )
+  WHERE rn = 1
+) AS source
+ON  target.event_id   = source.event_id
+AND target.event_date = source.event_date          -- partition pruning
+WHEN MATCHED AND source.event_version > target.event_version THEN
+  UPDATE SET event_version = source.event_version,
+             event_time    = source.event_time,
+             payload       = source.payload,
+             ingestion_time = source.ingestion_time
+WHEN NOT MATCHED THEN
+  INSERT ROW;
+```
+
+For append-only events the matched branch does nothing. For mutable events it updates only when the incoming version is newer. The same statement serves streaming, replay and backfill, so the two paths cannot disagree.
+
+**Option C: derive the lateness policy from the data, not from a guess.**
+
+| Percentile | Measured lateness (example) |
+|---|---|
+| p50 | 20 seconds |
+| p95 | 8 minutes |
+| p99 | 2 hours |
+| p99.9 | 20 hours |
+
+A policy that fits that distribution: early results every 5 minutes, on-time result when the watermark passes the window, corrections for 24 to 48 hours, anything later to a reconciliation table, and a scheduled backfill for older corrections.
+
+| Trade-off | Long allowed lateness | Short allowed lateness |
+|---|---|---|
+| Upside | More automatic corrections | Lower state and cost, simpler operations |
+| Downside | More state, more cost, later finality | More events handled by batch reconciliation |
+
+At 10B+ events a day, keeping every event ID in state for seven days is unaffordable. **Bound the streaming state by the lateness window, and keep the long-horizon uniqueness guarantee in the idempotent sink and the immutable raw layer.**
+
+> **Recommend.** "A for containment this week: quarantine the aggregates, preserve raw, introduce the partition-scoped MERGE so the numbers stop getting worse. B for the structural fix, so retries become safe. C for general correctness, so the pipeline is right for the next source and not just this one.
+>
+> **Aggregates are built from the canonical deduplicated table, never by adding to a total on each delivery.** A duplicate message adds the amount twice. When late events land, I recompute only the affected windows and MERGE the result on `event_date + store_id + product_id + metric_name`, so a rerun produces the same answer."
+
+**Flow 4. Target architecture on Google Cloud**
+
+```mermaid
+flowchart TD
+    SRC["Producers, Datastream<br/>stable event_id, business_key, version"] --> PS["Pub/Sub<br/>event_id attribute<br/>ordering key only where required<br/>retry and dead-letter policy"]
+    PS --> DF["Dataflow (Beam)<br/>event time, watermarks, triggers<br/>bounded dedup state<br/>version-aware updates, allowed lateness"]
+    PS -.-> RAW["Cloud Storage<br/>immutable raw archive, replay source"]
+    DF --> ST["BigQuery staging"]
+    DF -->|"beyond lateness window,<br/>poison records"| LATE["Very-late and dead-letter path<br/>auditable, replayable"]
+    ST --> MG["Partition-scoped MERGE<br/>event_id for uniqueness<br/>version for state"]
+    MG --> CAN["Canonical event and state table"]
+    CAN --> AGG["Recomputed idempotent aggregates<br/>(MERGE on dimensions + window)"]
+    AGG --> BI["Looker, APIs, ML features"]
+    RAW -->|"replay affected period"| DF
+    LATE -->|"scheduled backfill<br/>Dataproc or Dataflow"| MG
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    class SRC,PS,DF,ST blue
+    class MG,CAN,AGG,BI green
+    class RAW,LATE yellow
+```
+
+> **Support.** "Pub/Sub is at-least-once, so I never assume a message arrives once. **Cloud Storage** is the immutable raw archive and replay source. **Pub/Sub** carries the event ID as an attribute, uses ordering keys only per entity where order matters, and has a dead-letter policy. **Dataflow** does event-time processing, bounded deduplication, version-aware updates, and routes records past the lateness window to an auditable path. **BigQuery** takes staging, the partition-scoped MERGE, and recomputed aggregates. **Dataproc** handles heavy Spark backfills where that is what already exists. **Cloud Monitoring** watches backlog, watermark lag and freshness, and **Dataplex** gives lineage and quality visibility.
+>
+> I won't claim end-to-end exactly-once. Pub/Sub exactly-once delivery stops redelivery after an ack, but it does not remove duplicates the producer itself published, and Dataflow's deduplication on an ID attribute is best effort over a bounded window. What I claim is an **effectively-once business outcome**: stable event identity, bounded deduplication, version control and an idempotent write, so any stage can be retried, replayed or reordered without changing the answer."
+
+**Scale check at 10B+ rows a day.**
+
+| Item | Value or check |
+|---|---|
+| Average rate | About 115,700 events per second |
+| Peak | Several times the average, depending on traffic shape: measure it, do not assume it |
+| Check | Pub/Sub throughput and key skew, Dataflow CPU, shuffle and state size, watermark lag, hot keys, BigQuery write throughput, staging size, MERGE partition pruning |
+| Hot keys | Shard the **processing** key, for example `HASH(event_id) MOD 1000`. The uniqueness rule in the sink still uses the real `event_id` |
+| Never | An unbounded MERGE over the whole table. Filter source and target on `event_date` |
+
+**Flow 5. Repair and cut over**
+
+```mermaid
+flowchart LR
+    S["Snapshot corrupted tables<br/>keep for audit"] --> D["Deploy corrected pipeline<br/>to a new destination"]
+    D --> RP["Replay raw Cloud Storage<br/>for the affected period"]
+    RP --> CN["Build canonical table<br/>deterministic dedupe"]
+    CN --> RC["Recompute affected<br/>aggregate partitions"]
+    RC --> CK{"Compare old and new<br/>vs source totals"}
+    CK -->|"mismatch"| FX["Fix, re-run<br/>consumers stay on old"]
+    FX --> RP
+    CK -->|"duplicate keys 0, totals tie,<br/>freshness SLA met"| CUT["Dual run, then cut over<br/>keep snapshots and rollback"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class S,D,RP,CN,RC blue
+    class CK yellow
+    class FX red
+    class CUT green
+```
+
+Compare against the source: distinct event IDs, row counts, amounts and quantities, null and schema violations, late-event distribution.
+
+> **What could go wrong.** "Producers can't change: Option B is blocked, and sink-side idempotency becomes **permanent architecture**, so plan and fund it that way. Near duplicates with no reliable business key: deduplication becomes probabilistic and can delete valid events, so I'd quarantine rather than drop. Ordering keys on a hot entity: throttled partition, so order per entity, never globally. Lateness too long: state and cost balloon. Lateness too short: legitimate late events leak out and need frequent reconciliation. Backfill overlapping streaming: both paths must use the same keys and the same MERGE. Business definitions that change retroactively: versioned data contract plus immutable raw data to recompute from.
+>
+> **How I'd measure it.**"
+
+| Measure | Target |
+|---|---|
+| Duplicate canonical `event_id` | 0 |
+| Older version replacing newer | 0 |
+| Source-to-canonical reconciliation | Within the agreed tolerance |
+| Aggregate accuracy | Matches control totals |
+| Replay determinism | Same input gives the same canonical output |
+| Lateness p50, p95, p99, p99.9; watermark lag; Pub/Sub backlog | Tracked and alerted |
+| Freshness SLA | Set from measured lateness, for example 99% within one hour |
+| Manual corrections and incidents | Trending down |
+
+**90-second version to memorise.** Notation: `//` short pause, `///` long pause.
+
+> "I treat this as a correctness incident before a performance problem. // First I stop publishing the corrupted aggregates but keep every event landing in immutable Cloud Storage. /// Then I establish whether it's a **count** problem or a **state** problem: double-counting needs event uniqueness, older data overwriting newer needs version-aware updates. // And whether duplicates are exact or near.
+>
+> I trace bad records through producer, Pub/Sub, Dataflow and BigQuery on event ID, business key, version, event time and ingestion time, and I look at the full lateness distribution, not the average. ///
+>
+> Containment is BigQuery staging and a partition-scoped MERGE on event ID and version, // but that's only the first layer. // Long term, producers reuse a stable event ID on retries, // and Dataflow handles event time, watermarks, allowed lateness and bounded state, // with very-late records going to an auditable path instead of being dropped. ///
+>
+> Aggregates come from the canonical table, never from message deliveries. // I repair history by replaying raw data and recomputing only the affected partitions. ///
+>
+> My target isn't a vague exactly-once claim. // It's an **effectively-once business outcome**: duplicate keys at zero, old versions never replacing new, reconcilable aggregates, // and a freshness SLA based on measured lateness."
+
+**Key elements:** Contain first; the **count vs state** distinction; **exact vs near** duplicates; event ID for uniqueness and version for state; idempotency as a property of the write path; **event time vs processing time** with a lateness policy derived from the measured distribution; bounded state plus an idempotent sink; aggregates from the canonical table; recommendation as a sequence with an honest blocker; "effectively-once" instead of a universal exactly-once claim; reconciliation as the measure.
+
+**Pass signal:** You say **"at-least-once ingestion with idempotent writes"** unprompted, separate count from state, and treat idempotency as a *key property* rather than a feature.
+**Fail signal:** "Use BigQuery partitioning and clustering" as the answer, since partitioning does not fix duplicate writes. Or claiming end-to-end exactly-once.
 
 **RESOLVED — the honest bridge:** *"In my own production builds I used Kafka's exactly-once semantics and Flink checkpointing. On GCP the equivalents are Pub/Sub exactly-once delivery (a pull-subscription setting that prevents redelivery after ack) plus ordering keys, Dataflow's exactly-once state processing with dedup on a producer-assigned ID, and an idempotent BigQuery sink (Storage Write API offsets or `MERGE`). I have built those in lab exercises — the Pub/Sub dead-letter path, the ordering-key throughput planning, and the Dataflow watermark and late-data path — not yet at production scale on GCP."* **Say the last clause only if it is literally true on the day: run the labs end to end before the interview, or drop the sentence.** The labs are `GCP_DATA_ENGINEERING_COURSE/chapters/17-pubsub.md` (Lab 4 verifies the at-least-once dedup contract end to end; Lab 5 is the DLQ reason-code contract; Lab 6 is ordering-key throughput planning) and `chapters/22-apache-beam-and-dataflow.md` (Exercise 4 is the watermark and late-data path).
 
