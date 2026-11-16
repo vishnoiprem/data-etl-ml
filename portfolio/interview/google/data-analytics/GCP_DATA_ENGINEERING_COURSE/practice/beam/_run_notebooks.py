@@ -252,6 +252,24 @@ def main() -> int:
                 report.append(stderr.strip()[-1200:])
                 # The namespace is broken; drop back to the last good state.
                 accumulated.pop()
+            elif stderr.strip():
+                # The cell logged rather than printed.  Keep the log lines, but
+                # drop Beam's own runner chatter, which is not interesting.
+                lines = [
+                    line
+                    for line in stderr.splitlines()
+                    if line.startswith(("INFO:", "ERROR:", "WARNING:"))
+                    and not line.startswith(
+                        (
+                            "INFO:apache_beam.",
+                            "INFO:root:Creating state cache",
+                            "WARNING:apache_beam.",
+                        )
+                    )
+                ]
+                if lines:
+                    report.append("LOG:")
+                    report.extend(lines)
 
         target = out_dir / f"{slug}.txt"
         target.write_text("\n".join(report))

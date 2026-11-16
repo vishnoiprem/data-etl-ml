@@ -1,0 +1,28 @@
+=== exit 0 ===
+=== STDOUT ===
+ALL RUNNER MODULES: common, common_test, dask, dataflow, direct, interactive, internal, job, pipeline_context, pipeline_context_test, pipeline_utils, pipeline_utils_test, portability, render, render_test, runner, runner_test, sdf_utils, sdf_utils_test, test, trivial_runner, trivial_runner_test, worker
+'Processing... collect'
+'Done.'
+COLLECT:     0
+0   6
+1   8
+2  10
+'Processing... collect'
+'Done.'
+COLLECT SOURCE:    0
+0  1
+1  2
+2  3
+3  4
+4  5
+VISUALIZE FAILED: AttributeError 'Pipeline' object has no attribute 'visualize'
+HAS collect: True
+HAS show: True
+HAS visualize: True
+HAS display: False
+
+=== STDERR ===
+Failed to import GCSFileSystem; loading of this filesystem will be skipped. Error details: cannot import name 'storage' from 'google.cloud' (unknown location)
+WARNING:root:apitools not found, and bigquery client libraries are not available despite the import not raising an ImportError.
+WARNING:apache_beam.runners.interactive.interactive_environment:You have limited Interactive Beam features since your ipython kernel is not connected to any notebook frontend.
+
