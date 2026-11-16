@@ -1993,46 +1993,249 @@ The regulator doesn't want "we're pretty sure nobody can move it". They want evi
 
 ### Q14. "How do you test a data pipeline? What do you actually assert?"
 
-**Framework:** Test the contract, not the code
+**Framework:** **C-Q-R-I-R** — Contract → Quality → Reconcile → Idempotent → Restartable. Layers: unit → contract → data quality → integration → reconciliation → recovery.
 
-**Flow**
+**Opening line:** "I test a data pipeline in layers, because **a green job doesn't prove correct data**."
+
+**Flow 0 — the layers**
 
 ```mermaid
 flowchart LR
-    U["Unit<br/>transformation logic,<br/>every jurisdiction and edge"] --> C["Contract<br/>schema compatibility,<br/>incompatible change fails"]
-    C --> Q["Data quality gates<br/>counts, nulls, keys,<br/>ranges, freshness, distribution"]
-    Q --> I["Integration<br/>end to end with real systems"]
-    I --> X["Three most teams miss"]
-    X --> R["Reconciliation<br/>vs independent control total"]
-    X --> RS["Restartability<br/>kill mid-run, same output"]
-    X --> ID["Idempotency<br/>same input twice, same output"]
+    U["1 Unit<br/>business logic and edges"]
+    C["2 Contract<br/>producer to consumer"]
+    Q["3 Data quality<br/>counts, keys, nulls, ranges,<br/>freshness, distribution"]
+    I["4 Integration<br/>full GCP path"]
+    R["5 Reconcile<br/>vs independent control"]
+    ID["6 Idempotent<br/>same input twice"]
+    RS["7 Restartable<br/>kill mid-run"]
+    U --> C --> Q --> I --> R --> ID --> RS
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
     class U,C,Q,I blue
-    class X yellow
-    class R,RS,ID green
+    class R,ID,RS green
 ```
 
+The last three catch many of the failures that only appear in production.
 
-> "I test in layers, and the layer people skip is the one that matters most.
->
-> **Unit:** pure transformation logic — a function that computes an order's tax should have cases for every jurisdiction, edge, and boundary. These are fast and they're where the business rules live.
->
-> **Contract:** does the producer's schema match what the consumer expects? This is where schema evolution breaks things. I assert compatibility on every boundary — added optional column, widened type, new enum value — and I make an incompatible change *fail* rather than silently coerce.
->
-> **Data quality:** not unit tests, but assertions in the pipeline — row counts within tolerance against a source of truth, null rates, uniqueness on the declared key, referential integrity, value ranges, freshness, and distribution checks that catch a truncated or duplicated load. A pipeline that has these as **gates** fails rather than publishing bad data.
->
-> **Integration:** does the whole path work end to end, including the parts that talk to real systems.
->
-> **What I'd add that most teams miss:** a **reconciliation test** against an independently computed control total, and a **restartability test** — kill the job mid-run and confirm it resumes correctly and produces identical output. And an **idempotency test**: run the same input twice and assert the output is unchanged. Those three catch the failures that actually happen in production and that unit tests never will.
->
-> **And the test data question:** you don't need production data to test correctness, but you do need realistic *shape*. I'll use synthetic data with the right distributions and edge cases, and I'll use real data only where the shape itself is the risk — and then masked, with access logged, under the same controls as production."
+**Flow 1 — where the tests run in the lifecycle**
 
-**Key elements:** Layers with a **contract** layer people omit; quality gates that *fail* rather than warn; the three high-value tests most teams miss (**reconciliation, restartability, idempotency**); masked synthetic data.
+```mermaid
+flowchart TD
+    PR["Developer PR"]
+    PR --> T1["Unit tests"]
+    T1 --> T2["Contract and schema tests"]
+    T2 --> T3["Integration environment"]
+    T3 --> T4["Replay, idempotency,<br/>restart tests"]
+    T4 --> DP["Deploy"]
+    DP --> T5["Runtime quality assertions"]
+    T5 --> T6["Reconciliation"]
+    T6 --> G{"Quality gate<br/>passed?"}
+    G -->|"yes"| PUB["Publish certified data"]
+    G -->|"no, Tier-1"| STOP["Do not publish<br/>alert owner, keep last good"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class PR,T1,T2,T3,T4,DP,T5,T6 blue
+    class G yellow
+    class PUB green
+    class STOP red
+```
 
-**Pass signal:** You mention restartability and idempotency tests — these are rare and directly relevant to the brief's "restartability" language.
+For Tier-1 products, failed quality means **do not publish**, not "send a warning and publish anyway".
+
+**Layer 1 and 2: unit and contract**
+
+- **Unit.** Assert the business rule explicitly: order 1,000, discount 100, tax 63, so `net_amount = 963`. Then go beyond the happy path: zero amount, negative or refund, null discount, boundary values, currency precision, timezone boundaries, very large transaction, country-specific tax. In Beam, keep transforms separable so the logic tests without running a pipeline.
+- **Contract.** The producer changes `amount` from NUMERIC to STRING and adds `status`. The deployment pipeline must decide:
+
+```mermaid
+flowchart TD
+    CH["Producer schema change"]
+    CH --> Q1{"Change type"}
+    Q1 -->|"new optional field"| OK1["Potentially compatible: pass"]
+    Q1 -->|"required field removed"| F1["Fail"]
+    Q1 -->|"NUMERIC to STRING"| F2["Fail unless explicitly supported"]
+    Q1 -->|"new enum value"| R1["Compatibility rule must say if legal"]
+    F1 --> BLOCK["Blocked before deploy,<br/>not found by Dataflow at 02:00"]
+    F2 --> BLOCK
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class CH red
+    class Q1 yellow
+    class OK1 green
+    class F1,F2,BLOCK red
+    class R1 blue
+```
+
+**Layer 3: data-quality assertions, with a tolerance that is a business decision**
+
+| Check | Example assertion | Note |
+|---|---|---|
+| **Completeness** | source 10,000,000 rows vs target 9,999,985. Is 15 missing acceptable? | Financial settlement: probably zero tolerance. Telemetry: a small documented tolerance may be fine. **The tolerance is set by the product contract, not an arbitrary engineering number** |
+| **Uniqueness** | `SELECT order_id, COUNT(*) FROM orders GROUP BY order_id HAVING COUNT(*) > 1;` expect 0 rows | On the declared business key |
+| **Nullability** | `order_id`, `transaction_ts`, `amount` null rate = 0%; optional attributes under an agreed threshold | Critical vs optional fields differ |
+| **Referential integrity** | `orders.customer_id` must exist in `customers.customer_id`; measure orphan rate | Strict models: orphan rate = 0% |
+| **Business ranges** | `quantity > 0`, `discount <= gross_amount`, currency in approved list, `order_timestamp <= current_timestamp` | Catches logically impossible records a schema test cannot |
+| **Freshness** | Latest event time within the product's SLA | Ties to Q9 |
+
+**Distribution tests: catch the silent problem (Q9)**
+
+```mermaid
+flowchart LR
+    Y["Yesterday<br/>average transaction 1,200 THB"]
+    T["Today<br/>average transaction 12 THB"]
+    V["Every record is valid,<br/>the job is green"]
+    D["Distribution check<br/>volume, distinct customers, revenue,<br/>average order value, null %,<br/>category mix, min/max, p50/p95/p99"]
+    A["Alert or block publication<br/>when deviation exceeds agreed rules"]
+    Y --> T --> V --> D --> A
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Y blue
+    class T,V red
+    class D yellow
+    class A green
+```
+
+**Layer 5: reconciliation (one of the highest-value tests)**
+
+```mermaid
+flowchart TD
+    SRC["POS source<br/>orders and sales totals"]
+    CAN["BigQuery canonical<br/>orders and sales totals"]
+    CMP["Compare control totals<br/>COUNT(*), COUNT(DISTINCT business_key),<br/>SUM(amount), SUM(quantity)"]
+    DIM["Broken down by control dimensions<br/>date, store, country, payment type"]
+    RES{"Equal within<br/>agreed tolerance?"}
+    SRC --> CMP
+    CAN --> CMP
+    CMP --> DIM --> RES
+    RES -->|"yes"| P["Publish"]
+    RES -->|"no"| H["Hold, investigate by dimension"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class SRC,CAN blue
+    class CMP,DIM yellow
+    class RES yellow
+    class P green
+    class H red
+```
+
+Reconciling by dimension stops two errors cancelling each other out in a global total. The control total is computed **independently** of the pipeline under test. (Totals shown in the paste, such as "8.72B THB", are illustrative.)
+
+**Layers 6 and 7: idempotency and restartability**
+
+```mermaid
+flowchart TD
+    subgraph IDEM["Idempotency test"]
+        I1["Input X"] --> I2["Run 1: order 123 = 1,000 THB"]
+        I1 --> I3["Run 2, same input"]
+        I3 --> I4{"Output the same?"}
+        I4 -->|"yes"| I5["Pass"]
+        I4 -->|"no: 2,000 THB"| I6["Fail"]
+    end
+    subgraph RESTART["Restartability test"]
+        R1["100M records"] --> R2["47M processed"]
+        R2 --> R3["Kill worker or job"]
+        R3 --> R4["Restart"]
+        R4 --> R5["Assert: 100M final, 0 duplicates,<br/>0 missing, same aggregates"]
+    end
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class I1,I2,I3,R1,R2 blue
+    class I4 yellow
+    class I5,R5 green
+    class I6,R3 red
+    class R4 blue
+```
+
+> On GCP, idempotency comes from stable business or event keys, a staging table and an idempotent `MERGE` (with the source deduplicated first, see Q6). Restartability is proved by actually killing the run, not by reading the code. A pipeline isn't reliable because it works start to finish; it's reliable because it **recovers correctly when it doesn't**.
+
+**Late and out-of-order test (Dataflow)**
+
+```mermaid
+flowchart LR
+    E1["Event A<br/>event 10:05, arrives 10:05"]
+    E2["Event B<br/>event 10:03, arrives 10:17"]
+    E3["Event C<br/>event 09:30, arrives 13:00"]
+    P["Pipeline<br/>event-time windows, watermark,<br/>allowed lateness"]
+    A1["Assert: A and B in the correct<br/>event-time window"]
+    A2["Assert: B corrects the aggregate<br/>within allowed lateness"]
+    A3["Assert: C beyond the window<br/>follows the reconciliation or DLQ path"]
+    E1 --> P
+    E2 --> P
+    E3 --> P
+    P --> A1
+    P --> A2
+    P --> A3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class E1,E2,E3 blue
+    class P yellow
+    class A1,A2,A3 green
+```
+
+**End-to-end integration and test data**
+
+```mermaid
+flowchart LR
+    S["Synthetic source"] --> PS["Pub/Sub"] --> DF["Dataflow"] --> ST["BigQuery staging"] --> QG["Quality gate"] --> CE["BigQuery certified"] --> LK["Looker or consumer"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class S,PS,DF,ST blue
+    class QG yellow
+    class CE,LK green
+```
+
+The end-to-end test checks IAM, schema, serialisation, orchestration, write semantics, partitioning, quality gates and the consumer contract, not only transformation logic.
+
+**Test data.** Don't casually copy customer production PII into test. Use **synthetic data with realistic shape**, for example roughly: most normal orders, some refunds, some late events, a few duplicates, a little malformed data, a few extreme values and boundary cases. The proportions should approximate the real workload and deliberately cover the failure modes; they aren't universal numbers. Where production characteristics are essential, use protected, masked subsets under the client's security and privacy controls, with access logged.
+
+**Spoken answer (about 90 seconds).** `//` short pause, `///` long pause, `⏹` stop.
+
+> "I test pipelines in layers, but I test the **contract and the data outcome**, not just the code. ///
+>
+> First, **unit tests** for transformation and business rules, including edge cases. //
+> Second, **contract tests** at every producer-consumer boundary. // If a required field disappears or a type changes incompatibly, I want that to fail **before production**. //
+> Third, **runtime data-quality assertions**: row counts, uniqueness, null rates, referential integrity, valid ranges, freshness and distribution shifts. // For critical products these are **publication gates**, not warnings. //
+> Then **integration tests** across the whole path: Pub/Sub, Dataflow, BigQuery. ///
+>
+> But the three I consider most important are **reconciliation, idempotency and restartability**. // I reconcile against an **independent control total**. // I run the same input twice and check the output doesn't change. // And I **kill the pipeline halfway**, restart it, and verify no duplicates, nothing missing, same business totals. ///
+>
+> For streaming, I also inject **late, duplicated and out-of-order events** and check the watermark and correction behaviour. ///
+>
+> My definition of success isn't 'Dataflow finished'. // It's that the **correct data** was produced, it **agrees with an independent control**, and it **stays correct under retries and failures**. ⏹"
+
+**Strongest line:** "I don't just test whether the pipeline runs. I test whether it produces the right answer twice, and whether it still produces the right answer after I break it halfway through."
+
+**Follow-up probes**
+
+| Probe | Answer |
+|---|---|
+| "Who decides the tolerance?" | "The data product owner, written into the contract. Zero for settlement; a documented tolerance for telemetry. Engineering proposes, the business decides." |
+| "How do you test idempotency on BigQuery?" | "Run the load twice with the same input into a staging table, `MERGE` on the business key with the source deduped, and assert row count and sums are unchanged." |
+| "How do you simulate a failure in Dataflow?" | "Cancel or drain the job mid-run, or inject a poison record, restart from the same input, and assert the same outputs. The point is to prove the recovery path, not to read it." |
+| "Your reconciliation total comes from the same pipeline?" | "No. It must be independent: a source system count, or a separately computed query. Same-pipeline totals can't catch the pipeline's own bug." |
+| "Do you test in production?" | "Runtime quality assertions and reconciliation run on every production load. Destructive restart tests run in the integration environment." |
+| "A quality check fails at 3 a.m.?" | "Tier-1: block publication, keep last good data, alert the owner with the failed assertion. Not publish-and-warn." |
+| "Is 100% test coverage the goal?" | "No. Coverage of failure modes: bad inputs, schema change, duplicates, lateness, restarts. Line coverage tells you little about data correctness." |
+
+**Key elements:** Layers with the **contract** layer most people omit; gates that **fail** rather than warn; tolerance is a business decision; **reconciliation, idempotency, restartability**; late and out-of-order tests for streaming; synthetic data with realistic shape.
+
+**Pass signal:** You mention restartability and idempotency tests; these are rare and match the brief's "restartability" language.
 **Fail signal:** "We unit test the transformations and monitor in production."
 
 ---
