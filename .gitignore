@@ -83,6 +83,12 @@ data/
 !projects/trade-sourcing-ai/data/
 !projects/trade-sourcing-ai/data/quotes.json
 projects/trade-sourcing-ai/reports/
+# CopyForge AI: the sample drafts are required inputs for the demo and the
+# test suite, so they must be tracked. The generated reports (eval output,
+# the copyforge report) and the generated articles stay ignored.
+!projects/copyforge-ai/data/
+projects/copyforge-ai/reports/
+projects/copyforge-ai/output/
 !.release-please-manifest.json
 .devcontainer/
 !.devcontainer/devcontainer.json
@@ -161,6 +167,12 @@ realtime-stock-pipeline/trade-finder/reports/email_*.txt
 # apex-rag-omni frontend manifests (otherwise hidden by *.json above)
 !agentic-ai/apex-rag-omni/frontend/package.json
 !agentic-ai/apex-rag-omni/frontend/tsconfig.json
+
+# GCP Data Engineer course — Databricks Jobs API definitions.
+# These are authored source (the reviewable task graph for the
+# daily-product-revenue pipeline), not data, so they must be tracked.
+# The rule must come AFTER *.json so it wins (last-match-wins).
+!portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/DE-End-End-GCP/apps/databricks_jobs/*.json
 
 .idaa
 

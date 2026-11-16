@@ -1,0 +1,163 @@
+{
+  "name": "daily_product_revenue",
+  "description": "Daily product revenue ELT pipeline on Databricks. Converts CSV to Parquet (bronze), creates Spark SQL tables, then computes daily product revenue into the gold layer.",
+  "format": "multi-task",
+  "concurrency": 1,
+  "max_concurrent_runs": 1,
+  "parameters": [
+    {
+      "name": "src_base_dir",
+      "default": "dbfs:/public/retail_db"
+    },
+    {
+      "name": "bronze_base_dir",
+      "default": "dbfs:/public/retail_db_bronze"
+    },
+    {
+      "name": "gold_base_dir",
+      "default": "dbfs:/public/retail_db_gold"
+    },
+    {
+      "name": "table_name",
+      "default": "orders"
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 6 * * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "UNPAUSED"
+  },
+  "tasks": [
+    {
+      "task_key": "cleanup",
+      "task": {
+        "notebook_task": {
+          "notebook_path": "/Shared/01 Cleanup Database and Datasets",
+          "base_parameters": {
+            "bronze_base_dir": "${bronze_base_dir}",
+            "gold_base_dir": "${gold_base_dir}"
+          },
+          "source": "WORKSPACE"
+        }
+      },
+      "job_cluster_key": "etl_cluster"
+    },
+    {
+      "task_key": "convert_orders",
+      "depends_on": [
+        {
+          "task_key": "cleanup"
+        }
+      ],
+      "task": {
+        "notebook_task": {
+          "notebook_path": "/Shared/02 File Format Converter",
+          "base_parameters": {
+            "src_base_dir": "${src_base_dir}",
+            "bronze_base_dir": "${bronze_base_dir}",
+            "ds": "orders"
+          },
+          "source": "WORKSPACE"
+        }
+      },
+      "job_cluster_key": "etl_cluster"
+    },
+    {
+      "task_key": "convert_order_items",
+      "depends_on": [
+        {
+          "task_key": "cleanup"
+        }
+      ],
+      "task": {
+        "notebook_task": {
+          "notebook_path": "/Shared/02 File Format Converter",
+          "base_parameters": {
+            "src_base_dir": "${src_base_dir}",
+            "bronze_base_dir": "${bronze_base_dir}",
+            "ds": "order_items"
+          },
+          "source": "WORKSPACE"
+        }
+      },
+      "job_cluster_key": "etl_cluster"
+    },
+    {
+      "task_key": "create_spark_sql_tables",
+      "depends_on": [
+        {
+          "task_key": "convert_orders"
+        },
+        {
+          "task_key": "convert_order_items"
+        }
+      ],
+      "task": {
+        "notebook_task": {
+          "notebook_path": "/Shared/03 Create Spark SQL Tables",
+          "base_parameters": {
+            "table_name": "${table_name}",
+            "bronze_base_dir": "${bronze_base_dir}"
+          },
+          "source": "WORKSPACE"
+        }
+      },
+      "job_cluster_key": "etl_cluster"
+    },
+    {
+      "task_key": "daily_product_revenue",
+      "depends_on": [
+        {
+          "task_key": "create_spark_sql_tables"
+        }
+      ],
+      "task": {
+        "notebook_task": {
+          "notebook_path": "/Shared/04 Daily Product Revenue",
+          "base_parameters": {
+            "gold_base_dir": "${gold_base_dir}"
+          },
+          "source": "WORKSPACE"
+        }
+      },
+      "job_cluster_key": "etl_cluster"
+    },
+    {
+      "task_key": "validate",
+      "depends_on": [
+        {
+          "task_key": "daily_product_revenue"
+        }
+      ],
+      "task": {
+        "notebook_task": {
+          "notebook_path": "/Shared/Validate Notebook Runs",
+          "base_parameters": {
+            "gold_base_dir": "${gold_base_dir}"
+          },
+          "source": "WORKSPACE"
+        }
+      },
+      "job_cluster_key": "etl_cluster"
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "etl_cluster",
+      "new_cluster": {
+        "spark_version": "15.4.x-scala2.12",
+        "node_type_id": "i3.xlarge",
+        "num_workers": 2,
+        "spark_conf": {},
+        "custom_tags": {
+          "pipeline": "daily_product_revenue",
+          "environment": "retail"
+        },
+        "aws_attributes": {},
+        "gcp_attributes": {
+          "service_account_name": "retail-etl-sa"
+        }
+      }
+    }
+  ]
+}
