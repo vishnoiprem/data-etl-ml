@@ -396,6 +396,45 @@ the corpus currently supports only one side of it.
 | `README.md` | Onboarding for this directory: prerequisites, the chapter map, the dataset inventory, how to run the pipeline on each of the three engines, per-module API prerequisites, cost controls, and troubleshooting. |
 | `CURRICULUM_COVERAGE.md` | This document. |
 
+---
+
+## Cloud Shell — added 2026-11-16
+
+Cloud Shell was the one platform tool with a **factual error** in the course
+and no hands-on treatment in the build track. Both are now fixed.
+
+### The error, corrected
+
+`chapters/02-regions-zones-and-resource-hierarchy.md` claimed Cloud Shell
+was "ephemeral (5 hours idle by default)". The official docs say otherwise:
+
+| Claim | Course said | Official |
+|---|---|---|
+| Idle timeout | 5 hours | **40 minutes** — the VM terminates |
+| Session cap | not stated | **12 hours** |
+| Weekly quota | not stated | **50 hours** |
+| Home directory | "5 GB, in the home region of your Cloud Shell configuration" | 5 GB at `$HOME`, per user, shared across projects; the VM region is assigned automatically and is **not** user-selectable |
+| Home directory deletion | not stated | After **120 days** without access |
+
+Corrected in chapter 02, and the corrected numbers are now stated in
+`resources/CHEATSHEET.md` (§ Cloud Shell), `resources/SETUP.md`, and the
+`DE-End-End-GCP` chapter 01 and README.
+
+### What was added
+
+| File | Change |
+|---|---|
+| `DE-End-End-GCP/01 Getting Started with Data Engineering on GCP.md` | A full **Alternative — Google Cloud Shell** section: when to use it, when *not* to, launching it, verifying the session, the persistent `$HOME`, the `$HOME/.customize_environment` boot script, ephemeral mode, files in/out, the editor and Web Preview, and the browser-authentication trap |
+| `resources/SETUP.md` | A **"Or skip the install entirely — use Cloud Shell"** subsection under the CLI install step, so a learner without the SDK is not blocked |
+| `resources/CHEATSHEET.md` | A **§ Cloud Shell** reference block — limits table, in-session commands, persistent customisation, ephemeral mode, the authentication trap |
+| `DE-End-End-GCP/README.md` | The `gcloud` CLI requirement now points at Cloud Shell as the no-install alternative, with the two caveats stated inline |
+
+**Why it matters for the interview:** Cloud Shell is a natural RRK answer to
+"how do you work on GCP without putting credentials on a laptop" — and the
+40-minute idle timeout is the kind of specific number that separates
+someone who has actually used it from someone who has read the landing
+page.
+
 **Chapter 08 changes:** added a Databricks cluster creation section (cluster
 type/runtime/node type table, dedicated service account with scoped IAM
 roles, verification, job-cluster-vs-all-purpose lifecycle), a Unity Catalog

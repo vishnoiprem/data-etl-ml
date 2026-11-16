@@ -20,9 +20,20 @@ You need:
 |---|---|---|
 | Python | 3.9+ | `python3 --version` (Windows: `py -3 --version`) |
 | A GCP project | with billing attached | Google Cloud has no free tier without one |
-| `gcloud` CLI | current | [Install guide](https://cloud.google.com/sdk/docs/install) |
+| `gcloud` CLI | current | [Install guide](https://cloud.google.com/sdk/docs/install) — **or skip it and use Cloud Shell** |
 | VS Code | current | See [chapter 03](03%20Setup%20Local%20Environment%20using%20VS%20Code.md) |
 | SQL | working knowledge | The course is query-heavy from chapter 5 onward |
+
+> **No `gcloud` installed?** Use **Cloud Shell** — a browser terminal with
+> `gcloud`, `kubectl`, `docker` and `git` already present, authenticated
+> through your browser session. Open the console and click the **>_** icon,
+> or go to <https://shell.cloud.google.com>. Every `gcloud` command in this
+> course runs there unchanged.
+>
+> Two caveats: the VM is **discarded after 40 minutes of inactivity** (a
+> session is capped at 12 hours), and your `$HOME` **persists** (5 GB), so
+> cloned datasets survive between sessions. Full walkthrough in
+> [chapter 01](01%20Getting%20Started%20with%20Data%20Engineering%20on%20GCP.md).
 
 **Start here:** [03 Setup Local Environment using VS Code](03%20Setup%20Local%20Environment%20using%20VS%20Code.md)
 — it covers Windows and Mac, the virtual environment split, and `gcloud`
@@ -44,7 +55,7 @@ course root from its own location, so you can run it from anywhere.
 
 | # | Chapter | What you build | Evidence in this repo |
 |---|---|---|---|
-| 01 | [Getting Started with Data Engineering on GCP](01%20Getting%20Started%20with%20Data%20Engineering%20on%20GCP.md) | GCP account, project, SDK | — |
+| 01 | [Getting Started with Data Engineering on GCP](01%20Getting%20Started%20with%20Data%20Engineering%20on%20GCP.md) | GCP account, project, SDK, and **Cloud Shell** as the no-install alternative | — |
 | 02 | [Setting up Data Lake using GCS](02%20Setting%20up%20Data%20Lake%20using%20GCS.md) | The lake, bucket layout, file management | `notebooks/03 …/`, `data/retail_db*` |
 | 03 | [Setup Local Environment using VS Code](03%20Setup%20Local%20Environment%20using%20VS%20Code.md) | Your local dev environment | `tools/check_environment.py` |
 | 04 | [Setup Postgres Database using Cloud SQL](04%20Setup%20Postgres%20Database%20using%20GCP%20Cloud%20SQL.md) | Operational DB + Secret Manager | `notebooks/04 …/`, `data/retail_db/*.sql` |

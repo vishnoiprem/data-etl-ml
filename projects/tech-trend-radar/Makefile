@@ -1,4 +1,4 @@
-.PHONY: help up test smoke demo fetch eval report lint api clean
+.PHONY: help up up-semantic test smoke demo fetch eval report lint api clean
 
 # Use the shared parent venv (data-etl-ml/.env) when present, else PATH.
 VENV := $(abspath ../../.env/bin)
@@ -9,17 +9,21 @@ export PYTHONPATH := $(CURDIR)/src:$(PYTHONPATH)
 
 help:
 	@echo "Tech Trend Radar commands:"
-	@echo "  make up     - Install dependencies into the shared venv"
-	@echo "  make test   - Run the pytest suite (offline, no API key, no network)"
-	@echo "  make demo   - Run the offline end-to-end demo (uses recorded snapshots)"
-	@echo "  make fetch  - Fetch live data from the public APIs into data/snapshots/"
-	@echo "  make eval   - Run the eval harness (burst-detection accuracy, ranking)"
-	@echo "  make report - Write the trend report to reports/"
-	@echo "  make api    - Run the FastAPI app on :8000"
-	@echo "  make lint   - ruff check src/ tests/ scripts/"
+	@echo "  make up           - Install dependencies into the shared venv"
+	@echo "  make up-semantic  - Also install the semantic layer (pulls in torch, ~2 GB)"
+	@echo "  make test         - Run the pytest suite (offline, no API key, no network)"
+	@echo "  make demo         - Run the offline end-to-end demo (uses recorded snapshots)"
+	@echo "  make fetch        - Fetch live data from the public APIs into data/snapshots/"
+	@echo "  make eval         - Run the eval harness (burst-detection accuracy, ranking)"
+	@echo "  make report       - Write the trend report to reports/"
+	@echo "  make api          - Run the FastAPI app on :8000"
+	@echo "  make lint         - ruff check src/ tests/ scripts/ app.py"
 
 up:
 	$(PY) -m pip install -r requirements.txt
+
+up-semantic:
+	$(PY) -m pip install -r requirements.txt -r requirements-semantic.txt
 
 test:
 	$(PY) -m pytest tests/ -v
@@ -42,7 +46,7 @@ api:
 	$(PY) -m uvicorn app:app --port 8000
 
 lint:
-	ruff check src/ tests/ scripts/
+	ruff check src/ tests/ scripts/ app.py
 
 clean:
 	rm -rf .pytest_cache .ruff_cache

@@ -243,6 +243,33 @@ gcloud config set compute/zone us-central1-a
 
 `gcloud auth login` opens a browser. The alternative for a headless machine is a service account key — but do not commit that key to a repository, and prefer `gcloud auth application-default login` for libraries.
 
+#### Or skip the install entirely — use Cloud Shell
+
+If you would rather not install the SDK, **Cloud Shell** gives you a
+browser terminal with `gcloud`, `kubectl`, `docker` and `git` already
+present, authenticated through your browser session. Open the console and
+click the **>_** icon (or go to <https://shell.cloud.google.com>).
+
+```text
+gcloud --version
+gcloud auth list
+gcloud config get-value project
+gcloud config set compute/region us-central1
+gcloud config set compute/zone us-central1-a
+```
+
+Two things to know before you rely on it:
+
+- The **VM is discarded after 40 minutes of inactivity**, and a session is
+  capped at 12 hours. A long-running command can be killed.
+- Your **`$HOME` persists** (5 GB, per user), so cloned data and scripts
+  survive between sessions. It is deleted after 120 days without access.
+
+The active project from the console carries into the shell, and
+`GOOGLE_CLOUD_PROJECT` is set to match. See
+`DE-End-End-GCP/01 Getting Started with Data Engineering on GCP.md` for the
+full Cloud Shell walkthrough.
+
 ### 3. Enable APIs — only what your module needs
 
 Enabling an API is free, but the service behind it is not. Enable the smallest set for the chapter you are working on:

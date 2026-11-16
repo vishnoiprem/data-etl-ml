@@ -5,6 +5,7 @@
 * Overview of Google Cloud Platform
 * Signing up for GCP
 * Setup Google Cloud SDK
+* Alternative — Google Cloud Shell
 * Overview of Analytics Services on GCP
 
 ## Setting up Data Lake using GCS
