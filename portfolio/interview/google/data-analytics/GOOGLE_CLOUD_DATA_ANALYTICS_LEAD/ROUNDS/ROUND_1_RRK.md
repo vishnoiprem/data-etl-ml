@@ -2768,46 +2768,226 @@ flowchart LR
 
 ### Q17. "Your executive sponsor wants a solution. You think it's wrong. What do you do?"
 
-**Framework:** Understand the underlying goal → Separate goal from preference → Evidence → Prescribe → Respect the decision
+**Framework:** **O-E-R-C** — Outcome → Evidence → Recommend → Commit. One exception: legal, regulatory or material security risk → escalate appropriately.
 
-**Flow**
+**Opening line:** "First, I separate the **outcome** from the **proposed solution**." Make it less about disagreeing with an executive and more about protecting the executive's actual outcome.
+
+**Flow 0 — the whole answer**
 
 ```mermaid
 flowchart TD
-    N0["Solution or outcome?<br/>find what they are protecting"]
-    N1["Separate goal from preference<br/>what is non-negotiable?"]
-    N2["Bring evidence, not argument<br/>one number nobody can argue with"]
-    N3["Put it in writing<br/>what happens on each path"]
-    N4["Sponsor decides"]
-    N5["Respect it: document the risk,<br/>name the conditions, execute well<br/>and say what I need from them"]
-    N0 --> N1
-    N1 --> N2
-    N2 --> N3
-    N3 --> N4
-    N4 --> N5
+    O["OUTCOME<br/>what is the sponsor protecting?<br/>date, regulation, budget, promise"]
+    E["EVIDENCE<br/>show what happens on this path,<br/>not 'I disagree'"]
+    R["RECOMMEND<br/>options, consequences, one<br/>recommendation, what I need from you"]
+    D{"Sponsor decides"}
+    C["COMMIT<br/>document risk, set checkpoints,<br/>execute well"]
+    X["ESCALATE<br/>legal, regulatory, material<br/>security or data-residency risk"]
+    O --> E --> R --> D
+    D -->|"still their path,<br/>lawful and safe"| C
+    D -->|"crosses a legal or<br/>security line"| X
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
-    class N0,N1,N2,N3,N4 blue
-    class N5 green
+    class O,E,R blue
+    class D yellow
+    class C green
+    class X red
 ```
 
+**Flow 1 — find what is non-negotiable**
 
-> "The first thing I do is figure out whether they're attached to the *solution* or to the *outcome*. Executives are usually protecting an outcome — a date, a regulatory commitment, a budget, a stakeholder promise — and the solution is their current best model of how to get it. If I can find the outcome, I can have a real conversation, and often the executive will drop the preferred solution themselves once the constraint is named.
->
-> **So I separate the goal from the preference explicitly.** "What must be true for this to work?" "Which of these is non-negotiable — the date, the scope, the cost ceiling, or the architecture?" Once the non-negotiable is named, the question becomes a genuine engineering or sequencing problem, and that's where I can help rather than oppose.
->
-> **Then I bring evidence, not argument.** I want to make the cost of the preferred path concrete: a small proof of the risk, a benchmark, a failure mode from an analogous system. One number that can't be argued with — a measured latency, a realistic capacity ceiling, a cost estimate from actual usage — moves an executive conversation far more than a confident opinion. And I put it in writing, framed as "here's what happens on this path, and here's what I'd do instead."
->
-> **Then I respect the decision.** If, having seen the evidence, the sponsor still wants their path, I say so plainly, I document the risk, I name the conditions under which it works, and I execute well. My obligation is to make the risk visible and my recommendation clear — not to win. The day I start covertly sabotaging a decision I've made is the day I've stopped being a leader.
->
-> **One thing I'd add.** I make sure the sponsor also knows what I *need from them* to succeed on my path — a decision, a resource, a priority. My recommendations usually ask something of the sponsor too, and saying so keeps it a collaboration rather than a fight."
+```mermaid
+flowchart LR
+    S["Sponsor says<br/>'I want this architecture'<br/>or 'migrate everything in 6 months'"]
+    Q["Ask: what are you protecting?"]
+    S --> Q
+    Q --> A1["The date"]
+    Q --> A2["A regulatory commitment"]
+    Q --> A3["The budget"]
+    Q --> A4["A customer promise"]
+    Q --> A5["The business outcome"]
+    A1 --> N["Name the non-negotiable"]
+    A2 --> N
+    A3 --> N
+    A4 --> N
+    A5 --> N
+    N --> CH["Now I can challenge the solution<br/>without challenging the sponsor"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class S red
+    class Q yellow
+    class A1,A2,A3,A4,A5 blue
+    class N,CH green
+```
 
-**Key elements:** Outcome vs preference; naming the non-negotiable; evidence over argument; respect the decision; document the risk; and the escalation-to-colleague line ("I've made the risk visible, I execute").
+Say it as: "I wouldn't say 'I disagree with that architecture.' I'd say **'let me show you what happens if we take that path.'**"
 
-**Pass signal:** "I document the risk and execute well" — what separates a leader from a consultant who needs to be right.
-**Fail signal:** Talking about convincing them to see it your way, with no acceptance of their authority.
+**Flow 2 — worked GCP example: "rewrite all Spark into Dataflow, one standard platform"**
+
+Hypothetical to illustrate the method. Assume 600 existing Spark pipelines, an 8-month deadline, an experienced PySpark team, plus some new streaming requirements.
+
+| Option | Benefit | Risk |
+|---|---|---|
+| **A: Rewrite everything to Dataflow** | One processing framework; managed, serverless operations; strong Beam event-time model | Large rewrite and regression-testing effort; the 8-month date at risk; mature Spark logic rewritten with no new business value |
+| **B: Keep everything on Spark / Dataproc** | Fastest migration of existing work; uses current skills | Misses the chance to improve genuinely streaming workloads; keeps more Spark operations on us |
+| **C: Two tracks (recommended)** | Existing batch moves fast; event-driven work gets Dataflow; the standard is kept where it matters | Two engines to operate, which needs the shared controls below |
+
+```mermaid
+flowchart TD
+    SP["Sponsor goal: standardisation and lower operating overhead<br/>(I agree with the goal, I challenge the method)"]
+    SP --> T1["Track 1: existing batch Spark<br/>Dataproc then BigQuery"]
+    SP --> T2["Track 2: new and event-driven<br/>Pub/Sub then Dataflow then BigQuery"]
+    T1 --> ST["Standardise across both:<br/>IAM, Terraform, CI/CD, data contracts,<br/>Dataplex governance, monitoring,<br/>BigQuery serving"]
+    T2 --> ST
+    ST --> RS["Operating model the sponsor wants,<br/>date not put at risk"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class SP red
+    class T1,T2 blue
+    class ST yellow
+    class RS green
+```
+
+> **The conversation:** "I agree with your goal of standardisation. Where I'd challenge the current solution is making **runtime** standardisation the objective. We can standardise security, governance, observability, CI/CD and data contracts while keeping Dataproc for existing Spark-shaped workloads and Dataflow for event-driven processing. That gives you the operating model you want without putting the eight-month date at unnecessary risk."
+
+This is the Q11 principle applied to a sponsor: standardise the contract and operating model, not the runtime.
+
+**Flow 3 — when the sponsor's concern is cost: turn an architecture argument into an economic decision**
+
+Sponsor: "Move everything to BigQuery. We don't need Dataproc anymore." First ask: "Is eliminating Dataproc the objective, or is reducing platform cost the objective?"
+
+```mermaid
+flowchart TD
+    Q["Objective: remove Dataproc, or reduce cost?"]
+    Q --> EV["Bring evidence"]
+    EV --> E1["Current Dataproc cost"]
+    EV --> E2["Current BigQuery cost"]
+    EV --> E3["Migration and rewrite cost"]
+    EV --> E4["Expected BigQuery processing cost"]
+    EV --> E5["Engineering effort"]
+    EV --> E6["SLA impact and operational support"]
+    E1 --> TC["3-year total cost of ownership"]
+    E2 --> TC
+    E3 --> TC
+    E4 --> TC
+    E5 --> TC
+    E6 --> TC
+    TC --> DEC["Maybe eliminating Dataproc is right.<br/>Maybe it is not.<br/>The point is: make it an economic decision"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q yellow
+    class EV,E1,E2,E3,E4,E5,E6 blue
+    class TC green
+    class DEC green
+```
+
+**Flow 4 — what if the sponsor still says no?**
+
+I have shown a benchmark, a migration estimate, cost, technical risk and customer impact, and the sponsor says "No. We're standardising on Dataflow. Do it." Provided it isn't illegal, unsafe or in need of a separate governance escalation: **I execute.**
+
+> "Understood. My recommendation remains the two-track model because I believe it better protects the deadline. If we're choosing the Dataflow-only approach, I'll document the assumptions and risks and make the implementation successful."
+
+```mermaid
+flowchart TD
+    DC["Decision recorded<br/>standardise processing on Dataflow"]
+    DC --> OW["Decision owner: executive sponsor"]
+    DC --> RK["Risk: Spark rewrite may affect schedule"]
+    DC --> MT["Mitigation: Tier-1 pipelines first,<br/>parallel regression testing,<br/>weekly migration-velocity checkpoint"]
+    DC --> TR["Trigger: if velocity falls below<br/>the agreed threshold,<br/>revisit the Dataproc option"]
+    TR --> NO["Not 'I told you so'.<br/>Observable conditions to revisit"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class DC red
+    class OW,RK blue
+    class MT,TR yellow
+    class NO green
+```
+
+**Flow 5 — give the sponsor an escape hatch (a senior move)**
+
+Don't make an executive publicly say "I was wrong." Define checkpoints up front so evidence can change the decision without anyone losing face.
+
+```mermaid
+flowchart LR
+    G["Go: Dataflow rewrite<br/>for the first 30 pipelines"]
+    CK{"Checkpoint<br/>8 pipelines per week?<br/>inside the agreed regression threshold?"}
+    G --> CK
+    CK -->|"yes"| CO["Continue"]
+    CK -->|"no"| RO["Reopen the Dataproc option<br/>on agreed evidence"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class G blue
+    class CK yellow
+    class CO green
+    class RO red
+```
+
+(The 30 pipelines and 8 per week are example thresholds for illustration. Real ones come from measured velocity.)
+
+**Flow 6 — where "disagree and commit" stops**
+
+```mermaid
+flowchart TD
+    DS["Sponsor decision I disagree with"]
+    DS --> Q{"Is it a preference,<br/>or a legal, regulatory or<br/>material security issue?"}
+    Q -->|"architecture, sequencing,<br/>tooling preference"| CM["Disagree and commit:<br/>document and execute well"]
+    Q -->|"regulatory violation,<br/>material security exposure,<br/>prohibited residency movement,<br/>misleading financial reporting,<br/>unacceptable customer or data risk"| ES["Escalate through the proper<br/>risk and governance path.<br/>Do not quietly implement it<br/>after noting disagreement"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class DS red
+    class Q yellow
+    class CM green
+    class ES red
+```
+
+Example: regulated Thai personal data to be moved across a jurisdiction boundary without the required controls. That is no longer an architecture preference; it is a compliance and risk decision for the responsible authority (see Q13).
+
+**Spoken answer (about 90 seconds).** `//` short pause, `///` long pause, `⏹` stop.
+
+> "The first thing I do is separate the sponsor's **outcome** from their **preferred solution**. ///
+>
+> Usually the executive isn't attached to Dataflow or BigQuery or Dataproc. // They're protecting a **deadline, a cost ceiling, a regulatory commitment, a customer promise**. // Once I know the non-negotiable, I bring **evidence, not opinion**. ///
+>
+> For example, if the sponsor wants 600 Spark pipelines rewritten into Dataflow for one GCP standard, // I might **agree with standardisation but challenge where we standardise**. // I'd show the migration effort, the regression risk and the delivery impact, and recommend existing Spark on Dataproc, Dataflow for genuinely event-driven work, // and one standard for **IAM, Terraform, governance, CI/CD, observability and BigQuery serving**. ///
+>
+> I give options, consequences, a clear recommendation, and **what I need from them**. ///
+>
+> If they see the evidence and still choose their path, I **document the assumptions and risks and execute it well**. // My job is to make the risk visible, not to win. // And I agree **measurable checkpoints**, so we can revisit it on evidence, not personalities. ///
+>
+> The exception is a **legal, regulatory or material security issue**. // There I don't disagree and commit; I use the proper risk and governance escalation. ///
+>
+> Good leadership isn't getting the executive to agree with me. // It's making sure they can decide with the **clearest possible view of the consequences**. ⏹"
+
+**Strongest line:** "My job is to challenge clearly before the decision and commit fully after the decision. I don't need to win the argument, but I do need to make the consequences visible."
+
+**Follow-up probes**
+
+| Probe | Answer |
+|---|---|
+| "What if the sponsor won't listen?" | "Then I haven't found their outcome yet. I ask again what they're protecting, bring one number they can't argue with, and agree a checkpoint. If they still decide, I document and execute." |
+| "Have you ever been wrong in one of these?" | Use the Q34 wrong story (sequencing, not technology). Keep it literally true. |
+| "When would you refuse?" | "Legal, regulatory, material security or prohibited residency movement. Then it is a risk decision for the right authority, not mine to quietly implement." |
+| "How do you avoid it becoming personal?" | "Challenge the solution, never the sponsor. Evidence first, options second, recommendation third, and a request for what I need from them." |
+| "How do you show you're still committed after losing?" | "I make the chosen path succeed and I set checkpoints, so the decision is revisited on data, not on who was right." |
+| "Disagree in a meeting or privately?" | "Privately first, with evidence, so the sponsor isn't surprised in front of peers. Then in the room, as options." |
+
+**Key elements:** Outcome vs preference; name the non-negotiable; evidence not opinion; options with a recommendation and what you need from the sponsor; document risk and execute; checkpoints as an escape hatch; **the boundary where disagree-and-commit stops**.
+
+**Pass signal:** "I document the risk and execute well", plus the exception for legal, regulatory and security issues, plus checkpoints so the decision can change without anyone losing face.
+**Fail signal:** Talking about convincing them to see it your way with no acceptance of their authority. Or "disagree and commit" applied to a compliance breach.
 
 ---
 
