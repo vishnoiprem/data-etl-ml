@@ -1,0 +1,16 @@
+# Tech Trend Radar — optional dependencies for the semantic layer
+#
+# Install on top of requirements.txt:
+#
+#   pip install -r requirements.txt -r requirements-semantic.txt
+#
+# The semantic topic matcher embeds post titles with a local sentence
+# transformer and matches them against the known technologies. It is the
+# one signal that needs a model, and the only reason to make the install
+# heavy: `sentence-transformers` pulls in torch.
+#
+# It is genuinely optional. Without it the radar runs on the lexical
+# extractor alone — fewer topics found, and no matching of a technology
+# the vocabulary has never heard of. Nothing breaks; the difference is
+# reported through `/health` and in the CLI output.
+sentence-transformers>=3.0

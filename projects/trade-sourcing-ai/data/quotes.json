@@ -1,0 +1,89 @@
+{
+  "_note": "Synthetic supplier quotes used to exercise the quote-comparison path. The supplier identities, baseline economics (MOQ, sample policy, lead time baseline, verified scores) are real and come from projects/realtime-stock-pipeline/trade-finder/verify_suppliers.py. The quoted prices, payment terms and lead-time changes below are INVENTED for testing and must not be read as real supplier responses.",
+  "_provenance": {
+    "supplier_baselines": "projects/realtime-stock-pipeline/trade-finder/verify_suppliers.py",
+    "product_economics": "projects/realtime-stock-pipeline/trade-finder/find_opportunities.py",
+    "rfq_context": "projects/realtime-stock-pipeline/trade-finder/business-plan/04b_quote_tracker.md"
+  },
+  "_scenarios": {
+    "primary": "phone case silicone to India — three viable quotes with different risk/price trade-offs.",
+    "unviable": "compression socks to India at fitness-band-level prices — every quote must be rejected for margin."
+  },
+  "quotes": [
+    {
+      "quote_id": "q-goldstar-001",
+      "alibaba_id": "goldstar_2010",
+      "supplier_name": "Shenzhen Gold Star Technology Co., Ltd.",
+      "received_at": "2026-10-15",
+      "product": "phone case silicone",
+      "dest_country": "IN",
+      "order_units": 500,
+      "fob_usd": 0.44,
+      "lead_time_days": 19,
+      "moq": 100,
+      "payment_terms": "30% deposit, 70% before shipment",
+      "sample_policy": "Free sample, $30 DHL",
+      "notes": "We can hold these prices to end of month. Added CE certification cost into the unit price."
+    },
+    {
+      "quote_id": "q-ocom-002",
+      "alibaba_id": "ocom_2007",
+      "supplier_name": "Shenzhen OCOM Technology Co., Ltd.",
+      "received_at": "2026-10-15",
+      "product": "phone case silicone",
+      "dest_country": "IN",
+      "order_units": 500,
+      "fob_usd": 0.52,
+      "lead_time_days": 18,
+      "moq": 100,
+      "payment_terms": "100% before shipment",
+      "sample_policy": "Free sample",
+      "notes": "Premium service. Fastest response and largest team. Net 30 available with 3% surcharge."
+    },
+    {
+      "quote_id": "q-qytech-003",
+      "alibaba_id": "qytech_2014",
+      "supplier_name": "Shenzhen Qiyang Technology Co., Ltd.",
+      "received_at": "2026-10-16",
+      "product": "phone case silicone",
+      "dest_country": "IN",
+      "order_units": 500,
+      "fob_usd": 0.38,
+      "lead_time_days": 25,
+      "moq": 100,
+      "payment_terms": "30% deposit, 70% against bill of lading",
+      "sample_policy": "Free sample, buyer pays DHL ($25-40)",
+      "notes": "Lowest price. Longer lead time due to current production backlog. Trade Assurance only up to $5,000."
+    },
+    {
+      "quote_id": "q-goldstar-101",
+      "alibaba_id": "goldstar_2010",
+      "supplier_name": "Shenzhen Gold Star Technology Co., Ltd.",
+      "received_at": "2026-10-16",
+      "product": "compression socks",
+      "dest_country": "IN",
+      "order_units": 500,
+      "fob_usd": 8.50,
+      "lead_time_days": 19,
+      "moq": 100,
+      "payment_terms": "30% deposit, 70% before shipment",
+      "sample_policy": "Free sample, $30 DHL",
+      "notes": "Quoted from our existing fitness-band line. Socks are a new mould for us."
+    },
+    {
+      "quote_id": "q-ocom-102",
+      "alibaba_id": "ocom_2007",
+      "supplier_name": "Shenzhen OCOM Technology Co., Ltd.",
+      "received_at": "2026-10-16",
+      "product": "compression socks",
+      "dest_country": "IN",
+      "order_units": 500,
+      "fob_usd": 9.10,
+      "lead_time_days": 18,
+      "moq": 100,
+      "payment_terms": "100% before shipment",
+      "sample_policy": "Free sample",
+      "notes": "Premium service quoted on the same catalogue as the fitness band."
+    }
+  ]
+}
