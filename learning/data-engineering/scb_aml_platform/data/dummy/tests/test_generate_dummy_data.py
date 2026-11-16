@@ -27,10 +27,14 @@ HERE = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
 from scb_aml_platform.config.settings import (  # noqa: E402
-    BASE_DIR, COUNTRIES, CTR_THRESHOLD_USD,
+    COUNTRIES,
+    CTR_THRESHOLD_USD,
 )
 from scb_aml_platform.data.dummy.generate_dummy_data import (  # noqa: E402
-    main as gen_main, DUMMY_DIR,
+    DUMMY_DIR,
+)
+from scb_aml_platform.data.dummy.generate_dummy_data import (  # noqa: E402
+    main as gen_main,
 )
 
 

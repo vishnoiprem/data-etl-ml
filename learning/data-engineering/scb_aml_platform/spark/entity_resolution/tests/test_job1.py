@@ -19,7 +19,10 @@ HERE = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
 from scb_aml_platform.data.dummy.generate_dummy_data import (  # noqa: E402
-    main as _gen, DUMMY_DIR,
+    DUMMY_DIR,
+)
+from scb_aml_platform.data.dummy.generate_dummy_data import (  # noqa: E402
+    main as _gen,
 )
 
 
@@ -60,7 +63,7 @@ def test_full_entity_resolution_runs():
 def test_shared_id_collapses_to_single_golden():
     """Records sharing an id_number must share a golden_entity_id."""
     from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import (
-        pass1_exact_id, make_golden_id,
+        pass1_exact_id,
     )
     customers = pd.read_parquet(DUMMY_DIR / "customers.parquet")
     # Find a shared id_number
@@ -70,7 +73,6 @@ def test_shared_id_collapses_to_single_golden():
     if shared.empty:
         pytest.skip("no shared id_numbers in this dataset")
     shared_id = shared["id_number"].iloc[0]
-    group = customers[customers["id_number"] == shared_id]
     # After pass 1, all should have the same golden_entity_id
     df = pass1_exact_id(customers)
     group_after = df[df["id_number"] == shared_id]

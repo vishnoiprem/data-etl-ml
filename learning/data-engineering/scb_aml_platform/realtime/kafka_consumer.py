@@ -21,25 +21,29 @@ Here: kafka-python consumer + a tiny in-memory state store, so it runs on
 a fresh checkout without a Kafka broker (falls back to file-simulation mode).
 """
 
-import sys
 import json
+import sys
 import time
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    BASE_DIR, KAFKA_BOOTSTRAP, KAFKA_TOPIC_WIRE,
-    KAFKA_TOPIC_REALTIME_ALERTS, KAFKA_CONSUMER_GROUP,
-    REALTIME_WINDOW_SECONDS, REALTIME_VELOCITY_THRESHOLD,
-    REALTIME_CTR_THRESHOLD_USD, REALTIME_HIGH_RISK_DEST,
+    BASE_DIR,
+    KAFKA_BOOTSTRAP,
+    KAFKA_CONSUMER_GROUP,
+    KAFKA_TOPIC_REALTIME_ALERTS,
+    KAFKA_TOPIC_WIRE,
+    REALTIME_CTR_THRESHOLD_USD,
+    REALTIME_HIGH_RISK_DEST,
+    REALTIME_VELOCITY_THRESHOLD,
+    REALTIME_WINDOW_SECONDS,
 )
-from scb_aml_platform.ingestion.kafka_producer import _get_producer, MockProducer  # noqa: E402
+from scb_aml_platform.ingestion.kafka_producer import MockProducer, _get_producer
 
 OUTPUT_DIR = Path(BASE_DIR) / "output" / "alerts"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -96,8 +100,14 @@ def _score(event: dict, window: RollingWindow) -> tuple[list[str], int]:
     cust = event.get("sender_customer_id") or event.get("customer_id", "UNKNOWN")
     amt = float(event.get("amount_usd", 0))
     rcv = event.get("receiver_country", "")
+    # Both branches must produce a TIMEZONE-AWARE datetime. The parsed
+    # branch is aware (it carries the +00:00 offset); the fallback used
+    # to be `datetime.utcnow()`, which is naive — and the rolling window
+    # compares the two, so mixing them raised
+    # "can't compare offset-naive and offset-aware datetimes" the moment
+    # one event without `event_time` shared a customer with one that had it.
     ts = datetime.fromisoformat(event["event_time"].replace("Z", "+00:00")) \
-        if isinstance(event.get("event_time"), str) else datetime.utcnow()
+        if isinstance(event.get("event_time"), str) else datetime.now(timezone.utc)
 
     # RR01: Single wire ≥ CTR threshold
     if amt >= REALTIME_CTR_THRESHOLD_USD:
@@ -135,8 +145,8 @@ def _build_alert(event: dict, rules: list[str], score: int) -> dict:
         "receiver_country": event.get("receiver_country", ""),
         "alert_score": score,
         "action": "BLOCK" if score >= 80 else "REVIEW",
-        "event_time": event.get("event_time", datetime.utcnow().isoformat()),
-        "processed_at": datetime.utcnow().isoformat(),
+        "event_time": event.get("event_time", datetime.now(timezone.utc).isoformat()),
+        "processed_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -152,7 +162,7 @@ class _MockConsumer:
         self._iter = pd.read_parquet(source_parquet).to_dict("records")
         # Add event_time so realtime rules can run
         for rec in self._iter:
-            rec.setdefault("event_time", datetime.utcnow().isoformat())
+            rec.setdefault("event_time", datetime.now(timezone.utc).isoformat())
         logger.info(f"MockConsumer: {len(self._iter)} events from {source_parquet.name}")
 
     def __iter__(self):
@@ -197,10 +207,7 @@ def process_events(events, window: RollingWindow, sink: list) -> int:
     n_alerts = 0
     for raw in events:
         # KafkaConsumer yields (topic, partition, offset, value); mock yields dict
-        if isinstance(raw, tuple) and len(raw) == 4:
-            event = raw[3]
-        else:
-            event = raw
+        event = raw[3] if isinstance(raw, tuple) and len(raw) == 4 else raw
         if not isinstance(event, dict):
             continue
         rules, score = _score(event, window)
@@ -213,7 +220,7 @@ def process_events(events, window: RollingWindow, sink: list) -> int:
     return n_processed
 
 
-def run(max_events: Optional[int] = None) -> pd.DataFrame:
+def run(max_events: int | None = None) -> pd.DataFrame:
     """Consume wire events, apply realtime rules, persist alerts.
 
     Args:
@@ -264,7 +271,7 @@ def run(max_events: Optional[int] = None) -> pd.DataFrame:
 # ─────────────────────────────────────────────
 # REUSABLE API (for tests + downstream services)
 # ─────────────────────────────────────────────
-def score_event(event: dict, window: Optional[RollingWindow] = None) -> dict:
+def score_event(event: dict, window: RollingWindow | None = None) -> dict:
     """Score a single event. Returns the alert dict (or {} if no rules fire).
 
     Public so the FastAPI app and the ML feature store can score events

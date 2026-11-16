@@ -13,21 +13,23 @@ Covers:
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pytest
 
 HERE = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
-from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
-from scb_aml_platform.aml_engine.rules.rules_engine import run as rules_run  # noqa: E402
 from scb_aml_platform.aml_engine.risk_scoring.risk_scoring_engine import run as risk_run  # noqa: E402
-from scb_aml_platform.spark.feature_engineering.job3_feature_engineering import run as fe_run  # noqa: E402
-from scb_aml_platform.ml.risk_classifier import (  # noqa: E402
-    build_training_table, _prepare_X, train_model, RiskClassifier,
-)
+from scb_aml_platform.aml_engine.rules.rules_engine import run as rules_run  # noqa: E402
 from scb_aml_platform.config.settings import BASE_DIR, ML_MODEL_DIR  # noqa: E402
+from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
+from scb_aml_platform.ml.risk_classifier import (  # noqa: E402
+    RiskClassifier,
+    _prepare_X,
+    build_training_table,
+    train_model,
+)
+from scb_aml_platform.spark.feature_engineering.job3_feature_engineering import run as fe_run  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
@@ -58,7 +60,7 @@ def test_prepare_X_produces_numeric_matrix():
     assert X.shape[0] == len(df)
     assert X.shape[1] == len(names)
     # No object dtypes (one-hot + numeric coercion)
-    assert not any(X.dtypes == object)
+    assert not any(dtype is object for dtype in X.dtypes)
     # No NaNs
     assert not X.isna().any().any()
 

@@ -9,20 +9,21 @@ Covers:
 """
 
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 HERE = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
+from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
 from scb_aml_platform.realtime.kafka_consumer import (  # noqa: E402
-    RollingWindow, score_event, process_events,
+    RollingWindow,
+    process_events,
+    score_event,
 )
-from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 
@@ -60,7 +61,7 @@ def _event(**kwargs):
     base = {
         "wire_id": "W1", "sender_customer_id": "C1",
         "amount_usd": 1000, "receiver_country": "SG",
-        "event_time": datetime.utcnow().isoformat(),
+        "event_time": datetime.now(timezone.utc).isoformat(),
     }
     base.update(kwargs)
     return base
@@ -81,13 +82,13 @@ def test_rr02_fires_on_high_risk_destination():
 def test_rr03_fires_on_velocity():
     """Same customer, 5 wires in 5 minutes → velocity alert."""
     w = RollingWindow()
-    t0 = datetime.utcnow()
+    t0 = datetime.now(timezone.utc)
     triggered = []
     for i in range(5):
         e = _event(wire_id=f"W{i}", sender_customer_id="C2",
                    amount_usd=11_000, event_time=(t0 + timedelta(seconds=i)).isoformat())
         # Use a per-event window so cumulative state builds up
-        rules, score = _score_with_window(e, w)
+        rules, _score = _score_with_window(e, w)
         if rules:
             triggered.append(rules)
     assert any("RR03" in r for r in triggered), f"RR03 never fired: {triggered}"
@@ -96,13 +97,13 @@ def test_rr03_fires_on_velocity():
 def test_rr04_fires_on_structuring():
     """3 wires 85–100% of CTR in window → structuring alert."""
     w = RollingWindow()
-    t0 = datetime.utcnow()
+    t0 = datetime.now(timezone.utc)
     triggered = []
     for i in range(3):
         e = _event(wire_id=f"S{i}", sender_customer_id="C3",
                    amount_usd=9_500,  # 95% of 10k
                    event_time=(t0 + timedelta(seconds=i)).isoformat())
-        rules, score = _score_with_window(e, w)
+        rules, _score = _score_with_window(e, w)
         if rules:
             triggered.append(rules)
     assert any("RR04" in r for r in triggered), f"RR04 never fired: {triggered}"

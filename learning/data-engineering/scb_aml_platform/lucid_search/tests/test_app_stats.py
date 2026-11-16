@@ -18,6 +18,7 @@ sys.path.insert(0, str(HERE))
 
 # Ensure dummy data exists before app loads
 from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
+
 _gen()
 
 

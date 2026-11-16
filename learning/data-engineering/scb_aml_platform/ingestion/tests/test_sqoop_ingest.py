@@ -17,11 +17,11 @@ import pytest
 HERE = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
+from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
 from scb_aml_platform.ingestion.sqoop_ingest import (  # noqa: E402
-    ingest_accounts, ingest_wire_transfers, run_all,
+    ingest_wire_transfers,
 )
-from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 

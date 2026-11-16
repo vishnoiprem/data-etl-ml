@@ -16,11 +16,13 @@ import pytest
 HERE = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
+from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
 from scb_aml_platform.spark.aggregation.job2_transaction_aggregation import (  # noqa: E402
-    load_data, compute_cross_border_flows, run,
+    compute_cross_border_flows,
+    load_data,
+    run,
 )
-from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
@@ -35,7 +37,7 @@ def _generate():
 def test_load_data_normalizes_wire_date_to_value_date():
     """load_data() must produce wires with a `value_date` column even
     when the source parquet only has `wire_date`."""
-    txns, wires, entities = load_data()
+    _txns, wires, _entities = load_data()
     assert "value_date" in wires.columns
     assert pd.api.types.is_datetime64_any_dtype(wires["value_date"])
 

@@ -17,9 +17,9 @@ import pytest
 HERE = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
+from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
 from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import run  # noqa: E402
-from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"

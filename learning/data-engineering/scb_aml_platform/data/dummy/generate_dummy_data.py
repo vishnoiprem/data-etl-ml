@@ -26,7 +26,7 @@ are produced by Faker with a fixed seed so re-runs are reproducible.
 
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -38,7 +38,9 @@ HERE = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
 from scb_aml_platform.config.settings import (  # noqa: E402
-    BASE_DIR, COUNTRIES, CTR_THRESHOLD_USD,
+    BASE_DIR,
+    COUNTRIES,
+    CTR_THRESHOLD_USD,
 )
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
@@ -142,7 +144,7 @@ def _build_wires(customers: pd.DataFrame) -> pd.DataFrame:
         rows.append({
             "wire_id": f"W{i:06d}",
             "sender_customer_id": sender,
-            "receiver_country": rng.choice(COUNTRIES + ["IR", "KP", "SY"]),
+            "receiver_country": rng.choice([*COUNTRIES, "IR", "KP", "SY"]),
             "amount_usd": amount,
             "wire_date": (base_date + timedelta(days=int(rng.integers(0, 30)))).strftime("%Y-%m-%d"),
         })
@@ -299,7 +301,10 @@ def main() -> None:
     accounts.to_parquet(DUMMY_DIR / "accounts.parquet", index=False)
 
     manifest = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        # `now(timezone.utc).isoformat()` already carries the `+00:00`
+        # offset — appending a "Z" would give "+00:00Z", which is not a
+        # valid ISO-8601 timestamp.
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "seed": SEED,
         "counts": {
             "customers": len(customers),

@@ -4,9 +4,10 @@ Tests rules engine, risk scoring, and alert generation.
 """
 
 import sys
-import pytest
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 
@@ -61,11 +62,15 @@ def sample_wires():
 class TestEntityResolution:
 
     def test_jaro_winkler_same_name(self):
-        from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import jaro_winkler_score
+        from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import (
+            jaro_winkler_score,
+        )
         assert jaro_winkler_score("Mohammed", "Mohammed") == 1.0
 
     def test_jaro_winkler_variant(self):
-        from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import jaro_winkler_score
+        from scb_aml_platform.spark.entity_resolution.job1_entity_resolution import (
+            jaro_winkler_score,
+        )
         score = jaro_winkler_score("Mohammed", "Mohammad")
         assert score > 0.85
 
@@ -145,7 +150,9 @@ class TestRiskScoring:
 class TestScreening:
 
     def test_exact_match_scores_high(self):
-        from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import compute_match_score
+        from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import (
+            compute_match_score,
+        )
         score, mtype = compute_match_score(
             "Mohammed Al-Rahman", "Mohammed Al-Rahman",
             "1975-03-15", "1975-03-15", "AE", "AE"
@@ -154,15 +161,19 @@ class TestScreening:
         assert mtype == "exact"
 
     def test_fuzzy_match_scores_medium(self):
-        from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import compute_match_score
-        score, mtype = compute_match_score(
+        from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import (
+            compute_match_score,
+        )
+        score, _mtype = compute_match_score(
             "Mohammed Al-Rahman", "Mohamed Al-Rahman",
             "1975-03-15", "1975-03-15", "AE", "AE"
         )
         assert score >= 60
 
     def test_no_match_returns_zero(self):
-        from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import compute_match_score
+        from scb_aml_platform.spark.screening.job4_sanctions_pep_screening import (
+            compute_match_score,
+        )
         score, mtype = compute_match_score(
             "John Smith", "Zhang Wei",
             "1975-01-01", "1980-06-01", "UK", "CN"
