@@ -48,6 +48,28 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 **Framework:** Scope → Impact → Why this role
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Warehouse and ETL<br/>modelling framework"]
+    N1["Regulated banking AML<br/>15+ countries, MAS"]
+    N2["Platform at scale<br/>100M+ events a day<br/>600+ governed tables"]
+    N3["Head of Data Engineering<br/>$8B, 3 countries<br/>8 to 30, $3M, 10B+ rows/day"]
+    N4["Why this role<br/>build the practice, make<br/>it repeatable across a region"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3 blue
+    class N4 green
+```
+
+
 > "I have **15+ years** in data engineering, moving from warehouse and ETL work at **PayPal** and **Exilant**, where I built Apple-facing data products, through **DBS** where I built the SCD2 modelling framework, to **SCB Bank** as a Big Data Consultant supporting AML across **15+ countries** on Hadoop and Hive.
 >
 > The scale step came at **Lazada** — five and a half years, July 2018 to January 2024, as **VP Data Engineering**, part of Alibaba. There I owned a platform handling **100M+ daily events**, delivered **20M+ insights a day** through Flink and ClickHouse, and had **600+ production tables** under my ownership. That was where I learned to build for ten-times growth, and where I learned that the second-order effects — governance, operability, cost — matter as much as the pipeline.
@@ -68,6 +90,26 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 ### Q2. "Why Google Cloud Consulting, and why Singapore, and why now?"
 
 **Framework:** Capability fit → Market thesis → Personal motivation → Specificity
+
+**Flow**
+
+```mermaid
+flowchart LR
+    N0["Capability fit<br/>streaming, warehouse migration,<br/>cost, regulated APAC"]
+    N1["Market thesis<br/>why Google Cloud data and AI"]
+    N2["Personal motivation<br/>the practice-building half"]
+    N3["Specificity<br/>Singapore, why now"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2 blue
+    class N3 green
+```
+
 
 > "Three reasons.
 >
@@ -90,6 +132,29 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 **Framework:** Direct correction → Precise framing → Attribution honesty → The real claim
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Challenge<br/>Is the $8B yours?"]
+    N1["Correct the framing yourself<br/>before being pushed"]
+    N2["I own the platform under an $8B<br/>business. I did not drive $8B"]
+    N3["What I did drive<br/>8 to 30, $3M, 10B+ rows/day,<br/>close 5 days to 2 hours,<br/>200+ stores and 5 DCs"]
+    N4["Offer how each metric<br/>was measured"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0 red
+    class N1,N2,N3 blue
+    class N4 green
+```
+
+
 > "That's a fair challenge, and I should have stated it more precisely on the resume. The accurate framing is: **I own the data platform that supports a group with $8B+ in revenue.** I did not drive $8B of revenue.
 >
 > What I did drive was the platform's contribution to it. At Makro I scaled the team from **8 to 30** across four squads, own a **$3M annual cloud and vendor budget**, and the platform carries **10B+ daily rows**. Concretely, month-end close went from **5 days to 2 hours**, inventory for **200+ stores and 5 DCs** moved to near real time, and demand forecasting now covers **1,000+ vendors**. If a merchandising decision lands an hour sooner, that's platform and data latency showing up in the business.
@@ -108,6 +173,28 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 ### Q4. "You scaled the team from 8 to 30. What did *you* hire, and what did you inherit? Did quality hold?"
 
 **Framework:** Inherited vs built → Quality mechanisms → Attrition → Honest gap
+
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Both: inherited about 8,<br/>mostly running pipelines"]
+    N1["Hired the platform, data-product<br/>and ML layer"]
+    N2["Quality held by: written senior bar,<br/>level rubric, rotation"]
+    N3["Retention: hire behind the work,<br/>pipeline the ramp"]
+    N4["Real attrition figure,<br/>or say none and give mechanism"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3 blue
+    class N4 green
+```
+
 
 > "Both, and the split matters. I inherited a small team with a lot of operational load — roughly **8** people, most of them running pipelines rather than building platforms — and the hiring I did myself was the platform, data-product and ML capability layer.
 >
@@ -129,6 +216,28 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 ### Q5. "Your resume shows Lazada ending in January 2024 and Makro starting in July. What happened in between?"
 
 **Framework:** Say it plainly → What you did with the time → Why it is not on the resume → Connect forward → Stop
+
+**Flow**
+
+```mermaid
+flowchart TD
+    Q["The Jan to Jul 2024 gap question"] --> SP["Say it plainly, no defensiveness"]
+    SP --> V{"Which version is true?"}
+    V -->|"A: short engagement,<br/>left off the resume"| VA["Name the work, why it is not listed,<br/>why you left at month four"]
+    V -->|"B: deliberate break"| VB["What you chose and why<br/>what you used the time for"]
+    VA --> FW["Connect forward<br/>why Makro was the fit"]
+    VB --> FW
+    FW --> ST["Stop. Do not over-explain"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q red
+    class SP,VA,VB,FW blue
+    class V yellow
+    class ST green
+```
+
 
 Your resume does not list a role for January to July 2024. The interviewer will see the gap. The only bad answer is one that sounds like a cover story. Two honest versions; pick the one that is true and say it in under 45 seconds.
 
@@ -690,53 +799,439 @@ flowchart LR
 
 **Framework:** Stabilise → Diagnose → Fix the class → Prevent recurrence
 
-> "**First, stop the bleeding, then find the class.** In week one I want three things, not a platform migration.
->
-> **One — triage by severity, not by who is shouting.** I'll split into: data loss or wrong numbers reaching a customer (stop it now, by disabling the affected output or pinning to the last known-good), jobs failing but safely (let them fail, fix in order), and jobs failing noisily. I will not let the team spend week one on the noisiest jobs.
->
-> **Two — find out how many distinct root causes there are.** A 40% failure rate is usually 5–8 root causes with a long tail, not 40 problems. I'll group the failures by signature and get the top three to cover most volume. If it's one shared dependency — a flaky source, a memory limit, a schema change upstream — then it isn't 40 problems, it's one problem with 40 symptoms, and that insight is often worth the whole week.
->
-> **Three — make the failures legible.** Right now the team is firefighting, which usually means failures arrive as pager noise and get fixed reactively. I'd want the failure mode on the dashboard: which jobs, which error class, what changed, since when, and what's the business impact. I'd also check the single most common cause of pipeline failures in practice — an unhandled upstream schema change — and check whether this estate has any contract or schema-registry discipline at all.
->
-> **Then fix the class, not the instance.** For each of the top root causes: one of *make it retry-safe*, *make it idempotent*, *make it fail fast and route to a dead-letter path*, or *remove the dependency*. I want a named owner and a date per root cause, and I'd review daily against that list.
->
-> **What I'd avoid:** the temptation to introduce a new orchestration platform in week one. That reads as action but changes the failure surface while the team is already overloaded. The first win should be **fewer surprises**, and I'll get there by making existing behaviour visible and the top causes survivable.
->
-> **How I'd measure it:** failure rate by root cause, mean time to detect, mean time to resolve, and — the one that matters — the number of pages that reach a human overnight. That last one is usually the real definition of 'firefighting'."
+**The frame to say first:** "A 40% failure rate tells me the team needs **stability before transformation**. My first week is Stabilise, Diagnose, Fix the class, Prevent recurrence."
 
-**Key elements:** Triage by severity; root-cause *classing* not instance-fixing; data loss first; dead-letter path; explicit avoidance of a big platform change in week one; a metric that reflects the pain ("pages reaching a human overnight").
+**The line to memorise:** "**Don't fix 100 pipeline failures. Find the three failure patterns responsible for 70 of them and engineer those failures out of the platform.**"
+
+**Flow 1. The week on one page**
+
+```mermaid
+flowchart LR
+    S["Day 1 Stabilise<br/>classify by business severity<br/>quarantine wrong output<br/>pin consumers to known-good<br/>name incident owner, stop noisy paging"]
+    E["Day 2 Gather evidence<br/>7 to 30 days of failures from<br/>Logging, Dataflow, Composer,<br/>Pub/Sub, BigQuery, on-call<br/>normalise into failure signatures"]
+    P["Day 3 Find the Pareto<br/>cluster by signature, stage,<br/>upstream system, dependency"]
+    F["Days 4 to 5 Fix the top classes<br/>retry-safe, idempotent, fail fast,<br/>dead-letter, remove the dependency"]
+    O["Friday<br/>customer protected<br/>top 3 causes with owners<br/>fewer overnight pages<br/>30-day reliability backlog"]
+    S --> E --> P --> F --> O
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class S red
+    class E,F blue
+    class P yellow
+    class O green
+```
+
+> **First, protect the customer and the data.** "I classify failures by **business severity**, not by which alert is loudest.
+> - Wrong or incomplete data reaching customers, finance or operational systems: **stop or quarantine the output now.**
+> - Pipeline failure with no corruption: recover by business priority.
+> - Noisy failures with limited impact: behind the higher-priority incidents.
+>
+> **Second, find the failure classes.** Forty percent does not mean hundreds of independent problems. I take the last 7 to 30 days and cluster failures by error signature, pipeline stage, upstream system and dependency. I want to know whether most of the volume comes from three things: say upstream schema changes, Dataflow resource failures and Composer retry and dependency problems. Once I know that, I stop fixing pipelines and start fixing the **common failure mechanism**.
+>
+> **Third, make failures visible.** Cloud Monitoring, Cloud Logging, Dataflow and Composer metrics, one operational view: failure class, business impact, owner, start time, retries, dependency, recurrences.
+>
+> **Then fix the class permanently, and don't do the one thing that looks like action.** I would not announce a new orchestration platform or rebuild the architecture in week one. The team is overloaded, and a new technology adds failure surface before we understand the existing one."
+
+**Flow 2. Diagnosing stage by stage on Google Cloud**
+
+```mermaid
+flowchart LR
+    SRC["Sources"] --> PS["Pub/Sub or Datastream<br/>backlog size, oldest unacked age,<br/>ack latency, redelivery rate,<br/>dead-letter volume"]
+    PS --> DF["Dataflow<br/>worker CPU and memory, autoscaling,<br/>system and watermark lag, hot keys,<br/>shuffle, retries, malformed records"]
+    DF --> BQ["BigQuery<br/>failed load and query jobs, quota,<br/>schema incompatibility, partitions,<br/>non-idempotent writes"]
+    CO["Composer or Airflow<br/>dependency failures, scheduler, repeated retries,<br/>bad backoff, DAG timeouts, overlapping runs,<br/>sensors, upstream SLA misses"]
+    BQ --> LK["Looker and downstream"]
+    CO -.->|"orchestrates"| DF
+    CO -.->|"orchestrates"| BQ
+    Q["Separate: pipeline actually broken<br/>vs pipeline waiting on something else"] -.-> CO
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef grey fill:#f2f2f2,stroke:#999999,color:#1a1a1a
+    class SRC grey
+    class PS,DF,BQ,CO blue
+    class LK green
+    class Q yellow
+```
+
+| Signal | What it points at | The question to ask, not the reflex |
+|---|---|---|
+| Pub/Sub backlog up **and** oldest unacked age up | Dataflow consuming slowly | Worker or resource problem, hot key, or an external dependency? Adding workers can hide the symptom |
+| The same out-of-memory error across 200 pipelines | A weakness in the standard pattern | "Why does our standard Dataflow pattern allow this class of failure?" Fix sizing, skew, hot keys, oversized side inputs or batching once, not 200 tickets |
+| Composer task retrying five times | Bad retry policy on a non-transient error | Is it broken, or waiting on an upstream? Retries are not a fix |
+
+**Flow 3. The classic cascade, and the structural fix**
+
+```mermaid
+flowchart LR
+    subgraph BEFORE["Before: one change, five pages"]
+        direction TB
+        B1["Source adds a column"] --> B2["Dataflow mapping fails"]
+        B2 --> B3["Composer retries"]
+        B3 --> B4["Same job fails 5 times"]
+        B4 --> B5["Pager fires 5 times,<br/>an engineer wakes up"]
+    end
+    subgraph AFTER["After: schema contract and validation"]
+        direction TB
+        A1["Incoming record"] --> A2{"Compatible with<br/>the contract?"}
+        A2 -->|"Yes"| A3["Process"]
+        A2 -->|"No"| A4["Dead-letter path<br/>alert once"]
+    end
+    BEFORE --> AFTER
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class B1,B2,B3,B4,B5 red
+    class A1 blue
+    class A2 yellow
+    class A3,A4 green
+```
+
+"The answer is not 'give Composer more retries.' One malformed record should not kill a billion-record pipeline."
+
+**Flow 4. "Fix the class": five patterns**
+
+```mermaid
+flowchart TD
+    C["A top failure class"] --> Q{"Which pattern fits?"}
+    Q -->|"Transient network or API error"| P1["1 Retry-safe<br/>exponential backoff, jitter,<br/>bounded attempts, never unlimited"]
+    Q -->|"Retries create duplicates"| P2["2 Idempotent<br/>stable event_id, staging,<br/>BigQuery MERGE, same input same output"]
+    Q -->|"Unrecoverable config or schema error"| P3["3 Fail fast<br/>no 20 retries, surface the real cause"]
+    Q -->|"Few bad records"| P4["4 Dead-letter path<br/>to GCS or BigQuery, investigate, replay,<br/>pipeline keeps running"]
+    Q -->|"Fragile synchronous dependency"| P5["5 Remove the dependency<br/>external API call inside the pipeline becomes<br/>external data to Pub/Sub or GCS, then Dataflow"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class C blue
+    class Q yellow
+    class P1,P2,P3,P4,P5 green
+```
+
+**Day-by-day**
+
+| Day | Do | Output |
+|---|---|---|
+| 1 Stabilise | Identify business-critical pipelines. Quarantine incorrect output. Pin consumers to known-good data. Establish incident ownership. Stop duplicate and noisy paging. | Customer protected |
+| 2 Evidence | Pull 7 to 30 days from Cloud Logging, Dataflow, Composer, Pub/Sub, BigQuery and the on-call record. Normalise failure signatures. | One dataset of failures |
+| 3 Pareto | Cluster and rank. The shape is what matters: an illustrative split might be schema changes, transient source failures, memory and hot keys, bad retry behaviour, everything else. **The real numbers come from your incident data**, not from this example. | Three classes cover most of the volume |
+| 4 to 5 Fix | Schema problems: contract, validation, DLQ. Transient: bounded backoff with jitter. Duplicate writes: idempotency and MERGE. OOM: skew, hot keys, worker config. Alert storms: deduplicate and route by business severity. | Top classes engineered out, owners and dates named |
+
+Friday is not the end of the programme. It means the team has stopped blindly firefighting and has a 30-day reliability backlog.
+
+**What I put on the wall**
+
+| Metric | Why |
+|---|---|
+| Failure rate **by root cause** | Shows what to eliminate |
+| Data-correctness incidents | The real business risk |
+| MTTD and MTTR | Detection and recovery speed |
+| Repeat-incident rate | Are we fixing root causes? |
+| Pub/Sub backlog age, Dataflow system and watermark lag | Early-warning health |
+| SLA attainment | Customer impact |
+| **Pages reaching an engineer overnight** | The most human reliability metric, and the strongest leadership one |
+
+> "A platform can have hundreds of automatically recovered technical failures and still be healthy. How many times did we wake an engineer up this week?"
+
+**Spoken answer (about 90 seconds).** Notation: `//` short pause, `///` long pause.
+
+> "With a 40% failure rate I would not introduce a new platform in week one. // I'd stabilise what we have. ///
+>
+> Day one, I classify incidents by **business impact**. // Wrong data reaching a customer is stopped immediately. // A failed pipeline with safe data is lower priority. // And noisy alerts with no material impact don't get to dictate the team's priorities. ///
+>
+> Then I analyse the previous 7 to 30 days of failures across Cloud Logging, Dataflow, Pub/Sub, Composer and BigQuery, and group them by root-cause signature. // I'm looking for the **Pareto**. // If most failures come from schema changes, transient source failures and Dataflow memory pressure, // I fix those three engineering patterns rather than repairing pipelines one by one. ///
+>
+> Depending on the cause, I make pipelines retry-safe with bounded backoff, idempotent through deterministic keys and MERGE, fail-fast on non-recoverable errors, or route malformed records to a dead-letter path instead of crashing the pipeline. ///
+>
+> By Friday I want three things: // the customer protected, // the top root causes understood with named owners, // and measurably less firefighting. // My most human metric is how many pages reached an engineer overnight. ///
+>
+> I don't judge success by how fast my team fights fires. // I judge it by how many fires we've designed out of the system."
+
+**Connecting it to your own history, honestly.** Your **current resume does not carry an incident-reduction percentage.** Do not say "reduced incidents by 60%" unless you can state the baseline count, the definition of an incident, the window and what else changed. Say the mechanism instead, and the number only if you have it:
+
+> "I've dealt with this before. Rather than treating each incident separately, we categorised the recurring failures, found the few common causes behind most of the operational load, and changed the engineering patterns around those causes. The lesson: reliability doesn't improve because engineers become faster firefighters. It improves when you remove the reasons they need to fight fires."
+
+If asked "how, exactly?", answer with your **real** top root causes and the mechanism you implemented. If you do not have them to hand, say so and describe the method. The structure is drafted; the facts are yours to supply (see `ROUND_1_RRK_GAP_CLOSURE.md` §6).
+
+**Key elements:** Triage by business severity; root-cause *classing* not instance-fixing; data correctness first; stage-by-stage GCP diagnosis; five fix-the-class patterns; dead-letter path; explicit refusal of a platform change in week one; a metric that reflects the pain (pages reaching a human overnight).
 
 **Pass signal:** You find the class before the instance and you refuse to add a platform in week one.
-**Fail signal:** "I would introduce Airflow/Databricks and add monitoring" — changes surface area while overloaded.
-
-**STILL NEEDS PREM** — this maps directly to your real "incidents −60%". The answer *structure* is drafted above (triage by severity → root-cause classing → dead-letter path → refuse a platform change in week one → measure pages-reaching-a-human). Supply the **actual baseline count**, **what the top root causes turned out to be**, and **the specific mechanism that took it down 60%**. See `ROUND_1_RRK_GAP_CLOSURE.md` §6 for the full list of the **9 items** that still need your own memory (this is Q8 of the 9; the other eight still carry a literal `[TODO]` marker).
+**Fail signal:** "I would introduce Airflow or Databricks and add monitoring": it changes surface area while the team is overloaded. Or quoting a reduction percentage with no baseline.
 
 ---
 
 ### Q9. "Your team ships a data product that silently produces wrong numbers. How do you handle it — technically and organisationally?"
 
-**Framework:** Contain → Communicate → Root cause → Systemic fix → Trust
+**Framework:** Contain → Communicate → Find why detection failed → Recover → Make recurrence structurally harder
 
-> "**Contain first, and contain honestly.** I stop the wrong data reaching consumers — that's a freshness cut-off or a revert to last known-good — and then I tell people immediately. The instinct to hide it while you fix it is the wrong move, because the trust cost lands later and harder, and because the consumers of a wrong number may have already made a decision with it.
->
-> **Then find out how it went undetected.** That's the real question. If a wrong number reached a dashboard, the failure was either in the data or in the detection. Usually it's detection — no reconciliation, no assertion on row counts or value distributions, no alert on schema drift. A silent wrong answer means the pipeline succeeded, and success is not correctness.
->
-> **The fix has two halves, and I insist on both.** *Technical:* assertions on row counts, null rates, value ranges, referential integrity and schema at every boundary; reconciliation against a source of truth; freshness and volume monitoring as first-class signals; and a data contract with the producer so upstream changes are visible before they land. *Organisational:* a published definition of who owns correctness for each data product, and a channel where consumers report suspect numbers that's treated as a defect report, not a complaint.
->
-> **On recovery:** I'll do a full reprocess from a known-good checkpoint, then verify with reconciliation rather than spot checks, and I'll publish what was wrong, for how long, who was affected and what changed — including the thing I missed that let it through.
->
-> **The organisational point:** data quality is not a pipeline problem, it's a contract between producer and consumer. Once teams own the correctness of data products rather than the health of jobs, the class of problem shrinks."
+**The frame to say first:** "I treat silently wrong data as **more serious than a failed pipeline**. A failed pipeline is visible. Wrong data can look healthy while customers make decisions from it."
 
-**Key elements:** Contain + *honest* communication; detection failure is the real story; technical + organisational halves; reconciliation not spot-checks; data contracts; consumer feedback as a defect channel.
+**The line to memorise:** "**A green pipeline does not mean green data.**"
 
-**Pass signal:** You identify that "the pipeline succeeded" is exactly why it was silent.
-**Fail signal:** Treating it as only a data pipeline bug, or saying you'd communicate only after you understand the cause.
+**Flow 1. The whole answer on one page**
+
+```mermaid
+flowchart LR
+    C["1 Contain<br/>quarantine bad output<br/>serve last certified snapshot<br/>keep raw landing"]
+    M["2 Communicate<br/>before the RCA is finished<br/>what, since when, can I trust it,<br/>what to use, next update"]
+    W["3 Why was it silent?<br/>source, transformation,<br/>semantic, detection"]
+    R["4 Recover<br/>rebuild from immutable raw,<br/>full reconciliation,<br/>not spot checks"]
+    G["5 Gate and own<br/>quality gates block publication<br/>named owners for correctness"]
+    T["6 Restore trust<br/>blameless postmortem,<br/>publish what changed"]
+    C --> M --> W --> R --> G --> T
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class C red
+    class M,R,G blue
+    class W yellow
+    class T green
+```
+
+**1. Contain immediately.** "First I stop the wrong numbers spreading." I would **not** necessarily shut ingestion down, because I want the raw data and the evidence.
+
+**Flow 2. Containment: keep the raw, block the output, serve the last good**
+
+```mermaid
+flowchart LR
+    SRC["Source"] --> PL["Pipeline"]
+    PL --> RAW["Cloud Storage raw<br/>keeps landing, evidence preserved"]
+    PL -->|"affected output"| QU["Blocked and quarantined<br/>affected BigQuery table or view"]
+    GOOD["Last known-good<br/>certified snapshot"] --> LK["Looker and consumers<br/>affected content marked<br/>stale or unavailable"]
+    QU -.->|"not served"| LK
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    class SRC,PL blue
+    class RAW yellow
+    class QU red
+    class GOOD,LK green
+```
+
+In practice: stop publishing the affected table or view, point consumers at the last known-good snapshot where appropriate, mark affected Looker content or data products stale, preserve raw events in Cloud Storage, and record the exact affected partitions and time range. **Fresh-but-wrong is worse than stale-but-known-good.**
+
+**2. Communicate before the investigation is finished.** Do not wait six hours to know everything.
+
+> "We identified a correctness issue affecting sales aggregates from 09:00 onward. The affected output has been quarantined and the last verified dataset remains available. We're validating whether any decisions or reports consumed the incorrect values. Next update in 60 minutes."
+
+What the consumer needs: **what is affected, since when, can I trust it, what should I use instead, when is the next update.** What not to say: "Dataflow is broken." They do not care about the component.
+
+**3. The critical question: why was it silent?**
+
+Dataflow job success, BigQuery load success, Composer DAG success, Looker refresh success, and revenue is wrong by 18%. That is the real engineering problem: **job success is not data correctness.**
+
+**Flow 3. Four places the defect can live, and how each hides behind green**
+
+```mermaid
+flowchart TD
+    Q["Revenue is wrong by 18%<br/>every job is green"] --> A["A Source correctness"]
+    Q --> B["B Transformation correctness"]
+    Q --> SM["C Semantic correctness"]
+    Q --> DT["D Detection failure"]
+    A --> A1["Producer changed schema, units, timezone,<br/>currency, null semantics or key<br/>Example: price was THB, now satang,<br/>revenue 100x wrong, everything succeeds"]
+    B --> B1["Bad join, many-to-many explosion,<br/>bad filter, duplicates, timezone boundary,<br/>late events, precision, wrong grain<br/>Example: 1 order joins 4 promotions,<br/>revenue 4x"]
+    SM --> S1["Two teams define Net Sales differently<br/>engineering is right, the data-product<br/>contract failed"]
+    DT --> D1["What test should have failed<br/>before the customer saw this?"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q red
+    class A,B,SM blue
+    class DT yellow
+    class A1,B1,S1,D1 green
+```
+
+The question that matters most is the last one: **"What test should have failed before the customer saw this?"** Infrastructure monitoring will never catch a unit change or a join that multiplies rows.
+
+**4. Recover through reconciliation, not spot checking.** "We checked ten rows" is not acceptable. Identify the last verified checkpoint and rebuild the affected partitions from the immutable source.
+
+**Flow 4. Recovery and publication**
+
+```mermaid
+flowchart LR
+    RAW["Cloud Storage raw<br/>immutable"] --> FX["Corrected Dataflow<br/>or SQL logic"]
+    FX --> ST["BigQuery staging"]
+    ST --> RC{"Automated<br/>reconciliation<br/>vs source"}
+    RC -->|"fails"| FX
+    RC -->|"passes"| CE["Certified table"]
+    CE --> LK["Looker"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class RAW,FX,ST blue
+    class RC yellow
+    class CE,LK green
+```
+
+| Compare | Source vs target |
+|---|---|
+| Row count | equal |
+| Order count and distinct orders | equal |
+| Sum of quantity | equal |
+| Sum of revenue | equal |
+
+For financial metrics I expect **exact** reconciliation where the business semantics allow it, not an arbitrary percentage tolerance.
+
+**5. Data-quality gates at every critical boundary.** Failing a gate blocks publication.
+
+| Gate | Example |
+|---|---|
+| Schema | Expected column disappears: fail. Type changes: fail. Unexpected breaking schema: quarantine |
+| Completeness | Row count against expected volume and historical behaviour |
+| Uniqueness | `GROUP BY order_id HAVING COUNT(*) > 1` returns zero rows |
+| Nulls | Explicit contract on `order_id`, `customer_id`, `transaction_timestamp`, `amount`, `currency` |
+| Referential integrity | `order.customer_id` must exist in `customer.customer_id` |
+| Business assertions | Revenue at least zero; discount no more than gross; shipped orders no more than total; inventory within physical limits |
+
+```sql
+SELECT order_id, COUNT(*) AS n
+FROM dataset.orders
+WHERE order_date = @publish_date
+GROUP BY order_id
+HAVING COUNT(*) > 1;      -- expected: zero rows
+```
+
+"Technical tests alone are not enough. The business assertions are where a mature platform gets much stronger."
+
+**Flow 5. Where the gates sit on Google Cloud**
+
+```mermaid
+flowchart LR
+    PR["Producer<br/>data contract"] --> PS["Pub/Sub or Datastream"]
+    PS --> DF["Dataflow<br/>validate and route"]
+    DF -->|"good"| ST["BigQuery staging"]
+    DF -->|"bad"| DLQ["Dead-letter path"]
+    ST --> RC["Reconciliation<br/>and assertions"]
+    RC -->|"pass"| CE["Certified BigQuery"]
+    RC -->|"fail"| BLK["Publication blocked<br/>alert owner"]
+    CE --> LK["Looker<br/>certified semantic definitions"]
+    CO["Composer: validate, transform,<br/>reconcile, publish"] -.-> RC
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    class PR,PS,DF,ST,RC blue
+    class DLQ,BLK red
+    class CE,LK green
+    class CO yellow
+```
+
+| Service | Role |
+|---|---|
+| Cloud Storage | Immutable raw data for recovery and reprocessing |
+| Dataflow | Validation, transformation, routing of invalid records |
+| BigQuery | Reconciliation queries, assertions, certified datasets |
+| Dataplex | Governance, metadata, data-quality rules |
+| Cloud Monitoring and Logging | Freshness, quality and SLA alerts |
+| Looker | Certified semantic definitions, consumer-facing metrics |
+| Composer | Sequence validation, transformation, reconciliation, publication |
+
+**6. The organisational fix is equally important.** Ownership is explicit:
+
+| Role | Owns |
+|---|---|
+| Business owner | What the number **means** |
+| Producer owner | The source contract |
+| Data product owner | Correctness and SLA |
+| Platform team | Reliable execution |
+| Consumer | A clear defect and feedback channel |
+
+That prevents "my Dataflow job was green, so it's not my problem." **The team owns the correctness of the product, not merely whether the job ran.**
+
+**7. Run a blameless postmortem.** Not "who wrote the bad SQL?" but "how was one person's mistake able to reach production without the system detecting it?" Human error can be the trigger. It should not be the final root cause.
+
+```mermaid
+flowchart LR
+    P1["What happened?"] --> P2["Why were the<br/>numbers wrong?"]
+    P2 --> P3["Why did automated<br/>controls miss it?"]
+    P3 --> P4["Why did consumers<br/>detect it first?"]
+    P4 --> P5["What control prevents<br/>the whole class?"]
+    P5 --> P6["Owner and date"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class P1,P2,P3,P4,P5 blue
+    class P6 green
+```
+
+**8. Restore trust.** Say specifically what happened, not "fixed now":
+
+> "Sales data between 09:00 Tuesday and 14:00 Wednesday was affected by duplicate joins from an upstream change. We reprocessed that period from the raw source, reconciled order counts and financial totals against the source system, and republished the corrected dataset. We've added a cardinality and revenue reconciliation gate so this failure class now blocks publication."
+
+**What I measure**
+
+| Measure | Target |
+|---|---|
+| Incorrect records reaching consumers | 0 |
+| Critical reconciliation failures caught **before** publication | Tracked |
+| Data-quality rule coverage on Tier-1 products | Rising |
+| Time to detect, time to correct | Falling |
+| Repeat incidents of the same class | 0 |
+| Source-contract violations, consumer-reported defects | Falling |
+| **Share of correctness problems found by us before consumers** | Toward 100% for critical products |
+
+**Spoken answer (about 90 seconds).** Notation: `//` short pause, `///` long pause.
+
+> "I treat silently wrong numbers as more serious than a failed pipeline, // because a failed pipeline tells you it's broken. // A green pipeline can quietly damage business decisions. ///
+>
+> First I **contain** it. // I stop publication of the affected BigQuery product, // preserve the raw data, // and fall back to the last certified snapshot. ///
+>
+> Second I **communicate** immediately. // I don't wait for the root cause. // Consumers need to know what is affected, since when, whether to use the numbers, and when they'll hear from us again. ///
+>
+> Then I look for both the **data defect** and, more importantly, the **detection defect**. // If Dataflow, Composer and BigQuery all reported success while the business number was wrong, // our definition of success is incomplete. // I'd check the source contract, the transformation, join cardinality, duplication and the business definition. // Then I reprocess from a known-good source and reconcile fully, not spot-check. ///
+>
+> Permanently: data contracts and automated tests for schema, volume, uniqueness, nulls, referential integrity and critical business metrics, // with a failed check **blocking publication**. // Every critical data product gets a named business owner and technical owner, // and the team owns correctness, not just job execution. ///
+>
+> And I publish exactly what happened, what was affected, how it was corrected and what control we added. ///
+>
+> Pipeline success tells me the code ran. // Reconciliation and business assertions tell me the data is right."
+
+**Likely follow-ups**
+
+| Probe | 20-second answer |
+|---|---|
+| "How would you have known before the customer?" | "A reconciliation gate on row counts and key business totals before publication, plus freshness and volume anomaly alerts. The share of defects found by us first is the metric I track." |
+| "Why not shut the whole pipeline down?" | "I want the raw data and the evidence. I block the affected output and serve the last certified snapshot, so consumers have something trustworthy." |
+| "What if the business definition itself is disputed?" | "That is a data-product contract failure, not a bug. The business owner decides what the number means, it is written once in the semantic layer, and the pipeline is tested against that." |
+| "Who is accountable?" | "The data product owner for correctness and SLA. The platform team for reliable execution. Neither can say the job was green." |
+| "Have you seen this?" | Answer from your own history only. If you do not have a specific case you can stand behind, give the method and say so. |
+
+**Key elements:** Contain honestly and tell people at once; ask how it went **undetected**, because success is not correctness; four layers (source, transformation, semantic, detection); reconciliation not spot checks; gates that block publication; named ownership of correctness; blameless postmortem; trust restored with specifics.
+
+**Pass signal:** You say **"job success is not data correctness"** unprompted and make the detection failure, not the bug, the root cause.
+**Fail signal:** "I'd fix the bug and re-run it." Or hiding the incident while the fix is built.
 
 ---
 
 ### Q10. "Where do you draw the line between BigQuery, Dataproc and Bigtable?"
 
 **Framework:** Workload-shaped decision, with the deciding question first
+
+**Flow**
+
+```mermaid
+flowchart TD
+    Q{"What shape is the workload<br/>and what does the consumer need?"}
+    Q -->|"Large scans, joins,<br/>aggregations, SQL consumer"| BQ["BigQuery<br/>serverless, no cluster to run"]
+    Q -->|"Spark is the right tool or<br/>existing Spark investment"| DP["Dataproc<br/>you operate clusters and on-call"]
+    Q -->|"Random low-latency key lookups<br/>at high request rates"| BT["Bigtable<br/>serving store, not scans"]
+    BQ --> T1["Trap: BigQuery as a serving database<br/>unpredictable bill"]
+    DP --> D1["Default: start serverless,<br/>move to Dataproc only when a<br/>measured constraint forces it"]
+    BT --> T2["Trap: one product for everything<br/>tuning and capacity problem of another shape"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q yellow
+    class BQ,DP,BT blue
+    class T1,T2 red
+    class D1 green
+```
+
 
 > "The deciding question is always **what shape is the workload and what does the consumer need** — not which product is best. So:
 >
@@ -761,6 +1256,28 @@ flowchart LR
 
 **Framework:** Trade-off, then the forcing conditions
 
+**Flow**
+
+```mermaid
+flowchart TD
+    Q{"Is the work continuous,<br/>event-driven and stateful?"}
+    Q -->|"Yes"| DF["Dataflow<br/>exactly-once state, windowing,<br/>no cluster to operate"]
+    Q -->|"No: batch or iterative"| SP["Spark on Dataproc<br/>graph, feature engineering, ML,<br/>or existing Spark skills"]
+    DF --> F{"Is it really streaming?<br/>freshness in seconds, or 15 minutes?"}
+    F -->|"15 minutes is enough"| SQ["Scheduled BigQuery or Dataproc<br/>simpler and cheaper"]
+    F -->|"Seconds matter"| KEEP["Keep Dataflow"]
+    SP --> TT["Two tracks, one contract<br/>Composer or Dataform for orchestration,<br/>Dataplex for the catalogue"]
+    KEEP --> TT
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q,F yellow
+    class DF,SP,SQ,KEEP blue
+    class TT green
+```
+
+
 > "Dataflow is the streaming-first, serverless, managed choice. It gives me exactly-once state processing, windowing with explicit lateness semantics, and no cluster to operate — which for an enterprise team that doesn't want a platform on call is a real advantage. I reach for it when the work is continuous, event-driven, and stateful.
 >
 > **Spark still wins when:** the work is genuinely batch and iterative — graph algorithms, large feature engineering that doesn't fit a SQL model, or ML training that wants the Spark ecosystem. It also wins when there is **existing Spark investment and team fluency**: rewriting a working Spark estate to Dataflow costs real money and real time, and 'we standardised on Dataflow' is not a justification.
@@ -779,6 +1296,32 @@ flowchart LR
 ### Q12. "A client's data platform costs $4M a year. Where do you look first for savings — and how do you make savings that stick?"
 
 **Framework:** Find the cost driver → Fix in order → Make it stick
+
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Start from the bill<br/>by service, team, environment, job"]
+    N1["1 Partition and cluster"]
+    N2["2 Query discipline<br/>no unneeded scans or schedules"]
+    N3["3 Capacity model and storage tiering<br/>reservations, byte guards,<br/>lifecycle rules"]
+    N4["4 Idle resources<br/>clusters, VMs, disks, orphan streams"]
+    N5["5 Match SLAs to value<br/>tier freshness by criticality"]
+    N6["Make it stick<br/>in the data contract and template,<br/>cost as a governance gate,<br/>a named owner"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N4 --> N5
+    N5 --> N6
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3,N4,N5 blue
+    class N6 green
+```
+
 
 > "**I start with where the money actually is, and I get that from the bill, not from assumptions.** The first cut of analysis is cost by service, by team, by environment and by job — because in most estates a small number of workloads account for most of the spend.
 >
@@ -809,6 +1352,30 @@ The strong form of this answer is the method, not the percentage: show the cost-
 
 **Framework:** Model the boundary → Controls → Evidence → Operating discipline
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Model the boundary<br/>projects per jurisdiction,<br/>org policies block drift"]
+    N1["Classify before protecting<br/>PDPA, GDPR, MAS TRM<br/>policy tags"]
+    N2["Controls<br/>column security and masking,<br/>VPC-SC, CMEK per jurisdiction"]
+    N3["Cross-boundary flows<br/>approved paths only,<br/>named legal basis"]
+    N4["Evidence is the deliverable<br/>each control mapped to an artefact"]
+    N5["Operating discipline<br/>review, test, audit logs"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N4 --> N5
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3,N4 blue
+    class N5 green
+```
+
+
 > "I treat residency and regulation as **architecture constraints**, not policies to apply after the fact. The discipline I use: if the constraint isn't expressed as a structural boundary, it will be violated eventually by someone in a hurry.
 >
 > **Structurally:** separate projects per jurisdiction, with **org policies** — resource location, service-account key restrictions — so that a mis-placed resource is blocked rather than detected. I would not allow a single logical dataset to span jurisdictions, because the moment it does, every query becomes a residency question and the answer becomes 'it depends on the data'.
@@ -836,6 +1403,27 @@ The strong form of this answer is the method, not the percentage: show the cost-
 
 **Framework:** Test the contract, not the code
 
+**Flow**
+
+```mermaid
+flowchart LR
+    U["Unit<br/>transformation logic,<br/>every jurisdiction and edge"] --> C["Contract<br/>schema compatibility,<br/>incompatible change fails"]
+    C --> Q["Data quality gates<br/>counts, nulls, keys,<br/>ranges, freshness, distribution"]
+    Q --> I["Integration<br/>end to end with real systems"]
+    I --> X["Three most teams miss"]
+    X --> R["Reconciliation<br/>vs independent control total"]
+    X --> RS["Restartability<br/>kill mid-run, same output"]
+    X --> ID["Idempotency<br/>same input twice, same output"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class U,C,Q,I blue
+    class X yellow
+    class R,RS,ID green
+```
+
+
 > "I test in layers, and the layer people skip is the one that matters most.
 >
 > **Unit:** pure transformation logic — a function that computes an order's tax should have cases for every jurisdiction, edge, and boundary. These are fast and they're where the business rules live.
@@ -858,6 +1446,30 @@ The strong form of this answer is the method, not the percentage: show the cost-
 ---
 
 ### Q15. "Reviewing code: [DATA PROCESSING SNIPPET]"
+
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["1 Correctness<br/>boundaries, timezones, nulls"]
+    N1["2 Idempotency and restart"]
+    N2["3 Scale<br/>100x input, N+1, memory"]
+    N3["4 Data semantics<br/>late, duplicates, ordering, schema"]
+    N4["5 Security of the write path<br/>unvalidated input, PII in logs"]
+    N5["6 Maintainability<br/>can the next engineer change it safely?"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N4 --> N5
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3,N4 blue
+    class N5 green
+```
+
 
 **How to run the review.** Don't start at line 1. Work in this order and say your order out loud:
 1. **Correctness** — what does this compute, and is that what it's supposed to compute? Look for wrong boundaries, off-by-one, timezone/precision, null handling, division by zero.
@@ -885,6 +1497,27 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 
 **Framework:** Stabilise → Diagnose → Re-plan → Communicate
 
+**Flow**
+
+```mermaid
+flowchart LR
+    N0["Hours 0 to 12: establish the facts<br/>scope, decision rights, technical<br/>blocker, value never agreed<br/>talk to the delivery team"]
+    N1["Hours 12 to 36: targeted conversations<br/>sponsor, workstream owners,<br/>holders of stuck decisions"]
+    N2["Hours 36 to 72: one-page position<br/>what is happening, 3 changes,<br/>what we will not do, who needs what"]
+    N3{"Take it to the sponsor<br/>decision needed by a date"}
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2 blue
+    class N3 yellow
+    class N3 green
+```
+
+
 > "**72 hours is for stabilising and diagnosing, not for fixing.** Fixing before you understand is how a programme loses another month.
 >
 > **Hours 0–12: establish the facts.** What is actually behind? I'll look for four things, because 'off track' is a symptom with four common causes: the *scope* grew or the *timeline* was never real; the *decision rights* aren't where we think they are, so we're waiting on someone who didn't know they had to decide; there's a *technical* blocker nobody owns; or the *value* was never agreed, so no one is fighting for it. I'd get the programme's own artefacts — plan, RAID log, decisions log, delivery dashboard — and talk to the people closest to the work, not the steering committee. The steering committee tells you what they think is happening; the delivery team tells you what is happening.
@@ -908,6 +1541,30 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 
 **Framework:** Understand the underlying goal → Separate goal from preference → Evidence → Prescribe → Respect the decision
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Solution or outcome?<br/>find what they are protecting"]
+    N1["Separate goal from preference<br/>what is non-negotiable?"]
+    N2["Bring evidence, not argument<br/>one number nobody can argue with"]
+    N3["Put it in writing<br/>what happens on each path"]
+    N4["Sponsor decides"]
+    N5["Respect it: document the risk,<br/>name the conditions, execute well<br/>and say what I need from them"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N4 --> N5
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3,N4 blue
+    class N5 green
+```
+
+
 > "The first thing I do is figure out whether they're attached to the *solution* or to the *outcome*. Executives are usually protecting an outcome — a date, a regulatory commitment, a budget, a stakeholder promise — and the solution is their current best model of how to get it. If I can find the outcome, I can have a real conversation, and often the executive will drop the preferred solution themselves once the constraint is named.
 >
 > **So I separate the goal from the preference explicitly.** "What must be true for this to work?" "Which of these is non-negotiable — the date, the scope, the cost ceiling, or the architecture?" Once the non-negotiable is named, the question becomes a genuine engineering or sequencing problem, and that's where I can help rather than oppose.
@@ -928,6 +1585,26 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 ### Q18. "How do you align three stakeholders who each want different things from the same data platform?"
 
 **Framework:** Map interests → Find the overlap → Make trade-offs explicit → Decide the mechanism
+
+**Flow**
+
+```mermaid
+flowchart LR
+    N0["Interests, not positions<br/>CFO: predictable cost<br/>CDO: strategic, respected<br/>Business unit: unblocked, now"]
+    N1["Find the real overlap<br/>predictable cost of a new product,<br/>self-serve"]
+    N2["Make the trade-off explicit<br/>tiered service: self-serve, curated,<br/>monthly cost view"]
+    N3["Mechanism over alignment<br/>decision rights, governance forum,<br/>metrics each is accountable for"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2 blue
+    class N3 green
+```
+
 
 > "I start by separating **interests from positions**, because people defend positions but interests are negotiable. The CFO wants cost predictability and will fight anything that looks like open-ended spend. The Chief Data Officer wants the platform to be genuinely strategic and will fight anything that makes the data team a service desk. The business unit wants their data *now* and will fight anything that doesn't serve them. Those are positions. Underneath: the CFO wants to be able to forecast and be accountable; the CDO wants the team respected and resourced; the business unit wants to be unblocked and to be the customer.
 >
@@ -950,6 +1627,29 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 
 **Framework:** Decompose → Estimate with ranges → State assumptions → Manage the variance
 
+**Flow**
+
+```mermaid
+flowchart TD
+    A["Scope by data product and domain,<br/>not by task"] --> B["Estimate in ranges<br/>Assess, Design, Migrate, Operate<br/>assumptions written down"]
+    B --> C["Customer team availability<br/>is a commercial precondition"]
+    C --> O{"Coming in over?"}
+    O -->|"No"| W["Change control with impact assessment,<br/>weekly variance review"]
+    O -->|"Yes"| R1["1 Re-baseline openly"]
+    R1 --> R2["2 Back to outcomes, offer to de-scope<br/>to protect value and date"]
+    R2 --> R3["3 Find the cost driver honestly"]
+    R3 --> R4["4 Absorb my own estimate error,<br/>not the customer"]
+    R4 --> W
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class A,B,C,R1,R2,R3,R4 blue
+    class O yellow
+    class W green
+```
+
+
 > "**Scope by deliverable, not by task.** A data transformation is usually estimated as effort — and effort estimates on 2,000 pipelines are fiction. I estimate by **data product and data domain**: how many domains, how many source systems in each, how many consumers, how critical each product is. That gives a structure I can reason about.
 >
 > **Then estimate in ranges with explicit assumptions, and separate the known from the unknown.** I'd break the estimate into: *assess* (inventory, profiling, discovery — real effort, but bounded), *design* (target architecture, migration mapping — depends on assessment output), *migrate* (the variable part, driven by pipeline complexity), and *operate* (the part most proposals forget — and often larger than people think). Each with a range, and each assumption written down: what we assume about data quality, source stability, and customer team availability.
@@ -970,6 +1670,28 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 ### Q20. "How do you explain a technical trade-off to a CFO who has 3 minutes?"
 
 **Framework:** Lead with the money → Name the choice → Give the decision
+
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Lead with the money or risk<br/>in their language"]
+    N1["Name the choice<br/>A costs X more, ready in six weeks<br/>B is Y cheaper, two-year lock-in"]
+    N2["Recommend one option<br/>with the number that justifies it"]
+    N3["Say what the recommendation<br/>does not solve"]
+    N4["End with the decision and its owner<br/>architecture goes in the appendix"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3 blue
+    class N4 green
+```
+
 
 > "**Three minutes means no architecture diagrams and no product names unless they're essential.** I'd open with the business consequence in their language, give the choice, and ask for the decision.
 >
@@ -993,6 +1715,34 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 ### Q21. "You inherit a professional services practice. What do you do in the first 90 days?"
 
 **Framework:** Diagnose the business → Fix the economics → Build the machine → Then scale
+
+**Flow**
+
+```mermaid
+flowchart LR
+    subgraph P1["Days 1 to 30: understand the economics"]
+        direction TB
+        A1["Utilisation by person, margin by engagement,<br/>pipeline mix, why utilisation sits where it does,<br/>where margin leaks"]
+    end
+    subgraph P2["Days 30 to 60: fix before growing"]
+        direction TB
+        A2["Real acceptance criteria and change control,<br/>deliberate staffing mix,<br/>over-delivery treated as a signal"]
+    end
+    subgraph P3["Days 60 to 90: build the machine"]
+        direction TB
+        A3["Hiring and enablement, then assets,<br/>then the partner ecosystem"]
+    end
+    NO["Deliberately not in 90 days:<br/>new service offering, team restructure"]
+    P1 --> P2 --> P3
+    P3 -.-> NO
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class A1,A2,A3 blue
+    class NO red
+```
+
 
 > "**First 30 days — understand the economics.** A practice is not healthy because people are busy. It's healthy because the *right* work is billable, delivered well, and leaves behind something reusable. So in month one I want the real numbers: billable utilisation by person, delivery margin by engagement, revenue and pipeline mix, and — most importantly — **why** utilisation sits where it does. A practice at 60% utilisation is either understaffed, badly staffed, or losing to better-paid work elsewhere, and those need three different fixes. I also want to know where margin actually leaks: scoping, staffing mix, or over-delivery.
 >
@@ -1025,6 +1775,25 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 
 **Framework:** Name the hierarchy → Define each → Explain the coupling → Have a view
 
+**Flow**
+
+```mermaid
+flowchart TD
+    M["1 Delivery margin<br/>does the business model work?"] --> CO["2 Client outcomes"]
+    CO --> UT["3 Utilisation<br/>the enabling constraint, not the goal"]
+    UT <-->|"pull against each other:<br/>manage the mix"| M
+    CAP["Capacity planning, three inputs<br/>pipeline conversion,<br/>ramp time of a new consultant,<br/>productivity curve"] --> UT
+    OD["Watch over-delivery:<br/>estimate wrong, under-resourced,<br/>or ambiguous scope"] --> M
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class M green
+    class CO,UT,CAP blue
+    class OD yellow
+```
+
+
 > "**Utilisation is the operational heartbeat, but it is not the goal — and that's the important part.** Utilisation tells you whether your people are billable; it doesn't tell you whether the practice is profitable or whether the client is happy. A practice at 90% utilisation delivering late and over budget is in worse shape than one at 65% utilisation with healthy margins and happy clients, because it has no capacity to absorb a bad quarter, no room to upskill, and a team that's burning out.
 >
 > **So my hierarchy is: delivery margin first, client outcomes second, utilisation as the enabling constraint.** Margin is the number that actually tells you whether the business model works.
@@ -1047,6 +1816,28 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 ### Q23. "Pre-sales: an account team brings you a $3M data transformation opportunity. Walk me through how you'd approach it."
 
 **Framework:** Qualify → Shape → Size → Position → Hand over cleanly
+
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Qualify<br/>migration, consolidation, new product,<br/>or regulatory? cost of doing nothing?"]
+    N1["Forcing function and constraints<br/>deadline, regulated data,<br/>what is painful to replace"]
+    N2["Shape<br/>credible first phase: assess and plan,<br/>not a big fixed scope"]
+    N3["Position Google Cloud honestly<br/>including where it is not the answer"]
+    N4["Hand over cleanly<br/>same document, assumptions register"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3 blue
+    class N4 green
+```
+
 
 > "**Qualify before I commit senior people.** First I'd understand what the client actually wants to change: is this a **migration** off a platform that's not working, a **consolidation** of several platforms, a **new** data product, or a **regulatory** requirement? Those four have different shapes, different margins and very different competitor positions. And I'd ask what happens if they do nothing — if there's no cost to inaction, the deal usually isn't real, no matter how big the number.
 >
@@ -1075,6 +1866,29 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 
 **Framework:** Own it → Diagnose honestly → Act on the controllable → Coach the person → Prevent recurrence
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Own it in front of the team"]
+    N1["Diagnose honestly<br/>data quality, outside dependency,<br/>informal scope growth, my estimate"]
+    N2["Act on what I control<br/>re-plan, be explicit with the client:<br/>deliverable, date or scope"]
+    N3["Coach the person<br/>the gap, the missed signals,<br/>a specific action, what I change"]
+    N4["Fix the system<br/>instrumentation and review cadence"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0 red
+    class N1,N2,N3 blue
+    class N4 green
+```
+
+
 > "**First: I take responsibility in front of the team.** The engagement failing is my failure as the lead — not the consultant's. If I start by asking the consultant what they did wrong, I've taught the team that bad news is punished, and the next time I won't hear about a slipping schedule until it's a crisis.
 >
 > **Then I diagnose honestly, and I separate what was controllable from what wasn't.** Schedule and budget on a data engagement usually come down to: source data quality that wasn't assessed properly in discovery; a dependency on a client team or vendor outside my control; a scope that grew informally without change control; or a genuine estimation error by me. Those need completely different responses, and pretending they're the same is how engagements get managed badly.
@@ -1097,6 +1911,29 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 ### Q25. "How do you develop a strong performer, and how do you handle an underperformer?"
 
 **Framework:** Different conversations for different problems
+
+**Flow**
+
+```mermaid
+flowchart TD
+    Q["Two different people, two different conversations"] --> S["Strong performer"]
+    Q --> U["Underperformer: diagnose first"]
+    S --> S1["Give a bigger, ambiguous problem<br/>plus visibility and a voice"]
+    S1 --> S2["Protect from noise and burnout"]
+    U --> K{"What kind of gap?"}
+    K -->|"Capability"| K1["Training and a supported plan"]
+    K -->|"Clarity or blocked"| K2["My job: better definition,<br/>fewer handoffs"]
+    K -->|"Sustained, with capability and clarity"| K3["Performance conversation:<br/>clear feedback, timeframe, consequences"]
+    K3 --> F["Fairness: clean, respectful<br/>exit if it does not change"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q,K yellow
+    class S,S1,S2,U,K1,K2,K3 blue
+    class F green
+```
+
 
 > "**A strong performer doesn't need managing — they need a bigger problem.** My job is to find out what they're actually capable of and then put them somewhere that demands it. With a senior engineer, that usually means giving them the ambiguous, cross-cutting problem: the migration no one wants, the platform piece with no owner, the client situation with no precedent. I also give them **visibility and a voice** — exposure to the sponsor, a seat at the design review, ownership of a decision that's actually consequential. The people who grow are the ones whose work is seen by someone whose opinion matters to them.
 >
@@ -1121,6 +1958,30 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 
 **Framework:** Process, not intent → Your own actions → Evidence, with an honest account
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Process, not intent"]
+    N1["Broaden sourcing channels and<br/>vary the panel"]
+    N2["Standardise assessment<br/>structured rubric, same questions"]
+    N3["Check drop-off points<br/>where candidates are lost"]
+    N4["Honest account of what moved<br/>and what did not"]
+    N5["Dissent has a channel<br/>written risk before design decisions"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N4 --> N5
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3,N4 blue
+    class N5 green
+```
+
+
 > "**Diversity outcomes come from process, not intent**, and the process is unglamorous: where the requisition goes, how the loop is structured, who is in it, and whether the pipeline is narrow at the top.
 >
 > **Concretely, what I do:** broaden the sourcing channels rather than posting the same role on the same boards; make sure the panel reflects the team and isn't always the same three people; and critically, **standardise the assessment** — a structured rubric and the same questions for everyone, so the decision isn't a function of who was in the room or who happened to speak first. I also check the drop-off points: where do we lose candidates? If it's at a particular stage, that's a process problem with a specific fix.
@@ -1141,6 +2002,26 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 ### Q27. "How do you stay technically credible while leading a team?"
 
 **Framework:** Hands-on selectively → Stay current deliberately → Credibility through quality of judgement
+
+**Flow**
+
+```mermaid
+flowchart LR
+    N0["Credibility is the quality<br/>of my judgement and my review"]
+    N1["Stay current on the Google Cloud stack<br/>by building and running it"]
+    N2["Protect the time deliberately<br/>currency decays silently"]
+    N3["Be honest in the room<br/>so the team can tell me I am wrong"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2 blue
+    class N3 green
+```
+
 
 > "**My credibility comes from the quality of my judgement and my ability to review, not from doing all the work.** If I'm not the person writing the production code, I need to be the person whose review is worth their time — who can spot a correctness problem, a scaling problem, or a design that will hurt us in six months. So I keep a real practice of reading code and design docs, and I make sure my review is substantive. An architect who reviews in detail and is right is more credible than one who claims to still be hands-on.
 >
@@ -1172,6 +2053,26 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 **Framework:** One plan, one owner, explicit handoff artefacts
 
+**Flow**
+
+```mermaid
+flowchart LR
+    N0["One two-page delivery approach<br/>at proposal, then the delivery team's<br/>first artefact, co-authored"]
+    N1["Assumptions as a register<br/>each with an action and a date"]
+    N2["Standing joint review of the pipeline<br/>catch over-promising early"]
+    N3["Measure the gap<br/>proposed vs delivered on scope,<br/>timeline, broken assumptions"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2 blue
+    class N3 green
+```
+
+
 > "**The failure mode is two plans.** Pre-sales sells one thing and delivery builds another, and nobody notices until month three.
 >
 > **My mechanism:** the **same two-page delivery approach** goes to the client at proposal and lives as the delivery team's first artefact. One document, one owner, version-controlled, and the delivery lead co-authors it — so the person who has to build it is a party to what was promised.
@@ -1193,6 +2094,25 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 **Framework:** Assets → Enablement → Partners → In that order, with a discipline
 
+**Flow**
+
+```mermaid
+flowchart LR
+    A["Asset<br/>working artefact, usable by a new<br/>team in weeks, no author needed"] --> E["Enablement<br/>certification path so capability<br/>is verified"]
+    E --> P["Partners<br/>tiers, scorecard, escalation,<br/>same quality gates as our own"]
+    P --> R["Track reuse<br/>engagements per asset,<br/>time saved"]
+    R -->|"low reuse: not good enough<br/>or not marketed"| A
+    CA["Caution: invest in proportion<br/>to confirmed demand"] -.-> A
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class A,E,P blue
+    class R green
+    class CA yellow
+```
+
+
 > "**Every engagement should leave behind an asset.** Not a document — a working artefact: a migration factory, a cost-sizing model, a reference architecture with a validated deployment path, a test harness, a set of control mappings. The test is whether a new team can use it on a new client and get most of the value in weeks rather than months. If it requires the author to explain it, it isn't an asset.
 >
 > **Enablement is what turns assets into scale.** You build the asset, then you enable partners and your own people to use it, with a certification path so that capability is verified rather than assumed. An asset nobody else can use is a personal productivity hack.
@@ -1213,6 +2133,29 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 ### Q30. "Your engagement is over-delivering and losing margin. What do you do?"
 
 **Framework:** Diagnose the source → Distinguish generosity from estimate failure → Reset
+
+**Flow**
+
+```mermaid
+flowchart TD
+    Q{"Over-delivery or a bad estimate?"} --> V{"Does it vary<br/>across engagements?"}
+    V -->|"Consistent, say 130% everywhere"| E1["My estimating is systematically wrong<br/>and I own it"]
+    V -->|"Varies"| E2["Scope is ambiguous on those<br/>engagements: fix how scope is defined"]
+    E1 --> O1["1 Tighten scope and acceptance criteria"]
+    E2 --> O1
+    O1 --> O2["2 Change control: extra requests carry a cost"]
+    O2 --> O3["3 Check staffing is not absorbing an under-scoped deal"]
+    O3 --> O4["4 Address team behaviour directly"]
+    O4 --> G["If goodwill is deliberate:<br/>make it an explicit decision with a named account"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q,V yellow
+    class E1,E2,O1,O2,O3,O4 blue
+    class G green
+```
+
 
 > "**First, establish whether this is over-delivery or a bad estimate.** If they're delivering 130% of scope, that's either a genuinely generous team building trust — which has real value, because it earns you the next engagement — or the estimate was wrong and they're covering it, which is a problem that repeats on every engagement with the same assumptions.
 >
@@ -1237,6 +2180,28 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 **Framework:** Understand → Prepare → Options → Recommend → Support (applied to a blank page)
 
+**Flow**
+
+```mermaid
+flowchart TD
+    N0["Find the specific request<br/>hidden in the vague brief<br/>what changed, who asked, what if not"]
+    N1["Find the decision it serves<br/>cost, growth, risk or regulatory"]
+    N2["Get the data and constraints<br/>metrics, today, pain, budget,<br/>deadline, who works with me"]
+    N3["Do not propose a solution yet"]
+    N4["End with shared understanding and a<br/>short assessment as the next step<br/>state assumptions if answers are missing"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2,N3 blue
+    class N4 green
+```
+
+
 > "**I'd start by trying to fail the brief usefully.** A vague brief usually hides a specific request — a funding decision, an internal argument, a stakeholder who needs to win, a risk someone wants to retire. So in the first meeting I'd ask questions designed to surface that: *what's changed recently that made this a priority now? who asked for it? what happens if we don't do it? who will be unhappy if we do?*
 >
 > **Then I'd try to get to a decision this work exists to serve.** "Is this about cost, growth, risk, or a regulatory commitment?" Those lead to very different work.
@@ -1257,6 +2222,26 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 ### Q32. "How do you decide when to escalate to your manager or a sponsor? What do you escalate?"
 
 **Framework:** Escalate the decision, not the status → Threshold → Format
+
+**Flow**
+
+```mermaid
+flowchart TD
+    Q{"Is this a decision, or just status?"} -->|"Status"| NO["Do not escalate it"]
+    Q -->|"Decision"| T{"Is it mine to make?"}
+    T -->|"Yes"| DEC["Decide it. Escalating everything<br/>trains people to ignore you"]
+    T -->|"No: beyond my authority,<br/>commitment changes, stakeholder deadlock,<br/>compliance, or I am hiding a number"| ESC["Escalate with a decision-ready brief"]
+    ESC --> B["Situation, options with consequences,<br/>my recommendation, what I need by when"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q,T yellow
+    class NO,DEC blue
+    class ESC red
+    class B green
+```
+
 
 > "**I escalate decisions, not status.** Telling someone a thing is going badly without asking them to decide something is a status update, and it transfers anxiety instead of authority.
 >
@@ -1539,6 +2524,26 @@ flowchart TD
 
 **Framework:** Ask what you need to decide whether to do this job — 2–3 real questions, not ceremonial ones
 
+**Flow**
+
+```mermaid
+flowchart LR
+    N0["The practice, not the product<br/>what the role owns, biggest constraint"]
+    N1["The team<br/>strongest people, gaps, retention"]
+    N2["How the role is judged<br/>success at 12 months"]
+    N3["Make it two-way<br/>share my read of the first challenge,<br/>ask if it is the right one"]
+    N0 --> N1
+    N1 --> N2
+    N2 --> N3
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class N0,N1,N2 blue
+    class N3 green
+```
+
+
 > "**I'd ask about the practice, not the product.** I want to know what this role actually owns — whether the lead owns a P&L or owns delivery and quality, because that shapes what I'd do in the first year. And I'd want to know what the biggest constraint on the practice is right now: is it building pipeline, is it delivery capacity, is it the seniority mix on the team, or is it something nobody has fixed? I'd rather know what the hard part is, because that's the part I'd be hired to do.
 >
 > **Then I'd ask about the team.** Where are the strongest people and what are they working on, and where are the gaps? What's the retention picture, and where have people left?
@@ -1566,7 +2571,7 @@ flowchart TD
 | Present options without a recommendation | Weigh honestly, then be prescriptive — "it depends" is a starting point |
 | Say "we" without claiming your specific part | Name what *you* did, your decision, your artefact |
 | Name-drop products without reasons | Tie every product to a workload shape, constraint or risk |
-| Bluff on the 40% cost reduction appearing at two employers | Differentiate the two mechanisms explicitly — interviewers will notice |
+| Quote any cost, incident or delivery percentage that is not on your current resume | Give the mechanism and the measurement method; say the number only with its baseline |
 | Let a "20M+ insights/day" soft metric stand unexamined | Define what an insight is, or drop the metric |
 | Leave a TODO unresolved | Resolve every `[TODO]` before the interview — interviewers probe exactly there |
 

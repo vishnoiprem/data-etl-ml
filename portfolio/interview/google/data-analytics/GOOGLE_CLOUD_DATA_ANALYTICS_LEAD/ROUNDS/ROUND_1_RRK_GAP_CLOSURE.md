@@ -282,7 +282,7 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 | 3 | Q4 | Headcount split, attrition, hiring mistake | **Needs you.** Structural answer is drafted (inherited vs built, rubric, rotation). Supply: real numbers, or say "I don't have a retention figure and here's the mechanism instead" — the bank already says **do not invent** |
 | 4 | Q5 | The January to July 2024 gap | **Needs you.** Your current resume shows Lazada to Jan 2024 and Makro from Jul 2024 with nothing between. Q5 in the bank has two honest versions (short engagement left off the resume, or a deliberate break). Pick the true one and fill the one detail |
 | 5 | Q6 | Pub/Sub ordering keys / Dataflow exactly-once hands-on | **Bridged.** Honest bridge: *"In my own builds I used Kafka's exactly-once semantics and Flink checkpoints; on GCP the equivalents are Pub/Sub exactly-once delivery with dedup on a producer-assigned ID and ordering keys, and Dataflow's exactly-once on the runner. I've built those in lab exercises."* Say the last sentence only once the labs have actually been run. |
-| 6 | Q8 | Makro incidents −60%: baseline, root causes, mechanism | **Needs you.** The answer *structure* is drafted (triage by severity → root-cause classing → dead-letter path → measure). Supply baseline count and the actual top causes |
+| 6 | Q8 | Reliability story: real top root causes and mechanism | **Drafted 2026-11-16** with flow diagrams and a stage-by-stage GCP diagnosis. **Incidents −60% is not on the current resume**, so it is no longer asserted; say a number only with baseline, definition and window. **Needs you:** your real top root causes and the mechanism, if you want to answer "how, exactly?" from experience |
 | 7 | Q12 | Two 40% mechanisms | **Resolved** — §4 above |
 | 8 | Q13 | SCB/PDPA artefact you built | **Needs you.** Name a physical artefact: a control map, an evidence pack, a classification taxonomy. If none exists as a document, name the practice you ran and say so plainly |
 | 9 | Q15 | Practise code review 3× | **Resolved** — `ROUND_1_RRK_CODE_REVIEW_DRILL.md`, 16 verified findings, plus the correction that the file is in `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/`, not the course project |
@@ -298,7 +298,7 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 
 **Summary: 8 resolved, 9 need your own memory.** The 9 are exactly the facts that only you have — and the ones the interviewer will probe. **They are the highest-value 45 minutes of preparation remaining.**
 
-**The 9, precisely:** Q3 (delivery-time attribution), Q4 (headcount split, attrition, hiring mistake), Q5 (the January to July 2024 gap: which honest version), Q8 (incidents −60% baseline and root causes), Q13 (the SCB/PDPA artefact), Q24 (a real engagement where delivery slipped), Q25 (one person developed, one performance case), Q26 (a diversity example with a metric that moved), Q34 (the "I was wrong" story).
+**The 9, precisely:** Q3 (delivery-time attribution), Q4 (headcount split, attrition, hiring mistake), Q5 (the January to July 2024 gap: which honest version), Q8 (your real top root causes and mechanism; the −60% is not on the resume), Q13 (the SCB/PDPA artefact), Q24 (a real engagement where delivery slipped), Q25 (one person developed, one performance case), Q26 (a diversity example with a metric that moved), Q34 (the "I was wrong" story).
 
 ---
 
