@@ -1209,46 +1209,148 @@ flowchart LR
 
 ### Q10. "Where do you draw the line between BigQuery, Dataproc and Bigtable?"
 
-**Framework:** Workload-shaped decision, with the deciding question first
+**Framework:** Workload shape first, with the deciding question stated up front
 
-**Flow**
+**The frame to say first:** "I don't choose on data volume. I choose on **workload shape, access pattern, latency requirement, and who consumes the result**."
+
+**The line to memorise:** "**BigQuery to analyse, Dataproc to compute, Bigtable to serve by key.**"
+
+**Flow 1. The decision**
 
 ```mermaid
 flowchart TD
     Q{"What shape is the workload<br/>and what does the consumer need?"}
-    Q -->|"Large scans, joins,<br/>aggregations, SQL consumer"| BQ["BigQuery<br/>serverless, no cluster to run"]
-    Q -->|"Spark is the right tool or<br/>existing Spark investment"| DP["Dataproc<br/>you operate clusters and on-call"]
-    Q -->|"Random low-latency key lookups<br/>at high request rates"| BT["Bigtable<br/>serving store, not scans"]
-    BQ --> T1["Trap: BigQuery as a serving database<br/>unpredictable bill"]
-    DP --> D1["Default: start serverless,<br/>move to Dataproc only when a<br/>measured constraint forces it"]
-    BT --> T2["Trap: one product for everything<br/>tuning and capacity problem of another shape"]
+    Q -->|"SQL, large scans, joins, aggregations,<br/>dashboards, ad-hoc, analytical ML"| BQ["BigQuery<br/>the default for analytics<br/>managed, no Spark operations burden"]
+    Q -->|"Spark-shaped: existing PySpark or Scala,<br/>specialised libraries, iterative work,<br/>rewrite has poor return"| DP["Dataproc<br/>you operate clusters and on-call"]
+    Q -->|"Application needs a value by known key,<br/>very high request rate,<br/>predictable low latency"| BT["Bigtable<br/>a serving database, not an analytics engine"]
+    BQ --> A1["Tell me about millions or billions of rows"]
+    DP --> A2["Process these millions or billions of rows"]
+    BT --> A3["Here is my key, give me the answer fast"]
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
     class Q yellow
     class BQ,DP,BT blue
-    class T1,T2 red
-    class D1 green
+    class A1,A2,A3 green
 ```
 
+> "BigQuery is my default for analytics: users need SQL, large scans, joins, aggregations, dashboards or ad-hoc analysis, and it avoids creating a Spark operations problem for no reason. Dataproc is for Spark-shaped computation: existing PySpark or Scala, specialised libraries, iterative processing, or a migration where rewriting mature Spark logic adds little business value. Bigtable is different, it is a **serving database**: very high-throughput, low-latency lookups by a known key. I would not pick it for arbitrary joins or BI queries."
 
-> "The deciding question is always **what shape is the workload and what does the consumer need** — not which product is best. So:
->
-> **BigQuery** when the workload is analytical: large scans, joins, aggregations, and the consumer is SQL. Serverless, managed, and you pay for the scan and the warehouse; it also has no operational burden, which matters for a team that shouldn't be running clusters.
->
-> **Dataproc** when Spark is genuinely the right tool — heavy ETL that needs custom Scala/Python at scale, ML workloads on Spark, iterative algorithms that don't fit a SQL model, and importantly when you want to *keep your existing Spark investment and skills*. Its counterweight is that it is a platform you operate: clusters, autoscaling, job lifecycle, and someone on call.
->
-> **Bigtable** when the access pattern is **random, low-latency key lookups at high request rates** — not scans. It's the serving store for a high-volume operational or serving workload, and it's where HBase-style semantics, strong consistency and predictable low-latency at scale come from.
->
-> **The trap I'd warn an architect about** is using BigQuery as a serving database, or putting a random-access serving pattern on it because it was already there. That's how you end up with a warehouse carrying an application workload and an unpredictable bill. Second trap: standardising on one product for everything because 'simplicity' actually means you now have a tuning and capacity problem of a different shape.
->
-> My default rule: **start serverless and move to Dataproc only when a measured constraint forces it.** The cost of moving to Dataproc later is low. The cost of running Spark clusters for two years for workloads that never needed them is high."
+**Flow 2. One domain, three workloads (retail example)**
 
-**Key elements:** Decision is driven by **access pattern and consumer**, not preference; each product has an honest downside; you name the anti-patterns; you state a **default direction of travel** (serverless-first) which is a real architectural stance.
+```mermaid
+flowchart LR
+    subgraph W1["Tell me what happened"]
+        direction TB
+        U1["Business user: sales by store, category<br/>and customer segment, last 12 months"] --> E1["BigQuery<br/>scan, join, aggregate, Looker"]
+    end
+    subgraph W2["Process this"]
+        direction TB
+        U2["Hundreds of mature PySpark pipelines<br/>joining transactions, customers,<br/>products, promotions"] --> E2["Dataproc<br/>keep proven Spark logic, no forced rewrite"]
+    end
+    subgraph W3["Give me this now"]
+        direction TB
+        U3["Application: customer_id = 827234<br/>latest features, state, device history"] --> E3["Bigtable<br/>keyed read, predictable latency"]
+    end
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class U1,U2,U3 blue
+    class E1,E2,E3 green
+```
 
-**Pass signal:** You lead with the workload shape and can state when you would *move off* BigQuery.
-**Fail signal:** A feature comparison, or "it depends" with no default.
+If a rewrite creates no value, the pattern is: Cloud Storage, then Dataproc computes, then BigQuery serves the analytical consumer. **Dataproc does the computation; BigQuery serves the analyst.** That also makes it a low-risk migration step, because proven Spark engineering is preserved while the rest of the platform modernises.
+
+**Flow 3. They coexist: one platform, three engines**
+
+```mermaid
+flowchart LR
+    IN["Pub/Sub, Cloud Storage"] --> PR["Processing layer<br/>Dataflow and Dataproc"]
+    PR --> BQ["BigQuery<br/>analytics"]
+    PR --> BT["Bigtable<br/>online serving"]
+    BQ --> LK["Looker<br/>analysts and dashboards"]
+    BT --> AP["Applications and APIs<br/>precomputed features by customer_id"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class IN,PR blue
+    class BQ,BT yellow
+    class LK,AP green
+```
+
+For example, Dataproc computes a large Spark feature set. The output goes to BigQuery so analysts can study customer behaviour, **and** to Bigtable so an online application retrieves a customer's precomputed features by `customer_id`. Same domain, different access patterns.
+
+**When I move off BigQuery**
+
+| Stay with BigQuery | Move toward Bigtable | Move toward Dataproc |
+|---|---|---|
+| TB to PB analytics | A known access key | An existing Spark estate |
+| SQL and joins | Very high request volume | PySpark or Scala, Spark-ecosystem dependencies |
+| Seconds-level interactive | Predictable low operational latency | Specialised distributed transformations |
+| BI and analysts | Application serving | **A rewrite with poor return** |
+
+The decision needs an **economic or measurable reason**, not a preference.
+
+**Flow 4. The four traps**
+
+```mermaid
+flowchart TD
+    T["Traps to call out"] --> T1["1 BigQuery as an operational database<br/>5,000 requests a second of<br/>SELECT ... WHERE customer_id = ?"]
+    T --> T2["2 Bigtable for analytics<br/>joins, GROUP BY and arbitrary filters<br/>on a row-key model"]
+    T --> T3["3 Spark because it is big data<br/>50 TB does not mean Spark,<br/>data size alone decides nothing"]
+    T --> T4["4 Rewriting working Spark to look modern<br/>migration cost, no business value"]
+    T1 --> F1["Serve by key from Bigtable<br/>or another serving store"]
+    T2 --> F2["Analyse in BigQuery,<br/>design Bigtable rows for known access"]
+    T3 --> F3["If it is mostly SQL transforms,<br/>BigQuery is simpler to operate"]
+    T4 --> F4["Modernisation is not measured by<br/>how many technologies you remove"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class T red
+    class T1,T2,T3,T4 yellow
+    class F1,F2,F3,F4 green
+```
+
+**My default stance, stated so it is hard to challenge**
+
+> "For a **new analytical workload**, BigQuery is my default. I introduce **Dataproc** when the workload or an existing Spark investment gives me a measurable reason. I introduce **Bigtable** when the consumer changes from analytical querying to low-latency keyed serving."
+
+Note the refinement from "start serverless and move to Dataproc when a constraint forces it": Bigtable and Dataproc are not simply the next step after BigQuery. They are **different workload shapes**.
+
+**Spoken answer (about 60 seconds).** Notation: `//` short pause, `///` long pause.
+
+> "I draw the line on **workload shape**, not data size. ///
+>
+> **BigQuery** is my default for analytics: // large scans, SQL, joins, aggregations, BI and ad-hoc analysis. ///
+>
+> **Dataproc** is for genuinely Spark-shaped computation: // complex PySpark or Scala, specialised libraries, // or a mature Spark estate where rewriting doesn't create enough value. ///
+>
+> **Bigtable** is a serving decision. // If an application needs high-throughput, predictable low-latency access by a known key, // that's when I'd consider it. ///
+>
+> They don't necessarily compete. // Dataproc might compute customer features, // BigQuery holds them for analytics, // and Bigtable serves the latest features to an online application. ///
+>
+> The two anti-patterns I watch for: // running Spark just because the data is big, // and using BigQuery as an operational serving database just because the data already lives there. ///
+>
+> BigQuery to analyse, Dataproc to compute, Bigtable to serve by key."
+
+**Likely follow-ups**
+
+| Probe | 20-second answer |
+|---|---|
+| "Why not BigQuery for serving, if it can answer the query?" | "Capable of answering the SQL is not the same as right for a high-rate, low-latency application. You get unpredictable latency and cost. Precompute and serve by key." |
+| "When is Spark worth operating?" | "When there is mature Spark code and skills, Spark-specific libraries, or iterative work that does not fit SQL, and the rewrite return is poor. I'd use serverless Dataproc where it fits so there is less cluster to run." |
+| "How do you design for Bigtable?" | "Around the access pattern. The row key is the design: it must spread load and serve the known read. Hot-spotting on a sequential key is the classic mistake." |
+| "Dataflow or Dataproc?" | "See Q11: continuous, event-driven, stateful work goes to Dataflow, batch and iterative Spark goes to Dataproc." |
+| "What would you tell a customer who wants one engine for everything?" | "Standardising for simplicity moves the problem: you now have a tuning and capacity problem of a different shape. Pick per workload and unify the contract and orchestration." |
+
+**Key elements:** Workload shape, access pattern, latency and consumer decide, not volume; BigQuery as the analytics default; Dataproc only with a measurable reason; Bigtable as a serving store; the three coexisting in one platform; the four traps.
+
+**Pass signal:** You state the deciding question first and treat Bigtable and Dataproc as different workload shapes, not as "the next step after BigQuery".
+**Fail signal:** "Use BigQuery for everything" or "Spark because we have big data".
 
 ---
 
