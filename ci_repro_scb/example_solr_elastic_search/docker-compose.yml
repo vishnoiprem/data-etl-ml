@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+
+  # ── Elasticsearch (single node for testing) ──
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: es-node
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false     # disable auth for local dev
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - "9200:9200"    # REST API
+      - "9300:9300"    # Inter-node transport
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 10s
+      retries: 5
+
+  # ── Kibana (Elasticsearch UI) ──
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ── Apache Solr (standalone mode) ──
+  solr:
+    image: solr:9.5
+    container_name: solr-node
+    ports:
+      - "8983:8983"    # Solr Admin UI + API
+    volumes:
+      - solr-data:/var/solr
+    command: solr-precreate products   # auto-create a core named "products"
+
+volumes:
+  es-data:
+  solr-data:
