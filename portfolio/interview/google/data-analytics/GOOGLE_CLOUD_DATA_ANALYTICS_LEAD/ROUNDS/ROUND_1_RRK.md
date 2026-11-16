@@ -1569,105 +1569,423 @@ flowchart LR
 
 ### Q12. "A client's data platform costs $4M a year. Where do you look first for savings — and how do you make savings that stick?"
 
-**Framework:** Find the cost driver → Fix in order → Make it stick
+**Framework:** **B-O-S-G** — Bill → Optimise → Stop waste → Govern. Find the cost driver, fix in order, make it stick.
 
-**Flow**
+**Opening line:** "With a $4M platform I don't start optimising queries. **I start with the bill.**"
+
+**Flow 0 — the whole answer**
 
 ```mermaid
 flowchart TD
-    N0["Start from the bill<br/>by service, team, environment, job"]
-    N1["1 Partition and cluster"]
-    N2["2 Query discipline<br/>no unneeded scans or schedules"]
-    N3["3 Capacity model and storage tiering<br/>reservations, byte guards,<br/>lifecycle rules"]
-    N4["4 Idle resources<br/>clusters, VMs, disks, orphan streams"]
-    N5["5 Match SLAs to value<br/>tier freshness by criticality"]
-    N6["Make it stick<br/>in the data contract and template,<br/>cost as a governance gate,<br/>a named owner"]
-    N0 --> N1
-    N1 --> N2
-    N2 --> N3
-    N3 --> N4
-    N4 --> N5
-    N5 --> N6
+    B["BILL<br/>by service, environment, domain,<br/>team, data product, workload"]
+    O["OPTIMISE<br/>waste, efficiency,<br/>pricing model, SLA"]
+    S["STOP WASTE<br/>idle compute, unused schedules,<br/>retire low-value products"]
+    G["GOVERN<br/>owner, budget, SLA, FinOps view,<br/>guardrails, QBR"]
+    K["Saving still there in 12 months"]
+    B --> O --> S --> G --> K
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
-    class N0,N1,N2,N3,N4,N5 blue
-    class N6 green
+    class B red
+    class O,S blue
+    class G yellow
+    class K green
 ```
 
+**Flow 1 — find where the money is (concentration test)**
 
-> "**I start with where the money actually is, and I get that from the bill, not from assumptions.** The first cut of analysis is cost by service, by team, by environment and by job — because in most estates a small number of workloads account for most of the spend.
->
-> **In order, the levers I pull:**
-> **One — partition and cluster.** In BigQuery, the difference between a well-partitioned table and an unpartitioned one is often an order of magnitude on the same query. This is free money and it's almost always pure waste today. **Two — query discipline.** A query that scans a partition it doesn't need, or runs on a schedule when nobody reads the output, is the most common waste pattern I see. **Three — capacity model and storage tiering.** Move steady BigQuery workloads from on-demand to reservations (Editions) with separate reservations for ETL vs BI, and put `maximum_bytes_billed` guards on ad hoc work. For storage, use Cloud Storage lifecycle rules or Autoclass to move cold data to Nearline/Coldline/Archive based on measured access, remembering that GCS has no rehydration delay but does charge retrieval fees and minimum storage durations, so the threshold is a cost calculation, not a guess. **Four — idle resource elimination.** Always-on clusters, idle VMs, unattached disks, and a stream that keeps a pipeline alive for a subscriber that no longer exists. **Five — SLAs matched to value.** Not every pipeline needs to run every five minutes; a tiering of freshness SLAs by business criticality is often the largest single saving.
->
-> **On making it stick** — this is the part most engagements get wrong. Savings evaporate because the thing you optimised becomes someone's new normal and nobody owns it. So: I embed the optimisation in the **data contract and the pipeline template**, not in a one-off script. I add cost to the **quality and governance gates** so a scan-bloat regression fails the build. I put cost per data product on the **QBR dashboard** next to adoption, so cost is discussed in the same meeting as value. And I make sure the team that benefits from the saving keeps the benefit — if my change reduces their compute bill and they don't own that budget, I've created a perverse incentive.
->
-> **One caution.** I would not chase headline savings by tightening SLAs the business actually depends on. A 40% cost reduction that makes the business wait an extra day is not a saving, it's a deferral of cost into someone's operational pain. I want savings that show up in the P&L *and* survive contact with the users."
+```mermaid
+flowchart TD
+    T["Total bill"]
+    T --> SV["By service<br/>BigQuery, Dataproc, Dataflow, storage, other"]
+    SV --> DM["By LOB / domain"]
+    DM --> TM["By team"]
+    TM --> DP["By data product"]
+    DP --> WL["By pipeline, query, job"]
+    WL --> OW["Business owner + SLA"]
+    OW --> Q{"Is the spend<br/>concentrated?"}
+    Q -->|"yes: a small set of workloads<br/>drives most of it"| BL["Engineering backlog<br/>start with those workloads"]
+    Q -->|"no: flat and wide"| PL["Platform defaults and guardrails<br/>matter more than hunting"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class T red
+    class SV,DM,TM,DP,WL,OW blue
+    class Q yellow
+    class BL,PL green
+```
 
-**Key elements:** Bill-first, ordered levers, **the governance work that makes savings stick** (gates, dashboards, incentives), and the explicit distinction between real saving and deferred cost.
+> The target statement is "these 25 workloads drive a material part of annual cost" (a statement you can only make from the real bill). That is a backlog, not a generic cost-reduction programme.
 
-**Pass signal:** The "make it stick" half — ownership, gates, dashboards, incentives — most candidates skip this entirely.
-**Fail signal:** A list of tips. Or a saving that degrades an SLA with no acknowledgment.
+**Flow 2 — the levers in order**
+
+```mermaid
+flowchart LR
+    L1["1 BigQuery<br/>bytes, partitions, clusters,<br/>repeats, unused schedules"]
+    L2["2 Idle or needless compute<br/>5-minute job, daily reader"]
+    L3["3 Dataproc<br/>idle clusters, skew, sizing"]
+    L4["4 Dataflow<br/>utilisation, state, hot keys,<br/>24x7 for a daily report"]
+    L5["5 Storage<br/>lifecycle or Autoclass,<br/>with retrieval cost"]
+    L6["6 Pricing model<br/>on-demand vs capacity,<br/>modelled on history"]
+    L7["7 Dev vs prod<br/>sample data for iteration"]
+    L8["8 Retire<br/>is the product worth its cost?"]
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7 --> L8
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class L1,L2,L3,L4,L5,L6,L7 blue
+    class L8 red
+```
+
+| Lever | What I inspect | The trap |
+|---|---|---|
+| **BigQuery** | Bytes processed, slot use, job history, repeated queries, full scans, partition pruning, clustering, `SELECT *`, scheduled queries nobody reads, BI patterns, dev on prod-size tables | Making SQL pretty. The goal is **fewer bytes processed per useful business query**. `WHERE DATE(transaction_timestamp) = ...` on an unpartitioned table scans everything; design for the dominant pattern (`PARTITION BY transaction_date`, `CLUSTER BY store_id, customer_id`) and select only the columns needed |
+| **Needless schedule** | Freshness a pipeline delivers vs freshness anyone reads | Tuning a job that should not run every 5 minutes. Ask "what business decision needs five-minute freshness?" If nobody can say, move to 30 minutes, hourly or daily. That removes compute instead of speeding it up |
+| **Dataproc** | Persistent clusters, utilisation, executor sizing, autoscaling, idle periods, shuffle, skew, joins, caching, rereads | Four hours of Spark on 24 hours of cluster. Prefer ephemeral or job-scoped compute or autoscaling. Do **not** resize an important job and break its SLA to turn a FinOps dashboard green |
+| **Dataflow** | Worker utilisation, autoscaling, shuffle and state, hot keys, state retention, windows, low-volume always-on streams | Streaming for a report read once a day. Challenge the requirement; that workload may belong in batch |
+| **Storage** | Access profile by prefix: Standard / Nearline / Coldline / Archive; lifecycle or Autoclass | Moving everything cold. Count retrieval fees, minimum storage duration, regulatory retention, backups and replay frequency. If Spark or Dataflow replays it often, archiving only moves the cost |
+| **Pricing model** | Stable vs bursty BigQuery workloads on real history | Assuming one model is cheaper. Model both from actual usage. Bursty may suit on-demand; stable may suit capacity. Use `maximum_bytes_billed` to stop accidental huge ad hoc scans |
+| **Dev vs prod** | Developers testing SQL on full production-scale tables, 30 times | Give engineers a representative sample or dev dataset so they iterate without burning production compute |
+| **Retire** | Cost, active users, owner, last important use | Tuning a product nobody uses |
+
+**Flow 3 — tune or retire?**
+
+```mermaid
+flowchart TD
+    P["Data product<br/>illustration: high annual cost,<br/>4 active users, owner unclear,<br/>last important use 9 months ago"]
+    P --> Q1{"Named business owner<br/>and a decision it supports?"}
+    Q1 -->|"no"| R1["Retire candidate<br/>notify consumers, agree a window,<br/>archive, switch off"]
+    Q1 -->|"yes"| Q2{"Value justifies cost?"}
+    Q2 -->|"yes"| T1["Tune it<br/>levers 1 to 7"]
+    Q2 -->|"no"| R2["Renegotiate SLA or scope,<br/>or retire"]
+    R1 --> D["Definition of done:<br/>consumer moved or confirmed gone,<br/>legacy off, cost line removed"]
+    R2 --> D
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class P red
+    class Q1,Q2 yellow
+    class R1,R2,D green
+    class T1 blue
+```
+
+> Sometimes the best optimisation is **delete**, not tune. This is the same discipline as the 2,000-pipeline migration in Q7: retirement is an engineering deliverable. (The $-figure in the diagram is an illustration, not a claim about any client.)
+
+**Flow 4 — make it stick (the half most candidates skip)**
+
+```mermaid
+flowchart TD
+    X0["Without controls<br/>optimise once, then drift back up"]
+    A["A Ownership<br/>technical owner, business owner,<br/>budget, SLA, cost, adoption"]
+    Bx["B FinOps view<br/>cost per LOB, product, pipeline,<br/>per TB or event, per active user,<br/>bytes and slots, MoM variance"]
+    C["C Guardrails<br/>Terraform modules, pipeline templates,<br/>CI/CD cost checks, labels,<br/>quotas, budget alerts, defaults"]
+    Dx["D QBR governance<br/>cost, SLA, adoption,<br/>reliability, value on one page"]
+    OK["Cost is part of product ownership,<br/>not a once-a-year finance complaint"]
+    X0 --> A --> Bx --> C --> Dx --> OK
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class X0 red
+    class A,Bx,C blue
+    class Dx yellow
+    class OK green
+```
+
+**The mistake to name: cost removal vs cost displacement**
+
+```mermaid
+flowchart LR
+    M1["Change a 15-minute SLA<br/>to 24 hours"]
+    M2["Cloud cost down"]
+    M3["Store managers see<br/>yesterday's inventory"]
+    M4["Operational pain and business loss up"]
+    M5["That is displacement,<br/>not a saving"]
+    M1 --> M2 --> M3 --> M4 --> M5
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class M1,M2 blue
+    class M3,M4 yellow
+    class M5 red
+```
+
+Want **lower cost per unit of business value**, not merely a smaller cloud bill. Put value next to cost: a product costing a lot with major commercial value may be fine; a cheap one nobody uses may not be.
+
+**Spoken answer (about 90 seconds).** `//` short pause, `///` long pause, `⏹` stop.
+
+> "With a $4M platform, I **start with the bill**, not with assumptions. /// I attribute spend by service, domain, team and workload, because I'm looking for **concentration**. // A small number of workloads usually drive most of the cost. ///
+>
+> Then I attack **structural waste** first. // In BigQuery: bytes scanned, partitioning, clustering, repeated queries, unused scheduled workloads. // In Dataproc: idle clusters, skew, persistent capacity. // In Dataflow: utilisation, state, and especially streaming pipelines whose business SLA doesn't need streaming. // Then storage lifecycle, and whether stable workloads are on the right pricing model. ///
+>
+> Before I optimise anything expensive I ask one question: **does this data product still earn its cost?** // Retirement is often better than tuning. ///
+>
+> Then I make it **permanent**. // Every data product has a named owner, a cost and an SLA. // Cost sits on the same QBR page as adoption and reliability. // And the common fixes become **platform defaults and CI guardrails**, not one-time cleanup scripts. ///
+>
+> And I don't call it a saving if I've just degraded an SLA the business depends on. // I want **lower cost per unit of value**, not a smaller bill. ⏹
+>
+> Anyone can reduce a cloud bill for a quarter. // The harder job is changing the **ownership model** so the saving is still there a year later."
+
+**Follow-up probes**
+
+| Probe | Answer |
+|---|---|
+| "Which lever gives the biggest saving?" | "It depends on the bill, which is why I start there. Usually it is a SLA that's tighter than anyone needs, or a product nobody uses. Tuning comes after." |
+| "How do you know a saving is real?" | "Same workload, same window, before and after, with what else changed written down. If I can't give the baseline I don't quote the number." |
+| "Your most cost-efficient change?" | Name a real one with the mechanism and measurement, no percentage unless it is on the resume or you can defend its baseline. |
+| "On-demand or capacity for BigQuery?" | "Model both from job history. Bursty and unpredictable may suit on-demand; stable and predictable may suit capacity. Don't assume." |
+| "The team resists losing their budget saving?" | "The team that benefits keeps the benefit. If the saving lands on someone who doesn't own that budget, I've built a perverse incentive." |
+
+**Key elements:** Bill-first; concentration test; ordered levers; **retire before tune**; the governance that makes savings stick (ownership, FinOps view, guardrails, QBR); cost removal vs cost displacement.
+
+**Pass signal:** The "make it stick" half and the "is this product worth existing?" question. Most candidates give a list of tips.
+**Fail signal:** A list of tips. A saving that degrades an SLA with no acknowledgment. A percentage with no baseline.
 
 **RESOLVED against your current resume.** Your resume carries **no** cost-reduction percentage at any employer. The "−40% AWS/Databricks cost" and "−60% DBT/Spark runtime" figures came from a stale facts file and are not on the document the interviewer holds. See `ROUND_1_RRK_GAP_CLOSURE.md` §4.
 
 What that means for this answer:
-- You are free to describe the **mechanism** of cost work at Makro (partitioning and clustering corrected across the estate, data contracts, cost attribution per job and team, FinOps ownership, Databricks cluster policies) without a headline percentage.
-- If you want to quote a percentage, it must be one you can defend with **baseline, measurement window and what else changed**. State it as "roughly" and offer the baseline unprompted. A number that is not on the resume and cannot be defended is worse than no number.
+- You may describe the **mechanism** of cost work at Makro (partitioning and clustering, data contracts, cost attribution per job and team, FinOps ownership, Databricks cluster policies) without a headline percentage.
+- If you quote a percentage, it must have a **baseline, window and what else changed**. State it as "roughly" and offer the baseline unprompted.
 - Do **not** attach any figure from a role that is not on the resume to Makro.
-
-The strong form of this answer is the method, not the percentage: show the cost-per-job view, the three biggest levers you pulled, and the guardrail that stopped it coming back.
 
 ---
 
 ### Q13. "How do you handle data residency and regulatory requirements across Singapore, Thailand and Vietnam?"
 
-**Framework:** Model the boundary → Controls → Evidence → Operating discipline
+**Framework:** Classify → Boundary → Controls → Cross-border paths → Evidence → Operating discipline
 
-**Flow**
+**Opening line:** "I treat data residency as an **architecture constraint, not a compliance checkbox.**"
+
+For each country, three questions: **What data do we have? Where is it allowed to live? Under what conditions can it cross the boundary?** Then make the safe behaviour the default behaviour.
+
+**Flow 0 — the whole answer**
 
 ```mermaid
 flowchart TD
-    N0["Model the boundary<br/>projects per jurisdiction,<br/>org policies block drift"]
-    N1["Classify before protecting<br/>PDPA, GDPR, MAS TRM<br/>policy tags"]
-    N2["Controls<br/>column security and masking,<br/>VPC-SC, CMEK per jurisdiction"]
-    N3["Cross-boundary flows<br/>approved paths only,<br/>named legal basis"]
-    N4["Evidence is the deliverable<br/>each control mapped to an artefact"]
-    N5["Operating discipline<br/>review, test, audit logs"]
-    N0 --> N1
-    N1 --> N2
-    N2 --> N3
-    N3 --> N4
-    N4 --> N5
+    C1["1 Classify the data<br/>personal, sensitive, financial, restricted"]
+    C2["2 Make boundaries structural<br/>project and folder per jurisdiction,<br/>org policy blocks drift"]
+    C3["3 Enforce technically<br/>IAM, VPC-SC, CMEK,<br/>policy tags, masking"]
+    C4["4 Cross-border only by<br/>an approved path<br/>purpose, legal basis, owner"]
+    C5["5 Evidence<br/>requirement to control<br/>to artefact"]
+    C6["6 Operate it<br/>review, test, audit logs"]
+    C1 --> C2 --> C3 --> C4 --> C5 --> C6
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
-    class N0,N1,N2,N3,N4 blue
-    class N5 green
+    class C1 red
+    class C2,C3,C4,C5 blue
+    class C6 green
 ```
 
+**Flow 1 — classification drives the rules**
 
-> "I treat residency and regulation as **architecture constraints**, not policies to apply after the fact. The discipline I use: if the constraint isn't expressed as a structural boundary, it will be violated eventually by someone in a hurry.
->
-> **Structurally:** separate projects per jurisdiction, with **org policies** — resource location, service-account key restrictions — so that a mis-placed resource is blocked rather than detected. I would not allow a single logical dataset to span jurisdictions, because the moment it does, every query becomes a residency question and the answer becomes 'it depends on the data'.
->
-> **Classification before protection.** You cannot apply masking without knowing what's sensitive, so I start with taxonomy: what classes of data exist, which are regulated under PDPA in Singapore, PDPA in Thailand, GDPR where it applies, and MAS TRM expectations for Singapore financial institutions. Those classifications become **policy tags in Dataplex** and flow into BigQuery column-level security and dynamic masking, so protection is applied by classification rather than by a developer remembering.
->
-> **Cross-boundary flow** is the real design question. I define approved paths explicitly — which flows, which legal basis, which controls — rather than relying on network reachability. **VPC Service Controls** provides the perimeter for the most sensitive sets, and **CMEK** with a per-jurisdiction key hierarchy gives both residency evidence and customer-controlled destruction.
->
-> **Evidence is the deliverable.** In regulated programmes the regulator asks for proof, not assurance. So controls map to named requirements, each with an artefact — a policy, a log, a scan result, an approval record. I've done this for MAS TRM at SCB across AML for 15+ countries, so I know the evidence discipline, not just the controls.
->
-> **Country crib (verify with counsel before quoting as legal advice):** Singapore PDPA has no blanket localisation rule but imposes a transfer-limitation obligation (comparable protection abroad), and MAS outsourcing/TRM expectations apply to financial institutions. Thailand PDPA restricts cross-border transfer to destinations with adequate protection or via approved safeguards. Vietnam is the strictest of the three: Decree 13 (personal data protection) requires a transfer impact assessment, and the Cybersecurity Law/Decree 53 can require certain data to be stored locally. Say "the strictest regime sets the design baseline" and keep the exact legal reading with the client's counsel.
->
-> **And the honest limitation:** no architecture makes a residency question disappear. If the client's business model genuinely requires data to move, I say so early and design the controls and the legal basis around it — rather than discovering it in month seven."
+```mermaid
+flowchart TD
+    D["Data classification<br/>Public / Internal / Confidential /<br/>Personal / Sensitive Personal /<br/>Financial / Restricted"]
+    D --> J["Jurisdiction"]
+    J --> R["Allowed regions"]
+    R --> PR["Allowed processing"]
+    PR --> I["Allowed identities"]
+    I --> X["Cross-border rules"]
+    X --> RT["Retention and deletion"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class D red
+    class J,R,PR,I,X blue
+    class RT green
+```
 
-**Key elements:** Boundary as structure; classification-driven protection; **explicit approved cross-boundary paths**; evidence mapping to named requirements; honesty about when the constraint conflicts with the business.
+Classification comes **before** encryption: you cannot mask what you have not identified. Classifications become **policy tags in Dataplex**, which drive BigQuery column-level security and dynamic masking, so protection follows the label instead of a developer remembering.
 
-**Pass signal:** You treat residency as a design input that constrains topology, not a checkbox.
-**Fail signal:** "We keep that data in Singapore" with no controls, no evidence, no view on cross-border flow.
+**Flow 2 — make country boundaries structural**
+
+```mermaid
+flowchart TD
+    G["GLOBAL GOVERNANCE<br/>policies, standards,<br/>control evidence"]
+    G --> SG
+    G --> TH
+    G --> VN
+    subgraph SG["Singapore boundary"]
+        SG1["Projects and folders"]
+        SG2["BigQuery, GCS, Dataflow,<br/>Pub/Sub, KMS"]
+        SG1 --> SG2
+    end
+    subgraph TH["Thailand boundary"]
+        TH1["Projects and folders"]
+        TH2["BigQuery, GCS, Dataflow,<br/>Pub/Sub, KMS"]
+        TH1 --> TH2
+    end
+    subgraph VN["Vietnam boundary"]
+        VN1["Projects and folders"]
+        VN2["BigQuery, GCS, Dataflow,<br/>Pub/Sub, KMS"]
+        VN1 --> VN2
+    end
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class G red
+    class SG1,SG2,TH1,TH2,VN1,VN2 blue
+```
+
+Do **not** build `asia_customer_master` holding unrestricted regulated data from three countries and figure out residency later. Use `sg_customer`, `th_customer`, `vn_customer` with explicit ownership and boundaries. One logical dataset spanning jurisdictions makes every query a residency question.
+
+**Flow 3 — enforce it technically**
+
+```mermaid
+flowchart LR
+    ORG["Organisation"]
+    ORG --> POL["Org policy<br/>resource location,<br/>service-account key limits"]
+    ORG --> IAMX["IAM<br/>who can access"]
+    ORG --> VPC["VPC Service Controls<br/>where data may move"]
+    ORG --> KMS["Cloud KMS / CMEK<br/>per-jurisdiction key hierarchy"]
+    ORG --> LOG["Audit logs<br/>and Terraform policy"]
+    POL --> OUT["Mis-placed resource is<br/>blocked, not detected later"]
+    IAMX --> OUT
+    VPC --> OUT
+    KMS --> OUT
+    LOG --> OUT
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class ORG red
+    class POL,IAMX,VPC,KMS,LOG blue
+    class OUT green
+```
+
+> **IAM answers "who can access this?" VPC Service Controls helps answer "where is this data allowed to move?"** You need both.
+
+**Flow 4 — column and row protection inside BigQuery**
+
+```mermaid
+flowchart TD
+    T["customer table<br/>customer_id, name, email, mobile,<br/>passport_number, purchase_amount, store_id"]
+    T --> PT["Policy tags from Dataplex<br/>on sensitive columns"]
+    PT --> CL["Column-level security<br/>and dynamic masking"]
+    T --> RL["Row-level security<br/>and authorized views"]
+    CL --> AN["Analyst view<br/>customer_segment, purchase_amount, store_id"]
+    RL --> AN
+    AN --> NO["Not exposed by default:<br/>passport_number, mobile, full name"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class T red
+    class PT,CL,RL blue
+    class AN green
+    class NO yellow
+```
+
+Give people the data the job needs, not the whole table.
+
+**Flow 5 — a cross-border flow needs an explicit path**
+
+```mermaid
+flowchart TD
+    A["Thailand restricted data<br/>wants to reach Singapore"]
+    A --> Q{"Is cross-border transfer<br/>permitted for this data?"}
+    Q -->|"no"| L["Stays local"]
+    Q -->|"yes"| B["Legal basis or safeguard<br/>approved by Legal / DPO"]
+    B --> C["Approved attributes only"]
+    C --> D["Approved transfer path<br/>and destination boundary"]
+    D --> E["Audit evidence<br/>source, destination, purpose, owner,<br/>retention, encryption, approval"]
+    NO["Not this: a pipeline moves it<br/>because networking allows it"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class A red
+    class Q yellow
+    class L,E green
+    class B,C,D blue
+    class NO red
+```
+
+**Country notes: principles stated confidently, exact law validated with counsel**
+
+| Country | What to say | What not to say |
+|---|---|---|
+| **Singapore** | PDPA has a **Transfer Limitation Obligation**: personal data sent abroad must get protection comparable to the PDPA. So the design asks "what leaves, why, to whom, under which approved mechanism?" MAS TRM and outsourcing expectations apply to financial institutions | "PDPA means everything stays in Singapore." That is too simple |
+| **Thailand** | PDPA treats overseas transfer as something to design explicitly: the destination should have adequate protection, subject to statutory exceptions and permitted mechanisms. Thai customer PII sits in a TH-controlled boundary; only approved flows leave | Reciting section numbers you haven't checked |
+| **Vietnam** | The personal-data and data-localisation framework has been changing (a newer personal-data-protection law and implementing rules are reported to be replacing the Decree 13 transfer procedure). So: "I keep a distinctly controlled Vietnam boundary until Legal or the DPO has approved the specific transfer, and I validate against the **current** requirements with local counsel" | Quoting "Decree 13" or a transfer-impact-assessment rule as current law. Do not improvise a legal conclusion in an architecture meeting |
+
+> **Currency check before the interview:** I could not verify the 2026 Vietnamese position from this session. Confirm it yourself, or keep the answer at the principle ("the strictest regime sets the design baseline; counsel confirms the legal reading").
+
+**CMEK is not residency.** Encryption-key control and data residency are related but different controls. Residency depends on where data and processing artefacts are stored and processed, and the service's location commitments, not on where you manage a key. Say "CMEK gives customer-controlled keys and controlled destruction; it supports a residency story, it does not prove one." That distinction lands well with a strong cloud interviewer.
+
+**Flow 6 — evidence is part of the architecture**
+
+```mermaid
+flowchart LR
+    RQ["Requirement<br/>restricted data stays<br/>inside the approved boundary"]
+    CT["Control<br/>resource-location policy,<br/>architecture"]
+    IM["Implementation<br/>Terraform + org policy"]
+    EV["Evidence<br/>policy config, deployment record,<br/>audit logs"]
+    RQ --> CT --> IM --> EV
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class RQ red
+    class CT,IM blue
+    class EV green
+```
+
+| Requirement | Control | Owner | Evidence |
+|---|---|---|---|
+| Data location | Location architecture, org policy | Platform | Config evidence |
+| Access | IAM, groups | Security | IAM policy, audit logs |
+| Exfiltration | VPC Service Controls | Security | Perimeter config and logs |
+| Encryption | KMS / CMEK | Security | Key-policy evidence |
+| PII protection | Classification, policy tags, BigQuery controls | Data owner | Policy evidence |
+| Cross-border transfer | Approved flow | DPO / Legal | Approval and audit trail |
+
+The regulator doesn't want "we're pretty sure nobody can move it". They want evidence the control exists **and operates**.
+
+**Spoken answer (about 90 seconds).** `//` short pause, `///` long pause, `⏹` stop.
+
+> "I treat residency as an **architecture constraint**, not something Compliance adds later. ///
+>
+> First I **classify** the data. // I need to know what's personal, sensitive, financial or unrestricted, because the controls follow the classification. ///
+>
+> Second, I make **jurisdiction boundaries structural**. // Where the requirements call for it, that means separate project and data boundaries per country, controlled resource locations, IAM, VPC Service Controls and appropriate key management. ///
+>
+> Third, **cross-border movement is explicit**. // No pipeline moves regulated data just because networking allows it. // Every flow has a purpose, an approved mechanism, an owner, a destination and an audit trail. ///
+>
+> Singapore isn't a blanket 'everything stays here' rule. // Its Transfer Limitation Obligation requires comparable protection when data goes abroad. // Thailand also has explicit requirements for overseas transfer. // For Vietnam, the framework has been changing, so I'd validate the specific transfer against the **current** law with local counsel rather than quote an old rule. ///
+>
+> And **evidence is part of the deliverable**. // Every requirement maps to a control, and every control to an artefact: configuration, logs, classification records, approvals. // I've worked to that discipline on MAS-regulated AML work across 15-plus countries. ///
+>
+> If residency exists only in a PowerPoint policy, somebody will eventually violate it. // So I make the safe path the **technically enforced** path. ⏹"
+
+**One line to remember:** "Classify the data, make residency a physical architecture boundary, make cross-border flows explicit, and design the evidence at the same time as the control."
+
+**The honest limitation:** no architecture makes a residency question disappear. If the business model genuinely requires data to move, say so early and design the controls and the legal basis around it, rather than discovering it in month seven.
+
+**Follow-up probes**
+
+| Probe | Answer |
+|---|---|
+| "Does CMEK give you residency?" | "No. It gives customer-controlled keys and controlled destruction. Residency depends on where data and processing are located; I treat them as related, separate controls." |
+| "Does Singapore require data to stay in Singapore?" | "Not as a blanket rule. The Transfer Limitation Obligation requires comparable protection abroad, so I design approved transfer paths." |
+| "A pipeline needs Thai data in Singapore for a regional dashboard?" | "Can the dashboard use aggregated or de-identified attributes? If it needs personal data, it goes through the approved-flow path with Legal/DPO sign-off and evidence. Not through a convenient pipeline." |
+| "How do you prove it to a regulator?" | "Requirement to control to artefact: org-policy config, IAM and VPC-SC settings, audit logs, classification records, approval trail." |
+| "Where does the strictest regime come in?" | "It sets the design baseline, and counsel confirms the legal reading per country." |
+| "Your own evidence?" | Point to a physical artefact you built (see TODO). |
+
+**Key elements:** Boundary as structure; classification-driven protection; **explicit approved cross-boundary paths**; evidence mapped to named requirements; CMEK is not residency; honesty about when the constraint conflicts with the business; legal specifics validated with counsel.
+
+**Pass signal:** Residency is a design input that constrains topology, not a checkbox.
+**Fail signal:** "We keep that data in Singapore" with no controls, no evidence, no view on cross-border flow. Or reciting a legal rule that is out of date.
 
 [TODO: your SCB AML work across 15+ countries and your PDPA/GDPR work at Makro are the real evidence here — pull the specific artefact you produced (control map, evidence pack, classification taxonomy) so you can point to a physical thing you built.]
 
