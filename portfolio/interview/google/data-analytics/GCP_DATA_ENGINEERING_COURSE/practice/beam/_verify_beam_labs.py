@@ -26,19 +26,40 @@ import pathlib
 import re
 import subprocess
 import sys
-import tempfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 
 # A python block followed by its expected output.
+#
+# The code body must not contain a fence, so that an illustrative snippet in the
+# prose (which has no "Expected output" of its own) cannot swallow the real
+# block that follows it.
 BLOCK = re.compile(
-    r"```python\n(.*?)```\n\nExpected output:\n\n```text\n(.*?)```",
+    r"```python\n((?:(?!```).)*?)```\n\nExpected output:\n\n```text\n((?:(?!```).)*?)```",
+    re.S,
+)
+
+# The same, but the output is compared as a *multiset of lines* rather than an
+# exact string.  Beam makes no ordering promise, so a block that deliberately
+# demonstrates unordered output is marked with this heading and checked by
+# sorting both sides.  The multiset comparison still catches a missing or an
+# extra element — only the order is forgiven.
+BLOCK_UNORDERED = re.compile(
+    r"```python\n((?:(?!```).)*?)```\n\nExpected output \(unordered\):\n\n"
+    r"```text\n((?:(?!```).)*?)```",
     re.S,
 )
 
 # Only these files are scanned; the assignments are graded exercises and are
 # checked by their own solution scripts.
 SCAN_GLOBS = ["*.md", "labs/*.md", "assignments/*.md"]
+
+# The preamble every block gets: the module's own path on sys.path, plus the
+# Beam import, so a block can use either.
+PREAMBLE = """import sys, pathlib
+sys.path.insert(0, {beam_lib!r})
+sys.path.insert(0, {here!r})
+"""
 
 
 def candidate_interpreters() -> list[str]:
@@ -74,20 +95,48 @@ def scan_files() -> list[pathlib.Path]:
     files: list[pathlib.Path] = []
     for pattern in SCAN_GLOBS:
         files.extend(sorted(HERE.glob(pattern)))
-    # The top-level README and the workbench reference are not module prose.
+    # The README is an index, not module prose.
     return [f for f in files if f.name not in {"README.md"}]
 
 
-def run_block(interpreter: str, code: str, cwd: pathlib.Path) -> subprocess.CompletedProcess:
+def blocks_in(text: str) -> list[tuple[str, str, bool]]:
+    """Return ``(code, expected, unordered)`` for every block in a file.
+
+    A file may mix the two heading styles, so both patterns are searched and
+    the results are merged in the order they appear in the text.
+    """
+    found: list[tuple[int, str, str, bool]] = []
+    for match in BLOCK.finditer(text):
+        found.append((match.start(), match.group(1), match.group(2), False))
+    for match in BLOCK_UNORDERED.finditer(text):
+        found.append((match.start(), match.group(1), match.group(2), True))
+    found.sort(key=lambda item: item[0])
+    return [(code, expected, unordered) for _, code, expected, unordered in found]
+
+
+def same_output(actual: str, expected: str, unordered: bool) -> bool:
+    """Compare two transcripts, optionally forgiving line order."""
+    if not unordered:
+        return actual.rstrip("\n") == expected.rstrip("\n")
+    return sorted(actual.rstrip("\n").splitlines()) == sorted(
+        expected.rstrip("\n").splitlines()
+    )
+
+
+def run_block(
+    interpreter: str, code: str, cwd: pathlib.Path
+) -> subprocess.CompletedProcess:
     """Execute one code block and return the completed process."""
+    preamble = PREAMBLE.format(beam_lib=str(HERE), here=str(HERE))
     script = cwd / "_beam_block.py"
-    script.write_text(code)
+    script.write_text(preamble + code)
     try:
         return subprocess.run(
             [interpreter, str(script)],
             capture_output=True,
             text=True,
             cwd=str(cwd),
+            timeout=300,
         )
     finally:
         script.unlink(missing_ok=True)
@@ -127,13 +176,13 @@ def main() -> int:
     checked = 0
     unstable = 0
 
-    # Labs write their output under the beam/ directory, so run them there.
     workdir = HERE
 
     for path in scan_files():
         text = path.read_text(encoding="utf-8")
-        for index, match in enumerate(BLOCK.finditer(text), start=1):
-            code, expected = match.group(1), match.group(2)
+        for index, (code, expected, unordered) in enumerate(
+            blocks_in(text), start=1
+        ):
             checked += 1
 
             result = run_block(interpreter, code, workdir)
@@ -146,7 +195,7 @@ def main() -> int:
                 print(result.stderr.strip()[-1500:])
                 continue
 
-            if actual != want:
+            if not same_output(actual, want, unordered):
                 mismatches += 1
                 print(f"MISMATCH {path.name} block {index}")
                 print("--- expected ---")
@@ -162,7 +211,7 @@ def main() -> int:
                 first = actual
                 for _ in range(args.repeats - 1):
                     again = run_block(interpreter, code, workdir)
-                    if again.stdout.rstrip("\n") != first:
+                    if not same_output(again.stdout.rstrip("\n"), first, unordered):
                         unstable += 1
                         print(f"UNSTABLE {path.name} block {index}")
                         print(f"  run 1: {first[:200]!r}")

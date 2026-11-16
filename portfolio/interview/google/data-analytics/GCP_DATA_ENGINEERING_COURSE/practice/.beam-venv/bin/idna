@@ -1,0 +1,6 @@
+#!/Users/prem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/practice/.beam-venv/bin/python
+import sys
+from idna.cli import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

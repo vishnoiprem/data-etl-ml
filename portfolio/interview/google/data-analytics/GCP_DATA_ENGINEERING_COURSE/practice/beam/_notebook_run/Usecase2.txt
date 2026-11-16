@@ -1,0 +1,32 @@
+NOTEBOOK Usecase2.ipynb
+======================================================================
+
+--- cell 1 --- exit 0
+
+LOG:
+WARNING:root:apitools not found, and bigquery client libraries are not available despite the import not raising an ImportError.
+INFO:PrismJobServer:I1115 12:24:23.514734 1091433 ev_poll_posix.cc:588] FD from fork parent still in poll list: fd(5, generation: 1)
+INFO:PrismRunner:Serving JobManagement (endpoint='localhost:56349')
+ERROR:RetailSalesPipeline:Error processing record 1005,P005,Clothing,-2,19.99  # Invalid quantity: could not convert string to float: '19.99  # Invalid quantity'
+ERROR:RetailSalesPipeline:Error processing record 1006,P006,Electronics,1,-99.99  # Invalid price: could not convert string to float: '-99.99  # Invalid price'
+ERROR:RetailSalesPipeline:Error processing record 1007,,Toys,2,49.99  # Missing product_id: could not convert string to float: '49.99  # Missing product_id'
+INFO:PrismRunner:pipeline done! (job='job-001[job]')
+ERROR:RetailSalesPipeline:Error processing record 1005,P005,Clothing,-2,19.99  # Invalid quantity: could not convert string to float: '19.99  # Invalid quantity'
+ERROR:RetailSalesPipeline:Error processing record 1006,P006,Electronics,1,-99.99  # Invalid price: could not convert string to float: '-99.99  # Invalid price'
+ERROR:RetailSalesPipeline:Error processing record 1007,,Toys,2,49.99  # Missing product_id: could not convert string to float: '49.99  # Missing product_id'
+INFO:PrismRunner:pipeline done! (job='job-002[job]')
+
+--- cell 2 --- exit 0
+
+LOG:
+WARNING:root:apitools not found, and bigquery client libraries are not available despite the import not raising an ImportError.
+INFO:PrismJobServer:I1115 12:24:26.671599 1091609 ev_poll_posix.cc:588] FD from fork parent still in poll list: fd(5, generation: 1)
+INFO:PrismRunner:Serving JobManagement (endpoint='localhost:56366')
+ERROR:RetailSalesPipeline:Error processing record 1005,P005,Clothing,-2,19.99  # Invalid quantity: could not convert string to float: '19.99  # Invalid quantity'
+ERROR:RetailSalesPipeline:Error processing record 1006,P006,Electronics,1,-99.99  # Invalid price: could not convert string to float: '-99.99  # Invalid price'
+ERROR:RetailSalesPipeline:Error processing record 1007,,Toys,2,49.99  # Missing product_id: could not convert string to float: '49.99  # Missing product_id'
+INFO:PrismRunner:pipeline done! (job='job-001[job]')
+ERROR:RetailSalesPipeline:Error processing record 1005,P005,Clothing,-2,19.99  # Invalid quantity: could not convert string to float: '19.99  # Invalid quantity'
+ERROR:RetailSalesPipeline:Error processing record 1006,P006,Electronics,1,-99.99  # Invalid price: could not convert string to float: '-99.99  # Invalid price'
+ERROR:RetailSalesPipeline:Error processing record 1007,,Toys,2,49.99  # Missing product_id: could not convert string to float: '49.99  # Missing product_id'
+INFO:PrismRunner:pipeline done! (job='job-002[job]')

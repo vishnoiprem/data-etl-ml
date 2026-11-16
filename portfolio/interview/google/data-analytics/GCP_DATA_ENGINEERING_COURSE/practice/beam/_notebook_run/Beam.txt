@@ -1,0 +1,533 @@
+NOTEBOOK Beam.ipynb
+======================================================================
+
+--- cell 3 --- SKIPPED (jupyter magic)
+
+--- cell 5 --- exit 0
+
+
+--- cell 7 --- exit 0
+
+
+--- cell 9 --- SKIPPED (needs beam.io.Read()
+
+--- cell 10 --- SKIPPED (needs beam.io.Read()
+
+--- cell 13 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+
+--- cell 15 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+
+--- cell 17 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+
+--- cell 19 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+
+--- cell 21 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006223', 'order_timestamp': 1658802886, 'customer_id': 'C01057', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006164', 'order_timestamp': 1658713690, 'customer_id': 'C00767', 'quantity': 1, 'total': 20, 'books': [{'book_id': 'B04', 'quantity': 1, 'subtotal': 20}]}, {'order_id': '000000000005690', 'order_timestamp': 1657673301, 'customer_id': 'C00985', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000005658', 'order_timestamp': 1657573335, 'customer_id': 'C00791', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000005873', 'order_timestamp': 1658183696, 'customer_id': 'C00684', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}]
+
+--- cell 23 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006031', 'order_timestamp': 1658499486, 'customer_id': 'C01072', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000006170', 'order_timestamp': 1658730093, 'customer_id': 'C00921', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000005809', 'order_timestamp': 1658010058, 'customer_id': 'C00524', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000005692', 'order_timestamp': 1657705035, 'customer_id': 'C00630', 'quantity': 1, 'total': 44, 'books': [{'book_id': 'B10', 'quantity': 1, 'subtotal': 44}]}, {'order_id': '000000000006234', 'order_timestamp': 1658825468, 'customer_id': 'C00945', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+
+--- cell 25 --- SKIPPED (needs ReadFromBigQuery)
+
+--- cell 28 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006179', 'order_timestamp': 1658754182, 'customer_id': 'C00808', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006216', 'order_timestamp': 1658791199, 'customer_id': 'C00575', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006154', 'order_timestamp': 1658694786, 'customer_id': 'C00860', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000005730', 'order_timestamp': 1657815962, 'customer_id': 'C00803', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006192', 'order_timestamp': 1658766083, 'customer_id': 'C00577', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+
+--- cell 30 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006287', 'order_timestamp': 1658920140, 'customer_id': 'C00653', 'quantity': 1, 'total': 49, 'books': [{'book_id': 'B01', 'quantity': 1, 'subtotal': 49}]}, {'order_id': '000000000005736', 'order_timestamp': 1657822654, 'customer_id': 'C01192', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000006172', 'order_timestamp': 1658733419, 'customer_id': 'C00855', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006303', 'order_timestamp': 1658982250, 'customer_id': 'C01054', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000005937', 'order_timestamp': 1658318438, 'customer_id': 'C00711', 'quantity': 1, 'total': 20, 'books': [{'book_id': 'B04', 'quantity': 1, 'subtotal': 20}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+
+--- cell 32 --- exit 1
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006100', 'order_timestamp': 1658601113, 'customer_id': 'C00727', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000006276', 'order_timestamp': 1658886808, 'customer_id': 'C00914', 'quantity': 1, 'total': 49, 'books': [{'book_id': 'B01', 'quantity': 1, 'subtotal': 49}]}, {'order_id': '000000000006265', 'order_timestamp': 1658856112, 'customer_id': 'C00722', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000006135', 'order_timestamp': 1658678810, 'customer_id': 'C00892', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000006158', 'order_timestamp': 1658700309, 'customer_id': 'C00829', 'quantity': 1, 'total': 35, 'books': [{'book_id': 'B03', 'quantity': 1, 'subtotal': 35}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+STDERR:
+te-packages/grpc/_channel.py", line 1182, in with_call
+    return _end_unary_response_blocking(state, call, True, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/prem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/GCP_DATA_ENGINEERING_COURSE/practice/.beam-venv/lib/python3.12/site-packages/grpc/_channel.py", line 999, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)  # pytype: disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.UNKNOWN
+	details = "worker_id: 'job-009[job]_ref_Environment_default_environment_1' read from context metadata but not registered in worker pool"
+	debug_error_string = "UNKNOWN:worker_id: 'job-009[job]_ref_Environment_default_environment_1' read from context metadata but not registered in worker pool"
+>
+
+
+WARNING:apache_beam.utils.subprocess_server:Really destroying service at localhost:55762 with cmd: ('/Users/prem/.apache_beam/cache/prism/bin/apache_beam-v2.77.0-prism-darwin-arm64', '--job_port', '55762', '--log_level', 'info', '--log_kind', 'json', '--serve_http=false')
+
+--- cell 34 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000005919', 'order_timestamp': 1658265384, 'customer_id': 'C01030', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000005936', 'order_timestamp': 1658311385, 'customer_id': 'C00698', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006077', 'order_timestamp': 1658583210, 'customer_id': 'C00629', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000005854', 'order_timestamp': 1658144879, 'customer_id': 'C01127', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000005813', 'order_timestamp': 1658016748, 'customer_id': 'C01176', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+
+--- cell 36 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006070', 'order_timestamp': 1658576267, 'customer_id': 'C01110', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006143', 'order_timestamp': 1658684805, 'customer_id': 'C01035', 'quantity': 1, 'total': 47, 'books': [{'book_id': 'B05', 'quantity': 1, 'subtotal': 47}]}, {'order_id': '000000000005749', 'order_timestamp': 1657836924, 'customer_id': 'C00763', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000006046', 'order_timestamp': 1658518481, 'customer_id': 'C00847', 'quantity': 1, 'total': 44, 'books': [{'book_id': 'B10', 'quantity': 1, 'subtotal': 44}]}, {'order_id': '000000000005925', 'order_timestamp': 1658281126, 'customer_id': 'C01133', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+
+--- cell 38 --- SKIPPED (needs WriteToBigQuery)
+
+--- cell 40 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006002', 'order_timestamp': 1658426804, 'customer_id': 'C01075', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000006057', 'order_timestamp': 1658537441, 'customer_id': 'C00576', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000005769', 'order_timestamp': 1657907334, 'customer_id': 'C00845', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006080', 'order_timestamp': 1658586689, 'customer_id': 'C00525', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006212', 'order_timestamp': 1658786019, 'customer_id': 'C00969', 'quantity': 1, 'total': 49, 'books': [{'book_id': 'B01', 'quantity': 1, 'subtotal': 49}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+
+--- cell 41 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006088', 'order_timestamp': 1658596591, 'customer_id': 'C00496', 'quantity': 1, 'total': 38, 'books': [{'book_id': 'B11', 'quantity': 1, 'subtotal': 38}]}, {'order_id': '000000000005755', 'order_timestamp': 1657853756, 'customer_id': 'C00766', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000005641', 'order_timestamp': 1657520256, 'customer_id': 'C00788', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006196', 'order_timestamp': 1658770882, 'customer_id': 'C00648', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000005910', 'order_timestamp': 1658256739, 'customer_id': 'C00922', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+   id     name  score grade
+0   1    Alice     90     a
+1   2      Bob     85     b
+2   3  Charlie     88     a
+
+--- cell 43 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006027', 'order_timestamp': 1658490939, 'customer_id': 'C00792', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000005959', 'order_timestamp': 1658351431, 'customer_id': 'C00559', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006063', 'order_timestamp': 1658563095, 'customer_id': 'C00793', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006237', 'order_timestamp': 1658828369, 'customer_id': 'C00873', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000006010', 'order_timestamp': 1658434559, 'customer_id': 'C00745', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+   id     name  score grade
+0   1    Alice     90     a
+1   2      Bob     85     b
+2   3  Charlie     88     a
+('John', '25', 'Male', 'Engineering', '50000', 'USA', 'India', 5000.0)
+('Alice', '30', 'Female', 'HR', '60000', 'Canada', 'India', 6000.0)
+('Eve', '35', 'Female', None, '70000', 'Australia', 'India', 7000.0)
+('David', '32', 'Male', 'Marketing', '62000', 'Germany', 'India', 6200.0)
+('Sophia', '29', 'Female', 'IT', '0', 'France', 'India', 0.0)
+('Bob', '28', 'Male', 'IT', '55000', 'UK', 'India', 5500.0)
+('Charlie', '40', 'Male', 'IT', '75000', 'India', 'India', 7500.0)
+('Olivia', '33', 'Female', 'IT', '67000', 'Canada', 'India', 6700.0)
+('Liam', None, 'Male', 'Sales', '48000', 'USA', 'India', 4800.0)
+
+--- cell 45 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000005650', 'order_timestamp': 1657555151, 'customer_id': 'C01177', 'quantity': 1, 'total': 20, 'books': [{'book_id': 'B04', 'quantity': 1, 'subtotal': 20}]}, {'order_id': '000000000006047', 'order_timestamp': 1658521743, 'customer_id': 'C00880', 'quantity': 1, 'total': 20, 'books': [{'book_id': 'B04', 'quantity': 1, 'subtotal': 20}]}, {'order_id': '000000000005804', 'order_timestamp': 1658005271, 'customer_id': 'C01011', 'quantity': 1, 'total': 35, 'books': [{'book_id': 'B03', 'quantity': 1, 'subtotal': 35}]}, {'order_id': '000000000006126', 'order_timestamp': 1658655572, 'customer_id': 'C01142', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006315', 'order_timestamp': 1659039174, 'customer_id': 'C00510', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+   id     name  score grade
+0   1    Alice     90     a
+1   2      Bob     85     b
+2   3  Charlie     88     a
+('Liam', None, 'Male', 'Sales', '48000', 'USA', 'India', 4800.0)
+('Olivia', '33', 'Female', 'IT', '67000', 'Canada', 'India', 6700.0)
+('Eve', '35', 'Female', None, '70000', 'Australia', 'India', 7000.0)
+('Charlie', '40', 'Male', 'IT', '75000', 'India', 'India', 7500.0)
+('John', '25', 'Male', 'Engineering', '50000', 'USA', 'India', 5000.0)
+('Alice', '30', 'Female', 'HR', '60000', 'Canada', 'India', 6000.0)
+('Bob', '28', 'Male', 'IT', '55000', 'UK', 'India', 5500.0)
+('David', '32', 'Male', 'Marketing', '62000', 'Germany', 'India', 6200.0)
+('Sophia', '29', 'Female', 'IT', '0', 'France', 'India', 0.0)
+('HR', 60000)
+('IT', 197000)
+(None, 70000)
+('Sales', 48000)
+('Engineering', 50000)
+('Marketing', 62000)
+(None, 1)
+('Sales', 1)
+('Engineering', 1)
+('Marketing', 1)
+('HR', 1)
+('IT', 4)
+('Sales', 48000.0)
+('Engineering', 50000.0)
+('Marketing', 62000.0)
+('HR', 60000.0)
+('IT', 49250.0)
+(None, 70000.0)
+
+--- cell 47 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000005887', 'order_timestamp': 1658217573, 'customer_id': 'C00883', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000005806', 'order_timestamp': 1658005434, 'customer_id': 'C00980', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006025', 'order_timestamp': 1658486747, 'customer_id': 'C01159', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}, {'order_id': '000000000006325', 'order_timestamp': 1659078778, 'customer_id': 'C01022', 'quantity': 1, 'total': 20, 'books': [{'book_id': 'B04', 'quantity': 1, 'subtotal': 20}]}, {'order_id': '000000000006123', 'order_timestamp': 1658643557, 'customer_id': 'C00837', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+   id     name  score grade
+0   1    Alice     90     a
+1   2      Bob     85     b
+2   3  Charlie     88     a
+('Olivia', '33', 'Female', 'IT', '67000', 'Canada', 'India', 6700.0)
+('Sophia', '29', 'Female', 'IT', '0', 'France', 'India', 0.0)
+('Liam', None, 'Male', 'Sales', '48000', 'USA', 'India', 4800.0)
+('Bob', '28', 'Male', 'IT', '55000', 'UK', 'India', 5500.0)
+('Charlie', '40', 'Male', 'IT', '75000', 'India', 'India', 7500.0)
+('John', '25', 'Male', 'Engineering', '50000', 'USA', 'India', 5000.0)
+('Alice', '30', 'Female', 'HR', '60000', 'Canada', 'India', 6000.0)
+('Eve', '35', 'Female', None, '70000', 'Australia', 'India', 7000.0)
+('David', '32', 'Male', 'Marketing', '62000', 'Germany', 'India', 6200.0)
+('IT', 197000)
+('HR', 60000)
+('Sales', 48000)
+('Marketing', 62000)
+('Engineering', 50000)
+(None, 70000)
+('Engineering', 1)
+(None, 1)
+('IT', 4)
+('HR', 1)
+('Sales', 1)
+('Marketing', 1)
+('IT', 49250.0)
+('HR', 60000.0)
+('Sales', 48000.0)
+('Marketing', 62000.0)
+('Engineering', 50000.0)
+(None, 70000.0)
+{'user_id': '1', 'name': 'John', 'country': 'USA', 'order_id': '101', 'amount': '250'}
+{'user_id': '2', 'name': 'Alice', 'country': 'Canada', 'order_id': '102', 'amount': '300'}
+{'user_id': '3', 'name': 'Bob', 'country': 'UK', 'order_id': '104', 'amount': '500'}
+{'user_id': '4', 'name': 'Eve', 'country': 'Australia', 'order_id': '105', 'amount': '700'}
+{'user_id': '5', 'name': 'Charlie', 'country': 'India', 'order_id': '106', 'amount': '100'}
+
+--- cell 49 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006175', 'order_timestamp': 1658740829, 'customer_id': 'C01097', 'quantity': 1, 'total': 35, 'books': [{'book_id': 'B03', 'quantity': 1, 'subtotal': 35}]}, {'order_id': '000000000006026', 'order_timestamp': 1658486862, 'customer_id': 'C00928', 'quantity': 1, 'total': 49, 'books': [{'book_id': 'B01', 'quantity': 1, 'subtotal': 49}]}, {'order_id': '000000000005857', 'order_timestamp': 1658151944, 'customer_id': 'C01018', 'quantity': 1, 'total': 41, 'books': [{'book_id': 'B08', 'quantity': 1, 'subtotal': 41}]}, {'order_id': '000000000006260', 'order_timestamp': 1658851635, 'customer_id': 'C00947', 'quantity': 1, 'total': 28, 'books': [{'book_id': 'B02', 'quantity': 1, 'subtotal': 28}]}, {'order_id': '000000000005813', 'order_timestamp': 1658016748, 'customer_id': 'C01176', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+   id     name  score grade
+0   1    Alice     90     a
+1   2      Bob     85     b
+2   3  Charlie     88     a
+('John', '25', 'Male', 'Engineering', '50000', 'USA', 'India', 5000.0)
+('David', '32', 'Male', 'Marketing', '62000', 'Germany', 'India', 6200.0)
+('Alice', '30', 'Female', 'HR', '60000', 'Canada', 'India', 6000.0)
+('Bob', '28', 'Male', 'IT', '55000', 'UK', 'India', 5500.0)
+('Charlie', '40', 'Male', 'IT', '75000', 'India', 'India', 7500.0)
+('Eve', '35', 'Female', None, '70000', 'Australia', 'India', 7000.0)
+('Sophia', '29', 'Female', 'IT', '0', 'France', 'India', 0.0)
+('Olivia', '33', 'Female', 'IT', '67000', 'Canada', 'India', 6700.0)
+('Liam', None, 'Male', 'Sales', '48000', 'USA', 'India', 4800.0)
+('IT', 4)
+('Sales', 1)
+('Marketing', 1)
+('Engineering', 1)
+(None, 1)
+('HR', 1)
+('Marketing', 62000.0)
+('Engineering', 50000.0)
+(None, 70000.0)
+('HR', 60000.0)
+('IT', 49250.0)
+('Sales', 48000.0)
+('IT', 197000)
+('Sales', 48000)
+('Marketing', 62000)
+('Engineering', 50000)
+(None, 70000)
+('HR', 60000)
+{'user_id': '1', 'name': 'John', 'country': 'USA', 'order_id': '101', 'amount': '250'}
+{'user_id': '2', 'name': 'Alice', 'country': 'Canada', 'order_id': '102', 'amount': '300'}
+{'user_id': '3', 'name': 'Bob', 'country': 'UK', 'order_id': '104', 'amount': '500'}
+{'user_id': '4', 'name': 'Eve', 'country': 'Australia', 'order_id': '105', 'amount': '700'}
+{'user_id': '5', 'name': 'Charlie', 'country': 'India', 'order_id': '106', 'amount': '100'}
+{'user_id': '123', 'event_type': 'click', 'timestamp': '2023-10-01 10:00:00', 'metadata': '{"page": "home" "browser": "Chrome"}'}
+{'user_id': '456', 'event_type': 'view', 'timestamp': '2023-10-01 10:05:00', 'metadata': '{"page": "product" "browser": "Firefox"}'}
+{'user_id': '789', 'event_type': 'purchase', 'timestamp': '2023-10-01 10:10:00', 'metadata': '{"page": "checkout" "browser": "Safari"}'}
+
+--- cell 50 --- exit 0
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 2, 'name': 'Bob', 'score': 85}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+101,Product A,10
+102,Product B,15
+103,Product C,20
+2023-01-01,New York,Widget,100
+2023-01-02,New York,Widget,150
+2023-01-01,Los Angeles,Gadget,200
+2023-01-02,Los Angeles,Gadget,250
+2023-01-01,San Francisco,Widget,120
+2023-01-02,San Francisco,Widget,130
+test1, Los Angeles,Gadget,200
+2023-01-02,San Francisco,Widget,test2
+[{"name": "Alice", "age": 28},{"name": "Bob", "age": 24},{"name": "Charlie", "age": 32}]
+[{'order_id': '000000000006040', 'order_timestamp': 1658514156, 'customer_id': 'C00589', 'quantity': 1, 'total': 49, 'books': [{'book_id': 'B01', 'quantity': 1, 'subtotal': 49}]}, {'order_id': '000000000006277', 'order_timestamp': 1658903981, 'customer_id': 'C00927', 'quantity': 1, 'total': 35, 'books': [{'book_id': 'B03', 'quantity': 1, 'subtotal': 35}]}, {'order_id': '000000000005736', 'order_timestamp': 1657822654, 'customer_id': 'C01192', 'quantity': 1, 'total': 33, 'books': [{'book_id': 'B07', 'quantity': 1, 'subtotal': 33}]}, {'order_id': '000000000005719', 'order_timestamp': 1657776365, 'customer_id': 'C00669', 'quantity': 1, 'total': 49, 'books': [{'book_id': 'B01', 'quantity': 1, 'subtotal': 49}]}, {'order_id': '000000000005979', 'order_timestamp': 1658402594, 'customer_id': 'C00955', 'quantity': 1, 'total': 24, 'books': [{'book_id': 'B09', 'quantity': 1, 'subtotal': 24}]}]
+{'username': 'miguno', 'tweet': 'Rock: Nerf paper, scissors is fine.', 'timestamp': 1366150681}
+{'username': 'BlizzardCS', 'tweet': 'Works as intended.  Terran is IMBA.', 'timestamp': 1366154481}
+{'id': 1, 'name': 'Alice', 'score': 90}
+{'id': 3, 'name': 'Charlie', 'score': 88}
+   id     name  score grade
+0   1    Alice     90     a
+1   2      Bob     85     b
+2   3  Charlie     88     a
+('Olivia', '33', 'Female', 'IT', '67000', 'Canada', 'India', 6700.0)
+('Alice', '30', 'Female', 'HR', '60000', 'Canada', 'India', 6000.0)
+('Bob', '28', 'Male', 'IT', '55000', 'UK', 'India', 5500.0)
+('Charlie', '40', 'Male', 'IT', '75000', 'India', 'India', 7500.0)
+('Liam', None, 'Male', 'Sales', '48000', 'USA', 'India', 4800.0)
+('John', '25', 'Male', 'Engineering', '50000', 'USA', 'India', 5000.0)
+('Eve', '35', 'Female', None, '70000', 'Australia', 'India', 7000.0)
+('David', '32', 'Male', 'Marketing', '62000', 'Germany', 'India', 6200.0)
+('Sophia', '29', 'Female', 'IT', '0', 'France', 'India', 0.0)
+('IT', 197000)
+('Marketing', 62000)
+('Engineering', 50000)
+(None, 70000)
+('HR', 60000)
+('Sales', 48000)
+('IT', 4)
+('Marketing', 1)
+('Engineering', 1)
+(None, 1)
+('HR', 1)
+('Sales', 1)
+(None, 70000.0)
+('HR', 60000.0)
+('Sales', 48000.0)
+('IT', 49250.0)
+('Marketing', 62000.0)
+('Engineering', 50000.0)
+{'user_id': '5', 'name': 'Charlie', 'country': 'India', 'order_id': '106', 'amount': '100'}
+{'user_id': '1', 'name': 'John', 'country': 'USA', 'order_id': '101', 'amount': '250'}
+{'user_id': '2', 'name': 'Alice', 'country': 'Canada', 'order_id': '102', 'amount': '300'}
+{'user_id': '3', 'name': 'Bob', 'country': 'UK', 'order_id': '104', 'amount': '500'}
+{'user_id': '4', 'name': 'Eve', 'country': 'Australia', 'order_id': '105', 'amount': '700'}
+{'user_id': '123', 'event_type': 'click', 'timestamp': '2023-10-01 10:00:00', 'metadata': '{"page": "home" "browser": "Chrome"}'}
+{'user_id': '456', 'event_type': 'view', 'timestamp': '2023-10-01 10:05:00', 'metadata': '{"page": "product" "browser": "Firefox"}'}
+{'user_id': '789', 'event_type': 'purchase', 'timestamp': '2023-10-01 10:10:00', 'metadata': '{"page": "checkout" "browser": "Safari"}'}

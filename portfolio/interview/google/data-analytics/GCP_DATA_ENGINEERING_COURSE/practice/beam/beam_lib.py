@@ -1,89 +1,53 @@
-"""Shared helpers for the Beam labs.
+"""Shared helpers for the Beam practice modules and labs.
 
-Every lab in this suite imports from here, so the labs stay short and focused
-on the Beam concept they are teaching.  This module deliberately contains no
-Beam logic of its own — it is setup, data loading, and output formatting.
+Every module and lab imports from here, so the teaching material stays short
+and focused on the Beam concept it is teaching.  This module contains setup
+and output formatting only — no Beam logic of its own.
 
-Import it from a lab with::
+Import it from a module or lab with::
 
     import sys, pathlib
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
     from beam_lib import ...
 
-or simply run the lab through the workbench::
+or run a lab through the workbench::
 
     python beam_workbench.py run labs/01-beam-basics.py
 """
 
 from __future__ import annotations
 
-import json
+import glob
 import pathlib
 import sys
 
-# --------------------------------------------------------------------------
-# Paths — resolve the course root so labs work from any working directory.
-# --------------------------------------------------------------------------
-
 HERE = pathlib.Path(__file__).resolve().parent
 COURSE = HERE.parent.parent
-CORE = COURSE / "project" / "core"
-SAMPLE_DATA = COURSE / "sample_data"
+REPO = COURSE.parent.parent.parent.parent
 
-# The course's own pure-Python core: validation, currency normalisation,
-# windowing, dedup, and the BigQuery row shape.
-if str(CORE) not in sys.path:
-    sys.path.insert(0, str(CORE))
+# The user's own lab material: notebooks, sample data, template method.
+LAB_DIR = COURSE / "practice" / "Lab-sessions-beam-dataflow"
+SAMPLE_DATA = LAB_DIR / "sample_data"
+TEMPLATE_METHOD = LAB_DIR / "Template Method"
 
+# The course's generated sample data: 4800 events, 12 malformed.
+COURSE_SAMPLE_DATA = COURSE / "sample_data"
 
-# --------------------------------------------------------------------------
-# Data access
-# --------------------------------------------------------------------------
-
-def read_events(path: pathlib.Path | None = None) -> list[str]:
-    """Return the raw lines of the sample event file, header excluded.
-
-    The course's generator writes ``sample_data/events.csv`` with a header
-    row.  Beam's ``ReadFromText`` reads the header like any other line, so
-    the labs strip it deliberately rather than letting it become an event.
-    """
-    target = path or (SAMPLE_DATA / "events.csv")
-    if not target.exists():
-        raise FileNotFoundError(
-            f"{target} not found. Generate it first:\n"
-            "    python resources/sample_data.py --output-dir ./sample_data"
-        )
-    lines = target.read_text().splitlines()
-    if lines and lines[0].lower().startswith("event_id,"):
-        lines = lines[1:]
-    return lines
-
-
-def read_malformed(path: pathlib.Path | None = None) -> list[str]:
-    """Return the raw lines of the malformed event file (no header)."""
-    target = path or (SAMPLE_DATA / "malformed_events.csv")
-    if not target.exists():
-        raise FileNotFoundError(
-            f"{target} not found. Generate it first:\n"
-            "    python resources/sample_data.py --output-dir ./sample_data"
-        )
-    return target.read_text().splitlines()
+# Where the labs write their output.
+OUT_DIR = HERE / "_out"
 
 
 # --------------------------------------------------------------------------
-# Beam plumbing
+# Pipeline options
 # --------------------------------------------------------------------------
 
 def pipeline_options(runner: str = "DirectRunner", extra: list[str] | None = None):
-    """Return the ``PipelineOptions`` every lab uses.
+    """Return the ``PipelineOptions`` every module and lab uses.
 
     The legacy Direct Runner is requested explicitly with a LOOPBACK
     environment.  Beam 2.77 otherwise defaults to the Prism runner, which
-    does not support every transform the labs use (windowed
-    ``CombinePerKey`` and ``ParDo`` reading ``DoFn.WindowParam`` both fail on
-    it with a gRPC worker-pool error).
+    does not support every transform the material uses.
     """
-    import apache_beam as beam
     from apache_beam.options.pipeline_options import PipelineOptions
 
     args = ["--runner=" + runner]
@@ -94,15 +58,42 @@ def pipeline_options(runner: str = "DirectRunner", extra: list[str] | None = Non
     return PipelineOptions(args)
 
 
+# --------------------------------------------------------------------------
+# Data access
+# --------------------------------------------------------------------------
+
+def read_rows(path: pathlib.Path, *, skip_header: bool = True) -> list[str]:
+    """Return the lines of a local data file, header optionally stripped."""
+    lines = path.read_text().splitlines()
+    if skip_header and lines:
+        lines = lines[1:]
+    return lines
+
+
+def sample_file(name: str) -> pathlib.Path:
+    """Return the path of a file in the lab sample data folder."""
+    path = SAMPLE_DATA / name
+    if not path.exists():
+        raise FileNotFoundError(f"{path} not found")
+    return path
+
+
+def read_sample(name: str, *, skip_header: bool = True) -> list[str]:
+    """Return the lines of a sample data file, header optionally stripped."""
+    return read_rows(sample_file(name), skip_header=skip_header)
+
+
+# --------------------------------------------------------------------------
+# Output
+# --------------------------------------------------------------------------
+
 def read_output(pattern: str) -> list[str]:
-    """Read back what ``WriteToText`` produced, newest file last.
+    """Read back what ``WriteToText`` produced.
 
     ``WriteToText`` writes shard files named ``<prefix>-00000-of-00001`` and
-    friends, so the labs need to glob for them.  The lines are returned with
-    trailing newlines stripped, ready to print.
+    friends, so the labs glob for them.  Lines come back with trailing
+    newlines stripped, ready to print.
     """
-    import glob
-
     files = sorted(glob.glob(pattern))
     if not files:
         raise FileNotFoundError(f"no output files matching {pattern}")
@@ -114,11 +105,6 @@ def read_output(pattern: str) -> list[str]:
             if line.strip()
         )
     return lines
-
-
-def as_json(rows: list[dict]) -> list[str]:
-    """Render dict rows as sorted-key JSON, one per line."""
-    return [json.dumps(row, sort_keys=True) for row in rows]
 
 
 def show(title: str, lines: list[str], limit: int | None = None) -> None:
