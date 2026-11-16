@@ -286,10 +286,18 @@ jobs:
           docker pull "$IMAGE"
           echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
 
-      # Generate SPDX 2.3 JSON. The action pulls syft itself;
-      # `image: registry:...` tells it to scan from the local
-      # registry cache rather than re-pulling or going through
-      # a registry client.
+      # Generate SPDX 2.3 JSON. The action pulls syft itself.
+      #
+      # `image: registry:...` tells syft to pull the image DIRECTLY
+      # FROM THE REGISTRY, bypassing the container runtime entirely.
+      # (syft's own help: "registry:yourrepo/yourimage:tag — pull
+      # image directly from a registry (no container runtime
+      # required)".) An unprefixed reference would instead prefer the
+      # Docker daemon and only fall back to the registry, and
+      # `docker:` would force the daemon. The explicit scheme is
+      # chosen because the image was just pushed to GHCR and is
+      # already pulled above — pinning the source keeps the scan
+      # deterministic and avoids depending on daemon state.
       #
       # `anchore/sbom-action` uploads the SBOM as a workflow artifact
       # ITSELF (`upload-artifact: true` is its default) and then
