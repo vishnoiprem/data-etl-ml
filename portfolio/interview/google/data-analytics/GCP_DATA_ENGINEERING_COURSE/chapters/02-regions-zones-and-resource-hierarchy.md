@@ -162,7 +162,9 @@ Principles behind it:
 
 ### Cloud Shell
 
-Cloud Shell is a managed Debian environment with `gcloud`, `kubectl`, `docker`, `git`, `curl` and an editor preinstalled. It authenticates through your browser session, so there is no key file to leak, and it persists a home directory between sessions (5 GB, in the home region of your Cloud Shell configuration).
+Cloud Shell is a managed Debian environment with `gcloud`, `kubectl`, `docker`, `git`, `curl` and an editor preinstalled. It authenticates through your browser session, so there is no key file to leak, and it persists a home directory between sessions (5 GB of persistent disk mounted at `$HOME`, per user and shared across projects).
+
+The session itself is ephemeral, and the numbers matter when you plan a demo. The VM terminates after **40 minutes of inactivity**, and a session is capped at **12 hours**. The default weekly quota is **50 hours**. The persistent home directory outlives the VM — but it is deleted after **120 days** without access.
 
 Use Cloud Shell when:
 
@@ -170,7 +172,7 @@ Use Cloud Shell when:
 - You are demonstrating a walkthrough to a team and want everyone on identical tooling versions.
 - You need a quick place to run `gcloud` commands without managing credentials on a shared machine.
 
-Do **not** use Cloud Shell as your production deployment workstation for anything long-lived. The instance is ephemeral (5 hours idle by default), it is a single point of failure for interactive work, and long-running commands can be killed. For repeatable infrastructure, commit the commands to a script or a Terraform module and run them from CI.
+Do **not** use Cloud Shell as your production deployment workstation for anything long-lived. The instance is ephemeral (the VM is discarded after 40 minutes idle, and a session is capped at 12 hours), it is a single point of failure for interactive work, and long-running commands can be killed. For repeatable infrastructure, commit the commands to a script or a Terraform module and run them from CI.
 
 The authentication model deserves one warning: Cloud Shell uses the credentials of the **account you are signed into in the browser**, not of the `gcloud` configuration you think you set. If you run `gcloud auth list` in Cloud Shell and see a different account than expected, sign out of the wrong Google account in the browser, not with `gcloud auth revoke`.
 

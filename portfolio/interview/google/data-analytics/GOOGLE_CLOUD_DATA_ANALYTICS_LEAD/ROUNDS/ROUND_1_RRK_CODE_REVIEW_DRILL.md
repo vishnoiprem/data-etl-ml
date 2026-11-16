@@ -1,6 +1,6 @@
 # Q15 Code-Review Drill — Working Answer
 
-**Round:** 1 of 2 — RRK | **Interviewer:** Navakanth Talluri | **Question:** Q15, "Reviewing code: [DATA PROCESSING SNIPPET]"
+**Round:** 1 of 2 — RRK | **Interviewer:** the RRK interviewer | **Question:** Q15, "Reviewing code: [DATA PROCESSING SNIPPET]"
 **Why this exists:** The recruiter's brief states one RRK round includes "reviewing a short piece of data-processing code." This is the single most *predictable* technical question in the round — the format is known, only the snippet is unknown. A rehearsed review order is worth more than more study.
 
 **Source material:** `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/dataflow_batch_pipeline.py` (316 lines, Dataflow batch: GCS → BigQuery with validation + dead letter). Plus `GCP_DATA_ENGINEERING_COURSE/project/core/pipeline_logic.py`.

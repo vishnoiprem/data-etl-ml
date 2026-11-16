@@ -1,0 +1,77 @@
+name: tech-trend-radar-ci
+
+# CI for the projects/tech-trend-radar project.
+# - Pure-Python, no external services, no API key, no Docker.
+# - The test suite is hermetic: it uses recorded payloads and synthetic
+#   corpora, so it never touches the network.
+
+on:
+  push:
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale.
+    branches: [master, main]
+    paths:
+      - "projects/tech-trend-radar/**"
+      - ".github/workflows/tech-trend-radar-ci.yml"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "projects/tech-trend-radar/**"
+
+# Cancel superseded runs on the same ref to save runner minutes.
+concurrency:
+  group: tech-trend-radar-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: projects/tech-trend-radar/requirements.txt
+
+      - name: Install dependencies
+        # The semantic layer is installed separately and only on demand:
+        # `sentence-transformers` pulls in torch, which is a ~2 GB
+        # download that would dominate the runner's time for a layer the
+        # suite can exercise without it. The radar degrades to
+        # lexical-only extraction when the model is absent, and the tests
+        # that need it skip themselves — so CI proves the degraded path
+        # works, which is the path most users will be on.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r projects/tech-trend-radar/requirements.txt
+
+      - name: Run tests
+        # The suite never touches the network: the source adapters are
+        # tested against recorded payloads, and the ranking is tested
+        # against synthetic corpora with a known ground truth.
+        run: |
+          cd projects/tech-trend-radar
+          python -m pytest tests/ -v
+
+      - name: Run the eval harness
+        # Asserts burst-detection accuracy against a synthetic corpus whose
+        # ground truth is known by construction. Exits non-zero if a gate is
+        # missed. The ranking and coverage evaluations need a live snapshot,
+        # which CI does not collect, so only the deterministic burst gate is
+        # asserted here.
+        run: |
+          cd projects/tech-trend-radar
+          export PYTHONPATH="$PWD/src"
+          python -m tech_trend_radar.evaluation --out /tmp/trend-radar-eval.json
+
+      - name: Lint
+        run: |
+          cd projects/tech-trend-radar
+          ruff check src/ tests/ scripts/ app.py

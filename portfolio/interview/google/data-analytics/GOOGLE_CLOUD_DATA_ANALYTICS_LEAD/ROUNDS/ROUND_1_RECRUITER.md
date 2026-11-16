@@ -47,11 +47,11 @@
 **Framework:** 90-second narrative — Scope → Impact → Why This Role
 
 **Model answer — rewrite from your resume, do not deliver as written:**
-> "I'm currently **Head of Data** at **Makro/CP Group** in [location]. I run the enterprise data platform and the data strategy there: a team that has grown from **8 to 25**, a **$2M annual cloud and vendor budget**, **10B+ rows a day** and **500+ daily production jobs**. Before this I was **VP Data Engineering at Lazada (Alibaba Group)**, and earlier **Principal at Xendit** and a **Big Data Consultant at SCB Bank** doing AML work across **15+ countries**.
+> "I'm currently **Head of Data Engineering** at **Makro/CP Group** in [location]. I run the data, analytics and AI platform for an **$8B omnichannel business across three countries**: an organisation that has grown from **8 to 30** across four domain squads, a **$3M budget**, and a lakehouse processing **10B+ rows a day**. Before this I was **VP Data Engineering at Lazada (Alibaba Group)** for five and a half years, and earlier a **Big Data Consultant at SCB Bank** doing AML work across **15+ countries**.
 >
 > I've spent my career in the data platform layer — Spark, Kafka, Flink, Databricks — and that's the depth I'm bringing. What I'm moving toward is the consulting layer: **architecture plus client outcomes plus practice building**. I want to help Google's enterprise customers do the migration work I've done as a practitioner, and build the team and reusable assets that make it repeatable."
 
-**⚠️ What changed and why:** the original answer said *"Senior Data Engineering Manager, 12 engineers, 500+ TB, $3M+ engagements, 4 years at an SI Partner."* **None of that is your history.** You have never worked at an SI or Deloitte/Accenture; your team is 8 → 25, not 12; your scale is 10B+ daily rows, not 500TB migrated. The rewritten version uses only `resume-facts.md` figures.
+**⚠️ What changed and why:** the original answer said *"Senior Data Engineering Manager, 12 engineers, 500+ TB, $3M+ engagements, 4 years at an SI Partner."* **None of that is your history.** You have never worked at an SI or Deloitte/Accenture; your team is 8 → 30, not 12; your scale is 10B+ daily rows, not 500TB migrated. The rewritten version uses only `resume-facts.md` figures.
 
 **Key Elements:** Quantified scope, GCP-specific, partner experience, consulting DNA, clear motivation.
 
@@ -59,7 +59,7 @@
 
 #### Q2: "What's the largest team you've managed? How did you structure it?"
 **Model answer — rewrite from your resume:**
-> "Largest team: **Head of Data at Makro, 8 → 25**. [⚠️ **FILL THIS**: how you structured it — platform vs product vs analytics pods, how many in each, who you inherited vs hired. The `ROUND_1_RRK.md` **Q4** TODO is exactly this, and it is one of the nine things only you know.]
+> "Largest team: **Head of Data Engineering at Makro, 8 → 30**. [⚠️ **FILL THIS**: how you structured it — platform vs product vs analytics pods, how many in each, who you inherited vs hired. The `ROUND_1_RRK.md` **Q4** TODO is exactly this, and it is one of the nine things only you know.]
 >
 > Structure I ran: [⚠️ **FILL**: cadence — 1:1s, standups, retros, planning rhythm; how you set technical direction; how you split the team].
 >
@@ -73,11 +73,11 @@
 **Framework:** Situation → Architecture → Challenges → Outcome (2 min max)
 
 **Model answer — pick your real migration and use the framework:**
-> "**Situation:** [⚠️ **FILL**: which real migration — SCB Bank's AML estate on Hadoop/Hive across **15+ countries** is the strongest fit for "complex cloud data migration" because of the regulatory dimension. Makro's lakehouse is the strongest for scale: **10B+ rows/day**, **500+ daily jobs**. Lazada is strongest for streaming volume: **100M+ daily events**. Choose one and go deep — do not blend them.]
+> "**Situation:** [⚠️ **FILL**: which real migration — SCB Bank's AML estate on Hadoop/Hive across **15+ countries** is the strongest fit for "complex cloud data migration" because of the regulatory dimension. Makro's lakehouse is the strongest for scale: **10B+ rows/day** across finance, supply chain, retail and e-commerce. Lazada is strongest for streaming volume: **100M+ daily events**. Choose one and go deep — do not blend them.]
 >
 > **Architecture:** [⚠️ **FILL**: what was in scope, what the target platform was, how you decided replatform vs refactor vs retire. Use the **6 R's** framework — that part of the original answer is good methodology and is safe to keep.]
 >
-> **Challenges:** [⚠️ **FILL**: real obstacles. Regulatory/data residency if SCB; cost and a **$2M** budget if Makro; throughput and correctness if Lazada.]
+> **Challenges:** [⚠️ **FILL**: real obstacles. Regulatory/data residency if SCB; cost and a **$3M** budget if Makro; throughput and correctness if Lazada.]
 >
 > **Outcome:** [⚠️ **FILL**: a real number with its method. For Makro the defensible one is **month-end close from 5 days to 2 hours**, and **incidents −60%** — but both need the baseline you can state. For a cost outcome, the **40%** claim needs you to name whether it is spend or runtime and which employer.]
 >
@@ -92,7 +92,7 @@
 
 **Answer honestly, and make the honesty the strength:**
 
-> "My production depth is **Spark, Kafka, Flink and Databricks** — that's where I've run platforms at **10B+ daily rows** and **500+ daily jobs**. My **Google Cloud** depth is **architect-level**: I've designed and costed BigQuery and Dataflow solutions, and I've built an end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite.
+> "My production depth is **Spark, Kafka, Flink and Databricks** — that's where I've run platforms at **10B+ daily rows**. My **Google Cloud** depth is **architect-level**: I've designed and costed BigQuery and Dataflow solutions, and I've built an end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite.
 >
 > **My production depth on those specific services is lighter than I'd want it to be.** What I'd do first in this role is get onto the services with real customer data early, and lean on the team's GCP depth rather than pretend I have it."
 

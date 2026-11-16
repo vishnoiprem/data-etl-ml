@@ -1,0 +1,73 @@
+name: copyforge-ai-ci
+
+# CI for the projects/copyforge-ai project.
+# - Pure-Python, no external services, no API key, no Docker, no Ollama.
+# - The model backend is optional: the deterministic stub is what CI
+#   proves, and it is the path most users are on.
+
+on:
+  push:
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale.
+    branches: [master, main]
+    paths:
+      - "projects/copyforge-ai/**"
+      - ".github/workflows/copyforge-ai-ci.yml"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "projects/copyforge-ai/**"
+
+# Cancel superseded runs on the same ref to save runner minutes.
+concurrency:
+  group: copyforge-ai-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: projects/copyforge-ai/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r projects/copyforge-ai/requirements.txt
+
+      - name: Run tests
+        run: |
+          cd projects/copyforge-ai
+          python -m pytest tests/ -v
+
+      - name: Run the eval harness
+        # Asserts the rubric improvement, the idempotence and the
+        # author-text preservation against the acceptance thresholds.
+        # Exits non-zero if a gate is missed.
+        run: |
+          cd projects/copyforge-ai
+          export PYTHONPATH="$PWD/src"
+          python -m copyforge_ai.evaluation --out /tmp/copyforge-eval.json
+
+      - name: Smoke test (the offline demo)
+        # Confirms the whole pipeline imports and runs end to end with
+        # no API key, no network and no model server.
+        run: |
+          cd projects/copyforge-ai
+          python scripts/run_demo.py
+          test -f reports/copyforge_report.json && echo "copyforge_report.json OK"
+
+      - name: Lint
+        run: |
+          cd projects/copyforge-ai
+          ruff check src/ tests/ scripts/

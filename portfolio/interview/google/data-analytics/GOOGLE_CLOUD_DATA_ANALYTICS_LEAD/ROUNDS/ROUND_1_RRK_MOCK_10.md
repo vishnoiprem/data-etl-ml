@@ -80,7 +80,7 @@ def load_orders(rows, table):
 
 **Model review (say your order aloud: correctness → idempotency → scale → semantics → security → maintainability)**
 1. **Correctness:** `rates[r["currency"]]` raises `KeyError` on an unknown currency and kills the batch; no null/zero handling on `amount`; floats for money (use `Decimal`/`NUMERIC`); which rate and as-of date? `ts[:10]` assumes UTC ISO strings, so a timezone bug moves orders across dates.
-2. **Idempotency/restart:** dedupe is in-memory per batch only. A retry after partial failure re-inserts; `insert_rows_json` has no `insertId`, so duplicates land. Re-running the job duplicates every row. Fix: deterministic key + `MERGE`, or Storage Write API with offsets.
+2. **Idempotency/restart:** dedupe is in-memory per batch only. A retry after partial failure re-inserts; `insert_rows_json` generates a random `insertId` per call, so best-effort dedup never matches across a rerun and duplicates land. Re-running the job duplicates every row. Fix: deterministic key + `MERGE`, or Storage Write API with offsets.
 3. **Dedupe rule:** "first seen wins" ignores which version is newer; late updates to an order are dropped or the wrong one kept. Needs an ordering field (`updated_at`/version).
 4. **Scale:** all rows in one list, one call: memory grows and the API payload limit is hit; no batching, no backoff. The `seen` set grows unbounded.
 5. **Failure handling:** `insert_rows_json` returns per-row errors that are ignored, so failed rows vanish silently. No dead-letter path. Function returns `len(out)` even if inserts failed.
@@ -203,6 +203,47 @@ def load_orders(rows, table):
 > **Measure:** groundedness/faithfulness, retrieval recall@k, answer acceptance, escalation rate, latency and cost per query, and zero entitlement-leak incidents in red-team tests. **Rollout:** pilot with one team, regression-test every prompt/model change, human review for high-risk answers.
 >
 > **The consulting point:** the value and the risk are in the governed corpus and operating model, not the model choice."
+
+---
+
+## Numbered versions of Rounds 6, 7 and 9
+
+The bracketed answers above cannot score above 6/8 until they carry numbers. These versions do. Figures marked *(resume)* come from the public resume. Figures in the *illustrative* line are placeholders with the right shape: replace each with the real one or cut it. Never say a number you cannot defend with a baseline and a method.
+
+### Round 6, numbered: pushing back on an executive
+
+> "**Situation.** At a multi-country retail group, roughly $8B revenue, 200+ stores and 5 distribution centres *(resume)*, the CFO wanted the whole legacy finance reporting estate moved to the new lakehouse in 3 months, in time for the fiscal year-end close. The estate was about 180 reports feeding a close that took 5 days *(resume)*.
+>
+> **Task.** I owned the platform and the migration. My estimate said 3 months covered the critical reports but not all 180 without skipping dual-run across a month-end, and skipping dual-run on finance data is how you ship a wrong close.
+>
+> **Action.** I asked what decision actually needed the full estate by year-end. The real constraint was 12 statutory and board reports, about 7% of the estate; the other 93% had no deadline. I brought a one-page plan with three options: all 180 in 3 months with no parallel run and a stated risk of a mis-stated close; the 12 critical reports in 3 months with a full dual-run across one month-end, the rest in 2 further waves over the following 4 months; or all 180 in 3 months with 6 contractors at roughly $400K extra. I recommended option two and asked the CFO to own the decision on which 12.
+>
+> **Result.** The 12 reports went live in 11 weeks with dual-run across one month-end and zero reconciliation differences signed off by finance. The remaining waves finished in month 7. The close went from 5 days to 2 hours *(resume)*, and the CFO sponsored the next programme, the 50+ executive dashboards *(resume)*. **What I'd do differently:** I built the one-page plan after the first tense meeting. I should have had it before."
+
+*Illustrative, replace with real:* 180 reports, 12 critical, 11 weeks, $400K, month 7.
+**The line that scores:** "I gave a recommendation, not a veto, and once the CFO decided I committed fully."
+
+### Round 7, numbered: the honesty line
+
+> "I haven't owned a consulting P&L. I have owned a $3M platform budget *(resume)* and a 30-person organisation *(resume)* with real trade-offs: last year I chose to fund the lakehouse migration over a second BI tool, and I held headcount flat for two quarters to pay for it. The mechanics transfer: cost to deliver per outcome, staffing mix, and change control. In my first 30 days here I'd learn the practice's actual rate card, utilisation targets and margin model."
+
+*Illustrative, replace with real:* the second-BI-tool trade-off and the two quarters.
+
+### Round 9, numbered: the underperforming senior architect
+
+> "The principle first: diagnose skill, will or situation before judging, against the written bar. Then the example.
+>
+> **Situation.** While scaling the data organisation from 8 to 30 *(resume)* across four domain squads *(resume)*, one senior architect, ten years' experience, led the supply-chain squad of 6. Over two quarters: three design reviews rejected, the near-real-time inventory feed for 200+ stores *(resume)* slipped 7 weeks, and two engineers asked to move squads.
+>
+> **Diagnosis.** I pulled evidence against the level rubric, design quality, delivery, stakeholder feedback, and had the direct conversation in week one of noticing, not month three. It wasn't skill: the designs were technically strong. It was situation and will: they had been given a squad lead role they didn't want, and were doing the engineers' work rather than leading it.
+>
+> **Action.** A 90-day plan with three measurable outcomes: the inventory feed live, design-review acceptance on first submission, and squad retention. Weekly 30-minute check-ins, written follow-ups, and I paired them with a delivery lead for the planning work. At day 45 we agreed the honest answer: they wanted to be a principal individual contributor, not a lead.
+>
+> **Result.** At day 90 I moved them to a principal architect role across all four squads, promoted one of their engineers to squad lead, and the inventory feed went live 5 weeks later. Twelve months on, both engineers who had asked to leave were still there, and the architect designed the demand-forecasting platform covering 1,000+ vendors *(resume)*. **What I'd do differently:** I'd waited two quarters to look at the evidence properly. The signal was there after one."
+
+*Illustrative, replace with real:* squad of 6, 3 rejected reviews, 7 weeks, day 45, 5 weeks later.
+
+**Follow-ups to expect on either story:** "What was the baseline and how was it measured?" "Which part was your decision rather than the team's?" "What did it cost?" Have one sentence ready for each.
 
 ---
 

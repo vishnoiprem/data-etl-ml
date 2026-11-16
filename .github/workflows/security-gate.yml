@@ -53,6 +53,10 @@ jobs:
           - learning/data-engineering/data-engineering-course/aws_eventbridge_course/requirements.txt
           - learning/data-engineering/data-engineering-course/aws_snowflake_course/requirements.txt
           - projects/flink-cdc-dashboard/requirements.txt
+          - projects/copyforge-ai/requirements.txt
+          - projects/tech-trend-radar/requirements.txt
+          - projects/tech-trend-radar/requirements-semantic.txt
+          - projects/trade-sourcing-ai/requirements.txt
           - learning/Spark/document-processing/requirements.txt
           - learning/agentic-ai/7_Bedrock_course/recap/py-starter/requirements.txt
           - learning/agentic-ai/7_Bedrock_course/recap/py-starter/requirements-dev.txt

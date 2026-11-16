@@ -487,6 +487,55 @@ print(nearest_region("us-west1", "datastore"))
 print(len(services_available_in("us-central1")))
 ```
 
+## 🐚 Cloud Shell
+
+Browser terminal with `gcloud`, `kubectl`, `docker`, `git`, `curl` preinstalled. No install, no key file — it authenticates through your browser session.
+
+### Limits
+
+| Limit | Value |
+|---|---|
+| Idle timeout before the VM is discarded | **40 minutes** |
+| Maximum session length | **12 hours** |
+| Weekly quota (default) | **50 hours** |
+| Persistent home directory | **5 GB**, mounted at `$HOME`, per user |
+| Home directory deletion | After **120 days** without access |
+
+### Inside the session
+
+```text
+gcloud --version                                    # SDK version
+gcloud auth list                                    # which account is actually active
+gcloud config get-value project                     # selected project
+echo $GOOGLE_CLOUD_PROJECT                          # project carried in from the console
+curl metadata/computeMetadata/v1/instance/zone      # which region the VM is in
+cloudshell --help                                   # download files, open the editor
+```
+
+### Persistent customisation
+
+```text
+# $HOME/.customize_environment — runs once per boot, as root
+apt-get update
+apt-get -y install erlang
+```
+
+Output: `/var/log/customize_environment`. Packages may land shortly after the
+login prompt, because installation runs in parallel with logging.
+
+### Ephemeral mode
+
+Faster start, but files are removed when the session ends. Enable from the
+**More** menu, or use <https://shell.cloud.google.com/?ephemeral=true>.
+Never use it for course data.
+
+### The authentication trap
+
+Cloud Shell uses the credentials of the **Google account signed into the
+browser**, not the `gcloud` configuration you think is set. If
+`gcloud auth list` shows the wrong account, sign out of the wrong Google
+account in the browser — do not use `gcloud auth revoke`.
+
 ## 🖥️ Console Actions as CLI Commands
 
 | Console action | CLI equivalent |
@@ -521,6 +570,7 @@ print(len(services_available_in("us-central1")))
 | List all resources | `gcloud asset search-all-resources --scope=projects/PROJECT_ID` |
 | Export the billing data | `gcloud billing accounts list` then BigQuery export in the console |
 | Create a budget alert | `gcloud billing budgets create --billing-account=YOUR_BILLING_ACCOUNT --budget-amount=25` |
+| Open Cloud Shell | `gcloud config set project PROJECT_ID` (or use the **>_** console button) |
 
 ## 🔗 Related
 

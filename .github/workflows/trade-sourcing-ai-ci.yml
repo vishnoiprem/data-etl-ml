@@ -1,0 +1,76 @@
+name: trade-sourcing-ai-ci
+
+# CI for the projects/trade-sourcing-ai project.
+# - Pure-Python, no external services, no API key, no Docker.
+# - The suite runs against the real trade-finder dataset in the repo, so
+#   the sibling project must be checked out too (it is in the same repo).
+
+on:
+  push:
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale.
+    branches: [master, main]
+    paths:
+      - "projects/trade-sourcing-ai/**"
+      - "projects/realtime-stock-pipeline/trade-finder/**"
+      - ".github/workflows/trade-sourcing-ai-ci.yml"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "projects/trade-sourcing-ai/**"
+      - "projects/realtime-stock-pipeline/trade-finder/**"
+
+# Cancel superseded runs on the same ref to save runner minutes.
+concurrency:
+  group: trade-sourcing-ai-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: projects/trade-sourcing-ai/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r projects/trade-sourcing-ai/requirements.txt
+
+      - name: Run tests
+        # Dense retrieval is disabled in CI: it would download an embedding
+        # model on every run. The degradation path is covered by the suite.
+        run: |
+          cd projects/trade-sourcing-ai
+          python -m pytest tests/ -v
+
+      - name: Run the eval harness
+        # Asserts retrieval recall/nDCG/MRR and decision accuracy against
+        # the acceptance thresholds. Exits non-zero if a gate is missed.
+        run: |
+          cd projects/trade-sourcing-ai
+          export PYTHONPATH="$PWD/src:$PWD/../realtime-stock-pipeline/trade-finder"
+          python -m trade_sourcing_ai.evaluation --out /tmp/trade-ai-eval.json
+
+      - name: Smoke test (the offline demo)
+        # Confirms the whole agent imports and runs end to end with no API
+        # key and no network.
+        run: |
+          cd projects/trade-sourcing-ai
+          python scripts/run_demo.py --no-dense
+          test -f reports/value_report.json && echo "value_report.json OK"
+
+      - name: Lint
+        run: |
+          cd projects/trade-sourcing-ai
+          ruff check src/ tests/ scripts/
