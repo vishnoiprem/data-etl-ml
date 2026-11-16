@@ -6,7 +6,12 @@
 # The analysis is deterministic Python. The LLM is optional and only writes the
 # narrative prose — it never decides a finding, a severity or a dollar figure.
 boto3>=1.34
+# `httpx` is the HTTP client the Ollama router uses. Starlette's TestClient
+# wants `httpx2` (>=2.0) from starlette 1.10 onward and warns loudly when
+# only the legacy `httpx` is installed — the app's own test suite is the
+# only consumer of TestClient, but the warning is noise on every CI run.
 httpx>=0.27
+httpx2>=2.0
 moto>=5.0
 pydantic>=2.9
 pytest>=8.3

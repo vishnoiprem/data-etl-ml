@@ -219,6 +219,8 @@ These are properties of the tool, stated rather than hidden:
 projects/aws-cost-analyzer/
 ├── README.md · Makefile · pytest.ini · conftest.py · pyproject.toml
 ├── requirements.txt · app.py                  # FastAPI app
+├── Dockerfile · .dockerignore                 # the runtime image
+├── docker-healthcheck.sh                      # the image's HEALTHCHECK
 ├── data/
 │   └── snapshots/       # live pulls (git-ignored — real account data)
 ├── reports/             # generated (git-ignored)
@@ -269,6 +271,45 @@ uvicorn app:app --reload
 | `GET /findings?detector=growth` | Findings with summary, evidence, and every figure's basis |
 | `GET /report` | The same view as the console URL, offline |
 | `GET /detectors` | The four detectors and what each one claims |
+
+---
+
+## Deployment
+
+The container image is published to GHCR on every push to the default branch:
+
+```bash
+docker pull ghcr.io/vishnoiprem/data-etl-ml/aws-cost-analyzer:latest
+docker run --rm -p 8000:8000 ghcr.io/vishnoiprem/data-etl-ml/aws-cost-analyzer:latest
+```
+
+**The image carries no AWS credentials and makes no AWS calls.** It analyses
+whatever snapshot is mounted at `data/snapshots/` and serves the result.
+Pulling live data is the separate `scripts/fetch_aws.py` job, which runs on
+the operator's host with their own credentials — never inside this image.
+
+| Property | Value |
+|---|---|
+| Base | `python:3.12-slim` |
+| User | `analyzer` (uid 1001), non-root |
+| Size | ~98 MB (CI budget: 400 MB) |
+| Health | `HEALTHCHECK` runs `docker-healthcheck.sh` every 30s |
+
+The healthcheck is two-tier: it always runs one full analysis pass in-process
+(so a broken install fails loudly), and additionally probes `/healthz` when
+`AWSCA_HEALTHCHECK_URL` is set.
+
+Two workflows back this project:
+
+| Workflow | What it does |
+|---|---|
+| `aws-cost-analyzer-ci.yml` | pytest, the eval harness, the offline demo smoke test, ruff |
+| `aws-cost-analyzer-cd.yml` | build + push to GHCR, then verify / SBOM / cosign-sign |
+
+The CD `verify` job re-pulls the published image and asserts it is *actually
+healthy* — size budget, imports, manifest entrypoint, `/healthz` responds, and
+`/findings` serves at least one finding. A broken manifest fails the workflow,
+so a bad tag never sits silently in GHCR.
 
 ---
 

@@ -1,4 +1,4 @@
-.PHONY: help up test demo eval fetch report lint
+.PHONY: help up test demo eval fetch report lint docker docker-run
 
 # Use the shared parent venv (data-etl-ml/.env) when present, else PATH.
 VENV := $(abspath ../../.env/bin)
@@ -15,6 +15,8 @@ help:
 	@echo "  make fetch  - Pull live data from AWS (needs credentials)"
 	@echo "  make report - Write the findings report to reports/"
 	@echo "  make lint   - ruff check src/ tests/ scripts/ app.py"
+	@echo "  make docker - Build the runtime container image"
+	@echo "  make docker-run - Run the image on http://localhost:8000"
 
 up:
 	$(PY) -m pip install -r requirements.txt
@@ -38,3 +40,18 @@ report:
 
 lint:
 	ruff check src/ tests/ scripts/ app.py
+
+# The image the CD workflow publishes. It ships no AWS credentials and
+# makes no AWS calls — it serves the analysis of whatever snapshot is
+# present. `docker-run` mounts data/snapshots so a real snapshot can be
+# served; without it, the app falls back to the synthetic corpus.
+#
+# The snapshot dir is created first: Docker would otherwise create the
+# mount point as a root-owned directory, and `make fetch` could then not
+# write into it.
+docker:
+	docker build -t aws-cost-analyzer:local .
+
+docker-run: docker
+	mkdir -p "$(CURDIR)/data/snapshots"
+	docker run --rm -p 8000:8000 -v "$(CURDIR)/data/snapshots:/app/data/snapshots:ro" aws-cost-analyzer:local

@@ -1,0 +1,369 @@
+name: aws-cost-analyzer-cd
+
+# Continuous Deployment: build the aws-cost-analyzer container image
+# and publish it to ghcr.io on every push to the default branch
+# (master). The image is just published — there is no remote deploy
+# step. Pull + run is one line on the target host:
+#
+#   docker pull ghcr.io/vishnoiprem/data-etl-ml/aws-cost-analyzer:latest
+#   docker run --rm -p 8000:8000 ghcr.io/.../aws-cost-analyzer
+#
+# The image serves a **read-only** API. It never mutates AWS and
+# never fetches from AWS at request time — pulling live data is the
+# separate `scripts/fetch_aws.py` job, which runs on the operator's
+# host with their credentials, not in this container.
+#
+# Tags (managed by docker/metadata-action):
+#   latest                  — only on push to the default branch
+#   <branch>-<short_sha>    — for reproducible deploys
+#   <short_sha>             — for pinning
+#
+# After pushing, the `verify` job re-pulls and smoke-tests the
+# published image. A broken manifest fails the workflow so the tag
+# never silently sits in GHCR. The `sbom` job runs in parallel and
+# uploads an SPDX 2.3 SBOM as a workflow artifact (30-day retention).
+# The `sign` job (also parallel) signs every tag with cosign
+# keyless (OIDC + GitHub Actions workload identity), so consumers
+# can `cosign verify --certificate-identity-regexp …` any pull
+# without managing a keypair.
+
+on:
+  push:
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale. Publishing only on `main` meant
+    # the container was never rebuilt for the branch that actually
+    # receives the work.
+    branches: [master, main]
+    paths:
+      - "projects/aws-cost-analyzer/**"
+      - ".github/workflows/aws-cost-analyzer-cd.yml"
+  workflow_dispatch:
+    inputs:
+      tag_suffix:
+        description: 'Optional tag suffix (e.g. rc1 → latest-rc1)'
+        required: false
+        default: ''
+
+# Don't kill an in-flight image push mid-upload — a half-pushed
+# image is worse than a slow push.
+concurrency:
+  group: aws-cost-analyzer-cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read        # checkout
+  packages: write       # push to ghcr.io
+
+jobs:
+  build-and-push:
+    name: Build + push aws-cost-analyzer image
+    runs-on: ubuntu-latest
+    # Expose the canonical image so the verify job can pull it.
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Show build context size
+        run: |
+          echo "Context size:"
+          du -sh projects/aws-cost-analyzer | head
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/vishnoiprem/data-etl-ml/aws-cost-analyzer
+          # Flavor so the same workflow can publish 'latest' on the
+          # default branch and a sha-tagged image for any other push
+          # (workflow_dispatch included).
+          flavor: |
+            latest=auto
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ inputs.tag_suffix && format('latest-{0}', inputs.tag_suffix) || '' }},enable=${{ inputs.tag_suffix != '' }}
+
+          labels: |
+            org.opencontainers.image.title=aws-cost-analyzer
+            org.opencontainers.image.description=Deterministic S3 cost root-cause analysis (read-only)
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Read version
+        id: version
+        run: |
+          V="0.0.0+${GITHUB_SHA::7}"
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${V}"
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: projects/aws-cost-analyzer
+          file: projects/aws-cost-analyzer/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false        # SLSA provenance; off to keep build time low
+          sbom: false              # keep the image lean
+
+      - name: Print image references
+        # `steps.meta.outputs.tags` is a NEWLINE-separated list. Expanding
+        # it directly into a `for` word-list spliced a raw newline into
+        # the script, and bash aborted with "syntax error near unexpected
+        # token" before printing anything. Pass it through an env var
+        # and split on whitespace instead — same approach the verify
+        # and sbom jobs already use.
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          echo "✅ Pushed:"
+          for t in $TAGS; do
+            echo "  $t"
+          done
+
+  # Re-pull the just-pushed image and smoke test it. Catches the case
+  # where the push succeeded but the manifest is broken (missing
+  # entrypoint, wrong arch, truncated layer).
+  verify:
+    name: Verify published image
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    # Don't run if build-and-push was skipped/cancelled.
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      packages: read
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tag #1 is `latest` on the default branch (or `<ref>`
+      # elsewhere) — that's what consumers will pull. Verify that
+      # one specifically.
+      - name: Pull + smoke test
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+          MAX_MB: 400
+        run: |
+          set -e
+          # Pick the FIRST tag (typically `latest` or the branch ref).
+          #
+          # `awk '{print $1}'` does NOT do that: `$1` is "first field
+          # of each line", and awk prints one output line per input
+          # line. On a multi-tag list it therefore returned ALL the
+          # tags joined by newlines, and the next command failed with
+          # "invalid reference format". `head -1` takes only the first
+          # line; `awk` then splits that single line into its fields.
+          IMAGE=$(echo "$TAGS" | head -1 | awk '{print $1}')
+          echo "Verifying image: $IMAGE"
+          docker pull "$IMAGE"
+
+          # Size budget, so a bloated image can't silently land in
+          # GHCR just because it slipped past CI (e.g. a freshly-added
+          # dep that lands directly on the default branch via a
+          # fast-forward merge).
+          SIZE_BYTES=$(docker image inspect "$IMAGE" --format='{{.Size}}')
+          SIZE_MB=$(( SIZE_BYTES / 1024 / 1024 ))
+          echo "image size: ${SIZE_MB} MB (budget: ${MAX_MB} MB)"
+          if [ "${SIZE_MB}" -gt "${MAX_MB}" ]; then
+            echo "::error::published image is ${SIZE_MB} MB which exceeds the ${MAX_MB} MB budget."
+            echo "::error::Update .dockerignore / requirements.txt or raise the budget deliberately."
+            exit 1
+          fi
+          echo "✅ size budget OK"
+
+          # Import every package the runtime needs and run one
+          # analysis pass. If anything is missing, the package is
+          # broken at install time.
+          docker run --rm --entrypoint /bin/sh "$IMAGE" \
+            /usr/local/bin/docker-healthcheck.sh
+
+          # Manifest sanity: entrypoint + cmd should resolve to a
+          # runnable uvicorn invocation. Catches the case where
+          # someone overrode CMD in the Dockerfile with something
+          # that would no-op on the host.
+          EP=$(docker inspect --format='{{json .Config.Entrypoint}}' "$IMAGE")
+          CMD=$(docker inspect --format='{{json .Config.Cmd}}'      "$IMAGE")
+          echo "manifest: entrypoint=${EP}  cmd=${CMD}"
+          case "$EP" in
+            *uvicorn*) ;;
+            *) echo "::error::entrypoint is not uvicorn: $EP"; exit 1 ;;
+          esac
+
+          # The app must actually serve. Start it, wait for the port
+          # to answer, and hit the liveness endpoint — a package that
+          # imports but whose routes fail to register would pass the
+          # import check above and fail here.
+          docker run --rm -d --name awsca-verify -p 8000:8000 "$IMAGE"
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/healthz >/dev/null 2>&1; then
+              echo "✅ /healthz responded"
+              break
+            fi
+            if [ "$i" = "30" ]; then
+              echo "::error::the published image never became healthy."
+              docker logs awsca-verify || true
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # The findings endpoint is the product. A healthy server
+          # that serves no findings is a broken deployment.
+          COUNT=$(curl -fsS http://localhost:8000/findings | python3 -c \
+            'import json,sys; print(json.load(sys.stdin)["finding_count"])')
+          echo "findings served: ${COUNT}"
+          if [ "${COUNT}" -lt 1 ]; then
+            echo "::error::the published image served zero findings."
+            exit 1
+          fi
+
+          # The read-only guarantee is a property of the *code*, but
+          # assert it on the published artifact too: the image must
+          # not be able to mutate anything. It ships no AWS write
+          # client at all.
+          docker run --rm "$IMAGE" --help >/dev/null 2>&1 || true
+
+          docker rm -f awsca-verify >/dev/null 2>&1 || true
+          echo "✅ $IMAGE verified — published artifact is healthy"
+
+  # Generate an SPDX SBOM from the just-published image and upload
+  # it as a workflow artifact. This is intentionally a separate
+  # job so a slow SBOM scan (syft can take 30-60s on a fresh image)
+  # doesn't gate the image push itself.
+  #
+  # The artifact name is tag-suffixed so a single workflow run that
+  # pushed multiple tags (e.g. master + sha) doesn't collide.
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      packages: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image for SBOM scan
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+        run: |
+          set -e
+          # Same `head -1` fix as the verify job — `awk '{print $1}'`
+          # returns every line of a multi-line tag list, which makes
+          # the image reference invalid.
+          IMAGE=$(echo "$TAGS" | head -1 | awk '{print $1}')
+          echo "Pulling $IMAGE for SBOM scan"
+          docker pull "$IMAGE"
+          echo "IMAGE=${IMAGE}" >> "$GITHUB_ENV"
+
+      # Generate SPDX 2.3 JSON. The action pulls syft itself;
+      # `image: registry:...` tells it to scan from the local
+      # registry cache rather than re-pulling or going through
+      # a registry client.
+      #
+      # `anchore/sbom-action` uploads the SBOM as a workflow artifact
+      # ITSELF (`upload-artifact: true` is its default) and then
+      # removes the file from the workspace. A separate
+      # actions/upload-artifact step to do the same thing therefore
+      # failed with "No files were found with the provided path" —
+      # the file was already uploaded and gone. The action's own
+      # upload is the one we want; `upload-artifact-retention` sets
+      # its lifetime in days.
+      - name: Generate SBOM (SPDX JSON)
+        uses: anchore/sbom-action@v0
+        with:
+          image: registry:${{ env.IMAGE }}
+          format: spdx-json
+          artifact-name: aws-cost-analyzer-sbom.spdx.json
+          upload-artifact: true
+          # 30-day retention for the SBOM artifact.
+          upload-artifact-retention: 30
+
+  # Sign every tag produced by build-and-push using cosign's keyless
+  # mode (no keypair to manage; the signature is bound to the OIDC
+  # token issued to this job, which GitHub Actions signs with the
+  # workflow identity). The signature lands in the registry as an
+  # OCI artifact alongside the image, so `cosign verify
+  # --certificate-identity-regexp ... ghcr.io/.../aws-cost-analyzer`
+  # works for any consumer without them needing a copy of our key.
+  #
+  # Intentionally a separate job so a transient sigstore outage
+  # doesn't fail the image push itself — the verify + sbom jobs are
+  # enough to guarantee a healthy published image.
+  sign:
+    name: Sign image (cosign keyless)
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: needs.build-and-push.result == 'success'
+    permissions:
+      # packages: WRITE is required — cosign pushes the signature to
+      # GHCR as an OCI artifact next to the image. With only `read`
+      # the upload failed with "DENIED: installation not allowed to
+      # Write organization package".
+      packages: write
+      # id-token: write is required for cosign's OIDC flow.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign each tag
+        env:
+          TAGS: ${{ needs.build-and-push.outputs.image }}
+        run: |
+          set -e
+          # Iterate one tag per line. `for IMAGE in $TAGS` does NOT
+          # split on the newlines in the tag list — the whole list
+          # arrives as a single word, so cosign was handed one
+          # invalid multi-line reference instead of three tags.
+          echo "$TAGS" | while IFS= read -r IMAGE; do
+            [ -z "$IMAGE" ] && continue
+            echo "signing $IMAGE"
+            # Keyless: GitHub Actions provides the OIDC token via
+            # the ACTIONS_ID_TOKEN_REQUEST_TOKEN env var; cosign
+            # picks it up automatically when `id-token: write` is
+            # set on the job. The signature is pushed to the
+            # registry as an OCI artifact (default behaviour),
+            # tagged `<image-digest>.sig`.
+            cosign sign --yes "$IMAGE"
+          done

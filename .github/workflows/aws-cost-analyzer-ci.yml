@@ -10,7 +10,8 @@ name: aws-cost-analyzer-ci
 on:
   push:
     # `master` is this repo's default branch; `main` is kept for
-    # compatibility but is stale.
+    # compatibility but is stale. Triggering on `main` alone meant this
+    # project's CI never ran against the branch that receives the work.
     branches: [master, main]
     paths:
       - "projects/aws-cost-analyzer/**"
@@ -19,6 +20,13 @@ on:
     branches: [master, main]
     paths:
       - "projects/aws-cost-analyzer/**"
+      # Without this, a change to the workflow file alone never
+      # triggers a run — so a broken edit lands on the default branch
+      # and only the *next* code change reveals it.
+      - ".github/workflows/aws-cost-analyzer-ci.yml"
+  # Manual trigger, so the workflow can be re-run on demand (e.g. after
+  # a runner-side flake) without pushing an empty commit.
+  workflow_dispatch:
 
 # Cancel superseded runs on the same ref to save runner minutes.
 concurrency:
