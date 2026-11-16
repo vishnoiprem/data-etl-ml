@@ -291,7 +291,7 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 | 12 | Q25 | One person developed; one performance case | **Needs you.** The capability/clarity/sustained triage is drafted. Anchor in Makro 8→30 |
 | 13 | Q26 | Diversity example with a metric that moved | **Needs you.** Do not claim a number you cannot source |
 | 14 | Q27 | GCP gap honesty + plan | **Resolved** — §2 above |
-| 15 | Q34 | "I was wrong" story | **Structure resolved** — §5 above; content needs your real memory |
+| 15 | Q34 | "I was wrong" story | **Drafted 2026-11-16** — `ROUND_1_RRK.md` Q34 now has the right/wrong structure, three flow diagrams (benchmark decision, GCP reference architecture, gated migration waves), the GCP translation table and the probes; the spoken version with employer detail is in the private coach folder. **Still needs you:** confirm the "big migration, then waves" story is literally yours and write its one concrete casualty. If not, §5 fallback |
 | 16 | — | `dataflow_batch_pipeline.py` location | **Corrected** — `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/` |
 | 17 | — | Course test suite failing / 25 skipped | **Resolved** — §1 above |
 | 18 | — | Sample data missing | **Resolved** — §1 above |

@@ -92,7 +92,7 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 > "That's a fair challenge, and I should have stated it more precisely on the resume. The accurate framing is: **I own the data platform that supports a group with $8B+ in revenue.** I did not drive $8B of revenue.
 >
-> What I did drive was the platform's contribution to it. At Makro I scaled the team from **8 to 30**, own a **$3M annual cloud and vendor budget**, and the platform carries **10B+ daily rows** across **500+ daily jobs** at **99.99% uptime**. Concretely, month-end close went from **5 days to 2 hours**, incident volume dropped **60%**, and delivery time on order-to-cash fulfilment came down **40%**. If a merchandising decision lands an hour sooner, that's platform and data latency showing up in the business.
+> What I did drive was the platform's contribution to it. At Makro I scaled the team from **8 to 30** across four squads, own a **$3M annual cloud and vendor budget**, and the platform carries **10B+ daily rows**. Concretely, month-end close went from **5 days to 2 hours**, inventory for **200+ stores and 5 DCs** moved to near real time, and demand forecasting now covers **1,000+ vendors**. If a merchandising decision lands an hour sooner, that's platform and data latency showing up in the business.
 >
 > The distinction I'd draw: **owning a platform under an $8B business is not the same as driving $8B.** My claim is about the reliability, speed and cost of the decision-making that business runs on — and I can walk you through exactly which metrics moved and how they were measured."
 
@@ -101,7 +101,7 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 **Pass signal:** You separate *reach* from *causation* and then show you know how to defend causation.
 **Fail signal:** Defending "$8B" as your impact, or over-correcting into "it was just the business, not me."
 
-[TODO: verify the precise attribution of the 40% delivery-time reduction — was it your platform change, a routing-algorithm change, or joint? Have the attribution story ready: "X% was platform latency, Y% was algorithm, Z% was process."]
+[Not on the current resume, so say only with baseline and attribution ready: 500+ daily jobs, 99.99% uptime, incidents −60%, delivery −40%. If you use the delivery figure, have the split ready: "X% was platform latency, Y% was algorithm, Z% was process."]
 
 ---
 
@@ -798,43 +798,259 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 ### Q33. "What would you do in your first 30 days in this role?"
 
-**Framework:** People → Delivery → Practice → Self
+**Framework:** Listen → Help → Small win → Trusted data → Hands-on GCP → Day-30 outcome (a 90-day plan)
 
-> "**First, listen and map.** The first month is about building an accurate picture, not changing anything. I'd want to understand: who the senior team actually are, what they're each exceptional at, and where the gaps are relative to what the practice needs to sell; which engagements are live and which are at risk, and why; what the utilisation, margin and pipeline numbers actually say; and where the important relationships are — account teams, partners, and the customer base.
->
-> **Second, establish credibility before I use it.** Early on, my value is that I know the business. I'd want to be useful in the first week — sitting in on a client call, reviewing a design, helping with an at-risk delivery. Not to prove a point, but so that people understand I'm here to work with them rather than to inspect them.
->
-> **Third, start one thing that matters and is achievable.** Not a reorganisation. One visible improvement — maybe the delivery approach, or the utilisation visibility, or the partner scorecard — where I can show a result inside a quarter. Nothing that makes people feel threatened before anyone trusts me.
->
-> **Fourth, get the foundations: the data.** I want to know exactly how this practice performs, and I want the team's trust in the numbers, because without a shared, trusted view of performance I can't make any of the harder calls later.
->
-> **And on myself:** get hands-on with the Google Cloud stack early, because I'd want to be credible with architects and engineers who are better than me in specific areas — and because it's the fastest way to learn how this practice actually sells. I'd start certifications and make it visible."
+**Spoken version (about 90 seconds).** Notation: `//` short pause, `///` long pause, **bold** = stress.
 
-**Key elements:** Listen first, change nothing early; earn credibility by being useful, not by inspecting; one visible, achievable win; establish trusted data; and hands-on GCP time — which directly answers the recruiter's note.
+> "My first 30 days are about listening, learning and building credibility. // I wouldn't come in trying to reorganise anything.
+>
+> **First, understand the business and the team.** // I'd meet the senior people and learn what each of them is really good at, // where the capability gaps are, // which customer engagements are healthy and which are at risk, // and what the numbers say about pipeline, utilisation, margin and delivery.
+>
+> **Second, get into real work quickly.** // In the first week I'd want to join a customer conversation, review an architecture, or help on an at-risk delivery. // I want the team to see I'm there to help solve problems, // not just to inspect them.
+>
+> **Third, find one quick win.** // Not a reorganisation. // Something meaningful we can deliver inside the first quarter: // delivery predictability, utilisation visibility, an operational problem, or how we work with the Google account teams.
+>
+> **Fourth, establish trusted data.** // One view of pipeline, utilisation, margin, project health, customer satisfaction and delivery risk. /// If leadership is arguing about whether the numbers are right, // nobody can make a good decision on them.
+>
+> **Fifth, get hands-on with Google Cloud myself.** // Time with the architects and engineers on how we actually use BigQuery, Cloud Storage, Pub/Sub, Dataflow, Dataproc, Composer, Vertex AI and the security and governance stack, // and I'd start the certification path and make it visible.
+>
+> **By day 30 I want three things:** // a clear picture of where the practice is today, // agreement on the two or three biggest problems, // and a practical 90-day plan. /// The first 30 days aren't about showing everyone what I know. // They're about understanding the business well enough, and earning enough trust, // to make the right decisions afterwards."
 
-**Pass signal:** The "establish trusted data first" and "get hands-on with GCP early" — both are specific to this role.
-**Fail signal:** A 30-day plan that's all restructuring.
+**The flow to remember**
+
+```
+Listen → Help → Small win → Trusted data → Hands-on GCP → Day 30: picture + top 3 problems + 90-day plan
+```
+
+```mermaid
+flowchart LR
+    subgraph W1["Week 1"]
+        direction TB
+        A["Listen and map<br/>people, strengths, gaps<br/>engagements: healthy or at risk<br/>pipeline, utilisation, margin"]
+        B["Help on real work<br/>join a customer call<br/>review an architecture<br/>support an at-risk delivery"]
+    end
+    subgraph W2["Weeks 2 to 3"]
+        direction TB
+        C["Pick one quick win<br/>deliverable inside the quarter<br/>not a reorganisation"]
+        D["Establish trusted data<br/>one view: pipeline, utilisation,<br/>margin, project health, CSAT, risk"]
+    end
+    subgraph W3["Throughout"]
+        direction TB
+        E["Hands-on GCP<br/>BigQuery, GCS, Pub/Sub, Dataflow,<br/>Dataproc, Composer, Vertex AI,<br/>IAM / VPC-SC / CMEK<br/>certification path started"]
+    end
+    F{"Day 30 outcome"}
+    G["Clear picture of the practice today"]
+    H["Agreement on the 2 to 3 biggest problems"]
+    I["Practical 90-day plan"]
+    A --> B --> C --> D --> F
+    E --> F
+    F --> G
+    F --> H
+    F --> I
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    class A,B,C,D blue
+    class E yellow
+    class F yellow
+    class G,H,I green
+```
+
+**Key elements:** Listen first, change nothing early; earn credibility by being useful, not by inspecting; one visible, achievable win; establish trusted data; hands-on GCP time, which directly answers the recruiter's note; and a concrete day-30 outcome so the answer ends on a deliverable rather than a mood.
+
+**Likely follow-ups**
+
+| Probe | 15-second answer |
+|---|---|
+| "What would the quick win actually be?" | "I'd choose it after week one, but the shape is: something the team already knows is broken, visible to leadership, done inside the quarter. Utilisation visibility or delivery predictability are the usual candidates." |
+| "Why trusted data before anything else?" | "Because every harder call in months two and three, on people, pricing or engagements, depends on numbers people accept. If the first argument is about the data, I've lost the decision." |
+| "Which certification, and when?" | "Professional Data Engineer first, inside the first quarter, because it matches what the practice sells. Then Professional Cloud Architect." |
+| "What would you *not* do in 30 days?" | "Reorganise, change pricing, or make people decisions. Nothing irreversible before I have the picture and the trust." |
+
+**Pass signal:** The "establish trusted data first" and "get hands-on with GCP early" items, and a day-30 outcome that is a plan, not a restructure.
+**Fail signal:** A 30-day plan that's all restructuring, or one with no deliverable at the end.
 
 ---
 
 ### Q34. "Tell me about a time you disagreed with a decision. How did you handle it?"
 
-**Framework:** The disagreement → How you made the case → Outcome → And what you'd do differently
+**Framework:** One where you were right → one where you were wrong → the same method both times → what changed permanently
 
-> "I'll give you one where I was right, and one where I was wrong, because the first only tests whether you can win an argument.
+**Ground rule.** Tell each story on the platform it actually happened on, then **translate** the components to Google Cloud out loud ("on Google Cloud this layer is Dataproc"). Your GCP work is lab-scale (Q27 says so), so never say "I used Pub/Sub into Dataflow" as history. The interviewer still hears GCP fluency, and every sentence survives a follow-up. The spoken, personalised version with employer detail is in the private coach folder: `portfolio/interview/meta/coach/GOOGLE_RRK_Q34_DISAGREEMENT_ANSWER.md`.
+
+**Structure of the spoken answer (about 2 minutes)**
+
+> "I'll give you one where I was right, // and one where I was wrong, // because the first only tests whether you can win an argument.
 >
-> **[RIGHT]** [Real example — a technical or platform decision you pushed back on, how you made the case with evidence, and what changed. Use the incident −60%, month-end close 5d→2h, or the cost −40% work at Makro. Be specific about the counter-argument you were up against and why your evidence was better, not louder.]
+> **Where I was right.** The proposal on the table was to keep scaling the existing batch platform to absorb growing volume. // My concern: that treats the symptom. // More compute makes today's jobs faster, but storage and compute stay coupled, the batch window keeps growing, recovery stays slow, and cost grows in a straight line with volume. /// So instead of an architecture debate I proposed a **benchmark**: representative workloads on both designs, measuring runtime, failure rate, recovery time, throughput and cost per workload. // The decoupled lakehouse design won on every one, and the conversation stopped being my architecture against somebody else's. // We had evidence. // [Close on a result that is on your resume: month-end close **5 days to 2 hours**. Do **not** close on a cost percentage; none is on the resume.]
 >
-> **[WRONG]** [Real example where you were wrong and had to change course or course-correct. This is the one that builds trust with a Googleyness panel — "times you learned something new from a setback" is explicitly in the brief. A good answer is specific, doesn't blame others, and ends with what you changed permanently.]
+> **Where I was wrong.** Later I pushed too hard toward the target architecture. // Technically right, but I underestimated how much new technology the team had to absorb at once while keeping production running. // A **sequencing** mistake, not a technology mistake. /// I changed one large migration into gated waves: foundation first, low-risk workloads second, critical datasets dual-run and reconciled before any consumer moved, cutover only against criteria agreed in advance.
 >
-> **The bit I'd add:** in both cases the *method* is the same — I make the case with evidence, I respect the decision either way, and I document the risk. What changes is the probability that I'm right, which is exactly why I don't make it personal and I don't take silence as agreement."
+> **What changed permanently.** I no longer ask only 'what is the best architecture?' // I ask 'what is the best architecture **this team** can safely adopt, operate and scale?' // And either way the method is the same: bring evidence, hear the counter-argument, write the risk down, make the decision, don't make it personal."
 
-**Key elements:** One where you were right **and one where you were wrong** — the second is the differentiator, and the recruiter's brief explicitly asks for "times you learned something new from a setback"; compelling them; evidence; and no personalisation.
+**Diagram 1. The disagreement: scale the legacy platform, or benchmark and decide**
 
-**Pass signal:** A genuinely self-critical example where you name your own error and what you changed afterwards.
-**Fail signal:** Only the success story; or a "disagreement" that was really a "someone else was wrong and I fixed it."
+```mermaid
+flowchart LR
+    P["Problem on the table<br/>data volume growing,<br/>batch window slipping"]
+    subgraph A["Proposal A: scale the existing batch platform"]
+        direction TB
+        A1["Add more compute"] --> A2["Today's jobs run faster"]
+        A2 --> A3["Storage and compute still coupled<br/>recovery still slow<br/>cost grows with volume"]
+    end
+    subgraph B["What I proposed: benchmark, then decide"]
+        direction TB
+        B1["Pick representative workloads<br/>(month-end close among them)"] --> B2["Run on both designs"]
+        B2 --> B3["Measure runtime, failure rate,<br/>recovery time, throughput, cost"]
+    end
+    P --> A
+    P --> B
+    A3 --> D{"Decision on evidence,<br/>not opinion"}
+    B3 --> D
+    D --> O["Decoupled lakehouse chosen<br/>month-end close: 5 days to 2 hours"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    class A1,A2,A3 red
+    class B1,B2,B3 blue
+    class D yellow
+    class O green
+```
 
-[TODO: you have strong raw material here. Candidates: the decision to build the Makro lakehouse rather than extend the legacy stack; a late-stage decision at Lazada. For the "I was wrong" story, think hard — a decision you made that didn't work and what it taught you. If you can't identify one quickly, dig in the resume-facts file: the advisor flagged several claims you'll be stress-tested on, and one of those may be a place you changed your mind.]
+**Diagram 2. The reference architecture, translated to Google Cloud.** Memorise this one. Every follow-up is answered by pointing at a box.
+
+```mermaid
+flowchart LR
+    subgraph S["Sources"]
+        direction TB
+        S1["Operational databases<br/>(ERP, POS, WMS)"]
+        S2["Application events"]
+        S3["Batch files, partner feeds"]
+    end
+    subgraph I["Ingest"]
+        direction TB
+        I1["Datastream<br/>CDC, append-only change log"]
+        I2["Pub/Sub<br/>events, at-least-once"]
+        I3["Storage Transfer Service<br/>scheduled file moves"]
+    end
+    L["Cloud Storage<br/>raw landing zone, immutable"]
+    subgraph T["Transform"]
+        direction TB
+        T1["Dataproc<br/>existing Spark, no rewrite"]
+        T2["Dataflow (Beam)<br/>streaming, event time, watermarks"]
+    end
+    W["BigQuery<br/>curated and serving layers<br/>partition + cluster"]
+    BI["Looker / BI<br/>executive dashboards"]
+    S1 --> I1 --> L
+    S2 --> I2 --> T2
+    S3 --> I3 --> L
+    L --> T1 --> W
+    L --> T2 --> W
+    W --> BI
+    subgraph X["Cross-cutting, every wave"]
+        direction LR
+        X1["Composer<br/>DAGs, retries, backfills"]
+        X2["Dataplex, Data Catalog<br/>metadata, quality, lineage"]
+        X3["IAM, KMS, Secret Manager<br/>access, encryption, credentials"]
+        X4["Cloud Monitoring, Logging<br/>freshness SLAs, errors, cost"]
+        X5["Terraform, Cloud Build<br/>IaC and CI/CD"]
+    end
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef grey fill:#f2f2f2,stroke:#999999,color:#1a1a1a
+    class S1,S2,S3 grey
+    class I1,I2,I3,L,T1,T2 blue
+    class W,BI green
+    class X1,X2,X3,X4,X5 yellow
+```
+
+```
+Sources → Datastream / Pub/Sub / Transfer → Cloud Storage → Dataproc / Dataflow → BigQuery → BI
+            supporting every wave: Composer · Dataplex · IAM/KMS · Monitoring/Logging · Terraform
+```
+
+| GCP box | Why it is there (the one sentence to say) |
+|---|---|
+| Pub/Sub | Decouples producers from consumers; at-least-once, so consumers must be idempotent |
+| Datastream | CDC without load on the source; append-only, so the merge happens downstream |
+| Cloud Storage first | Replayable raw copy, cheap, shared by more than one engine; the warehouse is never the only copy |
+| Dataproc | Keeps working Spark code working; a rewrite is a cost, not a goal |
+| Dataflow | Streaming and new pipelines: event time, watermarks, allowed lateness, autoscaling, no cluster |
+| BigQuery | Storage and compute scale independently; partition and cluster by access pattern |
+| Composer | Dependencies, retries, backfills by logical date |
+| Dataplex / policy tags | Discovery, quality rules, lineage, column-level access |
+| IAM, CMEK, VPC-SC | Least privilege, customer-managed keys, no exfiltration path |
+| Monitoring + Logging | Reliability measured, not anecdotal: freshness, failure rate, cost per job |
+| Terraform + Cloud Build | Repeatable environments; every wave is a reviewed change |
+
+**Diagram 3. The wrong story and the fix: from one big migration to gated waves**
+
+```mermaid
+flowchart TD
+    BB["What I did first: one large migration<br/>new platform, new tools, new skills, all at once<br/>while production kept running"]
+    BB -->|"team overloaded, operational risk"| RE["Reset: move in waves,<br/>each with an exit gate"]
+    RE --> W1
+    subgraph W1["Wave 1: Foundation"]
+        direction LR
+        W1a["Landing storage, warehouse, IAM, network,<br/>keys, IaC, logging and monitoring"]
+    end
+    W1 --> W2
+    subgraph W2["Wave 2: Low-risk workloads"]
+        direction LR
+        W2a["Non-critical pipelines first<br/>keep Spark on Dataproc where a rewrite adds no value"]
+    end
+    W2 --> W3
+    subgraph W3["Wave 3: Critical workloads, dual run"]
+        direction LR
+        W3a["Old pipeline"] --> R{"Reconcile<br/>row counts, aggregates, financial totals,<br/>null rates, duplicates, freshness, KPIs"}
+        W3b["New pipeline"] --> R
+    end
+    R -->|"mismatch"| FIX["Fix and re-run<br/>consumers stay on the old pipeline"]
+    FIX --> W3b
+    R -->|"match for N consecutive cycles"| G{"Cutover gate"}
+    G -->|"reconciliation passes, SLA met, monitoring live, rollback tested"| CUT["Wave 4: Cutover<br/>switch consumers, retire legacy"]
+    G -->|"any criterion fails"| FIX
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    class BB,FIX red
+    class RE,W1a,W2a,W3a,W3b blue
+    class R,G yellow
+    class CUT green
+```
+
+**What the benchmark measured (pick three rows in the room, not all five)**
+
+| Dimension | Measure | How to say it |
+|---|---|---|
+| Performance | Pipeline runtime, query latency, freshness at the consumer | "Freshness at the dashboard, not job completion, is the number the business feels" |
+| Reliability | Failure rate, recovery time, SLA misses, MTTR | "Recovery time mattered more than failure rate" |
+| Scale | TB per hour, peak throughput, concurrent workloads | "We ran the peak day, not the average day" |
+| Cost | Cost per TB processed, compute per job, storage, support effort | "Cost per workload, same window, both designs. A percentage only with the baseline and what was excluded" |
+| Operations | Manual interventions per week, deployment lead time | "Count the human hours, not just the machine hours" |
+
+**Cutover criteria, agreed before Wave 3 starts:** reconciliation passes for N consecutive cycles; freshness SLA met on the new path; monitoring and alerting live and tested; rollback exercised, not just written. Then switch consumers, run legacy dark for one more cycle, retire it.
+
+**Follow-ups they will ask**
+
+| Probe | 20-second answer |
+|---|---|
+| "Why Dataproc **and** Dataflow? Pick one." | "Different jobs. Dataproc keeps working Spark code working, so migration risk stays low. Dataflow is for streaming and new pipelines where event time and autoscaling matter. Rewriting Spark to Beam because Dataflow is newer is a cost with no business outcome." |
+| "Why land in Cloud Storage before BigQuery?" | "Replay: a wrong transform is re-run from raw without going back to the source. Cost: raw stays cheap and the warehouse holds what people query. Decoupling: more than one engine reads the same raw data." |
+| "How did you validate the migration?" | "Dual run and reconcile before any consumer moved: row counts, aggregates, financial totals, null rates, duplicates, freshness, and the KPIs as executives see them. Cutover criteria written before Wave 3; legacy ran dark one more cycle." |
+| "How did you calculate the cost improvement?" | "Cost per workload, same window, both designs, exclusions written down. I don't have a cost percentage on my resume and I'd rather give you the method than a number without a baseline." |
+| "Who told you the big-bang approach was too much?" | "The team did, and that is part of the lesson. I had the evidence for the architecture and had not weighted the evidence about the team." |
+| "Would you make the same call on Google Cloud?" | "Same method, same waves. The foundation wave is shorter because BigQuery, Dataflow and Pub/Sub are serverless: fewer clusters to stand up and fewer to retire." |
+
+**Key elements:** One where you were right **and one where you were wrong**; the second is the differentiator, and the recruiter's brief explicitly asks for "times you learned something new from a setback". Evidence over opinion. The method stays the same either way. No personalisation, no blame.
+
+**Pass signal:** A genuinely self-critical example where you name your own error and what you changed afterwards, and an architecture you can defend box by box.
+**Fail signal:** Only the success story; a "disagreement" that was really "someone else was wrong and I fixed it"; or a GCP claim stated as history.
+
+[TODO: the "wrong" story must be literally true. Write down its one concrete casualty (the dataset, the week, the consumer) in the private file. If that memory is not there, use the fallback in `ROUND_1_RRK_GAP_CLOSURE.md` §5. Never close on a cost percentage.]
 
 ---
 
@@ -880,7 +1096,7 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 - [ ] **Resolve every `[TODO]` in this document** — each one is a known probe point.
 - [ ] **Re-read Part C and D aloud, timed** — these are where the level is judged, and they're the hardest to sound natural in.
 - [ ] **Practise the code review (Q15) three times, timed**, against `pipeline_logic.py`, `dataflow_batch_pipeline.py`, and one unfamiliar snippet.
-- [ ] **Write the "I was wrong" story (Q34) and rehearse it** — it must sound genuinely self-critical, not rehearsed humility.
+- [ ] **Rehearse Q33 and Q34 from the flow diagrams** — Q34's "I was wrong" story must be literally true with one concrete casualty written in the private file; it must sound self-critical, not rehearsed humility.
 - [ ] **Prepare the Q23 competitor one-pager** — Snowflake, Databricks, AWS, Microsoft, including where Google is weaker.
 - [ ] **Know your numbers cold, in two tiers.**
   - **On the resume the interviewer holds (say freely):** $8B business, 3 countries, org 8→30 across four squads (Finance, Supply Chain, O2O, Platform), $3M budget, 10B+ rows/day, month-end close 5d→2h, 50+ executive dashboards, 200+ stores and 5 DCs near real-time inventory, 1,000+ vendors forecasting; Lazada 100M+ daily events, 20M+ insights/day, 600+ governed tables, 10x growth, double promotion; SCB AML 15+ countries, MAS.
