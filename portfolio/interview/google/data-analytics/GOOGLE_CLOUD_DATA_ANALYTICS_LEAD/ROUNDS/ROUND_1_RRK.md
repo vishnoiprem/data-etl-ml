@@ -2545,44 +2545,223 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 
 ### Q16. "You're 8 weeks into a transformation programme and it's off track. What do you do in the first 72 hours?"
 
-**Framework:** Stabilise → Diagnose → Re-plan → Communicate
+**Framework:** **F-C-C-D** — Facts → Cause → Critical path → Decision. (Stabilise → Diagnose → Re-plan → Communicate.)
 
-**Flow**
+**Opening line:** "My first 72 hours are about **getting to the truth, stabilising the programme, and making the first decision.** I would not start with a big replanning workshop."
+
+**Flow 0 — the 72 hours**
 
 ```mermaid
 flowchart LR
-    N0["Hours 0 to 12: establish the facts<br/>scope, decision rights, technical<br/>blocker, value never agreed<br/>talk to the delivery team"]
-    N1["Hours 12 to 36: targeted conversations<br/>sponsor, workstream owners,<br/>holders of stuck decisions"]
-    N2["Hours 36 to 72: one-page position<br/>what is happening, 3 changes,<br/>what we will not do, who needs what"]
-    N3{"Take it to the sponsor<br/>decision needed by a date"}
-    N0 --> N1
-    N1 --> N2
-    N2 --> N3
+    H1["Hours 0-12<br/>FACTS<br/>promised vs actually exists"]
+    H2["Hours 12-36<br/>CAUSE<br/>targeted conversations,<br/>look for disagreement"]
+    H3["Hours 36-60<br/>CRITICAL PATH<br/>the short chain that controls the date"]
+    H4["Hours 60-72<br/>DECISION<br/>one-page brief,<br/>sponsor decision by a date"]
+    H1 --> H2 --> H3 --> H4
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
-    class N0,N1,N2 blue
-    class N3 yellow
-    class N3 green
+    class H1,H2,H3 blue
+    class H4 green
 ```
 
+**Flow 1 — hours 0 to 12: promised vs actual, with evidence**
 
-> "**72 hours is for stabilising and diagnosing, not for fixing.** Fixing before you understand is how a programme loses another month.
->
-> **Hours 0–12: establish the facts.** What is actually behind? I'll look for four things, because 'off track' is a symptom with four common causes: the *scope* grew or the *timeline* was never real; the *decision rights* aren't where we think they are, so we're waiting on someone who didn't know they had to decide; there's a *technical* blocker nobody owns; or the *value* was never agreed, so no one is fighting for it. I'd get the programme's own artefacts — plan, RAID log, decisions log, delivery dashboard — and talk to the people closest to the work, not the steering committee. The steering committee tells you what they think is happening; the delivery team tells you what is happening.
->
-> **Hours 12–36: a small number of targeted conversations** with the programme sponsor, the key workstream owners, and whoever holds the decisions that are actually stuck. I'm not convening a big workshop — that's usually an escalation and it burns goodwill. I want to know what each of them believes is happening, because where their accounts differ, that's your diagnosis.
->
-> **Hours 36–72: write down the diagnosis and make one decision.** The output of 72 hours is a one-page written position: what we believe is happening, the three things we will change, what we will explicitly *not* do, and what we need from whom by when. Then I take it to the sponsor and get agreement on the revised path.
->
-> **Two things I'll be careful about.** I don't relitigate the plan in the first 72 hours — that reads as panic and it burns the team's trust. And I don't hide the bad news; I frame it as *here is the decision I need from you by Thursday*, which keeps the sponsor in the solution rather than in the blame.
->
-> **And one thing I'll insist on:** name the possibility that the scope or the date has to change. Sometimes the honest move is a smaller programme that lands, not a full one that doesn't. I would rather negotiate that in week two than discover it in month six."
+Compare what the plan said would exist at week eight with what exists. Evidence, not traffic-light status. (Illustrative GCP migration; numbers are made up.)
 
-**Key elements:** 72 hours is for *diagnosis*, not fixing; four distinct root causes of "off track"; talk to delivery not the steering committee; written one-page output; "what I need from you by when" framing; willingness to reduce scope; explicit avoidance of a panic workshop.
+| Week-8 plan said | Reality | Gap type |
+|---|---|---|
+| GCP landing zone complete | Done | none |
+| IAM and networking complete | IAM 80% | Decision or approval |
+| BigQuery foundation complete | Done | none |
+| Golden pipeline complete | Not in production | Technical or scope |
+| 50 pipelines migrated | 18 of 50 | Planning (velocity) |
+| First business domain live | 0 | **Adoption** |
 
-**Pass signal:** You diagnose *before* you act and you distinguish programme failure from technical failure.
+Look at: committed scope vs scope today, critical path, backlog and burn-up, architecture decisions waiting, RAID log, dependency age, defect volume, GCP environment readiness, pipelines **production-ready** vs "done", pipelines actually **retired**, business adoption, spend vs plan. And talk to the engineers, architects and delivery leads doing the work.
+
+**Flow 2 — which problem do I actually have? (five buckets)**
+
+```mermaid
+flowchart TD
+    OFF["Programme off track"]
+    OFF --> Q1{"Scope grew?"}
+    Q1 -->|"yes"| S["SCOPE failure<br/>500 pipelines became<br/>+40 dashboards, ML platform,<br/>streaming, GenAI"]
+    Q1 -->|"no"| Q2{"Velocity assumption wrong?"}
+    Q2 -->|"yes"| PL["PLANNING failure<br/>planned 10 per week,<br/>actual 3 per week"]
+    Q2 -->|"no"| Q3{"Decisions unowned<br/>or waiting?"}
+    Q3 -->|"yes"| DE["DECISION failure<br/>BigQuery or Dataproc?<br/>TH or SG location?<br/>who approves PII movement?"]
+    Q3 -->|"no"| Q4{"Hard technical blocker?"}
+    Q4 -->|"yes"| TE["TECHNICAL blocker<br/>e.g. CDC not enableable<br/>on the source"]
+    Q4 -->|"no"| AD["ADOPTION failure<br/>tech migrated,<br/>business has not moved"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class OFF red
+    class Q1,Q2,Q3,Q4 yellow
+    class S,PL,DE,TE,AD blue
+```
+
+| Bucket | Tell-tale | Response |
+|---|---|---|
+| **Scope** | Original scope plus several new streams | Not an engineering productivity problem. Control scope and reprioritise |
+| **Planning** | Plan velocity far above actual because each pipeline needs source changes, reconciliation, security approval, UAT, cutover | Don't ask people to "work harder against false mathematics". Re-baseline on measured velocity |
+| **Decision** | Engineers waiting weeks on questions nobody owns | Governance bottleneck disguised as engineering delay. Assign a decision owner and a deadline |
+| **Technical** | A specific blocker (e.g. no CDC on the legacy Oracle source for Datastream) | Bring options and a recommendation, not a problem (see below) |
+| **Adoption** | 18 of 50 pipelines migrated, old platform 450 users, new platform 8 | "We've migrated technology but not the business." Needs a different recovery plan: consumer moves and legacy retirement |
+
+**Turn a technical blocker into a decision, not a worry**
+
+```mermaid
+flowchart TD
+    PB["Problem<br/>CDC unavailable on legacy source"]
+    PB --> OA["Option A<br/>change source configuration"]
+    PB --> OB["Option B<br/>temporary batch extraction"]
+    PB --> OC["Option C<br/>alternative ingestion pattern"]
+    OA --> RC["Recommendation<br/>B now, A permanently"]
+    OB --> RC
+    OC --> RC
+    RC --> DR["Decision needed from a named person<br/>by a named day and time"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class PB red
+    class OA,OB,OC blue
+    class RC yellow
+    class DR green
+```
+
+**Flow 3 — hours 12 to 36: targeted conversations, and where accounts disagree**
+
+```mermaid
+flowchart TD
+    CV["Small, individual conversations<br/>no 30-person crisis workshop"]
+    CV --> P1["Sponsor"]
+    CV --> P2["Programme or delivery lead"]
+    CV --> P3["Lead architect"]
+    CV --> P4["Data engineering lead"]
+    CV --> P5["Security or regulatory owner"]
+    CV --> P6["Critical business or product owner"]
+    P1 --> QS["Same questions to each"]
+    P2 --> QS
+    P3 --> QS
+    P4 --> QS
+    P5 --> QS
+    P6 --> QS
+    QS --> DI["Compare answers:<br/>where they disagree is the finding"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class CV red
+    class P1,P2,P3,P4,P5,P6 blue
+    class QS yellow
+    class DI green
+```
+
+The five questions: "What do you think is causing the delay?" / "What's the single decision you're waiting for?" / "If nothing changes, what date do you honestly think we'll hit?" / "What would you stop doing?" / "What are we calling complete that isn't actually usable?"
+
+Disagreement example: Sponsor says "engineering capacity"; engineering says "waiting for source access"; security says "nobody submitted the approval"; programme says "security approval is complete". **That is a programme problem, found in 36 hours.**
+
+**Flow 4 — hours 36 to 60: rebuild the critical path**
+
+```mermaid
+flowchart LR
+    C1["Security approval"] --> C2["Datastream connectivity"] --> C3["Golden ingestion pattern"] --> C4["BigQuery reconciliation"] --> C5["Business UAT"] --> C6["Consumer migration"] --> C7["Legacy retirement"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class C1,C2,C3,C4,C5,C6 blue
+    class C7 green
+```
+
+Stop thinking about 500 activities. Identify the small chain that controls the date; anything off that path is temporarily secondary. Then ask: "If we fix these five things, does the programme move?" If yes, that's the recovery focus.
+
+**Flow 5 — hours 60 to 72: the hard choice (the honest options)**
+
+```mermaid
+flowchart TD
+    D["Choose the recovery option"]
+    D --> A["A Keep scope, move date<br/>e.g. plus 8 weeks"]
+    D --> B["B Keep date, reduce scope<br/>regulatory and Tier-1 domains first,<br/>lower-value domains to Phase 2"]
+    D --> C["C Add capacity<br/>only if the critical path<br/>is genuinely parallel"]
+    D --> E["D Change technical approach<br/>critical Spark: rehost on Dataproc,<br/>modernise later;<br/>new streaming: Dataflow"]
+    C --> W["Warning: 20 more engineers do not help<br/>if all wait on one security decision"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class D red
+    class A,B,E green
+    class C yellow
+    class W red
+```
+
+**The 72-hour deliverable: a one-page recovery brief (sponsor-ready)**
+
+| Section | Content (illustrative figures, not a real programme) |
+|---|---|
+| **Current position** | Milestone attainment 62%; critical-path delay 4 weeks; pipelines in production 18 of 50; business domains live 0 of 2 |
+| **Root causes** | Security decision latency; source-access dependencies; too much simultaneous pipeline redesign |
+| **What changes now** | Named security decision owner with a 48-hour SLA; golden ingestion pattern finished before more migration; rehost suitable Spark on Dataproc instead of rewriting everything |
+| **What stops** | Non-critical GenAI work; optional dashboard migration; new architecture experiments |
+| **Decision required** | "To retain the regulatory date, approve moving the low-priority domains to Phase 2 by Thursday." That is an executive conversation |
+
+**A GCP example (hypothetical; say "imagine", not "I did")**
+
+```mermaid
+flowchart LR
+    SRC["Sources"] --> IN["Datastream or Pub/Sub"] --> GC["GCS"] --> PR["Dataflow or Dataproc"] --> BQ["BigQuery"] --> LK["Looker"]
+    FD["Finding: team rewriting mature Spark into Beam;<br/>source access and security approval<br/>take two weeks each"]
+    FD --> RT["Route change:<br/>mature Spark to Dataproc first,<br/>Dataflow only for event-driven work,<br/>standard destination in BigQuery,<br/>decision SLAs on access and security"]
+    RT --> OUT["Less transformation scope,<br/>same business outcome,<br/>standard not lowered"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class SRC,IN,GC,PR,BQ,LK blue
+    class FD red
+    class RT yellow
+    class OUT green
+```
+
+> "I haven't lowered the standard. I've changed the route to get there." This is the Q11 stance (standardise the contract, not the runtime) and the Q7 stance (rehost lane) applied to a recovery.
+
+**Spoken answer (about 90 seconds).** `//` short pause, `///` long pause, `⏹` stop.
+
+> "I don't try to **fix** an eight-week programme in 72 hours. // I use the 72 hours to establish the **truth** and make the **first hard decision**. ///
+>
+> In the first 12 hours I compare **promised outcomes with actual outcomes**: the plan, the RAID log, the decision log, delivery metrics and production evidence. // And I talk to the engineers and architects directly, not only the steering-committee status. // I'm working out whether this is **scope, an unrealistic plan, a decision bottleneck, a technical blocker, or adoption**. ///
+>
+> Between hours 12 and 36 I speak to the sponsor, delivery owner, architect, engineering lead and the key business owner. // Same questions to each, and I look for **where their explanations disagree**, because that's usually where the real problem is. ///
+>
+> Then I rebuild the **critical path**. // In a GCP transformation that might be security approval, source connectivity, Datastream into Dataflow, BigQuery reconciliation, UAT, consumer cutover. // I put the effort on whatever really controls the date. ///
+>
+> By 72 hours I produce a **one-page recovery position**: what's wrong, the three things we're changing, what we're stopping, and the decision I need from the sponsor, by when. ///
+>
+> And I put **scope and date on the table** explicitly. // I'd rather deliver a smaller programme that creates real value than defend a beautiful plan that won't land. ⏹"
+
+**Strongest closing line:** "A troubled programme doesn't need more activity in the first 72 hours. It needs clarity about what is actually blocking value, and one decision that changes the trajectory."
+
+**Follow-up probes**
+
+| Probe | Answer |
+|---|---|
+| "The sponsor says everything is green?" | "I'd ask for the evidence behind each green: what is in production, what is retired, who uses it. Status and evidence are different things." |
+| "What if the cause is the team's performance?" | "I check the plan and decisions first; most delay is system, not people. If it is capability, I'd say so privately and fix it with support or reassignment, not in the programme meeting." |
+| "Would you add people?" | "Only if the critical path is parallelisable. Otherwise it adds coordination cost to a decision bottleneck." |
+| "How do you tell the sponsor bad news?" | "As a decision, not a confession: here is what changed, here are the options, here is my recommendation, I need your decision by Thursday." |
+| "Scope or date?" | "Put both on the table. Usually the honest answer is a smaller first release that lands, with the rest in Phase 2." |
+| "How do you stop the team from losing trust?" | "Don't relitigate the whole plan in 72 hours. Change three things, stop a few, and show the team the reasoning." |
+| "What does 'done' mean after recovery?" | "Consumer moved and legacy off, not 'pipeline deployed'." |
+
+**Key elements:** 72 hours is for **diagnosis and the first decision**, not fixing; five distinct root causes (scope, plan, decisions, technical, **adoption**); promised vs actual evidence; targeted conversations and disagreement as a signal; critical path; scope-or-date choice; one-page brief with a dated sponsor decision.
+
+**Pass signal:** You diagnose before acting, separate programme failure from technical failure, and name adoption as a failure mode.
 **Fail signal:** "I would call a meeting and re-plan" with no diagnostic structure.
 
 ---
