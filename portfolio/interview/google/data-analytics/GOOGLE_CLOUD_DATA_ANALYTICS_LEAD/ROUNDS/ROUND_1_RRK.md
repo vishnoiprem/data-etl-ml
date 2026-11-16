@@ -1358,11 +1358,36 @@ Note the refinement from "start serverless and move to Dataproc when a constrain
 
 **Framework:** Trade-off first, then the conditions that force the other choice
 
-**The frame to say first:** "It is a **trade-off, not a ranking**. Dataflow is the managed, streaming-first choice. Spark wins when there is a real reason to keep Spark. I decide per workload, and I check whether the workload is really streaming before I choose."
+**The frame to say first:** "My default for event-driven, stateful processing on GCP is Dataflow, but I would not rewrite a good Spark workload just to standardise on Dataflow." I do not frame it as streaming versus batch, because both can cover more than that. I look at **workload semantics and existing engineering investment**, and before either I challenge the requirement: *does this actually need streaming?*
+
+It is a **trade-off, not a ranking**. Dataflow is the managed, streaming-first choice. Spark wins when there is a real reason to keep Spark. I decide per workload, and I check whether the workload is really streaming before I choose."
 
 **The line to memorise:** "**Dataflow for continuous, event-driven, stateful work. Spark for batch, iterative or existing Spark. And check it is really streaming first.**"
 
-**Flow 1. The decision**
+**Flow 0. Three questions, in this order**
+
+```mermaid
+flowchart TD
+    Q1{"1 Does it really need streaming?<br/>What freshness does the business need?"}
+    Q1 -->|"Seconds or a few minutes,<br/>event-time semantics needed"| DF["Dataflow<br/>my default for event-driven, stateful work"]
+    Q1 -->|"15 minutes, hourly, daily"| Q2{"2 Is it genuinely Spark-shaped,<br/>or already Spark?"}
+    Q2 -->|"Yes: large complex batch, iterative,<br/>custom PySpark or Scala, Spark ML,<br/>existing Spark estate"| DP["Dataproc, or serverless Spark"]
+    Q2 -->|"No"| Q3{"3 Can SQL solve it simply?"}
+    Q3 -->|"Yes, data already in BigQuery"| BQ["BigQuery with Dataform<br/>often the simplest operationally"]
+    Q3 -->|"No"| DP
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class Q1,Q2,Q3 yellow
+    class DF,DP,BQ green
+```
+
+**Three questions to remember.** (1) Does it really need streaming? If yes, Dataflow. (2) Is it genuinely Spark-shaped or already Spark? If yes, Dataproc. (3) Can SQL solve it simply? If yes, BigQuery with Dataform.
+
+**Simplest distinction.** Dataflow is for **events**: clickstream, payment events, IoT, inventory changes, fraud signals, real-time orders. Dataproc is for **Spark**: an existing Spark migration, large batch transformation, complex feature engineering, Spark ML, graph or iterative work, custom Spark libraries.
+
+**Flow 1. The detailed decision**
 
 ```mermaid
 flowchart TD
@@ -1425,6 +1450,28 @@ flowchart LR
 | Skills | Beam is a new skill for most teams | Spark skills are common and portable |
 | Fit | Continuous, event-driven, stateful | Batch, iterative, library-heavy, ML on Spark |
 
+
+**Why event time is the real reason to choose Dataflow, not "it is serverless"**
+
+```mermaid
+flowchart LR
+    EV["Order happens<br/>event_time = 10:01"] --> AR["Arrives late<br/>arrival_time = 10:17"]
+    AR --> WRONG["Processing-time window<br/>counts it in 10:17, wrong"]
+    AR --> RIGHT["Event-time window<br/>counts it in 10:01, right"]
+    RIGHT --> MECH["Beam model: event time, processing time,<br/>windows, watermarks, triggers,<br/>allowed lateness, keyed state"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class EV,AR blue
+    class WRONG red
+    class RIGHT,MECH green
+```
+
+The business semantics say the order belongs to 10:01. A model built for event time, watermarks, lateness and keyed state is the actual reason to pick Dataflow for this class of work.
+
+**When I still choose Spark.** Suppose the customer has 600 PySpark pipelines, eight years of development, custom Scala libraries, experienced Spark engineers and known reliability. I would not say "rewrite everything in Beam because we are moving to Google Cloud." I would ask **what business problem the rewrite solves**. If the answer is weak, existing Spark on Dataproc feeding BigQuery is the correct migration. That is not avoiding modernisation, it is avoiding a low-value rewrite.
+
 **Flow 3. The check that saves money: is it really streaming?**
 
 ```mermaid
@@ -1442,6 +1489,8 @@ flowchart LR
     class ST,MB blue
     class W green
 ```
+
+Ask the customer: "**What decision gets worse if the data is 15 minutes old?**" Fraud detection: seconds matter, so streaming. An executive sales report: 15 to 60 minutes is probably fine, so not true streaming. A 24-hour business SLA is not a real-time architecture.
 
 "A lot of 'streaming' pipelines are micro-batch in disguise, running every five minutes. If the freshness requirement is fifteen minutes and not seconds, a scheduled job is simpler and cheaper, and I would rather tell the customer that than over-engineer."
 
@@ -1472,6 +1521,10 @@ flowchart LR
 
 "Streaming and continuous work moves to Dataflow, batch Spark moves to Dataproc, and both sit under **one lakehouse contract and one orchestration layer**: Composer or Dataform for orchestration, Dataplex for the catalogue. That gives a consistent developer contract without forcing a single runtime."
 
+**Standardise the contract and controls, not the compute engine.** Both tracks follow the same naming, IAM, data contracts, quality rules, observability, CI/CD, lineage and SLAs, while each workload uses the engine that fits it.
+
+**On cost.** Serverless means less infrastructure management, not automatically lower cost. I measure compute cost per TB or per event, worker utilisation, shuffle and state cost, idle capacity, autoscaling behaviour, engineering and on-call effort, migration effort and **SLA achieved per dollar**. Sometimes Dataproc wins because existing Spark moves with few changes. Sometimes Dataflow wins because it removes a large operations burden. **Total cost includes engineers, not just the cloud invoice.** I do not quote a percentage without a baseline.
+
 **What I would check before deciding**
 
 | Question | Why it matters |
@@ -1483,17 +1536,19 @@ flowchart LR
 | Does the work need Spark-specific libraries or ML on Spark? | Pulls it to Dataproc |
 | Is it mostly SQL? | Then neither: BigQuery may be simplest |
 
-**Spoken answer (about 60 seconds).** Notation: `//` short pause, `///` long pause.
+**Spoken answer (about 75 seconds).** Notation: `//` short pause, `///` long pause.
 
-> "It's a trade-off, not a ranking. ///
+> "I don't frame Dataflow versus Dataproc as simply streaming versus batch, // because both can cover more than that. // I look at the workload semantics and the existing engineering investment. ///
 >
-> **Dataflow** is the streaming-first, managed choice: // event time, windows with explicit lateness, exactly-once state, and no cluster to operate. // I reach for it when the work is **continuous, event-driven and stateful**. ///
+> **Dataflow** is my default for continuous, event-driven processing where I need event time, windows, watermarks, late-data handling and stateful processing, // particularly when I don't want the customer operating Spark infrastructure. ///
 >
-> **Spark** wins when the work is genuinely batch and iterative, // or when there is existing Spark investment and team fluency. // Rewriting a working Spark estate costs real money and time, // and 'we standardised on Dataflow' isn't a justification. ///
+> **Spark on Dataproc** wins when the workload is genuinely Spark-shaped: // large complex batch, iterative processing, custom PySpark or Scala libraries, Spark ML, // or an existing Spark estate where rewriting creates little business value. ///
 >
-> In a migration I'd run **two tracks**: // streaming to Dataflow, batch Spark to Dataproc, // under one lakehouse contract and one orchestration layer. ///
+> In an enterprise migration I'd usually run **two tracks**: // event-driven workloads toward Dataflow, appropriate Spark workloads to Dataproc, // both landing in BigQuery under common governance, quality and orchestration standards. ///
 >
-> And first I'd check the workload is **really streaming**. // If fifteen-minute freshness is enough, // a scheduled job is simpler and cheaper, and I'd tell the customer that."
+> But first I'd ask one question: **what freshness does the business actually need?** // If someone says 'real time' but fifteen minutes is acceptable, // I may use BigQuery with Dataform or batch Spark instead. // I don't want to pay the complexity tax of streaming without a business reason. ///
+>
+> So I standardise the **data contract and operating model**, not the runtime."
 
 **Likely follow-ups**
 
@@ -1502,7 +1557,7 @@ flowchart LR
 | "Is Dataflow only for streaming?" | "No, Beam handles batch and streaming with one model. I reach for it when the work is continuous or stateful, or when I want no cluster to manage. Batch Spark with strong existing code stays on Spark." |
 | "Can Spark do streaming?" | "Yes, Structured Streaming. The question is who builds and runs the correctness and the cluster. Dataflow gives event-time, lateness and state with less to operate." |
 | "What does Dataflow not give you for free?" | "Exactly-once inside the pipeline does not make the sink idempotent or remove duplicates a producer published. I still make the write idempotent. See Q6." |
-| "Cost?" | "Both bill for resources used. The question is utilisation and operations effort. Ephemeral or serverless Spark and autoscaled Dataflow both avoid paying for idle. I'd compare on a representative workload, not on a list price." |
+| "Is Dataflow cheaper because it is serverless?" | "Serverless means less to operate, not automatically cheaper. I compare cost per TB or event, utilisation, shuffle and state, idle capacity and on-call effort on a representative workload. Total cost includes engineers." |
 | "What if the team only knows Spark?" | "Skills are a real cost. Keep Spark where it earns its place, adopt Dataflow where its guarantees matter, and invest in a small Beam core team instead of retraining everyone." |
 
 **Key elements:** A trade-off, not a ranking; Dataflow's managed streaming strengths; the genuine reasons for Spark (iterative work, ecosystem, existing code and skills); the "is it really streaming" check; two tracks under one contract.
