@@ -221,26 +221,29 @@ with beam.Pipeline(options=options) as p:
     grouped = src | "GroupByKey" >> beam.GroupByKey()
     combined = src | "CombinePerKey" >> beam.CombinePerKey(sum)
 
-    _ = grouped | "Write grouped" >> beam.io.WriteToText(
-        str(out / "grouped"), shard_name_template="", append_trailing_newlines=False
+    # One line per key, then sort the lines so the transcript is stable.
+    _ = grouped | "Format grouped" >> beam.Map(lambda kv: f"{kv[0]} -> {kv[1]}") | "Write grouped" >> beam.io.WriteToText(
+        str(out / "grouped"), shard_name_template=""
     )
-    _ = combined | "Write combined" >> beam.io.WriteToText(
-        str(out / "combined"), shard_name_template="", append_trailing_newlines=False
+    _ = combined | "Format combined" >> beam.Map(lambda kv: f"{kv[0]} -> {kv[1]}") | "Write combined" >> beam.io.WriteToText(
+        str(out / "combined"), shard_name_template=""
     )
 
-print("grouped:")
-print((out / "grouped").read_text())
-print("combined:")
-print((out / "combined").read_text())
+for name in ("grouped", "combined"):
+    print(f"{name}:")
+    for line in sorted((out / name).read_text().splitlines()):
+        print(f"  {line}")
 ```
 
-Expected output (unordered):
+Expected output:
 
 ```text
 grouped:
-('a', [1, 3, 5])('b', [2, 4])
+  a -> [1, 3, 5]
+  b -> [2, 4]
 combined:
-('a', 9)('b', 6)
+  a -> 9
+  b -> 6
 ```
 
 `GroupByKey` is the general one. `CombinePerKey(sum)` is `GroupByKey` plus a
