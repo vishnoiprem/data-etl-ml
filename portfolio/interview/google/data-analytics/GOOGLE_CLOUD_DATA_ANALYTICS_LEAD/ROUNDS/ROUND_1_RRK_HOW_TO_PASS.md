@@ -2,7 +2,7 @@
 # How to Pass the RRK — Google Cloud Data & Analytics Lead
 
 **Role:** Data & Analytics Lead, Google Cloud Consulting (Singapore) — Professional Services Organisation
-**Round:** 1 of 2 — Role Related Knowledge (RRK) | **Interviewer:** Navakanth Talluri | **~60 min**, virtual
+**Round:** 1 of 2 — Role Related Knowledge (RRK) | **Interviewer:** the RRK interviewer | **~60 min**, virtual
 **Loop:** RRK → RRK → Googleyness & Leadership → informal senior-leader conversation
 
 **Companion:** `ROUND_1_RRK.md` — the 35-question Q&A bank. This document is *how to pass*; that one is *what to say*. Also: `ROUND_1_RRK_GAP_CLOSURE.md` (resolved TODOs and the four exposures closed) and `ROUND_1_RRK_CODE_REVIEW_DRILL.md` (Q15).
@@ -248,4 +248,4 @@ Two narrow exceptions, if time permits: the **Family C streaming/state section**
 
 ---
 
-*Strategy derived from the Round 1 RRK brief from Ben Holman (Google Cloud GTM, APAC) and `HOW_TO_PASS.md`. Question bank: `ROUND_1_RRK.md`. Personal facts: `portfolio/interview/meta/coach/resume-facts.md`. The wider corpus's aspirational numbers are illustrative models, not biography — see `ROUND_1_RRK.md` §"How to Use This Document".*
+*Strategy derived from the Round 1 RRK brief from the recruiter and `HOW_TO_PASS.md`. Question bank: `ROUND_1_RRK.md`. Personal facts: `portfolio/interview/meta/coach/resume-facts.md`. The wider corpus's aspirational numbers are illustrative models, not biography — see `ROUND_1_RRK.md` §"How to Use This Document".*

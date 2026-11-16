@@ -122,7 +122,7 @@ ml/LLM/fine_tuned_gpt2/model.safetensors
 ml/GenAI-Pinnacle-Master/Computer Vision using PyTorch/Module 2/notebooks/best_model.pth
 
 # Interview prep — personal resume extract + weak-spot ledger. Repo is PUBLIC.
-medium/meta/coach/
+portfolio/interview/meta/coach/
 .claude/agents/
 
 # Nested git worktrees under .claude/worktrees/. These were previously

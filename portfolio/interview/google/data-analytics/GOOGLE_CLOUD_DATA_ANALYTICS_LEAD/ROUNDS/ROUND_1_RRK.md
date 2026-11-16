@@ -1,7 +1,7 @@
 # ROUND 1 — Role Related Knowledge (RRK) — Question & Answer Bank
 
 **Role:** Data & Analytics Lead, Google Cloud Consulting (Singapore) — Professional Services Organisation
-**Interviewer:** Navakanth Talluri | **Duration:** ~60 min
+**Interviewer:** the RRK interviewer | **Duration:** ~60 min
 **Loop context:** Two RRK rounds → Googleyness & Leadership (G&L) → informal senior-leader conversation. All virtual.
 **Round 2 note:** One of the two RRK rounds includes a hands-on practical — reviewing a short piece of data-processing code and designing an enterprise data platform live. You are not asked to write a full solution; you are asked to reason about correctness, scale, reliability, security and maintainability, and to draw and defend an architecture.
 
@@ -12,7 +12,7 @@
 ## 📌 How to Use This Document
 
 **1. Numbers rule — read this first.**
-Every metric in this bank comes from Prem's **verified resume** (`portfolio/interview/meta/coach/resume-facts.md`, extracted from `Prem_Resume_2026.pdf` on 2026-09-26). Anything in the wider corpus like "$2.1M → $12.3M ARR practice", "$2.5M / 120TB migration", "500TB FSI programme", "$5.4M revenue / 35% margin" is an **aspirational model, not Prem's history** — `HOW_TO_PASS.md` says so explicitly. Do not present those as fact.
+Every metric in this bank comes from your **verified resume** (`portfolio/interview/meta/coach/resume-facts.md`, extracted from `Prem_Resume_2026.pdf` on 2026-09-26). Anything in the wider corpus like "$2.1M → $12.3M ARR practice", "$2.5M / 120TB migration", "500TB FSI programme", "$5.4M revenue / 35% margin" is an **aspirational model, not your history** — `HOW_TO_PASS.md` says so explicitly. Do not present those as fact.
 
 Where a real fact needs sharpening (attribution, baseline, definition), the answer carries a `[TODO]` block. **Resolve every TODO before the interview.** An interviewer will probe exactly those places.
 
@@ -606,7 +606,7 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 **Pass signal:** "If I start by asking what they did wrong, I've taught the team that bad news is punished."
 **Fail signal:** A story where the consultant was the problem.
 
-[TODO: **Do not use the corpus story** ("a Select partner missed 3 milestones on an $800K engagement") — that is not Prem's history. Use a real engagement from Makro, Lazada or Xendit where a delivery slipped. Be ready to name what *you* did, what you coached, and what system change followed.]
+[TODO: **Do not use the corpus story** ("a Select partner missed 3 milestones on an $800K engagement") — that is not your history. Use a real engagement from Makro, Lazada or Xendit where a delivery slipped. Be ready to name what *you* did, what you coached, and what system change followed.]
 
 ---
 
@@ -888,7 +888,7 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 ---
 
-*Prepared against the Round 1 RRK brief from Ben Holman (Google Cloud GTM, APAC). Companion docs: `../HOW_TO_PASS.md`, `../../INTERVIEW_PREP/MASTER_QUESTION_BANK.md`, `../../GCP_DATA_ENGINEERING_COURSE/`.*
+*Prepared against the Round 1 RRK brief from the recruiter. Companion docs: `../HOW_TO_PASS.md`, `../../INTERVIEW_PREP/MASTER_QUESTION_BANK.md`, `../../GCP_DATA_ENGINEERING_COURSE/`.*
 *Personal facts sourced from `portfolio/interview/meta/coach/resume-facts.md` (extracted from `Prem_Resume_2026.pdf`, 2026-09-26). All other numbers in the wider corpus are illustrative models, not biography.*
 
 === END CONTENT ===

@@ -1,6 +1,6 @@
 # Round 1 RRK — Gap Closure Pack
 
-**Role:** Data & Analytics Lead, Google Cloud Consulting (Singapore) | **Interviewer:** Navakanth Talluri | **~60 min**
+**Role:** Data & Analytics Lead, Google Cloud Consulting (Singapore) | **Interviewer:** the RRK interviewer | **~60 min**
 **Built:** 2026-11-08 | **Companion:** `ROUND_1_RRK.md` (the answers), `ROUND_1_RRK_HOW_TO_PASS.md` (the strategy), `ROUND_1_RRK_CODE_REVIEW_DRILL.md` (Q15)
 
 This document closes the four exposures the strategy document identifies, plus the mechanical fixes made to the course so the "hands-on" claim is true rather than asserted.
@@ -290,20 +290,20 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 | # | Q | TODO | Status |
 |---|---|---|---|
 | 1 | Q1 | Confirm "Head of Data" title at Makro; Alibaba naming | **Resolved** — resume-facts.md line 9: *"Head of Data \| Enterprise AI Architecture \| Data Strategy"*. Use "Lazada (Alibaba Group)". Role-history row says *"Data Engineering (platform owner)"* — if the official title is not Head of Data, say "I run the enterprise data platform at Makro" |
-| 2 | Q3 | Attribution of the 40% delivery-time reduction | **Needs Prem.** Was it platform latency, routing algorithm, or joint? Recommended framing: *"the platform change removed data latency from the path; the algorithm change reduced the work per order; the 40% is joint and I'm not going to claim it as one or the other."* |
-| 3 | Q4 | Headcount split, attrition, hiring mistake | **Needs Prem.** Structural answer is drafted (inherited vs built, rubric, rotation). Supply: real numbers, or say "I don't have a retention figure and here's the mechanism instead" — the bank already says **do not invent** |
-| 4 | Q5 | Xendit figures safe? Honest reason | **Needs Prem.** Also: **resume-facts.md shows Xendit Jan–Jun 2024 and Makro from Jul 2024** — no gap. Confirm the real reason was scope narrowing vs re-org, and say it plainly |
+| 2 | Q3 | Attribution of the 40% delivery-time reduction | **Needs you.** Was it platform latency, routing algorithm, or joint? Recommended framing: *"the platform change removed data latency from the path; the algorithm change reduced the work per order; the 40% is joint and I'm not going to claim it as one or the other."* |
+| 3 | Q4 | Headcount split, attrition, hiring mistake | **Needs you.** Structural answer is drafted (inherited vs built, rubric, rotation). Supply: real numbers, or say "I don't have a retention figure and here's the mechanism instead" — the bank already says **do not invent** |
+| 4 | Q5 | Xendit figures safe? Honest reason | **Needs you.** Also: **resume-facts.md shows Xendit Jan–Jun 2024 and Makro from Jul 2024** — no gap. Confirm the real reason was scope narrowing vs re-org, and say it plainly |
 | 5 | Q6 | Pub/Sub ordering keys / Dataflow exactly-once hands-on | **Bridged.** Honest bridge: *"In my own builds I used Kafka's exactly-once semantics and Flink checkpoints; on GCP the equivalents are Pub/Sub exactly-once delivery with `message_id` dedup and ordering keys, and Dataflow's exactly-once on the runner. I've built those in this course project."* |
-| 6 | Q8 | Makro incidents −60%: baseline, root causes, mechanism | **Needs Prem.** The answer *structure* is drafted (triage by severity → root-cause classing → dead-letter path → measure). Supply baseline count and the actual top causes |
+| 6 | Q8 | Makro incidents −60%: baseline, root causes, mechanism | **Needs you.** The answer *structure* is drafted (triage by severity → root-cause classing → dead-letter path → measure). Supply baseline count and the actual top causes |
 | 7 | Q12 | Two 40% mechanisms | **Resolved** — §4 above |
-| 8 | Q13 | SCB/PDPA artefact you built | **Needs Prem.** Name a physical artefact: a control map, an evidence pack, a classification taxonomy. If none exists as a document, name the practice you ran and say so plainly |
+| 8 | Q13 | SCB/PDPA artefact you built | **Needs you.** Name a physical artefact: a control map, an evidence pack, a classification taxonomy. If none exists as a document, name the practice you ran and say so plainly |
 | 9 | Q15 | Practise code review 3× | **Resolved** — `ROUND_1_RRK_CODE_REVIEW_DRILL.md`, 16 verified findings, plus the correction that the file is in `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/`, not the course project |
 | 10 | Q21 | Practice P&L honesty | **Resolved** — §3 above |
-| 11 | Q24 | Real engagement where delivery slipped | **Needs Prem.** The corpus story (Select partner, 3 milestones, $800K) is **not** yours. Use Makro, Lazada or Xendit |
-| 12 | Q25 | One person developed; one performance case | **Needs Prem.** The capability/clarity/sustained triage is drafted. Anchor in Makro 8→25 |
-| 13 | Q26 | Diversity example with a metric that moved | **Needs Prem.** Do not claim a number you cannot source |
+| 11 | Q24 | Real engagement where delivery slipped | **Needs you.** The corpus story (Select partner, 3 milestones, $800K) is **not** yours. Use Makro, Lazada or Xendit |
+| 12 | Q25 | One person developed; one performance case | **Needs you.** The capability/clarity/sustained triage is drafted. Anchor in Makro 8→25 |
+| 13 | Q26 | Diversity example with a metric that moved | **Needs you.** Do not claim a number you cannot source |
 | 14 | Q27 | GCP gap honesty + plan | **Resolved** — §2 above |
-| 15 | Q34 | "I was wrong" story | **Structure resolved** — §5 above; content needs Prem's real memory |
+| 15 | Q34 | "I was wrong" story | **Structure resolved** — §5 above; content needs your real memory |
 | 16 | — | `dataflow_batch_pipeline.py` location | **Corrected** — `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/` |
 | 17 | — | Course test suite failing / 25 skipped | **Resolved** — §1 above |
 | 18 | — | Sample data missing | **Resolved** — §1 above |
