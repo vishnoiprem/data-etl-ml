@@ -1,0 +1,47 @@
+{
+  "GroupDefinitions": [
+    { "Type": "DIMENSION", "Key": "SERVICE" }
+  ],
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-05-01", "End": "2026-06-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "100.00" } }
+        }
+      ]
+    },
+    {
+      "TimePeriod": { "Start": "2026-06-01", "End": "2026-07-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "not-a-number" } }
+        }
+      ]
+    },
+    {
+      "TimePeriod": { "Start": "not-a-date", "End": "2026-08-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "50.00" } }
+        }
+      ]
+    },
+    {
+      "TimePeriod": { "Start": "2026-07-01", "End": "2026-08-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "250.00" } }
+        }
+      ]
+    }
+  ]
+}

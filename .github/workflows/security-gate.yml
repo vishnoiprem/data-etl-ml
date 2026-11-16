@@ -54,6 +54,7 @@ jobs:
           - learning/data-engineering/data-engineering-course/aws_snowflake_course/requirements.txt
           - projects/flink-cdc-dashboard/requirements.txt
           - projects/copyforge-ai/requirements.txt
+          - projects/aws-cost-analyzer/requirements.txt
           - projects/tech-trend-radar/requirements.txt
           - projects/tech-trend-radar/requirements-semantic.txt
           - projects/trade-sourcing-ai/requirements.txt

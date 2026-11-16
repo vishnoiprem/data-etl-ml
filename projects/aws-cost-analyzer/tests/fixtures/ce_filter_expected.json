@@ -1,0 +1,7 @@
+{
+  "Tags": {
+    "Key": "TagKey",
+    "Values": ["Data", "Data-Squad"],
+    "MatchOptions": ["CONTAINS"]
+  }
+}
