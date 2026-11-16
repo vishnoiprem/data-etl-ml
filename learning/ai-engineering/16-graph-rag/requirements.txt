@@ -55,7 +55,11 @@ ray==2.56.0
 chainlit==2.10.1
 llama-index==0.13.0
 llama-index-core==0.13.0
-llama-index-cli==0.13.0
+# llama-index-cli 0.13.0 never existed on PyPI — the package's own
+# version line stops at 0.5.x. Pinning it broke `pip install` outright.
+# llama-index 0.13.0 requires `llama-index-cli<0.6,>=0.5.0`, so 0.5.7
+# is both the latest and the only compatible choice.
+llama-index-cli==0.5.7
 langgraph-sdk==0.4.6
 black==26.10.1
 pytest==9.0.3

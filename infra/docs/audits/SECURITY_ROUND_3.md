@@ -210,3 +210,25 @@ Ran `pip-audit --path .env/lib/python3.13/site-packages` against the shared venv
 - `starlette` 0.46.2: the fixes need 1.x, a major jump. `chainlit` already conflicts with 0.46.2.
 - `transformers` 4.57.6, `pypdf` 4.3.1, `llama-index` 0.10.x: major jumps that need a code-compat check (see the open items above).
 - Remaining packages (`aiohttp`, `mcp`, `jupyterlab`, `notebook`, `jupyter-server`, `pyspark`, `nltk` and others) were not triaged in this pass.
+
+---
+
+## Superseded in part by Round 4
+
+[`SECURITY_ROUND_4.md`](SECURITY_ROUND_4.md) (2026-11-16) closes the
+open items above that had an upstream fix: `pypdf`, `soupsieve`,
+`nltk`, `virtualenv`, `setuptools`, `tornado`, `pyasn1`, `oauthlib`,
+`aiohttp`, `gitpython`, `mlflow`, `black` and `pillow` are all now on
+safe versions across every manifest.
+
+It also fixes `llama-index-cli==0.13.0`, a pin that referenced a release
+which never existed and broke `pip install` on any environment that
+tried to resolve it.
+
+Item 1 above is now closed. Item 5 (`nltk`) is closed — `nltk 3.10.4`
+ships the fix that was unavailable when this round was written. Items 2,
+3, 4, 6 and 7 are superseded: the pins now in the manifests resolve
+those transitive dependencies forward on their own.
+
+The `chromadb==0.4.22` accepted-risk entry is unchanged and still
+needs no action.
