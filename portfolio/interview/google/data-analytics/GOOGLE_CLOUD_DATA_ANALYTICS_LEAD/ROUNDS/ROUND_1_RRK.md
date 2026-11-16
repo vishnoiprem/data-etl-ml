@@ -2242,41 +2242,296 @@ The end-to-end test checks IAM, schema, serialisation, orchestration, write sema
 
 ### Q15. "Reviewing code: [DATA PROCESSING SNIPPET]"
 
-**Flow**
+**Framework:** **C-I-S-D-S-M** — Correctness → Idempotency and restart → Scale → Data semantics → Security → Maintainability.
+
+**Opening line:** "I review data-processing code in six passes. I start with correctness, because **clean, fast code that produces the wrong data is still a failed pipeline**." Say the order out loud; don't start at line 1.
+
+**Flow 0 — the six passes**
 
 ```mermaid
 flowchart TD
-    N0["1 Correctness<br/>boundaries, timezones, nulls"]
-    N1["2 Idempotency and restart"]
-    N2["3 Scale<br/>100x input, N+1, memory"]
-    N3["4 Data semantics<br/>late, duplicates, ordering, schema"]
-    N4["5 Security of the write path<br/>unvalidated input, PII in logs"]
+    N0["1 Correctness<br/>claim, key, contracts, nulls,<br/>boundaries, timezones, precision"]
+    N1["2 Idempotency and restart<br/>run twice, fail half-way"]
+    N2["3 Scale<br/>100x input, memory, N+1, skew"]
+    N3["4 Data semantics<br/>late, duplicates, ordering,<br/>which state wins"]
+    N4["5 Security and write path<br/>validation, PII, privilege, region"]
     N5["6 Maintainability<br/>can the next engineer change it safely?"]
-    N0 --> N1
-    N1 --> N2
-    N2 --> N3
-    N3 --> N4
-    N4 --> N5
+    N0 --> N1 --> N2 --> N3 --> N4 --> N5
     classDef red fill:#DA3832,stroke:#DA3832,color:#fff
     classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
     classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
     classDef green fill:#43938F,stroke:#43938F,color:#fff
-    class N0,N1,N2,N3,N4 blue
+    class N0 red
+    class N1,N2,N3,N4 blue
     class N5 green
 ```
 
+**Flow 1 — finding to consequence to fix (how to phrase each comment)**
 
-**How to run the review.** Don't start at line 1. Work in this order and say your order out loud:
-1. **Correctness** — what does this compute, and is that what it's supposed to compute? Look for wrong boundaries, off-by-one, timezone/precision, null handling, division by zero.
-2. **Idempotency & restart** — if I run this twice, does it produce the same result? Can I restart it after a partial failure?
-3. **Scale** — what happens at 100× the input? Where's the per-row work, the memory growth, the N+1?
-4. **Data semantics** — late events, duplicate handling, ordering keys, schema evolution.
-5. **Security of the write path** — is anything unvalidated reaching the sink? PII in logs?
-6. **Maintainability** — can the next engineer read this and change it safely?
+```mermaid
+flowchart LR
+    F["Finding<br/>what the code does"]
+    C["Consequence<br/>what is lost or corrupted"]
+    X["Why it is hidden<br/>looks healthy"]
+    Y["Fix<br/>smallest safe change"]
+    Z["Test<br/>that would have caught it"]
+    F --> C --> X --> Y --> Z
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class F blue
+    class C,X red
+    class Y,Z green
+```
 
-**What interviewers listen for:** you find the *semantic* bugs (a `join` that fans out on a non-unique key; a `dropDuplicates` without an ordering rule; a `MERGE` without a match condition) rather than style nits. You flag the *design* issue, not just the line — e.g. "this is a full-table scan per partition because the join isn't pushed down," not "this line is long."
+**Pass 1 — Correctness (lead here)**
 
-**The sentence that signals seniority:** *"The line is probably correct. The risk is that it's correct only if the upstream guarantees exactly-once delivery, and nothing in this code enforces that assumption — so I'd make the write idempotent and explicit about which guarantee it relies on."*
+Ask: what does the code claim to compute, what is the business key, what are the input and output contracts, and what happens for nulls, empty input, invalid input, boundary dates, time zones, decimal precision and division by zero? Can errors be swallowed and treated as bad data?
+
+**Lead finding — F3 in the drill:**
+
+```python
+some_datetime > some_date
+```
+
+In Python 3, comparing a `datetime.datetime` with a `datetime.date` raises `TypeError`. If it sits in
+
+```python
+try:
+    ...
+except Exception:
+    output_dead_letter(...)
+```
+
+then **every valid record** is classified as invalid.
+
+```mermaid
+flowchart TD
+    R["Valid record arrives"]
+    R --> CMP["datetime > date"]
+    CMP --> ERR["TypeError, every time"]
+    ERR --> EX["except Exception catches it"]
+    EX --> DL["Record goes to dead-letter"]
+    DL --> OK["Job finishes green"]
+    OK --> LOSS["Whole load lost,<br/>nothing failed"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class R blue
+    class CMP,ERR,EX yellow
+    class DL,OK,LOSS red
+```
+
+The review comment is not "the types are different". It is:
+
+> "This comparison can fail for every record, and the broad exception handler turns a deterministic coding defect into an apparently healthy dead-letter flow. We could lose an entire load without the pipeline failing."
+
+Fix by normalising explicitly, depending on whether the rule is date-based or timestamp-based:
+
+```python
+event_date = event_datetime.date()
+if event_date > cutoff_date:
+    ...
+# or compare timezone-aware datetimes
+if event_datetime > cutoff_datetime:
+    ...
+```
+
+**Pass 2 — Idempotency and restartability**
+
+Ask: "What happens if this job runs twice, or fails after writing half the data?" `WRITE_APPEND` with no stable event ID, business key, checkpoint or dedupe means a rerun can duplicate every row already written. That is not a config detail; the pipeline has **no safe recovery model**.
+
+```mermaid
+flowchart LR
+    I["Input"] --> V["Validate and enrich"] --> ST["BigQuery staging table"] --> M["MERGE on deterministic<br/>business key"] --> CA["Canonical table"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class I,V blue
+    class ST yellow
+    class M,CA green
+```
+
+```sql
+MERGE `project.dataset.target` AS target
+USING (
+  SELECT * EXCEPT(rn) FROM (
+    SELECT s.*, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY event_version DESC) AS rn
+    FROM `project.dataset.staging` s
+    WHERE event_date = @run_date
+  ) WHERE rn = 1
+) AS source
+ON target.event_id = source.event_id
+AND target.event_date = source.event_date
+AND target.event_date = @run_date
+WHEN MATCHED AND source.event_version > target.event_version THEN
+  UPDATE SET payload = source.payload, event_version = source.event_version, updated_at = source.updated_at
+WHEN NOT MATCHED THEN
+  INSERT ROW;
+```
+
+> The paste's `MERGE` omitted the source dedupe. BigQuery errors if more than one source row matches a target row, so dedupe the source first and filter the partition on both sides (same pattern as Q6).
+
+Verify: is the business key truly unique, are writes partition-scoped, what happens after a partial write, can a backfill overlap the live pipeline, does replay give the same canonical output? The test: run input X once, checksum Y; run it again, checksum must still be Y.
+
+**Pass 3 — Dead-letter behaviour**
+
+A dead-letter path is useful only if it is **persisted, monitored and replayable**. Tagging or logging rejected records without writing them to a durable sink is silent data loss.
+
+```mermaid
+flowchart TD
+    SRC["Pub/Sub or Cloud Storage"]
+    SRC --> VAL{"Valid?"}
+    VAL -->|"yes"| GOOD["BigQuery staging"]
+    VAL -->|"no"| DLT["Dead-letter Pub/Sub topic"]
+    DLT --> DLS["Cloud Storage or BigQuery quarantine"]
+    DLS --> AL["Alert on rate, owner assigned"]
+    AL --> RP["Replay after fix"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class SRC blue
+    class VAL yellow
+    class GOOD,RP green
+    class DLT,DLS,AL red
+```
+
+Each dead-letter record carries: `original_payload_reference`, `event_id`, `source_system`, `error_code`, `error_message`, `pipeline_version`, `failed_stage`, `event_time`, `processing_time`. Do **not** log raw PII, credentials, tokens or full customer payloads, and protect the quarantine like the original data.
+
+> "The dead-letter branch exists logically but not operationally. Because rejected records are not persisted, failures look handled while the data is permanently lost."
+
+**Pass 4 — Scale**
+
+Ask: "What changes when input grows 100 times?" Look for: whole dataset in driver memory, per-row network or database calls, N+1 queries, repeated parsing, global `GROUP BY` or sort, unbounded streaming state, hot keys, one small file per record, full-table `MERGE`, side inputs too large for memory, joins on skewed or non-unique keys.
+
+```mermaid
+flowchart TD
+    O["orders: 1 row per order_id"]
+    PR["promotions: 4 rows per order_id"]
+    J["orders.join(promotions, order_id)"]
+    O --> J
+    PR --> J
+    J --> F4["4 rows per order"]
+    F4 --> RV["Revenue summed afterwards<br/>is 4 times too large"]
+    RV --> FX["Assert right-side uniqueness<br/>or pick the intended row"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class O,PR blue
+    class J yellow
+    class F4,RV red
+    class FX green
+```
+
+```sql
+QUALIFY ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY effective_at DESC) = 1
+```
+
+> "The risk is not the join syntax. It is that correctness depends on right-side uniqueness, and the code neither verifies nor enforces that contract."
+
+**Pass 5 — Data semantics**
+
+`df.dropDuplicates(["customer_id"])` with several rows per customer keeps an arbitrary one, so the result can be nondeterministic. Define which state wins:
+
+```python
+window = Window.partitionBy("customer_id").orderBy(
+    F.col("event_version").desc(), F.col("event_time").desc(), F.col("ingestion_time").desc())
+latest = (df.withColumn("row_number", F.row_number().over(window))
+            .filter(F.col("row_number") == 1).drop("row_number"))
+```
+
+Also check late-event and duplicate-event behaviour, event time vs processing time, source ordering guarantees, schema evolution, update and version semantics, delete and tombstone handling.
+
+> "`dropDuplicates` removes duplicate rows, but it does not define which business state wins. We need a deterministic rule from version or event time."
+
+**Pass 6 — Security and write-path controls**
+
+Before anything reaches BigQuery, Cloud Storage or Bigtable: is untrusted input validated, are table or object names built from user input, can malformed data bypass validation, are secrets in code, are service accounts over-privileged, can logs expose personal or payment data, is the destination in an approved region, is the dead-letter data protected like the original?
+
+Keep **input errors and system errors apart**:
+
+```mermaid
+flowchart TD
+    EXC["except Exception: dead_letter(record)"]
+    EXC --> A["invalid customer record"]
+    EXC --> B["coding bug"]
+    EXC --> C["BigQuery permission failure"]
+    EXC --> D["network outage"]
+    EXC --> E["out of memory"]
+    A --> SAME["All get the same outcome:<br/>operational meaning destroyed"]
+    B --> SAME
+    C --> SAME
+    D --> SAME
+    E --> SAME
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class EXC yellow
+    class A blue
+    class B,C,D,E,SAME red
+```
+
+```python
+try:
+    validated = validate(record)
+except ValidationError:
+    dead_letter(record, error_code="VALIDATION_ERROR")
+else:
+    write(validated)
+```
+
+Infrastructure failures should normally **fail or retry the pipeline**, not mark valid business data as malformed.
+
+**Pass 7 (last) — Maintainability**
+
+Clear input and output contracts, isolated transformation functions, externalised config, named constants, structured error types, testable business logic, metrics, documented retry and dedupe semantics. Don't spend interview time on formatting unless it hides a defect.
+
+**How to present findings: rank by consequence**
+
+| Severity | Findings |
+|---|---|
+| **Critical** | `datetime` vs `date` fails for every record; broad `except` hides it and misroutes valid records; dead-letter records not durably persisted (silent loss); append-only writes make reruns non-idempotent |
+| **High** | Deduplication has no deterministic winner; join correctness depends on unverified key uniqueness; partial failure has no restart or checkpoint strategy; schema changes arrive without compatibility validation |
+| **Medium** | Possible full-table scans or unrestricted `MERGE`; per-record or external calls that won't scale; logs may expose raw payloads or sensitive data; config and business rules coupled to pipeline code |
+
+This ordering shows you can tell a style issue from a defect that can lose or corrupt all the data.
+
+**Spoken answer (about 90 seconds).** `//` short pause, `///` long pause, `⏹` stop.
+
+> "I wouldn't begin at line one. // I'd review in **six passes**: correctness, idempotency and restart, scale, data semantics, security, maintainability. ///
+>
+> My first finding would be the comparison of a Python **datetime with a date**. // That raises a TypeError for **every record**. // Because the code catches `Exception` broadly, the job keeps running and every valid record lands in dead-letter. // That's **more dangerous than a crash, because it looks handled**. ///
+>
+> Next, the write path. // It uses **append** with no deterministic key. // If the job retries after a partial failure, it duplicates every row. // I'd stage the data and use an **idempotent MERGE** on a stable event or business key. ///
+>
+> Third, the dead-letter branch is tagged and logged but **not persisted**. // That's silent data loss. // I'd write rejects to a protected Pub/Sub dead-letter topic, Cloud Storage or a BigQuery quarantine table, with an error code and a replay process. ///
+>
+> Then scale and semantics: **join fan-out** on non-unique keys, unbounded state, per-record calls, full-table scans, late events, and deduplication with no deterministic winner. ///
+>
+> My concern isn't whether each line is valid. // It's whether the pipeline stays **correct when input is duplicated, reordered, malformed, or replayed after a failure**. ⏹"
+
+**The sentence that signals seniority:** *"This line may be correct under the happy-path assumption. The design problem is that the assumption isn't enforced. I'd make the contract explicit and make the write safe when that assumption fails."* (Variant: "The line is probably correct. The risk is that it's correct only if upstream guarantees exactly-once delivery, and nothing in this code enforces that, so I'd make the write idempotent and explicit about which guarantee it relies on.")
+
+**Follow-up probes**
+
+| Probe | Answer |
+|---|---|
+| "Why start with correctness, not scale?" | "Fast code that produces the wrong data is a failed pipeline. Scale is a cost problem; wrong data is a trust problem." |
+| "What would you block the PR on?" | "The critical rows: whole-load failure hidden by a broad except, silent dead-letter loss, non-idempotent writes. Style comments don't block." |
+| "How do you prove the fix?" | "A test that feeds a normal record and asserts it is **not** dead-lettered; a replay test with a checksum; a kill-and-restart test (Q14)." |
+| "Is dead-lettering always right?" | "Only for input errors. System errors should fail or retry; otherwise valid data is mislabelled bad." |
+| "Unfamiliar snippet, no time?" | "Order of passes is the plan. Find the one thing that can lose or corrupt all data, say it first, then the next two." |
+
+**Key elements:** Six-pass order said aloud; **semantic** bugs (join fan-out, `dropDuplicates` without ordering, `MERGE` without a safe match) over style; findings ranked by consequence; finding, consequence, fix, test.
+
+**Pass signal:** You find the defect that looks like a healthy pipeline, and you rank by data-loss risk.
+**Fail signal:** A list of style nits, or a line-by-line read-through with no priority.
 
 **RESOLVED — see `ROUND_1_RRK_CODE_REVIEW_DRILL.md`**, which contains the six-pass review order and **16 verified findings** in the target file.
 
