@@ -427,27 +427,261 @@ Compare against the source: distinct event IDs, row counts, amounts and quantiti
 
 ### Q7. "How do you design a data platform for a customer who has 2,000 pipelines across five lines of business, a regulatory data-residency requirement, and an 8-month deadline?"
 
-**Framework:** Understand → Prepare → Options → Recommend → Support (enterprise scale)
+**Framework:** Reduce the problem → Inventory and classify → Options (A, B, C) → Recommend waves + a stabilisation lane → Platform vs domain split → Residency as a boundary → 8-month plan → Define "done" → Measure
 
-> "**Understand.** The 2,000 pipelines and the five LOBs tell me this is a **federated** problem, not a platform problem. I'd need to know: how many of those pipelines actually matter versus how many exist because nobody could kill them; whether the residency requirement is by country or by data classification; whether the 8-month deadline is fixed by a regulatory date or by a board decision; and who has authority to retire a pipeline. **The last question is the one that actually determines the schedule.**
->
-> **Prepare.** A current-state inventory that maps each pipeline to *business owner, data products it feeds, upstream source, and whether it is still needed*. I would treat that inventory as the first deliverable, not as a discovery exercise — because you cannot sequence 2,000 pipelines you haven't classified.
->
-> **Options.** *Option A: big-bang platform replacement* — one target platform, one cutover. Highest theoretical cleanliness, highest risk, and it will not hit 8 months with 2,000 pipelines. *Option B: domain-aligned migration, wave by wave* — group pipelines by data domain and LOB, migrate one domain to a full operating pattern (source → transform → serve → monitor) end to end, prove it, then repeat. *Option C: lift-and-shift the mess* — move the compute, keep the design. Fastest technically, and it preserves every problem including cost.
->
-> **Recommend:** **Option B**, and the reason is that it makes the *operating model* the unit of delivery rather than the pipeline. Each wave is a self-contained vertical that can run, be adopted, and be measured in production before the next one starts. That's what lets you hit a fixed date: you always have something working, and the residual risk is confined to one wave rather than spread across 2,000 pipelines. I'd also explicitly run Option C as a **stabilisation lane** for pipelines we don't have time to redesign, so the date is protected without pretending the mess is solved.
->
-> **Support.** On Google Cloud: **BigQuery** for the analytical serving layer with per-domain datasets and policy tags for classification; **Dataflow** for streaming and complex batch; **Dataproc** for Spark workloads that are genuinely Spark-shaped rather than being migrated to fit the platform; **Pub/Sub** plus **Datastream** for CDC from operational sources; **Dataplex** for the catalogue and data-quality rules, with policy tags carrying PII/PCI classifications through to **BigQuery column-level security** and **Looker**; **VPC Service Controls** as the perimeter for sensitive datasets; **Cloud KMS** with a customer-managed key hierarchy per residency boundary; and **Composer** for orchestration of the cross-domain workflows.
->
-> For data residency specifically: I would model the *boundary* explicitly — separate projects per jurisdiction, **resource-location org policies** to prevent drift, and data flows across boundaries only through approved paths. I would not let a single logical dataset span jurisdictions, because the moment it does, every query becomes a residency question.
->
-> **What could go wrong.** The most likely failure is not technical — it's that a wave is 'complete' by pipeline count but nobody is using the outputs, so the platform transforms without changing a business decision. Second: pipeline ownership sits with teams that have no incentive to retire anything, so the count doesn't come down. I'd handle that by making retirement a funded deliverable in each wave, with the business owner named, and by tracking **active adopters and retired pipelines** as first-class KPIs alongside migration counts.
->
-> **How I'd measure it:** pipelines migrated and *retired*, time-to-first-value per wave, adoption by named business users, incident rate and time-to-detect per wave, cost per data product, and a residency-violation count that must be zero."
+**The line to memorise:** "**Don't migrate 2,000 pipelines. Classify them, retire what shouldn't exist, build a golden path, and migrate business domains in waves.**"
 
-**Key elements:** The 2,000-pipeline problem is solved by **classification and wave sequencing, not by platform choice**; retirement is a funded deliverable; the data-domain vertical slice is the unit of delivery; residency is a *structural* constraint, not a config toggle; adoption tracked as a KPI.
+**Opening move:** "I would not start by designing the GCP architecture. First I'd **reduce the problem**."
 
-**Pass signal:** You talk about **retiring** pipelines and **operating model adoption** before the interviewer raises them.
+**Flow 1. The whole answer on one page**
+
+```mermaid
+flowchart LR
+    R["1 Reduce the problem<br/>how many pipelines are needed<br/>who owns them, what do they feed<br/>is the date regulatory?"]
+    I["2 Inventory and classify<br/>owner, LOB, criticality tier,<br/>classification, residency, SLA"]
+    D{"3 Disposition"}
+    RT["Retire"]
+    RH["Rehost<br/>stabilisation lane"]
+    RP["Replatform"]
+    RD["Redesign"]
+    F["4 Build foundation once<br/>landing zones, IAM, network,<br/>KMS, Terraform, CI/CD,<br/>Dataplex, observability, residency"]
+    G["5 Golden path<br/>one domain, end to end,<br/>in production"]
+    W["6 Migration factory<br/>domain waves in parallel<br/>reusable accelerators"]
+    X["7 Cutover and retire<br/>consumer moved, legacy off,<br/>owner accepted"]
+    R --> I --> D
+    D --> RT
+    D --> RH
+    D --> RP
+    D --> RD
+    RH --> F
+    RP --> F
+    RD --> F
+    F --> G --> W --> X
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class RT red
+    class R,I,F,G,W,RH,RP,RD blue
+    class D yellow
+    class X green
+```
+
+> **Reduce.** "With 2,000 pipelines across five lines of business I first want to know how many are genuinely required, who owns each, which business product it supports, how critical it is, and which can be retired. Then the **residency** requirement, precisely: which jurisdiction, does it apply to all data or only classes like PII and payment data, and does it cover backups, logs, metadata, encryption keys and disaster recovery? And whether eight months is a **regulatory date** or a board preference, because if the date cannot move, scope and strategy have to bend around it. **The question that decides the schedule is who has authority to retire a pipeline.**"
+
+**1. Inventory before migration.** The inventory is the first deliverable, not a discovery exercise, because you cannot sequence 2,000 pipelines you have not classified.
+
+```
+Pipeline
+├── Business owner          ├── Criticality: Tier 0 / 1 / 2
+├── LOB / domain            ├── Batch / streaming / CDC
+├── Source                  ├── Data classification
+├── Target and consumers    ├── Residency boundary
+├── SLA                     ├── Current technology
+└── Migration pattern  →  Retire | Rehost | Replatform | Redesign
+```
+
+Classifying first stops you spending eight months faithfully migrating things nobody uses.
+
+**Flow 2. The three options, and why waves win**
+
+```mermaid
+flowchart TD
+    Q["2,000 pipelines, 5 LOBs,<br/>residency, 8 months"]
+    Q --> A["A Big bang<br/>build everything, one cutover"]
+    Q --> B["B Domain waves<br/>one complete vertical at a time"]
+    Q --> C["C Lift and shift<br/>move compute, keep the design"]
+    A --> AR["Clean on paper, too risky for 8 months<br/>risk concentrated at one cutover"]
+    B --> BR["RECOMMENDED<br/>always something working in production<br/>risk confined to one wave<br/>adoption measured before the next"]
+    C --> CR["Fast, but carries the same cost,<br/>reliability and maintainability problems<br/>use only as a deadline-protection lane"]
+    classDef red fill:#DA3832,stroke:#DA3832,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    class A,AR red
+    class B,BR green
+    class C,CR yellow
+    class Q blue
+```
+
+> **Options and recommendation.** "A, big bang: theoretically clean, too risky, and it will not land in eight months. B, **domain-aligned waves**: each wave is a complete production vertical from source through processing into BigQuery to a named business consumer, proven before the next starts. C, lift and shift: fast, but it imports today's cost and reliability problems into GCP. I recommend **B**, because it makes the operating model, not the pipeline, the unit of delivery. And I'd run **C as an explicit stabilisation lane** for workloads we cannot realistically redesign before the deadline: move them with minimal change, modernise later. That protects the date without pretending the mess is solved."
+
+**Flow 3. Platform control plane versus domain-owned data products (the federated model)**
+
+```mermaid
+flowchart TD
+    subgraph SRC["Sources"]
+        direction LR
+        S1["ERP"] ~~~ S2["CRM"] ~~~ S3["Databases"] ~~~ S4["SaaS"]
+    end
+    SRC --> DS["Datastream<br/>CDC"]
+    SRC --> PS["Pub/Sub<br/>streaming"]
+    DS --> GCS["Cloud Storage<br/>immutable raw"]
+    PS --> GCS
+    GCS --> DF["Dataflow<br/>streaming, complex ETL"]
+    GCS --> DP["Dataproc<br/>existing Spark"]
+    DF --> BQ["BigQuery<br/>domain data products"]
+    DP --> BQ
+    BQ --> LK["Looker"]
+    BQ --> ML["ML, APIs, AI"]
+    subgraph CP["Platform control plane, owned centrally"]
+        direction LR
+        C1["Dataplex<br/>catalogue, quality"] ~~~ C2["Composer<br/>orchestration"] ~~~ C3["Monitoring<br/>Logging"]
+        C4["IAM, KMS,<br/>Secret Manager"] ~~~ C5["VPC-SC,<br/>org policies"] ~~~ C6["Terraform,<br/>CI/CD"]
+    end
+    BQ -.-> CP
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef grey fill:#f2f2f2,stroke:#999999,color:#1a1a1a
+    class S1,S2,S3,S4 grey
+    class DS,PS,GCS,DF,DP blue
+    class BQ,LK,ML green
+    class C1,C2,C3,C4,C5,C6 yellow
+```
+
+| Central platform team owns | Domains own |
+|---|---|
+| IAM patterns, networking, encryption | Business definitions |
+| Terraform modules, CI/CD templates | Transformation logic |
+| Observability, residency controls, guardrails | Data quality and SLAs |
+| Reference architectures | The data products and their consumers |
+
+"I wouldn't let each line of business design its own GCP platform. The platform team builds the foundation once, and domains build on the golden path."
+
+**Flow 4. Residency is an architectural boundary, not a BigQuery setting**
+
+```mermaid
+flowchart TD
+    GG["Global governance<br/>org policies, classification, approved sharing patterns"]
+    GG --> JA
+    GG --> JB
+    subgraph JA["Jurisdiction A: own folder and projects"]
+        direction TB
+        A1["Cloud Storage<br/>approved regions only"]
+        A2["BigQuery<br/>datasets in-region"]
+        A3["Dataflow, Dataproc<br/>in-region workers"]
+        A4["Cloud KMS keys<br/>per boundary"]
+    end
+    subgraph JB["Jurisdiction B: own folder and projects"]
+        direction TB
+        B1["Cloud Storage<br/>approved regions only"]
+        B2["BigQuery<br/>datasets in-region"]
+        B3["Dataflow, Dataproc<br/>in-region workers"]
+        B4["Cloud KMS keys<br/>per boundary"]
+    end
+    JA -.->|"raw regulated data does NOT cross"| JB
+    JA ==>|"approved, governed sharing only<br/>aggregated or de-identified"| SH["Shared analytics layer"]
+    JB ==> SH
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    class A1,A2,A3,A4,B1,B2,B3,B4 blue
+    class GG yellow
+    class SH green
+```
+
+Enforced with: separate folders and projects per jurisdiction; resource-location **organisation policies** so drift is blocked, not just detected; IAM; **VPC Service Controls**; Cloud KMS keys per boundary (CMEK where required); private connectivity; dataset and bucket locations; audit logs; classification through policy tags. **I would not let one logical dataset span jurisdictions, because every query then becomes a residency question.** And I'd explicitly **test backups, DR, logs, metadata and key location**, since residency does not end at the primary BigQuery dataset.
+
+**Flow 5. The 8-month plan: discovery and foundation in parallel, not in series**
+
+```mermaid
+flowchart LR
+    subgraph M1["Month 0 to 1: discover and build, in parallel"]
+        direction TB
+        M1a["Inventory 2,000 pipelines<br/>classify: retire, rehost,<br/>replatform, redesign"]
+        M1b["Foundation: landing zones, IAM,<br/>network, residency controls, KMS,<br/>Terraform, CI/CD, monitoring, Dataplex"]
+    end
+    subgraph M2["Month 2: golden path"]
+        direction TB
+        M2a["One representative domain,<br/>source to consumer to<br/>production support"]
+    end
+    subgraph M3["Months 3 to 6: migration factory"]
+        direction TB
+        M3a["Wave 1: critical domain"]
+        M3b["Wave 2: finance"]
+        M3c["Wave 3: customer"]
+        M3d["Wave 4: supply chain<br/>reusable accelerators:<br/>Terraform modules, Dataflow templates,<br/>Composer DAG templates, DQ templates,<br/>validation framework"]
+    end
+    subgraph M4["Months 7 to 8: cutover and retire"]
+        direction TB
+        M4a["Consumers moved, reconciled,<br/>SLA met, owner accepted,<br/>legacy off, cost removed"]
+    end
+    M1 --> M2 --> M3 --> M4
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef yellow fill:#F6C24A,stroke:#F6C24A,color:#1a1a1a
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class M1a,M1b,M3a,M3b,M3c,M3d blue
+    class M2a yellow
+    class M4a green
+```
+
+| Phase | What happens | Why |
+|---|---|---|
+| Month 0 to 1 | Inventory and classification run **alongside** the foundation build | Two months of discovery before any engineering burns a quarter of the schedule |
+| Month 2 | **Golden path**: one domain, end to end through quality, security, Looker, monitoring and production support | It becomes the reference implementation every later wave copies |
+| Months 3 to 6 | **Migration factory**: parallel waves with reusable accelerators | You are not hand-building 2,000 migrations; you are running a factory |
+| Months 7 to 8 | Cutover and retirement | The project is not finished when pipelines run in GCP |
+
+**Flow 6. The definition of "done" (the strongest leadership signal in this answer)**
+
+```mermaid
+flowchart LR
+    P1["Pipeline runs in GCP"] --> P2["Output reconciled<br/>to source"]
+    P2 --> P3["SLA passed"]
+    P3 --> P4["Business consumer<br/>moved"]
+    P4 --> P5["Owner accepted"]
+    P5 --> P6["Old pipeline stopped"]
+    P6 --> P7["Legacy cost removed"]
+    P7 --> DONE["DONE"]
+    classDef blue fill:#306FC7,stroke:#306FC7,color:#fff
+    classDef green fill:#43938F,stroke:#43938F,color:#fff
+    class P1,P2,P3,P4,P5,P6,P7 blue
+    class DONE green
+```
+
+"'Two thousand pipelines exist in GCP' is not done. **Consumer moved, legacy off** is done."
+
+> **What I'd measure.** "Not percentage of pipelines migrated as the executive KPI. A pipeline can be migrated and still be unused."
+
+| Group | Measures |
+|---|---|
+| Migration | Migrated, validated, cut over, **retired** |
+| Business | Domains live, named consumers adopted, time to first value, critical data products migrated |
+| Operations | Incidents, MTTR, freshness and SLA attainment, deployment frequency, data-quality failures |
+| Economics | Cost per pipeline, cost per TB, BigQuery consumption, legacy infrastructure retired |
+| Regulatory | **Residency violations = zero** |
+
+> **What could go wrong.** "The likeliest failure is not technical: a wave is complete by pipeline count but nobody uses the outputs, so the platform changes nothing about a decision. Second, ownership sits with teams that have no incentive to retire anything, so the count never falls. So I make **retirement a funded deliverable in each wave**, with the business owner named, and I track adopters and retired pipelines as first-class KPIs. Third, the stabilisation lane quietly becomes permanent, so every lane-C workload gets a modernise-by date and an owner."
+
+**Spoken answer (about 2 minutes).** Notation: `//` short pause, `///` long pause, **bold** = stress.
+
+> "I wouldn't treat 2,000 pipelines as 2,000 migration tasks. // I'd treat them as a **portfolio that needs classifying first**. ///
+>
+> I'd identify the business owner, consumer, criticality, residency class and disposition of every pipeline: // retire, rehost, replatform or redesign. // And I'd clarify the residency rule and whether eight months is a regulatory date. ///
+>
+> I wouldn't recommend a big bang. // I'd use **domain-aligned waves**, where each wave is a complete production vertical, // source through Dataflow or Dataproc into BigQuery to a named business consumer. // And I'd build the common foundation **once**: IAM, networking, Terraform, CI/CD, Dataplex, observability and residency controls, // so domains build on a golden path instead of inventing their own platform. ///
+>
+> Residency is a **structural boundary**. // Separate projects and locations per jurisdiction, // organisation policies that block drift, // VPC Service Controls and IAM around sensitive data, // keys managed in Cloud KMS, // and data crossing only through approved patterns. ///
+>
+> I'd keep a **stabilisation lane** for workloads that can't be redesigned before the deadline, // moved with minimal change and modernised later. ///
+>
+> And migration isn't complete when a pipeline runs in GCP. // It's complete when the **consumer has moved, reconciliation passes, the SLA is met, and the legacy pipeline is switched off**. // So my executive dashboard shows adoption and retirement, not just migration count."
+
+**Likely follow-ups**
+
+| Probe | 20-second answer |
+|---|---|
+| "Who decides what gets retired?" | "That is the question that sets the schedule. I get a named business owner per pipeline and a decision rule: no consumer in 90 days and no regulatory duty means retire, with a sign-off, not a quiet deletion." |
+| "How do five LOBs agree on one platform?" | "Federated: the platform team owns guardrails and the golden path, domains own definitions, quality and SLAs. Standards are the paved road, not a gate." |
+| "Why not Dataflow for everything?" | "Rewriting working Spark because Dataflow is newer is a cost with no business outcome. Existing Spark goes to Dataproc, streaming and new pipelines go to Dataflow, and I choose per workload on measured need." |
+| "What if the deadline is regulatory and the scope doesn't fit?" | "Then scope bends, not the date. Tier 0 and regulated data go first, the stabilisation lane takes the rest, and I put the trade-off in front of the sponsor with the named risk owner." |
+| "How do you stop quality regressing across 2,000 migrations?" | "A migration validation framework that every wave uses: row counts, aggregates, key checks, freshness and consumer KPIs, with dual run for Tier 0 and 1 before cutover." |
+| "How do you prove residency?" | "Org policies block non-approved locations, audit logs show where data sits, and I test backups, DR, logs, metadata and key location, not just the primary dataset." |
+
+**Key elements:** The 2,000-pipeline problem is solved by **classification and wave sequencing, not by platform choice**; retirement is a funded deliverable; the domain vertical slice is the unit of delivery; central control plane with domain-owned products; residency is a *structural* constraint, not a config toggle; discovery and foundation run in parallel; "done" means consumer moved and legacy off; adoption tracked as a KPI.
+
+**Pass signal:** You talk about **retiring** pipelines and **operating-model adoption** before the interviewer raises them, and you define done as consumer moved and legacy off.
 **Fail signal:** A BigQuery/Dataflow component list with no sequencing logic and no mention of who owns the change.
 
 ---
