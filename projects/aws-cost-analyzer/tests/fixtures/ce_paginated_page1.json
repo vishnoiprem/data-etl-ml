@@ -1,0 +1,18 @@
+{
+  "GroupDefinitions": [
+    { "Type": "DIMENSION", "Key": "SERVICE" }
+  ],
+  "NextPageToken": "page2token",
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-05-01", "End": "2026-06-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "10.00" } }
+        }
+      ]
+    }
+  ]
+}

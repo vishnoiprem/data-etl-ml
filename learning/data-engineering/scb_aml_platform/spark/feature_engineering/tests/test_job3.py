@@ -20,19 +20,19 @@ import pytest
 HERE = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
+from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 from scb_aml_platform.data.dummy.generate_dummy_data import (  # noqa: E402
     main as _gen,
 )
 from scb_aml_platform.spark.feature_engineering.job3_feature_engineering import (  # noqa: E402
-    compute_velocity_features,
-    compute_structuring_features,
-    compute_cross_border_features,
-    compute_network_features,
     compute_behavioural_features,
+    compute_cross_border_features,
     compute_kyc_features,
+    compute_network_features,
+    compute_structuring_features,
+    compute_velocity_features,
     run,
 )
-from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 

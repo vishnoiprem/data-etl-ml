@@ -34,9 +34,12 @@ dependencies = [
     # Spark (used in spark/ jobs even though local[*] mode)
     "pyspark==3.5.8",
     # Fuzzy matching / entity resolution
-    "jellyfish==0.11.2",
+    # jellyfish 0.11.2 / python-Levenshtein 0.21.1 are Rust extensions
+    # with no wheels for Python 3.12+, so installing them from source
+    # fails there. See requirements.in for the full note.
+    "jellyfish==1.3.0",
     "fuzzywuzzy==0.18.0",
-    "python-Levenshtein==0.21.1",
+    "python-Levenshtein==0.27.5",
     # Elasticsearch (Lucid Search)
     "elasticsearch==8.9.0",
     "elasticsearch-dsl==8.9.0",
@@ -153,6 +156,13 @@ ignore = [
     # dir on sys.path via tests/conftest.py) — the directory layout
     # is a repo-structure constraint, not a code defect.
     "N999",
+    # N806/N802: the ML modules name the feature matrix `X` and its
+    # splits `X_train`/`X_test`, next to the label vector `y`. That is
+    # the scikit-learn convention, and renaming them to `x`/`x_train`
+    # would make the code unfamiliar to anyone who works in the field.
+    # The rule wants lower_case; the codebase wants the standard name.
+    "N806",
+    "N802",
     # RUF001/RUF002/RUF003: ambiguous-unicode warnings. The codebase
     # deliberately uses typographic characters (en dash, ×, curly
     # quotes) in docstrings and comments. They render correctly and

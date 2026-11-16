@@ -20,7 +20,7 @@ import pandas as pd
 from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
-from scb_aml_platform.config.settings import BASE_DIR
+from scb_aml_platform.config.settings import BASE_DIR, REALTIME_HIGH_RISK_DEST
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
@@ -44,6 +44,13 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     # Parse dates
     txns["txn_date"] = pd.to_datetime(txns["txn_date"], errors="coerce")
+    # Synthetic generator writes `wire_date`; real SWIFT feeds use `value_date`.
+    # Normalize to `value_date` so all downstream code uses one name.
+    # (job3_feature_engineering.load_data does the same.)
+    if "wire_date" in wires.columns and "value_date" not in wires.columns:
+        wires = wires.rename(columns={"wire_date": "value_date"})
+    elif "value_date" in wires.columns and "wire_date" not in wires.columns:
+        wires = wires.rename(columns={"value_date": "wire_date"})
     wires["value_date"] = pd.to_datetime(wires["value_date"], errors="coerce")
 
     return txns, wires, entities
@@ -71,9 +78,17 @@ def window_agg(df: pd.DataFrame, id_col: str, amount_col: str,
 
 
 def compute_cross_border_flows(wires: pd.DataFrame) -> pd.DataFrame:
-    """Summarise cross-border wire transfer flows per sender."""
+    """Summarise cross-border wire transfer flows per sender.
+
+    "Cross-border" here means the wire landed in a high-risk destination.
+    The synthetic generator does not produce `sender_country` (only
+    `receiver_country`), so a sender/receiver comparison would raise
+    KeyError on every run. The high-risk destination set is the same
+    one the realtime rules use, so batch and realtime agree on what
+    counts as a risky destination.
+    """
     wires = wires.copy()
-    wires["is_cross_border"] = wires["sender_country"] != wires["receiver_country"]
+    wires["is_cross_border"] = wires["receiver_country"].isin(REALTIME_HIGH_RISK_DEST)
 
     cross = wires[wires["is_cross_border"]].copy()
 

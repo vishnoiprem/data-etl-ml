@@ -1,0 +1,86 @@
+name: aws-cost-analyzer-ci
+
+# CI for the projects/aws-cost-analyzer project.
+# - Pure-Python, no external services, no AWS credentials, no Docker.
+# - The LLM backend is optional: the deterministic stub is what CI proves,
+#   and the analysis itself never depends on a model.
+# - Cost Explorer is NEVER mocked with moto — moto does not implement
+#   `ce`, so every CE test runs against a recorded payload instead.
+
+on:
+  push:
+    # `master` is this repo's default branch; `main` is kept for
+    # compatibility but is stale. Triggering on `main` alone meant this
+    # project's CI never ran against the branch that receives the work.
+    branches: [master, main]
+    paths:
+      - "projects/aws-cost-analyzer/**"
+      - ".github/workflows/aws-cost-analyzer-ci.yml"
+  pull_request:
+    branches: [master, main]
+    paths:
+      - "projects/aws-cost-analyzer/**"
+      # Without this, a change to the workflow file alone never
+      # triggers a run — so a broken edit lands on the default branch
+      # and only the *next* code change reveals it.
+      - ".github/workflows/aws-cost-analyzer-ci.yml"
+  # Manual trigger, so the workflow can be re-run on demand (e.g. after
+  # a runner-side flake) without pushing an empty commit.
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref to save runner minutes.
+concurrency:
+  group: aws-cost-analyzer-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: projects/aws-cost-analyzer/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r projects/aws-cost-analyzer/requirements.txt
+
+      - name: Run tests
+        run: |
+          cd projects/aws-cost-analyzer
+          python -m pytest tests/ -v
+
+      - name: Run the eval harness
+        # Asserts recall on the planted anomalies, zero false positives on
+        # the planted decoys, exact target matching, and the honesty gates
+        # (no unbacked modelled figure, no savings without a basis, and no
+        # claim exceeding the measured spend it came from). Exits non-zero
+        # if a gate is missed.
+        run: |
+          cd projects/aws-cost-analyzer
+          export PYTHONPATH="$PWD/src"
+          python -m aws_cost_analyzer.evaluation --out reports/eval.json
+
+      - name: Smoke test (the offline demo)
+        # Confirms the whole pipeline imports and runs end to end with no
+        # AWS credentials, no network and no model server.
+        run: |
+          cd projects/aws-cost-analyzer
+          python scripts/run_demo.py
+          test -f reports/cost_analyzer_report.json && echo "cost_analyzer_report.json OK"
+          test -f reports/cost_analyzer_report.txt && echo "cost_analyzer_report.txt OK"
+
+      - name: Lint
+        run: |
+          cd projects/aws-cost-analyzer
+          ruff check src/ tests/ scripts/ app.py

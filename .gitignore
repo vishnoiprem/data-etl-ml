@@ -89,6 +89,16 @@ projects/trade-sourcing-ai/reports/
 !projects/copyforge-ai/data/
 projects/copyforge-ai/reports/
 projects/copyforge-ai/output/
+# AWS Cost Analyzer: the recorded Cost Explorer payloads under
+# tests/fixtures/ are required inputs for the test suite, so they must be
+# tracked — the root *.json catch-all would otherwise hide them. The live
+# pulls under data/snapshots/ (real account data) and the generated reports
+# stay ignored. These rules come AFTER the *.json and data/ catch-alls so
+# they win (git uses last-match-wins).
+!projects/aws-cost-analyzer/tests/fixtures/
+!projects/aws-cost-analyzer/tests/fixtures/*.json
+projects/aws-cost-analyzer/data/snapshots/
+projects/aws-cost-analyzer/reports/
 !.release-please-manifest.json
 .devcontainer/
 !.devcontainer/devcontainer.json

@@ -13,13 +13,15 @@ import pytest
 HERE = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(HERE))
 
-from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
 from scb_aml_platform.aml_engine.alert_generation.alert_generator import (  # noqa: E402
-    merge_alerts_with_risk, classify_and_file, run,
+    classify_and_file,
+    merge_alerts_with_risk,
+    run,
 )
-from scb_aml_platform.aml_engine.rules.rules_engine import run as rules_run  # noqa: E402
 from scb_aml_platform.aml_engine.risk_scoring.risk_scoring_engine import run as risk_run  # noqa: E402
+from scb_aml_platform.aml_engine.rules.rules_engine import run as rules_run  # noqa: E402
 from scb_aml_platform.config.settings import BASE_DIR  # noqa: E402
+from scb_aml_platform.data.dummy.generate_dummy_data import main as _gen  # noqa: E402
 
 DUMMY_DIR = Path(BASE_DIR) / "data" / "dummy"
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"

@@ -154,6 +154,8 @@ You need both: one where you were right (and made the case with evidence rather 
 
 **Dig now, not tonight.** This is the highest-value 30 minutes you can spend.
 
+**Drafted 2026-11-16:** `ROUND_1_RRK.md` Q34 now carries the full structure with flow diagrams (the benchmark decision, the GCP reference architecture, the gated migration waves) and the follow-up probes. The "wrong" story there is "right architecture, wrong migration sequencing: big bang, then waves". Use it only if it is literally true, with one concrete casualty you remember; otherwise the fallback in `ROUND_1_RRK_GAP_CLOSURE.md` §5. Q33 (first 30 days) now has a spoken version and a week-by-week flow diagram ending on a day-30 outcome.
+
 ---
 
 ## 5. Your Revision Plan

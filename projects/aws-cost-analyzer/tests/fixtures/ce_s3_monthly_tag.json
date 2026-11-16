@@ -1,0 +1,26 @@
+{
+  "GroupDefinitions": [
+    { "Type": "DIMENSION", "Key": "SERVICE" },
+    { "Type": "TAG", "Key": "user:Data" }
+  ],
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-09-01", "End": "2026-10-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service", "Data"],
+          "Metrics": { "UnblendedCost": { "Amount": "820.00" } }
+        },
+        {
+          "Keys": ["Amazon Simple Storage Service", "Data-Squad"],
+          "Metrics": { "UnblendedCost": { "Amount": "140.00" } }
+        },
+        {
+          "Keys": ["Amazon Simple Storage Service", "Untagged"],
+          "Metrics": { "UnblendedCost": { "Amount": "295.10" } }
+        }
+      ]
+    }
+  ]
+}

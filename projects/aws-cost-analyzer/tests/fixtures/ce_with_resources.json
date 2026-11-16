@@ -1,0 +1,33 @@
+{
+  "GroupDefinitions": [
+    { "Type": "DIMENSION", "Key": "SERVICE" }
+  ],
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-09-01", "End": "2026-10-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "900.00" } },
+          "Resources": [
+            { "Keys": ["growth-bucket"], "Match": "EXACT" }
+          ]
+        }
+      ]
+    },
+    {
+      "TimePeriod": { "Start": "2026-10-01", "End": "2026-11-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "1500.00" } },
+          "Resources": [
+            { "Keys": ["growth-bucket"], "Match": "EXACT" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -23,12 +23,11 @@ Trained on the synthetic data: small but realistic enough to demonstrate
 the full train → evaluate → predict → serve loop end-to-end.
 """
 
-import sys
 import json
+import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -36,7 +35,9 @@ from loguru import logger
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from scb_aml_platform.config.settings import (
-    BASE_DIR, ML_MODEL_DIR, ML_RISK_LABEL_THRESHOLD,
+    BASE_DIR,
+    ML_MODEL_DIR,
+    ML_RISK_LABEL_THRESHOLD,
 )
 
 PROCESSED_DIR = Path(BASE_DIR) / "data" / "processed"
@@ -114,7 +115,7 @@ def _prepare_X(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
             d = pd.get_dummies(df[c].astype(str), prefix=c)
             cat_dummies.append(d)
     if cat_dummies:
-        X = pd.concat([X] + cat_dummies, axis=1)
+        X = pd.concat([X, *cat_dummies], axis=1)
     return X, list(X.columns)
 
 
@@ -132,13 +133,17 @@ def train_model(test_size: float = 0.25, random_state: int = 42) -> dict:
           "feature_importances": {feature: importance, ...},
         }
     """
-    from sklearn.ensemble import GradientBoostingClassifier
-    from sklearn.model_selection import train_test_split
-    from sklearn.metrics import (
-        accuracy_score, precision_score, recall_score, f1_score,
-        roc_auc_score, classification_report, confusion_matrix,
-    )
     import joblib
+    from sklearn.ensemble import GradientBoostingClassifier
+    from sklearn.metrics import (
+        accuracy_score,
+        confusion_matrix,
+        f1_score,
+        precision_score,
+        recall_score,
+        roc_auc_score,
+    )
+    from sklearn.model_selection import train_test_split
 
     logger.info("=" * 60)
     logger.info("ML Risk Classifier — Training")
@@ -185,13 +190,13 @@ def train_model(test_size: float = 0.25, random_state: int = 42) -> dict:
         "f1": round(float(f1_score(y_test, y_pred, zero_division=0)), 4),
         "auc": round(float(roc_auc_score(y_test, y_proba)) if len(set(y_test)) > 1 else 0.0, 4),
         "train_seconds": train_seconds,
-        "n_train": int(len(X_train)),
-        "n_test": int(len(X_test)),
+        "n_train": len(X_train),
+        "n_test": len(X_test),
         "n_positive_test": int(y_test.sum()),
     }
     metrics["confusion_matrix"] = confusion_matrix(y_test, y_pred).tolist()
 
-    importances = dict(zip(feature_names, [round(float(v), 4) for v in model.feature_importances_]))
+    importances = dict(zip(feature_names, [round(float(v), 4) for v in model.feature_importances_], strict=True))
     top_features = dict(sorted(importances.items(), key=lambda kv: -kv[1])[:10])
     metrics["top_features"] = top_features
 
@@ -203,7 +208,7 @@ def train_model(test_size: float = 0.25, random_state: int = 42) -> dict:
     logger.info(f"  Top features: {list(top_features.keys())[:5]}")
 
     # ── Persist
-    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     ML_MODEL_DIR.mkdir(parents=True, exist_ok=True)
     model_path = ML_MODEL_DIR / f"risk_classifier_{ts}.joblib"
     joblib.dump({"model": model, "feature_names": feature_names}, model_path)
@@ -227,7 +232,10 @@ def train_model(test_size: float = 0.25, random_state: int = 42) -> dict:
     # ── Metrics JSON
     metrics["model_path"] = str(model_path)
     metrics["predictions_path"] = str(pred_path)
-    metrics["trained_at"] = datetime.utcnow().isoformat() + "Z"
+    # `now(timezone.utc).isoformat()` already carries the `+00:00` offset,
+    # so the timestamp is unambiguous on its own — appending a "Z" would
+    # make it "+00:00Z", which is not a valid ISO-8601 timestamp.
+    metrics["trained_at"] = datetime.now(timezone.utc).isoformat()
     metrics_path = ML_OUTPUT_DIR / "model_metrics.json"
     metrics_path.write_text(json.dumps(metrics, indent=2))
     logger.success(f"Metrics: {metrics_path}")
@@ -247,7 +255,7 @@ def train_model(test_size: float = 0.25, random_state: int = 42) -> dict:
 class RiskClassifier:
     """Lightweight inference wrapper. Loads `latest.joblib` once."""
 
-    def __init__(self, model_path: Optional[Path] = None):
+    def __init__(self, model_path: Path | None = None):
         import joblib
         path = Path(model_path) if model_path else ML_MODEL_DIR / "latest.joblib"
         if not path.exists():

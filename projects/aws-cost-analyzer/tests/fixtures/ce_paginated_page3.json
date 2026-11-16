@@ -1,0 +1,17 @@
+{
+  "GroupDefinitions": [
+    { "Type": "DIMENSION", "Key": "SERVICE" }
+  ],
+  "ResultsByTime": [
+    {
+      "TimePeriod": { "Start": "2026-07-01", "End": "2026-08-01" },
+      "Estimated": false,
+      "Groups": [
+        {
+          "Keys": ["Amazon Simple Storage Service"],
+          "Metrics": { "UnblendedCost": { "Amount": "30.00" } }
+        }
+      ]
+    }
+  ]
+}
