@@ -104,7 +104,7 @@ $ python3 project/local_runner.py --run
 |---|---|
 | BigQuery: partitioning, clustering, slot reservations, BI Engine, materialized views, incremental append | A query cost before/after |
 | Dataflow: templates (Batch, Streaming), Beam SDK, exactly-once, windowing with allowed lateness | A streaming job that handles out-of-order events |
-| Pub/Sub: ordering keys, exactly-once delivery, dead-letter topics, `message_id` deduplication | A DLQ with a triage runbook |
+| Pub/Sub: ordering keys, exactly-once delivery, dead-letter topics, dedup on a producer-assigned ID attribute (`message_id` is new on every publish retry, so it only catches redelivery) | A DLQ with a triage runbook |
 | Dataproc: Serverless batch, Spark 3, and the migration of one existing Spark job | The migrated job running on Dataproc |
 
 **Days 31–45 — Governance and the enterprise layer**
@@ -293,7 +293,7 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 | 2 | Q3 | Attribution of the 40% delivery-time reduction | **Needs you.** Was it platform latency, routing algorithm, or joint? Recommended framing: *"the platform change removed data latency from the path; the algorithm change reduced the work per order; the 40% is joint and I'm not going to claim it as one or the other."* |
 | 3 | Q4 | Headcount split, attrition, hiring mistake | **Needs you.** Structural answer is drafted (inherited vs built, rubric, rotation). Supply: real numbers, or say "I don't have a retention figure and here's the mechanism instead" — the bank already says **do not invent** |
 | 4 | Q5 | Xendit figures safe? Honest reason | **Needs you.** Also: **resume-facts.md shows Xendit Jan–Jun 2024 and Makro from Jul 2024** — no gap. Confirm the real reason was scope narrowing vs re-org, and say it plainly |
-| 5 | Q6 | Pub/Sub ordering keys / Dataflow exactly-once hands-on | **Bridged.** Honest bridge: *"In my own builds I used Kafka's exactly-once semantics and Flink checkpoints; on GCP the equivalents are Pub/Sub exactly-once delivery with `message_id` dedup and ordering keys, and Dataflow's exactly-once on the runner. I've built those in this course project."* |
+| 5 | Q6 | Pub/Sub ordering keys / Dataflow exactly-once hands-on | **Bridged.** Honest bridge: *"In my own builds I used Kafka's exactly-once semantics and Flink checkpoints; on GCP the equivalents are Pub/Sub exactly-once delivery with dedup on a producer-assigned ID and ordering keys, and Dataflow's exactly-once on the runner. I've built those in lab exercises."* Say the last sentence only once the labs have actually been run. |
 | 6 | Q8 | Makro incidents −60%: baseline, root causes, mechanism | **Needs you.** The answer *structure* is drafted (triage by severity → root-cause classing → dead-letter path → measure). Supply baseline count and the actual top causes |
 | 7 | Q12 | Two 40% mechanisms | **Resolved** — §4 above |
 | 8 | Q13 | SCB/PDPA artefact you built | **Needs you.** Name a physical artefact: a control map, an evidence pack, a classification taxonomy. If none exists as a document, name the practice you ran and say so plainly |

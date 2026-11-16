@@ -95,7 +95,7 @@ That's 15+ years across PayPal, Exilant (Apple), DBS, SCB, Lazada, Xendit, Makro
 - AWS/Databricks cost **−40%** (Makro *and* Xendit)
 
 **Regulated, multi-jurisdiction delivery.**
-PDPA/GDPR, MAS compliance, data residency across Singapore, Thailand and Vietnam. That's directly relevant to the Singapore market and to the brief's "regional regulatory considerations."
+PDPA (Singapore, Thailand), Vietnam's Decree 13, GDPR, MAS compliance, data residency across the three markets. That's directly relevant to the Singapore market and to the brief's "regional regulatory considerations."
 
 **Cost and margin judgment.**
 You own real budget. You've made trade-offs with $2M on the line. The brief asks about delivery margin and over-delivery; you can speak to that from the inside, not from a consulting deck.
