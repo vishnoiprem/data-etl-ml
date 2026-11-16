@@ -28,7 +28,7 @@ Use this for every scenario/hypothetical question:
 **2b. These answers are scripts, not testimony — and that distinction is the whole game.**
 Every quoted answer in this bank is written in **your first person** so it can be rehearsed out loud. It is **the shape of a strong answer**, not a claim that you did these things. Before you say any of it, check three things:
 
-- **Is it true?** The structural content (the framework, the sequence, the trade-off) is sound and safe. The **specifics** — your numbers, your mechanisms, your stories — must come from `resume-facts.md` or your own memory. Where a passage asserts something you have not verified (for example the *mechanism* behind each of the two 40% cost claims, or the *detail* of what happened inside your $2M budget), it is marked and it is **your job to correct it**. A beautifully-worded answer about something that did not happen is worse than a plain one that did — the interviewer will pull the thread, and you cannot sustain it.
+- **Is it true?** The structural content (the framework, the sequence, the trade-off) is sound and safe. The **specifics** — your numbers, your mechanisms, your stories — must come from `resume-facts.md` or your own memory. Where a passage asserts something you have not verified (for example the *mechanism* behind each of the two 40% cost claims, or the *detail* of what happened inside your $3M budget), it is marked and it is **your job to correct it**. A beautifully-worded answer about something that did not happen is worse than a plain one that did — the interviewer will pull the thread, and you cannot sustain it.
 - **Is it yours?** Do not deliver my phrasing verbatim. Rehearse until you could say it while making coffee, then say it in your own words. A rehearsed-sounding answer is detectable and it reads as coaching.
 - **Would you defend the follow-up?** The test of any sentence here is not whether it sounds good but whether you can answer *"how do you know that?"* and *"who else could have caused it?"* If you cannot, cut the sentence.
 
@@ -50,9 +50,9 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 > "I have **15+ years** in data engineering, moving from warehouse and ETL work at **PayPal** and **Exilant**, where I built Apple-facing data products, through **DBS** where I built the SCD2 modelling framework, to **SCB Bank** as a Big Data Consultant supporting AML across **15+ countries** on Hadoop and Hive.
 >
-> The scale step came at **Lazada** — five and a half years as **VP Data Engineer**, part of Alibaba. There I owned a platform handling **100M+ daily events**, delivered **20M+ insights a day** through Flink and ClickHouse, and had **600+ production tables** under my ownership. That was where I learned to build for ten-times growth, and where I learned that the second-order effects — governance, operability, cost — matter as much as the pipeline.
+> The scale step came at **Lazada** — five and a half years, July 2018 to January 2024, as **VP Data Engineering**, part of Alibaba. There I owned a platform handling **100M+ daily events**, delivered **20M+ insights a day** through Flink and ClickHouse, and had **600+ production tables** under my ownership. That was where I learned to build for ten-times growth, and where I learned that the second-order effects — governance, operability, cost — matter as much as the pipeline.
 >
-> Since **2024** I've been **Head of Data** at **Makro** within CP Group, running the enterprise data platform and AI architecture. I scaled the team from **8 to 25**, hold a **$2M annual cloud and vendor budget**, and the platform processes **10B+ daily rows** across **500+ daily jobs** at **99.99% uptime**. I've since worked through Xendit as Principal Data Engineer, focused on cost and platform efficiency.
+> Since **July 2024** I've been **Head of Data Engineering** at **Makro** within CP Group, running the data, analytics and AI platform for an **$8B omnichannel retail business across three countries**. I scaled the organisation from **8 to 30** across four domain squads, hold a **$3M budget** with vendor accountability, and the lakehouse processes **10B+ rows a day**. The outcomes I'd point to: month-end close from **five days to two hours**, near real-time inventory across **200+ stores and 5 DCs**, and demand forecasting covering **1,000+ vendors**.
 >
 > Why this role: my last five years have been exactly the three things this job needs — enterprise architecture, executive and commercial accountability, and leading senior engineers. What I want to add is the practice-building half: taking a capability and making it repeatable across a region rather than running it in one company."
 
@@ -61,7 +61,7 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 **Pass signal:** You talk about the **operating model** and **adoption**, not only the technology.
 **Fail signal:** A chronological CV recital with no outcome, or "I've been doing data for 15 years."
 
-**RESOLVED** (`resume-facts.md`): the resume headline is *"Head of Data | Enterprise AI Architecture | Data Strategy"* — so "Head of Data" is safe to use. State **"Lazada (Alibaba Group)"**; it is a marquee point and it is honest. Note the role-history row reads *"Data Engineering (platform owner)"* — if the formal internal title differs, the safe phrasing is *"I run the enterprise data platform at Makro."*
+**RESOLVED against your current resume (the one the interviewer holds):** title is **Head of Data Engineering | Makro (CP Group) | July 2024 – Present**. Lazada is **VP Data Engineering | Lazada Group (Alibaba) | Jul 2018 – Jan 2024**; say "Lazada, part of Alibaba". Every figure in the opener above is on that resume. An earlier note here cited a "Head of Data" headline, an 8-to-25 team, a $2M budget and a Xendit role from a stale facts file; all of that is withdrawn. The resume has **no** Xendit role and shows **January to July 2024 as a gap**; Q5 below is the honest answer for that.
 
 ---
 
@@ -71,7 +71,7 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 > "Three reasons.
 >
-> **Capability fit.** My deepest experience is in exactly the problems Google Cloud's data and AI practice sells: high-volume streaming (Kafka, Flink at Lazada's 100M+ daily events), large-scale warehousing migration, and cost architecture on a real budget — the **$2M annual cloud spend** I own today. I've also spent my career in the regulated APAC markets this role serves: MAS compliance at SCB, PDPA in Singapore and Thailand, Vietnam's Decree 13, and GDPR for EU data subjects.
+> **Capability fit.** My deepest experience is in exactly the problems Google Cloud's data and AI practice sells: high-volume streaming (Kafka, Flink at Lazada's 100M+ daily events), large-scale warehousing migration, and cost architecture on a real budget — the **$3M annual cloud spend** I own today. I've also spent my career in the regulated APAC markets this role serves: MAS compliance at SCB, PDPA in Singapore and Thailand, Vietnam's Decree 13, and GDPR for EU data subjects.
 >
 > **Market thesis.** Most enterprise data programmes I see in this region don't fail on technology choice — they fail on **operating model and adoption**: pipelines nobody owns, platforms nobody adopts, migration programmes that miss the behaviour change. That's a consulting problem first and a technology problem second, which is exactly why this is a Consulting role and not an engineering role.
 >
@@ -92,7 +92,7 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 > "That's a fair challenge, and I should have stated it more precisely on the resume. The accurate framing is: **I own the data platform that supports a group with $8B+ in revenue.** I did not drive $8B of revenue.
 >
-> What I did drive was the platform's contribution to it. At Makro I scaled the team from **8 to 25**, own a **$2M annual cloud and vendor budget**, and the platform carries **10B+ daily rows** across **500+ daily jobs** at **99.99% uptime**. Concretely, month-end close went from **5 days to 2 hours**, incident volume dropped **60%**, and delivery time on order-to-cash fulfilment came down **40%**. If a merchandising decision lands an hour sooner, that's platform and data latency showing up in the business.
+> What I did drive was the platform's contribution to it. At Makro I scaled the team from **8 to 30**, own a **$3M annual cloud and vendor budget**, and the platform carries **10B+ daily rows** across **500+ daily jobs** at **99.99% uptime**. Concretely, month-end close went from **5 days to 2 hours**, incident volume dropped **60%**, and delivery time on order-to-cash fulfilment came down **40%**. If a merchandising decision lands an hour sooner, that's platform and data latency showing up in the business.
 >
 > The distinction I'd draw: **owning a platform under an $8B business is not the same as driving $8B.** My claim is about the reliability, speed and cost of the decision-making that business runs on — and I can walk you through exactly which metrics moved and how they were measured."
 
@@ -105,7 +105,7 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 ---
 
-### Q4. "You scaled the team from 8 to 25. What did *you* hire, and what did you inherit? Did quality hold?"
+### Q4. "You scaled the team from 8 to 30. What did *you* hire, and what did you inherit? Did quality hold?"
 
 **Framework:** Inherited vs built → Quality mechanisms → Attrition → Honest gap
 
@@ -126,22 +126,26 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 
 ---
 
-### Q5. "Your Xendit role was six months. Why so short?"
+### Q5. "Your resume shows Lazada ending in January 2024 and Makro starting in July. What happened in between?"
 
-**Framework:** Clean, non-bitter → The actual reason → What it proved → No hedging
+**Framework:** Say it plainly → What you did with the time → Why it is not on the resume → Connect forward → Stop
 
-> "It was a deliberate, specific decision, and I'll be straightforward about it. I joined Xendit as **Principal Data Engineer** in **January 2024** for two reasons: I wanted to work closer to a high-growth payments platform, and I wanted to take on platform-cost work end to end rather than share it.
->
-> The platform work went well — we cut **AWS/Databricks spend by 40%**, and reduced **DBT/Spark runtimes by 60%**. But by around month four it was clear the role was going to be much closer to a **cost-optimisation engagement** than the broader data-platform scope I had signed up for. I don't want to be negative about them — they're a good company — but I wasn't going to stay in a role narrower than the one I'd left, so I made the call and moved to Makro in **July 2024**.
->
-> The reason I mention the numbers is that I'd rather show you six months of real delivery than dress it up. The cost work is genuinely mine, and it carries directly into this role — platform cost is one of the main levers in a consulting engagement's margin."
+Your resume does not list a role for January to July 2024. The interviewer will see the gap. The only bad answer is one that sounds like a cover story. Two honest versions; pick the one that is true and say it in under 45 seconds.
 
-**Key elements:** Not bitter, no blame of the employer, the reason is about **scope** not conflict. You volunteer the evidence that the work was real. You connect it forward.
+**Version A, if you did a short engagement in that window and left it off the resume:**
 
-**Pass signal:** Clear-eyed, factual, and you don't linger or over-explain.
-**Fail signal:** Vagueness ("it was a restructure"), criticism of the employer, or an obvious cover story.
+> "Between Lazada and Makro I did a six-month principal-engineer engagement at a payments company, focused on platform cost. // I don't list it because it was short and the scope turned out narrower than I'd signed up for, // and I'd rather the resume show the roles that define me. // The work itself was real: job-level Spark and DBT tuning, instance right-sizing, scheduling. // By month four it was clear it was a cost-optimisation engagement rather than a platform role, so I made the call and joined Makro in July. // Happy to go into the detail if useful."
 
-[TODO: confirm with Xendit whether the cost figures are safe to state and how they were measured. Also confirm the honest reason — if it was actually a re-org, say that plainly rather than a softer version.]
+**Version B, if the time was a deliberate break or a search:**
+
+> "I finished at Lazada in January after five and a half years and took the first half of 2024 deliberately: // I wanted the next role to be a platform-and-organisation role, not another architecture seat, // and I used the time to [the true thing: study, family, the Northwestern application, a specific search]. // Makro was the right fit and I started in July."
+
+**Key elements:** Plain. No employer criticism. One sentence of reason, one of evidence, then stop. If you use Version A, **the numbers from that engagement are not on your resume**: say them only if you can defend baseline and measurement, and never attach them to Makro.
+
+**Pass signal:** Clear-eyed, factual, under 45 seconds, and you move on.
+**Fail signal:** Vagueness ("it was a restructure"), a story that contradicts the resume dates, or defending a number you did not put on paper.
+
+[TODO: decide A or B and fill the one true detail. If A, decide whether the engagement should go back on the resume before the next round; a recruiter compares the two.]
 
 ---
 
@@ -309,15 +313,14 @@ A technically correct answer that doesn't reach **enterprise dependencies, adopt
 **Pass signal:** The "make it stick" half — ownership, gates, dashboards, incentives — most candidates skip this entirely.
 **Fail signal:** A list of tips. Or a saving that degrades an SLA with no acknowledgment.
 
-**PARTIALLY RESOLVED — the strategy is settled, the mechanisms need your confirmation.** See `ROUND_1_RRK_GAP_CLOSURE.md` §4.
+**RESOLVED against your current resume.** Your resume carries **no** cost-reduction percentage at any employer. The "−40% AWS/Databricks cost" and "−60% DBT/Spark runtime" figures came from a stale facts file and are not on the document the interviewer holds. See `ROUND_1_RRK_GAP_CLOSURE.md` §4.
 
-Your resume states *"AWS/Databricks cost −40%"* at **both** employers, and *"DBT/Spark runtime −60%"* at Xendit. It does **not** state what produced each 40%, so the mechanisms below are a *plausible differentiation to confirm or replace* — not established fact:
-- **Xendit = job-level engineering** (Spark/DBT job tuning, instance sizing, shuffle configuration, scheduling). Cleanest metric: **DBT/Spark runtime −60%** — a *time* metric, directly attributable to job config.
-- **Makro = platform-level change** (partitioning, data contracts, cost attribution per job/team, FinOps ownership). Metric: **cloud/vendor spend −40%** — a *money* metric.
+What that means for this answer:
+- You are free to describe the **mechanism** of cost work at Makro (partitioning and clustering corrected across the estate, data contracts, cost attribution per job and team, FinOps ownership, Databricks cluster policies) without a headline percentage.
+- If you want to quote a percentage, it must be one you can defend with **baseline, measurement window and what else changed**. State it as "roughly" and offer the baseline unprompted. A number that is not on the resume and cannot be defended is worse than no number.
+- Do **not** attach any figure from a role that is not on the resume to Makro.
 
-**Confirm both mechanisms against what you actually did.** If you cannot, that 40% is a number you cannot defend — drop it. **One clean claim beats two that look rounded.**
-
-Say the separation out loud: *"Different mechanism, different level, different metric."* **If you cannot defend both cleanly, drop the Makro 40% and keep the Xendit numbers** — a single clean claim beats two that look rounded.
+The strong form of this answer is the method, not the percentage: show the cost-per-job view, the three biggest levers you pulled, and the guardrail that stopped it coming back.
 
 ---
 
@@ -527,7 +530,7 @@ Also run three timed rehearsals: two on this file, one on an **unfamiliar** snip
 
 **RESOLVED — full answer in `ROUND_1_RRK_GAP_CLOSURE.md` §3.** The structure to say:
 
-*"I'll be straight with you: **I have not owned a consulting practice P&L.** What I've owned is the platform, the team and a real budget inside a business — $2M a year at Makro, with genuine trade-offs I had to make. Let me answer the management question, because the mechanism transfers."*
+*"I'll be straight with you: **I have not owned a consulting practice P&L.** What I've owned is the platform, the team and a real budget inside a business — $3M a year at Makro, with genuine trade-offs I had to make. Let me answer the management question, because the mechanism transfers."*
 
 Then give the three-cause decomposition of low utilisation (**understaffed / badly staffed / losing to better-paid work** — three different fixes), the margin-leak analysis (scoping, staffing mix, over-delivery), and the "what I deliberately would not do in the first 90 days" list (no new service offering before understanding the business; no restructuring before having the utilisation data; no chasing the biggest logo — a marquee logo at negative margin teaches the organisation the wrong lesson).
 
@@ -606,7 +609,7 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 **Pass signal:** "If I start by asking what they did wrong, I've taught the team that bad news is punished."
 **Fail signal:** A story where the consultant was the problem.
 
-[TODO: **Do not use the corpus story** ("a Select partner missed 3 milestones on an $800K engagement") — that is not your history. Use a real engagement from Makro, Lazada or Xendit where a delivery slipped. Be ready to name what *you* did, what you coached, and what system change followed.]
+[TODO: **Do not use the corpus story** ("a Select partner missed 3 milestones on an $800K engagement") — that is not your history. Use a real engagement from Makro or Lazada where a delivery slipped. Be ready to name what *you* did, what you coached, and what system change followed.]
 
 ---
 
@@ -629,7 +632,7 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 **Pass signal:** The capability / clarity / sustained triage — that's the differentiator. Most candidates only know the third case.
 **Fail signal:** "I'd have a feedback conversation and set goals" with no diagnosis.
 
-[TODO: anchor in the Makro team scale 8→25. Be ready to name one person you developed into a bigger role and one performance case you handled — with the diagnosis, what you did, and the outcome. If you can't recall a formal underperformance case, use a "near-miss" example where you caught a capability vs clarity gap — and say so honestly.]
+[TODO: anchor in the Makro team scale 8→30. Be ready to name one person you developed into a bigger role and one performance case you handled — with the diagnosis, what you did, and the outcome. If you can't recall a formal underperformance case, use a "near-miss" example where you caught a capability vs clarity gap — and say so honestly.]
 
 ---
 
@@ -650,7 +653,7 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 **Pass signal:** You cite a metric that moved, and you name what didn't work.
 **Fail signal:** Values-only answer, or claiming more than you can evidence.
 
-[TODO: real example required — a hiring process you changed, a diverse slate you built, a metric that moved. If your Makro hiring (8→25) included a deliberate sourcing or panel change, that's your example. Do not claim a number you can't source.]
+[TODO: real example required — a hiring process you changed, a diverse slate you built, a metric that moved. If your Makro hiring (8→30) included a deliberate sourcing or panel change, that's your example. Do not claim a number you can't source.]
 
 ---
 
@@ -673,7 +676,7 @@ Close with the honest gap: *"The mechanics I'd need to learn are partner rate ca
 
 **RESOLVED — full 60-day plan in `ROUND_1_RRK_GAP_CLOSURE.md` §2.** The structure to say:
 
-*"My production depth is Spark, Kafka, Flink and Databricks — that's where I've run platforms at 10B+ daily rows and 500+ daily jobs. My Google Cloud hands-on has been architect-level: I've designed and costed BigQuery and Dataflow solutions, and I've built this end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite, which I rebuilt this month because two of its tests were failing."*
+*"My production depth is Spark, Kafka, Flink and Databricks — that's where I've run platforms at 10B+ daily rows. My Google Cloud hands-on has been architect-level: I've designed and costed BigQuery and Dataflow solutions, and I've built this end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite, which I rebuilt this month because two of its tests were failing."*
 
 Then the dated plan: **Days 1–15** deploy the project live on GCP (Pub/Sub → Dataflow → BigQuery, real GCS source, real DLQ topic) + Skills Boost; **Days 16–30** depth (BigQuery partitioning/clustering/slots, Dataflow templates + exactly-once + windowing, Pub/Sub ordering keys + exactly-once + DLQ, Dataproc and one migrated Spark job); **Days 31–45** governance (keyless service accounts, org policies, VPC-SC perimeter, Sensitive Data Protection, CMEK, residency via org policy); **Days 46–60** production patterns (Dataplex catalogue + policy tags + quality rules, Looker semantic layer + RLS, Vertex AI / BigQuery ML, then write it up).
 
@@ -820,7 +823,7 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 > "I'll give you one where I was right, and one where I was wrong, because the first only tests whether you can win an argument.
 >
-> **[RIGHT]** [Real example — a technical or platform decision you pushed back on, how you made the case with evidence, and what changed. Use the incident −60%, month-end close 5d→2h, or the cost −40% work at Makro or Xendit. Be specific about the counter-argument you were up against and why your evidence was better, not louder.]
+> **[RIGHT]** [Real example — a technical or platform decision you pushed back on, how you made the case with evidence, and what changed. Use the incident −60%, month-end close 5d→2h, or the cost −40% work at Makro. Be specific about the counter-argument you were up against and why your evidence was better, not louder.]
 >
 > **[WRONG]** [Real example where you were wrong and had to change course or course-correct. This is the one that builds trust with a Googleyness panel — "times you learned something new from a setback" is explicitly in the brief. A good answer is specific, doesn't blame others, and ends with what you changed permanently.]
 >
@@ -831,7 +834,7 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 **Pass signal:** A genuinely self-critical example where you name your own error and what you changed afterwards.
 **Fail signal:** Only the success story; or a "disagreement" that was really a "someone else was wrong and I fixed it."
 
-[TODO: you have strong raw material here. Candidates: the decision to build the Makro lakehouse rather than extend the legacy stack; the cost work at Xendit; a late-stage decision at Lazada. For the "I was wrong" story, think hard — a decision you made that didn't work and what it taught you. If you can't identify one quickly, dig in the resume-facts file: the advisor flagged several claims you'll be stress-tested on, and one of those may be a place you changed your mind.]
+[TODO: you have strong raw material here. Candidates: the decision to build the Makro lakehouse rather than extend the legacy stack; a late-stage decision at Lazada. For the "I was wrong" story, think hard — a decision you made that didn't work and what it taught you. If you can't identify one quickly, dig in the resume-facts file: the advisor flagged several claims you'll be stress-tested on, and one of those may be a place you changed your mind.]
 
 ---
 
@@ -858,9 +861,9 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 
 | ❌ Don't | ✅ Do instead |
 |---|---|
-| Present the corpus's aspirational numbers ($12.3M ARR, $2.5M/120TB migration, 500TB FSI programme) as your history | Use only your resume facts: Makro, Lazada, Xendit, SCB, DBS, PayPal, Apple/Exilant |
+| Present the corpus's aspirational numbers ($12.3M ARR, $2.5M/120TB migration, 500TB FSI programme) as your history | Use only your resume facts: Makro, Lazada, SCB, DBS, PayPal, Apple/Exilant |
 | Say "$8B revenue impact" as your impact | Correct the framing yourself: "I own the platform supporting a group with $8B+ revenue" |
-| Claim a consulting practice P&L | Say plainly you ran a data org with a $2M budget and name the trade-offs; ask what you'd need to learn |
+| Claim a consulting practice P&L | Say plainly you ran a data org with a $3M budget and name the trade-offs; ask what you'd need to learn |
 | Bluff hands-on GCP depth | Be honest: production depth is Spark/Kafka/Flink/Databricks; GCP is architect-level; here's the 60-day plan |
 | Answer a hypothetical with a solution immediately | Ask clarifying questions, state assumptions, then proceed |
 | Present options without a recommendation | Weigh honestly, then be prescriptive — "it depends" is a starting point |
@@ -879,7 +882,9 @@ Close on the credibility principle: *"I'm not the best engineer in the room. But
 - [ ] **Practise the code review (Q15) three times, timed**, against `pipeline_logic.py`, `dataflow_batch_pipeline.py`, and one unfamiliar snippet.
 - [ ] **Write the "I was wrong" story (Q34) and rehearse it** — it must sound genuinely self-critical, not rehearsed humility.
 - [ ] **Prepare the Q23 competitor one-pager** — Snowflake, Databricks, AWS, Microsoft, including where Google is weaker.
-- [ ] **Know your numbers cold**: team 8→25, $2M budget, 10B+ daily rows, 500+ daily jobs, 99.99% uptime, month-end close 5d→2h, incidents −60%, delivery −40%, 100M+ daily events, 20M+ insights/day, 600+ tables, AML 15+ countries, cost −40%, Spark runtime −60%.
+- [ ] **Know your numbers cold, in two tiers.**
+  - **On the resume the interviewer holds (say freely):** $8B business, 3 countries, org 8→30 across four squads (Finance, Supply Chain, O2O, Platform), $3M budget, 10B+ rows/day, month-end close 5d→2h, 50+ executive dashboards, 200+ stores and 5 DCs near real-time inventory, 1,000+ vendors forecasting; Lazada 100M+ daily events, 20M+ insights/day, 600+ governed tables, 10x growth, double promotion; SCB AML 15+ countries, MAS.
+  - **Not on the resume (say only with baseline and measurement ready):** 500+ daily jobs, 99.99% uptime, incidents −60%, delivery −40%, any cost or runtime percentage. If you cannot state what was measured and over what window, do not say the number.
 - [ ] **Re-read the recruiter's brief** — the six "what great looks like" themes are the rubric, not decoration.
 - [ ] **Have one number ready for each metric you can't defend** — know the baseline, the measurement, and who else could have caused it.
 - [ ] **Know the GCP stack cold**: BigQuery, Dataflow, Dataproc, Pub/Sub, Dataplex, Looker, Vertex AI, Composer, VPC-SC, CMEK, policy tags.

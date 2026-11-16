@@ -81,27 +81,26 @@ Look for: utilisation vs margin vs over-delivery, capacity and ramp, pre-sales s
 Your evidence is genuinely strong on three of the six themes. Don't sandbag it.
 
 **Enterprise scale — you have it, but you must say it explicitly.**
-- Makro/CP Group: **10B+ daily rows**, **500+ daily jobs**, **99.99% uptime**, **$2M annual cloud/vendor budget**, team scaled **8 → 25**
-- Lazada (Alibaba): **100M+ daily events**, **20M+ insights/day** (Flink + ClickHouse), **600+ production tables**
-- SCB Bank: AML across **15+ countries** on Hadoop/Hive
+- Makro/CP Group: **$8B omnichannel business, 3 countries**, **10B+ daily rows**, **$3M budget**, org scaled **8 → 30** across four domain squads, **200+ stores and 5 DCs** near real-time inventory, **1,000+ vendors** forecasting
+- Lazada (Alibaba): **100M+ daily events**, **20M+ insights/day** (Flink + ClickHouse), **600+ governed production tables**, 10x data growth, double promotion
+- SCB Bank: AML across **15+ countries** on Hadoop/Hive, MAS compliance
 
-That's 15+ years across PayPal, Exilant (Apple), DBS, SCB, Lazada, Xendit, Makro — and it hits the brief's "enterprise dependencies, adoption, operating model and sustained outcomes."
+That's 15+ years across PayPal, Exilant (Apple), DBS, SCB, Lazada, Makro — and it hits the brief's "enterprise dependencies, adoption, operating model and sustained outcomes."
 
 **Production engineering — you have the war stories.**
-- Month-end close **5 days → 2 hours**
-- Incidents **−60%**
-- Delivery time **−40%** (order-to-cash)
-- **DBT/Spark runtime −60%** (Xendit); **FX pipeline manual effort −80%**
-- AWS/Databricks cost **−40%** (Makro *and* Xendit)
+- Month-end close **5 days → 2 hours** *(on resume)*
+- **50+ executive dashboards** covering revenue, profitability and O2O *(on resume)*
+- Incidents **−60%**, delivery time **−40%**, **500+ daily jobs**, **99.99% uptime** *(not on your current resume: say only with baseline and measurement ready)*
+- Cost work at Makro: describe the **mechanism** (partitioning, cost attribution per squad, cluster policies); no cost percentage is on the resume
 
 **Regulated, multi-jurisdiction delivery.**
 PDPA (Singapore, Thailand), Vietnam's Decree 13, GDPR, MAS compliance, data residency across the three markets. That's directly relevant to the Singapore market and to the brief's "regional regulatory considerations."
 
 **Cost and margin judgment.**
-You own real budget. You've made trade-offs with $2M on the line. The brief asks about delivery margin and over-delivery; you can speak to that from the inside, not from a consulting deck.
+You own real budget. You've made trade-offs with $3M on the line. The brief asks about delivery margin and over-delivery; you can speak to that from the inside, not from a consulting deck.
 
 **Leadership with real scale.**
-8 → 25 at Makro, plus senior architecture roles at Lazada. The brief's people-leadership section is asking whether you can develop and hold accountable senior ICs — you've been in that seat.
+8 → 30 at Makro, plus senior architecture roles at Lazada. The brief's people-leadership section is asking whether you can develop and hold accountable senior ICs — you've been in that seat.
 
 ---
 
@@ -128,10 +127,10 @@ This bites in two places:
 
 The brief asks how you run a professional services practice: utilisation, delivery margin, over-delivery, capacity and staffing planning, and how they interrelate.
 
-Your resume shows you ran a **data function** with a $2M budget. You have not owned a consulting practice P&L. There are illustrative numbers in the wider corpus ("$2.1M → $12.3M ARR at 34% margin", "Practice of the Year") — **those are not your history. Do not use them.**
+Your resume shows you ran a **data function** with a $3M budget. You have not owned a consulting practice P&L. There are illustrative numbers in the wider corpus ("$2.1M → $12.3M ARR at 34% margin", "Practice of the Year") — **those are not your history. Do not use them.**
 
 The strong answer is honest and redirects to what you *do* know:
-> *"I ran the platform and the team inside a business and I owned a $2M budget with genuine trade-offs — here's how I made those calls. I haven't owned a consulting P&L, and here's exactly what I'd need to learn in the first 90 days to get it right."*
+> *"I ran the platform and the team inside a business and I owned a $3M budget with genuine trade-offs — here's how I made those calls. I haven't owned a consulting P&L, and here's exactly what I'd need to learn in the first 90 days to get it right."*
 
 Then answer the *management* question using transfer logic from Q21/Q22 in the Q&A bank: utilisation at 60% has three different root causes (understaffed, badly staffed, or losing to better-paid work) needing three different fixes; margin leaks from scoping, staffing mix, or over-delivery; and the hierarchy is **margin → client outcomes → utilisation as the enabling constraint**, not the other way round.
 
@@ -141,9 +140,11 @@ Then answer the *management* question using transfer logic from Q21/Q22 in the Q
 
 **"$8B+ revenue impact"** — owning a platform under an $8B business is not driving $8B. Reframe before you're pushed (Q3).
 
-**"40% cost reduction at two different employers"** — identical figure at Makro and Xendit reads as a rounded number. You must differentiate the mechanisms out loud: at Xendit it was job-level Spark tuning, scheduling and instance sizing; at Makro it was platform-level change — contracts, partitioning, FinOps visibility and ownership. If you can't distinguish them cleanly, use the stronger one (Xendit: **DBT/Spark runtime −60%**) and drop the other.
+**"Cost reduction percentages"** — none is on your current resume. Earlier versions of these notes carried a 40% at two employers; that came from a stale facts file. Talk about the mechanism (partitioning, cost attribution per squad, cluster policies, the monthly report that stops it creeping back). If you quote a percentage, give the baseline month and what was measured in the same breath.
 
-**Also:** "20M+ insights/day" is a soft metric. Define what an insight is, or drop it. "99.99% uptime" — be ready to say *what* was measured (jobs? API? freshness SLA?).
+**"The January to July 2024 gap"** — the resume shows Lazada ending in January and Makro starting in July. Have the 45-second honest answer ready (RRK Q5, two versions). Never let it be the first time you have said it aloud.
+
+**Also:** "20M+ insights/day" is a soft metric. Define what an insight is, or drop it. "99.99% uptime" and "500+ daily jobs" are not on the resume; if you use them, be ready to say *what* was measured (jobs? API? freshness SLA?).
 
 ### 🟠 4.4 The "I was wrong" story
 
@@ -236,7 +237,7 @@ Two narrow exceptions, if time permits: the **Family C streaming/state section**
 - [ ] **Competitor one-pager** — Snowflake, Databricks, AWS, Microsoft, including where Google is weaker
 - [ ] **Parts C + D rehearsed aloud** — timed, at least twice
 - [ ] **60-day GCP hands-on plan** you can state out loud (Q27)
-- [ ] **Practice P&L answer** — honest, redirects to your $2M budget experience, names what you'd need to learn
+- [ ] **Practice P&L answer** — honest, redirects to your $3M budget experience, names what you'd need to learn
 - [ ] **One 60-minute mock**, recorded, no notes, scored against the six themes in §2
 - [ ] **Logistics** — camera, lighting, backup internet, water, and the Q&A bank open on a second screen
 

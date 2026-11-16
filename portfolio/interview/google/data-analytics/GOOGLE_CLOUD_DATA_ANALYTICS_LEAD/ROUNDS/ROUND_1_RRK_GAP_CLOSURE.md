@@ -86,7 +86,7 @@ $ python3 project/local_runner.py --run
 
 ### The honest answer, ready to say
 
-> "My production depth is **Spark, Kafka, Flink and Databricks** — that's where I've run platforms at 10B+ daily rows and 500+ daily jobs. **My Google Cloud hands-on is architect-level**: I've designed and costed BigQuery and Dataflow solutions, and I've built this end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite, which I repaired this month — it was failing its own audit checks because the sample data was never generated.
+> "My production depth is **Spark, Kafka, Flink and Databricks** — that's where I've run platforms at 10B+ daily rows. **My Google Cloud hands-on is architect-level**: I've designed and costed BigQuery and Dataflow solutions, and I've built this end-to-end course project — ingest, validation, dead-letter, BigQuery partitioning, IAM policy modelling, cost modelling — with a passing test suite, which I repaired this month — it was failing its own audit checks because the sample data was never generated.
 >
 > **My production depth on those specific services is lighter than I'd want it to be.** Here's the 60-day plan..."
 
@@ -136,13 +136,13 @@ $ python3 project/local_runner.py --run
 
 ### Why it is a gap
 
-Your resume shows you ran a **data function** with a **$2M budget** and scaled a team **8 → 25**. You have **not** owned a **consulting practice P&L**. The brief asks about *"utilisation, delivery margin and over-delivery, capacity and staffing planning, and how those metrics interrelate."*
+Your resume shows you ran a **data function** with a **$3M budget** and scaled a team **8 → 30**. You have **not** owned a **consulting practice P&L**. The brief asks about *"utilisation, delivery margin and over-delivery, capacity and staffing planning, and how those metrics interrelate."*
 
 **The corpus contains numbers that are not yours** — "$2.1M → $12.3M ARR practice at 34% margin", "Practice of the Year". **Never use them.** If asked directly, say plainly that you have not owned a consulting P&L. Then redirect to what you genuinely have.
 
 ### The answer (Q21) — the honest redirect
 
-> "I'll be straight with you: **I have not owned a consulting practice P&L.** What I've owned is the platform, the team and a real budget inside a business — $2M a year at Makro, with genuine trade-offs I had to make.
+> "I'll be straight with you: **I have not owned a consulting practice P&L.** What I've owned is the platform, the team and a real budget inside a business — $3M a year at Makro, with genuine trade-offs I had to make.
 >
 > **So let me answer the management question, because I think the mechanism transfers.** In the first 30 days I want the real numbers: utilisation by person, delivery margin by engagement, revenue and pipeline mix, and — most importantly — **why** utilisation sits where it does. **A practice at 60% utilisation is either understaffed, badly staffed, or losing to better-paid work elsewhere, and those need three different fixes.** I'd also want to know where margin actually leaks: scoping, staffing mix, or over-delivery.
 >
@@ -166,15 +166,15 @@ Your resume shows you ran a **data function** with a **$2M budget** and scaled a
 >
 > **Over-delivery is the signal I watch most carefully**, because it's the honest measure of estimating quality. If a team delivers 115% of scope for free, one of three things is true: the estimate was wrong, the team was under-resourced, or the scope was ambiguous and the team over-built to be safe. All three are fixable, and all three are being paid for by margin. **I'd rather see it in the margin line than discover it at year end.**"
 
-### The transfer from your real $2M budget — this is what makes the answer land
+### The transfer from your real $3M budget — this is what makes the answer land
 
 Make it concrete, because the interviewer is deciding whether you can actually do this job.
 
-> ⚠️ **The paragraph below is a template built on the resume fact that you own a $2M budget. It is not a quote from you and it asserts things you may not have done** — "every request for more compute came with an opportunity cost", "I had to choose what to fund and what to defend". **Rewrite it in your own words against what actually happened at Makro.** If you did *not* have to make explicit trade-offs, do not claim it — a concrete true detail beats a polished invented one.
+> ⚠️ **The paragraph below is a template built on the resume fact that you own a $3M budget. It is not a quote from you and it asserts things you may not have done** — "every request for more compute came with an opportunity cost", "I had to choose what to fund and what to defend". **Rewrite it in your own words against what actually happened at Makro.** If you did *not* have to make explicit trade-offs, do not claim it — a concrete true detail beats a polished invented one.
 
 Template:
 
-> "The one place I *have* lived this is the $2M. [Specific, true detail: a real cut you made, a real thing you defended, a real trade-off you lost.] Every request came with an opportunity cost against something else I wanted, and I had to make those calls against a business case, not a preference. That's the same skill — just applied to a platform budget rather than a delivery margin. **And it taught me the thing that matters most in a practice: the number has to be shared and believed, or every hard conversation becomes a negotiation about whose number is right.**"
+> "The one place I *have* lived this is the $3M. [Specific, true detail: a real cut you made, a real thing you defended, a real trade-off you lost.] Every request came with an opportunity cost against something else I wanted, and I had to make those calls against a business case, not a preference. That's the same skill — just applied to a platform budget rather than a delivery margin. **And it taught me the thing that matters most in a practice: the number has to be shared and believed, or every hard conversation becomes a negotiation about whose number is right.**"
 
 **Why this matters:** the interviewer is testing whether you can run a commercial conversation, and the specific true detail is what convinces them. A vague paragraph here signals you are reciting; one concrete true trade-off signals you have actually done it.
 
@@ -182,21 +182,9 @@ Template:
 
 ## 4. The Duplicate 40% — Differentiated (Q12, §4.3)
 
-**The problem:** "AWS/Databricks cost −40%" appears at **Makro** *and* **Xendit**. The same figure twice reads as a rounded number. An interviewer who notices will assume one is inflated.
+**Superseded.** This section was written against a stale facts file that listed "−40% AWS/Databricks cost" at two employers and a Xendit role. **Your current resume has neither**: no cost percentage anywhere, and no role between Lazada (to Jan 2024) and Makro (from Jul 2024). There is no duplicate-40% problem to differentiate, because neither 40% is on paper.
 
-**The fix — two different mechanisms, two different stories:**
-
-> ⚠️ **These attributions are my reading of your resume, not facts from it.** `resume-facts.md` says *"AWS/Databricks cost −40%"* at **both** employers and *"DBT/Spark runtime −60%"* at Xendit. It does **not** say what mechanism produced each 40%. **The mechanisms below are the plausible ones that make the two numbers distinguishable — confirm or replace them with what you actually did.** If you cannot confirm a mechanism, that 40% is a number you cannot defend, and the bank already tells you to drop it.
-
-### Xendit (Jan–Jun 2024) — **job-level engineering**
-
-| | |
-|---|---|
-| **Mechanism** | Spark job tuning, scheduling, instance sizing |
-| **Level** | The individual job |
-| **What changed** | Instance type selection per workload (over-provisioned → right-sized), shuffle partition tuning, avoiding small files, moving from hour-triggered to event/partition-aware scheduling, caching and broadcast-join choices instead of full scans |
-| **Measured as** | **DBT/Spark runtime −60%** — a *time* metric, directly attributable to job config |
-| **Strength** | **Strong.** Runtime is a direct function of the job configuration. Clean attribution. |
+What remains useful is the **Makro mechanism table** below, as the structure of a cost answer. Use it without a headline percentage unless you can give baseline, window and attribution unprompted.
 
 ### Makro (Jul 2024 – now) — **platform-level change**
 
@@ -205,16 +193,16 @@ Template:
 | **Mechanism** | Data contracts, partitioning strategy, FinOps visibility, ownership |
 | **Level** | The platform and the operating model |
 | **What changed** | Partitioning and clustering corrected across the estate so queries stopped scanning what they didn't need; a data contract and schema discipline so a runaway scan stops at the boundary rather than in the bill; **cost attributed per job and per team** so someone owned it; enforced via governance gates |
-| **Measured as** | **Cloud/vendor spend −40%** — a *money* metric |
-| **Strength** | Strong, but be precise that it is **platform-level change, not job tuning** |
+| **Measured as** | Cost per job and per team, month on month, against a stated baseline month. **No percentage is on your resume**; quote one only with the baseline attached |
+| **Strength** | Strong as a *method* answer. Be precise that it is **platform-level change, not job tuning** |
 
-### The sentence to say if challenged
+### The sentence to say if asked "how much did you save?"
 
-> "Both are 40%, and they're not the same work. **At Xendit it was job-level: I tuned the Spark and DBT jobs themselves — instance sizing, shuffle configuration, scheduling — and the cleanest number is DBT/Spark runtime down 60%, which is a time metric directly attributable to that change. At Makro it was platform-level: partitioning, data contracts, cost attribution and ownership across the estate, and there the number is spend, down 40%. **Different mechanism, different level, different metric.**"
+> "I'll give you the shape and then the number with its baseline, because a percentage on its own is not useful. // Baseline was [month], measured as [Databricks DBU spend plus cloud storage and compute, per job and per squad]. // The three levers were partitioning and clustering across the estate, cost attribution so a squad owned its bill, and cluster policies that stopped oversized clusters. // Against that baseline it came down by roughly [X] over [N] months, // and the guardrail is that the attribution report still runs every month, so it has not crept back."
 
-### If you cannot defend both cleanly
+### If you cannot fill the baseline
 
-**Drop the Makro 40% and keep the Xendit numbers.** A single clean claim beats two that look rounded. Say: *"The number I'd stand behind today is the Xendit one — DBT/Spark runtime −60% and the 40% spend reduction from job-level tuning. At Makro the work was platform-level change across the estate."* **Owning the narrower claim is a strength signal**, not a weakness.
+Say the method and stop. *"I can walk you through the levers and the guardrail; I would rather not quote a percentage I cannot give you the baseline for."* **Owning the narrower claim is a strength signal**, not a weakness.
 
 ### The other two soft metrics — decide before you walk in
 
@@ -235,7 +223,7 @@ Template:
 | # | Candidate | Why it works | Risk |
 |---|---|---|---|
 | **A** | **Building the Makro lakehouse rather than extending the legacy stack** | A genuine bet on a new architecture with a real cost if wrong; if you extended the legacy stack first and had to reverse it, this is the "wrong" version | Must be honest about *what specifically* went wrong. If it worked, this is the "right" story, not the "wrong" one |
-| **B** | **The Xendit scope narrowing** | You saw the role becoming narrower than you signed up for and chose to leave — that is a *judgment under incomplete information* story, and being wrong about what you'd get there is honest | Could read as "blaming the employer" if not framed carefully. **Frame it as: "I misjudged what I would get, and my mistake was not asking directly in the first month."** |
+| **B** | **The January to July 2024 decision** | If you took a short engagement that turned out narrower than you signed up for, that is a *judgment under incomplete information* story, and being wrong about what you'd get is honest. **Only if it is true; the role is not on your resume, so the story has to match Q5** | Could read as "blaming the employer" if not framed carefully. **Frame it as: "I misjudged what I would get, and my mistake was not asking directly in the first month."** |
 | **C** | **A late-stage decision at Lazada** | Five and a half years of platform ownership; there will have been a call that didn't land | Requires real recall |
 
 ### The structure that works
@@ -289,18 +277,18 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 
 | # | Q | TODO | Status |
 |---|---|---|---|
-| 1 | Q1 | Confirm "Head of Data" title at Makro; Alibaba naming | **Resolved** — resume-facts.md line 9: *"Head of Data \| Enterprise AI Architecture \| Data Strategy"*. Use "Lazada (Alibaba Group)". Role-history row says *"Data Engineering (platform owner)"* — if the official title is not Head of Data, say "I run the enterprise data platform at Makro" |
+| 1 | Q1 | Confirm title at Makro; Alibaba naming | **Resolved against the current resume** — *Head of Data Engineering \| Makro (CP Group) \| July 2024 – Present*; *VP Data Engineering \| Lazada Group (Alibaba) \| Jul 2018 – Jan 2024*. Say "Lazada, part of Alibaba" |
 | 2 | Q3 | Attribution of the 40% delivery-time reduction | **Needs you.** Was it platform latency, routing algorithm, or joint? Recommended framing: *"the platform change removed data latency from the path; the algorithm change reduced the work per order; the 40% is joint and I'm not going to claim it as one or the other."* |
 | 3 | Q4 | Headcount split, attrition, hiring mistake | **Needs you.** Structural answer is drafted (inherited vs built, rubric, rotation). Supply: real numbers, or say "I don't have a retention figure and here's the mechanism instead" — the bank already says **do not invent** |
-| 4 | Q5 | Xendit figures safe? Honest reason | **Needs you.** Also: **resume-facts.md shows Xendit Jan–Jun 2024 and Makro from Jul 2024** — no gap. Confirm the real reason was scope narrowing vs re-org, and say it plainly |
+| 4 | Q5 | The January to July 2024 gap | **Needs you.** Your current resume shows Lazada to Jan 2024 and Makro from Jul 2024 with nothing between. Q5 in the bank has two honest versions (short engagement left off the resume, or a deliberate break). Pick the true one and fill the one detail |
 | 5 | Q6 | Pub/Sub ordering keys / Dataflow exactly-once hands-on | **Bridged.** Honest bridge: *"In my own builds I used Kafka's exactly-once semantics and Flink checkpoints; on GCP the equivalents are Pub/Sub exactly-once delivery with dedup on a producer-assigned ID and ordering keys, and Dataflow's exactly-once on the runner. I've built those in lab exercises."* Say the last sentence only once the labs have actually been run. |
 | 6 | Q8 | Makro incidents −60%: baseline, root causes, mechanism | **Needs you.** The answer *structure* is drafted (triage by severity → root-cause classing → dead-letter path → measure). Supply baseline count and the actual top causes |
 | 7 | Q12 | Two 40% mechanisms | **Resolved** — §4 above |
 | 8 | Q13 | SCB/PDPA artefact you built | **Needs you.** Name a physical artefact: a control map, an evidence pack, a classification taxonomy. If none exists as a document, name the practice you ran and say so plainly |
 | 9 | Q15 | Practise code review 3× | **Resolved** — `ROUND_1_RRK_CODE_REVIEW_DRILL.md`, 16 verified findings, plus the correction that the file is in `INTERVIEW_PREP/ROUND_2_TECHNICAL/code/`, not the course project |
 | 10 | Q21 | Practice P&L honesty | **Resolved** — §3 above |
-| 11 | Q24 | Real engagement where delivery slipped | **Needs you.** The corpus story (Select partner, 3 milestones, $800K) is **not** yours. Use Makro, Lazada or Xendit |
-| 12 | Q25 | One person developed; one performance case | **Needs you.** The capability/clarity/sustained triage is drafted. Anchor in Makro 8→25 |
+| 11 | Q24 | Real engagement where delivery slipped | **Needs you.** The corpus story (Select partner, 3 milestones, $800K) is **not** yours. Use Makro or Lazada |
+| 12 | Q25 | One person developed; one performance case | **Needs you.** The capability/clarity/sustained triage is drafted. Anchor in Makro 8→30 |
 | 13 | Q26 | Diversity example with a metric that moved | **Needs you.** Do not claim a number you cannot source |
 | 14 | Q27 | GCP gap honesty + plan | **Resolved** — §2 above |
 | 15 | Q34 | "I was wrong" story | **Structure resolved** — §5 above; content needs your real memory |
@@ -310,7 +298,7 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 
 **Summary: 8 resolved, 9 need your own memory.** The 9 are exactly the facts that only you have — and the ones the interviewer will probe. **They are the highest-value 45 minutes of preparation remaining.**
 
-**The 9, precisely:** Q3 (delivery-time attribution), Q4 (headcount split, attrition, hiring mistake), Q5 (Xendit figures and the honest reason), Q8 (incidents −60% baseline and root causes), Q13 (the SCB/PDPA artefact), Q24 (a real engagement where delivery slipped), Q25 (one person developed, one performance case), Q26 (a diversity example with a metric that moved), Q34 (the "I was wrong" story).
+**The 9, precisely:** Q3 (delivery-time attribution), Q4 (headcount split, attrition, hiring mistake), Q5 (the January to July 2024 gap: which honest version), Q8 (incidents −60% baseline and root causes), Q13 (the SCB/PDPA artefact), Q24 (a real engagement where delivery slipped), Q25 (one person developed, one performance case), Q26 (a diversity example with a metric that moved), Q34 (the "I was wrong" story).
 
 ---
 
@@ -320,7 +308,7 @@ A fabricated "measurable change" is the single most dangerous thing you can say 
 |---|---|---|---|
 | **1** | `python3 resources/sample_data.py --output-dir ./sample_data` then `pytest project/tests/ -q` | 5 min | One command makes the whole course runnable. Nothing else matters until this passes. **Already done — this is a re-verification step, not new work** |
 | **2** | Sit with the 9 "needs your memory" items in §6 and write the real answers | 45 min | **These are the interview.** The bank already gives you the structure; only you have the facts |
-| **3** | Memorise the numbers cold | 20 min | Team 8→25, $2M, 10B+ rows, 500+ jobs, 99.99%, 5d→2h, −60% incidents, −40% delivery, 100M+ events, 20M+ insights, 600+ tables, AML 15+ countries, −40% cost, −60% runtime |
+| **3** | Memorise the numbers cold | 20 min | **On the resume:** $8B business, 3 countries, 8→30 across four squads, $3M, 10B+ rows, 5d→2h, 50+ dashboards, 200+ stores and 5 DCs, 1,000+ vendors, 100M+ events, 20M+ insights, 600+ tables, AML 15+ countries. **Not on the resume, baseline required:** 500+ jobs, 99.99%, −60% incidents, −40% delivery, any cost percentage |
 | **4** | Rehearse Q27 out loud, using the §2 plan | 10 min | Highest-risk question. It must sound planned, not improvised |
 | **5** | Rehearse Q21 + Q22 out loud | 15 min | Your biggest gap; the honest redirect only works if it's smooth |
 | **6** | Read `ROUND_1_RRK_CODE_REVIEW_DRILL.md` §2 — the 16 findings | 30 min | Q15 is the most predictable question in the round |

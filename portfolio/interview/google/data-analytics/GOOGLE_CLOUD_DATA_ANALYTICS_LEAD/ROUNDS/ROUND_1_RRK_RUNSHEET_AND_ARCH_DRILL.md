@@ -134,8 +134,8 @@ For each, finish with: **the one thing most likely to fail, how you would detect
 | # | Item | Note |
 |---|---|---|
 | 1 | The 13 `[TODO]` markers in `ROUND_1_RRK.md` | Each is a known probe point |
-| 2 | **Employer inconsistency** | `ROUND_1_RRK.md` and the TODO list refer to an employer that does not appear on your current resume. Either add it to the resume or rewrite those answers using only resume-backed experience. A recruiter will compare the two |
-| 3 | **Team-size inconsistency** | Resume says growth from 8 to 30; the answer bank says 8 to 25. Pick one true figure and use it everywhere |
+| 2 | **Employer inconsistency** | **Resolved 2026-11-16.** The answer bank no longer claims the role that is not on your resume. RRK Q5 is now the honest answer to the January to July 2024 gap, in two versions; pick the true one |
+| 3 | **Team-size and budget inconsistency** | **Resolved 2026-11-16.** All files now say 8 to 30, $3M, Head of Data Engineering, VP Data Engineering, matching the resume |
 | 4 | Google Cloud certification date | The brief says leaders are expected to get hands-on early |
 | 5 | Run Google's Interview Warmup once | The brief links it |
 | 6 | One live mock with someone who interrupts | Calibrates timing |
