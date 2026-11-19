@@ -49,7 +49,7 @@ cryptography==50.0.2
 filelock==4.2.1
 wheel==0.46.2
 oauthlib==4.0.1
-virtualenv==21.14.10
+virtualenv==21.14.13
 tqdm==4.67.3
 gunicorn==23.0.0
 nltk==3.10.4
