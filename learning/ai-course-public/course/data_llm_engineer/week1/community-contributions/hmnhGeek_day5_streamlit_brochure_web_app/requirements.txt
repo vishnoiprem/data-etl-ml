@@ -42,7 +42,7 @@ numpy==2.4.6
 openai==2.38.0
 packaging==26.2
 pandas==3.0.3
-pillow==12.2.0
+pillow==13.0.0
 plantuml==0.3.0
 plotly==6.7.0
 protobuf==7.35.0
