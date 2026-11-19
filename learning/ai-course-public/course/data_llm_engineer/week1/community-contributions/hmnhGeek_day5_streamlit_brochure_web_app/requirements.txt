@@ -46,7 +46,7 @@ pillow==12.2.0
 plantuml==0.3.0
 plotly==6.7.0
 protobuf==7.35.0
-pyarrow==24.0.0
+pyarrow==26.0.1
 pydantic==2.13.4
 pydantic-core==2.46.4
 pydeck==0.9.2
