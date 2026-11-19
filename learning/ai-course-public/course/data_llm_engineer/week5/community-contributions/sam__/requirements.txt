@@ -73,7 +73,7 @@ opentelemetry-semantic-conventions==0.61b0
 orjson==3.11.7
 overrides==7.7.0
 packaging==26.0
-pillow==12.1.1
+pillow==13.0.0
 plotly==6.6.0
 posthog==5.4.0
 propcache==0.4.1
