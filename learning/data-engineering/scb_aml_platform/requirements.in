@@ -6,7 +6,7 @@
 # Core data
 pandas>=2.0,<3.0
 numpy>=1.24,<2.0
-pyarrow>=12.0,<18.0
+pyarrow>=12.0,<26.0
 
 # Spark
 pyspark==3.5.8
