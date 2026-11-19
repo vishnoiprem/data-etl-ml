@@ -51,7 +51,7 @@ jaraco-context==6.1.0
 diffusers==0.38.0
 gitpython==3.2.1
 pypdf==6.21.4
-aiohttp==3.14.4
+aiohttp==3.14.5
 nltk==3.10.4
 mlflow==3.17.2
 transformers==5.10.0
