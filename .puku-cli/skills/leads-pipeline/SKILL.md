@@ -58,12 +58,17 @@ so the two never mix. Default to `pitch_pod` for client outreach.
 Emails go out as **Alex Morgan** `<alex.morgan@avilx.com>`. The From header, body
 signature, HTML signature, follow-up sign-off, and `Reply-To` all derive from
 `AVILX_FROM_NAME` / `AVILX_FROM_EMAIL` in `.env`. The one-click unsubscribe stays on
-`hello@avilx.com`.
+`hello@avilx.com` (`AVILX_UNSUB_EMAIL` overrides it) — never a person's inbox.
 
-Gmail only accepts a From address the authenticated account owns or has aliased. The
-SMTP login is `premvishnoisoft@gmail.com`, so `alex.morgan@avilx.com` only sends if
-that address is aliased on the account — otherwise a real provider is needed
-(`SETUP_MAILGUN.md`). Never claim a send succeeded without a `send_log` row.
+**Gmail strips the avilx.com address from the visible From header.** Verified by
+sending three test messages to the account itself on 2026-11-23: SMTP accepts
+`MAIL FROM:<alex.morgan@avilx.com>` with 250 OK, but the delivered `From:` reads
+`Alex Morgan <premvishnoisoft@gmail.com>`. The name survives; the address does not.
+So today the pipeline sends from the Gmail address wearing the Alex Morgan name.
+Sending from `alex.morgan@avilx.com` for real needs a provider with the avilx.com
+domain verified — see `SETUP_MAILGUN.md`.
+
+Never claim a send succeeded without a `send_log` row.
 
 ## Hard rules
 

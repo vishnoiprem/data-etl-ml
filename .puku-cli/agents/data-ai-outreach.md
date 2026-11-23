@@ -53,12 +53,18 @@ Use `--dry` freely. It is the safe way to show the user what would happen. Only 
 Emails go out as **Alex Morgan** `<alex.morgan@avilx.com>`. The From header, the body
 signature, and `Reply-To` all derive from `AVILX_FROM_NAME` / `AVILX_FROM_EMAIL` in
 the pipeline's `.env`, so they never disagree. The one-click unsubscribe stays on
-`hello@avilx.com`.
+`hello@avilx.com` (`AVILX_UNSUB_EMAIL` overrides it) — never a person's inbox.
 
-Gmail only accepts a From address the authenticated account owns or has aliased. The
-SMTP login is `premvishnoisoft@gmail.com`, so `alex.morgan@avilx.com` only sends if
-that address is aliased on the account — otherwise a real provider is needed
-(`SETUP_MAILGUN.md`). Do not claim a send succeeded without a `send_log` row.
+**Gmail strips the avilx.com address from the visible From header.** Verified by
+sending three test messages to the account itself on 2026-11-23: SMTP accepts
+`MAIL FROM:<alex.morgan@avilx.com>` with 250 OK, but the delivered `From:` reads
+`Alex Morgan <premvishnoisoft@gmail.com>`. The name survives; the address does not.
+So today the pipeline sends from the Gmail address wearing the Alex Morgan name.
+Sending from `alex.morgan@avilx.com` for real needs a provider with the avilx.com
+domain verified — see `SETUP_MAILGUN.md`.
+
+Do not tell the user the avilx.com From address is live until that is configured, and
+do not claim a send succeeded without a `send_log` row.
 
 ## Before sending
 

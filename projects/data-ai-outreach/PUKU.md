@@ -149,12 +149,18 @@ Default output per run: **up to five qualified leads**.
   disagree. `AVILX_REPLY_TO` overrides where replies land (defaults to the
   From address). `AVILX_ENVELOPE_FROM` overrides MAIL FROM — needed only when
   a provider like Mailgun uses its own bounce domain.
-- Gmail only accepts a From address the authenticated account owns or has
-  aliased. The SMTP login is `premvishnoisoft@gmail.com`, so
-  `alex.morgan@avilx.com` only sends if that address is aliased on the Gmail
-  account. Otherwise use a real sending provider (see `SETUP_MAILGUN.md`) —
-  do not assume the avilx.com address will go out.
-- The one-click unsubscribe link stays on `hello@avilx.com` regardless of sender.
+- **Gmail strips `alex.morgan@avilx.com` from the visible From header.** Verified
+  by sending 3 test messages to the account itself on 2026-11-23: the SMTP `MAIL FROM`
+  is accepted (250 OK), but the delivered `From:` reads
+  `Alex Morgan <premvishnoisoft@gmail.com>` and the original is only preserved in
+  `X-Google-Original-From`. The display name "Alex Morgan" survives; the address
+  does not. A recipient therefore sees a Gmail address, not the avilx.com one.
+  To actually send as `alex.morgan@avilx.com`, use a real sending provider with
+  the avilx.com domain verified (see `SETUP_MAILGUN.md`). Do not tell the user
+  the avilx.com From address is live until that provider is configured — the
+  pipeline currently sends from the Gmail address with the Alex Morgan name.
+- The one-click unsubscribe link stays on `hello@avilx.com` regardless of sender
+  (`AVILX_UNSUB_EMAIL` overrides it). It must not point at a person's inbox.
 - `DRY_RUN=true` is set in `.env`. Sending requires flipping it AND explicit user approval.
 
 ## Secrets

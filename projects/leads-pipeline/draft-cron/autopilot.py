@@ -85,6 +85,9 @@ YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
 # Replies to an email sent as Alex should land with Alex, not the generic
 # hello@ address. Set AVILX_REPLY_TO to override.
 REPLY_TO = os.getenv("AVILX_REPLY_TO", "").strip() or FROM_EMAIL
+# The one-click unsubscribe always goes to the generic mailbox, whoever
+# sent the email. Set AVILX_UNSUB_EMAIL to override.
+AVILX_UNSUB_EMAIL = os.getenv("AVILX_UNSUB_EMAIL", "").strip() or os.getenv("AVILX_EMAIL", "hello@avilx.com")
 YOUR_PHONE = os.getenv("YOUR_PHONE", "")
 YOUR_WHATSAPP = os.getenv("YOUR_WHATSAPP", "")
 YOUR_WEBSITE = os.getenv("YOUR_WEBSITE", "https://avilx.com")
@@ -116,11 +119,11 @@ EXCLUDE_TITLE = re.compile(
 )
 
 PERSONAL_SIG = (
-    f"{YOUR_NAME}\n"
+    f"{FROM_NAME}\n"
     f"{YOUR_COMPANY} — Global Build · Deploy · Engineers\n"
     f"(AI · Data · ML · Cloud · Databricks · 7+ clouds)\n"
     f"Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam\n"
-    f"📧 {YOUR_EMAIL} | 💬 wa.me/{YOUR_WHATSAPP.lstrip('+')} | 🌐 {YOUR_WEBSITE}"
+    f"📧 {FROM_EMAIL} | 💬 wa.me/{YOUR_WHATSAPP.lstrip('+')} | 🌐 {YOUR_WEBSITE}"
 )
 
 
@@ -1544,9 +1547,12 @@ def _render_email_html(lead: dict) -> str:
         html_chunk = html_chunk.replace("\n", "<br>")
         paragraphs.append(f"<p>{html_chunk}</p>")
 
-    # Footer (tracking + opt-out)
+    # Footer (tracking + opt-out).
+    # The unsubscribe link deliberately points at the generic AVILX_EMAIL
+    # mailbox, NOT the sender address — one-click unsubscribe has to land
+    # somewhere that is monitored regardless of who sent the email.
     unsub_mailto = (
-        f"mailto:{YOUR_EMAIL}?subject=unsubscribe%20{urllib.parse.quote(company)}"
+        f"mailto:{AVILX_UNSUB_EMAIL}?subject=unsubscribe%20{urllib.parse.quote(company)}"
         f"&body=Please%20remove%20me%20from%20the%20Avilx%20outreach%20list."
     )
     tracking_pill = (
