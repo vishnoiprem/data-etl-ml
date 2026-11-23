@@ -63,11 +63,22 @@ SMTP_USER = os.getenv("SMTP_USERNAME", os.getenv("GMAIL_ADDRESS", ""))
 SMTP_PASS = os.getenv("SMTP_PASSWORD", os.getenv("GMAIL_APP_PASSWORD", "")).replace(" ", "")
 SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() == "true"
 # Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are the authoritative
-# pair — they name the person the email comes from. The From address itself
-# is the SMTP envelope sender (SMTP_USER), because Gmail rejects a From
-# header whose domain the account isn't authorised to send as.
-FROM_NAME = os.getenv("AVILX_FROM_NAME", os.getenv("YOUR_NAME", "Prem Vishnoi"))
-FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", os.getenv("YOUR_EMAIL", "hello@avilx.com"))
+# pair — they name the person the email comes from.
+#
+# Gmail only lets you send as an address the authenticated account owns or
+# has aliased, and it rejects a From header whose domain the account isn't
+# authorised for. So the From header address and the SMTP envelope sender
+# (MAIL FROM) must both be an address the login is allowed to use.
+#
+# ENVELOPE_FROM is what we hand to send_message() as MAIL FROM. It defaults
+# to the From-header address, and falls back to the SMTP login only when the
+# From address isn't usable as an envelope sender. When sending as a
+# third-party provider (Mailgun/SendGrid) the envelope sender is the
+# provider's bounce domain, which is a different thing entirely — see
+# SETUP_MAILGUN.md.
+FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
+FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
+ENVELOPE_FROM = os.getenv("AVILX_ENVELOPE_FROM", "").strip() or FROM_EMAIL
 YOUR_NAME = os.getenv("YOUR_NAME", "Prem Vishnoi")
 YOUR_COMPANY = os.getenv("YOUR_COMPANY", "Avilx")
 YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
@@ -1813,7 +1824,7 @@ def _send_one(lead):
     _verify_recipient(addr)
 
     msg = MIMEMultipart("mixed")
-    msg["From"] = f"{FROM_NAME} <{SMTP_USER}>"
+    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
     msg["To"] = lead["contact_email"]
     subject = (lead.get("cover_letter_subject")
                or f"Avilx × {lead['company']}")
@@ -1853,17 +1864,20 @@ def _send_one(lead):
               f"({resume_path.stat().st_size // 1024} KB)")
 
     def _do_send():
+        # send_message() derives MAIL FROM from the From header by default.
+        # Pass envelope_sender explicitly so the envelope address stays
+        # decoupled from the visible From header.
         if SMTP_USE_SSL:
             ctx = ssl.create_default_context()
             with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=30) as s:
                 s.login(SMTP_USER, SMTP_PASS)
-                refused = s.send_message(msg)
+                refused = s.send_message(msg, from_addr=ENVELOPE_FROM)
                 return None, refused
         else:
             with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as s:
                 s.starttls()
                 s.login(SMTP_USER, SMTP_PASS)
-                refused = s.send_message(msg)
+                refused = s.send_message(msg, from_addr=ENVELOPE_FROM)
                 return None, refused
 
     # Retry on transient errors only. We re-raise permanent errors (auth fail,

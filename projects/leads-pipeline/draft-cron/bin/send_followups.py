@@ -108,9 +108,17 @@ def _send_followup_email(lead: dict, subject: str, body: str) -> None:
                  or os.getenv("AVILX_GMAIL_APP_PASSWORD", ""))
     YOUR_NAME = os.getenv("AVILX_FOUNDER", "Prem Vishnoi")
     YOUR_EMAIL = os.getenv("AVILX_EMAIL", "hello@avilx.com")
+    # Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are authoritative.
+    # ENVELOPE_FROM is what goes out as MAIL FROM — it defaults to the From
+    # address but can be overridden when the sending provider needs its own
+    # bounce domain.
+    FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
+    FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
+    ENVELOPE_FROM = os.getenv("AVILX_ENVELOPE_FROM", "").strip() or FROM_EMAIL
 
     msg = MIMEMultipart()
-    msg["From"] = f"{YOUR_NAME} <{YOUR_EMAIL}>"
+    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
+    msg["Reply-To"] = FROM_EMAIL
     msg["To"] = lead["contact_email"]
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain", "utf-8"))
@@ -138,7 +146,7 @@ def _send_followup_email(lead: dict, subject: str, body: str) -> None:
     ctx = ssl.create_default_context()
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=30) as s:
         s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(msg["From"], lead["contact_email"], msg.as_string())
+        s.sendmail(ENVELOPE_FROM, lead["contact_email"], msg.as_string())
 
 
 def _record_followup(lead_id: int, subject: str) -> None:

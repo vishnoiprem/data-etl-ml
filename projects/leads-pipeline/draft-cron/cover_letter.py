@@ -18,6 +18,8 @@ Env overrides:
     AVILX_WHATSAPP    default "+6592716405"   (no leading + required)
     AVILX_FOUNDER     default "Prem Vishnoi"
     AVILX_HQ          default "Ha Noi, Vietnam"
+    AVILX_FROM_NAME   default "Alex Morgan"  (sender display name; body signature)
+    AVILX_FROM_EMAIL  default "alex.morgan@avilx.com"  (sender address; body signature)
 """
 
 from __future__ import annotations
@@ -34,6 +36,16 @@ EMAIL = os.getenv("AVILX_EMAIL", "hello@avilx.com")
 WHATSAPP = os.getenv("AVILX_WHATSAPP", "+6592716405").lstrip("+")
 FOUNDER = os.getenv("AVILX_FOUNDER", "Prem Vishnoi")
 HQ = os.getenv("AVILX_HQ", "Ha Noi, Vietnam")
+# Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are authoritative —
+# they decide who the email appears to come from in both the From header
+# and the body signature. AVILX_FOUNDER stays as the fallback for
+# white-label setups that never set the From vars.
+FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
+FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
+# The name that signs the body. Prefer the sender identity so the body
+# and the From header never disagree.
+SIGNER = FROM_NAME or FOUNDER
+SIGNER_EMAIL = FROM_EMAIL or EMAIL
 CLOUD_LIST = "AWS · Azure · GCP · Tencent · Alibaba"
 
 # Stack terms lifted from the JD for the "Stack overlap I noticed:" line.
@@ -190,15 +202,15 @@ def render_text_body(lead: dict) -> str:
     return (
         f"Hi {co} team,\n\n"
         f"Saw the {role} role — stack and scope look like a strong match. "
-        f"{hook}I'm {FOUNDER}, I run {NAME} ({WEBSITE}) — a senior engineering pod "
+        f"{hook}I'm {SIGNER}, I run {NAME} ({WEBSITE}) — a senior engineering pod "
         f"out of {HQ}. Databricks Champion team, 7+ clouds, 8+ yrs avg.\n\n"
         f"Also relevant: {stack_str}.\n\n"
         f"If your timeline is tight, happy to run a 4-week pilot pod or staff-aug "
         f"a senior — 2-week kickoff, remote delivery, NDA + IP clean. "
         f"15-min call this week?\n\n"
-        f"{FOUNDER}\n"
+        f"{SIGNER}\n"
         f"{NAME} — {TAGLINE}\n"
-        f"{EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
+        f"{SIGNER_EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
     )
 
 
@@ -241,8 +253,8 @@ def render_html_body(lead: dict) -> str:
     stack_str = ", ".join(stack[:5]) if stack else "the stack in your JD"
     return _render_template(_HTML_TEMPLATE, dict(
         name=NAME, tagline=TAGLINE, company=co, role=role,
-        founder=FOUNDER, website=WEBSITE, hq=HQ, stack_str=stack_str,
-        email=EMAIL, whatsapp=WHATSAPP,
+        founder=SIGNER, website=WEBSITE, hq=HQ, stack_str=stack_str,
+        email=SIGNER_EMAIL, whatsapp=WHATSAPP,
     ))
 
 
@@ -265,7 +277,7 @@ def render_solo_subject(lead: dict) -> str:
     role = (lead.get("role") or "this role").strip()
     co_short = co if len(co) <= 20 else co[:17] + "…"
     role_short = role if len(role) <= 30 else role[:27] + "…"
-    subj = f"[Personal Application] {FOUNDER} for {co_short} — {role_short}"
+    subj = f"[Personal Application] {SIGNER} for {co_short} — {role_short}"
     if len(subj) > 70:
         # Trim from the middle — keep the [Personal Application] prefix intact
         # so the mode is still visible in the inbox
@@ -287,15 +299,15 @@ def render_solo_text_body(lead: dict) -> str:
     return (
         f"Hi {co} team,\n\n"
         f"I'm applying for the {role} role personally — not as a recruiter. "
-        f"{hook}I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
+        f"{hook}I'm {SIGNER}, 15+ years shipping AI/data/cloud systems across "
         f"{CLOUD_LIST} plus Huawei and on-prem — most recently RAG and "
         f"agentic systems on Databricks and multi-tenant ML platforms.\n\n"
         f"Also relevant from your JD: {stack_str} — all shipped in production.\n\n"
         f"Resume attached. Happy to do a 30-min technical screen this week and "
         f"share 1-2 case studies ({remote_phrase}, async-first).\n\n"
-        f"{FOUNDER}\n"
+        f"{SIGNER}\n"
         f"({NAME} founder · also available for pod engagements)\n"
-        f"{EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
+        f"{SIGNER_EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
     )
 
 
@@ -309,8 +321,8 @@ def render_solo_html_body(lead: dict) -> str:
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
     return _render_template(_SOLO_HTML_TEMPLATE, dict(
-        name=FOUNDER, tagline=f"Solo application — {role} at {co}",
-        cloud_list=CLOUD_LIST, hq=HQ, email=EMAIL, whatsapp=WHATSAPP,
+        name=SIGNER, tagline=f"Solo application — {role} at {co}",
+        cloud_list=CLOUD_LIST, hq=HQ, email=SIGNER_EMAIL, whatsapp=WHATSAPP,
         website=WEBSITE, co=co, role=role, stack_str=stack_str,
         remote_phrase=remote_phrase, brand=NAME,
     ))
