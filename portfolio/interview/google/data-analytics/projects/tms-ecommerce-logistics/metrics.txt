@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "kpi": "on_time_delivery_rate",
+      "measured": 0.0,
+      "target": 0.93,
+      "direction": "higher_is_better",
+      "verdict": "miss",
+      "gap": -0.93
+    },
+    {
+      "kpi": "first_attempt_success_rate",
+      "measured": 0.902,
+      "target": 0.82,
+      "direction": "higher_is_better",
+      "verdict": "pass",
+      "gap": 0.082
+    },
+    {
+      "kpi": "rto_rate",
+      "measured": 0.0,
+      "target": 0.18,
+      "direction": "lower_is_better",
+      "verdict": "pass",
+      "gap": -0.18
+    },
+    {
+      "kpi": "attempts_per_delivery",
+      "measured": 1.222,
+      "target": 1.35,
+      "direction": "lower_is_better",
+      "verdict": "pass",
+      "gap": -0.128
+    },
+    {
+      "kpi": "orders_per_stop",
+      "measured": 1.44,
+      "target": 1.5,
+      "direction": "higher_is_better",
+      "verdict": "miss",
+      "gap": -0.06
+    }
+  ],
+  "passed": 3,
+  "total": 5,
+  "pass_rate": 0.6,
+  "kpis": {
+    "as_of": "2026-11-18T14:00:00+00:00",
+    "shipments_due": 242,
+    "delivered": 0,
+    "returned": 0,
+    "on_time_delivery_rate": 0.0,
+    "first_attempt_success_rate": 0.902,
+    "rto_rate": 0.0,
+    "cod_rto_rate": 0.0,
+    "prepaid_rto_rate": 0.0,
+    "attempts_per_delivery": 1.222,
+    "mean_lead_time_hours": 0.0,
+    "mean_lateness_hours": 0.0,
+    "denominators": {
+      "otd": 242,
+      "fad": 2224,
+      "rto": 0,
+      "cod_rto": 136,
+      "prepaid_rto": 106
+    }
+  },
+  "cost": {
+    "breakdown": {
+      "fixed_cost": 38160.0,
+      "stop_cost": 97723.0,
+      "distance_cost": 100348.96,
+      "failed_attempt_cost": 13804.0,
+      "rto_cost": 0.0,
+      "total": 250035.96
+    },
+    "routes": 102,
+    "stops": 1801,
+    "parcels": 2587,
+    "delivered_parcels": 2224,
+    "cost_per_parcel": 96.65,
+    "cost_per_stop": 138.83,
+    "cost_per_delivery": 112.43,
+    "gmv_delivered": 0,
+    "cost_to_serve_pct_of_gmv": 0.0,
+    "orders_per_stop": 1.44
+  },
+  "gmv": {
+    "gmv_placed": 0,
+    "gmv_delivered": 0,
+    "gmv_returned": 0,
+    "delivery_rate": 0.0,
+    "cod_cash_collected": 0,
+    "cod_settlements": 0,
+    "average_days_to_settle": 0.0,
+    "max_days_to_settle": 0
+  }
+}

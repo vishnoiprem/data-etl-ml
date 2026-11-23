@@ -1,0 +1,56 @@
+health: {
+ "ok": true,
+ "service": "tms-ecommerce-logistics",
+ "corpus": {
+  "orders": 2444,
+  "shipments": 2444,
+  "parcels": 2588,
+  "couriers": 121,
+  "addresses": 701,
+  "zones": 12,
+  "hubs": 4,
+  "cod_orders": 1273,
+  "cod_share": 0.5209,
+  "flagged_address_orders": 134,
+  "orders_by_tier": {
+   "tier1": 806,
+   "tier2": 807,
+   "tier3": 831
+  },
+  "planted_fraud_orders": 41,
+  "planted_sla_breach_orders": 81,
+  "dim_weighted_parcels": 178,
+  "now": "2026-11-18T14:00:00+00:00",
+  "seed": 20261121
+ },
+ "routes_planned": 102,
+ "shipments_simulated": 2443,
+ "decisions_recorded": 257,
+ "scan_events": 16018,
+ "now": "2026-11-18T14:00:00+00:00",
+ "seed": 20261121,
+ "deterministic": true,
+ "transition_failures": 0
+}
+statuses: Counter({'delivered': 2239, 'returned': 204, 'created': 1})
+KPIS: {
+ "as_of": "2026-11-18T14:00:00+00:00",
+ "shipments_due": 242,
+ "delivered": 222,
+ "returned": 20,
+ "on_time_delivery_rate": 0.4091,
+ "first_attempt_success_rate": 0.904,
+ "rto_rate": 0.0826,
+ "cod_rto_rate": 0.0809,
+ "prepaid_rto_rate": 0.0849,
+ "attempts_per_delivery": 1.212,
+ "mean_lead_time_hours": 33.5,
+ "mean_lateness_hours": 13.61,
+ "denominators": {
+  "otd": 242,
+  "fad": 2239,
+  "rto": 242,
+  "cod_rto": 136,
+  "prepaid_rto": 106
+ }
+}

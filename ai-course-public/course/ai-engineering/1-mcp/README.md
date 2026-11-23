@@ -1,3 +1,4 @@
+
 # What Is MCP? A Practical Guide to Model Context Protocol
 
 *From tool discovery to real API calls: a visual, step-by-step explanation for AI engineers.*
