@@ -24,25 +24,22 @@ OUT_DIR.mkdir(exist_ok=True)
 
 
 def _sample_lead():
-    return {
+    """Sample lead rendered by the live template, so the preview can never
+    drift from what autopilot actually sends."""
+    from cover_letter import render_for_mode
+    lead = {
         "id": 0,
         "company": "RealResponse",
         "role": "Product Engineer (AI/RAG) — Remote (US)",
         "contact_email": "jobs@realresponse.com",
         "tracking_id": "realresp-a3k9",
+        "apply_mode": "pitch_pod",
         "jd_text": "Looking for a Product Engineer to build production RAG pipelines on top of OpenAI and Pinecone for our healthtech customers. HIPAA-aware.",
-        "cover_letter_body": (
-            "Hi RealResponse team,\n\n"
-            "Saw the Product Engineer (AI/RAG) — Remote (US) role — production RAG. Quick context if useful: I'm Prem, I run Avilx (avilx.com), a global Build·Deploy·Engineers pod out of Ha Noi. 6-20 senior engineers, AI/Data/ML/Cloud, **Databricks Champion** team, 7+ clouds (AWS · Azure · GCP · Tencent · Alibaba), 8+ yrs avg, regulated-industry work.\n\n"
-            "Stack overlap I noticed: rag, llm, openai, anthropic, vector, python, aws.\n\n"
-            "If your timeline is tight, happy to run a 4-week pilot pod or staff-aug a senior — 2-week kickoff, remote delivery, NDA + IP clean. 15-min call this week worth it?\n\n"
-            "Prem Vishnoi\n"
-            "Avilx — Global Build · Deploy · Engineers\n"
-            "(AI · Data · ML · Cloud · Databricks · 7+ clouds)\n"
-            "Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam\n"
-            "hello@avilx.com | wa.me/6592716405 | https://avilx.com"
-        ),
     }
+    subj, body, _html = render_for_mode(lead)
+    lead["cover_letter_subject"] = subj
+    lead["cover_letter_body"] = body
+    return lead
 
 
 def main():

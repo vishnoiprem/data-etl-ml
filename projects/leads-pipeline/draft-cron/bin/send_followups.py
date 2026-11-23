@@ -35,7 +35,7 @@ from dotenv import load_dotenv
 load_dotenv(HERE / ".env")
 
 import db.lead_store as ls
-from cover_letter import _pick_hook
+from cover_letter import _pick_hook, SIGNER
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ def _build_followup(lead: dict) -> tuple[str, str]:
             f"Hi {co} team,\n\n"
             f"{angle}\n\n"
             f"15-min call this week if there's still a fit?\n\n"
-            f"Prem\n"
+            f"{SIGNER}\n"
         )
     else:
         body = (
@@ -82,7 +82,7 @@ def _build_followup(lead: dict) -> tuple[str, str]:
             f"{angle}\n\n"
             f"No pressure — just wanted to make sure this didn't get "
             f"buried. 2-week pilot pod is still on the table if useful.\n\n"
-            f"Prem\n"
+            f"{SIGNER}\n"
         )
     return subj, body
 
@@ -106,8 +106,6 @@ def _send_followup_email(lead: dict, subject: str, body: str) -> None:
     SMTP_USER = os.getenv("AVILX_SMTP_USER") or os.getenv("AVILX_GMAIL_USER", "")
     SMTP_PASS = (os.getenv("AVILX_SMTP_PASS")
                  or os.getenv("AVILX_GMAIL_APP_PASSWORD", ""))
-    YOUR_NAME = os.getenv("AVILX_FOUNDER", "Prem Vishnoi")
-    YOUR_EMAIL = os.getenv("AVILX_EMAIL", "hello@avilx.com")
     # Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are authoritative.
     # ENVELOPE_FROM is what goes out as MAIL FROM — it defaults to the From
     # address but can be overridden when the sending provider needs its own

@@ -41,7 +41,7 @@ LOG_FILE = HERE / "auto_log.csv"
 from dotenv import load_dotenv
 load_dotenv(HERE / ".env")
 
-YOUR_NAME = os.getenv("YOUR_NAME", "Prem Vishnoi")
+YOUR_NAME = os.getenv("YOUR_NAME", os.getenv("AVILX_FROM_NAME", "Alex Morgan"))
 YOUR_COMPANY = os.getenv("YOUR_COMPANY", "Avilx")
 YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
 YOUR_WEBSITE = os.getenv("YOUR_WEBSITE", "https://avilx.com")
@@ -49,11 +49,14 @@ YOUR_PHONE = os.getenv("YOUR_PHONE", "")
 # Default matches cover_letter.WHATSAPP so the rendered sig is consistent
 # across the two renderers. Empty default would render `wa.me/` (broken).
 YOUR_WHATSAPP = os.getenv("YOUR_WHATSAPP", "+6592716405").lstrip("+")
+# The address the reply should land on. Matches the From header the rest
+# of the pipeline sends as.
+REPLY_TO = os.getenv("AVILX_REPLY_TO", "").strip() or os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
 
 PERSONAL_SIG = f"""{YOUR_NAME}
 {YOUR_COMPANY} — Global Build · Deploy · Engineers (AI · Data · ML · Cloud · Databricks · 7+ clouds)
 Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam
-📧 {YOUR_EMAIL} | 📱 {YOUR_PHONE} | 💬 WhatsApp: wa.me/{YOUR_WHATSAPP} | 🌐 {YOUR_WEBSITE} | 🐦 @vishnoiprem"""
+📧 {REPLY_TO} | 📱 {YOUR_PHONE} | 💬 WhatsApp: wa.me/{YOUR_WHATSAPP} | 🌐 {YOUR_WEBSITE} | 🐦 @vishnoiprem"""
 
 
 # ============== PARSING ==============
@@ -535,7 +538,7 @@ def generate_cover_letter(lead: dict) -> tuple[str, str]:
 
 Two angles: (1) I'm personally interested in the role — I've shipped {stack_text} at production scale. (2) Avilx can run a senior build pod (4-6 engineers, $40-70/hr blended) or staff aug ($50-100/hr) or principal architect seat ($120-180/hr) if {company} needs scale-up alongside this hire. Global delivery to China + APAC + US + EU, USD/EUR/CNY/SGD invoicing, Vietnam LLC, NDA + IP standard.
 
-Happy to share my resume (attached) and 1-2 relevant case studies on a 15-min call this week. WhatsApp me at wa.me/{YOUR_WHATSAPP} or drop a time: hello@avilx.com
+Happy to share my resume (attached) and 1-2 relevant case studies on a 15-min call this week. WhatsApp me at wa.me/{YOUR_WHATSAPP} or drop a time: {REPLY_TO}
 
 {PERSONAL_SIG}"""
 

@@ -107,7 +107,7 @@ client's brand.
 - Concise subject line. `cover_letter.py` prefixes by mode:
   `[Avilx Pod Pitch] …` or `[Personal Application] …`.
 - **One** call to action, e.g. "Would a 15-minute conversation be useful?"
-- Sign off as Alex from Avilex, include https://avilx.com/.
+- Sign off as Alex Morgan (`alex.morgan@avilx.com`), include https://avilx.com/.
 - No generic sales claims, no invented details, no unapproved client names or credentials.
 
 Render drafts with `cover_letter.render_for_mode(lead)` → `(subject, text_body, html_body)`.
@@ -143,9 +143,18 @@ Default output per run: **up to five qualified leads**.
   The dedup and bounce-deny tests insert lead rows and never delete them — without this
   split they accumulate in the live database and show up in the funnel as real leads.
 - `./run.sh doctor` reports exactly what is missing. Run it before expecting anything to work.
-- Gmail SMTP forces the `From` address to match the login user. The branded
-  `Prem Vishnoi <pvishnoi@avilx.com>` display name is used, but the envelope sender is the
-  Gmail login. `Reply-To` still goes to the business address.
+- The sender identity is **Alex Morgan** `<alex.morgan@avilx.com>`, set via
+  `AVILX_FROM_NAME` / `AVILX_FROM_EMAIL` in `.env`. `cover_letter.py` reads the
+  same vars for the body signature, so the From header and the body never
+  disagree. `AVILX_REPLY_TO` overrides where replies land (defaults to the
+  From address). `AVILX_ENVELOPE_FROM` overrides MAIL FROM — needed only when
+  a provider like Mailgun uses its own bounce domain.
+- Gmail only accepts a From address the authenticated account owns or has
+  aliased. The SMTP login is `premvishnoisoft@gmail.com`, so
+  `alex.morgan@avilx.com` only sends if that address is aliased on the Gmail
+  account. Otherwise use a real sending provider (see `SETUP_MAILGUN.md`) —
+  do not assume the avilx.com address will go out.
+- The one-click unsubscribe link stays on `hello@avilx.com` regardless of sender.
 - `DRY_RUN=true` is set in `.env`. Sending requires flipping it AND explicit user approval.
 
 ## Secrets

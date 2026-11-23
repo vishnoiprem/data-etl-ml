@@ -79,9 +79,12 @@ SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() == "true"
 FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
 FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
 ENVELOPE_FROM = os.getenv("AVILX_ENVELOPE_FROM", "").strip() or FROM_EMAIL
-YOUR_NAME = os.getenv("YOUR_NAME", "Prem Vishnoi")
+YOUR_NAME = os.getenv("YOUR_NAME", FROM_NAME)
 YOUR_COMPANY = os.getenv("YOUR_COMPANY", "Avilx")
 YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
+# Replies to an email sent as Alex should land with Alex, not the generic
+# hello@ address. Set AVILX_REPLY_TO to override.
+REPLY_TO = os.getenv("AVILX_REPLY_TO", "").strip() or FROM_EMAIL
 YOUR_PHONE = os.getenv("YOUR_PHONE", "")
 YOUR_WHATSAPP = os.getenv("YOUR_WHATSAPP", "")
 YOUR_WEBSITE = os.getenv("YOUR_WEBSITE", "https://avilx.com")
@@ -1530,7 +1533,7 @@ def _render_email_html(lead: dict) -> str:
         # Strip the PERSONAL_SIG lines from the body — we render our own sig
         if "Avilx — Global Build" in chunk or "Delivery:" in chunk[:30]:
             continue
-        if "Prem Vishnoi" in chunk and "Avilx" in chunk and len(chunk) < 600:
+        if FROM_NAME in chunk and "Avilx" in chunk and len(chunk) < 600:
             continue
         # Escape HTML FIRST so any < > & in the raw body become
         # entities. The **bold** regex below still works because ** is
@@ -1696,11 +1699,11 @@ def _render_email_html(lead: dict) -> str:
         <tr>
           <td style="padding:24px 32px 4px;font-size:14px;line-height:1.7;
                      color:#1e293b;">
-            <p style="margin:0 0 4px;">— Prem Vishnoi</p>
+            <p style="margin:0 0 4px;">— {FROM_NAME}</p>
             <p style="margin:0;color:#475569;font-size:13px;">
               Founder · Avilx<br>
               <a href="{YOUR_WEBSITE}" style="color:#1d4ed8;text-decoration:none;">{YOUR_WEBSITE}</a>
-              · <a href="mailto:{YOUR_EMAIL}" style="color:#1d4ed8;text-decoration:none;">{YOUR_EMAIL}</a>
+              · <a href="mailto:{FROM_EMAIL}" style="color:#1d4ed8;text-decoration:none;">{FROM_EMAIL}</a>
               {f'· <a href="https://wa.me/{YOUR_WHATSAPP.lstrip("+")}" style="color:#1d4ed8;text-decoration:none;">WhatsApp</a>' if YOUR_WHATSAPP else ''}
             </p>
             <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;">
@@ -1832,7 +1835,7 @@ def _send_one(lead):
     # MIME header and will bounce.
     subject = re.sub(r"[\r\n\t]+", " ", subject).strip()
     msg["Subject"] = subject
-    msg["Reply-To"] = YOUR_EMAIL
+    msg["Reply-To"] = REPLY_TO
 
     # ---- build body (HTML + plain-text alternative) ----
     text = (lead.get("cover_letter_body")

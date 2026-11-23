@@ -141,20 +141,22 @@ def _pick_hook(jd: str) -> str:
 
 
 def _hook_line(hook: str, lead: dict) -> str:
-    """Wrap a hook in a sentence that pivots to Prem/Avilx experience.
+    """Wrap a hook in a sentence that pivots to the sender's experience.
 
     Falls back to "" if the hook is empty so callers can `if hook_line:`.
     """
     if not hook:
         return ""
     role = (lead.get("role") or "").lower()
-    # Solo mode — Prem personally applies
+    # Solo mode — the sender applies personally
     if (lead.get("apply_mode") or "") == "apply_personal":
         return (f"That {hook} angle is exactly the work I do most often — "
                 f"shipped in production at scale. ")
-    # Pod mode — Avilx pitches a pod
+    # Pod mode — Avilx pitches a pod.
+    # The hook is already a phrase (e.g. "production RAG"), so don't prefix
+    # another "production" — it rendered as "production production RAG".
     return (f"Re the {hook} angle: that's core to our pod's recent work — "
-            f"we've stood up production {hook} for several clients in 2026. ")
+            f"we've stood up {hook} for several clients in 2026. ")
 
 
 
@@ -272,7 +274,7 @@ def render(lead: dict) -> Tuple[str, str, str]:
 # can we talk?" — no pod mention, no pricing, no "happy to staff aug"
 # language. Resume PDF is still attached by autopilot._pick_resume().
 def render_solo_subject(lead: dict) -> str:
-    """Subject line — [Personal Application] Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
+    """Subject line — [Personal Application] {sender} for {company} — {role}, trimmed to ≤70."""
     co = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
     co_short = co if len(co) <= 20 else co[:17] + "…"

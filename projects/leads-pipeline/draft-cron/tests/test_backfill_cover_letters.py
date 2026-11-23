@@ -100,7 +100,8 @@ def test_apply_personal_lead_gets_personal_application_prefix():
             "apply_mode": matched[0]["apply_mode"] or "pitch_pod",
         })
         assert subj.startswith("[Personal Application]"), subj
-        assert "Prem Vishnoi" in body
+        from cover_letter import SIGNER
+        assert SIGNER in body
         backfill._update(lead_id, subj, body)
 
         with ls.get_cursor() as cur:
