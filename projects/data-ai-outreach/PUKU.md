@@ -129,13 +129,23 @@ Default output per run: **up to five qualified leads**.
 
 ## Environment reality
 
-- Postgres :5433 is **not** running by default in this checkout. `cron_lock` fails closed
-  when the DB is unreachable, so the email phase will refuse to run until Postgres is up.
-  Start it with `docker compose up -d` before expecting sends to work.
-- Docker Desktop was not running during the last check; verify before relying on it.
+- Postgres must be reachable on `localhost:5433`. `cron_lock` fails closed when it isn't,
+  so the email phase refuses to run.
+  - Docker path: `docker compose up -d` in the pipeline dir (needs Docker Desktop running —
+    it does **not** start headlessly on this machine).
+  - Local path (currently working): Homebrew `postgresql@16`, started with
+    `LC_ALL="en_US.UTF-8" /usr/local/opt/postgresql@16/bin/pg_ctl -D /usr/local/var/postgresql@16 -o "-p 5433" -l /tmp/pg16_avilx.log start`.
+    The `LC_ALL` is required — without it Postgres fails with "postmaster became multithreaded".
+    Role `avilx` and database `avilx_leads` already exist.
+  - Schema is applied via `make schema` (or apply `db/schema.sql` then `db/migrations/*.sql`).
+- `./run.sh doctor` reports exactly what is missing. Run it before expecting anything to work.
 - Gmail SMTP forces the `From` address to match the login user. The branded
   `Prem Vishnoi <pvishnoi@avilx.com>` display name is used, but the envelope sender is the
   Gmail login. `Reply-To` still goes to the business address.
+- `DRY_RUN=true` is set in `.env`. Sending requires flipping it AND explicit user approval.
+- Test fixtures write rows into the same database (`source = 'test_dedup'`,
+  `@example.com` addresses). Clear them before a real run:
+  `DELETE FROM leads WHERE source LIKE 'test%' OR contact_email LIKE '%@example.com';`
 
 ## Secrets
 
