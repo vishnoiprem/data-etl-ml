@@ -27,7 +27,23 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-STATE_PATH = Path(os.getenv("AVILX_BOUNCE_DENY_PATH", HERE / "bounce_deny.json"))
+
+
+def _resolve_state_path() -> Path:
+    """Resolve the deny-list file location.
+
+    AVILX_BOUNCE_DENY_PATH may be set to an empty string (that's what
+    `.env.example` ships) — `Path("")` is `.`, which would silently point
+    the denylist at the current directory and break every atomic write.
+    Treat a blank value as "unset" and fall back to the default location.
+    """
+    override = os.getenv("AVILX_BOUNCE_DENY_PATH", "").strip()
+    if not override:
+        return HERE / "bounce_deny.json"
+    return Path(override).expanduser()
+
+
+STATE_PATH = _resolve_state_path()
 
 _lock = threading.Lock()
 
