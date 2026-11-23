@@ -138,14 +138,15 @@ Default output per run: **up to five qualified leads**.
     The `LC_ALL` is required — without it Postgres fails with "postmaster became multithreaded".
     Role `avilx` and database `avilx_leads` already exist.
   - Schema is applied via `make schema` (or apply `db/schema.sql` then `db/migrations/*.sql`).
+- **Tests run against a separate database** (`avilx_test`), never the live one. Use
+  `make test-db` once to create it and apply the schema, then `make test` or `pytest`.
+  The dedup and bounce-deny tests insert lead rows and never delete them — without this
+  split they accumulate in the live database and show up in the funnel as real leads.
 - `./run.sh doctor` reports exactly what is missing. Run it before expecting anything to work.
 - Gmail SMTP forces the `From` address to match the login user. The branded
   `Prem Vishnoi <pvishnoi@avilx.com>` display name is used, but the envelope sender is the
   Gmail login. `Reply-To` still goes to the business address.
 - `DRY_RUN=true` is set in `.env`. Sending requires flipping it AND explicit user approval.
-- Test fixtures write rows into the same database (`source = 'test_dedup'`,
-  `@example.com` addresses). Clear them before a real run:
-  `DELETE FROM leads WHERE source LIKE 'test%' OR contact_email LIKE '%@example.com';`
 
 ## Secrets
 
