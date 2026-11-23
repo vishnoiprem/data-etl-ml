@@ -62,6 +62,12 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
 SMTP_USER = os.getenv("SMTP_USERNAME", os.getenv("GMAIL_ADDRESS", ""))
 SMTP_PASS = os.getenv("SMTP_PASSWORD", os.getenv("GMAIL_APP_PASSWORD", "")).replace(" ", "")
 SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() == "true"
+# Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are the authoritative
+# pair — they name the person the email comes from. The From address itself
+# is the SMTP envelope sender (SMTP_USER), because Gmail rejects a From
+# header whose domain the account isn't authorised to send as.
+FROM_NAME = os.getenv("AVILX_FROM_NAME", os.getenv("YOUR_NAME", "Prem Vishnoi"))
+FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", os.getenv("YOUR_EMAIL", "hello@avilx.com"))
 YOUR_NAME = os.getenv("YOUR_NAME", "Prem Vishnoi")
 YOUR_COMPANY = os.getenv("YOUR_COMPANY", "Avilx")
 YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
@@ -1807,7 +1813,7 @@ def _send_one(lead):
     _verify_recipient(addr)
 
     msg = MIMEMultipart("mixed")
-    msg["From"] = f"{YOUR_NAME} <{SMTP_USER}>"
+    msg["From"] = f"{FROM_NAME} <{SMTP_USER}>"
     msg["To"] = lead["contact_email"]
     subject = (lead.get("cover_letter_subject")
                or f"Avilx × {lead['company']}")
