@@ -64,11 +64,36 @@ signature, HTML signature, follow-up sign-off, and `Reply-To` all derive from
 sending three test messages to the account itself on 2026-11-23: SMTP accepts
 `MAIL FROM:<alex.morgan@avilx.com>` with 250 OK, but the delivered `From:` reads
 `Alex Morgan <premvishnoisoft@gmail.com>`. The name survives; the address does not.
-So today the pipeline sends from the Gmail address wearing the Alex Morgan name.
-Sending from `alex.morgan@avilx.com` for real needs a provider with the avilx.com
-domain verified — see `SETUP_MAILGUN.md`.
+
+**Outlook SMTP AUTH fixes that — and the code path exists, but it is not live yet.**
+`avilx.com` is already a Microsoft 365 tenant, so `SMTP_AUTH=oauth2` sends over
+`smtp-mail.outlook.com:587` with an XOAUTH2 bearer token and genuinely delivers as
+`alex.morgan@avilx.com`. `.env` currently has `SMTP_AUTH=gmail`.
+
+All three of these must be done before flipping it
+(`projects/leads-pipeline/draft-cron/SETUP_OUTLOOK_SMTP.md`):
+
+1. `alex.morgan@avilx.com` is a **licensed** Exchange Online mailbox.
+2. SPF replaced with `v=spf1 include:spf.protection.outlook.com -all`.
+3. `python -m lib.m365_auth --device-code` has run.
 
 Never claim a send succeeded without a `send_log` row.
+
+## Sending
+
+`lib/smtp_client.py` owns the whole transport — `autopilot.py` and
+`bin/send_followups.py` both go through it, so host/port/auth/retry live in one
+place. `SMTP_AUTH` selects the mechanism (`gmail` = password login,
+`oauth2` = Outlook SMTP AUTH).
+
+| Intent | Command |
+|---|---|
+| Show the active send config | `.venv/bin/python -c "import lib.smtp_client as s; print(s.describe())"` |
+| Check / bootstrap the M365 token | `.venv/bin/python -m lib.m365_auth --status` / `--device-code` |
+| Clear a revoked token | `.venv/bin/python -m lib.m365_auth --clear` |
+
+The retry policy (backoff 0s/30s/120s, transient vs permanent classification)
+lives in `lib/smtp_client.py`, not in the send scripts.
 
 ## Hard rules
 
@@ -97,6 +122,8 @@ Never claim a send succeeded without a `send_log` row.
 
 ## Tests
 
-`make test` runs the 8 test modules against `avilx_test`, never the live database.
+`make test` runs the 13 test modules against `avilx_test`, never the live database.
 The dedup and bounce-deny tests insert lead rows and never delete them — without the
 split they accumulate in the live database and show up in the funnel as real leads.
+The `Makefile` `TEST_MODULES` list and `.github/workflows/leads-ci.yml` are kept in
+sync — if you add a test module, add it to both.

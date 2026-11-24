@@ -9,7 +9,9 @@
 #
 # Stop early:  pkill -f run_12h_cycle.sh
 HERE="$(cd "$(dirname "$0")" && pwd)"
-PY="${PY:-python3}"
+# Use the project venv — the runtime deps (python-dotenv, requests, psycopg2)
+# live there, not in the system python3.
+PY="${PY:-$HERE/.venv/bin/python}"
 LOG="/tmp/cycle_12h.log"
 
 # 12h = 720 minutes. With 15min sleeps we get ~48 cycles.

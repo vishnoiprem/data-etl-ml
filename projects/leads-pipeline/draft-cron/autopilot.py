@@ -35,9 +35,6 @@ import re
 import sys
 import json
 import time
-import socket
-import smtplib
-import ssl
 import argparse
 import subprocess
 import urllib.parse
@@ -53,15 +50,15 @@ from dotenv import load_dotenv
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
-from db.cron_lock import cron_lock
+from db.cron_lock import cron_lock  # noqa: E402 — needs the sys.path insert above
+import lib.smtp_client as smtp_client  # noqa: E402 — needs the sys.path insert above
 
 # --- env / config ---
 load_dotenv(HERE / ".env")
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
-SMTP_USER = os.getenv("SMTP_USERNAME", os.getenv("GMAIL_ADDRESS", ""))
-SMTP_PASS = os.getenv("SMTP_PASSWORD", os.getenv("GMAIL_APP_PASSWORD", "")).replace(" ", "")
-SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() == "true"
+# SMTP connection settings (host/port/auth) live in lib/smtp_client.py so the
+# main send path and bin/send_followups.py share one client. See that module
+# for the SMTP_AUTH=gmail|oauth2 switch.
+#
 # Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are the authoritative
 # pair — they name the person the email comes from.
 #
@@ -1872,68 +1869,27 @@ def _send_one(lead):
         print(f"    📎 attached: {resume_path.name} "
               f"({resume_path.stat().st_size // 1024} KB)")
 
-    def _do_send():
-        # send_message() derives MAIL FROM from the From header by default.
-        # Pass envelope_sender explicitly so the envelope address stays
-        # decoupled from the visible From header.
-        if SMTP_USE_SSL:
-            ctx = ssl.create_default_context()
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=30) as s:
-                s.login(SMTP_USER, SMTP_PASS)
-                refused = s.send_message(msg, from_addr=ENVELOPE_FROM)
-                return None, refused
-        else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as s:
-                s.starttls()
-                s.login(SMTP_USER, SMTP_PASS)
-                refused = s.send_message(msg, from_addr=ENVELOPE_FROM)
-                return None, refused
+    # The SMTP session, auth mode and retry policy all live in
+    # lib/smtp_client.py — shared with bin/send_followups.py so there is one
+    # place that knows how to authenticate and one place that knows the
+    # permanent-vs-transient error classification.
+    #
+    # send_message() derives MAIL FROM from the From header by default, so we
+    # pass envelope_sender explicitly: the envelope address stays decoupled
+    # from the visible From header.
+    def _on_attempt(attempt, sleep_s, err):
+        if attempt > 1:
+            print(f"    ⚠️  attempt {attempt} failed ({err}); "
+                  f"retrying in {sleep_s}s")
 
-    # Retry on transient errors only. We re-raise permanent errors (auth fail,
-    # bad recipient) immediately so the lead is marked failed and we move on.
-    # PERMANENT errors (don't retry):
-    #   - SMTPAuthenticationError  — bad password, fix at config time
-    #   - SMTPRecipientsRefused    — email bounced, retrying won't help
-    #   - SMTPSenderRefused        — From address rejected
-    # TRANSIENT errors (retry with backoff):
-    #   - SMTPResponseException with 421/450/451/452/454
-    #   - network/SSL/timeout errors
-    last_err = None
-    backoff = [0, 30, 120]  # 0s, 30s, 2m
-    for attempt, sleep_s in enumerate(backoff, start=1):
-        if sleep_s:
-            time.sleep(sleep_s)
-        try:
-            _do_send()
-            # SUCCESS: caller (send_queued_emails) does the atomic
-            # update_status + log_send in a single transaction. We just return.
-            return
-        except smtplib.SMTPAuthenticationError:
-            raise  # bad password — never transient
-        except smtplib.SMTPRecipientsRefused:
-            raise  # hard bounce — never transient
-        except smtplib.SMTPSenderRefused:
-            raise  # From address rejected — never transient
-        except (smtplib.SMTPResponseException, smtplib.SMTPServerDisconnected,
-                smtplib.SMTPConnectError, smtplib.SMTPHeloError,
-                smtplib.SMTPDataError, smtplib.SMTPException,
-                socket.timeout, ConnectionError, OSError) as e:
-            last_err = e
-            # Only retry on transient codes
-            transient = (
-                (isinstance(e, smtplib.SMTPResponseException)
-                 and e.smtp_code in (421, 450, 451, 452, 454))
-                or isinstance(e, (smtplib.SMTPServerDisconnected,
-                                   smtplib.SMTPConnectError,
-                                   smtplib.SMTPHeloError,
-                                   smtplib.SMTPDataError,
-                                   socket.timeout, ConnectionError, OSError))
-            )
-            if not transient or attempt == len(backoff):
-                break
-            # else loop: sleep + retry
-    # All attempts exhausted
-    raise last_err
+    smtp_client.send_with_retry(
+        msg,
+        envelope_from=ENVELOPE_FROM,
+        envelope_to=lead["contact_email"],
+        on_attempt=_on_attempt,
+    )
+    # SUCCESS: caller (send_queued_emails) does the atomic
+    # update_status + log_send in a single transaction. We just return.
 
 
 # =============================================================

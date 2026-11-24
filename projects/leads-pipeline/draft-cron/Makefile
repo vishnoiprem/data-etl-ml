@@ -47,7 +47,12 @@ TEST_MODULES := \
     test_better_email \
     test_bounce_deny_persistence \
     test_backfill_cover_letters \
-    test_mark_reply
+    test_mark_reply \
+    test_cover_letter \
+    test_cron_lock \
+    test_hnhiring_parse \
+    test_pre_send_guards \
+    test_m365_auth
 
 LINT_FILES := \
     find_more_leads.py find_clients.py refine_pipeline.py \
@@ -55,6 +60,7 @@ LINT_FILES := \
     bin/loop_status.py bin/loop_bounce_sync.py \
     bin/mark_reply.py bin/reply_metrics.py \
     state/bounce_deny_store.py \
+    lib/m365_auth.py lib/smtp_client.py \
     resume_tailor.py
 
 .PHONY: help install schema test test-db lint reply metrics docker-build docker-run docker-shell docker-healthcheck ci clean

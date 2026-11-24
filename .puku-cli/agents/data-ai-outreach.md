@@ -59,12 +59,28 @@ the pipeline's `.env`, so they never disagree. The one-click unsubscribe stays o
 sending three test messages to the account itself on 2026-11-23: SMTP accepts
 `MAIL FROM:<alex.morgan@avilx.com>` with 250 OK, but the delivered `From:` reads
 `Alex Morgan <premvishnoisoft@gmail.com>`. The name survives; the address does not.
-So today the pipeline sends from the Gmail address wearing the Alex Morgan name.
-Sending from `alex.morgan@avilx.com` for real needs a provider with the avilx.com
-domain verified — see `SETUP_MAILGUN.md`.
 
-Do not tell the user the avilx.com From address is live until that is configured, and
-do not claim a send succeeded without a `send_log` row.
+**Outlook SMTP AUTH fixes that, and the code path exists — but it is not live yet.**
+`avilx.com` is already a Microsoft 365 tenant (MX → `avilx-com.mail.protection.outlook.com`,
+DKIM selectors 1 & 2 live, DMARC `p=quarantine`). With `SMTP_AUTH=oauth2` the
+pipeline sends over `smtp-mail.outlook.com:587` using an XOAUTH2 bearer token,
+which genuinely delivers as `alex.morgan@avilx.com`. `lib/smtp_client.py` owns
+the transport (shared by `autopilot.py` and `bin/send_followups.py`);
+`lib/m365_auth.py` owns the token (`python -m lib.m365_auth --device-code`).
+
+`.env` currently has `SMTP_AUTH=gmail`. Before it can be flipped, all three must
+be done — see `projects/leads-pipeline/draft-cron/SETUP_OUTLOOK_SMTP.md`:
+
+1. `alex.morgan@avilx.com` must be a **licensed** Exchange Online mailbox.
+2. The **SPF record must be replaced** with
+   `v=spf1 include:spf.protection.outlook.com -all` (currently
+   `v=spf1 include:secureserver.net -all` — GoDaddy parking, `-all` hard fail).
+3. The device-code login must have run.
+
+Do not tell the user the avilx.com From address is live until all three are done
+and a test send's delivered headers show `From: Alex Morgan <alex.morgan@avilx.com>`
+with `spf=pass` / `dkim=pass` / `dmarc=pass`. And do not claim a send succeeded
+without a `send_log` row.
 
 ## Before sending
 

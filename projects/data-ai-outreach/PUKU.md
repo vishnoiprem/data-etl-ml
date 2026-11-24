@@ -155,10 +155,23 @@ Default output per run: **up to five qualified leads**.
   `Alex Morgan <premvishnoisoft@gmail.com>` and the original is only preserved in
   `X-Google-Original-From`. The display name "Alex Morgan" survives; the address
   does not. A recipient therefore sees a Gmail address, not the avilx.com one.
-  To actually send as `alex.morgan@avilx.com`, use a real sending provider with
-  the avilx.com domain verified (see `SETUP_MAILGUN.md`). Do not tell the user
-  the avilx.com From address is live until that provider is configured — the
-  pipeline currently sends from the Gmail address with the Alex Morgan name.
+- **Outlook SMTP AUTH is the fix for that, and the code path exists.** `avilx.com` is
+  already a Microsoft 365 tenant, so `SMTP_AUTH=oauth2` sends over
+  `smtp-mail.outlook.com:587` with an XOAUTH2 bearer token, which genuinely
+  delivers as `alex.morgan@avilx.com`. `lib/smtp_client.py` owns the whole
+  transport (both `autopilot.py` and `bin/send_followups.py` share it) and
+  `lib/m365_auth.py` owns the token. **But it is not live yet** — `SMTP_AUTH=gmail`
+  in `.env`. Before flipping it, all three must be done (see
+  `projects/leads-pipeline/draft-cron/SETUP_OUTLOOK_SMTP.md`):
+  1. `alex.morgan@avilx.com` must be a **licensed** Exchange Online mailbox —
+     Outlook SMTP AUTH may only send as the authenticated mailbox.
+  2. The **SPF record must be replaced** with `v=spf1 include:spf.protection.outlook.com -all`
+     (it is currently `v=spf1 include:secureserver.net -all` — GoDaddy parking,
+     which does not authorize Microsoft 365, and `-all` makes it a hard fail).
+  3. The device-code login must have run: `python -m lib.m365_auth --device-code`.
+  Do not tell the user the avilx.com From address is live until all three are done
+  and a test send's delivered headers show `From: Alex Morgan <alex.morgan@avilx.com>`
+  with `spf=pass` / `dkim=pass` / `dmarc=pass`.
 - The one-click unsubscribe link stays on `hello@avilx.com` regardless of sender
   (`AVILX_UNSUB_EMAIL` overrides it). It must not point at a person's inbox.
 - `DRY_RUN=true` is set in `.env`. Sending requires flipping it AND explicit user approval.
