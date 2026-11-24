@@ -78,7 +78,7 @@ jobs:
         run: |
           cd projects/leads-pipeline/draft-cron
           set -e
-          for t in test_dedup_key test_dedup test_parser test_resume_tailor test_better_email test_bounce_deny_persistence test_backfill_cover_letters test_mark_reply test_cover_letter test_cron_lock test_hnhiring_parse test_pre_send_guards test_m365_auth; do
+          for t in test_dedup_key test_dedup test_parser test_resume_tailor test_better_email test_bounce_deny_persistence test_backfill_cover_letters test_mark_reply test_cover_letter test_cron_lock test_hnhiring_parse test_hn_headline_segments test_pre_send_guards test_m365_auth; do
             echo "===> $t"
             PYTHONPATH=. python -m tests.$t
           done

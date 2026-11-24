@@ -51,12 +51,14 @@ TEST_MODULES := \
     test_cover_letter \
     test_cron_lock \
     test_hnhiring_parse \
+    test_hn_headline_segments \
     test_pre_send_guards \
     test_m365_auth
 
 LINT_FILES := \
     find_more_leads.py find_clients.py refine_pipeline.py \
     backfill_emails.py cover_letter.py dashboard.py \
+    autopilot.py \
     bin/loop_status.py bin/loop_bounce_sync.py \
     bin/mark_reply.py bin/reply_metrics.py \
     state/bounce_deny_store.py \
