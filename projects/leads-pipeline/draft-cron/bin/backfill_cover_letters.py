@@ -43,7 +43,8 @@ def _pick_leads(limit: int) -> list[dict]:
             SELECT id, company, role, jd_text, apply_mode,
                    cover_letter_subject, cover_letter_body
             FROM leads
-            WHERE (cover_letter_subject IS NULL OR cover_letter_subject = ''
+            WHERE status = 'pending'
+              AND (cover_letter_subject IS NULL OR cover_letter_subject = ''
                    OR cover_letter_body IS NULL OR cover_letter_body = '')
             ORDER BY id
             LIMIT %s

@@ -35,7 +35,8 @@ from dotenv import load_dotenv
 load_dotenv(HERE / ".env")
 
 import db.lead_store as ls
-from cover_letter import _pick_hook
+import lib.smtp_client as smtp_client
+from cover_letter import _pick_hook, SIGNER
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -74,7 +75,7 @@ def _build_followup(lead: dict) -> tuple[str, str]:
             f"Hi {co} team,\n\n"
             f"{angle}\n\n"
             f"15-min call this week if there's still a fit?\n\n"
-            f"Prem\n"
+            f"{SIGNER}\n"
         )
     else:
         body = (
@@ -82,7 +83,7 @@ def _build_followup(lead: dict) -> tuple[str, str]:
             f"{angle}\n\n"
             f"No pressure — just wanted to make sure this didn't get "
             f"buried. 2-week pilot pod is still on the table if useful.\n\n"
-            f"Prem\n"
+            f"{SIGNER}\n"
         )
     return subj, body
 
@@ -91,26 +92,30 @@ def _build_followup(lead: dict) -> tuple[str, str]:
 # Send path
 # ──────────────────────────────────────────────────────────────────
 def _send_followup_email(lead: dict, subject: str, body: str) -> None:
-    """Send a single follow-up via the same SMTP path as autopilot._send_one.
+    """Send a single follow-up via the shared SMTP client.
 
-    Reuses the SMTP env vars (AVILX_SMTP_*).
+    The connection, auth mode (gmail | oauth2) and retry policy all live in
+    lib/smtp_client.py — the same client the main send path uses.
     """
-    import smtplib
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     from email.mime.base import MIMEBase
     from email import encoders
 
-    SMTP_HOST = os.getenv("AVILX_SMTP_HOST", "smtp.gmail.com")
-    SMTP_PORT = int(os.getenv("AVILX_SMTP_PORT", "465"))
-    SMTP_USER = os.getenv("AVILX_SMTP_USER") or os.getenv("AVILX_GMAIL_USER", "")
-    SMTP_PASS = (os.getenv("AVILX_SMTP_PASS")
-                 or os.getenv("AVILX_GMAIL_APP_PASSWORD", ""))
-    YOUR_NAME = os.getenv("AVILX_FOUNDER", "Prem Vishnoi")
-    YOUR_EMAIL = os.getenv("AVILX_EMAIL", "hello@avilx.com")
+    # Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are authoritative.
+    # ENVELOPE_FROM is what goes out as MAIL FROM — it defaults to the From
+    # address but can be overridden when the sending provider needs its own
+    # bounce domain.
+    FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
+    FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
+    ENVELOPE_FROM = os.getenv("AVILX_ENVELOPE_FROM", "").strip() or FROM_EMAIL
+    # Replies land with Alex unless AVILX_REPLY_TO says otherwise — same
+    # rule as the main send path.
+    REPLY_TO = os.getenv("AVILX_REPLY_TO", "").strip() or FROM_EMAIL
 
     msg = MIMEMultipart()
-    msg["From"] = f"{YOUR_NAME} <{YOUR_EMAIL}>"
+    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
+    msg["Reply-To"] = REPLY_TO
     msg["To"] = lead["contact_email"]
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain", "utf-8"))
@@ -133,12 +138,16 @@ def _send_followup_email(lead: dict, subject: str, body: str) -> None:
     except Exception as e:
         print(f"    ⚠️  resume attach failed: {e}")
 
-    # Send
-    import ssl
-    ctx = ssl.create_default_context()
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=30) as s:
-        s.login(SMTP_USER, SMTP_PASS)
-        s.sendmail(msg["From"], lead["contact_email"], msg.as_string())
+    def _on_attempt(attempt, sleep_s, err):
+        if attempt > 1:
+            print(f"    ⚠️  attempt {attempt} failed ({err}); retrying in {sleep_s}s")
+
+    smtp_client.send_with_retry(
+        msg,
+        envelope_from=ENVELOPE_FROM,
+        envelope_to=lead["contact_email"],
+        on_attempt=_on_attempt,
+    )
 
 
 def _record_followup(lead_id: int, subject: str) -> None:

@@ -1274,12 +1274,17 @@ def insert_leads(leads, dry=False):
             # which lacks the mode prefix and tanks open rates.
             if _render_for_mode is not None:
                 try:
+                    # render_for_mode returns (subject, text_body, html_body).
+                    # We only store the text body — take the first two, or the
+                    # unpack raises ValueError and the bare except below
+                    # silently writes empty strings, which makes every lead
+                    # fall back to a generic "Avilx × {company}" subject.
                     _subj, _body = _render_for_mode({
                         "company": co,
                         "role": role,
                         "jd_text": ld.get("jd_text", "") or "",
                         "apply_mode": "pitch_pod",
-                    })
+                    })[:2]
                 except Exception:
                     _subj, _body = "", ""
             else:

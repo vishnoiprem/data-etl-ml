@@ -1,0 +1,33 @@
+KPIS: {
+ "as_of": "2026-11-18T14:00:00+00:00",
+ "shipments_due": 242,
+ "delivered": 159,
+ "returned": 20,
+ "on_time_delivery_rate": 0.1818,
+ "first_attempt_success_rate": 0.8866,
+ "rto_rate": 0.1117,
+ "cod_rto_rate": 0.0809,
+ "prepaid_rto_rate": 0.0849,
+ "attempts_per_delivery": 1.23,
+ "mean_lead_time_hours": 25.61,
+ "mean_lateness_hours": 9.32,
+ "denominators": {
+  "otd": 242,
+  "fad": 1032,
+  "rto": 179,
+  "cod_rto": 136,
+  "prepaid_rto": 106
+ }
+}
+next_day late 118 / 416 = 0.284
+same_day late 443 / 451 = 0.982
+express_cross_border late 0 / 36 = 0.0
+economy late 0 / 129 = 0.0
+plans:
+  2026-11-16 assigned 123 deferred 137 stops 88 ops 1.398
+  2026-11-17 assigned 108 deferred 152 stops 77 ops 1.403
+  2026-11-18 assigned 98 deferred 162 stops 77 ops 1.273
+  2026-11-19 assigned 504 deferred 380 stops 238 ops 2.118
+  2026-11-20 assigned 114 deferred 146 stops 87 ops 1.31
+  2026-11-21 assigned 98 deferred 162 stops 74 ops 1.324
+  2026-11-22 assigned 84 deferred 176 stops 66 ops 1.273

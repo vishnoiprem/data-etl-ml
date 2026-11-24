@@ -1,0 +1,18 @@
+         81391023 function calls in 55.699 seconds
+
+   Ordered by: internal time
+   List reduced from 38 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+  6566519   31.397    0.000   43.885    0.000 /Users/vishnoiprem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/projects/tms-ecommerce-logistics/src/tms/models.py:616(haversine_km)
+  6566519    5.054    0.000   48.939    0.000 /Users/vishnoiprem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/projects/tms-ecommerce-logistics/src/tms/routing.py:55(distance_km)
+ 26266076    4.495    0.000    4.495    0.000 {built-in method math.radians}
+ 13133038    2.622    0.000    2.622    0.000 {built-in method math.cos}
+      102    2.421    0.024   25.983    0.255 /Users/vishnoiprem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/projects/tms-ecommerce-logistics/src/tms/routing.py:318(_two_opt)
+ 13133038    2.395    0.000    2.395    0.000 {built-in method math.sin}
+   827010    1.921    0.000   20.912    0.000 /Users/vishnoiprem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/projects/tms-ecommerce-logistics/src/tms/routing.py:241(_insertion_delta)
+  6566519    1.608    0.000    1.608    0.000 {built-in method math.asin}
+  6566519    1.367    0.000    1.367    0.000 {built-in method math.sqrt}
+      102    0.755    0.007    7.187    0.070 /Users/vishnoiprem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/projects/tms-ecommerce-logistics/src/tms/routing.py:363(_relocate)
+
+

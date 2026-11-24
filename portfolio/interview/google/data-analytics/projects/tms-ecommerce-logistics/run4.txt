@@ -1,0 +1,25 @@
+KPIS: {
+ "as_of": "2026-11-18T14:00:00+00:00",
+ "shipments_due": 242,
+ "delivered": 221,
+ "returned": 21,
+ "on_time_delivery_rate": 0.1446,
+ "first_attempt_success_rate": 0.904,
+ "rto_rate": 0.0868,
+ "cod_rto_rate": 0.1029,
+ "prepaid_rto_rate": 0.066,
+ "attempts_per_delivery": 1.217,
+ "mean_lead_time_hours": 56.41,
+ "mean_lateness_hours": 36.5,
+ "denominators": {
+  "otd": 242,
+  "fad": 2218,
+  "rto": 242,
+  "cod_rto": 136,
+  "prepaid_rto": 106
+ }
+}
+next_day late 737 / 990 = 0.744
+economy late 207 / 607 = 0.341
+same_day late 451 / 452 = 0.998
+express_cross_border late 12 / 169 = 0.071

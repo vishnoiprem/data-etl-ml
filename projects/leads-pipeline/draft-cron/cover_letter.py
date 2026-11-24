@@ -18,6 +18,8 @@ Env overrides:
     AVILX_WHATSAPP    default "+6592716405"   (no leading + required)
     AVILX_FOUNDER     default "Prem Vishnoi"
     AVILX_HQ          default "Ha Noi, Vietnam"
+    AVILX_FROM_NAME   default "Alex Morgan"  (sender display name; body signature)
+    AVILX_FROM_EMAIL  default "alex.morgan@avilx.com"  (sender address; body signature)
 """
 
 from __future__ import annotations
@@ -34,6 +36,16 @@ EMAIL = os.getenv("AVILX_EMAIL", "hello@avilx.com")
 WHATSAPP = os.getenv("AVILX_WHATSAPP", "+6592716405").lstrip("+")
 FOUNDER = os.getenv("AVILX_FOUNDER", "Prem Vishnoi")
 HQ = os.getenv("AVILX_HQ", "Ha Noi, Vietnam")
+# Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are authoritative —
+# they decide who the email appears to come from in both the From header
+# and the body signature. AVILX_FOUNDER stays as the fallback for
+# white-label setups that never set the From vars.
+FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
+FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
+# The name that signs the body. Prefer the sender identity so the body
+# and the From header never disagree.
+SIGNER = FROM_NAME or FOUNDER
+SIGNER_EMAIL = FROM_EMAIL or EMAIL
 CLOUD_LIST = "AWS · Azure · GCP · Tencent · Alibaba"
 
 # Stack terms lifted from the JD for the "Stack overlap I noticed:" line.
@@ -129,20 +141,22 @@ def _pick_hook(jd: str) -> str:
 
 
 def _hook_line(hook: str, lead: dict) -> str:
-    """Wrap a hook in a sentence that pivots to Prem/Avilx experience.
+    """Wrap a hook in a sentence that pivots to the sender's experience.
 
     Falls back to "" if the hook is empty so callers can `if hook_line:`.
     """
     if not hook:
         return ""
     role = (lead.get("role") or "").lower()
-    # Solo mode — Prem personally applies
+    # Solo mode — the sender applies personally
     if (lead.get("apply_mode") or "") == "apply_personal":
         return (f"That {hook} angle is exactly the work I do most often — "
-                f"I've shipped it in production at scale. ")
-    # Pod mode — Avilx pitches a pod
+                f"shipped in production at scale. ")
+    # Pod mode — Avilx pitches a pod.
+    # The hook is already a phrase (e.g. "production RAG"), so don't prefix
+    # another "production" — it rendered as "production production RAG".
     return (f"Re the {hook} angle: that's core to our pod's recent work — "
-            f"we've stood up production {hook} for several clients in 2026. ")
+            f"we've stood up {hook} for several clients in 2026. ")
 
 
 
@@ -184,25 +198,21 @@ def render_text_body(lead: dict) -> str:
     role = (lead.get("role") or "this role").strip()
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
-    stack_str = ", ".join(stack[:8]) if stack else "the stack in your JD"
+    stack_str = ", ".join(stack[:5]) if stack else "the stack in your JD"
     hook = _hook_line(_pick_hook(jd), lead)
 
     return (
         f"Hi {co} team,\n\n"
         f"Saw the {role} role — stack and scope look like a strong match. "
-        f"{hook}Quick context if useful: I'm {FOUNDER}, I run {NAME} ({WEBSITE}), a "
-        f"global {TAGLINE} pod out of {HQ}. 6-20 senior engineers, "
-        f"AI/Data/ML/Cloud, **Databricks Champion** team, 7+ clouds ({CLOUD_LIST}), "
-        f"8+ yrs avg, regulated-industry work.\n\n"
-        f"Stack overlap I noticed: {stack_str}.\n\n"
+        f"{hook}I'm {SIGNER}, I run {NAME} ({WEBSITE}) — a senior engineering pod "
+        f"out of {HQ}. Databricks Champion team, 7+ clouds, 8+ yrs avg.\n\n"
+        f"Also relevant: {stack_str}.\n\n"
         f"If your timeline is tight, happy to run a 4-week pilot pod or staff-aug "
         f"a senior — 2-week kickoff, remote delivery, NDA + IP clean. "
-        f"15-min call this week worth it?\n\n"
-        f"{FOUNDER}\n"
+        f"15-min call this week?\n\n"
+        f"{SIGNER}\n"
         f"{NAME} — {TAGLINE}\n"
-        f"(AI · Data · ML · Cloud · Databricks · 7+ clouds)\n"
-        f"Delivery: China · APAC · US · EU | HQ: {HQ}\n"
-        f"{EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
+        f"{SIGNER_EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
     )
 
 
@@ -221,12 +231,11 @@ _HTML_TEMPLATE = """\
     <div style="background:#fff;border:1px solid #e5e7eb;border-top:0;padding:24px;border-radius:0 0 10px 10px;">
       <p>Hi {company} team,</p>
       <p>Saw the <b>{role}</b> role — stack and scope look like a strong match. \
-Quick context if useful: I'm {founder}, I run {name} ({website}), a global {tagline} \
-pod out of {hq}. 6-20 senior engineers, AI/Data/ML/Cloud, <b>Databricks Champion</b> \
-team, 7+ clouds, 8+ yrs avg, regulated-industry work.</p>
-      <p>Stack overlap I noticed: {stack_str}.</p>
+I'm {founder}, I run {name} ({website}) — a senior engineering pod out of {hq}. \
+<b>Databricks Champion</b> team, 7+ clouds, 8+ yrs avg.</p>
+      <p>Also relevant: {stack_str}.</p>
       <p>If your timeline is tight, happy to run a 4-week pilot pod or staff-aug a senior — \
-2-week kickoff, remote delivery, NDA + IP clean. 15-min call this week worth it?</p>
+2-week kickoff, remote delivery, NDA + IP clean. 15-min call this week?</p>
       <p style="margin-top:24px;">— {founder}<br>
         <span style="color:#6b7280;font-size:13px;">{name} · {tagline}</span><br>
         <span style="color:#6b7280;font-size:13px;">{email} · wa.me/{whatsapp} · {website}</span>
@@ -243,11 +252,11 @@ def render_html_body(lead: dict) -> str:
     role = (lead.get("role") or "this role").strip()
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
-    stack_str = ", ".join(stack[:8]) if stack else "the stack in your JD"
+    stack_str = ", ".join(stack[:5]) if stack else "the stack in your JD"
     return _render_template(_HTML_TEMPLATE, dict(
         name=NAME, tagline=TAGLINE, company=co, role=role,
-        founder=FOUNDER, website=WEBSITE, hq=HQ, stack_str=stack_str,
-        email=EMAIL, whatsapp=WHATSAPP,
+        founder=SIGNER, website=WEBSITE, hq=HQ, stack_str=stack_str,
+        email=SIGNER_EMAIL, whatsapp=WHATSAPP,
     ))
 
 
@@ -265,12 +274,12 @@ def render(lead: dict) -> Tuple[str, str, str]:
 # can we talk?" — no pod mention, no pricing, no "happy to staff aug"
 # language. Resume PDF is still attached by autopilot._pick_resume().
 def render_solo_subject(lead: dict) -> str:
-    """Subject line — [Personal Application] Prem Vishnoi for {company} — {role}, trimmed to ≤70."""
+    """Subject line — [Personal Application] {sender} for {company} — {role}, trimmed to ≤70."""
     co = (lead.get("company") or "").strip() or "your team"
     role = (lead.get("role") or "this role").strip()
     co_short = co if len(co) <= 20 else co[:17] + "…"
     role_short = role if len(role) <= 30 else role[:27] + "…"
-    subj = f"[Personal Application] {FOUNDER} for {co_short} — {role_short}"
+    subj = f"[Personal Application] {SIGNER} for {co_short} — {role_short}"
     if len(subj) > 70:
         # Trim from the middle — keep the [Personal Application] prefix intact
         # so the mode is still visible in the inbox
@@ -284,7 +293,7 @@ def render_solo_text_body(lead: dict) -> str:
     role = (lead.get("role") or "this role").strip()
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
-    stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
+    stack_str = ", ".join(stack[:5]) if stack else "the stack in your JD"
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
     hook = _hook_line(_pick_hook(jd), lead)
@@ -292,19 +301,15 @@ def render_solo_text_body(lead: dict) -> str:
     return (
         f"Hi {co} team,\n\n"
         f"I'm applying for the {role} role personally — not as a recruiter. "
-        f"{hook}I'm {FOUNDER}, 15+ years shipping AI/data/cloud systems across "
-        f"{CLOUD_LIST} plus Huawei, Oracle, and on-prem. Most recent work spans "
-        f"RAG/agentic systems on Databricks, multi-tenant ML platforms, and "
-        f"regulated-industry data (banking, healthcare, MLPS in China).\n\n"
-        f"Stack overlap I noticed in your JD: {stack_str}. I've shipped all of "
-        f"these in production at scale.\n\n"
+        f"{hook}I'm {SIGNER}, 15+ years shipping AI/data/cloud systems across "
+        f"{CLOUD_LIST} plus Huawei and on-prem — most recently RAG and "
+        f"agentic systems on Databricks and multi-tenant ML platforms.\n\n"
+        f"Also relevant from your JD: {stack_str} — all shipped in production.\n\n"
         f"Resume attached. Happy to do a 30-min technical screen this week and "
-        f"share 1-2 relevant case studies ({remote_phrase} delivery, async-first, "
-        f"NDA + IP clean).\n\n"
-        f"{FOUNDER}\n"
-        f"({NAME} founder · also available for senior pod engagements)\n"
-        f"Delivery: China · APAC · US · EU | HQ: {HQ}\n"
-        f"{EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
+        f"share 1-2 case studies ({remote_phrase}, async-first).\n\n"
+        f"{SIGNER}\n"
+        f"({NAME} founder · also available for pod engagements)\n"
+        f"{SIGNER_EMAIL} | wa.me/{WHATSAPP} | https://{WEBSITE}"
     )
 
 
@@ -314,12 +319,12 @@ def render_solo_html_body(lead: dict) -> str:
     role = (lead.get("role") or "this role").strip()
     jd = lead.get("jd_text") or ""
     stack = _extract_stack_overlap(jd)
-    stack_str = ", ".join(stack[:6]) if stack else "the stack in your JD"
+    stack_str = ", ".join(stack[:5]) if stack else "the stack in your JD"
     is_remote = bool(re.search(r"\b(remote|anywhere|work from home|wfh)\b", jd, re.I))
     remote_phrase = "remote" if is_remote else "global"
     return _render_template(_SOLO_HTML_TEMPLATE, dict(
-        name=FOUNDER, tagline=f"Solo application — {role} at {co}",
-        cloud_list=CLOUD_LIST, hq=HQ, email=EMAIL, whatsapp=WHATSAPP,
+        name=SIGNER, tagline=f"Solo application — {role} at {co}",
+        cloud_list=CLOUD_LIST, hq=HQ, email=SIGNER_EMAIL, whatsapp=WHATSAPP,
         website=WEBSITE, co=co, role=role, stack_str=stack_str,
         remote_phrase=remote_phrase, brand=NAME,
     ))
@@ -337,18 +342,14 @@ _SOLO_HTML_TEMPLATE = """\
       <p>Hi {co} team,</p>
       <p>I'm applying for the <b>{role}</b> role personally — not as a recruiter.
          I'm {name}, 15+ years shipping AI/data/cloud systems across {cloud_list}
-         plus Huawei, Oracle, and on-prem. Most recent work spans RAG/agentic
-         systems on Databricks, multi-tenant ML platforms, and
-         regulated-industry data (banking, healthcare, MLPS in China).</p>
-      <p>Stack overlap I noticed in your JD: <b>{stack_str}</b>. I've shipped
-         all of these in production at scale.</p>
+         plus Huawei and on-prem — most recently RAG and agentic systems on
+         Databricks and multi-tenant ML platforms.</p>
+      <p>Also relevant from your JD: <b>{stack_str}</b> — all shipped in production.</p>
       <p>Resume attached. Happy to do a 30-min technical screen this week and
-         share 1-2 relevant case studies ({remote_phrase} delivery, async-first,
-         NDA + IP clean).</p>
+         share 1-2 case studies ({remote_phrase}, async-first).</p>
       <p style="margin-top:28px;">— {name}<br/>
         <span style="color:#6b7280;font-size:13px;">({brand} founder · also
-        available for senior pod engagements)<br/>
-        Delivery: China · APAC · US · EU | HQ: {hq}<br/>
+        available for pod engagements)<br/>
         {email} | wa.me/{whatsapp} | https://{website}</span></p>
     </div>
   </div>

@@ -34,6 +34,9 @@ DB_PORT    ?= 5433
 DB_NAME    ?= avilx_leads
 DB_USER    ?= avilx
 DB_PASS    ?= avilx
+# Tests run against a separate database so they never write into the
+# live leads database. CI does the same (AVILX_DB_NAME: avilx_test).
+TEST_DB_NAME ?= avilx_test
 
 # Match the exact module order from .github/workflows/leads-ci.yml
 TEST_MODULES := \
@@ -44,17 +47,25 @@ TEST_MODULES := \
     test_better_email \
     test_bounce_deny_persistence \
     test_backfill_cover_letters \
-    test_mark_reply
+    test_mark_reply \
+    test_cover_letter \
+    test_cron_lock \
+    test_hnhiring_parse \
+    test_hn_headline_segments \
+    test_pre_send_guards \
+    test_m365_auth
 
 LINT_FILES := \
     find_more_leads.py find_clients.py refine_pipeline.py \
     backfill_emails.py cover_letter.py dashboard.py \
+    autopilot.py \
     bin/loop_status.py bin/loop_bounce_sync.py \
     bin/mark_reply.py bin/reply_metrics.py \
     state/bounce_deny_store.py \
+    lib/m365_auth.py lib/smtp_client.py \
     resume_tailor.py
 
-.PHONY: help install schema test lint reply metrics docker-build docker-run docker-shell docker-healthcheck ci clean
+.PHONY: help install schema test test-db lint reply metrics docker-build docker-run docker-shell docker-healthcheck ci clean
 
 help:           ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -67,12 +78,24 @@ install:        ## Create .venv and install deps
 schema:         ## Apply db/schema.sql to $AVILX_DB_NAME
 	@echo "Applying schema to $(DB_NAME)@$(DB_HOST):$(DB_PORT)"
 	PGPASSWORD=$(DB_PASS) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -f db/schema.sql
+	@for m in db/migrations/*.sql; do \
+	    echo "Applying $$m"; \
+	    PGPASSWORD=$(DB_PASS) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d $(DB_NAME) -f $$m; \
+	done
+
+test-db:        ## Create the test database and apply the schema to it
+	@echo "Ensuring $(TEST_DB_NAME) exists at $(DB_HOST):$(DB_PORT)"
+	@PGPASSWORD=$(DB_PASS) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d postgres \
+	    -tc "SELECT 1 FROM pg_database WHERE datname='$(TEST_DB_NAME)'" | grep -q 1 \
+	    || PGPASSWORD=$(DB_PASS) psql -h $(DB_HOST) -p $(DB_PORT) -U $(DB_USER) -d postgres \
+	        -c "CREATE DATABASE $(TEST_DB_NAME) OWNER $(DB_USER)"
+	@$(MAKE) --no-print-directory schema DB_NAME=$(TEST_DB_NAME)
 
 test:           ## Run all test modules (matches CI order)
-	@echo "Running $(words $(TEST_MODULES)) test modules"
+	@echo "Running $(words $(TEST_MODULES)) test modules against $(TEST_DB_NAME)"
 	@for t in $(TEST_MODULES); do \
 	    echo "===> $$t"; \
-	    PYTHONPATH=. $(PY) -m tests.$$t || exit 1; \
+	    AVILX_DB_NAME=$(TEST_DB_NAME) PYTHONPATH=. $(PY) -m tests.$$t || exit 1; \
 	done
 
 lint:           ## flake8 the modified source files

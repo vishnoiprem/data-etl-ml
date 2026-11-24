@@ -35,9 +35,6 @@ import re
 import sys
 import json
 import time
-import socket
-import smtplib
-import ssl
 import argparse
 import subprocess
 import urllib.parse
@@ -53,18 +50,41 @@ from dotenv import load_dotenv
 
 HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE))
-from db.cron_lock import cron_lock
+from db.cron_lock import cron_lock  # noqa: E402 — needs the sys.path insert above
+import lib.smtp_client as smtp_client  # noqa: E402 — needs the sys.path insert above
 
 # --- env / config ---
 load_dotenv(HERE / ".env")
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
-SMTP_USER = os.getenv("SMTP_USERNAME", os.getenv("GMAIL_ADDRESS", ""))
-SMTP_PASS = os.getenv("SMTP_PASSWORD", os.getenv("GMAIL_APP_PASSWORD", "")).replace(" ", "")
-SMTP_USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() == "true"
-YOUR_NAME = os.getenv("YOUR_NAME", "Prem Vishnoi")
+# SMTP connection settings (host/port/auth) live in lib/smtp_client.py so the
+# main send path and bin/send_followups.py share one client. See that module
+# for the SMTP_AUTH=gmail|oauth2 switch.
+#
+# Sender identity. AVILX_FROM_NAME / AVILX_FROM_EMAIL are the authoritative
+# pair — they name the person the email comes from.
+#
+# Gmail only lets you send as an address the authenticated account owns or
+# has aliased, and it rejects a From header whose domain the account isn't
+# authorised for. So the From header address and the SMTP envelope sender
+# (MAIL FROM) must both be an address the login is allowed to use.
+#
+# ENVELOPE_FROM is what we hand to send_message() as MAIL FROM. It defaults
+# to the From-header address, and falls back to the SMTP login only when the
+# From address isn't usable as an envelope sender. When sending as a
+# third-party provider (Mailgun/SendGrid) the envelope sender is the
+# provider's bounce domain, which is a different thing entirely — see
+# SETUP_MAILGUN.md.
+FROM_NAME = os.getenv("AVILX_FROM_NAME", "Alex Morgan")
+FROM_EMAIL = os.getenv("AVILX_FROM_EMAIL", "alex.morgan@avilx.com")
+ENVELOPE_FROM = os.getenv("AVILX_ENVELOPE_FROM", "").strip() or FROM_EMAIL
+YOUR_NAME = os.getenv("YOUR_NAME", FROM_NAME)
 YOUR_COMPANY = os.getenv("YOUR_COMPANY", "Avilx")
 YOUR_EMAIL = os.getenv("YOUR_EMAIL", "hello@avilx.com")
+# Replies to an email sent as Alex should land with Alex, not the generic
+# hello@ address. Set AVILX_REPLY_TO to override.
+REPLY_TO = os.getenv("AVILX_REPLY_TO", "").strip() or FROM_EMAIL
+# The one-click unsubscribe always goes to the generic mailbox, whoever
+# sent the email. Set AVILX_UNSUB_EMAIL to override.
+AVILX_UNSUB_EMAIL = os.getenv("AVILX_UNSUB_EMAIL", "").strip() or os.getenv("AVILX_EMAIL", "hello@avilx.com")
 YOUR_PHONE = os.getenv("YOUR_PHONE", "")
 YOUR_WHATSAPP = os.getenv("YOUR_WHATSAPP", "")
 YOUR_WEBSITE = os.getenv("YOUR_WEBSITE", "https://avilx.com")
@@ -96,11 +116,11 @@ EXCLUDE_TITLE = re.compile(
 )
 
 PERSONAL_SIG = (
-    f"{YOUR_NAME}\n"
+    f"{FROM_NAME}\n"
     f"{YOUR_COMPANY} — Global Build · Deploy · Engineers\n"
     f"(AI · Data · ML · Cloud · Databricks · 7+ clouds)\n"
     f"Delivery: China · APAC · US · EU | HQ: Ha Noi, Vietnam\n"
-    f"📧 {YOUR_EMAIL} | 💬 wa.me/{YOUR_WHATSAPP.lstrip('+')} | 🌐 {YOUR_WEBSITE}"
+    f"📧 {FROM_EMAIL} | 💬 wa.me/{YOUR_WHATSAPP.lstrip('+')} | 🌐 {YOUR_WEBSITE}"
 )
 
 
@@ -234,7 +254,7 @@ def scrape_hn_who_is_hiring():
                 continue
             # Try to find a company name (first quoted phrase or first capitalized line)
             company = _guess_company_from_hn_comment(text)
-            role = _guess_role_from_hn_comment(text)
+            role = _guess_role_from_hn_comment(text, company=company)
             leads.append({
                 "company": company or "Unknown (HN)",
                 "role": role or "AI/ML engineer (see comment)",
@@ -255,60 +275,381 @@ def _walk_hn_tree(node):
         yield from _walk_hn_tree(child)
 
 
+# US state / territory codes, used to recognise a trailing "Hoboken, NJ".
+# An explicit list rather than "any two capital letters": the generic
+# pattern classified "Aiden.ai" and "Shield AI" as locations.
+_US_STATE_CODES = (
+    "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN "
+    "MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA "
+    "WA WV WI WY DC PR VI GU AS MP"
+).split()
+
+# Cities that show up in HN "Who is Hiring" headlines. Without these,
+# "San Diego" and "Redwood City" read as company names.
+_KNOWN_CITIES = (
+    "san francisco|new york|new york city|los angeles|chicago|seattle|"
+    "boston|austin|denver|atlanta|san diego|san jose|redwood city|"
+    "palo alto|menlo park|mountain view|sunnyvale|santa clara|santa monica|"
+    "burlingame|san mateo|fremont|daly city|walnut creek|berkeley|"
+    "oakland|bay area|sf bay|silicon valley|brooklyn|queens|manhattan|"
+    "boulder|portland|philadelphia|pittsburgh|miami|minneapolis|"
+    "detroit|dallas|houston|phoenix|charlotte|raleigh|nashville|"
+    "orlando|tampa|fort worth|el paso|seattle wa|washington dc|"
+    "london|berlin|paris|amsterdam|dublin|lisbon|madrid|barcelona|"
+    "toronto|vancouver|montreal|sydney|melbourne|auckland|"
+    "tokyo|osaka|seoul|beijing|shanghai|shenzhen|singapore|bangalore|"
+    "hyderabad|pune|delhi|mumbai|chennai|taipei|hong kong|"
+    "zurich|geneva|vienna|milan|rome|prague|stockholm|oslo|helsinki|"
+    "new delhi|abu dhabi|dubai|sao paulo|lagos|nairobi"
+).split("|")
+
+
+def _hn_headline_segments(text):
+    """Split an HN comment headline into pipe segments.
+
+    HN "Who is Hiring" headlines are usually
+    `Company | Location | Role | Type` — but the order varies, some
+    posts start with the role, and the whole thing is sometimes a
+    single line with no pipes at all. So we never trust position;
+    we classify each segment by what it looks like.
+
+    HTML is stripped from the whole headline *before* splitting. The
+    embedded links contain escaped slashes ("<a href=\"https:&#x2F;&#x2F;
+    x.com\">..."), so splitting first would cut the tag in half and
+    leave fragments like '<a href="https:' behind.
+
+    Only REAL pipes split here. Escaped pipes (&#x2F;) are left inside
+    their segment, because they are often used *within* one field to
+    list several openings ("Senior Backend &#x2F; Senior Frontend").
+    Splitting on them globally kept only the last title in the list.
+    The company and role classifiers split escaped pipes themselves,
+    and only when the whole segment is not already a good candidate.
+    """
+    head = text.splitlines()[0] if text else ""
+    head = re.sub(r"<a\b[^>]*>.*?</a>", " ", head, flags=re.I | re.S)
+    head = re.sub(r"<[^>]*>", " ", head)
+    parts = [p.strip() for p in head.split("|") if p.strip()]
+    if not parts:
+        # No separators — the headline is a single free-text line, e.g.
+        # "Sift Science, San Francisco, is Hiring Machine Learning Engineers".
+        # Return it as one segment; the company/role classifiers below
+        # handle the "X, City, is Hiring Y" shape.
+        return [head.strip()] if head.strip() else []
+    return parts
+
+
 def _guess_company_from_hn_comment(text):
-    """Best-effort: HN format is 'Role | Company | Location | ...'."""
-    # Format: "Role | Company | Location | ...
-    parts = [p.strip() for p in text.split("|")]
-    # Company is usually the 2nd non-empty, non-keyword part
-    if len(parts) >= 2:
-        candidate = parts[1]
-        if candidate and not re.search(
-            r"remote|onsite|hybrid|full[- ]time|part[- ]time|contract|"
-            r"\$|usd|eur|gbp|apac|us|eu|china|singapore|london|nyc|"
-            r"san francisco|bay area|berlin|seoul|tokyo|toronto|"
-            r"anywhere|worldwide|wfh|distributed",
-            candidate, re.I,
-        ):
-            return candidate[:60]
+    """Best-effort company name from an HN 'Who is Hiring' comment.
+
+    The segment order varies across posts, so we classify segments by
+    content: a company is a segment that is NOT a role, NOT a location,
+    and NOT compensation/employment-type noise. Taking `parts[1]`
+    blindly (the old behaviour) picked the *location* on the common
+    `Company | Location | Role` format, so the company column ended up
+    holding "San Francisco, CA" and every email body said so.
+    """
+    segments = _hn_headline_segments(text)
+    for seg in segments:
+        # A headline that used escaped pipes for its fields ("Solvvy&#x2F;
+        # Palo Alto, CA&#x2F;Full-time") holds several things in one
+        # segment. Split it and try each piece.
+        for piece in _hn_split_escaped(seg):
+            seg = _hn_clean_segment(piece.splitlines()[0])
+            # A segment that still contains a pipe means the headline used a
+            # different separator (e.g. an HTML-escaped one) and we failed to
+            # split it — it holds several things, not one company name.
+            if "|" in seg:
+                continue
+            # "Sift Science, San Francisco, is Hiring Machine Learning Engineers"
+            # is one segment but holds three things. Cut it at the first comma
+            # that introduces a city, then drop any "is Hiring ..." tail.
+            seg = re.split(r",\s*[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\s*(?:,|$)", seg)[0].strip()
+            seg = re.sub(r",?\s*\bis\s+Hiring\b.*$", "", seg, flags=re.I).strip()
+            seg = re.sub(r"\s*\|\s*$", "", seg).strip()
+            # "tCell.io, Inc" — the comma introduces a legal suffix, not a city.
+            m = re.match(r"^(.*?),\s*(Inc\.?|LLC|Ltd\.?|GmbH|AG|Corp\.?|Co\.?)$", seg, re.I)
+            if m:
+                seg = m.group(1).strip()
+            # "Sendery ( https://sendery.co )" — drop the site in brackets.
+            seg = re.sub(r"\s*\(\s*https?://[^)]*\)", "", seg).strip()
+            if not seg or len(seg) > 60:
+                continue
+            if _hn_is_role_segment(seg) or _hn_is_location_segment(seg):
+                continue
+            if _hn_is_skill_segment(seg):
+                continue
+            if _hn_is_noise_segment(seg):
+                continue
+            return seg
+
     # Format: "CompanyName (YC W25) is hiring..."
     m = re.search(r"^([A-Z][A-Za-z0-9&'.\- ]{1,40})\s*\((?:YC|W)\d+\)", text, re.M)
     if m:
         return m.group(1).strip()
-    # Fallback: first non-empty line
+    # Some headlines carry no company at all — the post opens with the
+    # location ("Menlo Park, CA | ONSITE | Deep Learning / Computer
+    # Vision Researcher"). The body then says "Helm.ai is an early-stage
+    # startup team ...", so take the subject of the first "X is ...".
+    m = re.search(r"\b([A-Z][A-Za-z0-9&'.\- ]{1,40}?)\s+is\s+(?:an?|the)\b", text)
+    if m:
+        cand = m.group(1).strip()
+        if (cand and not _hn_is_role_segment(cand)
+                and not _hn_is_skill_segment(cand)
+                and not _hn_is_location_segment(cand)):
+            return cand
+    # Fallback: the first segment, if it is short enough to be a name.
+    # Returning the whole headline here is what put
+    # "Shield AI | San Diego, CA | Full-Time | Onsite | US Citizen" into
+    # the company column.
+    for seg in segments:
+        seg = _hn_clean_segment(seg.splitlines()[0])
+        if seg and "|" not in seg and len(seg) <= 60:
+            return seg
     first_line = next((ln.strip() for ln in text.splitlines() if ln.strip()), "")
     return first_line[:60] if first_line else None
 
 
-def _guess_role_from_hn_comment(text):
-    """Pick the most 'role-like' pipe segment (contains 'engineer', 'developer', etc)."""
-    parts = [p.strip() for p in text.split("|")]
-    role_keywords = re.compile(
-        r"\b(engineer|developer|architect|scientist|researcher|"
-        r"designer|manager|lead|analyst|admin|writer|designer)\b",
-        re.I,
-    )
-    location_keywords = re.compile(
-        r"\b(remote|onsite|hybrid|anywhere|worldwide|wfh|distributed)\b|"
-        r",\s*[A-Z][a-z]+(,)?(\s+[A-Z][a-z]+)*\b|"
-        r"\b(sf|nyc|us|eu|uk|apac|china|sg|hk|jp|kr|de|fr|es|it|br|"
-        r"canada|india|israel|australia|germany|spain|france|italy|"
-        r"brazil|mexico|argentina|ireland|netherlands|sweden|finland|"
-        r"poland|czech|denmark|norway|switzerland|austria|portugal|"
-        r"belgium|austria|turkey|saudi|uae|qatar|egypt|nigeria|"
-        r"kenya|south africa|philippines|indonesia|thailand|vietnam|"
-        r"malaysia|singapore|taiwan|japan|korea|hong kong)\b",
-        re.I,
-    )
-    for p in parts:
-        p = p.splitlines()[0].strip()
-        if role_keywords.search(p) and not location_keywords.search(p) and len(p) > 4:
-            return p[:100]
-    # Fallback to first non-empty part
-    for p in parts:
-        p = p.splitlines()[0].strip()
-        if p and not location_keywords.search(p):
-            return p[:100]
+def _hn_is_role_segment(seg):
+    """True if the segment reads like a job title.
+
+    The words are matched with an optional trailing "s" because HN posts
+    usually name the *opening* in the plural: "Software Engineers",
+    "Machine Learning Engineers and Scientists". Matching only the
+    singular left those segments unclassified, so the role extractor
+    fell through and returned the company name instead.
+    """
+    return bool(re.search(_HN_ROLE_TITLE_RE, seg, re.I))
+
+
+# A job *title* ("Senior ML Engineer") is a better role than a bare
+# skill area ("Deep Learning"), so the two are classified separately and
+# the title wins when a headline offers both.
+_HN_ROLE_TITLE_RE = (
+    r"\b(engineer|developer|architect|scientist|researcher|designer|"
+    r"manager|lead|analyst|admin|writer|director|intern|specialist|"
+    r"consultant|programmer|devops|sre|qa|tester)s?\b"
+)
+
+# Bare disciplines and technologies. These are still role-ish — a
+# headline segment reading "Deep Learning" is the job area, not the
+# company — but they rank below an actual title.
+_HN_ROLE_SKILL_RE = (
+    r"\b(deep learning|machine learning|computer vision|nlp|"
+    r"data science|data engineering|site reliability|platform|"
+    r"infrastructure|security|backend|frontend|full[- ]?stack|"
+    r"web rtc|voice ai|mobile|ios|android)\b"
+)
+
+
+def _hn_is_skill_segment(seg):
+    """True if the segment names a discipline rather than a job title."""
+    return bool(re.search(_HN_ROLE_SKILL_RE, seg, re.I))
+
+
+def _hn_is_location_segment(seg):
+    """True if the segment reads like a place rather than a company.
+
+    A segment that names a job title is never a location, even when it
+    also looks like one: "Manager, Network Contracting (Southeast Region)"
+    contains a comma followed by a capitalised word, which the city
+    heuristic would otherwise swallow. Role-ness wins.
+
+    The trailing US-state-code test uses an explicit list of the 50
+    states plus DC, not "any two uppercase letters". The generic form
+    misfired on real company names — "Aiden.ai" and "Shield AI" both
+    end in a two-letter token and were classified as locations, which
+    threw away their company.
+    """
+    if _hn_is_role_segment(seg):
+        return False
+    # A bare discipline is role-ish too: "Security, Machine Learning" is
+    # the job area, not "Security, Machine" (a city).
+    if _hn_is_skill_segment(seg):
+        return False
+    if re.search(r"(?:^|[\s,()])(?:" + "|".join(_US_STATE_CODES) + r")\s*$", seg):
+        return True
+    # A known city, optionally followed by a state code:
+    # "San Diego", "Redwood City", "San Francisco, CA".
+    city_alt = "|".join(re.escape(c) for c in _KNOWN_CITIES)
+    if re.search(r"(?:^|[\s,()])(?:" + city_alt + r")\s*(?:,\s*[A-Z]{2}\b)?\s*$",
+                 seg, re.I):
+        return True
+    return bool(re.search(
+        r"\b(remote|onsite|on-site|hybrid|anywhere|worldwide|wfh|distributed|"
+        r"full[- ]?time|part[- ]?time|contract|contractor|internship|"
+        r"freelance|us|usa|eu|uk|apac|china|singapore|japan|korea|india|"
+        r"london|nyc|berlin|seoul|tokyo|toronto|paris|amsterdam|dublin|"
+        r"madrid|zurich|vienna|milan|sydney|auckland)\b"
+        r"|,\s*[A-Z][a-z]+",         # "San Francisco, CA", "Hoboken, NJ"
+        seg, re.I | re.M,
+    ))
+
+
+def _hn_is_noise_segment(seg):
+    """True if the segment is compensation, a URL, or a generic marker."""
+    return bool(re.search(
+        r"^\s*(location|stack|tech|tools|apply|salary|comp|rate)\s*[:\-]"
+        r"|\$|usd|eur|gbp|inr|\bper (hour|year|yr)\b"
+        r"|^https?:|www\.|^#"
+        r"|\b(fte|fulltime|permanent|secondment)\b"
+        r"|\b(h1-b|visa|sponsorship available|no visa)\b"
+        r"|^\s*(equity|stock|options|bonus|benefits)\s*$",
+        seg, re.I,
+    ))
+
+
+def _hn_clean_segment(seg):
+    """Strip HTML tags and entities from one headline segment.
+
+    Anchor tags are removed *with their text*: in an HN headline the
+    anchor text is always the URL it links to ("<a href=\"...\">https://
+    humanapi.co</a>"), so keeping the text leaves fragments like
+    "humanapi.co" and "careers" in the role column.
+    """
+    seg = re.sub(r"<a\b[^>]*>.*?</a>", " ", seg, flags=re.I | re.S)
+    seg = re.sub(r"<[^>]+>", " ", seg)
+    for entity, char in (("&amp;", "&"), ("&#x2F;", "/"), ("&#47;", "/"),
+                         ("&quot;", '"'), ("&#39;", "'"), ("&nbsp;", " ")):
+        seg = seg.replace(entity, char)
+    return re.sub(r"\s+", " ", seg).strip()
+
+
+def _guess_role_from_hn_comment(text, company=None):
+    """Pick the most 'role-like' segment (contains 'engineer', etc.).
+
+    `company` is the already-derived company name. When it is passed, a
+    segment that merely repeats the company is deprioritised — posts like
+    "Sentenai | Boston, MA | Sentenai | Full-time" would otherwise yield
+    the company as the role when a distinct title exists elsewhere. A
+    repeat is still used as a last resort: many posts genuinely name the
+    role after the company ("Vungle | ... | Vungle") and returning the
+    company there is more useful than returning nothing.
+    """
+    segments = _hn_headline_segments(text)
+    company_l = (company or "").strip().lower()
+
+    def _is_company_repeat(part):
+        p = part.strip().lower()
+        if not p or not company_l:
+            return False
+        return p == company_l or p in company_l or company_l in p
+
+    role_candidates = []   # strong: a job title, not a place, not the company
+    skill_candidates = []  # weaker: a bare discipline ("Deep Learning")
+    weak_candidates = []   # role words that repeat the company
+
+    # Prefer a segment that reads like a title: role words, and not a place.
+    # The location check has to tolerate the HTML-escaped separators HN
+    # posts contain ("Solvvy&#x2F;Palo Alto, CA&#x2F;Full-time") — those
+    # are one segment after escaping, so we also split on the entity.
+    #
+    # The whole segment is tried first. One segment often holds several
+    # openings joined by escaped pipes ("Senior Backend &#x2F; Senior
+    # Frontend &#x2F; Senior Machine Learning"), and splitting it kept
+    # only the last one. Splitting is the fallback, for headlines where
+    # the escaped pipes really do separate unrelated fields.
+    for seg in segments:
+        whole = _hn_clean_segment(seg)
+        if (len(whole) > 4 and _hn_is_role_segment(whole)
+                and not _hn_is_location_segment(whole)
+                and not _hn_is_noise_segment(whole)
+                and not _is_company_repeat(whole)):
+            role_candidates.append(whole[:100])
+            continue
+        for part in _hn_split_escaped(seg):
+            part = _hn_clean_segment(part)
+            if len(part) <= 4 or _hn_is_location_segment(part):
+                continue
+            if _hn_is_noise_segment(part):
+                continue
+            if _hn_is_role_segment(part):
+                if _is_company_repeat(part):
+                    weak_candidates.append(part[:100])
+                else:
+                    role_candidates.append(part[:100])
+            elif _hn_is_skill_segment(part) and not _is_company_repeat(part):
+                skill_candidates.append(part[:100])
+    if role_candidates:
+        return role_candidates[0]
+    if skill_candidates:
+        return skill_candidates[0]
+
+    # Some posts have no separate role segment — the title is embedded in a
+    # headline like "Sift Science, San Francisco, is Hiring Machine Learning
+    # Engineers" or "Solvvy/Palo Alto/Full-time/Onsite" (where the title
+    # appears later in the body). Pull the title out of those.
+    m = re.search(r"\bis\s+Hiring\s+(.+)", text, re.I)
+    if m:
+        cand = m.group(1).split("<p>")[0].split("\n")[0].strip(" .,")
+        if cand and len(cand) <= 100 and _hn_is_role_segment(cand):
+            if not _is_company_repeat(cand):
+                return cand
+            weak_candidates.append(cand)
+    m = re.search(r"\bHiring\s+(?:for\s+)?([A-Z][\w /&\-]{4,60}Engineers?)\b", text)
+    if m:
+        cand = m.group(1).strip()
+        if not _is_company_repeat(cand):
+            return cand
+        weak_candidates.append(cand)
+
+    if weak_candidates:
+        return weak_candidates[0]
+
+    # Fallback: first non-empty part that isn't a location or the company.
+    for seg in segments:
+        for part in _hn_split_escaped(seg):
+            part = _hn_clean_segment(part)
+            if (part and not _hn_is_location_segment(part)
+                    and not _is_company_repeat(part) and not _hn_is_noise_segment(part)):
+                return part[:100]
+    # Last resort: the company repeated in the headline ("Vungle | ... |
+    # Vungle"). Many posts name the opening after the company, and
+    # returning the company beats returning nothing.
+    for seg in segments:
+        for part in _hn_split_escaped(seg):
+            part = _hn_clean_segment(part)
+            if (part and _is_company_repeat(part)
+                    and not _hn_is_location_segment(part)
+                    and not _hn_is_noise_segment(part)):
+                return part[:100]
     return None
+
+
+def _hn_split_escaped(seg):
+    """Split a segment on literal pipes AND on HTML-escaped pipes (&#x2F;).
+
+    Separators inside parentheses are left alone. "UI Engineer
+    (HTML&#x2F;CSS&#x2F;JS&#x2F;Backbone)" is one job title, and
+    splitting it produced the truncated "UI Engineer (HTML".
+    """
+    parts = []
+    buf = []
+    depth = 0
+    i = 0
+    n = len(seg)
+    while i < n:
+        ch = seg[i]
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth = max(0, depth - 1)
+
+        if depth == 0 and seg.startswith("|", i):
+            parts.append("".join(buf))
+            buf = []
+            i += 1
+            continue
+        if depth == 0 and (seg.startswith("&#x2F;", i)
+                           or seg.startswith("&#47;", i)
+                           or seg.startswith("&amp;", i)):
+            parts.append("".join(buf))
+            buf = []
+            i += len(seg[i:i + 6])
+            continue
+        buf.append(ch)
+        i += 1
+    parts.append("".join(buf))
+    return [p.strip() for p in parts if p.strip()]
 
 
 def scrape_weworkremotely():
@@ -1513,7 +1854,7 @@ def _render_email_html(lead: dict) -> str:
         # Strip the PERSONAL_SIG lines from the body — we render our own sig
         if "Avilx — Global Build" in chunk or "Delivery:" in chunk[:30]:
             continue
-        if "Prem Vishnoi" in chunk and "Avilx" in chunk and len(chunk) < 600:
+        if FROM_NAME in chunk and "Avilx" in chunk and len(chunk) < 600:
             continue
         # Escape HTML FIRST so any < > & in the raw body become
         # entities. The **bold** regex below still works because ** is
@@ -1524,9 +1865,12 @@ def _render_email_html(lead: dict) -> str:
         html_chunk = html_chunk.replace("\n", "<br>")
         paragraphs.append(f"<p>{html_chunk}</p>")
 
-    # Footer (tracking + opt-out)
+    # Footer (tracking + opt-out).
+    # The unsubscribe link deliberately points at the generic AVILX_EMAIL
+    # mailbox, NOT the sender address — one-click unsubscribe has to land
+    # somewhere that is monitored regardless of who sent the email.
     unsub_mailto = (
-        f"mailto:{YOUR_EMAIL}?subject=unsubscribe%20{urllib.parse.quote(company)}"
+        f"mailto:{AVILX_UNSUB_EMAIL}?subject=unsubscribe%20{urllib.parse.quote(company)}"
         f"&body=Please%20remove%20me%20from%20the%20Avilx%20outreach%20list."
     )
     tracking_pill = (
@@ -1679,11 +2023,11 @@ def _render_email_html(lead: dict) -> str:
         <tr>
           <td style="padding:24px 32px 4px;font-size:14px;line-height:1.7;
                      color:#1e293b;">
-            <p style="margin:0 0 4px;">— Prem Vishnoi</p>
+            <p style="margin:0 0 4px;">— {FROM_NAME}</p>
             <p style="margin:0;color:#475569;font-size:13px;">
               Founder · Avilx<br>
               <a href="{YOUR_WEBSITE}" style="color:#1d4ed8;text-decoration:none;">{YOUR_WEBSITE}</a>
-              · <a href="mailto:{YOUR_EMAIL}" style="color:#1d4ed8;text-decoration:none;">{YOUR_EMAIL}</a>
+              · <a href="mailto:{FROM_EMAIL}" style="color:#1d4ed8;text-decoration:none;">{FROM_EMAIL}</a>
               {f'· <a href="https://wa.me/{YOUR_WHATSAPP.lstrip("+")}" style="color:#1d4ed8;text-decoration:none;">WhatsApp</a>' if YOUR_WHATSAPP else ''}
             </p>
             <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;">
@@ -1807,7 +2151,7 @@ def _send_one(lead):
     _verify_recipient(addr)
 
     msg = MIMEMultipart("mixed")
-    msg["From"] = f"{YOUR_NAME} <{SMTP_USER}>"
+    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
     msg["To"] = lead["contact_email"]
     subject = (lead.get("cover_letter_subject")
                or f"Avilx × {lead['company']}")
@@ -1815,7 +2159,7 @@ def _send_one(lead):
     # MIME header and will bounce.
     subject = re.sub(r"[\r\n\t]+", " ", subject).strip()
     msg["Subject"] = subject
-    msg["Reply-To"] = YOUR_EMAIL
+    msg["Reply-To"] = REPLY_TO
 
     # ---- build body (HTML + plain-text alternative) ----
     text = (lead.get("cover_letter_body")
@@ -1846,65 +2190,27 @@ def _send_one(lead):
         print(f"    📎 attached: {resume_path.name} "
               f"({resume_path.stat().st_size // 1024} KB)")
 
-    def _do_send():
-        if SMTP_USE_SSL:
-            ctx = ssl.create_default_context()
-            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=30) as s:
-                s.login(SMTP_USER, SMTP_PASS)
-                refused = s.send_message(msg)
-                return None, refused
-        else:
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as s:
-                s.starttls()
-                s.login(SMTP_USER, SMTP_PASS)
-                refused = s.send_message(msg)
-                return None, refused
+    # The SMTP session, auth mode and retry policy all live in
+    # lib/smtp_client.py — shared with bin/send_followups.py so there is one
+    # place that knows how to authenticate and one place that knows the
+    # permanent-vs-transient error classification.
+    #
+    # send_message() derives MAIL FROM from the From header by default, so we
+    # pass envelope_sender explicitly: the envelope address stays decoupled
+    # from the visible From header.
+    def _on_attempt(attempt, sleep_s, err):
+        if attempt > 1:
+            print(f"    ⚠️  attempt {attempt} failed ({err}); "
+                  f"retrying in {sleep_s}s")
 
-    # Retry on transient errors only. We re-raise permanent errors (auth fail,
-    # bad recipient) immediately so the lead is marked failed and we move on.
-    # PERMANENT errors (don't retry):
-    #   - SMTPAuthenticationError  — bad password, fix at config time
-    #   - SMTPRecipientsRefused    — email bounced, retrying won't help
-    #   - SMTPSenderRefused        — From address rejected
-    # TRANSIENT errors (retry with backoff):
-    #   - SMTPResponseException with 421/450/451/452/454
-    #   - network/SSL/timeout errors
-    last_err = None
-    backoff = [0, 30, 120]  # 0s, 30s, 2m
-    for attempt, sleep_s in enumerate(backoff, start=1):
-        if sleep_s:
-            time.sleep(sleep_s)
-        try:
-            _do_send()
-            # SUCCESS: caller (send_queued_emails) does the atomic
-            # update_status + log_send in a single transaction. We just return.
-            return
-        except smtplib.SMTPAuthenticationError:
-            raise  # bad password — never transient
-        except smtplib.SMTPRecipientsRefused:
-            raise  # hard bounce — never transient
-        except smtplib.SMTPSenderRefused:
-            raise  # From address rejected — never transient
-        except (smtplib.SMTPResponseException, smtplib.SMTPServerDisconnected,
-                smtplib.SMTPConnectError, smtplib.SMTPHeloError,
-                smtplib.SMTPDataError, smtplib.SMTPException,
-                socket.timeout, ConnectionError, OSError) as e:
-            last_err = e
-            # Only retry on transient codes
-            transient = (
-                (isinstance(e, smtplib.SMTPResponseException)
-                 and e.smtp_code in (421, 450, 451, 452, 454))
-                or isinstance(e, (smtplib.SMTPServerDisconnected,
-                                   smtplib.SMTPConnectError,
-                                   smtplib.SMTPHeloError,
-                                   smtplib.SMTPDataError,
-                                   socket.timeout, ConnectionError, OSError))
-            )
-            if not transient or attempt == len(backoff):
-                break
-            # else loop: sleep + retry
-    # All attempts exhausted
-    raise last_err
+    smtp_client.send_with_retry(
+        msg,
+        envelope_from=ENVELOPE_FROM,
+        envelope_to=lead["contact_email"],
+        on_attempt=_on_attempt,
+    )
+    # SUCCESS: caller (send_queued_emails) does the atomic
+    # update_status + log_send in a single transaction. We just return.
 
 
 # =============================================================

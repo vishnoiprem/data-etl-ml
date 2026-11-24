@@ -1,0 +1,7 @@
+routes 16.96 102
+Traceback (most recent call last):
+  File "<string>", line 10, in <module>
+  File "/Users/vishnoiprem/PycharmProjects/data-etl-ml/portfolio/interview/google/data-analytics/projects/tms-ecommerce-logistics/src/tms/service.py", line 293, in _simulate_delivery
+    shipment.delivered_at = outcome.delivered_at
+  File "<string>", line 4, in __setattr__
+dataclasses.FrozenInstanceError: cannot assign to field 'delivered_at'
